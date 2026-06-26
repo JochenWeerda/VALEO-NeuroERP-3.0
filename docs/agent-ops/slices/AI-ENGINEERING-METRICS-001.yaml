@@ -21,6 +21,25 @@ acceptance:
   - "python scripts/ai_engineering_metrics.py --csv liefert CSV mit Header-Zeile."
 tests:
   - pytest -m unit tests/test_ai_engineering_metrics.py -v -p no:cov -o addopts=
+risks:
+  - Metriken aus Git-History koennen durch parallele Agenten-Commits und Rebase-/Merge-Strategien verzerrt werden.
+  - Rework-Quoten sind nur Prozessindikatoren und duerfen nicht ohne fachliche Kontextpruefung als Leistungsbewertung genutzt werden.
+ai_harness:
+  fachlicher_vertrag: >-
+    Kennzahlen dienen der Prozesssteuerung fuer AI-Engineering und machen Cycle-Time,
+    Rework, Doku-Drift und Agentenverteilung nachvollziehbar.
+  architektur_vertrag: >-
+    Reines CLI-/Analyse-Skript ohne Backend-Router, Datenbankzugriff oder Laufzeit-Service.
+  daten_vertrag: >-
+    Liest Git-Log und Slice-YAMLs; keine produktiven Mandanten- oder Kundendaten.
+  test_vertrag: >-
+    Unit-Tests sichern Parser, Aggregation, JSON-/CSV-Ausgabe und Drift-Kennzahlen.
+  security_vertrag: >-
+    Keine Secrets ausgeben; Reports duerfen nur Repository-Metadaten enthalten.
+  betriebs_vertrag: >-
+    Nightly-/Dashboard-Integration ist Folgeslice; CLI muss lokal deterministisch laufen.
+  dokumentations_vertrag: >-
+    Slice-YAML dokumentiert Metrikdefinitionen, Live-Sample und Folge-Gates.
 completion_evidence:
   - "2026-06-26: 29/29 Tests grün."
   - "2026-06-26: Live-Report: 96 Slices, 84 abgeschlossen, Median-Cycle-Time 0.1h, Rework-Rate 59%."
