@@ -1,0 +1,51 @@
+slice_id: ALEMBIC-MERGE-001
+title: "Admin-Mobile + Charge-Lineage Alembic Repair-Migration"
+status: abgeschlossen
+priority: P1
+wave: 8
+created: "2026-06-26"
+closed: "2026-06-26"
+
+problem: |
+  55 Alembic-Branches ausserhalb der Hauptkette. Die Migrations
+  admin_devices_output_profiles_20260215, admin_mobile_routing_connectors_20260215,
+  admin_api_keys_20260215 und inventory_charge_lineage_20260215 lagen in
+  Parallel-Chains. Dadurch: UndefinedTable-500-Fehler in allen Admin-Mobile-Endpoints
+  sowie charge_lineage_links beim Start.
+
+solution: |
+  Repair-Migration admin_mobile_repair_20260626 mit CREATE TABLE IF NOT EXISTS
+  fuer alle betroffenen Tabellen, angehaengt an den Hauptketten-Head
+  log_frachtbriefe_20260626. Kein alembic merge noetig — selbes Muster wie
+  job_runner_tables_repair_20260625.
+
+tables_created:
+  domain_shared:
+    - admin_devices
+    - admin_device_mappings
+    - admin_output_profiles
+    - admin_output_templates
+    - admin_output_template_versions
+    - admin_report_permissions
+    - admin_api_keys
+    - admin_stations
+    - admin_station_devices
+    - admin_routing_rules
+    - admin_scan_profiles
+    - admin_mobile_devices
+    - admin_connector_configs
+    - admin_connector_events
+  domain_inventory:
+    - charge_lineage_links
+    - storage_fee_runs
+
+files_changed:
+  - alembic/versions/admin_mobile_repair_20260626.py  # new, revision=admin_mobile_repair_20260626
+  - docs/agent-ops/slices/ALEMBIC-MERGE-001.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+
+new_alembic_head: admin_mobile_repair_20260626
+
+gap_sources:
+  - docs/project-context/open-gaps-and-known-issues.md (ALEMBIC-MERGE-001 P1)

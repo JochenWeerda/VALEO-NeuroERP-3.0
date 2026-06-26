@@ -8,6 +8,13 @@
 **Ziel:** POS/Kasse, Logistik, Compliance/Meldewesen, Personal/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion als Endnutzer-How-tos in `docs/benutzerhandbuch/` ergaenzen.
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 
+## ALEMBIC-MERGE-001 — Admin-Mobile + Charge-Lineage Alembic Repair-Migration
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+P1-Gap geschlossen: 14 Admin-Mobile-Tabellen (`admin_devices`, `admin_stations`, `admin_routing_rules` u.a.) + `charge_lineage_links` + `storage_fee_runs` lagen in Parallel-Alembic-Branches (55 Heads) und verursachten `UndefinedTable`-500er. Repair-Migration `admin_mobile_repair_20260626` mit `CREATE TABLE IF NOT EXISTS` an neuen Hauptketten-Head angehaengt.
+**Dateibesitz:** `alembic/versions/admin_mobile_repair_20260626.py`, `docs/agent-ops/slices/ALEMBIC-MERGE-001.yaml`
+**Neuer Alembic-Head:** `admin_mobile_repair_20260626`
+
 ## TAIL-CRM-001 — CRM RAG-/Intent-Panel + Dublettencheck (retroaktiv dokumentiert)
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
