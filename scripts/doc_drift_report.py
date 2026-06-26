@@ -33,6 +33,12 @@ ROUTE_INVENTORY = (
 
 SKIP_ENDPOINTS = frozenset({"__init__", "health", "deps"})
 SKIP_PAGE_NAMES = frozenset({"not-found", "error", "layout"})
+# Subdirectory segments that mark embedded sub-components, not routed pages:
+SKIP_PAGE_PARENT_DIRS = frozenset({"charts", "components", "reports"})
+# File-name prefixes that indicate dialog/helper components:
+SKIP_PAGE_NAME_PREFIXES = ("Dlg", "Legacy")
+# File-name suffixes that indicate embedded chart aggregators or UI atoms:
+SKIP_PAGE_NAME_SUFFIXES = ("Charts", "Chart", "Card", "Sparkline", "Table", "Sidebar")
 
 
 def _read(path: Path) -> str:
@@ -126,8 +132,16 @@ def check_pages_without_route_or_nav(
         name = f.stem
         if name.startswith("_") or name in SKIP_PAGE_NAMES:
             continue
+        # Skip sub-components (chart widgets, component fragments, dialog helpers)
+        parts = {p.name for p in f.relative_to(PAGES_DIR).parents}
+        if parts & SKIP_PAGE_PARENT_DIRS:
+            continue
+        if name.startswith(SKIP_PAGE_NAME_PREFIXES):
+            continue
+        if name.endswith(SKIP_PAGE_NAME_SUFFIXES):
+            continue
         module = page_to_module(f)
-        if module in route_modules:
+        if module in route_modules or module.lower() in {m.lower() for m in route_modules}:
             continue
         rel = str(f.relative_to(PAGES_DIR)).replace("\\", "/").removesuffix(".tsx")
         path_hint = rel.replace("/index", "") if rel.endswith("/index") else rel
