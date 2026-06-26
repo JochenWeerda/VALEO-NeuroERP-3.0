@@ -20,8 +20,8 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 - **Kuratiert vor vollständig.** Aktiv gepflegte Inhalte wandern in die
   Fachbereiche; Reste bleiben archiviert, bis sie kuratiert werden.
 - **Build bleibt grün.** Altbestände sind per `exclude_docs` vom Build
-  ausgenommen; Architektur/ADR nur kuratierte Whitelist-Seiten in der Site
-  (Einzel-ADRs und Wave-STATUS bleiben repo-only bis Folgeslice).
+  ausgenommen; Architektur nur kuratierte Whitelist; alle ADRs sind seit
+  Phase G in der Site (Wave-STATUS bleibt repo-only).
 
 ## Kategorien → Zielbucket
 
@@ -60,6 +60,8 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 6. **Phase F (2026-06-25):** Card-Duplikat `INV-001` (`inventory/` → kanonisch
    `lager/`) aufgelöst; Architektur + ADR in MkDocs-Navigation; Wave-Ordner
    weiterhin per `exclude_docs` vom Build ausgeschlossen (`DOC-MIGRATION-003`).
+7. **Phase G (2026-06-25):** Alle ADR-Dateien in MkDocs-Build aufgenommen;
+   Code-Fence-Fix in `adr-014-service-layer-pattern.md` (Pygments/`anchor_linenums`).
 
 ## Sicherheitsnetz
 
