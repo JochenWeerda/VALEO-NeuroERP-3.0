@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, product, docs]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
+last_reviewed: 2026-06-26
 version: 3.3.0
 ---
 
@@ -93,6 +93,8 @@ Das Bulk-Migrationsprogramm **DOC-MIGRATION-001…008** ist abgeschlossen:
 
 **Fortlaufende Pflege:** Neue Doku direkt in Diátaxis-Bereichen anlegen; Altbestände
 nur über `scripts/docs-legacy-migrate.py` archivieren; Cards intern halten.
+Neue ADRs: Datei unter `docs/adr/` anlegen, dann `python scripts/generate_adr_nav.py`
+(MkDocs-Nav, CI-Drift-Check).
 
 ## Sicherheitsnetz
 

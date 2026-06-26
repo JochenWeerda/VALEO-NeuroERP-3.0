@@ -7,6 +7,7 @@ on:
       - "mkdocs.yml"
       - "requirements-docs.txt"
       - "scripts/docs-staleness-check.cjs"
+      - "scripts/generate_adr_nav.py"
       - ".github/workflows/docs.yml"
   push:
     branches:
@@ -16,6 +17,7 @@ on:
       - "mkdocs.yml"
       - "requirements-docs.txt"
       - "scripts/docs-staleness-check.cjs"
+      - "scripts/generate_adr_nav.py"
       - ".github/workflows/docs.yml"
 
 permissions:
@@ -43,6 +45,9 @@ jobs:
 
       - name: Install docs toolchain
         run: pip install -r requirements-docs.txt
+
+      - name: ADR navigation drift check
+        run: python scripts/generate_adr_nav.py --check
 
       - name: Build documentation site
         run: python -m mkdocs build --site-dir site
