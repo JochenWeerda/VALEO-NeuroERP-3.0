@@ -1,0 +1,84 @@
+slice_id: FINANCE-HR-EINKAUF-REPAIR-001
+title: "Finance + HR + Einkauf Batch-Repair-Migration Wave 12"
+status: abgeschlossen
+priority: P1
+wave: 12
+created: "2026-06-26"
+closed: "2026-06-26"
+
+problem: |
+  Weitere Parallel-Alembic-Branches ausserhalb der Hauptkette verursachen 500er
+  fuer Finance-, HR- und Einkauf-Endpoints. Betroffen:
+  - domain_erp: ap_approval_rules, ap_approval_requests, ap_approvals,
+    matching_rules, bank_matches, booking_templates,
+    closing_checklist_templates, closing_checklists,
+    tax_keys, vat_returns, offene_posten, open_items,
+    business_partners, collaterals, debitors, debtors,
+    pos_transactions, pos_transaction_lines, delivery_notes (erp-schema),
+    cash_movements, serial_numbers, gift_cards,
+    bank_statements, bank_statement_lines
+    + ADD COLUMN IF NOT EXISTS auf journal_entries + journal_entry_lines
+  - domain_einkauf: rfq_requests, rfq_quotes
+  - domain_hr: shifts
+  - domain_shared: zahlungsformulare, zinsgruppen, leergutarten
+
+solution: |
+  Batch-Repair-Migration finance_hr_einkauf_repair_20260626 mit
+  CREATE TABLE IF NOT EXISTS + ADD COLUMN IF NOT EXISTS (via DO-Block)
+  fuer alle betroffenen Tabellen, idempotent an neuen Hauptketten-Head
+  finance_agrar_sales_repair_20260626 angehaengt.
+  Neuer Head: finance_hr_einkauf_repair_20260626
+
+tables_created:
+  domain_erp:
+    - ap_approval_rules
+    - ap_approval_requests
+    - ap_approvals
+    - matching_rules
+    - bank_matches
+    - booking_templates
+    - closing_checklist_templates
+    - closing_checklists
+    - tax_keys
+    - vat_returns
+    - offene_posten
+    - open_items
+    - business_partners
+    - collaterals
+    - debitors
+    - debtors
+    - pos_transactions
+    - pos_transaction_lines
+    - delivery_notes (erp-schema)
+    - cash_movements
+    - serial_numbers
+    - gift_cards
+    - bank_statements
+    - bank_statement_lines
+    - "journal_entries.period + source_user (ADD COLUMN IF NOT EXISTS)"
+    - "journal_entry_lines.debit_amount + credit_amount + tax_code + profit_center + reference + updated_at + tenant_id (ADD COLUMN IF NOT EXISTS)"
+  domain_einkauf:
+    - rfq_requests
+    - rfq_quotes
+  domain_hr:
+    - shifts
+  domain_shared:
+    - zahlungsformulare
+    - zinsgruppen
+    - leergutarten
+
+files_changed:
+  - alembic/versions/finance_hr_einkauf_repair_20260626.py  # new
+  - docs/agent-ops/slices/FINANCE-HR-EINKAUF-REPAIR-001.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+
+new_alembic_head: finance_hr_einkauf_repair_20260626
+
+gap_sources:
+  - docs/project-context/open-gaps-and-known-issues.md
+  - alembic/versions/add_missing_domain_erp_finance_tables_20260304.py
+  - alembic/versions/add_bank_statements_and_lines_20260304.py
+  - alembic/versions/proc_rfq_20260611.py
+  - alembic/versions/normalize_finance_hr_contracts_20260610.py
+  - alembic/versions/fachliche_vertiefung_wave13_20260522.py
