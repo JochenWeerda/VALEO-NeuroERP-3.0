@@ -11,7 +11,7 @@ version: 3.0.0
 
 # Traceability-Matrix
 
-> Generiert via `scripts/generate_traceability_matrix.py` · 2026-06-26 09:38 UTC
+> Generiert via `scripts/generate_traceability_matrix.py` · 2026-06-26 09:49 UTC
 
 ## Zusammenfassung
 
@@ -273,4 +273,4 @@ version: 3.0.0
 | `KIM-L3-BACKEND-001` | backend-complete |
 | `WMS-FLOW-001` | erledigt |
 
-*Stand: 2026-06-26 09:38 UTC · 123 Slices · Coverage 2% · Slice: TRACEABILITY-MATRIX-001*
+*Stand: 2026-06-26 09:49 UTC · 123 Slices · Coverage 2% · Slice: TRACEABILITY-MATRIX-001*
