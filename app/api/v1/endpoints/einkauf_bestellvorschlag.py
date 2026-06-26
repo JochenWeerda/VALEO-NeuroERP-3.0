@@ -387,7 +387,7 @@ async def vorschlag_freigeben(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/artikel-lager-parameter", summary="Artikel lager parameter auflisten",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_artikel_lager_parameter(
     article_id: Optional[str] = Query(None),
@@ -446,7 +446,7 @@ async def delete_artikel_lager_parameter(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/lieferanten", summary="Lieferanten auflisten",
-    response_model=EinkaufBestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_lieferanten(
     suche: Optional[str] = Query(None),
@@ -502,7 +502,7 @@ async def update_lieferant(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/kontrakte", summary="Kontrakte auflisten",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_kontrakte(
     lieferant_id: Optional[str] = Query(None),
@@ -662,7 +662,7 @@ async def bestellung_versenden(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/lager-konten", summary="Lager konten auflisten",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_lager_konten(
     artikelgruppe: Optional[str] = Query(None),
@@ -757,7 +757,7 @@ async def create_pfand_buchung(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/fremdwaren-einlagerung", summary="Fremdwaren auflisten",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_fremdwaren(
     eigentuemer_id: Optional[str] = Query(None),

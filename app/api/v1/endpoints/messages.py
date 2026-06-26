@@ -82,7 +82,7 @@ async def send_message(
 
 
 @router.get("/health", summary="Health messages",
-    response_model=MessageOut
+    response_model=dict[str, str]
 )
 async def messages_health():
     """GET Health"""

@@ -34,7 +34,7 @@ def create(body: IntakeIn, db: Session = Depends(get_db), tenant_id: str = Depen
     return WhatsAppIntakeService(db, tenant_id).create_inbox(body.raw_text, body.absender, body.quelle)
 
 
-@router.get("", response_model=dict[str, Any], summary="Posteingang auflisten")
+@router.get("", response_model=list[dict[str, Any]], summary="Posteingang auflisten")
 def list_inbox(
     status: Optional[str] = Query(None, description="neu|geparst|bestaetigt|verworfen"),
     db: Session = Depends(get_db),
