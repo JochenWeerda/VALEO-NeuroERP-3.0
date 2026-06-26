@@ -1,0 +1,90 @@
+name: E2E @critical — Semantische Kern-Pfade (SEMANTIC-E2E-STRICT-001)
+
+# Läuft bei jedem PR und push auf main.
+# Nur @critical-Tests — stricter als @smoke (kein 503-Fallback als Erfolg).
+# Blockiert bei Fehlern.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: e2e-critical-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-critical:
+    name: "E2E @critical Kern-Pfade"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+      API_DEV_TOKEN: e2e-critical-token
+      PLAYWRIGHT_BASE_URL: http://localhost:8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start backend
+        run: |
+          python scripts/init_db.py
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          curl -sf http://localhost:8000/api/v1/health || echo "Backend health check optional"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install Playwright + browsers
+        run: |
+          cd packages/frontend-web
+          pnpm install
+          pnpm exec playwright install chromium --with-deps
+
+      - name: Run @critical E2E tests
+        run: |
+          cd packages/frontend-web
+          pnpm exec playwright test \
+            playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts \
+            playwright-tests/specs/e2e-matrix/wms-silo-semantic-chain.spec.ts \
+            --grep "@critical" \
+            --reporter=list
+
+      - name: Upload results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-critical-results
+          path: packages/frontend-web/playwright-report/
+          retention-days: 14

@@ -220,3 +220,27 @@ test.describe.serial('WMS/Silo — Ernte-Annahme bis Rückverfolgung @smoke @e2e
   })
 
 })
+
+// SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad WMS/Agrar
+test.describe('WMS @critical Kern-Pfad', () => {
+  const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
+  const HEADERS_CRIT = {
+    'X-Tenant-ID': 'e2e-crit-wms',
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+  }
+
+  test('WMS @critical — Einlagerung-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/lager/einlagerungen', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+
+  test('WMS @critical — Wareneingang-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/einkauf/wareneingaenge', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+})

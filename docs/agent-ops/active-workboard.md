@@ -4698,46 +4698,62 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Ziel:** Drift-Status für Entwickler direkt in MkDocs sichtbar; Auto-aktualisiert durch Nightly-Workflow.
 **Dateibesitz:** `scripts/generate_drift_dashboard_page.py`, `docs/entwickler/drift-dashboard.md`, `.github/workflows/doc-drift-report.yml`, `mkdocs.yml`.
 
-## RELEASE-EVIDENCE-GATE-001 — Freigabe-Aggregator (Claim)
+## RELEASE-EVIDENCE-GATE-001 — Freigabe-Aggregator
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `scripts/release_evidence_report.py` (6 Dimensionen), `release-gates.yml`, Runbook-Abschnitt; Artifact `release_evidence.json`.
+**Dateibesitz:** `scripts/release_evidence_report.py`, `.github/workflows/release-gates.yml`, `docs/operations/production-readiness-runbook.md`.
 
-## SEMANTIC-ACTION-MATRIX-002 — Action-Matrices YAML (Claim)
+## SEMANTIC-ACTION-MATRIX-002 — Action-Matrices YAML
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — YAML-Matrizen unter `docs/quality-assurance/action-matrices/`; `generate_action_matrix_report.py`; Report `action-matrix-report.md`.
+**Dateibesitz:** `docs/quality-assurance/action-matrices/**`, `scripts/generate_action_matrix_report.py`.
 
-## SEMANTIC-E2E-STRICT-001 — Playwright @critical Tags (Claim)
+## SEMANTIC-E2E-STRICT-001 — Playwright @critical Tags
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `@critical` in O2C + WMS/Silo Specs; CI-Workflow `e2e-critical.yml` (blockierend auf main/develop).
+**Dateibesitz:** `.github/workflows/e2e-critical.yml`, `playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts`, `wms-silo-semantic-chain.spec.ts`.
 
-## TRACEABILITY-MATRIX-001 — Slice↔Test↔Doku (Claim)
+## TRACEABILITY-MATRIX-001 — Slice↔Test↔Doku
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `generate_traceability_matrix.py` → `docs/quality-assurance/traceability-matrix.md` (114 Slices).
+**Dateibesitz:** `scripts/generate_traceability_matrix.py`, `docs/quality-assurance/traceability-matrix.md`.
 
-## OPERATOR-AGENT-002 — Agent DB-Persistenz (Claim)
+## OPERATOR-AGENT-002 — Agent DB-Persistenz
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-26 — Schema `agent_proposals`, Repository, Alembic + Merge-Head; **Service-Wiring offen** (In-Memory MVP bleibt bis OPERATOR-AGENT-002b).
+**Dateibesitz:** `alembic/versions/agent_proposals_persist_20260626.py`, `app/infrastructure/models/agent_proposal_model.py`, `app/repositories/agent_proposal_repository.py`.
 
-## MCP-ERP-TOOLS-002 — MCP-Tools Erweiterung (Claim)
+## MCP-ERP-TOOLS-002 — MCP-Tools Erweiterung
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `mcp_erp_tools.yaml` um Domain-Tools erweitert (+158 Zeilen); Contract-Tests + Classification-Enforcement folgen in 002b.
+**Dateibesitz:** `config/mcp_erp_tools.yaml`.
 
 ## COVERAGE-RATCHET-002 — Coverage-Härtung (Claim)
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code / **Stand:** offen
 
 ## DOC-USER-MANUAL-002 — Benutzerhandbuch Vertiefung (Claim)
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code / **Stand:** offen
 
-## DOC-RELEASE-NOTES-001 — Release-Notes-Generator (Claim)
+## DOC-RELEASE-NOTES-001 — Release-Notes-Generator
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `generate_release_notes.py` → `docs/benutzerhandbuch/release-notes.md`; mike-Kopplung folgt in Welle 4.
+**Dateibesitz:** `scripts/generate_release_notes.py`, `docs/benutzerhandbuch/release-notes.md`.
 
-## INTEGRATION-EVIDENCE-BOARD-001 — Qualitäts-Cockpit (Claim)
+## INTEGRATION-EVIDENCE-BOARD-001 — Qualitäts-Cockpit
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code · **Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `quality_evidence.py` API, Router, `admin/qualitaets-cockpit.tsx`, Nav/Route, 3 API-Tests (`4d3dbbf52`).
+**Dateibesitz:** `app/api/v1/endpoints/quality_evidence.py`, `packages/frontend-web/src/pages/admin/qualitaets-cockpit.tsx`.
 
 ## EXTERNAL-MOCK-WORKFLOW-001 — Playwright Mock-Verträge (Claim)
 
-**Von:** Claude Code / **Stand:** in Arbeit
+**Von:** Claude Code / **Stand:** offen

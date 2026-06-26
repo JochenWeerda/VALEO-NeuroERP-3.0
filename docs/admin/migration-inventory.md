@@ -81,6 +81,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `admin_devices_output_profiles_20260215` | admin devices and output profile settings |
 | `admin_mobile_routing_connectors_20260215` | admin stations, routing, mobile scan and connectors |
 | `admin_report_permissions_20260215` | admin self-service report permissions |
+| `agent_proposals_persist_20260626` | OPERATOR-AGENT-002: Tabelle agent_proposals fuer persistente Agent-Proposals. |
 | `agrar_contracts_initial_20260213` | add agrar contracts and allocations |
 | `agrar_drying_rules_20260217` | add drying rule sets (lookup/factor/normalization) and audit snapshot on agrar_settlements |
 | `agrar_drying_rules_audit_contract_dms_20260217` | add audit fields, contract/customer links, DMS ref to drying rule sets |
@@ -294,3 +295,5 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
 | `wms_material_flow_stock_link_20260619` | WMS-FLOW-001: silo_cells current_stock_kg + BAB-Umlagen-Tabelle |
 | `wms_warehouse_aisles_20260612` | WMS: Lager-Gang (warehouse_aisles) + optionale Zuordnung auf warehouse_bins. |
+| `agent_proposals_persist_20260626` | OPERATOR-AGENT-002: Tabelle agent_proposals für persistente Agent-Proposals (tenant_id, action_type, approval_status, idempotency_key). |
+| `merge_agent_job_runner_20260626` | Alembic-Merge-Migration: agent_proposals_persist + job_runner_tables_repair. |
