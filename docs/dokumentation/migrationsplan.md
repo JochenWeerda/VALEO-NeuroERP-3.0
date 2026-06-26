@@ -34,8 +34,8 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 | Benutzeranleitungen (aktiv) | `docs/benutzerhandbuch/` |
 | Admin/Betrieb (aktiv) | `docs/admin/` |
 | Schnittstellen (generiert) | `docs/schnittstellen/` |
-| Architektur/ADR | `docs/architecture/`, `docs/adr/` (Nav-Einbindung folgt) |
-| Compliance | `docs/compliance/` |
+| Architektur/ADR | `docs/architecture/`, `docs/adr/` (Nav: Entwickler) |
+| Compliance | `docs/compliance/` (Nav: Compliance-Bereich) |
 | Workflow-Analyse-Cards (`docs/cards/`) | Intern (`docs/_internal/cards-inventory.md`); Ergebnisse → Workflows/Open-Gaps |
 
 ## Phasen
@@ -62,10 +62,17 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
    weiterhin per `exclude_docs` vom Build ausgeschlossen (`DOC-MIGRATION-003`).
 7. **Phase G (2026-06-25):** Alle ADR-Dateien in MkDocs-Build aufgenommen;
    Code-Fence-Fix in `adr-014-service-layer-pattern.md` (Pygments/`anchor_linenums`).
+8. **Phase H (2026-06-25):** Compliance-Unterseiten in Navigation; Admin
+   BRANDING/NUMBERING eingebunden (`DOC-MIGRATION-004`).
+9. **Phase I (2026-06-25):** Abgearbeitete Roadmap-Snapshots und Legacy-
+   Planungsdocs gelöscht (~23 Dateien); Verweise auf Process-Kernel/Open-Gaps;
+   `python scripts/docs-legacy-migrate.py --purge-roadmap --apply`
+   (`DOC-MIGRATION-005`).
 
 ## Sicherheitsnetz
 
 - Vor jeder Verschiebung Working-Tree-Status prüfen (keine fremden, offenen
   Änderungen an Zieldateien).
-- Verschiebungen ausschließlich per `git mv`.
+- Verschiebungen bevorzugt per `git mv`; **Ausnahme:** eindeutig abgearbeitete
+  Roadmap-Snapshots dürfen per `--purge-roadmap` entfernt werden.
 - Bei Unsicherheit: Datei im Archiv belassen statt voreilig kuratieren.

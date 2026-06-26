@@ -39,9 +39,9 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 - Status: `Waves 1 bis 100 sowie Waves 102–104 abgeschlossen; Service-Layer + Gap-Closure 2026-05-16`
 - Gesamtsuite: `8564 Tests gruen, 0 Fehler, 68 skipped, 1 xfailed` (Stand 2026-05-16; +2633 gegenueber Wave 104)
 - Gesamtabdeckung: `64,85%` (ueber 60%-Ratchet; 18/18 kritische Ratchet-Pfade gruen)
-- Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
-- Korrigierte Flow-Spine-Systemanalyse: `docs/roadmap/status/2026-03-26-systemanalyse-flow-spine.md`
-- Wave-104-Nachlieferung (GAP-G/H/I + Repo-Hygiene): `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`
+- Bereinigter Gap-Abgleich: `docs/project-context/open-gaps-and-known-issues.md`
+- Flow-Spine-Systemanalyse: `docs/workflows/` (Card-/Workflow-Audit)
+- Wave-104-Nachlieferung (GAP-G/H/I + Repo-Hygiene): in diesem STATUS dokumentiert
 - Letzte Lieferungen (2026-05-16):
   - `Service-Layer-Refaktorierung`: `business_partners.py`, `customers.py`, `personal.py`, `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py` auf thin-router + Service-Klassen umgestellt
   - `Gap-Closure`: EXT-003 (Event-Bus-Monitoring Grafana/Prometheus), HR-TIME-001 Pilot-Slice (driver_time_events, CRUD, Kollisions-Check), UX-GAP-CLOSURE-001, HRM-GERMANY-GAP-001
@@ -498,7 +498,7 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 Ergebnis:
 - Der fruehere Restgap-Stand fuer `002`, `021`, `023`, `024` und `029` ist aufgehoben; diese Gaps sind ueber die nachgezogenen Waves formal und technisch geschlossen.
-- Die fruehere Rest-Roadmap ist mit Wave `100` produktfachlich abgeschlossen; siehe `docs/roadmap/status/2026-03-20-restgap-roadmap.md`.
+- Die fruehere Rest-Roadmap ist mit Wave `100` produktfachlich abgeschlossen.
 
 ### Wave-100 Settlement-Abschlussvertrag
 
@@ -692,7 +692,7 @@ python -m pytest tests/test_process_kernel_wave1_contracts.py -q
 ## Offene Punkte
 
 - Der globale Roadmap-Status ausserhalb von `docs/architecture/process-kernel/STATUS.md` ist nicht automatisch synchron und muss bei groesseren Wave-Abschluessen separat nachgezogen werden.
-- Die bereinigte Gap-Einordnung fuer den Stand `2026-03-20` liegt in `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`; produktfachlich verbleiben derzeit keine offenen Top-50-Restgaps.
+- Die bereinigte Gap-Einordnung fuer den Stand `2026-03-20` liegt in `docs/project-context/open-gaps-and-known-issues.md`; produktfachlich verbleiben derzeit keine offenen Top-50-Restgaps.
 - Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 27 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
 - Bei jeder neuen Lieferung sind Schichtgrenzen aktiv zu verifizieren:
   - kein Import von `app/api/` aus `app/core/`
@@ -759,7 +759,6 @@ Basierend auf der strategischen Roadmap (valeo_wettbewerbsanalyse_spitzenpositio
 
 - Strategischer Plan: C:\Users\Jochen\.cursor\plans\valeo_wettbewerbsanalyse_spitzenposition_79027aec.plan.md
 - Detailstaende: `wave-*/STATUS.md`
-- Wave-104-Nachlieferungsdoku: `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`
 
 ### Neuro-Core Architecture Layer (2026-03-29)
 

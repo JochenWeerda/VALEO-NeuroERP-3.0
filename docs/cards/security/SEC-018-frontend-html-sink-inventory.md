@@ -3,7 +3,7 @@
 ## Status
 
 - **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
-- **Evidenz:** packages/frontend-web/src/__tests__/security/print-html-sinks.test.ts, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+- **Evidenz:** packages/frontend-web/src/__tests__/security/print-html-sinks.test.ts
 
 ## Titel
 

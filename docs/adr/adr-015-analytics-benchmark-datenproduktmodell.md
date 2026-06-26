@@ -33,4 +33,4 @@ Negativ:
 ## References
 - [Target State Landhandel ERP](../architecture/target-state-landhandel-erp.md)
 - [ADR-006 Read-Model / Query-Contract-Prinzip](adr-006-read-model-query-contract-prinzip.md)
-- [2026-03-06-top-50-gap-backlog-landhandel.md](../roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md)
+- [Open Gaps](../project-context/open-gaps-and-known-issues.md)

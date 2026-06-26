@@ -3,7 +3,7 @@
 ## Status
 
 - **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
-- **Evidenz:** tests/test_security_articles.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+- **Evidenz:** tests/test_security_articles.py
 
 - Bereich: Articles API
 - Risiko: Payload-Spoofing und tenant-fremde Artikel-Nebenpfade

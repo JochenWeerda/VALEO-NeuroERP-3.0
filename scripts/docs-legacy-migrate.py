@@ -63,7 +63,7 @@ KEEP_PREFIXES = (
     "docs/architecture/",
     "docs/adr/",
     "docs/runbooks/",
-    "docs/roadmap/",
+    "docs/roadmap/README.md",
     "docs/quality-assurance/",
     "docs/_internal/",
 )
@@ -184,7 +184,11 @@ def build_inventory(files: list[Path]) -> dict:
             continue
         seen_resolved.add(resolved)
         r = rel(p)
-        by_name[p.name.lower()].append(r)
+        # Archiv-Kopien und Card-Redirect-Stubs nicht als Duplikat zählen.
+        if "_internal/archive/" in r or "status: redirect-stub" in p.read_text(encoding="utf-8", errors="ignore")[:400]:
+            pass
+        else:
+            by_name[p.name.lower()].append(r)
         if should_keep(p):
             kept.append(r)
             continue
@@ -269,6 +273,8 @@ def write_inventory(data: dict) -> None:
             "- Migration: `python scripts/docs-legacy-migrate.py --apply`",
             "- Dry-run: `python scripts/docs-legacy-migrate.py --dry-run`",
             "- Card-Dedupe: `python scripts/docs-legacy-migrate.py --dedupe-cards`",
+            "- Roadmap-Status: `python scripts/docs-legacy-migrate.py --archive-roadmap-status --apply`",
+            "- Roadmap-Purge: `python scripts/docs-legacy-migrate.py --purge-roadmap --apply`",
             "- Ziel: `docs/_internal/archive/` (einheitlich)",
             "",
         ]
@@ -374,14 +380,124 @@ def apply_card_dedupe(dry_run: bool) -> int:
     return moved
 
 
+def git_rm(path: Path, dry_run: bool) -> bool:
+    if not path.exists():
+        return False
+    if dry_run:
+        mode = "git rm" if is_tracked(path) else "rm"
+        print(f"  WOULD ({mode}): {rel(path)}")
+        return True
+    if is_tracked(path):
+        subprocess.run(["git", "rm", "-f", str(path)], check=True, cwd=ROOT)
+    else:
+        path.unlink()
+    return True
+
+
+def apply_purge_completed_roadmaps(dry_run: bool) -> int:
+    """Entfernt abgearbeitete Roadmap-Snapshots und Legacy-Planungsdocs."""
+    removed = 0
+    targets: list[Path] = []
+
+    archive_dir = ARCHIVE / "roadmap-status"
+    if archive_dir.is_dir():
+        targets.extend(p for p in archive_dir.rglob("*") if p.is_file())
+
+    roadmap_dir = DOCS / "roadmap"
+    if roadmap_dir.is_dir():
+        for p in roadmap_dir.iterdir():
+            if p.name == "README.md":
+                continue
+            if p.is_file():
+                targets.append(p)
+        status_dir = roadmap_dir / "status"
+        if status_dir.is_dir():
+            targets.extend(p for p in status_dir.rglob("*") if p.is_file())
+
+    for path in sorted(set(targets)):
+        if git_rm(path, dry_run):
+            removed += 1
+
+    readme = roadmap_dir / "README.md"
+    body = (
+        "# Roadmap (ersetzt)\n\n"
+        "Historische Roadmap- und Gap-Snapshots wurden entfernt (abgearbeitet).\n\n"
+        "## Operativer Lieferstand\n\n"
+        "| Quelle | Pfad |\n"
+        "|--------|------|\n"
+        "| Process Kernel | `docs/architecture/process-kernel/STATUS.md` |\n"
+        "| Open Gaps | `docs/project-context/open-gaps-and-known-issues.md` |\n"
+        "| Active Workboard | `docs/agent-ops/active-workboard.md` |\n"
+    )
+    if dry_run:
+        print(f"  WOULD write {rel(readme)}")
+    else:
+        readme.parent.mkdir(parents=True, exist_ok=True)
+        readme.write_text(body, encoding="utf-8")
+        if is_tracked(readme):
+            subprocess.run(["git", "add", str(readme)], check=True, cwd=ROOT)
+        else:
+            subprocess.run(["git", "add", str(readme)], check=True, cwd=ROOT)
+
+    # Leeres status-Verzeichnis entfernen
+    status_dir = roadmap_dir / "status"
+    if not dry_run and status_dir.is_dir() and not any(status_dir.iterdir()):
+        status_dir.rmdir()
+
+    return removed
+
+
+def apply_archive_roadmap_status(dry_run: bool) -> int:
+    """Verschiebt datierte roadmap/status-Snapshots ins interne Archiv."""
+    src_dir = DOCS / "roadmap" / "status"
+    dst_dir = ARCHIVE / "roadmap-status"
+    moved = 0
+    if not src_dir.is_dir():
+        print("  SKIP: docs/roadmap/status/ not found")
+        return 0
+    for src in sorted(src_dir.glob("*.md")):
+        dst = dst_dir / src.name
+        git_mv(src, dst, dry_run)
+        moved += 1
+    idx = dst_dir / "README.md"
+    archived = sorted(f.name for f in dst_dir.glob("*.md") if f.name != "README.md")
+    body = [
+        "# Roadmap-Status-Snapshots (historisch)",
+        "",
+        f"Konsolidiert aus `docs/roadmap/status/` ({len(archived)} Dateien).",
+        "",
+        "**Operativer Lieferstand:**",
+        "- `docs/architecture/process-kernel/STATUS.md`",
+        "- `docs/project-context/open-gaps-and-known-issues.md`",
+        "",
+        "## Archivierte Dateien",
+        "",
+    ]
+    body.extend(f"- `{name}`" for name in archived)
+    content = "\n".join(body) + "\n"
+    if dry_run:
+        print(f"  WOULD write {rel(idx)}")
+    else:
+        idx.parent.mkdir(parents=True, exist_ok=True)
+        idx.write_text(content, encoding="utf-8")
+    return moved
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Legacy docs migration")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--inventory-only", action="store_true")
     parser.add_argument("--dedupe-cards", action="store_true")
+    parser.add_argument("--archive-roadmap-status", action="store_true")
+    parser.add_argument("--purge-roadmap", action="store_true")
     args = parser.parse_args()
-    dry_run = args.dry_run or (not args.apply and not args.dedupe_cards)
+    dry_run = args.dry_run or (
+        not args.apply
+        and not args.dedupe_cards
+        and not args.archive_roadmap_status
+        and not args.purge_roadmap
+    )
 
     files = collect_md_files()
     data = build_inventory(files)
@@ -394,6 +510,22 @@ def main() -> None:
         print(f"\n{label}: card dedupe ...")
         n = apply_card_dedupe(dry_run=dedupe_dry)
         print(f"done: card_dedupe={n}")
+        return
+
+    if args.archive_roadmap_status:
+        arch_dry = not args.apply
+        label = "DRY-RUN" if arch_dry else "APPLY"
+        print(f"\n{label}: archive roadmap/status ...")
+        n = apply_archive_roadmap_status(dry_run=arch_dry)
+        print(f"done: roadmap_status_archived={n}")
+        return
+
+    if args.purge_roadmap:
+        purge_dry = not args.apply
+        label = "DRY-RUN" if purge_dry else "APPLY"
+        print(f"\n{label}: purge completed roadmaps ...")
+        n = apply_purge_completed_roadmaps(dry_run=purge_dry)
+        print(f"done: roadmap_purged={n}")
         return
 
     if args.inventory_only:

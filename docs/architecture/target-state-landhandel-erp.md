@@ -147,9 +147,8 @@ Ein Prozess gilt erst dann als „fertig“, wenn er:
 
 ## 9. Referenzen
 
-- [2026-03-06-valeo-spitzenposition-konsolidiert.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/status/2026-03-06-valeo-spitzenposition-konsolidiert.md)
-- [2026-03-06-top-50-gap-backlog-landhandel.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md)
-- [2026-03-06-arbeitsaufteilung-codex-hauptstrang.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/status/2026-03-06-arbeitsaufteilung-codex-hauptstrang.md)
+- [Open Gaps](../project-context/open-gaps-and-known-issues.md)
+- [Process Kernel STATUS](process-kernel/STATUS.md)
 
 ## 10. Offene ADR-Kandidaten
 

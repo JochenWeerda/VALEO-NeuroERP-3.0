@@ -16,8 +16,8 @@ version: 1.0.0
 
 | Metrik | Wert |
 |--------|------|
-| Markdown-Dateien gesamt | 667 |
-| Kuratiert (behalten) | 648 |
+| Markdown-Dateien gesamt | 647 |
+| Kuratiert (behalten) | 628 |
 | Archiv-Kandidaten | 0 |
 | Doppelte Dateinamen | 140 |
 
@@ -32,8 +32,7 @@ version: 1.0.0
 |-----------|-----------|
 | `status.md` | 119 |
 | `index.md` | 9 |
-| `readme.md` | 7 |
-| `inv-001-inventory-to-settlement.md` | 3 |
+| `readme.md` | 8 |
 | `governance.md` | 2 |
 | `crm.md` | 2 |
 | `vk-010-ernte-annahme.md` | 2 |
@@ -60,6 +59,7 @@ version: 1.0.0
 | `otc-011-zahlungseingang-und-abstimmung.md` | 2 |
 | `dom-supply-003-physische-kette.md` | 2 |
 | `cts-001-contract-to-settlement.md` | 2 |
+| `cts-009-rohwaren-positionsmonitor.md` | 2 |
 
 ## Card-Duplikate (kanonisch aufgelöst)
 
@@ -72,5 +72,7 @@ version: 1.0.0
 - Migration: `python scripts/docs-legacy-migrate.py --apply`
 - Dry-run: `python scripts/docs-legacy-migrate.py --dry-run`
 - Card-Dedupe: `python scripts/docs-legacy-migrate.py --dedupe-cards`
+- Roadmap-Status: `python scripts/docs-legacy-migrate.py --archive-roadmap-status --apply`
+- Roadmap-Purge: `python scripts/docs-legacy-migrate.py --purge-roadmap --apply`
 - Ziel: `docs/_internal/archive/` (einheitlich)
 

@@ -3,7 +3,7 @@
 ## Status
 
 - **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
-- **Evidenz:** .github/workflows/security-agent.yml, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+- **Evidenz:** .github/workflows/security-agent.yml
 
 ## Titel
 

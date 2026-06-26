@@ -3,7 +3,7 @@
 **Status:** akzeptiert
 **Datum:** 2026-04-24
 **Meilenstein:** M-01
-**Bezug:** [TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md](../roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md), `packages/erp-domain/src/types/express.d.ts`
+**Bezug:** [TODO-SPRINT-001](../agent-ops/slices/TODO-SPRINT-001.yaml), `packages/erp-domain/src/types/express.d.ts`
 
 ## Kontext
 

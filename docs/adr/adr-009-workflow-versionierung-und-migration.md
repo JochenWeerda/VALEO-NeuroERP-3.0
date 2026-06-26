@@ -31,4 +31,4 @@ Negativ:
 ## References
 - [Target State Landhandel ERP](../architecture/target-state-landhandel-erp.md)
 - [ADR-005 Workflow-/Policy-Kern](adr-005-workflow-policy-kern.md)
-- [2026-03-06-top-50-gap-backlog-landhandel.md](../roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md)
+- [Open Gaps](../project-context/open-gaps-and-known-issues.md)
