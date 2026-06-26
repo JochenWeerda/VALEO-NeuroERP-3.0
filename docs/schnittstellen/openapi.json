@@ -86640,6 +86640,17 @@
             "title": "Context Summary",
             "type": "string"
           },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
           "proposed_action": {
             "title": "Proposed Action",
             "type": "string"
