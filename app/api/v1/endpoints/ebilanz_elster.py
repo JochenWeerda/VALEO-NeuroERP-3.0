@@ -129,7 +129,7 @@ class EricReadinessOut(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/taxonomie-felder", summary="Felder taxonomie",
-    response_model=EbilanzElsterOut
+    response_model=list[EbilanzElsterOut]
 )
 def taxonomie_felder() -> list[dict]:
     """Return the list of XBRL taxonomy fields with GCD/GAAP classification."""

@@ -1,5 +1,24 @@
 # Active Workboard
 
+## LOG-FRACHTBRIEF-001 — Logistik Frachtbrief-Endpoint
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Alembic-Migration `log_frachtbriefe_20260626` + Endpoint `GET/POST/PATCH /api/v1/logistik/frachtbriefe` + Tests. Frontend `useFrachtbriefe()` liefert jetzt 200 statt 404.
+**Dateibesitz:** `alembic/versions/log_frachtbriefe_20260626.py`, `app/api/v1/endpoints/logistik_frachtbriefe.py`, `tests/test_log_frachtbrief.py`, `docs/agent-ops/slices/LOG-FRACHTBRIEF-001.yaml`
+
+## MCP-ERP-TOOLS-001 — MCP Tool-Katalog YAML
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+`app/config/mcp_erp_tools.yaml` mit 21 validen Tool-Definitionen (Agrar, Verkauf, Einkauf, Lager, CRM, Finance, Logistik, Compliance). GET /api/v1/mcp/tools liefert 200 statt 500 FileNotFoundError.
+**Dateibesitz:** `app/config/mcp_erp_tools.yaml`, `docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml`
+
+## RUNTIME-KAT-C-001 — Response-Model-Mismatches Kat. C (health/live + ebilanz/taxonomie)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+- `health.py`: `return StatusResponse(success=True, message="alive")` statt `{"status":"alive"}` (fehlende `success`-Feld-ResponseValidationError)
+- `ebilanz_elster.py`: `response_model=list[EbilanzElsterOut]` statt Einzelobjekt fuer list-Return
+**Dateibesitz:** `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/ebilanz_elster.py`, `docs/agent-ops/slices/RUNTIME-KAT-C-001.yaml`
+
 ## DOC-CONSOLIDATION-010 - Doku-Konsolidierung: erledigte Zukunftsplaene, Dubletten, echter Restbacklog
 
 **Von:** Codex

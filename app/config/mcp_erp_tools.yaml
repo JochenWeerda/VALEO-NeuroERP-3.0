@@ -1,0 +1,205 @@
+# MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff
+# Felder je Tool (alle Pflicht):
+#   tool_id, domain, name, scope, idempotent, risk_class, audit, data_classification
+# Erlaubte Werte:
+#   risk_class: low | medium | high | critical
+#   audit: read | write | none
+#   data_classification: PUBLIC | EU_ONLY | LOCAL_ONLY | SYNTHETIC_ALLOWED | NEVER
+
+tools:
+  # ── Agrar ──────────────────────────────────────────────────────────────────
+  - tool_id: erp.agrar.contracts.list
+    domain: agrar
+    name: "Agrarkontakte auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.agrar.harvest.list
+    domain: agrar
+    name: "Ernteannahmen auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.agrar.settlement.trigger
+    domain: agrar
+    name: "Abrechnung ausloesen"
+    scope: write
+    idempotent: false
+    risk_class: high
+    audit: write
+    data_classification: LOCAL_ONLY
+
+  # ── Verkauf ────────────────────────────────────────────────────────────────
+  - tool_id: erp.sales.orders.list
+    domain: verkauf
+    name: "Auftraege auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.sales.orders.create
+    domain: verkauf
+    name: "Auftrag anlegen"
+    scope: write
+    idempotent: false
+    risk_class: medium
+    audit: write
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.sales.invoices.list
+    domain: verkauf
+    name: "Rechnungen auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  # ── Einkauf ────────────────────────────────────────────────────────────────
+  - tool_id: erp.einkauf.orders.list
+    domain: einkauf
+    name: "Bestellungen auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.einkauf.three_way_match.run
+    domain: einkauf
+    name: "3-Wege-Match ausfuehren"
+    scope: write
+    idempotent: false
+    risk_class: high
+    audit: write
+    data_classification: LOCAL_ONLY
+
+  # ── Lager / WMS ────────────────────────────────────────────────────────────
+  - tool_id: erp.lager.stock.query
+    domain: lager
+    name: "Bestand abfragen"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.lager.fefo.suggest
+    domain: lager
+    name: "FEFO-Entnahmevorschlag"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.lager.transfer.create
+    domain: lager
+    name: "Umlagerung anlegen"
+    scope: write
+    idempotent: false
+    risk_class: medium
+    audit: write
+    data_classification: LOCAL_ONLY
+
+  # ── CRM ────────────────────────────────────────────────────────────────────
+  - tool_id: erp.crm.customers.list
+    domain: crm
+    name: "Kunden auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.crm.customers.get360
+    domain: crm
+    name: "360-Grad-Kundensicht abrufen"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.crm.opportunities.list
+    domain: crm
+    name: "Opportunities auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  # ── Finance / FIBU ─────────────────────────────────────────────────────────
+  - tool_id: erp.finance.journal.list
+    domain: finance
+    name: "Buchungsjournal auflisten"
+    scope: read
+    idempotent: true
+    risk_class: medium
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.finance.period.close
+    domain: finance
+    name: "Periode abschliessen"
+    scope: write
+    idempotent: false
+    risk_class: critical
+    audit: write
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.finance.open_items.list
+    domain: finance
+    name: "Offene Posten auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  # ── Logistik ───────────────────────────────────────────────────────────────
+  - tool_id: erp.logistik.tours.list
+    domain: logistik
+    name: "Touren auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.logistik.frachtbriefe.list
+    domain: logistik
+    name: "Frachtbriefe auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  # ── Compliance ─────────────────────────────────────────────────────────────
+  - tool_id: erp.compliance.qs.list
+    domain: compliance
+    name: "QS-Checklisten auflisten"
+    scope: read
+    idempotent: true
+    risk_class: low
+    audit: read
+    data_classification: LOCAL_ONLY
+
+  - tool_id: erp.compliance.sanctions.check
+    domain: compliance
+    name: "Sanktionslisten-Pruefung"
+    scope: read
+    idempotent: true
+    risk_class: medium
+    audit: read
+    data_classification: EU_ONLY
