@@ -19,14 +19,19 @@ ai_harness:
   architekturvertrag:
     - Alembic-Revision: agent_proposals_persist_20260626 (down_revision: wf_cockpit_persist_20260625).
     - Repository-Pattern: OperatorAgentService delegiert Persistenz an AgentProposalRepository.
-    - In-Memory-Dict bleibt als Cache; DB ist autoritativ.
+    - API-Endpunkte instanziieren Service pro Request via Depends(get_db).
   akzeptanzkriterien:
     - Alembic-Migration existiert und ist syntaktisch korrekt.
     - AgentProposalRecord-Modell importierbar ohne Fehler.
     - AgentProposalRepository.save() / get() / list() implementiert.
+    - OperatorAgentService nutzt Repository; Proposals überleben Service-Neustart.
+    - tests/test_operator_agent_persist.py grün mit require_db.
 
 dateibesitz:
   - app/infrastructure/models/agent_proposal_model.py
   - alembic/versions/agent_proposals_persist_20260626.py
   - app/repositories/agent_proposal_repository.py
+  - app/services/operator_agent_service.py
+  - app/api/v1/endpoints/operator_agent.py
+  - tests/test_operator_agent_persist.py
   - docs/agent-ops/slices/OPERATOR-AGENT-002.yaml
