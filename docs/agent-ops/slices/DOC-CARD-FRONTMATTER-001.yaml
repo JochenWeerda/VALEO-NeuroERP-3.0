@@ -1,8 +1,9 @@
 slice_id: DOC-CARD-FRONTMATTER-001
 title: "Card-Frontmatter schrittweise auf Prozess-Cards"
 owner: —
-status: offen
+status: abgeschlossen
 updated: 2026-06-26
+completed_at: 2026-06-26
 coordination: >-
   Ergaenzung zu DOC-CARD-CHAIN-001. Nur docs/cards/** aendern. Pro Slice
   max. 10–15 Cards; mehrere Agenten koennen nach Ketten aufteilen (harvest,

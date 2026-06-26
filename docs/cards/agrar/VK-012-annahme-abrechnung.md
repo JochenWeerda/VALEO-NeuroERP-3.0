@@ -1,3 +1,11 @@
+---
+card_id: VK-012
+chain: harvest-to-settlement
+chain_step: 7
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-012-annahme-abrechnung.md
+---
 # VK-012 — Annahme-Abrechnung (Card)
 
 **Slice:** VK-012 | **Owner:** Claude Sonnet 4.6 | **Datum:** 2026-03-27

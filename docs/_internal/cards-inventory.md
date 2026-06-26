@@ -19,11 +19,11 @@ Ketten-Referenz: [`workflow-chains.md`](workflow-chains.md).
 
 | Metrik | Wert |
 |--------|------|
-| Cards gesamt | 147 |
-| Status abgeschlossen/umgesetzt | 147 |
+| Cards gesamt | 148 |
+| Status abgeschlossen/umgesetzt | 148 |
 | Review empfohlen | 7 |
 | Ohne Ketten-Zuordnung (Registry) | 0 |
-| Prozess-Cards ohne YAML-Frontmatter | 26 |
+| Prozess-Cards ohne YAML-Frontmatter | 0 |
 
 ## Ketten (Card-Anzahl)
 
@@ -31,7 +31,7 @@ Ketten-Referenz: [`workflow-chains.md`](workflow-chains.md).
 |-------|-------|
 | `(querschnitt/plattform)` | 118 |
 | `harvest-to-settlement` | 12 |
-| `procure-to-pay` | 4 |
+| `procure-to-pay` | 5 |
 | `order-to-cash` | 3 |
 | `compliance-to-report` | 2 |
 | `contract-to-settlement` | 2 |
@@ -51,6 +51,7 @@ Ketten-Referenz: [`workflow-chains.md`](workflow-chains.md).
 | `Erstanalyse abgeschlossen` | 1 |
 | `abgeschlossen (Kernkette VK-011/VK-018/VK-010-standardmaske; Rest siehe Abschnitt 13)` | 1 |
 | `abgeschlossen (Kernpfad; Follow-up: Inline-Fehler pro Wizard-Schritt)` | 1 |
+| `abgeschlossen (Overview; Detail-Slices P2P-020+)` | 1 |
 | `alle Slices umgesetzt` | 1 |
 | `umgesetzt (A1-A5)` | 1 |
 | `umgesetzt (C1-C3)` | 1 |

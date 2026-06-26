@@ -1,3 +1,10 @@
+---
+card_id: CRM-001
+chain: null
+related_chain: order-to-cash
+card_type: overview
+workflow_doc: docs/workflows/crm-001-crm-to-revenue.md
+---
 # Card: CRM-001 — CRM-to-Revenue
 
 | Feld | Wert |

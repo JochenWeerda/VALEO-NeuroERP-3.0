@@ -1,3 +1,11 @@
+---
+card_id: VK-016
+chain: harvest-to-settlement
+chain_step: 3
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-016-queue-cta-und-artikel-api.md
+---
 # Card: VK-016 - Queue-CTA und kanonische Artikelauflösung
 
 ## 1. Einordnung

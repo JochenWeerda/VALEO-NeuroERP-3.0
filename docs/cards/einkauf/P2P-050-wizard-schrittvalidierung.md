@@ -1,3 +1,11 @@
+---
+card_id: P2P-050
+chain: procure-to-pay
+chain_step: null
+card_type: cross-cutting
+flow_spine: flow-spine-procure-to-pay
+workflow_doc: docs/workflows/p2p-050-wizard-schrittvalidierung.md
+---
 # Card: P2P-050 - Wizard-Schrittvalidierung in der Bestellmaske
 
 ## 1. Einordnung

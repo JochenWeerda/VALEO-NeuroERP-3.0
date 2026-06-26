@@ -1,3 +1,11 @@
+---
+card_id: FIN-001
+chain: finance-to-close
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-finance-to-close
+workflow_doc: docs/workflows/fin-001-finance-to-reporting.md
+---
 # Card: FIN-001 — Finance-to-Reporting
 
 | Feld | Wert |

@@ -6,8 +6,8 @@ import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
-import { apiClient } from '@/lib/api-client'
-import { api } from '@/lib/axios'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
+import { unwrapCrmListPage, type CrmListEnvelope } from '@/lib/api/crm-list-response'
 import { toast } from '@/hooks/use-toast'
 
 // Konfiguration für Lieferanten ListReport
@@ -269,14 +269,11 @@ export default function LieferantenListePage(): JSX.Element {
     queryKey: ['crm', 'lieferanten'],
     queryFn: async () => {
       try {
-        const r = await apiClient.get('/api/v1/crm/business-partners')
-        if (r.data) {
-          const raw = r.data as any
-          const items = raw.data || (Array.isArray(raw) ? raw : [])
-          const total = raw.total || items.length
-          return { items, total }
-        }
-      } catch { /* API nicht erreichbar */ }
+        const r = await apiClient.get<CrmListEnvelope<Record<string, unknown>>>('/api/v1/crm/business-partners')
+        return unwrapCrmListPage(r.data)
+      } catch {
+        /* API nicht erreichbar */
+      }
       return { items: [], total: 0 }
     },
     staleTime: 2 * 60 * 1000,
@@ -319,14 +316,18 @@ export default function LieferantenListePage(): JSX.Element {
         return
       }
       try {
-        await api.post('/api/v1/crm/kommunikation/newsletter', {
+        await apiClient.post('/api/v1/crm/kommunikation/newsletter', {
           empfaenger: emails,
           typ: 'lieferanten',
           betreff: 'Information von VALEO',
         })
         toast({ title: 'Newsletter versendet', description: `Versand an ${emails.length} Empfänger initiiert.` })
-      } catch (e: any) {
-        toast({ title: 'Versand fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      } catch (e: unknown) {
+        toast({
+          title: 'Versand fehlgeschlagen',
+          description: getAxiosErrorMessage(e),
+          variant: 'destructive',
+        })
       }
     }
 
@@ -347,14 +348,18 @@ export default function LieferantenListePage(): JSX.Element {
       }
       try {
         await Promise.all(
-          items.map((l: any) =>
-            api.patch(`/api/v1/crm/lieferanten/${l.id}`, { status: 'gesperrt' })
-          )
+          items.map((l: { id: string }) =>
+            apiClient.put(`/api/v1/crm/business-partners/${l.id}`, { status: 'inactive' }),
+          ),
         )
         toast({ title: 'Gesperrt', description: `${items.length} Lieferant(en) gesperrt.`, variant: 'destructive' })
         invalidate()
-      } catch (e: any) {
-        toast({ title: 'Fehler beim Sperren', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      } catch (e: unknown) {
+        toast({
+          title: 'Fehler beim Sperren',
+          description: getAxiosErrorMessage(e),
+          variant: 'destructive',
+        })
       }
     }
 
@@ -429,17 +434,23 @@ export default function LieferantenListePage(): JSX.Element {
     const formData = new FormData()
     formData.append('file', file)
     try {
-      const res = await api.post('/api/v1/crm/import/lieferanten', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      const res = await apiClient.post<{ created?: number; updated?: number; errors?: string[] }>(
+        '/api/v1/crm/import/lieferanten',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      )
+      const { created = 0, updated = 0, errors = [] } = res.data ?? {}
       toast({
         title: t('crud.messages.importSuccess', { defaultValue: 'Import abgeschlossen' }),
         description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
       })
       queryClient.invalidateQueries({ queryKey: ['crm', 'lieferanten'] })
-    } catch (err: any) {
-      toast({ title: t('crud.messages.importError', { defaultValue: 'Import fehlgeschlagen' }), description: err.response?.data?.detail ?? err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({
+        title: t('crud.messages.importError', { defaultValue: 'Import fehlgeschlagen' }),
+        description: getAxiosErrorMessage(err),
+        variant: 'destructive',
+      })
     }
     e.target.value = ''
   }

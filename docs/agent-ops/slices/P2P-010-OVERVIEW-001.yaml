@@ -1,8 +1,9 @@
 slice_id: P2P-010-OVERVIEW-001
 title: "P2P-010 Procure-to-Pay Overview-Card"
 owner: —
-status: offen
+status: abgeschlossen
 updated: 2026-06-26
+completed_at: 2026-06-26
 coordination: >-
   Doku-Slice aus workflow-chains.md (fehlender Step 0). Keine Code-Aenderung
   ausser optional Nav/Workflow-Verlinkung. Parallele P2P-020-Wizard-Fixes

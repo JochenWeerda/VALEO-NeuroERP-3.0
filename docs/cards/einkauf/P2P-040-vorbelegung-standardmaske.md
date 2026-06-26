@@ -1,3 +1,11 @@
+---
+card_id: P2P-040
+chain: procure-to-pay
+chain_step: 2
+card_type: process-step
+flow_spine: flow-spine-procure-to-pay
+workflow_doc: docs/workflows/p2p-040-procure-to-pay-vorbelegung.md
+---
 # Card: P2P-040 - Alternativpfad Bedarfsmeldung oder Rahmenabruf
 
 ## 1. Einordnung

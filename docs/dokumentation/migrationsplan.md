@@ -4,8 +4,8 @@ type: explanation
 audience: [entwickler, product, docs]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-06-26
+version: 3.1.0
 ---
 
 # Doku-Migrationsplan
@@ -45,11 +45,11 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 2. **Phase B:** Architektur- und ADR-Bereiche kuratieren und in die Navigation
    aufnehmen (eigener Slice).
 3. **Phase C:** Verbleibende Themen-Cluster (CRM, i18n, GAP) konsolidieren und
-   einordnen. **Cards-Audit (2026-06-25):** 148 Workflow-Cards unter
-   `docs/cards/` inventarisiert (`docs/_internal/cards-inventory.md`);
-   veraltete offene/kritische Meldungen gegen Code/Workboard verifiziert;
-   SEC-003–SEC-034 und Kern-Prozess-Cards (VK-010, P2P-020, CRM/COM/FIN-001)
-   aktualisiert. Cards bleiben intern; Ergebnisse fließen in Workflows/Open-Gaps.
+   einordnen. **Cards-Audit (2026-06-26):** 148 Cards inventarisiert;
+   Ketten-Registry [`workflow-chains.md`](../_internal/workflow-chains.md);
+   Frontmatter auf alle Registry-Prozess-Cards migriert
+   (`scripts/migrate-cards-frontmatter.py`); P2P-010 Overview angelegt.
+   Cards bleiben intern; Ergebnisse fließen in Workflows/Open-Gaps.
 4. **Phase D:** Staleness-Gate verschärfen (blockierend), sobald die kuratierte
    Basis vollständig Frontmatter trägt.
 

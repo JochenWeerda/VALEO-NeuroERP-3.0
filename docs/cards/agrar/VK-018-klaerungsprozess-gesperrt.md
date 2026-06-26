@@ -1,3 +1,11 @@
+---
+card_id: VK-018
+chain: harvest-to-settlement
+chain_step: 6
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-018-klaerungsprozess-gesperrt.md
+---
 # Card: VK-018 - Klaerungsprozess gesperrte Ware
 
 ## 1. Einordnung

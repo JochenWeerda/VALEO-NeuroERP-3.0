@@ -1,3 +1,12 @@
+---
+card_id: P2P-020
+chain: procure-to-pay
+chain_step: 1
+card_type: process-step
+parent_card: P2P-010
+flow_spine: flow-spine-procure-to-pay
+workflow_doc: docs/workflows/p2p-001-procure-to-pay-direktbestellung.md
+---
 # Card: P2P-020 - Direktbestellung in Standardmaske erfassen
 
 ## 1. Einordnung

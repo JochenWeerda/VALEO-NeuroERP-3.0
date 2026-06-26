@@ -42,9 +42,24 @@ Empfohlene Struktur:
 
 ## Pflege (Docs-as-Code)
 
-1. Card-Status nach Slice-Abschluss aktualisieren (`abgeschlossen` / `umgesetzt`).
-2. Behobene Gaps durchstreichen oder in Tabelle mit **behoben** markieren.
-3. `python scripts/cards-inventory-audit.py` ausführen.
-4. Verbleibende echte Lücken in `open-gaps-and-known-issues.md` spiegeln.
+1. Neue Prozess-Cards mit YAML-Frontmatter anlegen (Vorlage: [`card-template.md`](card-template.md)).
+2. Ketten-Zuordnung in [`docs/_internal/workflow-chains.md`](../_internal/workflow-chains.md) pflegen.
+3. Card-Status nach Slice-Abschluss aktualisieren (`abgeschlossen` / `umgesetzt`).
+4. Behobene Gaps durchstreichen oder in Tabelle mit **behoben** markieren.
+5. Inventar regenerieren:
+
+```bash
+python scripts/cards-inventory-audit.py
+```
+
+6. Frontmatter-Nachzug für Registry-Cards (idempotent):
+
+```bash
+python scripts/migrate-cards-frontmatter.py
+```
+
+7. Verbleibende echte Lücken in `open-gaps-and-known-issues.md` spiegeln.
+
+**Ketten-Registry:** [`workflow-chains.md`](../_internal/workflow-chains.md) · **Inventar:** [`cards-inventory.md`](../_internal/cards-inventory.md)
 
 Vorlage: [`card-template.md`](card-template.md)

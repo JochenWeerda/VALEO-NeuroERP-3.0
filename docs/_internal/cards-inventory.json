@@ -13,7 +13,7 @@
       "chain_step": 1,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-010-ernte-annahme",
@@ -27,7 +27,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-011-qp-handover-und-lkw-validierung",
@@ -55,7 +55,7 @@
       "chain_step": 7,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-013-kampagnenabschluss",
@@ -69,7 +69,7 @@
       "chain_step": 8,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-014-settlement-kampagnenreferenz",
@@ -83,7 +83,7 @@
       "chain_step": 9,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-015-settlement-kampagnen-backfill",
@@ -97,7 +97,7 @@
       "chain_step": 10,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-016-queue-cta-und-artikel-api",
@@ -111,7 +111,7 @@
       "chain_step": 3,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-017-queue-article-id",
@@ -125,7 +125,7 @@
       "chain_step": 4,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-018-klaerungsprozess-gesperrt",
@@ -139,7 +139,7 @@
       "chain_step": 6,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-019-queue-repair-article-id",
@@ -153,7 +153,7 @@
       "chain_step": 5,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "VK-020-rohware-wizard-schrittvalidierung",
@@ -167,7 +167,7 @@
       "chain_step": 11,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "CMP-001-compliance-to-report",
@@ -181,7 +181,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "COM-001-compliance-to-audit",
@@ -197,7 +197,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "DOM-DOC-003-nachweis-und-rueckmeldung",
@@ -211,7 +211,7 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "CRM-001-crm-to-revenue",
@@ -227,7 +227,7 @@
       "chain_step": null,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "DOM-CRM-003-fall-und-ownership",
@@ -241,7 +241,7 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "DOM-PROC-003-beschaffungsausnahmen",
@@ -255,7 +255,21 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
+    },
+    {
+      "id": "P2P-010-procure-to-pay",
+      "file": "einkauf/P2P-010-procure-to-pay.md",
+      "status": "abgeschlossen (Overview; Detail-Slices P2P-020+)",
+      "closed": true,
+      "open_sections": [],
+      "needs_review": false,
+      "chain": "procure-to-pay",
+      "related_chain": null,
+      "chain_step": 0,
+      "card_type": "overview",
+      "unassigned_chain": false,
+      "has_frontmatter": true
     },
     {
       "id": "P2P-020-direktbestellung-standardmaske",
@@ -269,7 +283,7 @@
       "chain_step": 1,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "P2P-040-vorbelegung-standardmaske",
@@ -283,7 +297,7 @@
       "chain_step": 2,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "P2P-041-vorbelegung-aus-anfrage-und-vertrag",
@@ -297,7 +311,7 @@
       "chain_step": 3,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "P2P-050-wizard-schrittvalidierung",
@@ -311,7 +325,7 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "DOM-FIN-003-fibu-operatorparitaet",
@@ -325,7 +339,7 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "FIN-001-finance-to-close",
@@ -339,7 +353,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "FIN-001-finance-to-reporting",
@@ -355,7 +369,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "OTC-011-zahlungseingang-und-abstimmung",
@@ -369,7 +383,7 @@
       "chain_step": 1,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "DOM-SUPPLY-003-physische-kette",
@@ -383,7 +397,7 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "INV-001-inventory-to-settlement",
@@ -397,7 +411,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "CTS-001-contract-to-settlement",
@@ -411,7 +425,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "CTS-009-rohwaren-positionsmonitor",
@@ -425,7 +439,7 @@
       "chain_step": 1,
       "card_type": "process-step",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "DOM-CON-003-fixierung-markt-mahnung",
@@ -439,7 +453,7 @@
       "chain_step": null,
       "card_type": "cross-cutting",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "INV-001-inventory-to-settlement",
@@ -453,7 +467,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "INT-SG-021-superglue-compose-stack",
@@ -1581,7 +1595,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "SEC-001-hardcoded-secrets-remediation",
@@ -2057,7 +2071,7 @@
       "chain_step": 0,
       "card_type": "overview",
       "unassigned_chain": false,
-      "has_frontmatter": false
+      "has_frontmatter": true
     },
     {
       "id": "OTC-010-order-to-cash",
@@ -2219,6 +2233,7 @@
       "OTC-010-order-to-cash"
     ],
     "procure-to-pay": [
+      "P2P-010-procure-to-pay",
       "P2P-020-direktbestellung-standardmaske",
       "P2P-040-vorbelegung-standardmaske",
       "P2P-041-vorbelegung-aus-anfrage-und-vertrag",
