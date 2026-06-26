@@ -1,0 +1,34 @@
+name: Doc Drift Report
+
+on:
+  schedule:
+    # Montag 05:00 UTC — informativer Woechentlicher Drift-Snapshot
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift-report:
+    name: Doku-Code-Drift (informativ)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate drift report
+        run: python scripts/doc_drift_report.py
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-drift-report
+          path: artifacts/doc_drift_report.json
+          if-no-files-found: error
+          retention-days: 90

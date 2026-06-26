@@ -163,3 +163,4 @@ packages/frontend-web/tests/e2e/__verify__/
 # MkDocs Build-Output (Docs-as-Code)
 /site/
 /site_check/
+/site_check_*/
