@@ -1,5 +1,10 @@
 # Externe Agrar-ERP-Plattformen — Erweiterter Gap-Vergleich
 
+**Konsolidierungsstatus 2026-06-26:** Historische externe Vergleichsanalyse.
+Mehrere damals offene Punkte sind inzwischen durch DOM-/WM-/FEED-Slices
+geschlossen oder in externe Gates verschoben. Aktuelle Restarbeit steht in
+[`open-gaps-and-known-issues.md`](open-gaps-and-known-issues.md).
+
 Stand: `2026-05-17`
 Quellen: Direkte Browser-Analyse externer Agrar-ERP-Plattformen (165 Endpoints, 24 Module) und Agrar-Spezialsoftware (vollständiger Modulbaum).
 

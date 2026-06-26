@@ -1,5 +1,10 @@
 # ERP Reference Gap Analysis: Agrar-Spezialsoftware, Community ERP, Web-ERP-Standard
 
+**Konsolidierungsstatus 2026-06-26:** Referenz- und Inspirationsdokument, kein
+aktueller Umsetzungsplan. Neue Slices duerfen nur aus dieser Datei abgeleitet
+werden, wenn der Befund gegen aktuellen Code, Workboard und Open-Gaps erneut
+validiert wurde.
+
 Stand: `2026-04-12`
 
 ## Zweck

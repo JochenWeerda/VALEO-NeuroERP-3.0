@@ -1,6 +1,32 @@
 # Professional Tail Gap Plan 2026-04-09
 
-Stand: `2026-04-09`
+Stand: `2026-04-09` | Letzte Aktualisierung: `2026-06-26`
+
+## Status-Aktualisierung 2026-06-26
+
+### Abgeschlossen seit 2026-04-09
+
+| Tail-Block | Umgesetzt durch |
+|---|---|
+| Tail-Serie 6–11 (CRM Opp, Kontakt, FIBU, Futtermittel ×3) | Als abgeschlossen deklariert 2026-04-09 + DOM-004-Wellen |
+| Tail-Serie B 12–17 (Zertifikate, Schäden, Fahrer, Tankstelle, Bodenproben, Saatgut) | Als abgeschlossen deklariert 2026-04-09 |
+| Tail-Serie C 18–23 (Zulassungen, VVVO, Rahmenverträge, Versicherungen, Labor, Projekte) | Als abgeschlossen deklariert 2026-04-09 |
+| TAIL-CRM-001: Duplicate Detection | STMD-DUP-001 (Wave 3, 2026-06-18) — UST-ID/IBAN/PLZ+Name-Fuzzy/EAN-Duplikate + Soft-Merge |
+| TAIL-CRM-001: 360°-Kundensicht, KIM | KIM-DS-001, KIM-L3-BACKEND-001, KIM-L3-FRONTEND-001 (2026-06-26) |
+| TAIL-SERVICE-001 (im Kern) | WF-TRIGGER-001 (Wave 3) + DOM-SUPPLY-004 Folgebelege |
+
+### Noch offen (Stand 2026-06-26)
+
+| Tail-Block | Was fehlt noch |
+|---|---|
+| TAIL-CRM-001 | RAG-Panel und Intent-Bar in `LegacyKundenStammModern.tsx` noch als TODO markiert |
+| TAIL-NAWARO-001 | Druck-/Vorschau-/Serienbrief-Pfade NaWaRo noch nicht vollständig angeschlossen |
+| TAIL-AGRI-001 | PSM-Beratung Demo-Fallback; Saatgut-Edit-Flow noch Placeholder |
+| TAIL-SALES-001 | `orders-modern.tsx` Export/Import/Archiv-Aktionen noch Toast-only |
+
+Verbindliche offene Punkte → `docs/project-context/open-gaps-and-known-issues.md`.
+
+---
 
 ## Zweck
 

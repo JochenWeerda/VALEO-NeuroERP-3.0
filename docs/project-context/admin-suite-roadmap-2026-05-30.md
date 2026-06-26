@@ -1,5 +1,10 @@
 # VALEO Admin Suite Roadmap
 
+**Konsolidierungsstatus 2026-06-26:** Roadmap-Referenz. Teile der Admin-Suite
+sind inzwischen als Readiness-, Compliance-, Diagnostics-, Security- und
+Operations-Vertraege umgesetzt. Offene Punkte sind nur noch gueltig, wenn sie in
+Open-Gaps, Workboard oder einem aktiven Slice wieder auftauchen.
+
 Stand: `2026-05-30`
 
 ## Ziel

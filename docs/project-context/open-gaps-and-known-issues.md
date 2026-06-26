@@ -3,6 +3,11 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
+Dokumentations-Konsolidierung: **2026-06-26** (`DOC-CONSOLIDATION-010`).
+Der Code-zu-Doku-Drift steht bei 0; alte Planungs-/Benchmark-Dateien sind als
+historische Referenzen markiert. Aktuelle Restarbeit ist hier und im Bericht
+[`documentation-consolidation-2026-06-26.md`](documentation-consolidation-2026-06-26.md)
+zu fuehren.
 Production-Readiness-Nachaudit: **2026-06-09** (CI/Security, Deployment,
 simulierte externe Pruefer, POS-Fiskalisierung und CRM360/KIM).
 Governance-Nachzug: **2026-06-11** (`COMPAT-GOV-001`, `INV-STOCK-MOVEMENTS-001`,
@@ -438,6 +443,37 @@ Bulk-Migration der organisch gewachsenen Doku in Diátaxis + internes Archiv.
 **Fortlaufend:** Inventar `python scripts/docs-legacy-migrate.py --inventory-only`;
 Details: [`migrationsplan.md`](../dokumentation/migrationsplan.md).
 ADR-Nav: `python scripts/generate_adr_nav.py` nach neuer ADR-Datei (`DOC-MIGRATION-009`).
+
+---
+
+## Konsolidiertes Restbacklog (Stand 2026-06-26)
+
+Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert):
+
+| Thema | Slice / Tracker | Prio |
+|---|---|---|
+| WF-Cockpit: Persistenz, NATS-Projektor, UI-Leitstand, Dead-Letter, Retry | VALEO-WF-COCKPIT-001 (offen) | P1 |
+| Lager/WMS: FEFO-Pick-Listen, Bestandsbewertung FIFO/Ø, Permanente Inventur | WMS-FEFO-001 ff. (nicht gestartet) | P1 |
+| Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile, einkauf/lieferscheine, crm/pipeline) | neue Migrations-Slices | P1 |
+| Runtime 5xx Kat. C: Custom-Envelope-Validierung (18 Endpoints) | globaler Middleware-Fix | P1 |
+| Runtime 5xx Kat. E: MCP-Tools-YAML fehlt | MCP-ERP-TOOLS-001 | P2 |
+| Runtime 5xx Kat. F: `/api/v1/logistik/frachtbriefe` kein Backend-Endpoint | LOG-FRACHTBRIEF-001 | P2 |
+| Finanz-Abschluss-Stubs (calculate/lock/run) | FIN-ABSCHLUSS-STUBS-001 | P1 |
+| CMP UStVA `.data`-Bug im API-Client | CMP-UStVA-API-CLIENT-001 | P2 |
+| CRM Legacy-Pfade `/api/crm/` → `/api/v1/crm/` | CRM-LEGACY-API-MIGRATE-001 | P2 |
+| Compliance CamelCase Register | COM-REGISTER-CAMELCASE-001 | P2 |
+| Agrar Silo: Zielzellen-Regelengine (WE/Waage → Silozelle automatisch) | WM-AGRI-MAP-001 (Folge-Slice) | P2 |
+| Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 (nicht gestartet) | P3 |
+| CRM: RAG-Panel + Intent-Bar in `LegacyKundenStammModern.tsx` | TAIL-CRM-001 (restl. Teil) | P3 |
+| NaWaRo: Druck-/Vorschau-/Serienbrief-Pfad vollständig | TAIL-NAWARO-001 | P3 |
+| Agrar PSM-Beratung Demo-Fallback; Saatgut-Edit-Flow Placeholder | TAIL-AGRI-001 | P3 |
+| Sales `orders-modern.tsx` Export/Import/Archiv (Toast → echter Pfad) | TAIL-SALES-001 | P3 |
+| Coverage: Ratchet für weitere kritische Pfade anheben (aktuell 64,85 %) | COVERAGE-001 (laufend) | P2 |
+
+**Extern blockiert** (kein Repo-Fortschritt möglich): DATEV-Steuerberater-Cutover,
+DMS-Live-Probe (`PAPERLESS_URL`), reale TSE-/DSFinV-K-Prüfwerkzeug-Abnahme,
+ATLAS-/ERiC-Zertifikat, UAT-Unterschriften, GitHub-Environment-Reviewer/Branch-Protection,
+produktive Cluster-Secrets, Backup-/Restore- und Incident-Drills.
 
 ---
 
