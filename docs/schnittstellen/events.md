@@ -1,85 +1,169 @@
 ---
-title: Event-Katalog (NATS / Outbox)
+title: Event-Katalog (NATS / Outbox) — generiert
+description: Maschinenlesbar generierter AsyncAPI-Event-Katalog für VALEO NeuroERP 3.0.
 type: reference
 audience: [integrator, entwickler]
-owner: Cursor
+owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-25
+last_reviewed: 2026-06-26
 version: 3.0.0
 ---
 
 # Event-Katalog (NATS / Outbox)
 
-VALEO NeuroERP publiziert fachliche Domänen-Events über das **Transactional
-Outbox Pattern**: Events werden in derselben DB-Transaktion wie die fachliche
-Änderung persistiert und anschließend zuverlässig nach **NATS JetStream**
-ausgeliefert. So bleibt der Event-Strom konsistent mit dem Datenbestand.
+> Maschinenlesbare Quelle: [`docs/schnittstellen/asyncapi.yaml`](asyncapi.yaml)
+> Generiert via `scripts/generate_asyncapi.py`
+
+VALEO NeuroERP publiziert fachliche Domänen-Events über das **Transactional Outbox Pattern**:
+Events werden atomar mit der fachlichen Änderung persistiert und über **NATS JetStream** ausgeliefert.
 
 ## Namenskonvention
 
-```text
-<domäne>.<aggregat>.<aktion>
+```
+tenant.{tenantId}.<domäne>.<aggregat>.<aktion>
 ```
 
-Beispiele: `inventory.material_flow.transfer_booked`,
-`procurement.return.created`, `payment_run.returned`.
+## Zustellgarantien
 
-## Zustellung & Garantien
-
-- **Transaktional:** Event + Datenänderung sind atomar (Outbox).
-- **At-least-once:** Konsumenten müssen idempotent verarbeiten.
-- **Mandant:** Jedes Event trägt den Tenant-Bezug; Konsumenten respektieren die
-  Mandantentrennung.
-- **Korrelation:** Korrelations-ID wird zur Nachvollziehbarkeit propagiert.
-
-## Repräsentativer Katalog
-
-### inventory (Materialfluss / Silo)
-
-| Event | Auslöser |
+| Eigenschaft | Wert |
 |---|---|
-| `inventory.material_flow.silo_system_created` | Silosystem angelegt |
-| `inventory.material_flow.silo_cell_created` | Silozelle angelegt |
-| `inventory.material_flow.silo_cell_updated` | Silozelle geändert |
-| `inventory.material_flow.node_created` | Materialfluss-Knoten angelegt |
-| `inventory.material_flow.edge_created` | Materialfluss-Kante angelegt |
-| `inventory.material_flow.flush_charge_booked` | Spülcharge gebucht |
-| `inventory.material_flow.transfer_booked` | Umlagerung gebucht |
-| `inventory.material_flow.silo_lot_link_booked` | Lot-Silozellen-Verknüpfung gebucht |
+| Zustellung | At-least-once (Konsumenten müssen idempotent sein) |
+| Transaktionalität | Outbox-Pattern: Event + Datenänderung atomar |
+| Mandantentrennung | Jedes Event trägt `tenant_id` |
+| Korrelation | `correlation_id` für verteiltes Tracing |
 
-### procurement (Einkauf)
+## Agrar
 
-| Event | Auslöser |
-|---|---|
-| `purchase_order.created` | Bestellung angelegt |
-| `goods_receipt.created` | Wareneingang erfasst |
-| `procurement.return.created` | Einkaufsretoure angelegt |
-| `service_entry_sheet.created` | Leistungserfassungsblatt angelegt |
-| `procurement.edi.message.created` | EDI-Nachricht erzeugt |
-| `procurement.edi.message.ack` | EDI-Nachricht bestätigt |
+| Event | Kanal | Quelle |
+|---|---|---|
+| `agrar.contract.allocated` | outbox | `api/v1/endpoints/weighing_tickets.py` |
+| `agrar.weighing_ticket.allocated` | outbox | `api/v1/endpoints/weighing_tickets.py` |
 
-### finance (Zahlungen)
+## Außendienst
 
-| Event | Auslöser |
-|---|---|
-| `payment_run.returned` | Zahllauf-Rückläufer verbucht |
+| Event | Kanal | Quelle |
+|---|---|---|
+| `field_service_task.completed` | outbox | `services/agribusiness_service.py` |
+| `field_service_task.created` | outbox | `services/agribusiness_service.py` |
 
-### agrar / QS
+## CRM
 
-| Event | Auslöser |
-|---|---|
-| `qs_status_changed` | QS-Status eines Lots geändert |
+| Event | Kanal | Quelle |
+|---|---|---|
+| `crm_case.created` | outbox | `services/crm_compat_service.py` |
 
-!!! note "Vollständige AsyncAPI"
-    Dieser Katalog ist kuratiert und repräsentativ. Eine vollständige,
-    generierte AsyncAPI-Spezifikation (analog zu OpenAPI) ist als Folgearbeit
-    vorgesehen. Single Source of Truth bleiben die Event-Definitionen im Code
-    (`enqueue_event(...)` / Outbox-Service).
+## Einkauf
 
-## Konsumenten-Leitlinien
+| Event | Kanal | Quelle |
+|---|---|---|
+| `goods_receipt.created` | outbox | `services/einkauf_compat_service.py` |
+| `procurement.edi.message.ack` | outbox | `services/einkauf_compat_service.py` |
+| `procurement.edi.message.created` | outbox | `services/einkauf_compat_service.py` |
+| `procurement.return.created` | outbox | `services/einkauf_compat_service.py` |
+| `purchase_order.approved` | outbox | `api/v1/endpoints/compat.py` |
+| `purchase_order.cancelled` | outbox | `api/v1/endpoints/compat.py` |
+| `purchase_order.communication.sent` | outbox | `api/v1/endpoints/compat.py` |
+| `purchase_order.created` | outbox | `api/v1/endpoints/compat.py` |
+| `service_entry_sheet.created` | outbox | `services/einkauf_compat_service.py` |
 
-1. **Idempotent** verarbeiten (Event-ID/Dedup-Key prüfen).
-2. **Mandant** aus dem Event respektieren — keine mandantenübergreifende
-   Verarbeitung.
-3. **Reihenfolge** nicht voraussetzen; auf fachliche Versionsfelder stützen.
-4. **Fehler** mit Backoff/Retry behandeln; Dead-Letter für Giftnachrichten.
+## Finanzbuchhaltung
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `payment_run.returned` | outbox | `api/v1/endpoints/payment_runs.py` |
+
+## Lager
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `lager.auslagerung.created` | outbox | `services/inventory_compat_service.py` |
+| `lager.einlagerung.created` | outbox | `services/inventory_compat_service.py` |
+
+## Lager / Materialfluss
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `inventory.material_flow.edge_created` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.edge_updated` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.flush_charge_booked` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.node_created` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.node_updated` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.silo_cell_created` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.silo_cell_updated` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.silo_lot_link_booked` | outbox | `services/agri_lot_link_booking_service.py` |
+| `inventory.material_flow.silo_lot_synced` | outbox | `services/agri_silo_lot_link_service.py` |
+| `inventory.material_flow.silo_system_created` | outbox | `services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.transfer_booked` | outbox | `services/agri_silo_material_flow_service.py` |
+
+## Logistik
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `lkw.registered` | outbox | `services/annahme_service.py` |
+
+## POS / Kasse
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `pos.tagesabschluss.created` | outbox | `services/pos_compat_service.py` |
+
+## Portal
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `portal_order.cancelled` | outbox | `services/portal_compat_service.py` |
+| `portal_order.created` | outbox | `services/portal_compat_service.py` |
+
+## Qualitätssicherung
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `qualitaets_check.completed` | outbox | `services/annahme_service.py` |
+| `qualitaets_check.created` | outbox | `services/annahme_service.py` |
+
+## Sonstige
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `cash_closing.posted` | outbox | `api/v1/endpoints/compat.py` |
+| `compliance.violations_detected` | outbox | `workers/compliance_monitor.py` |
+| `inventur.abgeschlossen` | outbox | `services/inventory_compat_service.py` |
+| `settlement.created` | outbox | `core/settlement_audit_chain.py` |
+
+## System
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `tenant.*.agrar_settlement.{verb}` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.ap_invoice.{verb}` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.audit_evidence.created` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.command.dispatched` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.duenge_bilanz.calculated` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.e2e_chain.link_completed` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.iot_device.telemetry` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.payment_run.{verb}` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.process.state_changed` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.silo.transfer` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.sla.violated` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.workflow.{verb}` | nats | `core/event_consumer_wiring.py` |
+
+## Tierernährung
+
+| Event | Kanal | Quelle |
+|---|---|---|
+| `ration.created` | outbox | `services/inventory_compat_service.py` |
+
+## AsyncAPI-Spec
+
+Die maschinenlesbare Spec im AsyncAPI 2.6 Format:
+
+```yaml
+# docs/schnittstellen/asyncapi.yaml
+asyncapi: '2.6.0'
+info:
+  title: VALEO NeuroERP Event-Katalog
+  version: '3.0.0'
+# ... (vollständige Spec in asyncapi.yaml)
+```
+
+*Stand: 2026-06-26 · 51 Events · Slice: DOC-ASYNCAPI-001*

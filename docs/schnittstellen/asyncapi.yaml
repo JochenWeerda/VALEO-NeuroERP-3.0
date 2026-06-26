@@ -1,0 +1,1604 @@
+asyncapi: '2.6.0'
+info:
+  title: VALEO NeuroERP Event-Katalog
+  version: '3.0.0'
+  description: >
+    NATS JetStream / Transactional-Outbox Events für VALEO NeuroERP 3.0.
+    Generiert via scripts/generate_asyncapi.py.
+  x-generated: '2026-06-26'
+
+servers:
+  production:
+    url: nats://nats:4222
+    protocol: nats
+    description: NATS JetStream (Production)
+  development:
+    url: nats://localhost:4222
+    protocol: nats
+    description: NATS JetStream (Development)
+
+defaultContentType: application/json
+
+channels:
+  "tenant.{tenantId}.agrar.contract.allocated":
+    description: >
+      [Agrar] Agrar Contract Allocated
+    subscribe:
+      summary: agrar.contract.allocated
+      operationId: on_agrar_contract_allocated
+      message:
+        $ref: '#/components/messages/agrar_contract_allocatedEvent'
+
+  "tenant.{tenantId}.agrar.weighing_ticket.allocated":
+    description: >
+      [Agrar] Agrar Weighing Ticket Allocated
+    subscribe:
+      summary: agrar.weighing_ticket.allocated
+      operationId: on_agrar_weighing_ticket_allocated
+      message:
+        $ref: '#/components/messages/agrar_weighing_ticket_allocatedEvent'
+
+  "tenant.{tenantId}.field_service_task.completed":
+    description: >
+      [Außendienst] Field Service Task Completed
+    subscribe:
+      summary: field_service_task.completed
+      operationId: on_field_service_task_completed
+      message:
+        $ref: '#/components/messages/field_service_task_completedEvent'
+
+  "tenant.{tenantId}.field_service_task.created":
+    description: >
+      [Außendienst] Field Service Task Created
+    subscribe:
+      summary: field_service_task.created
+      operationId: on_field_service_task_created
+      message:
+        $ref: '#/components/messages/field_service_task_createdEvent'
+
+  "tenant.{tenantId}.crm_case.created":
+    description: >
+      [CRM] Crm Case Created
+    subscribe:
+      summary: crm_case.created
+      operationId: on_crm_case_created
+      message:
+        $ref: '#/components/messages/crm_case_createdEvent'
+
+  "tenant.{tenantId}.goods_receipt.created":
+    description: >
+      [Einkauf] Goods Receipt Created
+    subscribe:
+      summary: goods_receipt.created
+      operationId: on_goods_receipt_created
+      message:
+        $ref: '#/components/messages/goods_receipt_createdEvent'
+
+  "tenant.{tenantId}.procurement.edi.message.ack":
+    description: >
+      [Einkauf] Procurement Edi Message Ack
+    subscribe:
+      summary: procurement.edi.message.ack
+      operationId: on_procurement_edi_message_ack
+      message:
+        $ref: '#/components/messages/procurement_edi_message_ackEvent'
+
+  "tenant.{tenantId}.procurement.edi.message.created":
+    description: >
+      [Einkauf] Procurement Edi Message Created
+    subscribe:
+      summary: procurement.edi.message.created
+      operationId: on_procurement_edi_message_created
+      message:
+        $ref: '#/components/messages/procurement_edi_message_createdEvent'
+
+  "tenant.{tenantId}.procurement.return.created":
+    description: >
+      [Einkauf] Procurement Return Created
+    subscribe:
+      summary: procurement.return.created
+      operationId: on_procurement_return_created
+      message:
+        $ref: '#/components/messages/procurement_return_createdEvent'
+
+  "tenant.{tenantId}.purchase_order.approved":
+    description: >
+      [Einkauf] Purchase Order Approved
+    subscribe:
+      summary: purchase_order.approved
+      operationId: on_purchase_order_approved
+      message:
+        $ref: '#/components/messages/purchase_order_approvedEvent'
+
+  "tenant.{tenantId}.purchase_order.cancelled":
+    description: >
+      [Einkauf] Purchase Order Cancelled
+    subscribe:
+      summary: purchase_order.cancelled
+      operationId: on_purchase_order_cancelled
+      message:
+        $ref: '#/components/messages/purchase_order_cancelledEvent'
+
+  "tenant.{tenantId}.purchase_order.communication.sent":
+    description: >
+      [Einkauf] Purchase Order Communication Sent
+    subscribe:
+      summary: purchase_order.communication.sent
+      operationId: on_purchase_order_communication_sent
+      message:
+        $ref: '#/components/messages/purchase_order_communication_sentEvent'
+
+  "tenant.{tenantId}.purchase_order.created":
+    description: >
+      [Einkauf] Purchase Order Created
+    subscribe:
+      summary: purchase_order.created
+      operationId: on_purchase_order_created
+      message:
+        $ref: '#/components/messages/purchase_order_createdEvent'
+
+  "tenant.{tenantId}.service_entry_sheet.created":
+    description: >
+      [Einkauf] Service Entry Sheet Created
+    subscribe:
+      summary: service_entry_sheet.created
+      operationId: on_service_entry_sheet_created
+      message:
+        $ref: '#/components/messages/service_entry_sheet_createdEvent'
+
+  "tenant.{tenantId}.payment_run.returned":
+    description: >
+      [Finanzbuchhaltung] Payment Run Returned
+    subscribe:
+      summary: payment_run.returned
+      operationId: on_payment_run_returned
+      message:
+        $ref: '#/components/messages/payment_run_returnedEvent'
+
+  "tenant.{tenantId}.lager.auslagerung.created":
+    description: >
+      [Lager] Lager Auslagerung Created
+    subscribe:
+      summary: lager.auslagerung.created
+      operationId: on_lager_auslagerung_created
+      message:
+        $ref: '#/components/messages/lager_auslagerung_createdEvent'
+
+  "tenant.{tenantId}.lager.einlagerung.created":
+    description: >
+      [Lager] Lager Einlagerung Created
+    subscribe:
+      summary: lager.einlagerung.created
+      operationId: on_lager_einlagerung_created
+      message:
+        $ref: '#/components/messages/lager_einlagerung_createdEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.edge_created":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Edge Created
+    subscribe:
+      summary: inventory.material_flow.edge_created
+      operationId: on_inventory_material_flow_edge_created
+      message:
+        $ref: '#/components/messages/inventory_material_flow_edge_createdEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.edge_updated":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Edge Updated
+    subscribe:
+      summary: inventory.material_flow.edge_updated
+      operationId: on_inventory_material_flow_edge_updated
+      message:
+        $ref: '#/components/messages/inventory_material_flow_edge_updatedEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.flush_charge_booked":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Flush Charge Booked
+    subscribe:
+      summary: inventory.material_flow.flush_charge_booked
+      operationId: on_inventory_material_flow_flush_charge_booked
+      message:
+        $ref: '#/components/messages/inventory_material_flow_flush_charge_bookedEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.node_created":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Node Created
+    subscribe:
+      summary: inventory.material_flow.node_created
+      operationId: on_inventory_material_flow_node_created
+      message:
+        $ref: '#/components/messages/inventory_material_flow_node_createdEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.node_updated":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Node Updated
+    subscribe:
+      summary: inventory.material_flow.node_updated
+      operationId: on_inventory_material_flow_node_updated
+      message:
+        $ref: '#/components/messages/inventory_material_flow_node_updatedEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.silo_cell_created":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Silo Cell Created
+    subscribe:
+      summary: inventory.material_flow.silo_cell_created
+      operationId: on_inventory_material_flow_silo_cell_created
+      message:
+        $ref: '#/components/messages/inventory_material_flow_silo_cell_createdEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.silo_cell_updated":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Silo Cell Updated
+    subscribe:
+      summary: inventory.material_flow.silo_cell_updated
+      operationId: on_inventory_material_flow_silo_cell_updated
+      message:
+        $ref: '#/components/messages/inventory_material_flow_silo_cell_updatedEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.silo_lot_link_booked":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Silo Lot Link Booked
+    subscribe:
+      summary: inventory.material_flow.silo_lot_link_booked
+      operationId: on_inventory_material_flow_silo_lot_link_booked
+      message:
+        $ref: '#/components/messages/inventory_material_flow_silo_lot_link_bookedEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.silo_lot_synced":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Silo Lot Synced
+    subscribe:
+      summary: inventory.material_flow.silo_lot_synced
+      operationId: on_inventory_material_flow_silo_lot_synced
+      message:
+        $ref: '#/components/messages/inventory_material_flow_silo_lot_syncedEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.silo_system_created":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Silo System Created
+    subscribe:
+      summary: inventory.material_flow.silo_system_created
+      operationId: on_inventory_material_flow_silo_system_created
+      message:
+        $ref: '#/components/messages/inventory_material_flow_silo_system_createdEvent'
+
+  "tenant.{tenantId}.inventory.material_flow.transfer_booked":
+    description: >
+      [Lager / Materialfluss] Inventory Material Flow Transfer Booked
+    subscribe:
+      summary: inventory.material_flow.transfer_booked
+      operationId: on_inventory_material_flow_transfer_booked
+      message:
+        $ref: '#/components/messages/inventory_material_flow_transfer_bookedEvent'
+
+  "tenant.{tenantId}.lkw.registered":
+    description: >
+      [Logistik] Lkw Registered
+    subscribe:
+      summary: lkw.registered
+      operationId: on_lkw_registered
+      message:
+        $ref: '#/components/messages/lkw_registeredEvent'
+
+  "tenant.{tenantId}.pos.tagesabschluss.created":
+    description: >
+      [POS / Kasse] Pos Tagesabschluss Created
+    subscribe:
+      summary: pos.tagesabschluss.created
+      operationId: on_pos_tagesabschluss_created
+      message:
+        $ref: '#/components/messages/pos_tagesabschluss_createdEvent'
+
+  "tenant.{tenantId}.portal_order.cancelled":
+    description: >
+      [Portal] Portal Order Cancelled
+    subscribe:
+      summary: portal_order.cancelled
+      operationId: on_portal_order_cancelled
+      message:
+        $ref: '#/components/messages/portal_order_cancelledEvent'
+
+  "tenant.{tenantId}.portal_order.created":
+    description: >
+      [Portal] Portal Order Created
+    subscribe:
+      summary: portal_order.created
+      operationId: on_portal_order_created
+      message:
+        $ref: '#/components/messages/portal_order_createdEvent'
+
+  "tenant.{tenantId}.qualitaets_check.completed":
+    description: >
+      [Qualitätssicherung] Qualitaets Check Completed
+    subscribe:
+      summary: qualitaets_check.completed
+      operationId: on_qualitaets_check_completed
+      message:
+        $ref: '#/components/messages/qualitaets_check_completedEvent'
+
+  "tenant.{tenantId}.qualitaets_check.created":
+    description: >
+      [Qualitätssicherung] Qualitaets Check Created
+    subscribe:
+      summary: qualitaets_check.created
+      operationId: on_qualitaets_check_created
+      message:
+        $ref: '#/components/messages/qualitaets_check_createdEvent'
+
+  "tenant.{tenantId}.cash_closing.posted":
+    description: >
+      [Sonstige] Cash Closing Posted
+    subscribe:
+      summary: cash_closing.posted
+      operationId: on_cash_closing_posted
+      message:
+        $ref: '#/components/messages/cash_closing_postedEvent'
+
+  "tenant.{tenantId}.compliance.violations_detected":
+    description: >
+      [Sonstige] Compliance Violations Detected
+    subscribe:
+      summary: compliance.violations_detected
+      operationId: on_compliance_violations_detected
+      message:
+        $ref: '#/components/messages/compliance_violations_detectedEvent'
+
+  "tenant.{tenantId}.inventur.abgeschlossen":
+    description: >
+      [Sonstige] Inventur Abgeschlossen
+    subscribe:
+      summary: inventur.abgeschlossen
+      operationId: on_inventur_abgeschlossen
+      message:
+        $ref: '#/components/messages/inventur_abgeschlossenEvent'
+
+  "tenant.{tenantId}.settlement.created":
+    description: >
+      [Sonstige] Settlement Created
+    subscribe:
+      summary: settlement.created
+      operationId: on_settlement_created
+      message:
+        $ref: '#/components/messages/settlement_createdEvent'
+
+  "tenant.*.agrar_settlement.{verb}":
+    description: >
+      [System] Tenant * Agrar Settlement {Verb}
+    subscribe:
+      summary: "tenant.*.agrar_settlement.{verb}"
+      operationId: on_tenant_any_agrar_settlement_{verb}
+      message:
+        $ref: '#/components/messages/tenant_any_agrar_settlement_verbEvent'
+
+  "tenant.*.ap_invoice.{verb}":
+    description: >
+      [System] Tenant * Ap Invoice {Verb}
+    subscribe:
+      summary: "tenant.*.ap_invoice.{verb}"
+      operationId: on_tenant_any_ap_invoice_{verb}
+      message:
+        $ref: '#/components/messages/tenant_any_ap_invoice_verbEvent'
+
+  tenant.*.audit_evidence.created:
+    description: >
+      [System] Tenant * Audit Evidence Created
+    subscribe:
+      summary: tenant.*.audit_evidence.created
+      operationId: on_tenant_any_audit_evidence_created
+      message:
+        $ref: '#/components/messages/tenant_any_audit_evidence_createdEvent'
+
+  tenant.*.command.dispatched:
+    description: >
+      [System] Tenant * Command Dispatched
+    subscribe:
+      summary: tenant.*.command.dispatched
+      operationId: on_tenant_any_command_dispatched
+      message:
+        $ref: '#/components/messages/tenant_any_command_dispatchedEvent'
+
+  tenant.*.duenge_bilanz.calculated:
+    description: >
+      [System] Tenant * Duenge Bilanz Calculated
+    subscribe:
+      summary: tenant.*.duenge_bilanz.calculated
+      operationId: on_tenant_any_duenge_bilanz_calculated
+      message:
+        $ref: '#/components/messages/tenant_any_duenge_bilanz_calculatedEvent'
+
+  tenant.*.e2e_chain.link_completed:
+    description: >
+      [System] Tenant * E2E Chain Link Completed
+    subscribe:
+      summary: tenant.*.e2e_chain.link_completed
+      operationId: on_tenant_any_e2e_chain_link_completed
+      message:
+        $ref: '#/components/messages/tenant_any_e2e_chain_link_completedEvent'
+
+  tenant.*.iot_device.telemetry:
+    description: >
+      [System] Tenant * Iot Device Telemetry
+    subscribe:
+      summary: tenant.*.iot_device.telemetry
+      operationId: on_tenant_any_iot_device_telemetry
+      message:
+        $ref: '#/components/messages/tenant_any_iot_device_telemetryEvent'
+
+  "tenant.*.payment_run.{verb}":
+    description: >
+      [System] Tenant * Payment Run {Verb}
+    subscribe:
+      summary: "tenant.*.payment_run.{verb}"
+      operationId: on_tenant_any_payment_run_{verb}
+      message:
+        $ref: '#/components/messages/tenant_any_payment_run_verbEvent'
+
+  tenant.*.process.state_changed:
+    description: >
+      [System] Tenant * Process State Changed
+    subscribe:
+      summary: tenant.*.process.state_changed
+      operationId: on_tenant_any_process_state_changed
+      message:
+        $ref: '#/components/messages/tenant_any_process_state_changedEvent'
+
+  tenant.*.silo.transfer:
+    description: >
+      [System] Tenant * Silo Transfer
+    subscribe:
+      summary: tenant.*.silo.transfer
+      operationId: on_tenant_any_silo_transfer
+      message:
+        $ref: '#/components/messages/tenant_any_silo_transferEvent'
+
+  tenant.*.sla.violated:
+    description: >
+      [System] Tenant * Sla Violated
+    subscribe:
+      summary: tenant.*.sla.violated
+      operationId: on_tenant_any_sla_violated
+      message:
+        $ref: '#/components/messages/tenant_any_sla_violatedEvent'
+
+  "tenant.*.workflow.{verb}":
+    description: >
+      [System] Tenant * Workflow {Verb}
+    subscribe:
+      summary: "tenant.*.workflow.{verb}"
+      operationId: on_tenant_any_workflow_{verb}
+      message:
+        $ref: '#/components/messages/tenant_any_workflow_verbEvent'
+
+  "tenant.{tenantId}.ration.created":
+    description: >
+      [Tierernährung] Ration Created
+    subscribe:
+      summary: ration.created
+      operationId: on_ration_created
+      message:
+        $ref: '#/components/messages/ration_createdEvent'
+
+components:
+  messages:
+  agrar_contract_allocatedEvent:
+    name: agrar.contract.allocated
+    title: Agrar Contract Allocated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  agrar_weighing_ticket_allocatedEvent:
+    name: agrar.weighing_ticket.allocated
+    title: Agrar Weighing Ticket Allocated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  field_service_task_completedEvent:
+    name: field_service_task.completed
+    title: Field Service Task Completed
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  field_service_task_createdEvent:
+    name: field_service_task.created
+    title: Field Service Task Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  crm_case_createdEvent:
+    name: crm_case.created
+    title: Crm Case Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  goods_receipt_createdEvent:
+    name: goods_receipt.created
+    title: Goods Receipt Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  procurement_edi_message_ackEvent:
+    name: procurement.edi.message.ack
+    title: Procurement Edi Message Ack
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  procurement_edi_message_createdEvent:
+    name: procurement.edi.message.created
+    title: Procurement Edi Message Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  procurement_return_createdEvent:
+    name: procurement.return.created
+    title: Procurement Return Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  purchase_order_approvedEvent:
+    name: purchase_order.approved
+    title: Purchase Order Approved
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  purchase_order_cancelledEvent:
+    name: purchase_order.cancelled
+    title: Purchase Order Cancelled
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  purchase_order_communication_sentEvent:
+    name: purchase_order.communication.sent
+    title: Purchase Order Communication Sent
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  purchase_order_createdEvent:
+    name: purchase_order.created
+    title: Purchase Order Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  service_entry_sheet_createdEvent:
+    name: service_entry_sheet.created
+    title: Service Entry Sheet Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  payment_run_returnedEvent:
+    name: payment_run.returned
+    title: Payment Run Returned
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  lager_auslagerung_createdEvent:
+    name: lager.auslagerung.created
+    title: Lager Auslagerung Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  lager_einlagerung_createdEvent:
+    name: lager.einlagerung.created
+    title: Lager Einlagerung Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_edge_createdEvent:
+    name: inventory.material_flow.edge_created
+    title: Inventory Material Flow Edge Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_edge_updatedEvent:
+    name: inventory.material_flow.edge_updated
+    title: Inventory Material Flow Edge Updated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_flush_charge_bookedEvent:
+    name: inventory.material_flow.flush_charge_booked
+    title: Inventory Material Flow Flush Charge Booked
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_node_createdEvent:
+    name: inventory.material_flow.node_created
+    title: Inventory Material Flow Node Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_node_updatedEvent:
+    name: inventory.material_flow.node_updated
+    title: Inventory Material Flow Node Updated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_silo_cell_createdEvent:
+    name: inventory.material_flow.silo_cell_created
+    title: Inventory Material Flow Silo Cell Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_silo_cell_updatedEvent:
+    name: inventory.material_flow.silo_cell_updated
+    title: Inventory Material Flow Silo Cell Updated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_silo_lot_link_bookedEvent:
+    name: inventory.material_flow.silo_lot_link_booked
+    title: Inventory Material Flow Silo Lot Link Booked
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_silo_lot_syncedEvent:
+    name: inventory.material_flow.silo_lot_synced
+    title: Inventory Material Flow Silo Lot Synced
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_silo_system_createdEvent:
+    name: inventory.material_flow.silo_system_created
+    title: Inventory Material Flow Silo System Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventory_material_flow_transfer_bookedEvent:
+    name: inventory.material_flow.transfer_booked
+    title: Inventory Material Flow Transfer Booked
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  lkw_registeredEvent:
+    name: lkw.registered
+    title: Lkw Registered
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  pos_tagesabschluss_createdEvent:
+    name: pos.tagesabschluss.created
+    title: Pos Tagesabschluss Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  portal_order_cancelledEvent:
+    name: portal_order.cancelled
+    title: Portal Order Cancelled
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  portal_order_createdEvent:
+    name: portal_order.created
+    title: Portal Order Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  qualitaets_check_completedEvent:
+    name: qualitaets_check.completed
+    title: Qualitaets Check Completed
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  qualitaets_check_createdEvent:
+    name: qualitaets_check.created
+    title: Qualitaets Check Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  cash_closing_postedEvent:
+    name: cash_closing.posted
+    title: Cash Closing Posted
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  compliance_violations_detectedEvent:
+    name: compliance.violations_detected
+    title: Compliance Violations Detected
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  inventur_abgeschlossenEvent:
+    name: inventur.abgeschlossen
+    title: Inventur Abgeschlossen
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  settlement_createdEvent:
+    name: settlement.created
+    title: Settlement Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_agrar_settlement_verbEvent:
+    name: "tenant.*.agrar_settlement.{verb}"
+    title: Tenant * Agrar Settlement {Verb}
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_ap_invoice_verbEvent:
+    name: "tenant.*.ap_invoice.{verb}"
+    title: Tenant * Ap Invoice {Verb}
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_audit_evidence_createdEvent:
+    name: tenant.*.audit_evidence.created
+    title: Tenant * Audit Evidence Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_command_dispatchedEvent:
+    name: tenant.*.command.dispatched
+    title: Tenant * Command Dispatched
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_duenge_bilanz_calculatedEvent:
+    name: tenant.*.duenge_bilanz.calculated
+    title: Tenant * Duenge Bilanz Calculated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_e2e_chain_link_completedEvent:
+    name: tenant.*.e2e_chain.link_completed
+    title: Tenant * E2E Chain Link Completed
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_iot_device_telemetryEvent:
+    name: tenant.*.iot_device.telemetry
+    title: Tenant * Iot Device Telemetry
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_payment_run_verbEvent:
+    name: "tenant.*.payment_run.{verb}"
+    title: Tenant * Payment Run {Verb}
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_process_state_changedEvent:
+    name: tenant.*.process.state_changed
+    title: Tenant * Process State Changed
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_silo_transferEvent:
+    name: tenant.*.silo.transfer
+    title: Tenant * Silo Transfer
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_sla_violatedEvent:
+    name: tenant.*.sla.violated
+    title: Tenant * Sla Violated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_workflow_verbEvent:
+    name: "tenant.*.workflow.{verb}"
+    title: Tenant * Workflow {Verb}
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  ration_createdEvent:
+    name: ration.created
+    title: Ration Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ

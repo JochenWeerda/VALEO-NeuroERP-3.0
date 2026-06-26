@@ -164,3 +164,6 @@ packages/frontend-web/tests/e2e/__verify__/
 /site/
 /site_check/
 /site_check_*/
+
+# AsyncAPI event extraction intermediate
+events_raw.json
