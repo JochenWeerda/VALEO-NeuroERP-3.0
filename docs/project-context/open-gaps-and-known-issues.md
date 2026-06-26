@@ -31,7 +31,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Response-Model-Coverage**: Nachzug 2026-06-25: External-Mock-Harness-Routen tragen `response_model` gate-kompatibel vor Summary-Texten mit Klammern; verhindert False-Negative im Regex-basierten CI-Check.
 - **Response-Model-Coverage**: Nachzug 2026-06-25b: Workflow-Cockpit-Persistenz und Silo-Zielzellen-Regelengine mit expliziten `response_model`-Metadaten versehen; Gate wieder bei 80 untypisierten Legacy-Routen.
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27). Nachzug 2026-06-26: Portal-/CRM-Buildbruch aus dem E2E-Smoke geschlossen (`potential-analyse`, `empfehlungen`, `whatsapp-simulator`): falsche Default-API-Imports auf named `apiClient`, Toast-Hook auf kanonischen `@/hooks/use-toast`, fehlende JSX-Funktionsklammer in `empfehlungen`; lokaler Nachweis `pnpm --dir packages/frontend-web build` gruen.
-- **Alembic**: 1 Head (`log_frachtbriefe_20260626`) — linear nach LOG-FRACHTBRIEF-001 (2026-06-26; vorher `external_mock_sessions_20260623`)
+- **Alembic**: 1 produktiver Head (`log_frachtbriefe_20260626`) in der Hauptkette. Parallel: 55 weitere Heads in Neben-Branches (`admin_mobile_routing_connectors_20260215`, `crm_campaigns_20260524`, `agrar_drying_rules_audit_contract_dms_20260217` u.a.) — verursachen `UndefinedTable`-500er fuer Admin-Mobile-Endpoints. ALEMBIC-MERGE-001 als P1-Gap dokumentiert.
 - **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
@@ -476,7 +476,11 @@ Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert)
 ~~Runtime Kat. E: mcp/tools + mcp/tools/summary~~ → MCP-ERP-TOOLS-001 (Welle 5) ·
 ~~Runtime Kat. F: logistik/frachtbriefe~~ → LOG-FRACHTBRIEF-001 (Welle 5) ·
 ~~Zielzellen-Regelengine~~ → WM-AGRI-MAP-001 (retroaktiv 2026-06-26): `silo_target_cell.py` + `silo_rule_engine_service.py` bereits vorhanden ·
-~~Track & Trace / ePOD~~ → LOG-TRACK-001 (retroaktiv 2026-06-26): `logistics_tours.py` + `logistics_epod_service.py` + `tour_events`-Migration bereits vorhanden
+~~Track & Trace / ePOD~~ → LOG-TRACK-001 (retroaktiv 2026-06-26): `logistics_tours.py` + `logistics_epod_service.py` + `tour_events`-Migration bereits vorhanden ·
+~~TAIL-CRM-001~~ → LegacyKundenStammModern.tsx: Dublettensicht, Wissenspanel, Naechste-Aktion, Ctrl+K (Codex, retroaktiv 2026-06-26) ·
+~~TAIL-NAWARO-001~~ → nawaro-communication.ts: buildCsvArtifact/downloadArtifact/openHtmlPreview (Codex, retroaktiv 2026-06-26) ·
+~~TAIL-AGRI-001~~ → beratung.tsx: echte PSM-Readiness; saatgut-stamm.tsx: echter Edit-Flow (Codex, retroaktiv 2026-06-26) ·
+~~TAIL-SALES-001~~ → orders-modern.tsx: CSV-Export, Statusfilter, Import/Archiv an Auftragsliste (Codex, retroaktiv 2026-06-26)
 
 | Thema | Slice / Tracker | Prio | Quelle (zum Rückschreiben) |
 |---|---|---|---|
@@ -485,11 +489,12 @@ Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert)
 | ~~Runtime 5xx Kat. C Restliste~~: `mcp/policy/list`, `einkauf/lieferanten+kontrakte+artikel-lager-parameter`, `kaeufergruppe/katalog`, `messages/health`, `crm/bestell-inbox` | RUNTIME-KAT-C-002 **abgeschlossen 2026-06-26** | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
 | Runtime 5xx Kat. C: `inventory/warehouses/` PaginatedResponse (pruefen ob noch offen) | RUNTIME-KAT-A-002 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
 | Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 | P3 | `domain-depth-plan-2026-05-17.md` § 10 Futtermittel · `open-gaps-and-known-issues.md` § Enterprise-Domain-Gap-Closure |
-| CRM: RAG-Panel + Intent-Bar in `LegacyKundenStammModern.tsx` | TAIL-CRM-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 2 CRM Modernisierung · TAIL-CRM-001 |
-| NaWaRo: Druck-/Vorschau-/Serienbrief-Pfad vollständig | TAIL-NAWARO-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 1 NaWaRo-Kommunikation · TAIL-NAWARO-001 |
-| Agrar PSM-Beratung Demo-Fallback; Saatgut-Edit-Flow Placeholder | TAIL-AGRI-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 3 Agrar Beratung · TAIL-AGRI-001 |
-| Sales `orders-modern.tsx` Export/Import/Archiv (Toast → echter Pfad) | TAIL-SALES-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 4 Sales Modern Surface · TAIL-SALES-001 |
-| Coverage: Ratchet für weitere kritische Pfade anheben (aktuell 64,85 %) | COV-RATCHET-007 | P2 | `open-gaps-and-known-issues.md` § COVERAGE-001 · `docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md` |
+| ~~CRM RAG-/Intent-Panel~~ | TAIL-CRM-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 2 |
+| ~~NaWaRo Druck/Vorschau/Serienbrief~~ | TAIL-NAWARO-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 1 |
+| ~~Agrar PSM-Beratung + Saatgut-Edit~~ | TAIL-AGRI-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 3 |
+| ~~Sales orders-modern Export/Import/Archiv~~ | TAIL-SALES-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 4 |
+| ~~Coverage Ratchet Welle 5/6 Endpoints~~ | COV-RATCHET-007 **abgeschlossen 2026-06-26**: `logistik_frachtbriefe`, `silo_target_cell`, `policies`, `kaeufergruppe`, `messages` in Ratchet aufgenommen | P2 | `scripts/check_critical_backend_coverage.py` |
+| Alembic Multi-Head: 55 offene Heads (admin-mobile, crm, agrar, compliance u.a. in Parallel-Branches) | ALEMBIC-MERGE-001 | P1 | `open-gaps-and-known-issues.md` § Build-Health Alembic · `alembic/versions/` Heads-Analyse 2026-06-26 |
 
 **Extern blockiert** (kein Repo-Fortschritt möglich): DATEV-Steuerberater-Cutover,
 DMS-Live-Probe (`PAPERLESS_URL`), reale TSE-/DSFinV-K-Prüfwerkzeug-Abnahme,

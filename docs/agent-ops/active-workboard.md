@@ -1,5 +1,29 @@
 # Active Workboard
 
+## TAIL-CRM-001 — CRM RAG-/Intent-Panel + Dublettencheck (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: LegacyKundenStammModern.tsx enthält vollständige Dublettensicht, Wissenspanel und Naechste-Aktion-Surface. Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/LegacyKundenStammModern.tsx`, `docs/agent-ops/slices/TAIL-CRM-001.yaml`
+
+## TAIL-NAWARO-001 — NaWaRo Druck/Vorschau/Serienbrief (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: mitteilung-drucken.tsx + anbauflaechen.tsx nutzen `nawaro-communication.ts` (buildCsvArtifact, downloadArtifact, openHtmlPreview). Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/nawaro/`, `packages/frontend-web/src/lib/nawaro-communication.ts`, `docs/agent-ops/slices/TAIL-NAWARO-001.yaml`
+
+## TAIL-AGRI-001 — Agrar PSM-Beratung + Saatgut-Edit (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: beratung.tsx nutzt echte PSM-Stammdaten mit expliziter Readiness; saatgut-stamm.tsx hat echten Edit-Flow. Keine Demo-Fallbacks. Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/agrar/psm/beratung.tsx`, `packages/frontend-web/src/pages/agrar/saatgut-stamm.tsx`, `docs/agent-ops/slices/TAIL-AGRI-001.yaml`
+
+## TAIL-SALES-001 — Sales orders-modern Export/Import/Archiv (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: orders-modern.tsx an reale Order-Liste angebunden, CSV-Export, echte Statusfilter, Import/Archiv über kanonische Auftragsliste. Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/sales/orders-modern.tsx`, `docs/agent-ops/slices/TAIL-SALES-001.yaml`
+
 ## RUNTIME-KAT-C-002 — Response-Model-Mismatches Kat. C Restliste (7 Endpoints)
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
