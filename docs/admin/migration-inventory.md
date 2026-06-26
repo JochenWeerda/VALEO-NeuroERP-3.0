@@ -242,6 +242,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_heads_docflow_agrar_einkauf_20260301` | Merge heads: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3 |
 | `merge_heads_ops_and_erp_20260304` | merge heads: domain_ops (missing_ops) and domain_erp (finance tables) |
 | `merge_l3c_and_procurement_indexes_20260213` | Merge Alembic heads l3c_gap_001 and optimize_procurement_indexes_20260213. |
+| `merge_log_agent_20260626` | Merge Alembic heads: log_frachtbriefe + merge_agent_job_runner. |
 | `merge_log_agri_heads_20260623` | Merge log_disposition and agri_silo_lot_link heads (DOM-INV-004 pre-step). |
 | `merge_sales_orders_and_consignment_20260215` | merge heads sales_orders_items_shipping and consignment_storage_fee_engine |
 | `merge_supply_production_readiness_20260610` | Merge supply-chain and production-readiness migration branches. |
