@@ -1,8 +1,13 @@
 slice_id: CRM-LEGACY-API-MIGRATE-001
 title: "CRM Legacy axios → /api/v1/crm/"
 owner: —
-status: offen
+status: abgeschlossen
 updated: 2026-06-26
+closed: 2026-06-26
+closed_reason: >-
+  Gap-Verifikation Wave 14 2026-06-26: CRM-Seiten (kontakt-management.tsx,
+  kunden-liste.tsx, lieferanten-liste.tsx) haben keine @/lib/axios-Imports.
+  crm.ts nutzt bereits /api/v1/crm/. Akzeptanzkriterien erfuellt.
 coordination: >-
   Aus CRM-001 Card. @/lib/api/crm.ts nutzt bereits /api/v1/crm/; verbleibende
   Masken mit @/lib/axios schrittweise migrieren. Kein Proxy-Entfernen in
