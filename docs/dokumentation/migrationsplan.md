@@ -4,8 +4,8 @@ type: explanation
 audience: [entwickler, product, docs]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
-version: 3.1.0
+last_reviewed: 2026-06-25
+version: 3.2.0
 ---
 
 # Doku-Migrationsplan
@@ -42,8 +42,8 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 
 1. **Phase A (dieser Slice):** Internen Bereich etablieren, eindeutig
    historische Root-Artefakte archivieren, Inventar/Plan festschreiben.
-2. **Phase B:** Architektur- und ADR-Bereiche kuratieren und in die Navigation
-   aufnehmen (eigener Slice).
+2. **Phase B (2026-06-25):** Architektur- und ADR-Bereiche in die Navigation
+   aufgenommen (`DOC-MIGRATION-003`); Wave-Ordner weiterhin vom Build ausgeschlossen.
 3. **Phase C:** Verbleibende Themen-Cluster (CRM, i18n, GAP) konsolidieren und
    einordnen. **Cards-Audit (2026-06-26):** 148 Cards inventarisiert;
    Ketten-Registry [`workflow-chains.md`](../_internal/workflow-chains.md);
@@ -52,6 +52,14 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
    Cards bleiben intern; Ergebnisse fließen in Workflows/Open-Gaps.
 4. **Phase D:** Staleness-Gate verschärfen (blockierend), sobald die kuratierte
    Basis vollständig Frontmatter trägt.
+5. **Phase E (2026-06-26):** Bulk-Archivierung ~390 Alt-Dokumente nach
+   `docs/_internal/archive/` (`scripts/docs-legacy-migrate.py`); Doppel-Archiv
+   `docs/archive/` aufgelöst; Root von 107 auf 2 kuratierte Dateien reduziert
+   (`index.md`, `MASKEN.md`). Duplikat-Dateinamen (140) im Inventar dokumentiert;
+   inhaltliche Zusammenführung nur über Bucket-README-Indexe, kein Löschen.
+6. **Phase F (2026-06-25):** Card-Duplikat `INV-001` (`inventory/` → kanonisch
+   `lager/`) aufgelöst; Architektur + ADR in MkDocs-Navigation; Wave-Ordner
+   weiterhin per `exclude_docs` vom Build ausgeschlossen (`DOC-MIGRATION-003`).
 
 ## Sicherheitsnetz
 

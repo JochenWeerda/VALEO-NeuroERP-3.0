@@ -1,0 +1,698 @@
+{
+  "generated": "2026-06-26",
+  "total_md": 667,
+  "keep_count": 648,
+  "archive_candidates": [],
+  "duplicate_basenames": {
+    "readme.md": [
+      "docs/_internal/README.md",
+      "docs/adr/README.md",
+      "docs/agent-ops/README.md",
+      "docs/architecture/frontend-routing/README.md",
+      "docs/cards/README.md",
+      "docs/warehouse/README.md",
+      "docs/workflows/README.md"
+    ],
+    "index.md": [
+      "docs/admin/index.md",
+      "docs/agent-docs/index.md",
+      "docs/architecture/index.md",
+      "docs/benutzerhandbuch/index.md",
+      "docs/compliance/index.md",
+      "docs/entwickler/index.md",
+      "docs/index.md",
+      "docs/referenz/index.md",
+      "docs/schnittstellen/index.md"
+    ],
+    "status.md": [
+      "docs/architecture/process-kernel/STATUS.md",
+      "docs/architecture/process-kernel/wave-1/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-1/package-b/STATUS.md",
+      "docs/architecture/process-kernel/wave-1/package-c/STATUS.md",
+      "docs/architecture/process-kernel/wave-1/STATUS.md",
+      "docs/architecture/process-kernel/wave-10/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-10/STATUS.md",
+      "docs/architecture/process-kernel/wave-100/STATUS.md",
+      "docs/architecture/process-kernel/wave-101/STATUS.md",
+      "docs/architecture/process-kernel/wave-102/STATUS.md",
+      "docs/architecture/process-kernel/wave-103/STATUS.md",
+      "docs/architecture/process-kernel/wave-104/STATUS.md",
+      "docs/architecture/process-kernel/wave-11/STATUS.md",
+      "docs/architecture/process-kernel/wave-12/STATUS.md",
+      "docs/architecture/process-kernel/wave-13/STATUS.md",
+      "docs/architecture/process-kernel/wave-14/STATUS.md",
+      "docs/architecture/process-kernel/wave-15/STATUS.md",
+      "docs/architecture/process-kernel/wave-16/STATUS.md",
+      "docs/architecture/process-kernel/wave-17/STATUS.md",
+      "docs/architecture/process-kernel/wave-18/STATUS.md",
+      "docs/architecture/process-kernel/wave-19/STATUS.md",
+      "docs/architecture/process-kernel/wave-2/STATUS.md",
+      "docs/architecture/process-kernel/wave-20/STATUS.md",
+      "docs/architecture/process-kernel/wave-21/STATUS.md",
+      "docs/architecture/process-kernel/wave-22/STATUS.md",
+      "docs/architecture/process-kernel/wave-23/STATUS.md",
+      "docs/architecture/process-kernel/wave-24/STATUS.md",
+      "docs/architecture/process-kernel/wave-25/STATUS.md",
+      "docs/architecture/process-kernel/wave-26/STATUS.md",
+      "docs/architecture/process-kernel/wave-27/STATUS.md",
+      "docs/architecture/process-kernel/wave-28/STATUS.md",
+      "docs/architecture/process-kernel/wave-29/STATUS.md",
+      "docs/architecture/process-kernel/wave-3/STATUS.md",
+      "docs/architecture/process-kernel/wave-30/STATUS.md",
+      "docs/architecture/process-kernel/wave-31/STATUS.md",
+      "docs/architecture/process-kernel/wave-32/STATUS.md",
+      "docs/architecture/process-kernel/wave-33/STATUS.md",
+      "docs/architecture/process-kernel/wave-34/STATUS.md",
+      "docs/architecture/process-kernel/wave-35/STATUS.md",
+      "docs/architecture/process-kernel/wave-36/STATUS.md",
+      "docs/architecture/process-kernel/wave-37/STATUS.md",
+      "docs/architecture/process-kernel/wave-38/STATUS.md",
+      "docs/architecture/process-kernel/wave-39/STATUS.md",
+      "docs/architecture/process-kernel/wave-4/STATUS.md",
+      "docs/architecture/process-kernel/wave-40/STATUS.md",
+      "docs/architecture/process-kernel/wave-41/STATUS.md",
+      "docs/architecture/process-kernel/wave-42/STATUS.md",
+      "docs/architecture/process-kernel/wave-43/STATUS.md",
+      "docs/architecture/process-kernel/wave-44/STATUS.md",
+      "docs/architecture/process-kernel/wave-45/STATUS.md",
+      "docs/architecture/process-kernel/wave-46/STATUS.md",
+      "docs/architecture/process-kernel/wave-47/STATUS.md",
+      "docs/architecture/process-kernel/wave-48/STATUS.md",
+      "docs/architecture/process-kernel/wave-49/STATUS.md",
+      "docs/architecture/process-kernel/wave-5/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-5/package-b/STATUS.md",
+      "docs/architecture/process-kernel/wave-5/STATUS.md",
+      "docs/architecture/process-kernel/wave-50/STATUS.md",
+      "docs/architecture/process-kernel/wave-51/STATUS.md",
+      "docs/architecture/process-kernel/wave-52/STATUS.md",
+      "docs/architecture/process-kernel/wave-53/STATUS.md",
+      "docs/architecture/process-kernel/wave-54/STATUS.md",
+      "docs/architecture/process-kernel/wave-55/STATUS.md",
+      "docs/architecture/process-kernel/wave-56/STATUS.md",
+      "docs/architecture/process-kernel/wave-57/STATUS.md",
+      "docs/architecture/process-kernel/wave-58/STATUS.md",
+      "docs/architecture/process-kernel/wave-59/STATUS.md",
+      "docs/architecture/process-kernel/wave-6/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-6/package-b/STATUS.md",
+      "docs/architecture/process-kernel/wave-6/STATUS.md",
+      "docs/architecture/process-kernel/wave-60/STATUS.md",
+      "docs/architecture/process-kernel/wave-61/STATUS.md",
+      "docs/architecture/process-kernel/wave-62/STATUS.md",
+      "docs/architecture/process-kernel/wave-63/STATUS.md",
+      "docs/architecture/process-kernel/wave-64/STATUS.md",
+      "docs/architecture/process-kernel/wave-65/STATUS.md",
+      "docs/architecture/process-kernel/wave-66/STATUS.md",
+      "docs/architecture/process-kernel/wave-67/STATUS.md",
+      "docs/architecture/process-kernel/wave-68/STATUS.md",
+      "docs/architecture/process-kernel/wave-69/STATUS.md",
+      "docs/architecture/process-kernel/wave-7/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-7/package-b/STATUS.md",
+      "docs/architecture/process-kernel/wave-7/STATUS.md",
+      "docs/architecture/process-kernel/wave-70/STATUS.md",
+      "docs/architecture/process-kernel/wave-71/STATUS.md",
+      "docs/architecture/process-kernel/wave-72/STATUS.md",
+      "docs/architecture/process-kernel/wave-73/STATUS.md",
+      "docs/architecture/process-kernel/wave-74/STATUS.md",
+      "docs/architecture/process-kernel/wave-75/STATUS.md",
+      "docs/architecture/process-kernel/wave-76/STATUS.md",
+      "docs/architecture/process-kernel/wave-77/STATUS.md",
+      "docs/architecture/process-kernel/wave-78/STATUS.md",
+      "docs/architecture/process-kernel/wave-79/STATUS.md",
+      "docs/architecture/process-kernel/wave-8/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-8/package-b/STATUS.md",
+      "docs/architecture/process-kernel/wave-8/STATUS.md",
+      "docs/architecture/process-kernel/wave-80/STATUS.md",
+      "docs/architecture/process-kernel/wave-81/STATUS.md",
+      "docs/architecture/process-kernel/wave-82/STATUS.md",
+      "docs/architecture/process-kernel/wave-83/STATUS.md",
+      "docs/architecture/process-kernel/wave-84/STATUS.md",
+      "docs/architecture/process-kernel/wave-85/STATUS.md",
+      "docs/architecture/process-kernel/wave-86/STATUS.md",
+      "docs/architecture/process-kernel/wave-87/STATUS.md",
+      "docs/architecture/process-kernel/wave-88/STATUS.md",
+      "docs/architecture/process-kernel/wave-89/STATUS.md",
+      "docs/architecture/process-kernel/wave-9/package-a/STATUS.md",
+      "docs/architecture/process-kernel/wave-9/package-b/STATUS.md",
+      "docs/architecture/process-kernel/wave-9/STATUS.md",
+      "docs/architecture/process-kernel/wave-90/STATUS.md",
+      "docs/architecture/process-kernel/wave-91/STATUS.md",
+      "docs/architecture/process-kernel/wave-92/STATUS.md",
+      "docs/architecture/process-kernel/wave-93/STATUS.md",
+      "docs/architecture/process-kernel/wave-94/STATUS.md",
+      "docs/architecture/process-kernel/wave-95/STATUS.md",
+      "docs/architecture/process-kernel/wave-96/STATUS.md",
+      "docs/architecture/process-kernel/wave-97/STATUS.md",
+      "docs/architecture/process-kernel/wave-98/STATUS.md",
+      "docs/architecture/process-kernel/wave-99/STATUS.md"
+    ],
+    "governance.md": [
+      "docs/architecture/process-kernel/wave-2/package-ap3-ap6/GOVERNANCE.md",
+      "docs/dokumentation/governance.md"
+    ],
+    "crm.md": [
+      "docs/benutzerhandbuch/crm.md",
+      "docs/uat/checklisten/CRM.md"
+    ],
+    "vk-010-ernte-annahme.md": [
+      "docs/cards/agrar/VK-010-ernte-annahme.md",
+      "docs/workflows/vk-010-ernte-annahme.md"
+    ],
+    "vk-011-qp-handover-und-lkw-validierung.md": [
+      "docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md",
+      "docs/workflows/vk-011-qp-handover-und-lkw-validierung.md"
+    ],
+    "vk-012-annahme-abrechnung.md": [
+      "docs/cards/agrar/VK-012-annahme-abrechnung.md",
+      "docs/workflows/vk-012-annahme-abrechnung.md"
+    ],
+    "vk-013-kampagnenabschluss.md": [
+      "docs/cards/agrar/VK-013-kampagnenabschluss.md",
+      "docs/workflows/vk-013-kampagnenabschluss.md"
+    ],
+    "vk-014-settlement-kampagnenreferenz.md": [
+      "docs/cards/agrar/VK-014-settlement-kampagnenreferenz.md",
+      "docs/workflows/vk-014-settlement-kampagnenreferenz.md"
+    ],
+    "vk-015-settlement-kampagnen-backfill.md": [
+      "docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md",
+      "docs/workflows/vk-015-settlement-kampagnen-backfill.md"
+    ],
+    "vk-016-queue-cta-und-artikel-api.md": [
+      "docs/cards/agrar/VK-016-queue-cta-und-artikel-api.md",
+      "docs/workflows/vk-016-queue-cta-und-artikel-api.md"
+    ],
+    "vk-017-queue-article-id.md": [
+      "docs/cards/agrar/VK-017-queue-article-id.md",
+      "docs/workflows/vk-017-queue-article-id.md"
+    ],
+    "vk-018-klaerungsprozess-gesperrt.md": [
+      "docs/cards/agrar/VK-018-klaerungsprozess-gesperrt.md",
+      "docs/workflows/vk-018-klaerungsprozess-gesperrt.md"
+    ],
+    "vk-019-queue-repair-article-id.md": [
+      "docs/cards/agrar/VK-019-queue-repair-article-id.md",
+      "docs/workflows/vk-019-queue-repair-article-id.md"
+    ],
+    "vk-020-rohware-wizard-schrittvalidierung.md": [
+      "docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md",
+      "docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md"
+    ],
+    "cmp-001-compliance-to-report.md": [
+      "docs/cards/compliance/CMP-001-compliance-to-report.md",
+      "docs/workflows/cmp-001-compliance-to-report.md"
+    ],
+    "com-001-compliance-to-audit.md": [
+      "docs/cards/compliance/COM-001-compliance-to-audit.md",
+      "docs/workflows/com-001-compliance-to-audit.md"
+    ],
+    "dom-doc-003-nachweis-und-rueckmeldung.md": [
+      "docs/cards/compliance/DOM-DOC-003-nachweis-und-rueckmeldung.md",
+      "docs/workflows/dom-doc-003-nachweis-und-rueckmeldung.md"
+    ],
+    "crm-001-crm-to-revenue.md": [
+      "docs/cards/crm/CRM-001-crm-to-revenue.md",
+      "docs/workflows/crm-001-crm-to-revenue.md"
+    ],
+    "dom-crm-003-fall-und-ownership.md": [
+      "docs/cards/crm/DOM-CRM-003-fall-und-ownership.md",
+      "docs/workflows/dom-crm-003-fall-und-ownership.md"
+    ],
+    "dom-proc-003-beschaffungsausnahmen.md": [
+      "docs/cards/einkauf/DOM-PROC-003-beschaffungsausnahmen.md",
+      "docs/workflows/dom-proc-003-beschaffungsausnahmen.md"
+    ],
+    "p2p-050-wizard-schrittvalidierung.md": [
+      "docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md",
+      "docs/workflows/p2p-050-wizard-schrittvalidierung.md"
+    ],
+    "dom-fin-003-fibu-operatorparitaet.md": [
+      "docs/cards/finance/DOM-FIN-003-fibu-operatorparitaet.md",
+      "docs/workflows/dom-fin-003-fibu-operatorparitaet.md"
+    ],
+    "fin-001-finance-to-close.md": [
+      "docs/cards/finance/FIN-001-finance-to-close.md",
+      "docs/workflows/fin-001-finance-to-close.md"
+    ],
+    "fin-001-finance-to-reporting.md": [
+      "docs/cards/finance/FIN-001-finance-to-reporting.md",
+      "docs/workflows/fin-001-finance-to-reporting.md"
+    ],
+    "otc-011-zahlungseingang-und-abstimmung.md": [
+      "docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md",
+      "docs/workflows/otc-011-zahlungseingang-und-abstimmung.md"
+    ],
+    "dom-supply-003-physische-kette.md": [
+      "docs/cards/inventory/DOM-SUPPLY-003-physische-kette.md",
+      "docs/workflows/dom-supply-003-physische-kette.md"
+    ],
+    "inv-001-inventory-to-settlement.md": [
+      "docs/cards/inventory/INV-001-inventory-to-settlement.md",
+      "docs/cards/lager/INV-001-inventory-to-settlement.md",
+      "docs/workflows/inv-001-inventory-to-settlement.md"
+    ],
+    "cts-001-contract-to-settlement.md": [
+      "docs/cards/kontrakte/CTS-001-contract-to-settlement.md",
+      "docs/workflows/cts-001-contract-to-settlement.md"
+    ],
+    "cts-009-rohwaren-positionsmonitor.md": [
+      "docs/cards/kontrakte/CTS-009-rohwaren-positionsmonitor.md",
+      "docs/workflows/cts-009-rohwaren-positionsmonitor.md"
+    ],
+    "dom-con-003-fixierung-markt-mahnung.md": [
+      "docs/cards/kontrakte/DOM-CON-003-fixierung-markt-mahnung.md",
+      "docs/workflows/dom-con-003-fixierung-markt-mahnung.md"
+    ],
+    "int-sg-021-superglue-compose-stack.md": [
+      "docs/cards/neuro-core/INT-SG-021-superglue-compose-stack.md",
+      "docs/workflows/int-sg-021-superglue-compose-stack.md"
+    ],
+    "int-sg-022-superglue-edge-proxy.md": [
+      "docs/cards/neuro-core/INT-SG-022-superglue-edge-proxy.md",
+      "docs/workflows/int-sg-022-superglue-edge-proxy.md"
+    ],
+    "int-sg-023-superglue-k8s-base.md": [
+      "docs/cards/neuro-core/INT-SG-023-superglue-k8s-base.md",
+      "docs/workflows/int-sg-023-superglue-k8s-base.md"
+    ],
+    "int-sg-024-superglue-helm-overlay.md": [
+      "docs/cards/neuro-core/INT-SG-024-superglue-helm-overlay.md",
+      "docs/workflows/int-sg-024-superglue-helm-overlay.md"
+    ],
+    "int-sg-025-superglue-k8s-edge.md": [
+      "docs/cards/neuro-core/INT-SG-025-superglue-k8s-edge.md",
+      "docs/workflows/int-sg-025-superglue-k8s-edge.md"
+    ],
+    "int-sg-026-superglue-backup-restore.md": [
+      "docs/cards/neuro-core/INT-SG-026-superglue-backup-restore.md",
+      "docs/workflows/int-sg-026-superglue-backup-restore.md"
+    ],
+    "int-sg-027-superglue-infra-ci.md": [
+      "docs/cards/neuro-core/INT-SG-027-superglue-infra-ci.md",
+      "docs/workflows/int-sg-027-superglue-infra-ci.md"
+    ],
+    "int-sg-028-superglue-ops-runbook.md": [
+      "docs/cards/neuro-core/INT-SG-028-superglue-ops-runbook.md",
+      "docs/workflows/int-sg-028-superglue-ops-runbook.md"
+    ],
+    "int-sg-029-superglue-argocd.md": [
+      "docs/cards/neuro-core/INT-SG-029-superglue-argocd.md",
+      "docs/workflows/int-sg-029-superglue-argocd.md"
+    ],
+    "int-sg-030-superglue-secrets-certificates.md": [
+      "docs/cards/neuro-core/INT-SG-030-superglue-secrets-certificates.md",
+      "docs/workflows/int-sg-030-superglue-secrets-certificates.md"
+    ],
+    "int-sg-031-superglue-monitoring.md": [
+      "docs/cards/neuro-core/INT-SG-031-superglue-monitoring.md",
+      "docs/workflows/int-sg-031-superglue-monitoring.md"
+    ],
+    "int-sg-032-superglue-dashboard.md": [
+      "docs/cards/neuro-core/INT-SG-032-superglue-dashboard.md",
+      "docs/workflows/int-sg-032-superglue-dashboard.md"
+    ],
+    "int-sg-033-superglue-deploy-workflow.md": [
+      "docs/cards/neuro-core/INT-SG-033-superglue-deploy-workflow.md",
+      "docs/workflows/int-sg-033-superglue-deploy-workflow.md"
+    ],
+    "int-sg-034-superglue-bootstrap.md": [
+      "docs/cards/neuro-core/INT-SG-034-superglue-bootstrap.md",
+      "docs/workflows/int-sg-034-superglue-bootstrap.md"
+    ],
+    "int-sg-035-superglue-runtime-contract.md": [
+      "docs/cards/neuro-core/INT-SG-035-superglue-runtime-contract.md",
+      "docs/workflows/int-sg-035-superglue-runtime-contract.md"
+    ],
+    "int-sg-036-superglue-rest-v1.md": [
+      "docs/cards/neuro-core/INT-SG-036-superglue-rest-v1.md",
+      "docs/workflows/int-sg-036-superglue-rest-v1.md"
+    ],
+    "int-sg-037-superglue-run-envelope.md": [
+      "docs/cards/neuro-core/INT-SG-037-superglue-run-envelope.md",
+      "docs/workflows/int-sg-037-superglue-run-envelope.md"
+    ],
+    "int-sg-038-superglue-bootstrap-and-provisioning.md": [
+      "docs/cards/neuro-core/INT-SG-038-superglue-bootstrap-and-provisioning.md",
+      "docs/workflows/int-sg-038-superglue-bootstrap-and-provisioning.md"
+    ],
+    "int-sg-039-superglue-runtime-smoke.md": [
+      "docs/cards/neuro-core/INT-SG-039-superglue-runtime-smoke.md",
+      "docs/workflows/int-sg-039-superglue-runtime-smoke.md"
+    ],
+    "int-sg-040-superglue-target-structure.md": [
+      "docs/cards/neuro-core/INT-SG-040-superglue-target-structure.md",
+      "docs/workflows/int-sg-040-superglue-target-structure.md"
+    ],
+    "int-sg-041-superglue-tool-provisioning.md": [
+      "docs/cards/neuro-core/INT-SG-041-superglue-tool-provisioning.md",
+      "docs/workflows/int-sg-041-superglue-tool-provisioning.md"
+    ],
+    "int-sg-042-superglue-dev-egress.md": [
+      "docs/cards/neuro-core/INT-SG-042-superglue-dev-egress.md",
+      "docs/workflows/int-sg-042-superglue-dev-egress.md"
+    ],
+    "int-sg-043-superglue-tenant-bootstrap.md": [
+      "docs/cards/neuro-core/INT-SG-043-superglue-tenant-bootstrap.md",
+      "docs/workflows/int-sg-043-superglue-tenant-bootstrap.md"
+    ],
+    "int-sg-044-superglue-secret-resolver.md": [
+      "docs/cards/neuro-core/INT-SG-044-superglue-secret-resolver.md",
+      "docs/workflows/int-sg-044-superglue-secret-resolver.md"
+    ],
+    "int-sg-045-superglue-tool-lifecycle.md": [
+      "docs/cards/neuro-core/INT-SG-045-superglue-tool-lifecycle.md",
+      "docs/workflows/int-sg-045-superglue-tool-lifecycle.md"
+    ],
+    "int-sg-046-superglue-result-normalization.md": [
+      "docs/cards/neuro-core/INT-SG-046-superglue-result-normalization.md",
+      "docs/workflows/int-sg-046-superglue-result-normalization.md"
+    ],
+    "int-sg-047-superglue-dms-connector.md": [
+      "docs/cards/neuro-core/INT-SG-047-superglue-dms-connector.md",
+      "docs/workflows/int-sg-047-superglue-dms-connector.md"
+    ],
+    "int-sg-048-superglue-partner-edi.md": [
+      "docs/cards/neuro-core/INT-SG-048-superglue-partner-edi.md",
+      "docs/workflows/int-sg-048-superglue-partner-edi.md"
+    ],
+    "int-sg-049-superglue-crm-masterdata.md": [
+      "docs/cards/neuro-core/INT-SG-049-superglue-crm-masterdata.md",
+      "docs/workflows/int-sg-049-superglue-crm-masterdata.md"
+    ],
+    "int-sg-050-superglue-file-references.md": [
+      "docs/cards/neuro-core/INT-SG-050-superglue-file-references.md",
+      "docs/workflows/int-sg-050-superglue-file-references.md"
+    ],
+    "int-sg-051-superglue-execute-gates.md": [
+      "docs/cards/neuro-core/INT-SG-051-superglue-execute-gates.md",
+      "docs/workflows/int-sg-051-superglue-execute-gates.md"
+    ],
+    "int-sg-052-superglue-idempotency.md": [
+      "docs/cards/neuro-core/INT-SG-052-superglue-idempotency.md",
+      "docs/workflows/int-sg-052-superglue-idempotency.md"
+    ],
+    "int-sg-053-superglue-quarantine-retry.md": [
+      "docs/cards/neuro-core/INT-SG-053-superglue-quarantine-retry.md",
+      "docs/workflows/int-sg-053-superglue-quarantine-retry.md"
+    ],
+    "int-sg-054-superglue-admin-surface.md": [
+      "docs/cards/neuro-core/INT-SG-054-superglue-admin-surface.md",
+      "docs/workflows/int-sg-054-superglue-admin-surface.md"
+    ],
+    "int-sg-055-superglue-monitoring.md": [
+      "docs/cards/neuro-core/INT-SG-055-superglue-monitoring.md",
+      "docs/workflows/int-sg-055-superglue-monitoring.md"
+    ],
+    "int-sg-056-superglue-ci-smoke.md": [
+      "docs/cards/neuro-core/INT-SG-056-superglue-ci-smoke.md",
+      "docs/workflows/int-sg-056-superglue-ci-smoke.md"
+    ],
+    "int-sg-057-superglue-procurement.md": [
+      "docs/cards/neuro-core/INT-SG-057-superglue-procurement.md",
+      "docs/workflows/int-sg-057-superglue-procurement.md"
+    ],
+    "int-sg-058-superglue-finance-export.md": [
+      "docs/cards/neuro-core/INT-SG-058-superglue-finance-export.md",
+      "docs/workflows/int-sg-058-superglue-finance-export.md"
+    ],
+    "int-sg-059-superglue-logistics.md": [
+      "docs/cards/neuro-core/INT-SG-059-superglue-logistics.md",
+      "docs/workflows/int-sg-059-superglue-logistics.md"
+    ],
+    "int-sg-060-superglue-broad-rollout.md": [
+      "docs/cards/neuro-core/INT-SG-060-superglue-broad-rollout.md",
+      "docs/workflows/int-sg-060-superglue-broad-rollout.md"
+    ],
+    "int-sg-061-superglue-live-readiness.md": [
+      "docs/cards/neuro-core/INT-SG-061-superglue-live-readiness.md",
+      "docs/workflows/int-sg-061-superglue-live-readiness.md"
+    ],
+    "int-sg-062-superglue-onboarding-pack.md": [
+      "docs/cards/neuro-core/INT-SG-062-superglue-onboarding-pack.md",
+      "docs/workflows/int-sg-062-superglue-onboarding-pack.md"
+    ],
+    "int-sg-063-superglue-onboarding-export.md": [
+      "docs/cards/neuro-core/INT-SG-063-superglue-onboarding-export.md",
+      "docs/workflows/int-sg-063-superglue-onboarding-export.md"
+    ],
+    "int-sg-064-superglue-onboarding-templates.md": [
+      "docs/cards/neuro-core/INT-SG-064-superglue-onboarding-templates.md",
+      "docs/workflows/int-sg-064-superglue-onboarding-templates.md"
+    ],
+    "int-sg-065-superglue-onboarding-ci.md": [
+      "docs/cards/neuro-core/INT-SG-065-superglue-onboarding-ci.md",
+      "docs/workflows/int-sg-065-superglue-onboarding-ci.md"
+    ],
+    "int-sg-066-superglue-admin-downloads.md": [
+      "docs/cards/neuro-core/INT-SG-066-superglue-admin-downloads.md",
+      "docs/workflows/int-sg-066-superglue-admin-downloads.md"
+    ],
+    "nc-002-interaction-state-manager.md": [
+      "docs/cards/neuro-core/NC-002-interaction-state-manager.md",
+      "docs/workflows/nc-002-interaction-state-manager.md"
+    ],
+    "nc-003-voice-adapter-layer.md": [
+      "docs/cards/neuro-core/NC-003-voice-adapter-layer.md",
+      "docs/workflows/nc-003-voice-adapter-layer.md"
+    ],
+    "nc-004-consent-engine.md": [
+      "docs/cards/neuro-core/NC-004-consent-engine.md",
+      "docs/workflows/nc-004-consent-engine.md"
+    ],
+    "nc-005-simulation-engine.md": [
+      "docs/cards/neuro-core/NC-005-simulation-engine.md",
+      "docs/workflows/nc-005-simulation-engine.md"
+    ],
+    "nc-006-compensation-engine.md": [
+      "docs/cards/neuro-core/NC-006-compensation-engine.md",
+      "docs/workflows/nc-006-compensation-engine.md"
+    ],
+    "nc-a-neuro-core-kernel.md": [
+      "docs/cards/neuro-core/NC-A-neuro-core-kernel.md",
+      "docs/workflows/nc-a-neuro-core-kernel.md"
+    ],
+    "nc-a10-dynamic-plan-generation.md": [
+      "docs/cards/neuro-core/NC-A10-dynamic-plan-generation.md",
+      "docs/workflows/nc-a10-dynamic-plan-generation.md"
+    ],
+    "nc-a11-cross-entity-integrity.md": [
+      "docs/cards/neuro-core/NC-A11-cross-entity-integrity.md",
+      "docs/workflows/nc-a11-cross-entity-integrity.md"
+    ],
+    "nc-a12-risk-scoring.md": [
+      "docs/cards/neuro-core/NC-A12-risk-scoring.md",
+      "docs/workflows/nc-a12-risk-scoring.md"
+    ],
+    "nc-a13-tenant-policy-overrides.md": [
+      "docs/cards/neuro-core/NC-A13-tenant-policy-overrides.md",
+      "docs/workflows/nc-a13-tenant-policy-overrides.md"
+    ],
+    "nc-a14-broker-tenant-overrides.md": [
+      "docs/cards/neuro-core/NC-A14-broker-tenant-overrides.md",
+      "docs/workflows/nc-a14-broker-tenant-overrides.md"
+    ],
+    "nc-a15-external-http-execution.md": [
+      "docs/cards/neuro-core/NC-A15-external-http-execution.md",
+      "docs/workflows/nc-a15-external-http-execution.md"
+    ],
+    "nc-a16-tool-contract-harmonization.md": [
+      "docs/cards/neuro-core/NC-A16-tool-contract-harmonization.md",
+      "docs/workflows/nc-a16-tool-contract-harmonization.md"
+    ],
+    "nc-a6-neuro-tool-broker.md": [
+      "docs/cards/neuro-core/NC-A6-neuro-tool-broker.md",
+      "docs/workflows/nc-a6-neuro-tool-broker.md"
+    ],
+    "nc-a7-broker-openapi-execution.md": [
+      "docs/cards/neuro-core/NC-A7-broker-openapi-execution.md",
+      "docs/workflows/nc-a7-broker-openapi-execution.md"
+    ],
+    "nc-a8-verification-policy-wave2.md": [
+      "docs/cards/neuro-core/NC-A8-verification-policy-wave2.md",
+      "docs/workflows/nc-a8-verification-policy-wave2.md"
+    ],
+    "nc-a9-intent-llm-fallback.md": [
+      "docs/cards/neuro-core/NC-A9-intent-llm-fallback.md",
+      "docs/workflows/nc-a9-intent-llm-fallback.md"
+    ],
+    "nc-b1-state-graph-confidence-ledger.md": [
+      "docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md",
+      "docs/workflows/nc-b1-state-graph-confidence-ledger.md"
+    ],
+    "nc-c-guardrails-pii.md": [
+      "docs/cards/neuro-core/NC-C-guardrails-pii.md",
+      "docs/workflows/nc-c-guardrails-pii.md"
+    ],
+    "nc-d-audit-hardening.md": [
+      "docs/cards/neuro-core/NC-D-audit-hardening.md",
+      "docs/workflows/nc-d-audit-hardening.md"
+    ],
+    "nc-f-copilot-backend.md": [
+      "docs/cards/neuro-core/NC-F-copilot-backend.md",
+      "docs/workflows/nc-f-copilot-backend.md"
+    ],
+    "nc-g2-nats-consumer.md": [
+      "docs/cards/neuro-core/NC-G2-nats-consumer.md",
+      "docs/workflows/nc-g2-nats-consumer.md"
+    ],
+    "nc-g3-nats-handlers.md": [
+      "docs/cards/neuro-core/NC-G3-nats-handlers.md",
+      "docs/workflows/nc-g3-nats-handlers.md"
+    ],
+    "nc-g4-policy-registry.md": [
+      "docs/cards/neuro-core/NC-G4-policy-registry.md",
+      "docs/workflows/nc-g4-policy-registry.md"
+    ],
+    "nc-g5-prompt-pack-registry.md": [
+      "docs/cards/neuro-core/NC-G5-prompt-pack-registry.md",
+      "docs/workflows/nc-g5-prompt-pack-registry.md"
+    ],
+    "nc-g8-monitoring-surfacing.md": [
+      "docs/cards/neuro-core/NC-G8-monitoring-surfacing.md",
+      "docs/workflows/nc-g8-monitoring-surfacing.md"
+    ],
+    "rek-001-complaint-to-resolution.md": [
+      "docs/cards/qualitaet/REK-001-complaint-to-resolution.md",
+      "docs/workflows/rek-001-complaint-to-resolution.md"
+    ],
+    "sec-001-hardcoded-secrets-remediation.md": [
+      "docs/cards/security/SEC-001-hardcoded-secrets-remediation.md",
+      "docs/workflows/sec-001-hardcoded-secrets-remediation.md"
+    ],
+    "sec-002-local-secret-management.md": [
+      "docs/cards/security/SEC-002-local-secret-management.md",
+      "docs/workflows/sec-002-local-secret-management.md"
+    ],
+    "sec-003-auth-tenant-hardening.md": [
+      "docs/cards/security/SEC-003-auth-tenant-hardening.md",
+      "docs/workflows/sec-003-auth-tenant-hardening.md"
+    ],
+    "sec-004-supplier-portal-hardening.md": [
+      "docs/cards/security/SEC-004-supplier-portal-hardening.md",
+      "docs/workflows/sec-004-supplier-portal-hardening.md"
+    ],
+    "sec-005-realtime-websocket-hardening.md": [
+      "docs/cards/security/SEC-005-realtime-websocket-hardening.md",
+      "docs/workflows/sec-005-realtime-websocket-hardening.md"
+    ],
+    "sec-006-accounting-period-tenant-hardening.md": [
+      "docs/cards/security/SEC-006-accounting-period-tenant-hardening.md",
+      "docs/workflows/sec-006-accounting-period-tenant-hardening.md"
+    ],
+    "sec-007-creditors-tenant-hardening.md": [
+      "docs/cards/security/SEC-007-creditors-tenant-hardening.md",
+      "docs/workflows/sec-007-creditors-tenant-hardening.md"
+    ],
+    "sec-008-einkauf-tenant-hardening.md": [
+      "docs/cards/security/SEC-008-einkauf-tenant-hardening.md",
+      "docs/workflows/sec-008-einkauf-tenant-hardening.md"
+    ],
+    "sec-009-admin-mobile-sql-whitelist.md": [
+      "docs/cards/security/SEC-009-admin-mobile-sql-whitelist.md",
+      "docs/workflows/sec-009-admin-mobile-sql-whitelist.md"
+    ],
+    "sec-010-vies-xml-hardening.md": [
+      "docs/cards/security/SEC-010-vies-xml-hardening.md",
+      "docs/workflows/sec-010-vies-xml-hardening.md"
+    ],
+    "sec-011-documents-info-disclosure.md": [
+      "docs/cards/security/SEC-011-documents-info-disclosure.md",
+      "docs/workflows/sec-011-documents-info-disclosure.md"
+    ],
+    "sec-012-webhook-ssrf-hardening.md": [
+      "docs/cards/security/SEC-012-webhook-ssrf-hardening.md",
+      "docs/workflows/sec-012-webhook-ssrf-hardening.md"
+    ],
+    "sec-013-print-xss-hardening.md": [
+      "docs/cards/security/SEC-013-print-xss-hardening.md",
+      "docs/workflows/sec-013-print-xss-hardening.md"
+    ],
+    "sec-014-external-vault-startup-guard.md": [
+      "docs/cards/security/SEC-014-external-vault-startup-guard.md",
+      "docs/workflows/sec-014-external-vault-startup-guard.md"
+    ],
+    "sec-015-accruals-tenant-hardening.md": [
+      "docs/cards/security/SEC-015-accruals-tenant-hardening.md",
+      "docs/workflows/sec-015-accruals-tenant-hardening.md"
+    ],
+    "sec-016-egress-ssrf-policy.md": [
+      "docs/cards/security/SEC-016-egress-ssrf-policy.md",
+      "docs/workflows/sec-016-egress-ssrf-policy.md"
+    ],
+    "sec-017-security-ci-lane.md": [
+      "docs/cards/security/SEC-017-security-ci-lane.md",
+      "docs/workflows/sec-017-security-ci-lane.md"
+    ],
+    "sec-018-frontend-html-sink-inventory.md": [
+      "docs/cards/security/SEC-018-frontend-html-sink-inventory.md",
+      "docs/workflows/sec-018-frontend-html-sink-inventory.md"
+    ],
+    "sec-019-ap-approval-workflow-hardening.md": [
+      "docs/cards/security/SEC-019-ap-approval-workflow-hardening.md",
+      "docs/workflows/sec-019-ap-approval-workflow-hardening.md"
+    ],
+    "sec-020-subsidiary-ledger-reconciliation-hardening.md": [
+      "docs/cards/security/SEC-020-subsidiary-ledger-reconciliation-hardening.md",
+      "docs/workflows/sec-020-subsidiary-ledger-reconciliation-hardening.md"
+    ],
+    "sec-021-tax-keys-hardening.md": [
+      "docs/cards/security/SEC-021-tax-keys-hardening.md",
+      "docs/workflows/sec-021-tax-keys-hardening.md"
+    ],
+    "sec-022-vat-return-export-hardening.md": [
+      "docs/cards/security/SEC-022-vat-return-export-hardening.md",
+      "docs/workflows/sec-022-vat-return-export-hardening.md"
+    ],
+    "sec-023-sales-credit-notes-hardening.md": [
+      "docs/cards/security/SEC-023-sales-credit-notes-hardening.md",
+      "docs/workflows/sec-023-sales-credit-notes-hardening.md"
+    ],
+    "sec-024-sales-reports-hardening.md": [
+      "docs/cards/security/SEC-024-sales-reports-hardening.md",
+      "docs/workflows/sec-024-sales-reports-hardening.md"
+    ],
+    "sec-025-sales-delivery-notes-hardening.md": [
+      "docs/cards/security/SEC-025-sales-delivery-notes-hardening.md",
+      "docs/workflows/sec-025-sales-delivery-notes-hardening.md"
+    ],
+    "sec-026-articles-tenant-hardening.md": [
+      "docs/cards/security/SEC-026-articles-tenant-hardening.md",
+      "docs/workflows/sec-026-articles-tenant-hardening.md"
+    ],
+    "sec-027-warehouse-transfers-hardening.md": [
+      "docs/cards/security/SEC-027-warehouse-transfers-hardening.md",
+      "docs/workflows/sec-027-warehouse-transfers-hardening.md"
+    ],
+    "sec-028-security-observability.md": [
+      "docs/cards/security/SEC-028-security-observability.md",
+      "docs/workflows/sec-028-security-observability.md"
+    ],
+    "sec-029-agrar-contracts-hardening.md": [
+      "docs/cards/security/SEC-029-agrar-contracts-hardening.md",
+      "docs/workflows/sec-029-agrar-contracts-hardening.md"
+    ],
+    "sec-030-security-dashboard-alerting.md": [
+      "docs/cards/security/SEC-030-security-dashboard-alerting.md",
+      "docs/workflows/sec-030-security-dashboard-alerting.md"
+    ],
+    "sec-031-sales-orders-hardening.md": [
+      "docs/cards/security/SEC-031-sales-orders-hardening.md",
+      "docs/workflows/sec-031-sales-orders-hardening.md"
+    ],
+    "sec-032-sales-offers-hardening.md": [
+      "docs/cards/security/SEC-032-sales-offers-hardening.md",
+      "docs/workflows/sec-032-sales-offers-hardening.md"
+    ],
+    "sec-034-security-event-persistence.md": [
+      "docs/cards/security/SEC-034-security-event-persistence.md",
+      "docs/workflows/sec-034-security-event-persistence.md"
+    ],
+    "svc-001-service-to-customer.md": [
+      "docs/cards/service/SVC-001-service-to-customer.md",
+      "docs/workflows/svc-001-service-to-customer.md"
+    ],
+    "otc-010-order-to-cash.md": [
+      "docs/cards/verkauf/OTC-010-order-to-cash.md",
+      "docs/workflows/otc-010-order-to-cash.md"
+    ]
+  }
+}

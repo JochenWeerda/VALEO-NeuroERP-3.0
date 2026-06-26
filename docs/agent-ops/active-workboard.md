@@ -4461,6 +4461,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — ~390 Markdown-Dateien nach `docs/_internal/archive/` migriert; `docs/archive/` aufgelöst; Root-Docs von 107→2 (`index.md`, `MASKEN.md`); Inventar + Duplikat-Report; `mkdocs build` grün.
 **Dateibesitz:** `scripts/docs-legacy-migrate.py`, `docs/_internal/archive/**`, `docs/_internal/legacy-docs-inventory.md`, `docs/agent-ops/slices/DOC-MIGRATION-002.yaml`.
 
+## DOC-MIGRATION-003 — Card-Duplikate + Architektur-Nav (Phase F)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — INV-001-Duplikat (`inventory/` → kanonisch `lager/`); Architektur + ADR in MkDocs-Nav; Wave-Ordner weiter ausgeschlossen; Inventar-Zählung per `resolve()`.
+**Dateibesitz:** `mkdocs.yml`, `docs/entwickler/index.md`, `docs/cards/inventory/INV-001-inventory-to-settlement.md`, `docs/agent-ops/slices/DOC-MIGRATION-003.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)

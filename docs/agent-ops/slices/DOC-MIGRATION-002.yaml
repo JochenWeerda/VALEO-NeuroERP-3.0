@@ -1,0 +1,30 @@
+slice_id: DOC-MIGRATION-002
+title: "Doku-Migration Phase E: Altbestand konsolidieren und archivieren"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-26
+completed_at: 2026-06-26
+goal: >-
+  ~390 historische Markdown-Dateien aus docs/archive, docs/-Root und legacy
+  Nebenordnern nach docs/_internal/archive/ verschieben; Doppel-Archiv
+  docs/archive/ auflösen; Duplikate inventarisieren; mkdocs build grün halten.
+file_ownership:
+  - docs/_internal/archive/**
+  - docs/_internal/legacy-docs-inventory.md
+  - docs/_internal/legacy-docs-inventory.json
+  - docs/_internal/README.md
+  - docs/dokumentation/migrationsplan.md
+  - scripts/docs-legacy-migrate.py
+  - docs/agent-ops/slices/DOC-MIGRATION-002.yaml
+acceptance:
+  - docs/archive/ ist leer (Inhalt in _internal/archive/repo-archive/).
+  - docs/-Root enthält nur index.md und MASKEN.md als Loseblatt-Markdown.
+  - legacy-docs-inventory.md dokumentiert Duplikat-Basenames.
+  - python -m mkdocs build --site-dir site_check Exit 0.
+  - Keine Dateien gelöscht (git mv / mv+git add).
+tests:
+  - python scripts/docs-legacy-migrate.py --inventory-only
+  - python -m mkdocs build --site-dir site_check
+risks:
+  - Externe Links auf alte Pfade brechen; Pfade in Inventar/README dokumentiert.
+  - 140 doppelte Dateinamen verbleiben (Cards inventory/lager, roadmap/status) — Folgeslice.

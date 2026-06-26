@@ -33,7 +33,8 @@ CHAIN_REGISTRY: dict[str, dict] = {
     "OTC-010-order-to-cash": {"chain": "order-to-cash", "chain_step": 0, "card_type": "overview"},
     "OTC-011-zahlungseingang-und-abstimmung": {"chain": "order-to-cash", "chain_step": 1, "card_type": "process-step", "parent_card": "OTC-010"},
     # procure-to-pay
-    "P2P-020-direktbestellung-standardmaske": {"chain": "procure-to-pay", "chain_step": 1, "card_type": "process-step"},
+    "P2P-010-procure-to-pay": {"chain": "procure-to-pay", "chain_step": 0, "card_type": "overview"},
+    "P2P-020-direktbestellung-standardmaske": {"chain": "procure-to-pay", "chain_step": 1, "card_type": "process-step", "parent_card": "P2P-010"},
     "P2P-040-vorbelegung-standardmaske": {"chain": "procure-to-pay", "chain_step": 2, "card_type": "process-step"},
     "P2P-041-vorbelegung-aus-anfrage-und-vertrag": {"chain": "procure-to-pay", "chain_step": 3, "card_type": "process-step"},
     "P2P-050-wizard-schrittvalidierung": {"chain": "procure-to-pay", "chain_step": None, "card_type": "cross-cutting"},
