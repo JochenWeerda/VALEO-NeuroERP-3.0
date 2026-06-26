@@ -43,7 +43,7 @@ async def sync_proplanta_psm_data(
     try:
         if not is_configured():
             raise HTTPException(
-                status_code=400,
+                status_code=503,
                 detail="Proplanta PSM integration not configured"
             )
 
@@ -91,7 +91,7 @@ async def list_proplanta_psm(
     try:
         if not is_configured():
             raise HTTPException(
-                status_code=400,
+                status_code=503,
                 detail="Proplanta PSM integration not configured"
             )
 
@@ -139,7 +139,7 @@ async def search_proplanta_psm(
     try:
         if not is_configured():
             raise HTTPException(
-                status_code=400,
+                status_code=503,
                 detail="Proplanta PSM integration not configured"
             )
 
@@ -160,7 +160,7 @@ async def get_proplanta_psm_details(psm_id: str):
     try:
         if not is_configured():
             raise HTTPException(
-                status_code=400,
+                status_code=503,
                 detail="Proplanta PSM integration not configured"
             )
 
@@ -187,7 +187,7 @@ async def get_proplanta_psm_stats():
     try:
         if not is_configured():
             raise HTTPException(
-                status_code=400,
+                status_code=503,
                 detail="Proplanta PSM integration not configured"
             )
 
@@ -240,7 +240,7 @@ async def import_proplanta_psm_to_local(
     try:
         if not is_configured():
             raise HTTPException(
-                status_code=400,
+                status_code=503,
                 detail="Proplanta PSM integration not configured"
             )
 

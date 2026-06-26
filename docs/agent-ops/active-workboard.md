@@ -18,6 +18,18 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## Wave 13 — WF-COCKPIT-002 + FEED-QS-001 + RUNTIME-KAT-E-002
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+
+**WF-COCKPIT-002**: `WfCockpitNatsProjector` in `startup_event_consumer()` eingebunden — wird bei `EVENT_BUS_ENABLED=true` und `EVENT_BUS_PROVIDER=nats` nach `nats_consumer.start()` gestartet; Shutdown sauber verdrahtet; domain_workflow.wf_cockpit_* Tabellen idempotent in Repair-Migration gesichert.
+
+**FEED-QS-001**: Neuer Router `/futtermittel/qs` mit HACCP-Plaenen (Gefahrenanalyse/CCP/Ueberwachung), VLOG-Meldungen (GVO-frei, Zertifikat, Status-Workflow) und QS-Leitfaden-Pruefpunkten (Periode, Bestaetigung, Abweichung/Massnahme). 3 neue domain_shared-Tabellen.
+
+**RUNTIME-KAT-E-002**: Proplanta PSM 400 → 503 bei fehlender Konfiguration (6 Stellen in psm_proplanta.py).
+
+**Neuer Alembic-Head:** `feed_qs_wf_cockpit_repair_20260626`
+
 ## FINANCE-HR-EINKAUF-REPAIR-001 — Finance + HR + Einkauf Batch-Repair-Migration Wave 12
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
