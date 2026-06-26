@@ -30,5 +30,6 @@ dateibesitz:
   - playwright-tests/specs/e2e-matrix/fibu-semantic-chain.spec.ts
   - playwright-tests/specs/e2e-matrix/pos-tse-semantic-chain.spec.ts
   - playwright-tests/specs/e2e-matrix/qs-reklamation-semantic-chain.spec.ts
+  - playwright.config.critical.ts
   - .github/workflows/e2e-critical.yml
   - docs/agent-ops/slices/SEMANTIC-E2E-STRICT-001.yaml

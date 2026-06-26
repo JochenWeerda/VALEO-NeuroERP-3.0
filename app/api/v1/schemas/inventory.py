@@ -4,8 +4,8 @@ Schemas for articles, warehouses, stock movements, and inventory management
 """
 
 from datetime import datetime, date, time
-from typing import Optional
-from pydantic import Field
+from typing import Any, Optional, Union
+from pydantic import Field, field_validator
 from decimal import Decimal
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
@@ -181,6 +181,14 @@ class WarehouseBase(BaseSchema):
     name: str = Field(..., min_length=1, max_length=100, description="Warehouse name")
     address: Optional[str] = Field(None, max_length=200, description="Warehouse address")
     city: Optional[str] = Field(None, max_length=50, description="City")
+
+    @field_validator("address", mode="before")
+    @classmethod
+    def coerce_address(cls, v: Any) -> Optional[str]:
+        # 001_initial_schema.py created address as JSONB; coerce to str for backwards compat
+        if isinstance(v, dict):
+            return str(v)
+        return v
     postal_code: Optional[str] = Field(None, max_length=10, description="Postal code")
     country: Optional[str] = Field(default="DE", max_length=2, description="Country code")
     contact_person: Optional[str] = Field(None, max_length=100, description="Contact person")

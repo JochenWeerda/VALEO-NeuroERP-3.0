@@ -79,6 +79,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `add_workflow_version_20260307` | Gap 011: workflow_version in workflow_status (versionierte Workflow Engine) |
 | `admin_api_keys_20260215` | admin api key management |
 | `admin_devices_output_profiles_20260215` | admin devices and output profile settings |
+| `admin_mobile_repair_20260626` | ALEMBIC-MERGE-001: Admin-Mobile + Charge-Lineage Repair-Migration. |
 | `admin_mobile_routing_connectors_20260215` | admin stations, routing, mobile scan and connectors |
 | `admin_report_permissions_20260215` | admin self-service report permissions |
 | `agent_proposals_persist_20260626` | OPERATOR-AGENT-002: Tabelle agent_proposals fuer persistente Agent-Proposals. |
@@ -151,6 +152,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `einkauf_bestellungen_dedupe_unique_20260407` | einkauf_bestellungen: Duplikate bereinigen + Unique-Index |
 | `einkauf_domain_tables_20260227` | einkauf domain tables — Lieferanten, Kontrakte, Bestellungen, Bestellvorschlaege, ArtikelLagerParameter, LagerKonten, PalettenKonto, PfandKonto, FremdwarenEinlagerung |
 | `einkauf_lieferschein_frachtauftrag_20260214` | Add procurement delivery note and freight order tables. |
+| `einkauf_ls_opportunities_repair_20260626` | EINKAUF-LS-REPAIR-001: Einkauf-Lieferschein + Opportunities Repair-Migration. |
 | `einkauf_missing_tables_20260305` | Einkauf: missing tables for RFQ, delivery advices, order confirmations, article groups, payment runs |
 | `einkauf_rechnungseingang_workflow_audit_20260301` | Add workflow audit columns to einkauf_rechnungseingaenge (Prüfen/Freigeben/Verbuchen) |
 | `ensure_chart_of_accounts_and_journal_entry_lines_20260303` | chart_of_accounts und journal_entry_lines anlegen (Nachlauf zu journal_entries) |
@@ -227,6 +229,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |
 | `log_carrier_invoices_20260618` | LOG-FRACHT-001: Spediteur-Rechnungen (carrier_invoices) |
 | `log_disposition_20260623` | DOM-LOG-004.2/.3: tour_disposition_checks + epod_settlements |
+| `log_frachtbriefe_20260626` | LOG-FRACHTBRIEF-001: Frachtbrief-Tabelle fuer /api/v1/logistik/frachtbriefe. |
 | `log_freight_tariff_storno_20260613` | Fracht-Tarif: Storno-Spalten (soft, auditierbar). |
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
@@ -237,13 +240,16 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_doc_proc_20260612` | Merge DOC- und PROC-Branch zu einem Alembic-Head. |
 | `merge_dom004_feed_chain_20260623` | Merge parallel 2026-06-23 branches (DOM-*-004 wave + FEED-CHAIN-004). |
 | `merge_driver_time_hrm_gates_20260517` | merge driver_time and hrm_gates heads |
+| `merge_einkauf_log_agent_20260626` | Merge Alembic heads: einkauf_ls_opportunities_repair + merge_log_agent. |
 | `merge_heads_20260522` | Merge: agrar_ernte_planung_20260520 + fachliche_vertiefung_wave13_20260522 |
 | `merge_heads_docflow_agrar_einkauf_20260301` | Merge heads: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3 |
 | `merge_heads_ops_and_erp_20260304` | merge heads: domain_ops (missing_ops) and domain_erp (finance tables) |
 | `merge_l3c_and_procurement_indexes_20260213` | Merge Alembic heads l3c_gap_001 and optimize_procurement_indexes_20260213. |
+| `merge_log_agent_20260626` | Merge Alembic heads: log_frachtbriefe + merge_agent_job_runner. |
 | `merge_log_agri_heads_20260623` | Merge log_disposition and agri_silo_lot_link heads (DOM-INV-004 pre-step). |
 | `merge_sales_orders_and_consignment_20260215` | merge heads sales_orders_items_shipping and consignment_storage_fee_engine |
 | `merge_supply_production_readiness_20260610` | Merge supply-chain and production-readiness migration branches. |
+| `merge_warehouse_einkauf_20260626` | Merge Alembic heads: warehouse_schema_repair + merge_einkauf_log_agent. |
 | `merge_wave104_20260326` | Merge Wave 104 migrations with main head |
 | `mobile_event_queue_20260619` | MOB-SYNC-001: Mobile Offline-Sync Event-Queue |
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
@@ -290,6 +296,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
+| `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |

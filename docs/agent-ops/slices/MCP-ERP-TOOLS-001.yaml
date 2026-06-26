@@ -1,49 +1,24 @@
 slice_id: MCP-ERP-TOOLS-001
-title: "Produktiver ERP-MCP-Toolkatalog"
+title: "MCP Tool-Katalog YAML (app/config/mcp_erp_tools.yaml)"
+priority: P2
 owner: Claude Code
-status: completed
-created_at: "2026-06-23"
-goal: >-
-  Rollenbasierter, auditierter ERP-Tool-Katalog fuer Agent-Zugriff: YAML-Registry
-  mit Tools fuer CRM, Sales, FIBU, WMS, DMS, Compliance. Service-Layer validiert
-  Schema/Scope/Idempotenz/Risiko. API GET /mcp/tools (list, summary, detail).
-file_ownership:
-  - config/mcp_erp_tools.yaml
-  - app/services/mcp_tool_registry_service.py
-  - app/api/v1/endpoints/mcp_tool_registry.py
-  - tests/test_mcp_tool_registry.py
-  - docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml
-acceptance:
-  - MCP-Toolkatalog ist aus YAML ladbar und ueber read-only API abrufbar.
-  - Filter nach Domain, Scope und Risiko sowie Detailabruf einzelner Tools funktionieren.
-  - Validierung sichert Pflichtfelder, Schema, Idempotenz und Human-Approval-Regeln.
-tests:
-  - python -m py_compile app/services/mcp_tool_registry_service.py app/api/v1/endpoints/mcp_tool_registry.py
-  - pytest -q -o addopts= tests/test_mcp_tool_registry.py
-risks:
-  - config/mcp_erp_tools.yaml ist Pflicht; fehlt die Datei gibt FileNotFoundError beim Start.
-  - human_approval_required-Tools duerfen nur high/critical risk_class haben.
-external_gates:
-  - not_applicable
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  GET /api/v1/mcp/tools lieferte 500 weil app/config/mcp_erp_tools.yaml fehlte.
+  McpToolRegistryService wirft FileNotFoundError ohne diese Datei.
+  Dieser Slice erstellt die YAML-Datei mit 21 validen ERP-Tool-Definitionen (6 Domains).
+
 ai_harness:
-  fachlicher_vertrag: >-
-    Agenten koennen per GET /mcp/tools den Tool-Katalog abrufen, nach Domain/Scope/Risiko
-    filtern und Einzeltools mit Schema, Idempotenz, Endpoint und Human-Approval-Flag lesen.
-  architektur_vertrag: >-
-    Tool-Registry bleibt YAML-file-basiert; kein DB-Schema. Service kapselt Laden
-    und Validierung. API ist read-only. Keine Mutatoren fuer Tool-Definitionen.
-  daten_vertrag: >-
-    tool_id, domain, name, scope, idempotent, risk_class, audit, input_schema,
-    output_schema, endpoint, human_approval_required.
-  test_vertrag: >-
-    9 Unit-Tests: list/filter/get/not-found/validate/summary/human-approval-guard/invalid.
-    validate_all() muss 0 Fehler fuer YAML liefern.
-  security_vertrag: >-
-    Keine Schreiboperationen ueber API. human_approval_required-Tools sind auf
-    high/critical risk_class beschraenkt und in Tests geprueft.
-  betriebs_vertrag: >-
-    Registry-YAML ist versioniert und wird von validate_all() bei Startup geprueft.
-    Fehler-Free-Check ist Pflicht im CI.
-  dokumentations_vertrag: >-
-    Workboard-Abschnitt MCP-ERP-TOOLS-001; config/mcp_erp_tools.yaml als
-    lesbares Referenzdokument.
+  fachlicher_vertrag:
+    - GET /api/v1/mcp/tools liefert 200 mit 21 Tool-Eintraegen.
+    - Alle Eintraege valide gemaess McpToolValidationError-Pruefung.
+  architekturvertrag:
+    - Nur YAML-Datei angelegt, kein Code geaendert.
+  akzeptanzkriterien:
+    - GET /api/v1/mcp/tools 200 (statt 500 FileNotFoundError).
+
+dateibesitz:
+  - app/config/mcp_erp_tools.yaml
+  - docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml

@@ -266,6 +266,7 @@ from app.api.v1.endpoints import (
     hausbankenstamm,
     artikel_bestandteile,
     logistik_frachttabellen,
+    logistik_frachtbriefe,
 )
 
 # Fachliche Vertiefung Wave 5 — Vermehrungsvertrag, Vertreterstamm, Geschäftsjahre, Periodische Buchungen
@@ -1978,6 +1979,7 @@ api_router.include_router(preis_rabattgruppen.router)
 api_router.include_router(hausbankenstamm.router)
 api_router.include_router(artikel_bestandteile.router)
 api_router.include_router(logistik_frachttabellen.router)
+api_router.include_router(logistik_frachtbriefe.router, prefix="/logistik", tags=["logistik", "frachtbriefe"])
 
 # Fachliche Vertiefung Wave 5
 api_router.include_router(vermehrungsvertrag.router)

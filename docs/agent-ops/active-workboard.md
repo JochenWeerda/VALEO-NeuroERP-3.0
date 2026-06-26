@@ -1,5 +1,96 @@
 # Active Workboard
 
+## DOC-USER-MANUAL-002 - Benutzerhandbuch vervollstaendigen
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-26 - Benutzerhandbuch um POS/Kasse, Logistik/Touren, Compliance/Meldewesen, Personal/Zeit/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion erweitert.
+**Ziel:** POS/Kasse, Logistik, Compliance/Meldewesen, Personal/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion als Endnutzer-How-tos in `docs/benutzerhandbuch/` ergaenzen.
+**Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
+
+## WAREHOUSE-REPAIR-001 — domain_inventory.warehouses Schema-Repair + Kat-C-Fix
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Kat-C-500 `/api/v1/inventory/warehouses/` geschlossen: `001_initial_schema.py` hatte `address` als JSONB angelegt, Pydantic-Schema erwartete `Optional[str]` → `model_validate` fehlgeschlagen. Fix: `field_validator("address", mode="before")` in `WarehouseBase` konvertiert JSONB-dict → str. Repair-Migration `warehouse_schema_repair_20260626` ergaenzt fehlende Spalten + legt `inventory_counts` und `inventory_stock_movements` idempotent an.
+**Dateibesitz:** `alembic/versions/warehouse_schema_repair_20260626.py`, `app/api/v1/schemas/inventory.py`, `docs/agent-ops/slices/WAREHOUSE-REPAIR-001.yaml`
+**Neuer Alembic-Head:** `warehouse_schema_repair_20260626`
+
+## EINKAUF-LS-REPAIR-001 — Einkauf-Lieferschein + Opportunities Repair-Migration
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+P1-Gap (Welle 9) geschlossen: `einkauf_lieferscheine`, `einkauf_lieferschein_positionen`, `einkauf_frachtauftraege` + `opportunities` (public schema) lagen in Parallel-Branches → 500 UndefinedTable fuer `/einkauf/lieferscheine[/last]`, `/crm/opportunities/pipeline`. Repair-Migration `einkauf_ls_opportunities_repair_20260626` idempotent angehaengt.
+**Dateibesitz:** `alembic/versions/einkauf_ls_opportunities_repair_20260626.py`, `docs/agent-ops/slices/EINKAUF-LS-REPAIR-001.yaml`
+**Neuer Alembic-Head:** `einkauf_ls_opportunities_repair_20260626`
+
+## ALEMBIC-MERGE-001 — Admin-Mobile + Charge-Lineage Alembic Repair-Migration
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+P1-Gap geschlossen: 14 Admin-Mobile-Tabellen (`admin_devices`, `admin_stations`, `admin_routing_rules` u.a.) + `charge_lineage_links` + `storage_fee_runs` lagen in Parallel-Alembic-Branches (55 Heads) und verursachten `UndefinedTable`-500er. Repair-Migration `admin_mobile_repair_20260626` mit `CREATE TABLE IF NOT EXISTS` an neuen Hauptketten-Head angehaengt.
+**Dateibesitz:** `alembic/versions/admin_mobile_repair_20260626.py`, `docs/agent-ops/slices/ALEMBIC-MERGE-001.yaml`
+**Neuer Alembic-Head:** `admin_mobile_repair_20260626`
+
+## TAIL-CRM-001 — CRM RAG-/Intent-Panel + Dublettencheck (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: LegacyKundenStammModern.tsx enthält vollständige Dublettensicht, Wissenspanel und Naechste-Aktion-Surface. Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/LegacyKundenStammModern.tsx`, `docs/agent-ops/slices/TAIL-CRM-001.yaml`
+
+## TAIL-NAWARO-001 — NaWaRo Druck/Vorschau/Serienbrief (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: mitteilung-drucken.tsx + anbauflaechen.tsx nutzen `nawaro-communication.ts` (buildCsvArtifact, downloadArtifact, openHtmlPreview). Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/nawaro/`, `packages/frontend-web/src/lib/nawaro-communication.ts`, `docs/agent-ops/slices/TAIL-NAWARO-001.yaml`
+
+## TAIL-AGRI-001 — Agrar PSM-Beratung + Saatgut-Edit (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: beratung.tsx nutzt echte PSM-Stammdaten mit expliziter Readiness; saatgut-stamm.tsx hat echten Edit-Flow. Keine Demo-Fallbacks. Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/agrar/psm/beratung.tsx`, `packages/frontend-web/src/pages/agrar/saatgut-stamm.tsx`, `docs/agent-ops/slices/TAIL-AGRI-001.yaml`
+
+## TAIL-SALES-001 — Sales orders-modern Export/Import/Archiv (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation: orders-modern.tsx an reale Order-Liste angebunden, CSV-Export, echte Statusfilter, Import/Archiv über kanonische Auftragsliste. Bereits von Codex erledigt.
+**Dateibesitz:** `packages/frontend-web/src/pages/sales/orders-modern.tsx`, `docs/agent-ops/slices/TAIL-SALES-001.yaml`
+
+## RUNTIME-KAT-C-002 — Response-Model-Mismatches Kat. C Restliste (7 Endpoints)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+7 Endpoints: `policies/policy/list` ok→success, `einkauf/lieferanten+kontrakte+artikel-lager-parameter` Einzelobjekt→list[], `kaeufergruppe/katalog` dict→list[dict], `messages/health` MessageOut→dict[str,str], `crm/bestell-inbox` GET dict→list[dict].
+**Dateibesitz:** `policies.py`, `einkauf_bestellvorschlag.py`, `kaeufergruppe.py`, `messages.py`, `whatsapp_intake.py`, `docs/agent-ops/slices/RUNTIME-KAT-C-002.yaml`
+
+## WM-AGRI-MAP-001 — Zielzellen-Regelengine (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation ergab: `silo_target_cell.py` + `silo_rule_engine_service.py` + `agri_lot_link_booking.py` bereits vollständig implementiert. GET /silo/zielzellen-vorschlag, GET /zielzellen-vorschlag/lot/{lot_id}, POST /material-flow/lot-link/auto-book vorhanden.
+**Dateibesitz:** `app/api/v1/endpoints/silo_target_cell.py`, `app/services/silo_rule_engine_service.py`, `docs/agent-ops/slices/WM-AGRI-MAP-001.yaml`
+
+## LOG-TRACK-001 — Logistik Track & Trace / ePOD (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation ergab: `logistics_tours.py` + `logistics_epod_service.py` + Alembic `domain_logistics.tour_events` bereits vollständig. POST /tours/{id}/events, GET /gps-track, ePOD-Settlement (DOM-LOG-004.3) vorhanden.
+**Dateibesitz:** `app/api/v1/endpoints/logistics_tours.py`, `app/services/logistics_epod_service.py`, `docs/agent-ops/slices/LOG-TRACK-001.yaml`
+
+## LOG-FRACHTBRIEF-001 — Logistik Frachtbrief-Endpoint
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Alembic-Migration `log_frachtbriefe_20260626` + Endpoint `GET/POST/PATCH /api/v1/logistik/frachtbriefe` + Tests. Frontend `useFrachtbriefe()` liefert jetzt 200 statt 404.
+**Dateibesitz:** `alembic/versions/log_frachtbriefe_20260626.py`, `app/api/v1/endpoints/logistik_frachtbriefe.py`, `tests/test_log_frachtbrief.py`, `docs/agent-ops/slices/LOG-FRACHTBRIEF-001.yaml`
+
+## MCP-ERP-TOOLS-001 — MCP Tool-Katalog YAML
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+`app/config/mcp_erp_tools.yaml` mit 21 validen Tool-Definitionen (Agrar, Verkauf, Einkauf, Lager, CRM, Finance, Logistik, Compliance). GET /api/v1/mcp/tools liefert 200 statt 500 FileNotFoundError.
+**Dateibesitz:** `app/config/mcp_erp_tools.yaml`, `docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml`
+
+## RUNTIME-KAT-C-001 — Response-Model-Mismatches Kat. C (health/live + ebilanz/taxonomie)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+- `health.py`: `return StatusResponse(success=True, message="alive")` statt `{"status":"alive"}` (fehlende `success`-Feld-ResponseValidationError)
+- `ebilanz_elster.py`: `response_model=list[EbilanzElsterOut]` statt Einzelobjekt fuer list-Return
+**Dateibesitz:** `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/ebilanz_elster.py`, `docs/agent-ops/slices/RUNTIME-KAT-C-001.yaml`
+
 ## DOC-CONSOLIDATION-010 - Doku-Konsolidierung: erledigte Zukunftsplaene, Dubletten, echter Restbacklog
 
 **Von:** Codex

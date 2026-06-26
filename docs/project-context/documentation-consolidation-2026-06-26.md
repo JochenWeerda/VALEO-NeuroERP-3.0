@@ -46,6 +46,19 @@ erneut geprueft und bei Bedarf aktualisiert werden.
 | Action-/Traceability-Gaps sind Heuristik, kein Beweis fuer fehlende Implementierung. | `docs/quality-assurance/action-matrix-report.md`, `docs/quality-assurance/traceability-matrix.md`, jeweilige Generatoren | Diese beiden QA-Reports und dieser Konsolidierungsbericht | Bei Generator-Logik oder neuen Matrixwerten: Konsolidierungshinweis beibehalten, aber konkrete Restbacklog-Punkte neu bewerten. |
 | Externe Production-Readiness-Gates bleiben offen, auch wenn Repo-Evidenz vorhanden ist. | `docs/operations/production-readiness-runbook.md`, `scripts/simulate_external_assessors.py`, `docs/project-context/open-gaps-and-known-issues.md` | Restliste P0/P1 in diesem Bericht | Bei realer Abnahme: Open-Gaps zuerst aktualisieren, danach diesen Bericht und ggf. Runbooks nachziehen. |
 | Admin-Suite-Roadmap ist Referenz, kein aktueller Umsetzungsplan. | `docs/project-context/admin-suite-roadmap-2026-05-30.md`, Admin-Suite-Slices im Workboard | `docs/project-context/admin-suite-roadmap-2026-05-30.md`, dieser Bericht | Bei neuen Admin-Suite-Slices: Workboard/Slice ist fuehrend; Roadmap nur mit Statushinweis fortschreiben. |
+| Randdokumente duerfen offene Card-Gaps nur behalten, wenn Slice/Open-Gaps und Code das bestaetigen. | `docs/cards/**`, `docs/workflows/**`, `docs/agent-ops/slices/*.yaml`, Code-/Testtreffer per `rg` | `FIN-001`, `COM-001`, `open-gaps-and-known-issues.md`, betroffene Slice-YAMLs | Bei Card-Aenderungen immer Workflow, Slice-YAML und Open-Gaps mit derselben Quelle nachziehen. |
+
+## Randdokumente-Nachlauf 2026-06-26
+
+Zusaetzlich zu den grossen Gap-Matrizen wurden aktive Randdokumente in
+`docs/cards/`, `docs/workflows/` und `docs/compliance/` gesichtet. Ergebnis:
+
+| Bereich | Befund | Quellen | Aktion |
+|---|---|---|---|
+| FIN-001 Card | Card fuehrte Abschluss-Stubs noch als offen, obwohl Code, Tests und Workflow die Fachlogik belegen. | `app/services/finance_closing_service.py`, `app/api/v1/endpoints/finance_actions.py`, `tests/test_finance_closing_service.py`, `docs/workflows/fin-001-finance-to-reporting.md` | FIN-Card, Open-Gaps und Slice-YAML geschlossen; externe FiBu-Abnahme bleibt Gate. |
+| COM-001 Card | Card fuehrte CamelCase-Register noch als offen, obwohl Backend snake_case + camelCase liefert und Frontend camelCase nutzt. | `app/api/v1/endpoints/compliance.py`, `packages/frontend-web/src/lib/api/betrieb.ts`, Register-Seiten, `docs/workflows/com-001-compliance-to-audit.md` | COM-Card, Open-Gaps und Slice-YAML geschlossen; fachliche Compliance-Abnahme bleibt Gate. |
+| CRM-001 Card | Legacy-/Compat-Routen existieren weiterhin bewusst; keine vollstaendige Schliessung ohne erneuten gezielten Frontend-Sweep. | `CRM-LEGACY-API-MIGRATE-001.yaml`, `route-tree.gen.tsx`, CRM-API-Treffer | Bleibt als echter Restpunkt. |
+| ISO/A1 Compliance | Roadmap-/Gap-Dokumente sind Referenz fuer Zertifizierungs- und Organisationsgates, nicht aktueller Code-Backlog. | `docs/compliance/iso27001-gap-analysis.md`, `docs/compliance/a-eins-compliance-roadmap.md`, Production-Readiness-Runbook | Keine Code-Gaps daraus ableiten; offene Punkte als externe/organisatorische Gates fuehren. |
 
 ## Tatsaechlich Noch Zu Erledigen
 
@@ -77,8 +90,12 @@ erneut geprueft und bei Bedarf aktualisiert werden.
 4. **Runtime-Sweep-Restliste erneut live verifizieren.**
    `open-gaps-and-known-issues.md` fuehrt noch Restkategorien aus dem
    Live-Sweep: fehlende Tabellen/Migrationen, Response-Envelope-Validierung,
-   fehlende Konfiguration und einzelne Feature-Luecken. Ein neuer Sweep muss
-   trennen, was durch Folgeslices bereits geschlossen ist.
+   fehlende Konfiguration und einzelne Feature-Luecken.
+   **Welle-5-Nachzug (2026-06-26):** Kat. C (`health/live`, `ebilanz/taxonomie-felder`),
+   Kat. E (`mcp/tools`), Kat. F (`logistik/frachtbriefe`) sind in `open-gaps-and-known-issues.md`
+   als geschlossen markiert. Verbleibend: Kat. A (fehlende DB-Tabellen), restliche Kat. C
+   (`mcp/policy/list`, `einkauf/*`, `inventory/warehouses`), Kat. E (Proplanta).
+   Ein neuer Live-Sweep muss die aktuelle Lage der A/C-Restkandidaten verifiizieren.
    *Quellen:* `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 (Kat. A–F)
    *Rueckschreiben bei Schliessung:* jeweilige Kategorie in § RUNTIME-API-SWEEP-001 als behoben kennzeichnen + § Konsolidiertes Restbacklog.
 

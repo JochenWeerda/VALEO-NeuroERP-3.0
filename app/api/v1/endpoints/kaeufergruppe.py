@@ -44,7 +44,7 @@ def _row(r) -> dict:
     return d
 
 
-@router.get("/katalog", response_model=dict[str, Any], summary="Käufergruppen-Katalog (Label/Zielanteil/Ansatz)")
+@router.get("/katalog", response_model=list[dict[str, Any]], summary="Käufergruppen-Katalog (Label/Zielanteil/Ansatz)")
 def katalog() -> list[dict[str, Any]]:
     return [
         {"group": g.value, "label": p.label, "ziel_anteil_min": p.ziel_anteil_min,

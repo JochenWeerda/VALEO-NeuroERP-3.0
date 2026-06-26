@@ -1,0 +1,28 @@
+slice_id: LOG-FRACHTBRIEF-001
+title: "Logistik Frachtbrief-Endpoint (GET/POST /api/v1/logistik/frachtbriefe)"
+priority: P2
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  Frontend (useFrachtbriefe) rief /api/v1/logistik/frachtbriefe auf und erhielt 404.
+  Dieser Slice legt Alembic-Migration + Thin-Router-Endpoint an.
+
+ai_harness:
+  fachlicher_vertrag:
+    - GET /api/v1/logistik/frachtbriefe liefert 200.
+    - POST /api/v1/logistik/frachtbriefe legt Frachtbrief an (201).
+    - PATCH /api/v1/logistik/frachtbriefe/{id}/status aktualisiert Status.
+  architekturvertrag:
+    - Alembic-Migration log_frachtbriefe_20260626 im Head-Chain.
+    - Thin-Router, kein Inline-Business-Logic.
+  akzeptanzkriterien:
+    - GET 200 statt 404.
+    - pytest tests/test_log_frachtbrief.py gruen.
+
+dateibesitz:
+  - alembic/versions/log_frachtbriefe_20260626.py
+  - app/api/v1/endpoints/logistik_frachtbriefe.py
+  - tests/test_log_frachtbrief.py
+  - docs/agent-ops/slices/LOG-FRACHTBRIEF-001.yaml

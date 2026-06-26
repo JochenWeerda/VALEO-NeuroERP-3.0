@@ -120,7 +120,7 @@ async def liveness_check() -> Dict[str, str]:
     Kubernetes liveness probe - is the process alive?
     Simple check, no dependencies.
     """
-    return {"status": "alive"}
+    return StatusResponse(success=True, message="alive")
 
 
 @router.get("/health/startup", status_code=status.HTTP_200_OK, summary="Check startup",

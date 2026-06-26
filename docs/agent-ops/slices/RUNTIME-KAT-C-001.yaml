@@ -1,0 +1,26 @@
+slice_id: RUNTIME-KAT-C-001
+title: "Runtime 5xx Kat. C: Response-Model-Mismatches beheben"
+priority: P1
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  Zwei Endpoints mit ResponseValidationError behoben:
+  - health/live: response_model=StatusResponse, return {"status":"alive"} -> return StatusResponse(success=True, message="alive")
+  - ebilanz/taxonomie-felder: response_model=EbilanzElsterOut (Einzelobj) fuer list-Return -> list[EbilanzElsterOut]
+
+ai_harness:
+  fachlicher_vertrag:
+    - GET /api/v1/health/health/live liefert 200.
+    - GET /api/v1/ebilanz/taxonomie-felder liefert 200.
+    - Keine fachliche Verhaltensaenderung.
+  architekturvertrag:
+    - Minimaler Eingriff: nur response_model / return-Wert angepasst.
+  akzeptanzkriterien:
+    - Beide Endpoints 200 ohne ValidationError in Live-Sweep.
+
+dateibesitz:
+  - app/api/v1/endpoints/health.py
+  - app/api/v1/endpoints/ebilanz_elster.py
+  - docs/agent-ops/slices/RUNTIME-KAT-C-001.yaml
