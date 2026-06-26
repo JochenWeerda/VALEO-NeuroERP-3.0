@@ -1,0 +1,33 @@
+slice_id: DOC-DRIFT-DASHBOARD-002
+title: "Doku-Code-Drift-Dashboard in MkDocs"
+priority: P2
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  MkDocs-Seite docs/entwickler/drift-dashboard.md aus doc_drift_report.json generieren.
+  Nightly in doc-drift-report.yml auto-committen. In Nav eingebunden.
+
+ai_harness:
+  fachlicher_vertrag:
+    - docs/entwickler/drift-dashboard.md zeigt Status (GRUEN/GELB/ROT), Dimensionen und offene Punkte.
+    - Seite wird automatisch nach jedem Nightly-Drift-Report aktualisiert.
+    - Gate-Beschreibung ist direkt auf der Seite sichtbar (--fail-over 0 Befehl dokumentiert).
+  architekturvertrag:
+    - scripts/generate_drift_dashboard_page.py ist Single Source of Truth für die Seite.
+    - Liest artifacts/doc_drift_report.json — läuft nach doc_drift_report.py in gleicher Pipeline.
+    - Auto-Commit nur bei tatsächlicher Änderung (git diff --cached --quiet Guard).
+    - Seite darf nicht manuell bearbeitet werden.
+  akzeptanzkriterien:
+    - docs/entwickler/drift-dashboard.md existiert mit korrektem Frontmatter.
+    - mkdocs build grün (Seite in Nav erreichbar).
+    - Generator läuft ohne Fehler bei total_drift_items=0.
+    - doc-drift-report.yml committet Dashboard-Update wenn Drift sich ändert.
+
+dateibesitz:
+  - scripts/generate_drift_dashboard_page.py
+  - docs/entwickler/drift-dashboard.md
+  - .github/workflows/doc-drift-report.yml
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-DRIFT-DASHBOARD-002.yaml

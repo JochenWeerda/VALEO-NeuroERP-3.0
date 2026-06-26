@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   drift-report:
@@ -24,6 +24,21 @@ jobs:
 
       - name: Generate drift report
         run: python scripts/doc_drift_report.py
+
+      - name: Generate drift dashboard page (DOC-DRIFT-DASHBOARD-002)
+        run: python scripts/generate_drift_dashboard_page.py
+
+      - name: Commit updated dashboard (wenn geaendert)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/entwickler/drift-dashboard.md
+          if git diff --cached --quiet; then
+            echo "Kein Dashboard-Update noetig."
+          else
+            git commit -m "chore(docs): Drift-Dashboard aktualisiert [DOC-DRIFT-DASHBOARD-002]"
+            git push
+          fi
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v4

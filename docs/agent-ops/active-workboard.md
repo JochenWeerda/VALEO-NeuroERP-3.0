@@ -4682,16 +4682,18 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Ziel:** Doku-Drift von Endpoints/Migrationen/Services/Pages dauerhaft auf 0 halten durch blockierendes CI-Gate.
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `docs/agent-ops/slices/DOC-DRIFT-GATE-002.yaml`.
 
-## DOCS-CODE-SYNC-002 — Mapping-Härtung (Claim)
+## DOCS-CODE-SYNC-002 — Mapping-Härtung
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit — Lane A, Welle 1
-**Ziel:** docs-code-sync-map.yaml auf generierte Inventar-Artefakte erweitern; generierte .json/.yaml als gültige Doku-Mappings zählen lassen.
+**Stand:** abgeschlossen 2026-06-26 — `docs-code-sync-map.yaml`: `generated_artifacts` + `generated_doc_paths` Felder ergänzt (openapi.json, asyncapi.yaml, endpoint-inventory.md, migration-inventory.md, service-inventory.md, route-inventory.gen.json, docs-help.ts); `docs-code-sync-check.cjs`: Parser + Prüflogik für generierte Artefakte erweitert (zählen als Doku-Nachweis).
+**Ziel:** Endpoint/Migration/Service/Seite-PRs können generierte Inventar-Dateien statt klassischer .md-Doku vorweisen — verhindert false-positive CI-Fehler bei Inventar-basierten Doku-Ansätzen.
+**Dateibesitz:** `config/docs-code-sync-map.yaml`, `scripts/docs-code-sync-check.cjs`.
 
-## DOC-DRIFT-DASHBOARD-002 — MkDocs-Sichtbarkeit (Claim)
+## DOC-DRIFT-DASHBOARD-002 — MkDocs-Sichtbarkeit
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit — Lane B, Welle 1
-**Ziel:** generate_drift_dashboard_page.py erzeugt docs/entwickler/drift-dashboard.md aus doc_drift_report.json; in MkDocs-Nav einbinden.
+**Stand:** abgeschlossen 2026-06-26 — `scripts/generate_drift_dashboard_page.py` generiert `docs/entwickler/drift-dashboard.md` mit Status (GRUEN/GELB/ROT), Dimensionen, offenen Punkten und Gate-Dokumentation; in MkDocs-Nav eingebunden; `doc-drift-report.yml` committet Dashboard nach jedem Nightly-Report automatisch.
+**Ziel:** Drift-Status für Entwickler direkt in MkDocs sichtbar; Auto-aktualisiert durch Nightly-Workflow.
+**Dateibesitz:** `scripts/generate_drift_dashboard_page.py`, `docs/entwickler/drift-dashboard.md`, `.github/workflows/doc-drift-report.yml`, `mkdocs.yml`.
