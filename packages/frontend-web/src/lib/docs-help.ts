@@ -86,3 +86,25 @@ export function findHelpEntry(currentPath: string): HelpEntry | null {
   }
   return null;
 }
+
+/** Route der eingebetteten Hilfeseite */
+export const HELP_ROUTE = '/hilfe';
+
+/** URL des Benutzerhandbuchs */
+export const DOCS_USER_MANUAL_URL = `${DOCS_BASE_URL}/benutzerhandbuch/`;
+
+/** Gibt die Hilfe-URL für einen gegebenen App-Pfad zurück. */
+export function getEmbeddedHelpHref(currentPath: string): string {
+  const entry = findHelpEntry(currentPath);
+  return entry ? `${HELP_ROUTE}?ctx=${encodeURIComponent(entry.docPath)}` : HELP_ROUTE;
+}
+
+/** Löst einen doc-Pfad oder -Schlüssel zur vollständigen Hilfe-URL auf. */
+export function resolveHelpUrl(docPath: string): string {
+  return docPath.startsWith('http') ? docPath : `${DOCS_BASE_URL}/${docPath}`;
+}
+
+/** Öffnet eine Docs-URL im neuen Tab. */
+export function openDocs(url: string): void {
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
