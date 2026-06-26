@@ -463,11 +463,8 @@ export default function UStVAPage(): JSX.Element {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const applyVATReturnResponse = (response: unknown) => {
-    const raw = response && typeof response === 'object' && 'data' in (response as object)
-      ? (response as { data?: Record<string, unknown> }).data
-      : (response as Record<string, unknown> | undefined)
-    const mapped = mapVatReturnPayload(raw)
+  const applyVATReturnResponse = (response: Record<string, unknown> | undefined) => {
+    const mapped = mapVatReturnPayload(response)
     if (!mapped) {
       return
     }
@@ -481,7 +478,7 @@ export default function UStVAPage(): JSX.Element {
           period: formData?.periode,
         })
         toast({ title: t('crud.messages.calculationCompleted'), description: t('crud.messages.ustvaAmountsRecalculated') })
-        applyVATReturnResponse(result.data)
+        applyVATReturnResponse(result as Record<string, unknown>)
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: t('common.error'), description: getAxiosErrorMessage(error) })
       }
@@ -512,7 +509,7 @@ export default function UStVAPage(): JSX.Element {
         const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
           approved_by: currentActor,
         })
-        applyVATReturnResponse(response.data)
+        applyVATReturnResponse(response as Record<string, unknown>)
         toast({
           title: t('crud.messages.approvalSuccess'),
           description: t('crud.messages.ustvaApproved'),
@@ -551,7 +548,7 @@ export default function UStVAPage(): JSX.Element {
         const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
           submitted_by: currentActor,
         })
-        applyVATReturnResponse(response.data)
+        applyVATReturnResponse(response as Record<string, unknown>)
         setIsDirty(false)
         if (workflowInstanceId && workflowProcess) {
           try {
@@ -581,7 +578,7 @@ export default function UStVAPage(): JSX.Element {
           format: 'xml',
           id: formData.id,
         })
-        if (res.data?.url) window.open(res.data.url, '_blank')
+        if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.xmlExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: t('common.error'), description: getAxiosErrorMessage(error) })
