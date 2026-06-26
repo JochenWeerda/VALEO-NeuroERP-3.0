@@ -1,37 +1,38 @@
 slice_id: OTC-010-POS-HANDOVER-001
-title: "OTC-010 Positionen Auftrag→Lieferschein + Belegkette"
+title: "OTC-010 Positionen Auftrag->Lieferschein + Belegkette"
 owner: Codex
-status: reserviert
+status: completed
 updated: 2026-06-26
 coordination: >-
   Folge aus CARD-AUDIT-001 / OTC-010 Card. Kein Eingriff in OTC-011
-  (Zahlungseingang). Backend-Feld source_order_id koordiniert mit
-  Belegketten-Standard (Document Consistency Principle).
+  (Zahlungseingang). Backend-Feld sales_order_id als bestehender kanonischer
+  Belegketten-Standard genutzt; kein paralleles source_order_id eingefuehrt.
 goal: >-
   Offene OTC-010-P1/P2/P3 schliessen: Auftragspositionen in Lieferschein
-  prefüllen, strukturiertes source_order_id persistieren, Rechnungsroute
-  /verkauf/rechnungen/<id> auf invoice-editor mit ?id= verifizieren oder
-  weiterleiten.
+  prefuellen, strukturiertes sales_order_id persistieren, Rechnungsroute
+  /verkauf/rechnungen/<id> direkt im invoice-editor oeffnen.
 file_ownership:
   - packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx
   - packages/frontend-web/src/pages/sales/order-editor.tsx
   - packages/frontend-web/src/pages/sales/invoice-editor.tsx
-  - app/api/v1/endpoints/sales_orders.py
-  - app/api/v1/endpoints/delivery_notes.py
+  - app/api/v1/endpoints/sales_delivery_notes.py
   - docs/cards/verkauf/OTC-010-order-to-cash.md
   - docs/workflows/otc-010-order-to-cash.md
   - docs/project-context/open-gaps-and-known-issues.md
   - docs/agent-ops/slices/OTC-010-POS-HANDOVER-001.yaml
 acceptance:
-  - ?auftrag= Prefill übernimmt Positionen (nicht nur Kundendaten).
-  - Lieferschein speichert/liefert source_order_id fuer Belegkette.
+  - "?auftrag= Prefill uebernimmt Positionen (nicht nur Kundendaten)."
+  - Lieferschein speichert/liefert sales_order_id fuer Belegkette.
   - Sofort-Rechnung / Rechnungs-Deep-Link oeffnet invoice-editor korrekt.
   - OTC-010 Card Offene Gaps als behoben markiert oder auf Folgeslice reduziert.
   - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false gruen.
 tests:
   - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
-  - pytest -q -o addopts= -k "delivery_note or sales_order" --maxfail=3
+  - pytest -q -o addopts= tests/test_sales_o2c_001.py tests/test_sales_orders_api.py tests/test_sales_delivery_notes_api.py tests/test_docflow_conversion_order.py --maxfail=3
+completion_evidence:
+  - 2026-06-26 pnpm.cmd --dir packages/frontend-web exec tsc --noEmit --pretty false
+  - 2026-06-26 pytest -q -o addopts= tests/test_sales_o2c_001.py tests/test_sales_orders_api.py tests/test_sales_delivery_notes_api.py tests/test_docflow_conversion_order.py --maxfail=3 (30 passed)
 risks:
-  - Backend-Schema-Aenderung fuer source_order_id erfordert ggf. Alembic-Migration.
+  - Keine neue Migration erforderlich; domain_sales.delivery_notes.sales_order_id existiert bereits.
 external_gates:
-  - Fachliche Abnahme Belegkette Auftrag→LS→RE durch Vertrieb/FiBu.
+  - Fachliche Abnahme Belegkette Auftrag->LS->RE durch Vertrieb/FiBu.
