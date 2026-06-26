@@ -2,35 +2,42 @@
 title: In-App-Hilfe (Route → Dokumentation)
 description: Mapping von Frontend-Routen auf Dokumentationsseiten für die In-App-Hilfe.
 type: reference
-audience: [entwickler]
-owner: Claude Code
+audience: [entwickler, endnutzer]
+owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.0.0
+version: 3.2.0
 ---
 
 # In-App-Hilfe — Route → Dokumentation
 
-> Slice: **DOC-INAPP-HELP-002**
+> Slice: **DOC-USER-MANUAL-004** / **DOC-INAPP-HELP-002**
 > Mapping: [`src/lib/docs-help.ts`](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/blob/main/packages/frontend-web/src/lib/docs-help.ts)
 
 ## Konzept
 
 Der Hook `useInAppHelp()` liest die aktuelle Route, sucht den längsten Präfix-Treffer
-in `ROUTE_HELP_MAP` und öffnet die passende MkDocs-Seite.
+in `ROUTE_HELP_MAP` und öffnet die passende MkDocs-Seite im Benutzerhandbuch.
 
-```ts
-import { findHelpEntry } from '@/lib/docs-help';
+**Abdeckung:** 895 App-Routen → 176 Präfix-Einträge.
 
-// In einer Komponente:
-const entry = findHelpEntry('verkauf/auftrag/123');
-// → { label: 'Verkaufsauftrag', url: 'https://.../benutzerhandbuch/verkauf/' }
-```
-
-## Gemappte Routen
+## Beispiel-Routen (Auszug)
 
 | Route-Präfix | Hilfe-Seite | Label |
 |---|---|---|
+| `(start)` | [Dashboard und Workflows](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/dashboard-workflows/) | Dashboard und Workflows |
+| `admin-suite` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/compliance` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/connectors` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/devices` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/diagnostics` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/ki-anbieter` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/migration` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/operations` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/pos-fiscalization` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/security` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/setup` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin-suite/system-status` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/agenten-integration` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/ai-approvals` | [AI-Freigaben](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/agent-docs/guardrails/) | AI-Freigaben |
 | `admin/audit-log` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
@@ -63,29 +70,16 @@ const entry = findHelpEntry('verkauf/auftrag/123');
 | `admin/voice-channel` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/webhooks` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/webshop` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
-| `agrar` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/aussaat` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/aussaat/:id` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/aussaat/liste` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/aussaat/neu` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/biostimulanzien` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/biostimulanzien-liste` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/biostimulanzien-stamm` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/biostimulanzien-stamm/:id` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/bodenprobe/:id` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/bodenprobe/neu` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/bodenproben` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/bodenproben/liste` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/duenger` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/duenger-liste` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/duenger-stamm` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/duenger-stamm/:id` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/duenger/bedarfsrechner` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
+| `agrar` | [Agrar-Warenwirtschaft](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/) | Agrar-Warenwirtschaft |
+| `agrar/aussaat` | [Agrar-Warenwirtschaft](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/) | Agrar-Warenwirtschaft |
+| `agrar/aussaat/:id` | [Agrar-Warenwirtschaft](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/) | Agrar-Warenwirtschaft |
+| `agrar/aussaat/liste` | [Agrar-Warenwirtschaft](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/) | Agrar-Warenwirtschaft |
+| `agrar/aussaat/neu` | [Agrar-Warenwirtschaft](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/) | Agrar-Warenwirtschaft |
 
 ## Erweiterung
 
-1. `scripts/generate_inapp_help_map.py` — `HELP_MAP` erweitern
-2. Script neu ausführen: `python scripts/generate_inapp_help_map.py`
+1. `scripts/generate_benutzerhandbuch_full.py` — Kapitel/Präfixe pflegen
+2. `python scripts/generate_inapp_help_map.py`
 3. `src/lib/docs-help.ts` committen
 
-*Stand: 2026-06-26 · 50 Routen gemappt · Slice: DOC-INAPP-HELP-002*
+*Stand: 2026-06-26 · 895 Routen gemappt · Slice: DOC-USER-MANUAL-004*

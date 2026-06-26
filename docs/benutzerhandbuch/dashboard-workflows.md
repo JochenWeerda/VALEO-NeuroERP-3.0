@@ -1,5 +1,5 @@
 ---
-title: Compliance und Meldewesen
+title: Dashboard und Workflows
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,13 +8,13 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# Compliance und Meldewesen
+# Dashboard und Workflows
 
-Register, Meldungen, GoBD, PCN/UFI.
+Leitstand, Flow Spine, Freigaben, Prozessüberwachung.
 
 ## Ziel
 
-Sie arbeiten sicher in allen Masken des Bereichs **Compliance und Meldewesen** — von der Navigation
+Sie arbeiten sicher in allen Masken des Bereichs **Dashboard und Workflows** — von der Navigation
 bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
@@ -30,53 +30,53 @@ Vollständige Abdeckung: **35** App-Routen
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Bvl Meldungen | `/compliance/bvl-meldungen` | `@/pages/compliance/bvl-umsatzmeldung` |
-| Bvl Umsatzmeldung | `/compliance/bvl-umsatzmeldung` | `@/pages/compliance/bvl-umsatzmeldung` |
-| Cross Compliance | `/compliance/cross-compliance` | `@/pages/compliance/cross-compliance` |
-| Datenpannen | `/compliance/datenpannen` | `@/pages/compliance/datenpannen` |
-| Enni Meldungen | `/compliance/enni-meldungen` | `@/pages/compliance/enni-meldungen` |
-| Enni Neu | `/compliance/enni-neu` | `@/pages/compliance/enni-meldungen` |
-| Export Pruefprotokoll | `/compliance/export-pruefprotokoll` | `@/pages/compliance/export-pruefprotokoll` |
-| Gelangensbestaetigung | `/compliance/gelangensbestaetigung` | `@/pages/compliance/gelangensbestaetigung` |
-| Intrastat | `/compliance/intrastat` | `@/pages/compliance/intrastat` |
-| Lksg | `/compliance/lksg` | `@/pages/compliance/lksg` |
-| Meldewesen Konsole | `/compliance/meldewesen-konsole` | `@/pages/compliance/meldewesen-konsole` |
-| Pcn Liste | `/compliance/pcn-liste` | `@/pages/compliance/pcn-liste` |
-| Pcn Ufi | `/compliance/pcn-ufi` | `@/pages/compliance/pcn-ufi` |
-| Qs Checkliste | `/compliance/qs-checkliste` | `@/pages/compliance/qs-checkliste` |
-| Saatgut Nachbau | `/compliance/saatgut-nachbau` | `@/pages/compliance/saatgut-nachbau` |
-| Saatgut Nachbau Neu | `/compliance/saatgut-nachbau-neu` | `@/pages/compliance/saatgut-nachbau` |
-| Sachkunde Neu | `/compliance/sachkunde-neu` | `@/pages/compliance/sachkunde-register` |
-| Sachkunde Register | `/compliance/sachkunde-register` | `@/pages/compliance/sachkunde-register` |
-| Sanktionspruefung | `/compliance/sanktionspruefung` | `@/pages/compliance/sanktionspruefung` |
-| Verarbeitungsverzeichnis | `/compliance/verarbeitungsverzeichnis` | `@/pages/compliance/verarbeitungsverzeichnis` |
-| Vvvo Register | `/compliance/vvvo-register` | `@/pages/compliance/vvvo-register` |
-| Zulassungen Register | `/compliance/zulassungen-register` | `@/pages/compliance/zulassungen-register` |
-| Foerderung | `/foerderung` | `@/pages/foerderung/liste` |
-| Antrag | `/foerderung/antrag` | `@/pages/foerderung/antrag` |
-| :Id | `/foerderung/antrag/:id` | `@/pages/foerderung/antrag` |
-| Liste | `/foerderung/liste` | `@/pages/foerderung/liste` |
-| Biodiversitaet | `/nachhaltigkeit/biodiversitaet` | `@/pages/nachhaltigkeit/biodiversitaet` |
-| Co2 Bilanz | `/nachhaltigkeit/co2-bilanz` | `@/pages/nachhaltigkeit/co2-bilanz` |
-| Esg Report | `/nachhaltigkeit/esg-report` | `@/pages/nachhaltigkeit/esg-report` |
-| Eudr Compliance | `/nachhaltigkeit/eudr-compliance` | `@/pages/nachhaltigkeit/eudr-compliance` |
-| Dashboard | `/subventionen/dashboard` | `@/pages/subventionen/dashboard` |
-| Zertifikate | `/zertifikate` | `@/pages/zertifikate/liste` |
-| :Id | `/zertifikate/:id` | `@/pages/zertifikate/liste` |
-| Liste | `/zertifikate/liste` | `@/pages/zertifikate/liste` |
-| Neu | `/zertifikate/neu` | `@/pages/zertifikate/liste` |
+| Start-Dashboard | `/` | `@/pages/start-dashboard` |
+| Copilot | `/copilot` | `@/pages/analytics` |
+| Customizable | `/dashboard/customizable` | `@/pages/dashboard/customizable` |
+| Einkauf | `/dashboard/einkauf` | `@/pages/dashboard/einkauf-dashboard` |
+| Einkauf Dashboard | `/dashboard/einkauf-dashboard` | `@/pages/dashboard/einkauf-dashboard` |
+| Sales | `/dashboard/sales` | `@/pages/dashboard/sales-dashboard` |
+| Sales Dashboard | `/dashboard/sales-dashboard` | `@/pages/dashboard/sales-dashboard` |
+| Geschaeftsfuehrung | `/dashboards/geschaeftsfuehrung` | `@/pages/dashboards/geschaeftsfuehrung` |
+| Executive Dashboard | `/management/executive-dashboard` | `@/pages/management/executive-dashboard` |
+| Alerts | `/monitoring/alerts` | `@/pages/admin/monitoring/alerts` |
+| Regeln | `/monitoring/regeln` | `@/pages/admin/monitoring/regeln` |
+| Policies | `/policies` | `@/pages/policy-manager` |
+| Policy Manager | `/policy-manager` | `@/pages/policy-manager` |
+| Live Monitor | `/system/live-monitor` | `@/pages/system/live-monitor` |
+| Flow Spine Complaint To Resolution | `/workflow/flow-spine-complaint-to-resolution` | `@/pages/workflow/flow-spine-complaint-to-resolution` |
+| Flow Spine Compliance To Report | `/workflow/flow-spine-compliance-to-report` | `@/pages/workflow/flow-spine-compliance-to-report` |
+| Flow Spine Contract To Settlement | `/workflow/flow-spine-contract-to-settlement` | `@/pages/workflow/flow-spine-contract-to-settlement` |
+| Flow Spine Finance To Close | `/workflow/flow-spine-finance-to-close` | `@/pages/workflow/flow-spine-finance-to-close` |
+| Flow Spine Harvest To Settlement | `/workflow/flow-spine-harvest-to-settlement` | `@/pages/workflow/flow-spine-harvest-to-settlement` |
+| Flow Spine Inventory To Settlement | `/workflow/flow-spine-inventory-to-settlement` | `@/pages/workflow/flow-spine-inventory-to-settlement` |
+| Flow Spine Order To Cash | `/workflow/flow-spine-order-to-cash` | `@/pages/workflow/flow-spine-order-to-cash` |
+| Flow Spine Procure To Pay | `/workflow/flow-spine-procure-to-pay` | `@/pages/workflow/flow-spine-procure-to-pay` |
+| Flow Spine Service To Customer | `/workflow/flow-spine-service-to-customer` | `@/pages/workflow/flow-spine-service-to-customer` |
+| Flow Spine Studio | `/workflow/flow-spine-studio` | `@/pages/workflow/flow-spine-studio` |
+| Leitstand | `/workflow/leitstand` | `@/pages/workflow/leitstand` |
+| Process Mining Analytics | `/workflow/process-mining-analytics` | `@/pages/workflow/process-mining-analytics` |
+| Workflow Monitoring | `/workflow/workflow-monitoring` | `@/pages/workflow/workflow-monitoring` |
+| Workflow Regeln | `/workflow/workflow-regeln` | `@/pages/workflow/workflow-regeln` |
+| Workflow Sandbox | `/workflow/workflow-sandbox` | `@/pages/workflow/workflow-sandbox` |
+| Workflows | `/workflows` | `@/pages/workflow/workflow-monitoring` |
+| Approval | `/workflows/approval` | `@/pages/workflows/approval` |
+| :Workflowid | `/workflows/approval/:workflowId` | `@/pages/workflows/approval` |
+| History | `/workflows/history` | `@/pages/workflow/workflow-monitoring` |
+| Supervisor | `/workflows/supervisor` | `@/pages/workflows/supervisor` |
+| Trigger | `/workflows/trigger` | `@/pages/workflows/trigger` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Bvl Meldungen
+### Start-Dashboard
 
-**Route:** `/compliance/bvl-meldungen` · **Modul:** `@/pages/compliance/bvl-umsatzmeldung`
+**Route:** `/` · **Modul:** `@/pages/start-dashboard`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bvl Meldungen** öffnen (`/compliance/bvl-meldungen`).
+1. Sidebar oder Suche: **Start-Dashboard** öffnen (Startseite).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -91,13 +91,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Bvl Umsatzmeldung
+### Copilot
 
-**Route:** `/compliance/bvl-umsatzmeldung` · **Modul:** `@/pages/compliance/bvl-umsatzmeldung`
+**Route:** `/copilot` · **Modul:** `@/pages/analytics`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bvl Umsatzmeldung** öffnen (`/compliance/bvl-umsatzmeldung`).
+1. Sidebar oder Suche: **Copilot** öffnen (`/copilot`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -112,13 +112,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Cross Compliance
+### Customizable
 
-**Route:** `/compliance/cross-compliance` · **Modul:** `@/pages/compliance/cross-compliance`
+**Route:** `/dashboard/customizable` · **Modul:** `@/pages/dashboard/customizable`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Cross Compliance** öffnen (`/compliance/cross-compliance`).
+1. Sidebar oder Suche: **Customizable** öffnen (`/dashboard/customizable`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -133,13 +133,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Datenpannen
+### Einkauf
 
-**Route:** `/compliance/datenpannen` · **Modul:** `@/pages/compliance/datenpannen`
+**Route:** `/dashboard/einkauf` · **Modul:** `@/pages/dashboard/einkauf-dashboard`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Datenpannen** öffnen (`/compliance/datenpannen`).
+1. Sidebar oder Suche: **Einkauf** öffnen (`/dashboard/einkauf`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -154,13 +154,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Enni Meldungen
+### Einkauf Dashboard
 
-**Route:** `/compliance/enni-meldungen` · **Modul:** `@/pages/compliance/enni-meldungen`
+**Route:** `/dashboard/einkauf-dashboard` · **Modul:** `@/pages/dashboard/einkauf-dashboard`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Enni Meldungen** öffnen (`/compliance/enni-meldungen`).
+1. Sidebar oder Suche: **Einkauf Dashboard** öffnen (`/dashboard/einkauf-dashboard`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -175,13 +175,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Enni Neu
+### Sales
 
-**Route:** `/compliance/enni-neu` · **Modul:** `@/pages/compliance/enni-meldungen`
+**Route:** `/dashboard/sales` · **Modul:** `@/pages/dashboard/sales-dashboard`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Enni Neu** öffnen (`/compliance/enni-neu`).
+1. Sidebar oder Suche: **Sales** öffnen (`/dashboard/sales`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -196,13 +196,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Export Pruefprotokoll
+### Sales Dashboard
 
-**Route:** `/compliance/export-pruefprotokoll` · **Modul:** `@/pages/compliance/export-pruefprotokoll`
+**Route:** `/dashboard/sales-dashboard` · **Modul:** `@/pages/dashboard/sales-dashboard`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Export Pruefprotokoll** öffnen (`/compliance/export-pruefprotokoll`).
+1. Sidebar oder Suche: **Sales Dashboard** öffnen (`/dashboard/sales-dashboard`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -217,13 +217,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Gelangensbestaetigung
+### Geschaeftsfuehrung
 
-**Route:** `/compliance/gelangensbestaetigung` · **Modul:** `@/pages/compliance/gelangensbestaetigung`
+**Route:** `/dashboards/geschaeftsfuehrung` · **Modul:** `@/pages/dashboards/geschaeftsfuehrung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Gelangensbestaetigung** öffnen (`/compliance/gelangensbestaetigung`).
+1. Sidebar oder Suche: **Geschaeftsfuehrung** öffnen (`/dashboards/geschaeftsfuehrung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -238,13 +238,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Intrastat
+### Executive Dashboard
 
-**Route:** `/compliance/intrastat` · **Modul:** `@/pages/compliance/intrastat`
+**Route:** `/management/executive-dashboard` · **Modul:** `@/pages/management/executive-dashboard`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Intrastat** öffnen (`/compliance/intrastat`).
+1. Sidebar oder Suche: **Executive Dashboard** öffnen (`/management/executive-dashboard`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -259,13 +259,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Lksg
+### Alerts
 
-**Route:** `/compliance/lksg` · **Modul:** `@/pages/compliance/lksg`
+**Route:** `/monitoring/alerts` · **Modul:** `@/pages/admin/monitoring/alerts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Lksg** öffnen (`/compliance/lksg`).
+1. Sidebar oder Suche: **Alerts** öffnen (`/monitoring/alerts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -280,13 +280,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Meldewesen Konsole
+### Regeln
 
-**Route:** `/compliance/meldewesen-konsole` · **Modul:** `@/pages/compliance/meldewesen-konsole`
+**Route:** `/monitoring/regeln` · **Modul:** `@/pages/admin/monitoring/regeln`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Meldewesen Konsole** öffnen (`/compliance/meldewesen-konsole`).
+1. Sidebar oder Suche: **Regeln** öffnen (`/monitoring/regeln`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -301,13 +301,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Pcn Liste
+### Policies
 
-**Route:** `/compliance/pcn-liste` · **Modul:** `@/pages/compliance/pcn-liste`
+**Route:** `/policies` · **Modul:** `@/pages/policy-manager`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Pcn Liste** öffnen (`/compliance/pcn-liste`).
+1. Sidebar oder Suche: **Policies** öffnen (`/policies`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -322,13 +322,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Pcn Ufi
+### Policy Manager
 
-**Route:** `/compliance/pcn-ufi` · **Modul:** `@/pages/compliance/pcn-ufi`
+**Route:** `/policy-manager` · **Modul:** `@/pages/policy-manager`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Pcn Ufi** öffnen (`/compliance/pcn-ufi`).
+1. Sidebar oder Suche: **Policy Manager** öffnen (`/policy-manager`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -343,13 +343,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Qs Checkliste
+### Live Monitor
 
-**Route:** `/compliance/qs-checkliste` · **Modul:** `@/pages/compliance/qs-checkliste`
+**Route:** `/system/live-monitor` · **Modul:** `@/pages/system/live-monitor`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Qs Checkliste** öffnen (`/compliance/qs-checkliste`).
+1. Sidebar oder Suche: **Live Monitor** öffnen (`/system/live-monitor`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -364,13 +364,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Saatgut Nachbau
+### Flow Spine Complaint To Resolution
 
-**Route:** `/compliance/saatgut-nachbau` · **Modul:** `@/pages/compliance/saatgut-nachbau`
+**Route:** `/workflow/flow-spine-complaint-to-resolution` · **Modul:** `@/pages/workflow/flow-spine-complaint-to-resolution`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Saatgut Nachbau** öffnen (`/compliance/saatgut-nachbau`).
+1. Sidebar oder Suche: **Flow Spine Complaint To Resolution** öffnen (`/workflow/flow-spine-complaint-to-resolution`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -385,13 +385,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Saatgut Nachbau Neu
+### Flow Spine Compliance To Report
 
-**Route:** `/compliance/saatgut-nachbau-neu` · **Modul:** `@/pages/compliance/saatgut-nachbau`
+**Route:** `/workflow/flow-spine-compliance-to-report` · **Modul:** `@/pages/workflow/flow-spine-compliance-to-report`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Saatgut Nachbau Neu** öffnen (`/compliance/saatgut-nachbau-neu`).
+1. Sidebar oder Suche: **Flow Spine Compliance To Report** öffnen (`/workflow/flow-spine-compliance-to-report`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -406,13 +406,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Sachkunde Neu
+### Flow Spine Contract To Settlement
 
-**Route:** `/compliance/sachkunde-neu` · **Modul:** `@/pages/compliance/sachkunde-register`
+**Route:** `/workflow/flow-spine-contract-to-settlement` · **Modul:** `@/pages/workflow/flow-spine-contract-to-settlement`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Sachkunde Neu** öffnen (`/compliance/sachkunde-neu`).
+1. Sidebar oder Suche: **Flow Spine Contract To Settlement** öffnen (`/workflow/flow-spine-contract-to-settlement`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -427,13 +427,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Sachkunde Register
+### Flow Spine Finance To Close
 
-**Route:** `/compliance/sachkunde-register` · **Modul:** `@/pages/compliance/sachkunde-register`
+**Route:** `/workflow/flow-spine-finance-to-close` · **Modul:** `@/pages/workflow/flow-spine-finance-to-close`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Sachkunde Register** öffnen (`/compliance/sachkunde-register`).
+1. Sidebar oder Suche: **Flow Spine Finance To Close** öffnen (`/workflow/flow-spine-finance-to-close`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -448,13 +448,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Sanktionspruefung
+### Flow Spine Harvest To Settlement
 
-**Route:** `/compliance/sanktionspruefung` · **Modul:** `@/pages/compliance/sanktionspruefung`
+**Route:** `/workflow/flow-spine-harvest-to-settlement` · **Modul:** `@/pages/workflow/flow-spine-harvest-to-settlement`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Sanktionspruefung** öffnen (`/compliance/sanktionspruefung`).
+1. Sidebar oder Suche: **Flow Spine Harvest To Settlement** öffnen (`/workflow/flow-spine-harvest-to-settlement`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -469,13 +469,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Verarbeitungsverzeichnis
+### Flow Spine Inventory To Settlement
 
-**Route:** `/compliance/verarbeitungsverzeichnis` · **Modul:** `@/pages/compliance/verarbeitungsverzeichnis`
+**Route:** `/workflow/flow-spine-inventory-to-settlement` · **Modul:** `@/pages/workflow/flow-spine-inventory-to-settlement`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Verarbeitungsverzeichnis** öffnen (`/compliance/verarbeitungsverzeichnis`).
+1. Sidebar oder Suche: **Flow Spine Inventory To Settlement** öffnen (`/workflow/flow-spine-inventory-to-settlement`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -490,13 +490,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Vvvo Register
+### Flow Spine Order To Cash
 
-**Route:** `/compliance/vvvo-register` · **Modul:** `@/pages/compliance/vvvo-register`
+**Route:** `/workflow/flow-spine-order-to-cash` · **Modul:** `@/pages/workflow/flow-spine-order-to-cash`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Vvvo Register** öffnen (`/compliance/vvvo-register`).
+1. Sidebar oder Suche: **Flow Spine Order To Cash** öffnen (`/workflow/flow-spine-order-to-cash`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -511,13 +511,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zulassungen Register
+### Flow Spine Procure To Pay
 
-**Route:** `/compliance/zulassungen-register` · **Modul:** `@/pages/compliance/zulassungen-register`
+**Route:** `/workflow/flow-spine-procure-to-pay` · **Modul:** `@/pages/workflow/flow-spine-procure-to-pay`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zulassungen Register** öffnen (`/compliance/zulassungen-register`).
+1. Sidebar oder Suche: **Flow Spine Procure To Pay** öffnen (`/workflow/flow-spine-procure-to-pay`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -532,13 +532,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Foerderung
+### Flow Spine Service To Customer
 
-**Route:** `/foerderung` · **Modul:** `@/pages/foerderung/liste`
+**Route:** `/workflow/flow-spine-service-to-customer` · **Modul:** `@/pages/workflow/flow-spine-service-to-customer`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Foerderung** öffnen (`/foerderung`).
+1. Sidebar oder Suche: **Flow Spine Service To Customer** öffnen (`/workflow/flow-spine-service-to-customer`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -553,13 +553,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Antrag
+### Flow Spine Studio
 
-**Route:** `/foerderung/antrag` · **Modul:** `@/pages/foerderung/antrag`
+**Route:** `/workflow/flow-spine-studio` · **Modul:** `@/pages/workflow/flow-spine-studio`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Antrag** öffnen (`/foerderung/antrag`).
+1. Sidebar oder Suche: **Flow Spine Studio** öffnen (`/workflow/flow-spine-studio`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -574,13 +574,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### :Id
+### Leitstand
 
-**Route:** `/foerderung/antrag/:id` · **Modul:** `@/pages/foerderung/antrag`
+**Route:** `/workflow/leitstand` · **Modul:** `@/pages/workflow/leitstand`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/foerderung/antrag/:id`).
+1. Sidebar oder Suche: **Leitstand** öffnen (`/workflow/leitstand`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -595,13 +595,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Liste
+### Process Mining Analytics
 
-**Route:** `/foerderung/liste` · **Modul:** `@/pages/foerderung/liste`
+**Route:** `/workflow/process-mining-analytics` · **Modul:** `@/pages/workflow/process-mining-analytics`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Liste** öffnen (`/foerderung/liste`).
+1. Sidebar oder Suche: **Process Mining Analytics** öffnen (`/workflow/process-mining-analytics`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -616,13 +616,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Biodiversitaet
+### Workflow Monitoring
 
-**Route:** `/nachhaltigkeit/biodiversitaet` · **Modul:** `@/pages/nachhaltigkeit/biodiversitaet`
+**Route:** `/workflow/workflow-monitoring` · **Modul:** `@/pages/workflow/workflow-monitoring`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Biodiversitaet** öffnen (`/nachhaltigkeit/biodiversitaet`).
+1. Sidebar oder Suche: **Workflow Monitoring** öffnen (`/workflow/workflow-monitoring`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -637,13 +637,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Co2 Bilanz
+### Workflow Regeln
 
-**Route:** `/nachhaltigkeit/co2-bilanz` · **Modul:** `@/pages/nachhaltigkeit/co2-bilanz`
+**Route:** `/workflow/workflow-regeln` · **Modul:** `@/pages/workflow/workflow-regeln`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Co2 Bilanz** öffnen (`/nachhaltigkeit/co2-bilanz`).
+1. Sidebar oder Suche: **Workflow Regeln** öffnen (`/workflow/workflow-regeln`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -658,13 +658,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Esg Report
+### Workflow Sandbox
 
-**Route:** `/nachhaltigkeit/esg-report` · **Modul:** `@/pages/nachhaltigkeit/esg-report`
+**Route:** `/workflow/workflow-sandbox` · **Modul:** `@/pages/workflow/workflow-sandbox`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Esg Report** öffnen (`/nachhaltigkeit/esg-report`).
+1. Sidebar oder Suche: **Workflow Sandbox** öffnen (`/workflow/workflow-sandbox`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -679,13 +679,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Eudr Compliance
+### Workflows
 
-**Route:** `/nachhaltigkeit/eudr-compliance` · **Modul:** `@/pages/nachhaltigkeit/eudr-compliance`
+**Route:** `/workflows` · **Modul:** `@/pages/workflow/workflow-monitoring`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Eudr Compliance** öffnen (`/nachhaltigkeit/eudr-compliance`).
+1. Sidebar oder Suche: **Workflows** öffnen (`/workflows`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -700,13 +700,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Dashboard
+### Approval
 
-**Route:** `/subventionen/dashboard` · **Modul:** `@/pages/subventionen/dashboard`
+**Route:** `/workflows/approval` · **Modul:** `@/pages/workflows/approval`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Dashboard** öffnen (`/subventionen/dashboard`).
+1. Sidebar oder Suche: **Approval** öffnen (`/workflows/approval`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -721,13 +721,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zertifikate
+### :Workflowid
 
-**Route:** `/zertifikate` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/workflows/approval/:workflowId` · **Modul:** `@/pages/workflows/approval`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zertifikate** öffnen (`/zertifikate`).
+1. Sidebar oder Suche: **:Workflowid** öffnen (`/workflows/approval/:workflowId`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -742,13 +742,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### :Id
+### History
 
-**Route:** `/zertifikate/:id` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/workflows/history` · **Modul:** `@/pages/workflow/workflow-monitoring`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/zertifikate/:id`).
+1. Sidebar oder Suche: **History** öffnen (`/workflows/history`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -763,13 +763,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Liste
+### Supervisor
 
-**Route:** `/zertifikate/liste` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/workflows/supervisor` · **Modul:** `@/pages/workflows/supervisor`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Liste** öffnen (`/zertifikate/liste`).
+1. Sidebar oder Suche: **Supervisor** öffnen (`/workflows/supervisor`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -784,13 +784,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Neu
+### Trigger
 
-**Route:** `/zertifikate/neu` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/workflows/trigger` · **Modul:** `@/pages/workflows/trigger`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/zertifikate/neu`).
+1. Sidebar oder Suche: **Trigger** öffnen (`/workflows/trigger`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.

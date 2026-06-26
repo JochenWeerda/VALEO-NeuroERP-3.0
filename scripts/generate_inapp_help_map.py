@@ -1,155 +1,119 @@
-"""Generiert route→Doku-Mapping für DOC-INAPP-HELP-002 (Top-50 Routen)."""
+"""Generiert route→Doku-Mapping für In-App-Hilfe (vollständige Fach-Routen).
+
+DOC-USER-MANUAL-004: HELP_MAP wird aus scripts/generate_benutzerhandbuch_full.CHAPTERS
+abgeleitet; Admin-/Entwickler-Routen bleiben manuell kuratiert.
+"""
+import importlib.util
 import json
+import sys
 from pathlib import Path
 from datetime import date
 
 REPO = Path(__file__).parent.parent
 DOCS_BASE = "https://jochenweerda.github.io/VALEO-NeuroERP-3.0"
 
-# Lade Route-Inventory
-ri = json.loads((REPO / "packages/frontend-web/src/app/routing/route-inventory.gen.json").read_text(encoding="utf-8"))
+# Handbuch-Kapitel laden (gemeinsame Zuordnungslogik)
+_spec = importlib.util.spec_from_file_location(
+    "benutzerhandbuch_full",
+    REPO / "scripts" / "generate_benutzerhandbuch_full.py",
+)
+_bh = importlib.util.module_from_spec(_spec)
+sys.modules["benutzerhandbuch_full"] = _bh
+_spec.loader.exec_module(_bh)
+
+ri = json.loads(
+    (REPO / "packages/frontend-web/src/app/routing/route-inventory.gen.json").read_text(
+        encoding="utf-8"
+    )
+)
 routes = ri.get("routes", [])
 
-# Mapping: path-prefix → docs-Ziel
-# Reihenfolge: spezifischer zuerst
-HELP_MAP = [
-    # Agrar / Ernteannahme
-    ("agrar/annahme",           "benutzerhandbuch/annahme",          "Ernteannahme"),
-    ("agrar/partie",            "benutzerhandbuch/annahme",          "Partie-Verwaltung"),
-    ("agrar/kontrakt",          "benutzerhandbuch/agrar-kontrakte",  "Agrar-Kontrakte"),
-    ("agrar/kontrakte",         "benutzerhandbuch/agrar-kontrakte",  "Agrar-Kontrakte"),
-    ("agrar/wetter",            "benutzerhandbuch/annahme",          "Wetter & Prognose"),
-    ("agrar",                   "benutzerhandbuch/annahme",          "Agrar-Modul"),
-
-    # NaWaRo
-    ("nawaro",                  "benutzerhandbuch/nawaro",           "NaWaRo-Meldungen"),
-    ("strecke/nawaro",          "benutzerhandbuch/nawaro",           "NaWaRo Streckengeschäft"),
-
-    # Genossenschaft
-    ("genossenschaft",          "benutzerhandbuch/genossenschaft",   "Genossenschaft"),
-
-    # Verkauf / O2C
-    ("verkauf/auftrag",         "benutzerhandbuch/verkauf",          "Verkaufsauftrag"),
-    ("verkauf/lieferschein",    "benutzerhandbuch/verkauf",          "Lieferschein"),
-    ("verkauf/rechnung",        "benutzerhandbuch/verkauf",          "Ausgangsrechnung"),
-    ("verkauf/angebot",         "benutzerhandbuch/verkauf",          "Angebot"),
-    ("verkauf",                 "benutzerhandbuch/verkauf",          "Verkauf"),
-
-    # Einkauf / P2P
-    ("einkauf/bestellung",      "benutzerhandbuch/einkauf",          "Bestellung"),
-    ("einkauf/wareneingang",    "benutzerhandbuch/einkauf",          "Wareneingang"),
-    ("einkauf/rechnung",        "benutzerhandbuch/einkauf",          "Eingangsrechnung"),
-    ("einkauf",                 "benutzerhandbuch/einkauf",          "Einkauf"),
-
-    # Lager / WMS
-    ("lager/einlagerung",       "benutzerhandbuch/lager",            "Einlagerung"),
-    ("lager/auslagerung",       "benutzerhandbuch/lager",            "Auslagerung"),
-    ("lager/inventur",          "benutzerhandbuch/lager",            "Inventur"),
-    ("lager/qs-leitstand",      "benutzerhandbuch/qualitaetssicherung","QS-Leitstand"),
-    ("lager",                   "benutzerhandbuch/lager",            "Lager"),
-
-    # Finanzbuchhaltung / Controlling
-    ("fibu/buchungen",          "benutzerhandbuch/finanzbuchhaltung","Buchungsjournal"),
-    ("fibu/offene-posten",      "benutzerhandbuch/finanzbuchhaltung","Offene Posten"),
-    ("fibu/zahlungslaeufe",     "benutzerhandbuch/finanzbuchhaltung","Zahlungsläufe"),
-    ("fibu/periodenabschluss",  "benutzerhandbuch/finanzbuchhaltung","Periodenabschluss"),
-    ("fibu/datev",              "benutzerhandbuch/finanzbuchhaltung","DATEV-Export"),
-    ("fibu",                    "benutzerhandbuch/finanzbuchhaltung","Finanzbuchhaltung"),
-    ("controlling",             "benutzerhandbuch/controlling-kostenrechnung","Controlling"),
-
-    # POS / Personal
-    ("pos",                     "benutzerhandbuch/pos-kasse",        "POS und Kasse"),
-    ("kasse",                   "benutzerhandbuch/pos-kasse",        "Kasse"),
-    ("personal",                "benutzerhandbuch/personal-lohn",  "Personal und Lohn"),
-    ("hr",                      "benutzerhandbuch/personal-lohn",  "Personal und Lohn"),
-
-    # Produktion
-    ("produktion",              "benutzerhandbuch/futtermittel-produktion","Futtermittel/Produktion"),
-    ("mischfutter",             "benutzerhandbuch/futtermittel-produktion","Futtermittel/Produktion"),
-
-    # CRM
-    ("crm/kunden",              "benutzerhandbuch/crm",              "Kundenstamm"),
-    ("crm/leads",               "benutzerhandbuch/crm",              "Leads"),
-    ("crm/kampagnen",           "benutzerhandbuch/crm",              "Kampagnen"),
-    ("crm/kim",                 "benutzerhandbuch/crm",              "KI-Kundencockpit (KIM)"),
-    ("crm",                     "benutzerhandbuch/crm",              "CRM"),
-
-    # Admin / Betrieb
-    ("admin/mandanten",         "admin/mandanten-administration",    "Mandanten-Administration"),
-    ("admin/benutzer",          "admin/rbac-und-rollen",             "Benutzer & Rollen"),
-    ("admin/module",            "admin/module-und-feature-flags",    "Module & Feature-Flags"),
-    ("admin/externe-gates",     "admin/monitoring-und-slo",          "Externe Gate-Dashboards"),
-    ("admin/ai-approvals",      "agent-docs/guardrails",             "AI-Freigaben"),
-    ("admin",                   "admin/index",                       "Administration"),
-
-    # Compliance (Endnutzer-Meldewesen)
-    ("compliance/meldewesen",   "benutzerhandbuch/compliance-meldewesen","Compliance/Meldewesen"),
-    ("meldewesen",              "benutzerhandbuch/compliance-meldewesen","Meldewesen"),
-    ("compliance/gobd",         "compliance/gobd-checklist",         "GoBD-Prüfung"),
-    ("compliance/datenschutz",  "compliance/gdpr-checklist",         "Datenschutz (DSGVO)"),
-    ("compliance",              "benutzerhandbuch/compliance-meldewesen","Compliance"),
-
-    # Kontrakte (Navigation root)
-    ("kontrakte/preisfixierung","benutzerhandbuch/agrar-kontrakte",  "Preisfixierung"),
-    ("kontrakte",               "benutzerhandbuch/agrar-kontrakte",  "Kontrakte"),
-
-    # Logistik
-    ("logistik/disposition",    "benutzerhandbuch/logistik",         "Disposition"),
-    ("logistik/touren",         "benutzerhandbuch/logistik",         "Tourenplanung"),
-    ("logistik/frachtbriefe",   "benutzerhandbuch/logistik",         "Frachtbriefe"),
-    ("logistik",                "benutzerhandbuch/logistik",         "Logistik"),
-
-    # Dokumente / DMS
-    ("dokumente",               "benutzerhandbuch/dokumente-belegarchiv","Dokumente"),
-    ("fuhrpark/ausgehende",     "benutzerhandbuch/dokumente-belegarchiv","Ausgehende Belege"),
-    ("strecke/dokumente",       "benutzerhandbuch/dokumente-belegarchiv","Strecken-Dokumente"),
-
-    # Workflow / Betrieb
-    ("workflow/leitstand",      "schnittstellen/events",             "Workflow-Leitstand"),
-    ("workflow",                "schnittstellen/events",             "Workflow"),
-
-    # Schnittstellen
-    ("api-docs",                "schnittstellen/rest-api",           "API-Dokumentation"),
+# Admin / Entwickler (nicht Benutzerhandbuch)
+ADMIN_HELP_MAP: list[tuple[str, str, str]] = [
+    ("admin/mandanten", "admin/mandanten-administration", "Mandanten-Administration"),
+    ("admin/benutzer", "admin/rbac-und-rollen", "Benutzer & Rollen"),
+    ("admin/module", "admin/module-und-feature-flags", "Module & Feature-Flags"),
+    ("admin/externe-gates", "admin/monitoring-und-slo", "Externe Gate-Dashboards"),
+    ("admin/ai-approvals", "agent-docs/guardrails", "AI-Freigaben"),
+    ("admin-suite", "admin/index", "Administration"),
+    ("admin", "admin/index", "Administration"),
+    ("compliance/gobd", "compliance/gobd-checklist", "GoBD-Prüfung"),
+    ("compliance/datenschutz", "compliance/gdpr-checklist", "Datenschutz (DSGVO)"),
+    ("api-docs", "schnittstellen/rest-api", "API-Dokumentation"),
 ]
 
+
+def build_help_map() -> list[tuple[str, str, str]]:
+    entries: list[tuple[str, str, str]] = []
+    for filename, title, prefixes, _desc in _bh.CHAPTERS:
+        doc_path = f"benutzerhandbuch/{filename.removesuffix('.md')}"
+        for prefix in prefixes:
+            entries.append((prefix.rstrip("/"), doc_path, title))
+    entries.extend(ADMIN_HELP_MAP)
+    # Längster Präfix zuerst
+    entries.sort(key=lambda x: len(x[0]), reverse=True)
+    return entries
+
+
+HELP_MAP = build_help_map()
+
+
 def find_doc(path: str) -> tuple[str, str] | None:
+    if not path:
+        ch = _bh.match_chapter("")
+        if ch:
+            return f"benutzerhandbuch/{ch[0].removesuffix('.md')}", ch[1]
+        return "benutzerhandbuch/dashboard-workflows", "Dashboard und Workflows"
     for prefix, doc_path, label in HELP_MAP:
         if path == prefix or path.startswith(prefix + "/"):
             return doc_path, label
+    ch = _bh.match_chapter(path)
+    if ch:
+        return f"benutzerhandbuch/{ch[0].removesuffix('.md')}", ch[1]
     return None
 
-# Top-50 priorisierte Routen (auto + alias, keine generated-only)
-priority_routes = []
+
+# Alle Routen mit Treffer (für Doku-Tabelle)
+mapped_routes = []
 for r in routes:
-    path = r.get("path", "")
-    if not path or path in ("", "/"):
-        continue
+    path = (r.get("path") or "").strip().lstrip("/")
     match = find_doc(path)
     if match:
-        priority_routes.append({
-            "path": path,
-            "module": r.get("module", ""),
-            "doc_path": match[0],
-            "doc_label": match[1],
-            "doc_url": f"{DOCS_BASE}/{match[0]}/",
-        })
+        mapped_routes.append(
+            {
+                "path": path or "(start)",
+                "module": r.get("module", ""),
+                "doc_path": match[0],
+                "doc_label": match[1],
+                "doc_url": f"{DOCS_BASE}/{match[0]}/",
+            }
+        )
 
-# Deduplizieren nach path
-seen = set()
+seen: set[str] = set()
 deduped = []
-for r in priority_routes:
+for r in mapped_routes:
     if r["path"] not in seen:
         seen.add(r["path"])
         deduped.append(r)
 
-top50 = deduped[:50]
-print(f"Mapped: {len(top50)} Routen")
+# ROUTE_HELP_MAP: ein Eintrag pro HELP_MAP-Präfix (längster zuerst in findHelpEntry)
+prefix_entries: dict[str, dict] = {}
+for prefix, doc_path, label in HELP_MAP:
+    if prefix not in prefix_entries:
+        prefix_entries[prefix] = {
+            "docPath": doc_path,
+            "label": label,
+            "url": f"{DOCS_BASE}/{doc_path}/",
+        }
 
-# ── TypeScript Mapping-Datei ───────────────────────────────────────────────────
+sorted_prefixes = sorted(prefix_entries.keys(), key=len, reverse=True)
+print(f"HELP_MAP-Präfixe: {len(sorted_prefixes)} · gemappte Routen: {len(deduped)}")
+
 ts_entries = []
-for r in top50:
+for prefix in sorted_prefixes:
+    e = prefix_entries[prefix]
     ts_entries.append(
-        f'  "{r["path"]}": {{ docPath: "{r["doc_path"]}", label: "{r["doc_label"]}", url: "{r["doc_url"]}" }},'
+        f'  "{prefix}": {{ docPath: "{e["docPath"]}", label: "{e["label"]}", url: "{e["url"]}" }},'
     )
 
 ts_content = f"""// DOC-INAPP-HELP-002 — Route → Dokumentation Mapping
@@ -219,38 +183,33 @@ ts_path = REPO / "packages/frontend-web/src/lib/docs-help.ts"
 ts_path.write_text(ts_content, encoding="utf-8")
 print(f"Geschrieben: {ts_path}")
 
-# ── MkDocs-Seite: In-App-Hilfe-Konzept ────────────────────────────────────────
+# MkDocs-Seite: In-App-Hilfe (Top-50 Beispiele + Gesamtzahl)
+top50 = deduped[:50]
 md_lines = [
     "---",
     "title: In-App-Hilfe (Route → Dokumentation)",
     "description: Mapping von Frontend-Routen auf Dokumentationsseiten für die In-App-Hilfe.",
     "type: reference",
-    "audience: [entwickler]",
-    "owner: Claude Code",
+    "audience: [entwickler, endnutzer]",
+    "owner: Cursor",
     "status: aktiv",
     f"last_reviewed: {date.today().isoformat()}",
-    "version: 3.0.0",
+    "version: 3.2.0",
     "---",
     "",
     "# In-App-Hilfe — Route → Dokumentation",
     "",
-    "> Slice: **DOC-INAPP-HELP-002**",
+    "> Slice: **DOC-USER-MANUAL-004** / **DOC-INAPP-HELP-002**",
     "> Mapping: [`src/lib/docs-help.ts`](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/blob/main/packages/frontend-web/src/lib/docs-help.ts)",
     "",
     "## Konzept",
     "",
     "Der Hook `useInAppHelp()` liest die aktuelle Route, sucht den längsten Präfix-Treffer",
-    "in `ROUTE_HELP_MAP` und öffnet die passende MkDocs-Seite.",
+    "in `ROUTE_HELP_MAP` und öffnet die passende MkDocs-Seite im Benutzerhandbuch.",
     "",
-    "```ts",
-    "import { findHelpEntry } from '@/lib/docs-help';",
+    f"**Abdeckung:** {len(deduped)} App-Routen → {len(sorted_prefixes)} Präfix-Einträge.",
     "",
-    "// In einer Komponente:",
-    "const entry = findHelpEntry('verkauf/auftrag/123');",
-    "// → { label: 'Verkaufsauftrag', url: 'https://.../benutzerhandbuch/verkauf/' }",
-    "```",
-    "",
-    "## Gemappte Routen",
+    "## Beispiel-Routen (Auszug)",
     "",
     "| Route-Präfix | Hilfe-Seite | Label |",
     "|---|---|---|",
@@ -262,12 +221,12 @@ md_lines += [
     "",
     "## Erweiterung",
     "",
-    "1. `scripts/generate_inapp_help_map.py` — `HELP_MAP` erweitern",
-    "2. Script neu ausführen: `python scripts/generate_inapp_help_map.py`",
+    "1. `scripts/generate_benutzerhandbuch_full.py` — Kapitel/Präfixe pflegen",
+    "2. `python scripts/generate_inapp_help_map.py`",
     "3. `src/lib/docs-help.ts` committen",
     "",
-    f"*Stand: {date.today().isoformat()} · {len(top50)} Routen gemappt · Slice: DOC-INAPP-HELP-002*",
+    f"*Stand: {date.today().isoformat()} · {len(deduped)} Routen gemappt · Slice: DOC-USER-MANUAL-004*",
 ]
 
 (REPO / "docs/benutzerhandbuch/in-app-hilfe.md").write_text("\n".join(md_lines), encoding="utf-8")
-print(f"Geschrieben: docs/benutzerhandbuch/in-app-hilfe.md ({len(top50)} Einträge)")
+print(f"Geschrieben: docs/benutzerhandbuch/in-app-hilfe.md")

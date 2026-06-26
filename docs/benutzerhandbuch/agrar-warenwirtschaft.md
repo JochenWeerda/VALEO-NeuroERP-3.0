@@ -1,192 +1,156 @@
 ---
-title: Finanzbuchhaltung – Offene Posten, Mahnwesen, Zahlungen
+title: Agrar-Warenwirtschaft
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-06-26
+version: 3.2.0
 ---
 
-# Finanzbuchhaltung – Offene Posten, Mahnwesen, Zahlungen
+# Agrar-Warenwirtschaft
 
-Behalten Sie Forderungen und Verbindlichkeiten im Blick, mahnen Sie überfällige
-Posten an und verbuchen Sie Zahlungen.
+PSM, Düngung, Saatgut, Feldbuch, Tierhaltung.
 
-![Hauptbuch mit Journalverlauf, Objektkontext und Wirtschaftslage](img/finanzbuchhaltung-hauptbuch.webp)
+## Ziel
 
-## Offene Posten prüfen
+Sie arbeiten sicher in allen Masken des Bereichs **Agrar-Warenwirtschaft** — von der Navigation
+bis zu Speichern, Freigabe und Folgebelegen.
 
-1. Bereich *Finanzen* → *Offene Posten*.
-2. Nach Typ (Forderung/Verbindlichkeit) und Fälligkeit filtern.
-3. Beleg öffnen für Details und Mahnstatus.
+## Voraussetzungen
 
-## Mahnlauf durchführen
-
-1. *Finanzen* → *Mahnwesen* → *Neuer Mahnlauf*.
-2. Stichtag und Mahnstufen wählen.
-3. Vorschlagsliste prüfen (Kunden, Beträge, Stufe).
-4. **Mahnlauf freigeben**. Mahnungen werden erzeugt und der Mahnstatus erhöht.
-
-## Zahlung verbuchen
-
-1. *Finanzen* → *Zahlungen* → *Zahlungseingang erfassen*.
-2. Kunde/Beleg zuordnen, Betrag erfassen.
-3. **Buchen**. Der offene Posten wird ausgeglichen (oder teilausgeglichen).
-
-!!! note "Zahllauf-Rückläufer"
-    Rückläufer aus einem Zahllauf werden als Ereignis verbucht und der offene
-    Posten wieder geöffnet.
-
-**Ergebnis:** Offene Posten, Mahnstatus und Zahlungen sind konsistent und
-GoBD-konform dokumentiert.
-
-## Häufige Fehler
-
-- **Zahlung nicht zuordenbar:** Verwendungszweck/Belegnummer prüfen.
-- **Mahnung trotz Zahlung:** Zahlungseingang war zum Stichtag noch nicht gebucht.
-- **Falsche Mahnstufe:** Mahnhistorie des Kunden prüfen.
+- Gültige Anmeldung und Mandant (`X-Tenant-ID`).
+- Modul für diesen Fachbereich ist installiert (siehe Administration → Module).
+- Ihre Rolle hat Lese- bzw. Schreibberechtigung für die jeweilige Maske.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **121** App-Routen
+Vollständige Abdeckung: **88** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Konten | `/banken/konten` | `@/pages/banken/konten` |
-| :Id | `/banken/konto/:id` | `@/pages/banken/konten` |
-| Neu | `/banken/konto/neu` | `@/pages/banken/konten` |
-| Document | `/document` | `@/pages/document` |
-| Umsatzsteuervoranmeldung | `/export/umsatzsteuervoranmeldung` | `@/pages/export/umsatzsteuervoranmeldung` |
-| Ustva | `/export/ustva` | `@/pages/export/umsatzsteuervoranmeldung` |
-| Fibu | `/fibu` | `@/pages/fibu/abschluss-cockpit` |
-| Fibu Suite | `/fibu-suite` | `@runtime/fibu-suite` |
-| $ | `/fibu-suite/$` | `@runtime/fibu-suite` |
-| Abschluss Checklist Detail | `/fibu/abschluss-checklist-detail` | `@/pages/fibu/abschluss-checklist-detail` |
-| :Id | `/fibu/abschluss-checklist-detail/:id` | `@/pages/fibu/abschluss-checklist-detail` |
-| Abschluss Cockpit | `/fibu/abschluss-cockpit` | `@/pages/fibu/abschluss-cockpit` |
-| :Id | `/fibu/anlage/:id` | `@/pages/fibu/anlagen` |
-| Neu | `/fibu/anlage/neu` | `@/pages/fibu/anlagen` |
-| Anlagen | `/fibu/anlagen` | `@/pages/fibu/anlagen` |
-| Anlagen Suite | `/fibu/anlagen-suite` | `@/pages/fibu/anlagen-suite` |
-| Atlas | `/fibu/atlas` | `@/pages/fibu/atlas` |
-| Bilanz | `/fibu/bilanz` | `@/pages/fibu/bilanz` |
-| Buchhaltungsuebersicht | `/fibu/buchhaltungsuebersicht` | `@/pages/fibu/buchhaltungsuebersicht` |
-| Buchungsjournal | `/fibu/buchungsjournal` | `@/pages/fibu/buchungsjournal` |
-| Buchungsuebernahme Connectors | `/fibu/buchungsuebernahme-connectors` | `@/pages/fibu/buchungsuebernahme-connectors` |
-| Bwa | `/fibu/bwa` | `@/pages/fibu/bwa` |
-| Debitoren | `/fibu/debitoren` | `@/pages/fibu/debitoren` |
-| Debitoren Api | `/fibu/debitoren-api` | `@/pages/fibu/debitoren-api` |
-| Elster Online | `/fibu/elster-online` | `@/pages/fibu/elster-online` |
-| Erloeskennziffern | `/fibu/erloeskennziffern` | `@/pages/fibu/erloeskennziffern` |
-| Erloeskontenzuordnung | `/fibu/erloeskontenzuordnung` | `@/pages/fibu/erloeskontenzuordnung` |
-| Forderungsgruppen | `/fibu/forderungsgruppen` | `@/pages/fibu/forderungsgruppen` |
-| Geschaeftsjahre | `/fibu/geschaeftsjahre` | `@/pages/fibu/geschaeftsjahre` |
-| Guv | `/fibu/guv` | `@/pages/fibu/guv` |
-| Hauptbuch | `/fibu/hauptbuch` | `@/pages/fibu/hauptbuch` |
-| Kontenplan | `/fibu/kontenplan` | `@/pages/fibu/kontenplan` |
-| Kostenstellenrechnung | `/fibu/kostenstellenrechnung` | `@/pages/fibu/kostenstellenrechnung` |
-| Kreditlinie Neu | `/fibu/kreditlinie-neu` | `@/pages/fibu/kreditlinien` |
-| Kreditlinien | `/fibu/kreditlinien` | `@/pages/fibu/kreditlinien` |
-| Kreditoren | `/fibu/kreditoren` | `@/pages/fibu/kreditoren` |
-| Lohn Connector | `/fibu/lohn-connector` | `@/pages/fibu/lohn-connector` |
-| Monatswerte | `/fibu/monatswerte` | `@/pages/fibu/monatswerte` |
-| Offene Posten | `/fibu/offene-posten` | `@/pages/fibu/offene-posten` |
-| Op Skonto Auszifferung | `/fibu/op-skonto-auszifferung` | `@/pages/fibu/op-skonto-auszifferung` |
-| Op Verwaltung | `/fibu/op-verwaltung` | `@/pages/fibu/op-verwaltung` |
-| Periodische Buchungen | `/fibu/periodische-buchungen` | `@/pages/fibu/periodische-buchungen` |
-| Quadriga Config | `/fibu/quadriga-config` | `@/pages/fibu/quadriga-connector` |
-| Quadriga Connector | `/fibu/quadriga-connector` | `@/pages/fibu/quadriga-connector` |
-| Sachkonto | `/fibu/sachkonto` | `@/pages/fibu/sachkonto` |
-| :Id | `/fibu/sachkonto/:id` | `@/pages/fibu/sachkonto` |
-| Schnittstelle Fibu | `/fibu/schnittstelle-fibu` | `@/pages/fibu/schnittstelle-fibu` |
-| Schnittstellen Center | `/fibu/schnittstellen-center` | `@/pages/fibu/schnittstellen-center` |
-| Sicherheit Neu | `/fibu/sicherheit-neu` | `@/pages/fibu/sicherheiten` |
-| Sicherheiten | `/fibu/sicherheiten` | `@/pages/fibu/sicherheiten` |
-| Stammdaten | `/fibu/stammdaten` | `@/pages/fibu/stammdaten` |
-| :Id | `/fibu/verbindlichkeit/:id` | `@/pages/fibu/verbindlichkeiten` |
-| Verbindlichkeiten | `/fibu/verbindlichkeiten` | `@/pages/fibu/verbindlichkeiten` |
-| Zahlungseingaenge | `/fibu/zahlungseingaenge` | `@/pages/fibu/zahlungseingaenge` |
-| Zahlungslaeufe | `/fibu/zahlungslaeufe` | `@/pages/fibu/zahlungslaeufe` |
-| Zahlungsmeldungen | `/fibu/zahlungsmeldungen` | `@/pages/fibu/zahlungsmeldungen` |
-| Zahlungsvorschlaege | `/fibu/zahlungsvorschlaege` | `@/pages/fibu/zahlungsvorschlaege` |
-| Finance | `/finance` | `@/pages/finance/index` |
-| Abschluss | `/finance/abschluss` | `@/pages/finance/abschluss` |
-| :Id | `/finance/accounts/:id` | `@/pages/finance/chart-of-accounts` |
-| Ap Invoice Form | `/finance/ap-invoice-form` | `@/pages/finance/ap-invoice-form` |
-| Ap Invoices List | `/finance/ap-invoices-list` | `@/pages/finance/ap-invoices-list` |
-| Invoices | `/finance/ap/invoices` | `@/pages/finance/ap-invoices-list` |
-| :Id | `/finance/ap/invoices/:id` | `@/pages/finance/ap-invoice-form` |
-| New | `/finance/ap/invoices/new` | `@/pages/finance/ap-invoice-form` |
-| Audit Trail | `/finance/audit-trail` | `@/pages/finance/audit-trail` |
-| Bank | `/finance/bank` | `@/pages/finance/bankkonten-stamm` |
-| Bank Abgleich | `/finance/bank-abgleich` | `@/pages/finance/bank-abgleich` |
-| Bank Stamm | `/finance/bank-stamm` | `@/pages/finance/bank-stamm` |
-| Bankkonten | `/finance/bankkonten` | `@/pages/finance/bankkonten-stamm` |
-| Bankkonten Stamm | `/finance/bankkonten-stamm` | `@/pages/finance/bankkonten-stamm` |
-| :Id | `/finance/bankkonten/:id` | `@/pages/finance/bankkonten-stamm` |
-| New | `/finance/bookings/new` | `@/pages/fibu/buchungsjournal` |
-| Buchungen | `/finance/buchungen` | `@/pages/finance/buchungserfassung` |
-| Buchungserfassung | `/finance/buchungserfassung` | `@/pages/finance/buchungserfassung` |
-| Buchungsimport | `/finance/buchungsimport` | `@/pages/finance/buchungsimport` |
-| Buchungsvorlagen | `/finance/buchungsvorlagen` | `@/pages/finance/buchungsvorlagen` |
-| Chart Of Accounts | `/finance/chart-of-accounts` | `@/pages/finance/chart-of-accounts` |
-| Datev Export | `/finance/datev-export` | `@/pages/finance/datev-export` |
-| Debitoren | `/finance/debitoren` | `@/pages/finance/debitoren-stamm` |
-| Debitoren Liste | `/finance/debitoren-liste` | `@/pages/finance/debitoren-liste` |
-| Debitoren Stamm | `/finance/debitoren-stamm` | `@/pages/finance/debitoren-stamm` |
-| :Id | `/finance/debitoren/:id` | `@/pages/finance/debitoren-stamm` |
-| New | `/finance/debitoren/new` | `@/pages/finance/debitoren-stamm` |
-| Dunning | `/finance/dunning` | `@/pages/finance/mahnwesen` |
-| Dunning Editor | `/finance/dunning-editor` | `@/pages/finance/dunning-editor` |
-| Invoice Form | `/finance/invoice-form` | `@/pages/finance/invoice-form` |
-| Invoices | `/finance/invoices` | `@/pages/finance/invoices-list` |
-| Invoices List | `/finance/invoices-list` | `@/pages/finance/invoices-list` |
-| Neu | `/finance/invoices/neu` | `@/pages/finance/invoice-form` |
-| New | `/finance/invoices/new` | `@/pages/finance/invoice-form` |
-| Kasse | `/finance/kasse` | `@/pages/finance/kasse` |
-| Kontenplan | `/finance/kontenplan` | `@/pages/finance/kontenplan` |
-| Kreditoren | `/finance/kreditoren` | `@/pages/finance/kreditoren-stamm` |
-| Kreditoren Stamm | `/finance/kreditoren-stamm` | `@/pages/finance/kreditoren-stamm` |
-| Lastschriften Debitoren | `/finance/lastschriften-debitoren` | `@/pages/finance/lastschriften-debitoren` |
-| Mahnlauf | `/finance/mahnlauf` | `@/pages/finance/mahnlauf` |
-| Mahnwesen | `/finance/mahnwesen` | `@/pages/finance/mahnwesen` |
-| Nebenbuch Abstimmung | `/finance/nebenbuch-abstimmung` | `@/pages/finance/nebenbuch-abstimmung` |
-| Offene Posten | `/finance/offene-posten` | `@/pages/fibu/offene-posten` |
-| Offene Posten Cockpit | `/finance/offene-posten-cockpit` | `@/pages/finance/offene-posten-cockpit` |
-| Op Debitoren | `/finance/op-debitoren` | `@/pages/finance/op-debitoren` |
-| Op Kreditoren | `/finance/op-kreditoren` | `@/pages/finance/op-kreditoren` |
-| Payment Matching | `/finance/payment-matching` | `@/pages/finance/payment-matching` |
-| Payments | `/finance/payments` | `@/pages/finance/payment-matching` |
-| Periodenabschluss | `/finance/periodenabschluss` | `@/pages/finance/periodenabschluss` |
-| Periods | `/finance/periods` | `@/pages/finance/periods` |
-| Reports | `/finance/reports` | `@/pages/finance/reports` |
-| Analyticschartcontent | `/finance/reports/analyticschartcontent` | `@/pages/finance/reports/analyticschartcontent` |
-| Analyticsbalancesharechart | `/finance/reports/charts/analyticsbalancesharechart` | `@/pages/finance/reports/charts/analyticsbalancesharechart` |
-| Analyticscashflowchart | `/finance/reports/charts/analyticscashflowchart` | `@/pages/finance/reports/charts/analyticscashflowchart` |
-| Financialcardsparkline | `/finance/reports/financialcardsparkline` | `@/pages/finance/reports/financialcardsparkline` |
-| Skonto Optimizer | `/finance/skonto-optimizer` | `@/pages/finance/skonto-optimizer` |
-| Steuerschluessel | `/finance/steuerschluessel` | `@/pages/finance/steuerschluessel` |
-| Umsatz | `/finance/umsatz` | `@/pages/finance/reports` |
-| Ustva | `/finance/ustva` | `@/pages/finance/ustva` |
-| Wechselkurse | `/finance/wechselkurse` | `@/pages/finance/wechselkurse` |
-| Zahlungseingang | `/finance/zahlungseingang` | `@/pages/finance/zahlungseingang` |
-| Zahlungslauf Kreditoren | `/finance/zahlungslauf-kreditoren` | `@/pages/finance/zahlungslauf-kreditoren` |
-| Liquiditaet | `/finanzplanung/liquiditaet` | `@/pages/finanzplanung/liquiditaet` |
-| Mahnlauf | `/mahnwesen/mahnlauf` | `@/pages/mahnwesen/mahnlauf` |
+| Agrar | `/agrar` | `@/pages/agrar/aussaat/liste` |
+| Aussaat | `/agrar/aussaat` | `@/pages/agrar/aussaat/liste` |
+| :Id | `/agrar/aussaat/:id` | `@/pages/agrar/aussaat/liste` |
+| Liste | `/agrar/aussaat/liste` | `@/pages/agrar/aussaat/liste` |
+| Neu | `/agrar/aussaat/neu` | `@/pages/agrar/aussaat/liste` |
+| Biostimulanzien | `/agrar/biostimulanzien` | `@/pages/agrar/biostimulanzien-liste` |
+| Biostimulanzien Liste | `/agrar/biostimulanzien-liste` | `@/pages/agrar/biostimulanzien-liste` |
+| Biostimulanzien Stamm | `/agrar/biostimulanzien-stamm` | `@/pages/agrar/biostimulanzien-liste` |
+| :Id | `/agrar/biostimulanzien-stamm/:id` | `@/pages/agrar/biostimulanzien-liste` |
+| :Id | `/agrar/bodenprobe/:id` | `@/pages/agrar/bodenproben/liste` |
+| Neu | `/agrar/bodenprobe/neu` | `@/pages/agrar/bodenproben/liste` |
+| Bodenproben | `/agrar/bodenproben` | `@/pages/agrar/bodenproben/liste` |
+| Liste | `/agrar/bodenproben/liste` | `@/pages/agrar/bodenproben/liste` |
+| Duenger | `/agrar/duenger` | `@/pages/agrar/duenger/liste` |
+| Duenger Liste | `/agrar/duenger-liste` | `@/pages/agrar/duenger-liste` |
+| Duenger Stamm | `/agrar/duenger-stamm` | `@/pages/agrar/duenger-stamm` |
+| :Id | `/agrar/duenger-stamm/:id` | `@/pages/agrar/duenger-stamm` |
+| Bedarfsrechner | `/agrar/duenger/bedarfsrechner` | `@/pages/agrar/duenger/bedarfsrechner` |
+| Liste | `/agrar/duenger/liste` | `@/pages/agrar/duenger/liste` |
+| Mischungen | `/agrar/duenger/mischungen` | `@/pages/agrar/duenger/mischungen` |
+| Stamm | `/agrar/duenger/stamm` | `@/pages/agrar/duenger/stamm` |
+| :Id | `/agrar/duenger/stamm/:id` | `@/pages/agrar/duenger/stamm` |
+| Edit | `/agrar/duenger/stamm/:id/edit` | `@/pages/agrar/duenger/stamm` |
+| Planung | `/agrar/duengung/planung` | `@/pages/agrar/duengung/planung` |
+| Ernte | `/agrar/ernte` | `@/pages/agrar/ernte/liste` |
+| Ernte Annahme Erfassung | `/agrar/ernte-annahme-erfassung` | `@/pages/agrar/ernte-annahme-erfassung` |
+| :Id | `/agrar/ernte-annahme-erfassung/:id` | `@/pages/agrar/ernte-annahme-erfassung` |
+| :Id | `/agrar/ernte/:id` | `@/pages/agrar/ernte-annahme-erfassung` |
+| Liste | `/agrar/ernte/liste` | `@/pages/agrar/ernte/liste` |
+| Neu | `/agrar/ernte/neu` | `@/pages/agrar/ernte/neu` |
+| Erntefenster Konfig | `/agrar/erntefenster-konfig` | `@/pages/agrar/erntefenster-konfig` |
+| :Id | `/agrar/feldbuch/massnahme/:id` | `@/pages/agrar/feldbuch/massnahmen` |
+| Neu | `/agrar/feldbuch/massnahme/neu` | `@/pages/agrar/feldbuch/massnahmen` |
+| Massnahmen | `/agrar/feldbuch/massnahmen` | `@/pages/agrar/feldbuch/massnahmen` |
+| :Id | `/agrar/feldbuch/schlag/:id` | `@/pages/agrar/feldbuch/schlagkartei` |
+| Neu | `/agrar/feldbuch/schlag/neu` | `@/pages/agrar/feldbuch/schlag/neu` |
+| Schlagkartei | `/agrar/feldbuch/schlagkartei` | `@/pages/agrar/feldbuch/schlagkartei` |
+| Kontrakt Engagement | `/agrar/kontrakt-engagement` | `@/pages/agrar/kontrakt-engagement` |
+| Kontrakt Erfuellung | `/agrar/kontrakt-erfuellung` | `@/pages/agrar/kontrakt-erfuellung` |
+| Kontrakt Fixierung | `/agrar/kontrakt-fixierung` | `@/pages/agrar/kontrakt-fixierung` |
+| Kontrakt Settlement | `/agrar/kontrakt-settlement` | `@/pages/agrar/kontrakt-settlement` |
+| Kulturpflanzen | `/agrar/kulturpflanzen` | `@/pages/agrar/kulturpflanzen/liste` |
+| :Id | `/agrar/kulturpflanzen/:id` | `@/pages/agrar/kulturpflanzen/liste` |
+| Liste | `/agrar/kulturpflanzen/liste` | `@/pages/agrar/kulturpflanzen/liste` |
+| Neu | `/agrar/kulturpflanzen/neu` | `@/pages/agrar/kulturpflanzen/liste` |
+| Kunden Schlagkartei | `/agrar/kunden-schlagkartei` | `@/pages/agrar/kunden-schlagkartei` |
+| :Kunden Nr | `/agrar/kunden-schlagkartei/:kunden_nr` | `@/pages/agrar/kunden-schlagkartei` |
+| Maschinenauslastung | `/agrar/maschinenauslastung` | `@/pages/agrar/maschinenauslastung` |
+| Milchvieh Crosssell | `/agrar/milchvieh-crosssell` | `@/pages/agrar/milchvieh-crosssell` |
+| Milchvieh Karte | `/agrar/milchvieh-karte` | `@/pages/agrar/milchvieh-karte` |
+| Applikation | `/agrar/pflanzenschutz/applikation` | `@/pages/agrar/pflanzenschutz/applikation` |
+| Psm | `/agrar/psm` | `@/pages/agrar/psm/liste` |
+| Abgabedokumentation | `/agrar/psm/abgabedokumentation` | `@/pages/agrar/psm/abgabedokumentation` |
+| Auflagen Manager | `/agrar/psm/auflagen-manager` | `@/pages/agrar/psm/auflagen-manager` |
+| Bearbeiten | `/agrar/psm/auflagen/:id/bearbeiten` | `@/pages/agrar/psm/auflagen-manager` |
+| Beratung | `/agrar/psm/beratung` | `@/pages/agrar/psm/beratung` |
+| Liste | `/agrar/psm/liste` | `@/pages/agrar/psm/liste` |
+| Resistenz | `/agrar/psm/resistenz` | `@/pages/agrar/psm/resistenz` |
+| Sachkunde Register | `/agrar/psm/sachkunde-register` | `@/pages/agrar/psm/sachkunde-register` |
+| Edit | `/agrar/psm/sachkunde/:id/edit` | `@/pages/agrar/psm/sachkunde-register` |
+| Neu | `/agrar/psm/sachkunde/neu` | `@/pages/agrar/psm/sachkunde-register` |
+| Stamm | `/agrar/psm/stamm` | `@/pages/agrar/psm/stamm` |
+| :Id | `/agrar/psm/stamm/:id` | `@/pages/agrar/psm/stamm` |
+| Wasserschutz | `/agrar/psm/wasserschutz` | `@/pages/agrar/psm/wasserschutz` |
+| Rohwarengruppen | `/agrar/rohwarengruppen` | `@/pages/agrar/rohwarengruppen` |
+| Saatgut | `/agrar/saatgut` | `@/pages/agrar/saatgut-liste` |
+| Saatgut Liste | `/agrar/saatgut-liste` | `@/pages/agrar/saatgut-liste` |
+| Saatgut Stamm | `/agrar/saatgut-stamm` | `@/pages/agrar/saatgut-stamm` |
+| :Id | `/agrar/saatgut-stamm/:id` | `@/pages/agrar/saatgut-stamm` |
+| Bestellung | `/agrar/saatgut/bestellung` | `@/pages/agrar/saatgut/bestellung` |
+| Liste | `/agrar/saatgut/liste` | `@/pages/agrar/saatgut/liste` |
+| :Id | `/agrar/saatgut/sorte/:id` | `@/pages/agrar/saatgut/sortenregister` |
+| Neu | `/agrar/saatgut/sorte/neu` | `@/pages/agrar/saatgut/sortenregister` |
+| Sortenregister | `/agrar/saatgut/sortenregister` | `@/pages/agrar/saatgut/sortenregister` |
+| Stamm | `/agrar/saatgut/stamm` | `@/pages/agrar/saatgut/stamm` |
+| :Id | `/agrar/saatgut/stamm/:id` | `@/pages/agrar/saatgut/stamm` |
+| Saatzucht | `/agrar/saatzucht` | `@/pages/agrar/saatzucht` |
+| Sammelabrechnung | `/agrar/sammelabrechnung` | `@/pages/agrar/sammelabrechnung` |
+| Karte | `/agrar/schlaege/karte` | `@/pages/agrar/schlaege/karte` |
+| Vermehrungsvertraege | `/agrar/vermehrungsvertraege` | `@/pages/agrar/vermehrungsvertraege` |
+| Wetterwarnung | `/agrar/wetterwarnung` | `@/pages/agrar/wetterwarnung` |
+| Zinsabrechnung | `/agrar/zinsabrechnung` | `@/pages/agrar/zinsabrechnung` |
+| Farmers | `/agribusiness/farmers` | `@/pages/agribusiness/farmers` |
+| Field Service Task Edit | `/agribusiness/field-service-task-edit` | `@/pages/agribusiness/field-service-task-edit` |
+| Field Service Task Neu | `/agribusiness/field-service-task-neu` | `@/pages/agribusiness/field-service-task-neu` |
+| Field Service Tasks | `/agribusiness/field-service-tasks` | `@/pages/agribusiness/field-service-tasks` |
+| Bearbeiten | `/agribusiness/field-service-tasks/:taskId/bearbeiten` | `@/pages/agribusiness/field-service-task-edit` |
+| Neu | `/agribusiness/field-service-tasks/neu` | `@/pages/agribusiness/field-service-task-neu` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Konten
+### Agrar
 
-**Route:** `/banken/konten` · **Modul:** `@/pages/banken/konten`
+**Route:** `/agrar` · **Modul:** `@/pages/agrar/aussaat/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Konten** öffnen (`/banken/konten`).
+1. Sidebar oder Suche: **Agrar** öffnen (`/agrar`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Aussaat
+
+**Route:** `/agrar/aussaat` · **Modul:** `@/pages/agrar/aussaat/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Aussaat** öffnen (`/agrar/aussaat`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -203,11 +167,32 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/banken/konto/:id` · **Modul:** `@/pages/banken/konten`
+**Route:** `/agrar/aussaat/:id` · **Modul:** `@/pages/agrar/aussaat/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/banken/konto/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/aussaat/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Liste
+
+**Route:** `/agrar/aussaat/liste` · **Modul:** `@/pages/agrar/aussaat/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/aussaat/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -224,11 +209,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Neu
 
-**Route:** `/banken/konto/neu` · **Modul:** `@/pages/banken/konten`
+**Route:** `/agrar/aussaat/neu` · **Modul:** `@/pages/agrar/aussaat/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/banken/konto/neu`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/aussaat/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -243,13 +228,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Document
+### Biostimulanzien
 
-**Route:** `/document` · **Modul:** `@/pages/document`
+**Route:** `/agrar/biostimulanzien` · **Modul:** `@/pages/agrar/biostimulanzien-liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Document** öffnen (`/document`).
+1. Sidebar oder Suche: **Biostimulanzien** öffnen (`/agrar/biostimulanzien`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -264,13 +249,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Umsatzsteuervoranmeldung
+### Biostimulanzien Liste
 
-**Route:** `/export/umsatzsteuervoranmeldung` · **Modul:** `@/pages/export/umsatzsteuervoranmeldung`
+**Route:** `/agrar/biostimulanzien-liste` · **Modul:** `@/pages/agrar/biostimulanzien-liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Umsatzsteuervoranmeldung** öffnen (`/export/umsatzsteuervoranmeldung`).
+1. Sidebar oder Suche: **Biostimulanzien Liste** öffnen (`/agrar/biostimulanzien-liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -285,97 +270,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Ustva
+### Biostimulanzien Stamm
 
-**Route:** `/export/ustva` · **Modul:** `@/pages/export/umsatzsteuervoranmeldung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Ustva** öffnen (`/export/ustva`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Fibu
-
-**Route:** `/fibu` · **Modul:** `@/pages/fibu/abschluss-cockpit`
+**Route:** `/agrar/biostimulanzien-stamm` · **Modul:** `@/pages/agrar/biostimulanzien-liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Fibu** öffnen (`/fibu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Fibu Suite
-
-**Route:** `/fibu-suite` · **Modul:** `@runtime/fibu-suite`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Fibu Suite** öffnen (`/fibu-suite`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### $
-
-**Route:** `/fibu-suite/$` · **Modul:** `@runtime/fibu-suite`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **$** öffnen (`/fibu-suite/$`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Abschluss Checklist Detail
-
-**Route:** `/fibu/abschluss-checklist-detail` · **Modul:** `@/pages/fibu/abschluss-checklist-detail`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Abschluss Checklist Detail** öffnen (`/fibu/abschluss-checklist-detail`).
+1. Sidebar oder Suche: **Biostimulanzien Stamm** öffnen (`/agrar/biostimulanzien-stamm`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -392,32 +293,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/fibu/abschluss-checklist-detail/:id` · **Modul:** `@/pages/fibu/abschluss-checklist-detail`
+**Route:** `/agrar/biostimulanzien-stamm/:id` · **Modul:** `@/pages/agrar/biostimulanzien-liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/fibu/abschluss-checklist-detail/:id`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Abschluss Cockpit
-
-**Route:** `/fibu/abschluss-cockpit` · **Modul:** `@/pages/fibu/abschluss-cockpit`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Abschluss Cockpit** öffnen (`/fibu/abschluss-cockpit`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/biostimulanzien-stamm/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -434,11 +314,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/fibu/anlage/:id` · **Modul:** `@/pages/fibu/anlagen`
+**Route:** `/agrar/bodenprobe/:id` · **Modul:** `@/pages/agrar/bodenproben/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/fibu/anlage/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/bodenprobe/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -455,11 +335,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Neu
 
-**Route:** `/fibu/anlage/neu` · **Modul:** `@/pages/fibu/anlagen`
+**Route:** `/agrar/bodenprobe/neu` · **Modul:** `@/pages/agrar/bodenproben/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/fibu/anlage/neu`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/bodenprobe/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -474,13 +354,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Anlagen
+### Bodenproben
 
-**Route:** `/fibu/anlagen` · **Modul:** `@/pages/fibu/anlagen`
+**Route:** `/agrar/bodenproben` · **Modul:** `@/pages/agrar/bodenproben/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Anlagen** öffnen (`/fibu/anlagen`).
+1. Sidebar oder Suche: **Bodenproben** öffnen (`/agrar/bodenproben`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -495,13 +375,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Anlagen Suite
+### Liste
 
-**Route:** `/fibu/anlagen-suite` · **Modul:** `@/pages/fibu/anlagen-suite`
+**Route:** `/agrar/bodenproben/liste` · **Modul:** `@/pages/agrar/bodenproben/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Anlagen Suite** öffnen (`/fibu/anlagen-suite`).
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/bodenproben/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -516,13 +396,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Atlas
+### Duenger
 
-**Route:** `/fibu/atlas` · **Modul:** `@/pages/fibu/atlas`
+**Route:** `/agrar/duenger` · **Modul:** `@/pages/agrar/duenger/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Atlas** öffnen (`/fibu/atlas`).
+1. Sidebar oder Suche: **Duenger** öffnen (`/agrar/duenger`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -537,13 +417,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Bilanz
+### Duenger Liste
 
-**Route:** `/fibu/bilanz` · **Modul:** `@/pages/fibu/bilanz`
+**Route:** `/agrar/duenger-liste` · **Modul:** `@/pages/agrar/duenger-liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bilanz** öffnen (`/fibu/bilanz`).
+1. Sidebar oder Suche: **Duenger Liste** öffnen (`/agrar/duenger-liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -558,559 +438,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Buchhaltungsuebersicht
+### Duenger Stamm
 
-**Route:** `/fibu/buchhaltungsuebersicht` · **Modul:** `@/pages/fibu/buchhaltungsuebersicht`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Buchhaltungsuebersicht** öffnen (`/fibu/buchhaltungsuebersicht`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Buchungsjournal
-
-**Route:** `/fibu/buchungsjournal` · **Modul:** `@/pages/fibu/buchungsjournal`
+**Route:** `/agrar/duenger-stamm` · **Modul:** `@/pages/agrar/duenger-stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Buchungsjournal** öffnen (`/fibu/buchungsjournal`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Buchungsuebernahme Connectors
-
-**Route:** `/fibu/buchungsuebernahme-connectors` · **Modul:** `@/pages/fibu/buchungsuebernahme-connectors`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Buchungsuebernahme Connectors** öffnen (`/fibu/buchungsuebernahme-connectors`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Bwa
-
-**Route:** `/fibu/bwa` · **Modul:** `@/pages/fibu/bwa`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Bwa** öffnen (`/fibu/bwa`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Debitoren
-
-**Route:** `/fibu/debitoren` · **Modul:** `@/pages/fibu/debitoren`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Debitoren** öffnen (`/fibu/debitoren`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Debitoren Api
-
-**Route:** `/fibu/debitoren-api` · **Modul:** `@/pages/fibu/debitoren-api`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Debitoren Api** öffnen (`/fibu/debitoren-api`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Elster Online
-
-**Route:** `/fibu/elster-online` · **Modul:** `@/pages/fibu/elster-online`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Elster Online** öffnen (`/fibu/elster-online`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Erloeskennziffern
-
-**Route:** `/fibu/erloeskennziffern` · **Modul:** `@/pages/fibu/erloeskennziffern`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Erloeskennziffern** öffnen (`/fibu/erloeskennziffern`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Erloeskontenzuordnung
-
-**Route:** `/fibu/erloeskontenzuordnung` · **Modul:** `@/pages/fibu/erloeskontenzuordnung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Erloeskontenzuordnung** öffnen (`/fibu/erloeskontenzuordnung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Forderungsgruppen
-
-**Route:** `/fibu/forderungsgruppen` · **Modul:** `@/pages/fibu/forderungsgruppen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Forderungsgruppen** öffnen (`/fibu/forderungsgruppen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Geschaeftsjahre
-
-**Route:** `/fibu/geschaeftsjahre` · **Modul:** `@/pages/fibu/geschaeftsjahre`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Geschaeftsjahre** öffnen (`/fibu/geschaeftsjahre`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Guv
-
-**Route:** `/fibu/guv` · **Modul:** `@/pages/fibu/guv`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Guv** öffnen (`/fibu/guv`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Hauptbuch
-
-**Route:** `/fibu/hauptbuch` · **Modul:** `@/pages/fibu/hauptbuch`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Hauptbuch** öffnen (`/fibu/hauptbuch`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kontenplan
-
-**Route:** `/fibu/kontenplan` · **Modul:** `@/pages/fibu/kontenplan`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kontenplan** öffnen (`/fibu/kontenplan`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kostenstellenrechnung
-
-**Route:** `/fibu/kostenstellenrechnung` · **Modul:** `@/pages/fibu/kostenstellenrechnung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kostenstellenrechnung** öffnen (`/fibu/kostenstellenrechnung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kreditlinie Neu
-
-**Route:** `/fibu/kreditlinie-neu` · **Modul:** `@/pages/fibu/kreditlinien`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kreditlinie Neu** öffnen (`/fibu/kreditlinie-neu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kreditlinien
-
-**Route:** `/fibu/kreditlinien` · **Modul:** `@/pages/fibu/kreditlinien`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kreditlinien** öffnen (`/fibu/kreditlinien`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kreditoren
-
-**Route:** `/fibu/kreditoren` · **Modul:** `@/pages/fibu/kreditoren`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kreditoren** öffnen (`/fibu/kreditoren`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Lohn Connector
-
-**Route:** `/fibu/lohn-connector` · **Modul:** `@/pages/fibu/lohn-connector`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Lohn Connector** öffnen (`/fibu/lohn-connector`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Monatswerte
-
-**Route:** `/fibu/monatswerte` · **Modul:** `@/pages/fibu/monatswerte`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Monatswerte** öffnen (`/fibu/monatswerte`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Offene Posten
-
-**Route:** `/fibu/offene-posten` · **Modul:** `@/pages/fibu/offene-posten`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Offene Posten** öffnen (`/fibu/offene-posten`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Op Skonto Auszifferung
-
-**Route:** `/fibu/op-skonto-auszifferung` · **Modul:** `@/pages/fibu/op-skonto-auszifferung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Op Skonto Auszifferung** öffnen (`/fibu/op-skonto-auszifferung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Op Verwaltung
-
-**Route:** `/fibu/op-verwaltung` · **Modul:** `@/pages/fibu/op-verwaltung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Op Verwaltung** öffnen (`/fibu/op-verwaltung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Periodische Buchungen
-
-**Route:** `/fibu/periodische-buchungen` · **Modul:** `@/pages/fibu/periodische-buchungen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Periodische Buchungen** öffnen (`/fibu/periodische-buchungen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Quadriga Config
-
-**Route:** `/fibu/quadriga-config` · **Modul:** `@/pages/fibu/quadriga-connector`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Quadriga Config** öffnen (`/fibu/quadriga-config`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Quadriga Connector
-
-**Route:** `/fibu/quadriga-connector` · **Modul:** `@/pages/fibu/quadriga-connector`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Quadriga Connector** öffnen (`/fibu/quadriga-connector`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Sachkonto
-
-**Route:** `/fibu/sachkonto` · **Modul:** `@/pages/fibu/sachkonto`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Sachkonto** öffnen (`/fibu/sachkonto`).
+1. Sidebar oder Suche: **Duenger Stamm** öffnen (`/agrar/duenger-stamm`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1127,11 +461,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/fibu/sachkonto/:id` · **Modul:** `@/pages/fibu/sachkonto`
+**Route:** `/agrar/duenger-stamm/:id` · **Modul:** `@/pages/agrar/duenger-stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/fibu/sachkonto/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/duenger-stamm/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1146,13 +480,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schnittstelle Fibu
+### Bedarfsrechner
 
-**Route:** `/fibu/schnittstelle-fibu` · **Modul:** `@/pages/fibu/schnittstelle-fibu`
+**Route:** `/agrar/duenger/bedarfsrechner` · **Modul:** `@/pages/agrar/duenger/bedarfsrechner`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Schnittstelle Fibu** öffnen (`/fibu/schnittstelle-fibu`).
+1. Sidebar oder Suche: **Bedarfsrechner** öffnen (`/agrar/duenger/bedarfsrechner`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1167,13 +501,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schnittstellen Center
+### Liste
 
-**Route:** `/fibu/schnittstellen-center` · **Modul:** `@/pages/fibu/schnittstellen-center`
+**Route:** `/agrar/duenger/liste` · **Modul:** `@/pages/agrar/duenger/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Schnittstellen Center** öffnen (`/fibu/schnittstellen-center`).
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/duenger/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1188,13 +522,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Sicherheit Neu
+### Mischungen
 
-**Route:** `/fibu/sicherheit-neu` · **Modul:** `@/pages/fibu/sicherheiten`
+**Route:** `/agrar/duenger/mischungen` · **Modul:** `@/pages/agrar/duenger/mischungen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Sicherheit Neu** öffnen (`/fibu/sicherheit-neu`).
+1. Sidebar oder Suche: **Mischungen** öffnen (`/agrar/duenger/mischungen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1209,34 +543,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Sicherheiten
+### Stamm
 
-**Route:** `/fibu/sicherheiten` · **Modul:** `@/pages/fibu/sicherheiten`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Sicherheiten** öffnen (`/fibu/sicherheiten`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Stammdaten
-
-**Route:** `/fibu/stammdaten` · **Modul:** `@/pages/fibu/stammdaten`
+**Route:** `/agrar/duenger/stamm` · **Modul:** `@/pages/agrar/duenger/stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Stammdaten** öffnen (`/fibu/stammdaten`).
+1. Sidebar oder Suche: **Stamm** öffnen (`/agrar/duenger/stamm`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1253,11 +566,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/fibu/verbindlichkeit/:id` · **Modul:** `@/pages/fibu/verbindlichkeiten`
+**Route:** `/agrar/duenger/stamm/:id` · **Modul:** `@/pages/agrar/duenger/stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/fibu/verbindlichkeit/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/duenger/stamm/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1272,13 +585,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Verbindlichkeiten
+### Edit
 
-**Route:** `/fibu/verbindlichkeiten` · **Modul:** `@/pages/fibu/verbindlichkeiten`
+**Route:** `/agrar/duenger/stamm/:id/edit` · **Modul:** `@/pages/agrar/duenger/stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Verbindlichkeiten** öffnen (`/fibu/verbindlichkeiten`).
+1. Sidebar oder Suche: **Edit** öffnen (`/agrar/duenger/stamm/:id/edit`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1293,13 +606,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zahlungseingaenge
+### Planung
 
-**Route:** `/fibu/zahlungseingaenge` · **Modul:** `@/pages/fibu/zahlungseingaenge`
+**Route:** `/agrar/duengung/planung` · **Modul:** `@/pages/agrar/duengung/planung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zahlungseingaenge** öffnen (`/fibu/zahlungseingaenge`).
+1. Sidebar oder Suche: **Planung** öffnen (`/agrar/duengung/planung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1314,13 +627,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zahlungslaeufe
+### Ernte
 
-**Route:** `/fibu/zahlungslaeufe` · **Modul:** `@/pages/fibu/zahlungslaeufe`
+**Route:** `/agrar/ernte` · **Modul:** `@/pages/agrar/ernte/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zahlungslaeufe** öffnen (`/fibu/zahlungslaeufe`).
+1. Sidebar oder Suche: **Ernte** öffnen (`/agrar/ernte`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1335,76 +648,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zahlungsmeldungen
+### Ernte Annahme Erfassung
 
-**Route:** `/fibu/zahlungsmeldungen` · **Modul:** `@/pages/fibu/zahlungsmeldungen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Zahlungsmeldungen** öffnen (`/fibu/zahlungsmeldungen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Zahlungsvorschlaege
-
-**Route:** `/fibu/zahlungsvorschlaege` · **Modul:** `@/pages/fibu/zahlungsvorschlaege`
+**Route:** `/agrar/ernte-annahme-erfassung` · **Modul:** `@/pages/agrar/ernte-annahme-erfassung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zahlungsvorschlaege** öffnen (`/fibu/zahlungsvorschlaege`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Finance
-
-**Route:** `/finance` · **Modul:** `@/pages/finance/index`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Finance** öffnen (`/finance`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Abschluss
-
-**Route:** `/finance/abschluss` · **Modul:** `@/pages/finance/abschluss`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Abschluss** öffnen (`/finance/abschluss`).
+1. Sidebar oder Suche: **Ernte Annahme Erfassung** öffnen (`/agrar/ernte-annahme-erfassung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1421,74 +671,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/finance/accounts/:id` · **Modul:** `@/pages/finance/chart-of-accounts`
+**Route:** `/agrar/ernte-annahme-erfassung/:id` · **Modul:** `@/pages/agrar/ernte-annahme-erfassung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/finance/accounts/:id`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Ap Invoice Form
-
-**Route:** `/finance/ap-invoice-form` · **Modul:** `@/pages/finance/ap-invoice-form`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Ap Invoice Form** öffnen (`/finance/ap-invoice-form`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Ap Invoices List
-
-**Route:** `/finance/ap-invoices-list` · **Modul:** `@/pages/finance/ap-invoices-list`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Ap Invoices List** öffnen (`/finance/ap-invoices-list`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Invoices
-
-**Route:** `/finance/ap/invoices` · **Modul:** `@/pages/finance/ap-invoices-list`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Invoices** öffnen (`/finance/ap/invoices`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/ernte-annahme-erfassung/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1505,11 +692,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/finance/ap/invoices/:id` · **Modul:** `@/pages/finance/ap-invoice-form`
+**Route:** `/agrar/ernte/:id` · **Modul:** `@/pages/agrar/ernte-annahme-erfassung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/finance/ap/invoices/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/ernte/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -1524,517 +711,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### New
+### Liste
 
-**Route:** `/finance/ap/invoices/new` · **Modul:** `@/pages/finance/ap-invoice-form`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **New** öffnen (`/finance/ap/invoices/new`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Audit Trail
-
-**Route:** `/finance/audit-trail` · **Modul:** `@/pages/finance/audit-trail`
+**Route:** `/agrar/ernte/liste` · **Modul:** `@/pages/agrar/ernte/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Audit Trail** öffnen (`/finance/audit-trail`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Bank
-
-**Route:** `/finance/bank` · **Modul:** `@/pages/finance/bankkonten-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Bank** öffnen (`/finance/bank`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Bank Abgleich
-
-**Route:** `/finance/bank-abgleich` · **Modul:** `@/pages/finance/bank-abgleich`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Bank Abgleich** öffnen (`/finance/bank-abgleich`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Bank Stamm
-
-**Route:** `/finance/bank-stamm` · **Modul:** `@/pages/finance/bank-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Bank Stamm** öffnen (`/finance/bank-stamm`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Bankkonten
-
-**Route:** `/finance/bankkonten` · **Modul:** `@/pages/finance/bankkonten-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Bankkonten** öffnen (`/finance/bankkonten`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Bankkonten Stamm
-
-**Route:** `/finance/bankkonten-stamm` · **Modul:** `@/pages/finance/bankkonten-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Bankkonten Stamm** öffnen (`/finance/bankkonten-stamm`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### :Id
-
-**Route:** `/finance/bankkonten/:id` · **Modul:** `@/pages/finance/bankkonten-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **:Id** öffnen (`/finance/bankkonten/:id`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### New
-
-**Route:** `/finance/bookings/new` · **Modul:** `@/pages/fibu/buchungsjournal`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **New** öffnen (`/finance/bookings/new`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Buchungen
-
-**Route:** `/finance/buchungen` · **Modul:** `@/pages/finance/buchungserfassung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Buchungen** öffnen (`/finance/buchungen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Buchungserfassung
-
-**Route:** `/finance/buchungserfassung` · **Modul:** `@/pages/finance/buchungserfassung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Buchungserfassung** öffnen (`/finance/buchungserfassung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Buchungsimport
-
-**Route:** `/finance/buchungsimport` · **Modul:** `@/pages/finance/buchungsimport`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Buchungsimport** öffnen (`/finance/buchungsimport`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Buchungsvorlagen
-
-**Route:** `/finance/buchungsvorlagen` · **Modul:** `@/pages/finance/buchungsvorlagen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Buchungsvorlagen** öffnen (`/finance/buchungsvorlagen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Chart Of Accounts
-
-**Route:** `/finance/chart-of-accounts` · **Modul:** `@/pages/finance/chart-of-accounts`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Chart Of Accounts** öffnen (`/finance/chart-of-accounts`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Datev Export
-
-**Route:** `/finance/datev-export` · **Modul:** `@/pages/finance/datev-export`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Datev Export** öffnen (`/finance/datev-export`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Debitoren
-
-**Route:** `/finance/debitoren` · **Modul:** `@/pages/finance/debitoren-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Debitoren** öffnen (`/finance/debitoren`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Debitoren Liste
-
-**Route:** `/finance/debitoren-liste` · **Modul:** `@/pages/finance/debitoren-liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Debitoren Liste** öffnen (`/finance/debitoren-liste`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Debitoren Stamm
-
-**Route:** `/finance/debitoren-stamm` · **Modul:** `@/pages/finance/debitoren-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Debitoren Stamm** öffnen (`/finance/debitoren-stamm`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### :Id
-
-**Route:** `/finance/debitoren/:id` · **Modul:** `@/pages/finance/debitoren-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **:Id** öffnen (`/finance/debitoren/:id`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### New
-
-**Route:** `/finance/debitoren/new` · **Modul:** `@/pages/finance/debitoren-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **New** öffnen (`/finance/debitoren/new`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Dunning
-
-**Route:** `/finance/dunning` · **Modul:** `@/pages/finance/mahnwesen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Dunning** öffnen (`/finance/dunning`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Dunning Editor
-
-**Route:** `/finance/dunning-editor` · **Modul:** `@/pages/finance/dunning-editor`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Dunning Editor** öffnen (`/finance/dunning-editor`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Invoice Form
-
-**Route:** `/finance/invoice-form` · **Modul:** `@/pages/finance/invoice-form`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Invoice Form** öffnen (`/finance/invoice-form`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Invoices
-
-**Route:** `/finance/invoices` · **Modul:** `@/pages/finance/invoices-list`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Invoices** öffnen (`/finance/invoices`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Invoices List
-
-**Route:** `/finance/invoices-list` · **Modul:** `@/pages/finance/invoices-list`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Invoices List** öffnen (`/finance/invoices-list`).
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/ernte/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2051,11 +734,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Neu
 
-**Route:** `/finance/invoices/neu` · **Modul:** `@/pages/finance/invoice-form`
+**Route:** `/agrar/ernte/neu` · **Modul:** `@/pages/agrar/ernte/neu`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/finance/invoices/neu`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/ernte/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2070,13 +753,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### New
+### Erntefenster Konfig
 
-**Route:** `/finance/invoices/new` · **Modul:** `@/pages/finance/invoice-form`
+**Route:** `/agrar/erntefenster-konfig` · **Modul:** `@/pages/agrar/erntefenster-konfig`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **New** öffnen (`/finance/invoices/new`).
+1. Sidebar oder Suche: **Erntefenster Konfig** öffnen (`/agrar/erntefenster-konfig`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2091,13 +774,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kasse
+### :Id
 
-**Route:** `/finance/kasse` · **Modul:** `@/pages/finance/kasse`
+**Route:** `/agrar/feldbuch/massnahme/:id` · **Modul:** `@/pages/agrar/feldbuch/massnahmen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kasse** öffnen (`/finance/kasse`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/feldbuch/massnahme/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2112,13 +795,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kontenplan
+### Neu
 
-**Route:** `/finance/kontenplan` · **Modul:** `@/pages/finance/kontenplan`
+**Route:** `/agrar/feldbuch/massnahme/neu` · **Modul:** `@/pages/agrar/feldbuch/massnahmen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kontenplan** öffnen (`/finance/kontenplan`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/feldbuch/massnahme/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2133,13 +816,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kreditoren
+### Massnahmen
 
-**Route:** `/finance/kreditoren` · **Modul:** `@/pages/finance/kreditoren-stamm`
+**Route:** `/agrar/feldbuch/massnahmen` · **Modul:** `@/pages/agrar/feldbuch/massnahmen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kreditoren** öffnen (`/finance/kreditoren`).
+1. Sidebar oder Suche: **Massnahmen** öffnen (`/agrar/feldbuch/massnahmen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2154,13 +837,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kreditoren Stamm
+### :Id
 
-**Route:** `/finance/kreditoren-stamm` · **Modul:** `@/pages/finance/kreditoren-stamm`
+**Route:** `/agrar/feldbuch/schlag/:id` · **Modul:** `@/pages/agrar/feldbuch/schlagkartei`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kreditoren Stamm** öffnen (`/finance/kreditoren-stamm`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/feldbuch/schlag/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2175,13 +858,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Lastschriften Debitoren
+### Neu
 
-**Route:** `/finance/lastschriften-debitoren` · **Modul:** `@/pages/finance/lastschriften-debitoren`
+**Route:** `/agrar/feldbuch/schlag/neu` · **Modul:** `@/pages/agrar/feldbuch/schlag/neu`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Lastschriften Debitoren** öffnen (`/finance/lastschriften-debitoren`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/feldbuch/schlag/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2196,13 +879,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Mahnlauf
+### Schlagkartei
 
-**Route:** `/finance/mahnlauf` · **Modul:** `@/pages/finance/mahnlauf`
+**Route:** `/agrar/feldbuch/schlagkartei` · **Modul:** `@/pages/agrar/feldbuch/schlagkartei`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mahnlauf** öffnen (`/finance/mahnlauf`).
+1. Sidebar oder Suche: **Schlagkartei** öffnen (`/agrar/feldbuch/schlagkartei`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2217,13 +900,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Mahnwesen
+### Kontrakt Engagement
 
-**Route:** `/finance/mahnwesen` · **Modul:** `@/pages/finance/mahnwesen`
+**Route:** `/agrar/kontrakt-engagement` · **Modul:** `@/pages/agrar/kontrakt-engagement`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mahnwesen** öffnen (`/finance/mahnwesen`).
+1. Sidebar oder Suche: **Kontrakt Engagement** öffnen (`/agrar/kontrakt-engagement`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2238,13 +921,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Nebenbuch Abstimmung
+### Kontrakt Erfuellung
 
-**Route:** `/finance/nebenbuch-abstimmung` · **Modul:** `@/pages/finance/nebenbuch-abstimmung`
+**Route:** `/agrar/kontrakt-erfuellung` · **Modul:** `@/pages/agrar/kontrakt-erfuellung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Nebenbuch Abstimmung** öffnen (`/finance/nebenbuch-abstimmung`).
+1. Sidebar oder Suche: **Kontrakt Erfuellung** öffnen (`/agrar/kontrakt-erfuellung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2259,13 +942,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Offene Posten
+### Kontrakt Fixierung
 
-**Route:** `/finance/offene-posten` · **Modul:** `@/pages/fibu/offene-posten`
+**Route:** `/agrar/kontrakt-fixierung` · **Modul:** `@/pages/agrar/kontrakt-fixierung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Offene Posten** öffnen (`/finance/offene-posten`).
+1. Sidebar oder Suche: **Kontrakt Fixierung** öffnen (`/agrar/kontrakt-fixierung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2280,13 +963,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Offene Posten Cockpit
+### Kontrakt Settlement
 
-**Route:** `/finance/offene-posten-cockpit` · **Modul:** `@/pages/finance/offene-posten-cockpit`
+**Route:** `/agrar/kontrakt-settlement` · **Modul:** `@/pages/agrar/kontrakt-settlement`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Offene Posten Cockpit** öffnen (`/finance/offene-posten-cockpit`).
+1. Sidebar oder Suche: **Kontrakt Settlement** öffnen (`/agrar/kontrakt-settlement`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2301,13 +984,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Op Debitoren
+### Kulturpflanzen
 
-**Route:** `/finance/op-debitoren` · **Modul:** `@/pages/finance/op-debitoren`
+**Route:** `/agrar/kulturpflanzen` · **Modul:** `@/pages/agrar/kulturpflanzen/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Op Debitoren** öffnen (`/finance/op-debitoren`).
+1. Sidebar oder Suche: **Kulturpflanzen** öffnen (`/agrar/kulturpflanzen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2322,13 +1005,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Op Kreditoren
+### :Id
 
-**Route:** `/finance/op-kreditoren` · **Modul:** `@/pages/finance/op-kreditoren`
+**Route:** `/agrar/kulturpflanzen/:id` · **Modul:** `@/pages/agrar/kulturpflanzen/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Op Kreditoren** öffnen (`/finance/op-kreditoren`).
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/kulturpflanzen/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2343,13 +1026,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Payment Matching
+### Liste
 
-**Route:** `/finance/payment-matching` · **Modul:** `@/pages/finance/payment-matching`
+**Route:** `/agrar/kulturpflanzen/liste` · **Modul:** `@/pages/agrar/kulturpflanzen/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Payment Matching** öffnen (`/finance/payment-matching`).
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/kulturpflanzen/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2364,13 +1047,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Payments
+### Neu
 
-**Route:** `/finance/payments` · **Modul:** `@/pages/finance/payment-matching`
+**Route:** `/agrar/kulturpflanzen/neu` · **Modul:** `@/pages/agrar/kulturpflanzen/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Payments** öffnen (`/finance/payments`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/kulturpflanzen/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2385,13 +1068,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Periodenabschluss
+### Kunden Schlagkartei
 
-**Route:** `/finance/periodenabschluss` · **Modul:** `@/pages/finance/periodenabschluss`
+**Route:** `/agrar/kunden-schlagkartei` · **Modul:** `@/pages/agrar/kunden-schlagkartei`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Periodenabschluss** öffnen (`/finance/periodenabschluss`).
+1. Sidebar oder Suche: **Kunden Schlagkartei** öffnen (`/agrar/kunden-schlagkartei`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2406,13 +1089,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Periods
+### :Kunden Nr
 
-**Route:** `/finance/periods` · **Modul:** `@/pages/finance/periods`
+**Route:** `/agrar/kunden-schlagkartei/:kunden_nr` · **Modul:** `@/pages/agrar/kunden-schlagkartei`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Periods** öffnen (`/finance/periods`).
+1. Sidebar oder Suche: **:Kunden Nr** öffnen (`/agrar/kunden-schlagkartei/:kunden_nr`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2427,13 +1110,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Reports
+### Maschinenauslastung
 
-**Route:** `/finance/reports` · **Modul:** `@/pages/finance/reports`
+**Route:** `/agrar/maschinenauslastung` · **Modul:** `@/pages/agrar/maschinenauslastung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Reports** öffnen (`/finance/reports`).
+1. Sidebar oder Suche: **Maschinenauslastung** öffnen (`/agrar/maschinenauslastung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2448,13 +1131,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Analyticschartcontent
+### Milchvieh Crosssell
 
-**Route:** `/finance/reports/analyticschartcontent` · **Modul:** `@/pages/finance/reports/analyticschartcontent`
+**Route:** `/agrar/milchvieh-crosssell` · **Modul:** `@/pages/agrar/milchvieh-crosssell`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Analyticschartcontent** öffnen (`/finance/reports/analyticschartcontent`).
+1. Sidebar oder Suche: **Milchvieh Crosssell** öffnen (`/agrar/milchvieh-crosssell`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2469,13 +1152,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Analyticsbalancesharechart
+### Milchvieh Karte
 
-**Route:** `/finance/reports/charts/analyticsbalancesharechart` · **Modul:** `@/pages/finance/reports/charts/analyticsbalancesharechart`
+**Route:** `/agrar/milchvieh-karte` · **Modul:** `@/pages/agrar/milchvieh-karte`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Analyticsbalancesharechart** öffnen (`/finance/reports/charts/analyticsbalancesharechart`).
+1. Sidebar oder Suche: **Milchvieh Karte** öffnen (`/agrar/milchvieh-karte`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2490,13 +1173,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Analyticscashflowchart
+### Applikation
 
-**Route:** `/finance/reports/charts/analyticscashflowchart` · **Modul:** `@/pages/finance/reports/charts/analyticscashflowchart`
+**Route:** `/agrar/pflanzenschutz/applikation` · **Modul:** `@/pages/agrar/pflanzenschutz/applikation`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Analyticscashflowchart** öffnen (`/finance/reports/charts/analyticscashflowchart`).
+1. Sidebar oder Suche: **Applikation** öffnen (`/agrar/pflanzenschutz/applikation`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2511,13 +1194,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Financialcardsparkline
+### Psm
 
-**Route:** `/finance/reports/financialcardsparkline` · **Modul:** `@/pages/finance/reports/financialcardsparkline`
+**Route:** `/agrar/psm` · **Modul:** `@/pages/agrar/psm/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Financialcardsparkline** öffnen (`/finance/reports/financialcardsparkline`).
+1. Sidebar oder Suche: **Psm** öffnen (`/agrar/psm`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2532,13 +1215,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Skonto Optimizer
+### Abgabedokumentation
 
-**Route:** `/finance/skonto-optimizer` · **Modul:** `@/pages/finance/skonto-optimizer`
+**Route:** `/agrar/psm/abgabedokumentation` · **Modul:** `@/pages/agrar/psm/abgabedokumentation`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Skonto Optimizer** öffnen (`/finance/skonto-optimizer`).
+1. Sidebar oder Suche: **Abgabedokumentation** öffnen (`/agrar/psm/abgabedokumentation`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2553,13 +1236,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Steuerschluessel
+### Auflagen Manager
 
-**Route:** `/finance/steuerschluessel` · **Modul:** `@/pages/finance/steuerschluessel`
+**Route:** `/agrar/psm/auflagen-manager` · **Modul:** `@/pages/agrar/psm/auflagen-manager`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Steuerschluessel** öffnen (`/finance/steuerschluessel`).
+1. Sidebar oder Suche: **Auflagen Manager** öffnen (`/agrar/psm/auflagen-manager`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2574,13 +1257,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Umsatz
+### Bearbeiten
 
-**Route:** `/finance/umsatz` · **Modul:** `@/pages/finance/reports`
+**Route:** `/agrar/psm/auflagen/:id/bearbeiten` · **Modul:** `@/pages/agrar/psm/auflagen-manager`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Umsatz** öffnen (`/finance/umsatz`).
+1. Sidebar oder Suche: **Bearbeiten** öffnen (`/agrar/psm/auflagen/:id/bearbeiten`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2595,13 +1278,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Ustva
+### Beratung
 
-**Route:** `/finance/ustva` · **Modul:** `@/pages/finance/ustva`
+**Route:** `/agrar/psm/beratung` · **Modul:** `@/pages/agrar/psm/beratung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Ustva** öffnen (`/finance/ustva`).
+1. Sidebar oder Suche: **Beratung** öffnen (`/agrar/psm/beratung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2616,13 +1299,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Wechselkurse
+### Liste
 
-**Route:** `/finance/wechselkurse` · **Modul:** `@/pages/finance/wechselkurse`
+**Route:** `/agrar/psm/liste` · **Modul:** `@/pages/agrar/psm/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Wechselkurse** öffnen (`/finance/wechselkurse`).
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/psm/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2637,13 +1320,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zahlungseingang
+### Resistenz
 
-**Route:** `/finance/zahlungseingang` · **Modul:** `@/pages/finance/zahlungseingang`
+**Route:** `/agrar/psm/resistenz` · **Modul:** `@/pages/agrar/psm/resistenz`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zahlungseingang** öffnen (`/finance/zahlungseingang`).
+1. Sidebar oder Suche: **Resistenz** öffnen (`/agrar/psm/resistenz`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2658,13 +1341,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zahlungslauf Kreditoren
+### Sachkunde Register
 
-**Route:** `/finance/zahlungslauf-kreditoren` · **Modul:** `@/pages/finance/zahlungslauf-kreditoren`
+**Route:** `/agrar/psm/sachkunde-register` · **Modul:** `@/pages/agrar/psm/sachkunde-register`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zahlungslauf Kreditoren** öffnen (`/finance/zahlungslauf-kreditoren`).
+1. Sidebar oder Suche: **Sachkunde Register** öffnen (`/agrar/psm/sachkunde-register`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2679,13 +1362,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Liquiditaet
+### Edit
 
-**Route:** `/finanzplanung/liquiditaet` · **Modul:** `@/pages/finanzplanung/liquiditaet`
+**Route:** `/agrar/psm/sachkunde/:id/edit` · **Modul:** `@/pages/agrar/psm/sachkunde-register`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Liquiditaet** öffnen (`/finanzplanung/liquiditaet`).
+1. Sidebar oder Suche: **Edit** öffnen (`/agrar/psm/sachkunde/:id/edit`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -2700,13 +1383,580 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Mahnlauf
+### Neu
 
-**Route:** `/mahnwesen/mahnlauf` · **Modul:** `@/pages/mahnwesen/mahnlauf`
+**Route:** `/agrar/psm/sachkunde/neu` · **Modul:** `@/pages/agrar/psm/sachkunde-register`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mahnlauf** öffnen (`/mahnwesen/mahnlauf`).
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/psm/sachkunde/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Stamm
+
+**Route:** `/agrar/psm/stamm` · **Modul:** `@/pages/agrar/psm/stamm`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Stamm** öffnen (`/agrar/psm/stamm`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/agrar/psm/stamm/:id` · **Modul:** `@/pages/agrar/psm/stamm`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/psm/stamm/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Wasserschutz
+
+**Route:** `/agrar/psm/wasserschutz` · **Modul:** `@/pages/agrar/psm/wasserschutz`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Wasserschutz** öffnen (`/agrar/psm/wasserschutz`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Rohwarengruppen
+
+**Route:** `/agrar/rohwarengruppen` · **Modul:** `@/pages/agrar/rohwarengruppen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Rohwarengruppen** öffnen (`/agrar/rohwarengruppen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Saatgut
+
+**Route:** `/agrar/saatgut` · **Modul:** `@/pages/agrar/saatgut-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Saatgut** öffnen (`/agrar/saatgut`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Saatgut Liste
+
+**Route:** `/agrar/saatgut-liste` · **Modul:** `@/pages/agrar/saatgut-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Saatgut Liste** öffnen (`/agrar/saatgut-liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Saatgut Stamm
+
+**Route:** `/agrar/saatgut-stamm` · **Modul:** `@/pages/agrar/saatgut-stamm`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Saatgut Stamm** öffnen (`/agrar/saatgut-stamm`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/agrar/saatgut-stamm/:id` · **Modul:** `@/pages/agrar/saatgut-stamm`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/saatgut-stamm/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Bestellung
+
+**Route:** `/agrar/saatgut/bestellung` · **Modul:** `@/pages/agrar/saatgut/bestellung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Bestellung** öffnen (`/agrar/saatgut/bestellung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Liste
+
+**Route:** `/agrar/saatgut/liste` · **Modul:** `@/pages/agrar/saatgut/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Liste** öffnen (`/agrar/saatgut/liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/agrar/saatgut/sorte/:id` · **Modul:** `@/pages/agrar/saatgut/sortenregister`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/saatgut/sorte/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Neu
+
+**Route:** `/agrar/saatgut/sorte/neu` · **Modul:** `@/pages/agrar/saatgut/sortenregister`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Neu** öffnen (`/agrar/saatgut/sorte/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Sortenregister
+
+**Route:** `/agrar/saatgut/sortenregister` · **Modul:** `@/pages/agrar/saatgut/sortenregister`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Sortenregister** öffnen (`/agrar/saatgut/sortenregister`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Stamm
+
+**Route:** `/agrar/saatgut/stamm` · **Modul:** `@/pages/agrar/saatgut/stamm`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Stamm** öffnen (`/agrar/saatgut/stamm`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/agrar/saatgut/stamm/:id` · **Modul:** `@/pages/agrar/saatgut/stamm`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/agrar/saatgut/stamm/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Saatzucht
+
+**Route:** `/agrar/saatzucht` · **Modul:** `@/pages/agrar/saatzucht`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Saatzucht** öffnen (`/agrar/saatzucht`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Sammelabrechnung
+
+**Route:** `/agrar/sammelabrechnung` · **Modul:** `@/pages/agrar/sammelabrechnung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Sammelabrechnung** öffnen (`/agrar/sammelabrechnung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Karte
+
+**Route:** `/agrar/schlaege/karte` · **Modul:** `@/pages/agrar/schlaege/karte`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Karte** öffnen (`/agrar/schlaege/karte`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Vermehrungsvertraege
+
+**Route:** `/agrar/vermehrungsvertraege` · **Modul:** `@/pages/agrar/vermehrungsvertraege`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Vermehrungsvertraege** öffnen (`/agrar/vermehrungsvertraege`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Wetterwarnung
+
+**Route:** `/agrar/wetterwarnung` · **Modul:** `@/pages/agrar/wetterwarnung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Wetterwarnung** öffnen (`/agrar/wetterwarnung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Zinsabrechnung
+
+**Route:** `/agrar/zinsabrechnung` · **Modul:** `@/pages/agrar/zinsabrechnung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Zinsabrechnung** öffnen (`/agrar/zinsabrechnung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Farmers
+
+**Route:** `/agribusiness/farmers` · **Modul:** `@/pages/agribusiness/farmers`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Farmers** öffnen (`/agribusiness/farmers`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Field Service Task Edit
+
+**Route:** `/agribusiness/field-service-task-edit` · **Modul:** `@/pages/agribusiness/field-service-task-edit`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Field Service Task Edit** öffnen (`/agribusiness/field-service-task-edit`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Field Service Task Neu
+
+**Route:** `/agribusiness/field-service-task-neu` · **Modul:** `@/pages/agribusiness/field-service-task-neu`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Field Service Task Neu** öffnen (`/agribusiness/field-service-task-neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Field Service Tasks
+
+**Route:** `/agribusiness/field-service-tasks` · **Modul:** `@/pages/agribusiness/field-service-tasks`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Field Service Tasks** öffnen (`/agribusiness/field-service-tasks`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Bearbeiten
+
+**Route:** `/agribusiness/field-service-tasks/:taskId/bearbeiten` · **Modul:** `@/pages/agribusiness/field-service-task-edit`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Bearbeiten** öffnen (`/agribusiness/field-service-tasks/:taskId/bearbeiten`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Neu
+
+**Route:** `/agribusiness/field-service-tasks/neu` · **Modul:** `@/pages/agribusiness/field-service-task-neu`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Neu** öffnen (`/agribusiness/field-service-tasks/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
