@@ -39,6 +39,6 @@ ai_harness:
   security_vertrag: >-
     Liest nur Repo-Dateien. Keine Credentials, keine externen Verbindungen.
   betriebs_vertrag: >-
-    Manuell: python scripts/doc_drift_report.py. CI-Integration als naechster Slice.
+    Manuell: python scripts/doc_drift_report.py. CI: AI-DOC-DRIFT-CI-001 (woechentlich, informativ).
   dokumentations_vertrag: >-
     Workboard-Abschnitt AI-DOC-DRIFT-DASHBOARD-001; Report-Format in YAML-Doku.
