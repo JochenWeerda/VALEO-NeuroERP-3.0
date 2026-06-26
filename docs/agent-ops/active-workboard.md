@@ -1,5 +1,13 @@
 # Active Workboard
 
+## DOC-USER-MANUAL-002 - Benutzerhandbuch vervollstaendigen
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-26 - Erweiterung des Benutzerhandbuchs um operative Randdomaenen mit Quellen-/Reverse-Pflege.
+**Ziel:** POS/Kasse, Logistik, Compliance/Meldewesen, Personal/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion als Endnutzer-How-tos in `docs/benutzerhandbuch/` ergaenzen.
+**Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
+
 ## TAIL-CRM-001 — CRM RAG-/Intent-Panel + Dublettencheck (retroaktiv dokumentiert)
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
