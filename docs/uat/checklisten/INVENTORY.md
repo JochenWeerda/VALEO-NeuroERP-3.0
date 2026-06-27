@@ -1,3 +1,14 @@
+---
+title: UAT Checkliste — Inventory / Lager Domain
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UAT-Abnahmekriterien fuer Inventory-/Lager-Domain — Artikel, Bestaende, Transfers, Bewertung.
+---
+
 # UAT Checkliste: Inventory Domain
 
 ## Artikel-Liste (`/artikel/liste`)

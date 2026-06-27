@@ -1,3 +1,14 @@
+---
+title: UAT Checkliste — Agrar Domain
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UAT-Abnahmekriterien fuer Agrar-Domain — PSM, Ernteannahme, Kontrakte, Lagerung.
+---
+
 # UAT Checkliste: Agrar Domain
 
 ## PSM-Liste (`/agrar/psm`)

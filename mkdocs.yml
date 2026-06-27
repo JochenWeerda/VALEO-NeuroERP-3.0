@@ -123,6 +123,11 @@ exclude_docs: |
   /standards/
   /testing/
   /uat/
+  !/uat/checklisten/AGRAR.md
+  !/uat/checklisten/CRM.md
+  !/uat/checklisten/FINANCE.md
+  !/uat/checklisten/INVENTORY.md
+  !/uat/checklisten/SALES.md
   /user/
   /valeo-reference/
   /warehouse/
@@ -210,6 +215,12 @@ nav:
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
       - Playwright Auth (Smoke): quality-assurance/playwright-smoke-auth.md
       - Browser-Use Checklists: quality-assurance/browser-use-checklists.md
+      - UAT Checklisten:
+          - Agrar: uat/checklisten/AGRAR.md
+          - CRM: uat/checklisten/CRM.md
+          - Finance: uat/checklisten/FINANCE.md
+          - Inventory: uat/checklisten/INVENTORY.md
+          - Sales: uat/checklisten/SALES.md
       - Architektur:
           - Index: architecture/index.md
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md

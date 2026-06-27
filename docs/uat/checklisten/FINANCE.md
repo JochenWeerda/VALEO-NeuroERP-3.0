@@ -1,3 +1,14 @@
+---
+title: UAT Checkliste — Finance Domain
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UAT-Abnahmekriterien fuer Finance-Domain — Buchungsjournal, FiBu, USt, Controlling.
+---
+
 # UAT Checkliste: Finance Domain
 
 ## Buchungsjournal (`/finance/bookings/new`)

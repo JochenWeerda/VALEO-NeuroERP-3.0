@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-UAT-CHECKLISTS-001 - UAT-Domain-Checklisten in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Fuenf UAT-Abnahme-Checklisten (Agrar, CRM, Finance, Inventory, Sales) mit Frontmatter versehen und im Entwickler-Bereich unter UAT Checklisten veroeffentlicht.
+**Ziel:** Faehigkeitsrelevante Abnahmekriterien fuer QA und Entwickler im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/uat/checklisten/AGRAR.md`, `CRM.md`, `FINANCE.md`, `INVENTORY.md`, `SALES.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-UAT-CHECKLISTS-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle fuenf Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 26.19 s).
+
 ## DOC-DEPLOYMENT-RUNBOOKS-001 - Deployment-Runbooks in MkDocs integrieren
 
 **Von:** Claude Code
