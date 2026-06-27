@@ -1,3 +1,14 @@
+---
+title: Cards — Konzept und Pflege
+type: explanation
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Erklaert das Cards-Konzept (kleinste pruefrelevante Prozesseinheit) und beschreibt Pfadkonvention, Dateinamenschema und Pflegeprozess fuer interne Prozess-Audits.
+---
+
 # Cards
 
 ## Zweck

@@ -1,3 +1,14 @@
+---
+title: Card Template — Vorlage fuer Prozess-Cards
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Vollstaendige Vorlage fuer interne Prozess-Cards mit YAML-Frontmatter, 17 Pruefabschnitten, Kurzversion und Mermaid-Beispiel.
+---
+
 # Card Template
 
 ## YAML-Frontmatter (empfohlen für Prozess-Cards)

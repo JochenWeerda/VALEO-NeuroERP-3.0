@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-CARDS-SURFACE-001 - Cards-Konzept und interne Inventar-Docs in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Zwei Cards-Konzeptdokumente (README, card-template) mit Frontmatter versehen; zwei bereits frontmatter-versehene interne Inventar-Docs (_internal/cards-inventory, legacy-docs-inventory) per exclude_docs-Ausnahme eingebunden; Unterabschnitt Prozess-Cards unter Entwickler veroeffentlicht.
+**Ziel:** Interne Prozess-Audit-Infrastruktur (Cards-Konzept, Template, Inventar) fuer Entwickler und QA im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/cards/README.md`, `card-template.md`, `docs/_internal/cards-inventory.md`, `legacy-docs-inventory.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-CARDS-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 18.49 s).
+
 ## DOC-WAREHOUSE-SURFACE-001 - Warehouse/WM-AGRI-Dokumente in MkDocs integrieren
 
 **Von:** Claude Code

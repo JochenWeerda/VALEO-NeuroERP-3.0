@@ -81,11 +81,15 @@ exclude_docs: |
   !/MASKEN.md
   /_internal/
   !/_internal/workflow-chains.md
+  !/_internal/cards-inventory.md
+  !/_internal/legacy-docs-inventory.md
   /analysis/
   /api/
   /agent-ops/
   /archive/
   /cards/
+  !/cards/README.md
+  !/cards/card-template.md
   /config/
   /data/
   /db/
@@ -249,6 +253,11 @@ nav:
       - Auditor Simulation Template: quality-assurance/external-auditor-simulation-template.md
       - E2E CRUD Acceptance Matrix: quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
       - Workflow-Ketten (intern): _internal/workflow-chains.md
+      - Prozess-Cards:
+          - Cards — Konzept: cards/README.md
+          - Card Template: cards/card-template.md
+          - Cards-Inventar (intern): _internal/cards-inventory.md
+          - Legacy-Docs-Inventar: _internal/legacy-docs-inventory.md
       - UAT Checklisten:
           - Agrar: uat/checklisten/AGRAR.md
           - CRM: uat/checklisten/CRM.md
