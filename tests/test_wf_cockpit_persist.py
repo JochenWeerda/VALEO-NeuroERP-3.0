@@ -217,3 +217,87 @@ class TestGetInstanceDetail:
         assert result["id"] == "p1"
         assert "events" in result
         assert "blockers" in result
+
+
+class TestRetryInstance:
+    def _svc_with_row(self, status: str):
+        db = MagicMock()
+        row = MagicMock()
+        row.status = status
+        row.replayable = True
+        db.execute.return_value.fetchone.return_value = row
+        db.execute.return_value.rowcount = 1
+        return WorkflowCockpitPersistService(db=db, tenant_id="t1"), db
+
+    def test_retry_failed_returns_true(self):
+        svc, db = self._svc_with_row("failed")
+        result = svc.retry_instance(process_instance_id="p1", retried_by="hr-admin", reason="network error")
+        assert result is True
+        assert db.commit.call_count >= 1
+
+    def test_retry_blocked_external_returns_true(self):
+        svc, db = self._svc_with_row("blocked_external_gate")
+        result = svc.retry_instance(process_instance_id="p1")
+        assert result is True
+
+    def test_retry_running_status_returns_false(self):
+        svc, db = self._svc_with_row("running")
+        result = svc.retry_instance(process_instance_id="p1")
+        assert result is False
+        db.commit.assert_not_called()
+
+    def test_retry_not_found_returns_false(self):
+        db = MagicMock()
+        db.execute.return_value.fetchone.return_value = None
+        svc = WorkflowCockpitPersistService(db=db, tenant_id="t1")
+        result = svc.retry_instance(process_instance_id="unknown")
+        assert result is False
+
+
+class TestCompensateInstance:
+    def _svc_with_row(self, status: str):
+        db = MagicMock()
+        row = MagicMock()
+        row.status = status
+        db.execute.return_value.fetchone.return_value = row
+        db.execute.return_value.rowcount = 1
+        return WorkflowCockpitPersistService(db=db, tenant_id="t1"), db
+
+    def test_compensate_returns_true(self):
+        svc, db = self._svc_with_row("failed")
+        result = svc.compensate_instance(
+            process_instance_id="p1",
+            compensated_by="manager",
+            compensation_action="storno",
+            notes="Kundenauftrag storniert",
+        )
+        assert result is True
+        assert db.commit.call_count >= 1
+
+    def test_compensate_not_found_returns_false(self):
+        db = MagicMock()
+        db.execute.return_value.fetchone.return_value = None
+        svc = WorkflowCockpitPersistService(db=db, tenant_id="t1")
+        result = svc.compensate_instance(process_instance_id="missing")
+        assert result is False
+
+
+class TestUpsertFromEventSync:
+    def test_sync_calls_upsert_and_append(self):
+        db = MagicMock()
+        db.execute.return_value.fetchone.return_value = None
+        db.execute.return_value.fetchall.return_value = []
+        svc = WorkflowCockpitPersistService(db=db, tenant_id="t1")
+        svc._upsert_from_event_sync(
+            tenant_id="t2",
+            process_instance_id="p1",
+            process_key="O2C",
+            status="running",
+            correlation_id="c1",
+            current_step="Auftragsannahme",
+            business_object_ref="order-42",
+            event_kind="order_created",
+            event_message="Auftrag erstellt",
+            event_payload={"ref": "order-42"},
+        )
+        assert db.execute.call_count >= 2
