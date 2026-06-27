@@ -48,7 +48,8 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.highlight:
-      anchor_linenums: true
+      anchor_linenums: false
+      auto_title: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
@@ -93,6 +94,8 @@ exclude_docs: |
   /integrations/
   /migration/
   /operations/
+  !/operations/production-readiness-runbook.md
+  !/operations/dependency-and-compatibility-maintenance.md
   /perf/
   /policies/
   /project-context/
@@ -102,6 +105,8 @@ exclude_docs: |
   !/quality-assurance/traceability-matrix.md
   /roadmap/
   /runbooks/
+  !/runbooks/ALERTS.md
+  !/runbooks/DISASTER-RECOVERY.md
   /schemas/
   /screenshots/
   /setup/
@@ -172,6 +177,11 @@ nav:
       - Skalierung & Performance: admin/skalierung-performance.md
       - PDF-Branding: admin/BRANDING.md
       - Nummernkreise: admin/NUMBERING.md
+      - Runbooks:
+          - Alert-Handling: runbooks/ALERTS.md
+          - Disaster Recovery: runbooks/DISASTER-RECOVERY.md
+          - Production-Readiness: operations/production-readiness-runbook.md
+          - Dependency-Pflege: operations/dependency-and-compatibility-maintenance.md
   - Entwickler:
       - Überblick: entwickler/index.md
       - Lokales Setup: entwickler/lokales-setup.md

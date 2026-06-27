@@ -1,3 +1,14 @@
+---
+title: Dependency- und Kompatibilitätspflege
+type: reference
+audience: [entwickler, betrieb]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Release-Kompatibilitätsmatrix, Toolchain-Pins, Dependency-Update-Prozess für VALEO NeuroERP.
+---
+
 # Dependency and Compatibility Maintenance
 
 Stand: 2026-06-11

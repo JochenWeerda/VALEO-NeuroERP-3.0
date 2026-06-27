@@ -1,5 +1,15 @@
 # Active Workboard
 
+## Wave 18 — DOC-OPS-RUNBOOKS-001: Ops/Runbook-Dateien in MkDocs integrieren
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27
+
+Vier vom MkDocs-Build ausgeschlossene Operations-/Runbook-Dateien integriert und mit Frontmatter versehen:
+`docs/runbooks/ALERTS.md`, `DISASTER-RECOVERY.md`, `docs/operations/production-readiness-runbook.md`,
+`operations/dependency-and-compatibility-maintenance.md`. Neuer Admin-Nav-Abschnitt „Runbooks" in mkdocs.yml.
+Zwei Build-Bugs behoben: `anchor_linenums: false` + `auto_title: true` (Workaround pymdownx/Pygments-2.20
+`filename=None`-Crash). Build grün: „Documentation built in 22.02 seconds — 0 Errors".
+
 ## DOC-USER-MANUAL-003 - Benutzerhandbuch Kern- und Spezialdomaenen
 
 **Von:** Cursor

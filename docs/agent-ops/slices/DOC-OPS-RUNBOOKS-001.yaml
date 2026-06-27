@@ -1,0 +1,40 @@
+slice_id: DOC-OPS-RUNBOOKS-001
+title: "Ops/Runbook-Dateien in MkDocs integrieren (Wave 18)"
+status: abgeschlossen
+wave: 18
+owner: Claude Code
+created: 2026-06-27
+completed: 2026-06-27
+
+description: >
+  Vier bisher vom MkDocs-Build ausgeschlossene Operations-/Runbook-Dateien wurden
+  integriert, mit Frontmatter versehen und im Admin-Bereich der Doku verlinkt.
+  Außerdem wurden zwei MkDocs-Build-Bugs behoben.
+
+scope:
+  files_modified:
+    - docs/runbooks/ALERTS.md
+    - docs/runbooks/DISASTER-RECOVERY.md
+    - docs/operations/production-readiness-runbook.md
+    - docs/operations/dependency-and-compatibility-maintenance.md
+    - mkdocs.yml
+
+changes:
+  - Frontmatter (title/type/audience/owner/status/last_reviewed/version/description) zu allen 4 Dateien hinzugefügt
+  - exclude_docs-Ausnahmen in mkdocs.yml für alle 4 Dateien ergänzt
+  - Neuer Runbooks-Abschnitt unter Admin & Betrieb in der Nav ergänzt
+  - anchor_linenums auf false gesetzt (Workaround pymdownx/Pygments)
+  - auto_title: true in pymdownx.highlight ergänzt — behebt NoneType-Crash
+    wenn Pygments 2.20 filename=None erhält (pymdownx übergibt title=None
+    für Codeblöcke ohne expliziten Titel)
+  - Jinja2-Expressions in ALERTS.md escaped ({{ }} → { { } })
+
+build_result: "Documentation built in 22.02 seconds — 0 Errors"
+
+ai_harness:
+  claim: "4 Runbook-Dateien sind im MkDocs-Build enthalten und der Build ist fehlerfrei"
+  evidence:
+    - "mkdocs build: Documentation built — 0 Errors"
+    - "runbooks/ALERTS.md, DISASTER-RECOVERY.md, operations/*.md in nav"
+  contract_level: L2
+  external_gates: []
