@@ -1,5 +1,23 @@
 # Active Workboard
 
+## DOC-ARCH-SURFACE-003 - Restliche Architekturdokumente und Open-Gaps in MkDocs
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sieben von architecture/index.md verlinkte Architektur-Konzeptdokumente und open-gaps-and-known-issues.md mit Frontmatter versehen und in MkDocs integriert; INFO-Warnungen fuer ausgeschlossene Links behoben.
+**Ziel:** Alle von architecture/index.md referenzierten Dokumente im Docs-Build auffindbar machen und Open-Gaps-Tracker unter Referenz veroeffentlichen.
+**Dateibesitz:** `docs/architecture/adr-clusters-and-epics.md`, `business-logic-architecture.md`, `module-resolution-architecture.md`, `react-lifecycle-architecture.md`, `KI-USABILITY-MICROSERVICES.md`, `context-architecture-revolution.md`, `typescript-generic-architecture.md`, `docs/project-context/open-gaps-and-known-issues.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ARCH-SURFACE-003.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle acht Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 26.45 s).
+
+## DOC-ARCH-SURFACE-002 - Weitere Architekturdokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — DMS-Integration, AI-Dev-Standard, Architecture-Decision-Map und Agrar-Event-Contracts mit Frontmatter versehen und im Architektur-Abschnitt veroeffentlicht.
+**Ziel:** Integrations- und Standard-Architekturdokumente fuer Entwickler und Agenten im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/architecture/dms-paperless-integration.md`, `ai-assisted-enterprise-development-standard.md`, `architecture-decision-map.md`, `agrar-event-hook-contracts.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ARCH-SURFACE-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 25.53 s).
+
 ## DOC-ARCH-SURFACE-001 - Schluessel-Architekturdokumente in MkDocs integrieren
 
 **Von:** Claude Code

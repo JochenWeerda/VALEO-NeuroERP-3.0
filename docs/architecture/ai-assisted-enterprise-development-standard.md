@@ -1,3 +1,14 @@
+---
+title: AI-assisted Enterprise Development Standard
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Accepted-Standard fuer AI-gestuetzte Enterprise-Entwicklung in VALEO NeuroERP — Slice-Workflow, Governance, Qualitaetsgates.
+---
+
 # AI-assisted Enterprise Development Standard
 
 **Status:** Accepted

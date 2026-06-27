@@ -1,3 +1,14 @@
+---
+title: Module Resolution Architecture
+type: explanation
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Architekturentwurf fuer Module-Aufloesung und Dependency-Management in VALEO NeuroERP Frontend/Backend.
+---
+
 # VALEO NeuroERP 3.0 - Module Resolution Architecture Revolution
 
 ## 🎯 **PROBLEM: Advanced Module Resolution**
@@ -43,7 +54,7 @@ export class ModuleLoader {
 
     public static async loadRemoteEntry(remoteName: string, url: string): Promise<void> {
         if (ModuleLoader.loadedRemotes.has(remoteName)) return;
-        
+
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = url;

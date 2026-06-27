@@ -149,6 +149,18 @@ exclude_docs: |
   !/architecture/target-processes.md
   !/architecture/target-state-landhandel-erp.md
   !/architecture/tooling-quality-governance.md
+  !/architecture/dms-paperless-integration.md
+  !/architecture/ai-assisted-enterprise-development-standard.md
+  !/architecture/architecture-decision-map.md
+  !/architecture/agrar-event-hook-contracts.md
+  !/architecture/adr-clusters-and-epics.md
+  !/architecture/business-logic-architecture.md
+  !/architecture/module-resolution-architecture.md
+  !/architecture/react-lifecycle-architecture.md
+  !/architecture/KI-USABILITY-MICROSERVICES.md
+  !/architecture/context-architecture-revolution.md
+  !/architecture/typescript-generic-architecture.md
+  !/project-context/open-gaps-and-known-issues.md
 
 nav:
   - Start: index.md
@@ -240,6 +252,17 @@ nav:
           - Zielprozesse: architecture/target-processes.md
           - Zielbild Landhandel ERP: architecture/target-state-landhandel-erp.md
           - Quality & Governance Tooling: architecture/tooling-quality-governance.md
+          - DMS / Paperless-ngx: architecture/dms-paperless-integration.md
+          - AI-Dev Standard: architecture/ai-assisted-enterprise-development-standard.md
+          - Architecture Decision Map: architecture/architecture-decision-map.md
+          - Agrar Event-Contracts: architecture/agrar-event-hook-contracts.md
+          - ADR Clusters & Epics: architecture/adr-clusters-and-epics.md
+          - Business Logic Architecture: architecture/business-logic-architecture.md
+          - Module Resolution: architecture/module-resolution-architecture.md
+          - React Lifecycle: architecture/react-lifecycle-architecture.md
+          - KI Usability / Microservices: architecture/KI-USABILITY-MICROSERVICES.md
+          - Context Architecture: architecture/context-architecture-revolution.md
+          - TypeScript Generics: architecture/typescript-generic-architecture.md
       # adr-nav:begin (generated — scripts/generate_adr_nav.py; do not edit manually)
       - ADRs:
           - Index: adr/README.md
@@ -315,6 +338,7 @@ nav:
       - Business Rules: project-context/business-rules.md
       - Module Map: project-context/module-map.md
       - Domain Landhandel: project-context/domain-landhandel-und-agrarhandel.md
+      - Open Gaps & Known Issues: project-context/open-gaps-and-known-issues.md
   - Grundlagen:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md

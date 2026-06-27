@@ -1,3 +1,14 @@
+---
+title: Agrar Event- und Hook-Contracts (v1)
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: NATS-Event- und Hook-Vertragsformat fuer Agrar-Domain v1 — Ernte, Qualitaet, Settlement, Kampagne.
+---
+
 # Agrar Event- und Hook-Contracts (v1)
 
 Stand: 13.02.2026

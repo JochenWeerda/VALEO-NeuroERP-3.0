@@ -1,3 +1,14 @@
+---
+title: Architecture Decision Map
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Uebersicht aller ADRs nach Domainbereich und Entscheidungstyp — Navigation durch die Architekturentscheidungen von VALEO NeuroERP.
+---
+
 # Architecture Decision Map
 
 ## Ziel
