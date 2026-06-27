@@ -1,3 +1,14 @@
+---
+title: Agrar-Spezialsoftware Paritaetsmatrix
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: archiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Historischer Benchmark zur Agrar-Spezialsoftware-Paritaet (Stand 2026-05-17) — nicht als aktuelle Wettbewerbsanalyse verwenden.
+---
+
 # Agrar-Spezialsoftware Paritaetsmatrix
 
 **Konsolidierungsstatus 2026-06-26:** Historischer Benchmark. Nicht als aktuelle

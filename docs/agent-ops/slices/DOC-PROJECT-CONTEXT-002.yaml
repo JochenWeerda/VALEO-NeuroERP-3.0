@@ -1,0 +1,54 @@
+slice_id: DOC-PROJECT-CONTEXT-002
+title: "Weitere Projekt-Kontext-Dokumente in MkDocs einbinden — Wave 32"
+status: done
+wave: 32
+
+fachlicher_vertrag:
+  ziel: >
+    Sieben weitere Projekt-Kontext-Dokumente (Gap-Matrizen, ERP-Referenzanalysen,
+    UI-Maskenbestand, AI-Dev-Plan, Doku-Konsolidierung) mit Frontmatter versehen
+    und unter Referenz > Projekt-Kontext veroeffentlichen.
+  akzeptanzkriterien:
+    - Alle sieben Dateien erreichbar unter Referenz-Navigation
+    - Valide Frontmatter auf allen Dateien
+
+architektur_vertrag:
+  komponenten:
+    - docs/project-context/agrar-erp-gap-matrix-2026-05-17.md
+    - docs/project-context/agrar-parity-matrix-2026-05-17.md
+    - docs/project-context/ai-assisted-development-implementation-plan-2026-06-23.md
+    - docs/project-context/ui-maskenbestand.md
+    - docs/project-context/documentation-consolidation-2026-06-26.md
+    - docs/project-context/erp-reference-gap-analysis-amic-community-erp-fiori-2026-04-08.md
+    - docs/project-context/erp-reference-matrix-2026-04-12.md
+  aenderungen:
+    - Frontmatter hinzugefuegt (alle sieben Dateien)
+    - exclude_docs Ausnahmen fuer alle sieben Dateien
+    - Nav-Eintraege unter Referenz (direkt + Unterabschnitt Gap-Analysen)
+
+daten_vertrag:
+  migrations: keine
+  schema_aenderungen: keine
+
+test_vertrag:
+  pruefschritte:
+    - mkdocs build muss ohne ERROR abschliessen
+
+security_vertrag:
+  datenschutz: keine personenbezogenen Daten betroffen
+  zugriff: oeffentliche Dokumentationssite
+
+betriebs_vertrag:
+  deployment: mkdocs build / gh-pages deploy
+  monitoring: keine
+
+dokumentations_vertrag:
+  workboard_eintrag: DOC-PROJECT-CONTEXT-002
+  nav_eintraege:
+    - Referenz > UI-Maskenbestand
+    - Referenz > AI-Dev Implementierungsplan
+    - Referenz > Doku-Konsolidierung 2026-06
+    - Referenz > Gap-Analysen & Referenz > Agrar-ERP Gap-Matrix
+    - Referenz > Gap-Analysen & Referenz > Agrar-Paritaetsmatrix
+    - Referenz > Gap-Analysen & Referenz > ERP Referenz Gap-Analyse
+    - Referenz > Gap-Analysen & Referenz > ERP Referenzmatrix

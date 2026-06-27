@@ -1,3 +1,14 @@
+---
+title: UI-Maskenbestand — Inventar aller ERP-Masken
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Vollstaendiges Inventar aller ERP-Masken nach Domain und Maskentyp (ObjectPage, ListReport, Wizard) — Grundlage fuer Maskenplanung und Gap-Analyse.
+---
+
 # UI-Maskenbestand
 
 ## Zweck

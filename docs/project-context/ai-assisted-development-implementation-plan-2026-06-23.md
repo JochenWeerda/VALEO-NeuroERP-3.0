@@ -1,3 +1,14 @@
+---
+title: AI-assisted Development Implementation Plan
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Implementierungsplan fuer AI-gestuetzte Entwicklungsprozesse in VALEO NeuroERP (Stand 2026-06-23) — Phasenplanung, Toolchain und Rollout-Strategie.
+---
+
 # AI-assisted Development Implementation Plan
 
 **Status:** umgesetzt

@@ -1,3 +1,14 @@
+---
+title: Dokumentations-Konsolidierung 2026-06-26
+type: explanation
+audience: [entwickler, docs]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Bericht zur Dokumentations-Konsolidierung vom 2026-06-26 — Ziele, abgeschlossene Schritte, Ergebnis und naechste Schritte fuer die Docs-Pflege.
+---
+
 # Documentation Consolidation 2026-06-26
 
 ## Ziel

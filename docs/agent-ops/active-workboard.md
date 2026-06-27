@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-PROJECT-CONTEXT-002 - Weitere Projekt-Kontext-Docs in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sieben weitere Projekt-Kontext-Dokumente (Agrar-ERP-Gap-Matrix, Agrar-Paritaetsmatrix, AI-Dev-Plan, UI-Maskenbestand, Doku-Konsolidierung, ERP-Referenz-Gap-Analyse, ERP-Referenzmatrix) mit Frontmatter versehen und als Referenz-Navigation veroeffentlicht.
+**Ziel:** Strategische Gap-Analysen, ERP-Referenzmatrizen und Projektkontextdokumente fuer Entwickler und Product im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/project-context/agrar-erp-gap-matrix-2026-05-17.md`, `agrar-parity-matrix-2026-05-17.md`, `ai-assisted-development-implementation-plan-2026-06-23.md`, `ui-maskenbestand.md`, `documentation-consolidation-2026-06-26.md`, `erp-reference-gap-analysis-amic-community-erp-fiori-2026-04-08.md`, `erp-reference-matrix-2026-04-12.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-PROJECT-CONTEXT-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sieben Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 38.98 s).
+
 ## DOC-AGENTOPS-SURFACE-002 - Weitere Agent-Ops-Skill-Docs in MkDocs integrieren
 
 **Von:** Claude Code

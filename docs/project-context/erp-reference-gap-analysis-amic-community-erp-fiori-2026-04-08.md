@@ -1,3 +1,14 @@
+---
+title: ERP Reference Gap Analysis — Agrar / Community ERP / Fiori
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: archiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Referenz- und Inspirationsanalyse zu Agrar-Spezialsoftware, Community ERP und SAP Fiori Web-ERP-Standard (Stand 2026-04-08) — nicht als aktuelle Wettbewerbsanalyse verwenden.
+---
+
 # ERP Reference Gap Analysis: Agrar-Spezialsoftware, Community ERP, Web-ERP-Standard
 
 **Konsolidierungsstatus 2026-06-26:** Referenz- und Inspirationsdokument, kein
