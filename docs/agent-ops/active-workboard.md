@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HR-TIME-WIZARD-001 - UX-M3 Gefuehrter Planungswizard (5 Schritte)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 5-Schritt-Inline-Wizard im Planung-Tab (Zeitraum → Bedarf → Praeferenzen → Vorschau → Abschluss); dynamische Bedarfszeilen; Fortschrittsbalken; `useCreateWorkPlanAssignment`-Hook; Mutation-Guard via `isPending`; tsc 0 Fehler.
+**Ziel:** UX-M3 (Gefuehrter Planungswizard): Arbeitsplan ohne manuelle Mehrfacherfassung erstellen — Schritt-fuer-Schritt-Fuehrer mit Vorschau vor Speichern.
+**Dateibesitz:** `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-WIZARD-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Wizard oeffnet auf Knopf; 5 Schritte navigierbar; Schritt 5 sendet POST; isPending-Guard aktiv; tsc 0; UX-M3 als umgesetzt markiert.
+
 ## HR-TIME-SEASON-BOARD-001 - UX-M7 Saison-Leitstand 7-Tage-Heatmap
 
 **Von:** Claude Code

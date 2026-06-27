@@ -30,6 +30,7 @@ import {
   useUpdateDriverTimeEvent,
   useWorkPlan,
   useZeiterfassung,
+  useCreateWorkPlanAssignment,
   type Absence,
   type CalendarEvent,
   type CampaignCapacity,
@@ -114,6 +115,12 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [selectedWorkPlanItem, setSelectedWorkPlanItem] = useState<WorkPlanAssignment | null>(null)
   const [selectedDriverEvent, setSelectedDriverEvent] = useState<DriverTimeEvent | null>(null)
   const [driverPatchForm, setDriverPatchForm] = useState({ vehicleId: '', tourRef: '', notes: '' })
+  const createWorkPlanAssignment = useCreateWorkPlanAssignment()
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4 | 5>(1)
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [wizardZeitraum, setWizardZeitraum] = useState({ von: selectedDate, bis: selectedDate })
+  const [wizardBedarf, setWizardBedarf] = useState([{ roleCode: 'lkw_fahrer', label: 'LKW-Fahrer', count: '1', startTime: '06:00', endTime: '14:00' }])
+  const [wizardPref, setWizardPref] = useState({ nightOk: false, requireLkw: false, notes: '' })
   const updateDriverTimeEvent = useUpdateDriverTimeEvent()
 
   const startCorrection = (entry: ZeitEintrag) => {
@@ -451,6 +458,30 @@ export default function ZeiterfassungPage(): JSX.Element {
 
   const handlePrintWorkPlan = () => {
     window.print()
+  }
+
+  const handleWizardFinish = async () => {
+    const assignmentsToCreate = wizardBedarf.flatMap(row => {
+      const count = Math.max(1, parseInt(row.count, 10) || 1)
+      return Array.from({ length: count }, (_, i) => ({
+        datum: wizardZeitraum.von,
+        employeeRef: `tbd-${row.roleCode}-${i + 1}`,
+        label: row.label || row.roleCode,
+        startTime: row.startTime || null,
+        endTime: row.endTime || null,
+        roleCode: row.roleCode || null,
+        notes: wizardPref.notes || null,
+      }))
+    })
+    try {
+      for (const assignment of assignmentsToCreate) {
+        await createWorkPlanAssignment.mutateAsync(assignment)
+      }
+      setWizardOpen(false)
+      setWizardStep(1)
+    } catch {
+      // toast provided by query-level error handling
+    }
   }
 
   if (isLoading || isCockpitLoading) {
@@ -1102,6 +1133,117 @@ export default function ZeiterfassungPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="planung" className="space-y-4">
+          {/* Planungswizard UX-M3 */}
+          {!wizardOpen ? (
+            <div className="flex justify-end">
+              <Button size="sm" className="gap-2" onClick={() => { setWizardOpen(true); setWizardStep(1) }}>
+                <Plus className="h-4 w-4" />
+                Neuen Arbeitsplan erstellen
+              </Button>
+            </div>
+          ) : (
+            <Card className="border-primary/40">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Arbeitsplan-Assistent — Schritt {wizardStep} von 5</CardTitle>
+                  <div className="flex gap-1">
+                    {([1, 2, 3, 4, 5] as const).map(s => (
+                      <div key={s} className={`h-2 w-8 rounded-full ${s <= wizardStep ? 'bg-primary' : 'bg-muted'}`} />
+                    ))}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {wizardStep === 1 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Zeitraum festlegen</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="mb-1 block text-xs">Von</Label>
+                        <Input type="date" value={wizardZeitraum.von} onChange={e => setWizardZeitraum(p => ({ ...p, von: e.target.value }))} />
+                      </div>
+                      <div>
+                        <Label className="mb-1 block text-xs">Bis</Label>
+                        <Input type="date" value={wizardZeitraum.bis} onChange={e => setWizardZeitraum(p => ({ ...p, bis: e.target.value }))} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {wizardStep === 2 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Rollenbedarf definieren</p>
+                    {wizardBedarf.map((row, idx) => (
+                      <div key={idx} className="grid grid-cols-5 gap-2">
+                        <Input placeholder="Rolle" value={row.roleCode} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, roleCode: e.target.value } : r))} />
+                        <Input placeholder="Bezeichnung" value={row.label} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, label: e.target.value } : r))} />
+                        <Input placeholder="Anzahl" type="number" min={1} value={row.count} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, count: e.target.value } : r))} />
+                        <Input placeholder="Von" type="time" value={row.startTime} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, startTime: e.target.value } : r))} />
+                        <Input placeholder="Bis" type="time" value={row.endTime} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, endTime: e.target.value } : r))} />
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => setWizardBedarf(b => [...b, { roleCode: '', label: '', count: '1', startTime: '06:00', endTime: '14:00' }])}>
+                      <Plus className="h-3 w-3" /> Zeile hinzufügen
+                    </Button>
+                  </div>
+                )}
+                {wizardStep === 3 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Präferenzen</p>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={wizardPref.nightOk} onChange={e => setWizardPref(p => ({ ...p, nightOk: e.target.checked }))} />
+                      Nachttouren möglich
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={wizardPref.requireLkw} onChange={e => setWizardPref(p => ({ ...p, requireLkw: e.target.checked }))} />
+                      LKW-Führerschein erforderlich
+                    </label>
+                    <Textarea placeholder="Hinweise zur Planung" rows={2} value={wizardPref.notes} onChange={e => setWizardPref(p => ({ ...p, notes: e.target.value }))} />
+                  </div>
+                )}
+                {wizardStep === 4 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Vorschau — zu erstellende Einträge</p>
+                    <div className="space-y-2">
+                      {wizardBedarf.map((row, idx) => (
+                        <div key={idx} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                          <span className="font-medium">{row.label || row.roleCode}</span>
+                          <span className="text-muted-foreground">{row.count}× · {row.startTime}–{row.endTime} · {wizardZeitraum.von}</span>
+                          <Badge variant="outline">{wizardPref.requireLkw ? 'LKW' : row.roleCode}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                    {wizardPref.notes && <p className="text-xs text-muted-foreground">Hinweis: {wizardPref.notes}</p>}
+                  </div>
+                )}
+                {wizardStep === 5 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Abschluss — Arbeitsplan anlegen</p>
+                    <div className="rounded-lg border bg-muted/30 p-4 text-sm space-y-1">
+                      <p><span className="font-medium">Zeitraum:</span> {wizardZeitraum.von} – {wizardZeitraum.bis}</p>
+                      <p><span className="font-medium">Rollen:</span> {wizardBedarf.length} Eintragsgruppe(n)</p>
+                      <p><span className="font-medium">Gesamtbedarf:</span> {wizardBedarf.reduce((s, r) => s + (parseInt(r.count, 10) || 1), 0)} Stellen</p>
+                    </div>
+                    <Button className="w-full gap-2" onClick={handleWizardFinish} disabled={createWorkPlanAssignment.isPending}>
+                      <CheckCircle2 className="h-4 w-4" />
+                      {createWorkPlanAssignment.isPending ? 'Wird angelegt…' : 'Arbeitsplan anlegen'}
+                    </Button>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setWizardOpen(false); setWizardStep(1) }}>Abbrechen</Button>
+                  <div className="flex gap-2">
+                    {wizardStep > 1 && (
+                      <Button variant="outline" size="sm" onClick={() => setWizardStep(s => (s - 1) as typeof s)}>Zurück</Button>
+                    )}
+                    {wizardStep < 5 && (
+                      <Button size="sm" onClick={() => setWizardStep(s => (s + 1) as typeof s)}>Weiter</Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid gap-4 xl:grid-cols-3">
             <Card>
               <CardHeader>
