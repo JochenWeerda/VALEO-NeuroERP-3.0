@@ -211,6 +211,37 @@ def upgrade() -> None:
             updated_at      TIMESTAMPTZ     DEFAULT NOW()
         )
     """))
+    for ddl in [
+        "ALTER TABLE domain_erp.closing_checklists ADD COLUMN IF NOT EXISTS period_start DATE",
+        "ALTER TABLE domain_erp.closing_checklists ADD COLUMN IF NOT EXISTS period_end DATE",
+        "ALTER TABLE domain_erp.closing_checklists ADD COLUMN IF NOT EXISTS completed_by VARCHAR(128)",
+        "ALTER TABLE domain_erp.closing_checklists ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ",
+        "ALTER TABLE domain_erp.closing_checklists ADD COLUMN IF NOT EXISTS notes TEXT",
+    ]:
+        conn.execute(text(ddl))
+    conn.execute(text("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp'
+                  AND table_name = 'closing_checklists'
+                  AND column_name = 'period'
+            ) THEN
+                UPDATE domain_erp.closing_checklists
+                SET period_start = COALESCE(
+                        period_start,
+                        TO_DATE(period || '-01', 'YYYY-MM-DD')
+                    ),
+                    period_end = COALESCE(
+                        period_end,
+                        (TO_DATE(period || '-01', 'YYYY-MM-DD') + INTERVAL '1 month' - INTERVAL '1 day')::date
+                    )
+                WHERE period IS NOT NULL AND period_start IS NULL;
+            END IF;
+        END
+        $$
+    """))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_closing_checklists_tenant_period
             ON domain_erp.closing_checklists (tenant_id, period_start, status)
@@ -272,6 +303,93 @@ def upgrade() -> None:
             created_at      TIMESTAMPTZ     DEFAULT NOW(),
             updated_at      TIMESTAMPTZ     DEFAULT NOW()
         )
+    """))
+    for ddl in [
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS partner_id VARCHAR(64)",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS partner_type VARCHAR(16) DEFAULT 'debitor'",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS document_type VARCHAR(32) DEFAULT 'invoice'",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS document_number VARCHAR(100)",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS document_date DATE",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS due_date DATE",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'EUR'",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS gross_amount NUMERIC(15,2) DEFAULT 0",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS open_amount NUMERIC(15,2) DEFAULT 0",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS discount_date DATE",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(15,2) DEFAULT 0",
+        "ALTER TABLE domain_erp.offene_posten ADD COLUMN IF NOT EXISTS status VARCHAR(32) DEFAULT 'open'",
+    ]:
+        conn.execute(text(ddl))
+    conn.execute(text("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp' AND table_name = 'offene_posten'
+                  AND column_name = 'op_status'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_erp.offene_posten
+                    SET status = COALESCE(status, op_status, 'open')
+                    WHERE status IS NULL
+                $sql$;
+            END IF;
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp' AND table_name = 'offene_posten'
+                  AND column_name = 'kunde_id'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_erp.offene_posten
+                    SET partner_id = COALESCE(partner_id, kunde_id)
+                    WHERE partner_id IS NULL
+                $sql$;
+            END IF;
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp' AND table_name = 'offene_posten'
+                  AND column_name = 'debtor_id'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_erp.offene_posten
+                    SET partner_id = COALESCE(partner_id, debtor_id)
+                    WHERE partner_id IS NULL
+                $sql$;
+            END IF;
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp' AND table_name = 'offene_posten'
+                  AND column_name = 'rechnungsnr'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_erp.offene_posten
+                    SET document_number = COALESCE(document_number, rechnungsnr)
+                    WHERE document_number IS NULL
+                $sql$;
+            END IF;
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp' AND table_name = 'offene_posten'
+                  AND column_name = 'faelligkeit'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_erp.offene_posten
+                    SET due_date = COALESCE(due_date, faelligkeit)
+                    WHERE due_date IS NULL
+                $sql$;
+            END IF;
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp' AND table_name = 'offene_posten'
+                  AND column_name = 'offen'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_erp.offene_posten
+                    SET open_amount = COALESCE(open_amount, offen)
+                    WHERE open_amount IS NULL
+                $sql$;
+            END IF;
+        END
+        $$
     """))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_offene_posten_tenant_status
@@ -382,6 +500,15 @@ def upgrade() -> None:
             created_at      TIMESTAMPTZ     DEFAULT NOW(),
             updated_at      TIMESTAMPTZ     DEFAULT NOW()
         )
+    """))
+    conn.execute(text(
+        "ALTER TABLE domain_erp.pos_transactions "
+        "ADD COLUMN IF NOT EXISTS transaction_date TIMESTAMPTZ DEFAULT NOW()"
+    ))
+    conn.execute(text("""
+        UPDATE domain_erp.pos_transactions
+        SET transaction_date = COALESCE(transaction_date, created_at, NOW())
+        WHERE transaction_date IS NULL
     """))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_pos_transactions_tenant_date
