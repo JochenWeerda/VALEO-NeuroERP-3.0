@@ -92,6 +92,10 @@ exclude_docs: |
   !/agent-ops/handoff-template.md
   !/agent-ops/parallel-work-protocol.md
   !/agent-ops/resume-packet-template.md
+  !/agent-ops/README.md
+  !/agent-ops/autogoal-skill.md
+  !/agent-ops/goal-skill.md
+  !/agent-ops/agent-orchestrator-pilot.md
   /archive/
   /cards/
   !/cards/README.md
@@ -349,12 +353,16 @@ nav:
       - ai_harness-Verträge: agent-docs/contracts.md
       - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
       - Agent-Ops:
+          - Überblick: agent-ops/README.md
           - Active Workboard: agent-ops/active-workboard.md
           - Session Start Checklist: agent-ops/session-start-checklist.md
           - Task Slice Template: agent-ops/task-slice-template.md
           - Handoff Template: agent-ops/handoff-template.md
           - Parallel Work Protocol: agent-ops/parallel-work-protocol.md
           - Resume Packet Template: agent-ops/resume-packet-template.md
+          - /goal Skill: agent-ops/goal-skill.md
+          - /autogoal Skill: agent-ops/autogoal-skill.md
+          - Agent Orchestrator Pilot: agent-ops/agent-orchestrator-pilot.md
   - Compliance:
       - Überblick: compliance/index.md
       - GoBD-Checkliste: compliance/gobd-checklist.md

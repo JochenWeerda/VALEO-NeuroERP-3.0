@@ -1,3 +1,14 @@
+---
+title: Agent Orchestrator Pilot
+type: explanation
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Pilotentwurf fuer einen Agent-Orchestrator — Aufgabenverteilung, Tool-Routing und Koordinationsmuster fuer mehrere parallele Agenten (Stand 2026-05-05).
+---
+
 # Agent Orchestrator Pilot
 
 Stand: `2026-05-05`

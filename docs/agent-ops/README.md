@@ -1,3 +1,14 @@
+---
+title: Agent Ops — Ueberblick
+type: explanation
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Ueberblick ueber den Agent-Ops-Bereich — parallele Agentenarbeit restart-sicher und konfliktarm gestalten; Verzeichnisstruktur und Verantwortlichkeiten.
+---
+
 # Agent Ops
 
 ## Zweck

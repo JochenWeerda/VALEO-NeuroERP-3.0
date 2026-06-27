@@ -1,3 +1,14 @@
+---
+title: /autogoal — Goal-Driven Agent Mode
+type: reference
+audience: [agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Beschreibung des /autogoal-Skills fuer zielgesteuertes Agenten-Modus — Aktivierung, Schleifenverhalten und Abbruchbedingungen.
+---
+
 # /autogoal — Goal-Driven Agent Mode
 
 > **Cursor-Aktivierung:** `.cursor/skills/autogoal/SKILL.md` (lokal, gitignored).

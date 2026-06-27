@@ -1,0 +1,48 @@
+slice_id: DOC-AGENTOPS-SURFACE-002
+title: "Weitere Agent-Ops-Skill-Dokumente in MkDocs einbinden — Wave 31"
+status: done
+wave: 31
+
+fachlicher_vertrag:
+  ziel: >
+    Vier weitere Agent-Ops-Dokumente (README, autogoal-skill, goal-skill,
+    agent-orchestrator-pilot) mit Frontmatter versehen und in Agent-Ops-Unterabschnitt
+    einbinden.
+  akzeptanzkriterien:
+    - Alle vier Dateien erreichbar unter Agent-Dokumentation > Agent-Ops
+    - Valide Frontmatter auf allen Dateien
+
+architektur_vertrag:
+  komponenten:
+    - docs/agent-ops/README.md
+    - docs/agent-ops/autogoal-skill.md
+    - docs/agent-ops/goal-skill.md
+    - docs/agent-ops/agent-orchestrator-pilot.md
+  aenderungen:
+    - Frontmatter hinzugefuegt (alle vier Dateien)
+    - exclude_docs Ausnahmen fuer alle vier Dateien
+    - Nav-Eintraege im Agent-Ops-Unterabschnitt ergaenzt
+
+daten_vertrag:
+  migrations: keine
+  schema_aenderungen: keine
+
+test_vertrag:
+  pruefschritte:
+    - mkdocs build muss ohne ERROR abschliessen
+
+security_vertrag:
+  datenschutz: keine personenbezogenen Daten betroffen
+  zugriff: oeffentliche Dokumentationssite
+
+betriebs_vertrag:
+  deployment: mkdocs build / gh-pages deploy
+  monitoring: keine
+
+dokumentations_vertrag:
+  workboard_eintrag: DOC-AGENTOPS-SURFACE-002
+  nav_eintraege:
+    - Agent-Dokumentation > Agent-Ops > Ueberblick
+    - Agent-Dokumentation > Agent-Ops > /goal Skill
+    - Agent-Dokumentation > Agent-Ops > /autogoal Skill
+    - Agent-Dokumentation > Agent-Ops > Agent Orchestrator Pilot
