@@ -1,34 +1,49 @@
 # Active Workboard
 
-## Wave 20 — DOC-QA-SURFACE-001: QA/Test-Docs und External-Mock-Verträge
+## DOC-DEPLOYMENT-RUNBOOKS-001 - Deployment-Runbooks in MkDocs integrieren
 
-**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sechs Deployment-Dokumente (ArgoCD/GitOps, Canary-Rollout, IDEV-Setup, Secrets, Zoll, Frontend EPCIS) mit Frontmatter versehen und unter Admin → Deployment in Navigation aufgenommen.
+**Ziel:** Betriebsrelevante Deployment-Runbooks fuer Admins und Entwickler auffindbar machen.
+**Dateibesitz:** `docs/deployment/gitops/argocd.md`, `docs/deployment/runbook/infra/canary-rollout.md`, `docs/deployment/runbook/infra/idev-setup.md`, `docs/deployment/runbook/security/secrets-inventory.md`, `docs/deployment/runbook/compliance/zoll-setup.md`, `docs/deployment/runbook/frontend/epcis-ui.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-DEPLOYMENT-RUNBOOKS-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sechs Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 25.66 s).
 
-3 QA-/Test-Dokumente mit Frontmatter versehen und in MkDocs-Build integriert:
-`quality-assurance/playwright-smoke-auth.md` (SSO-only Auth-Strategie für Playwright),
-`quality-assurance/browser-use-checklists.md` (E2E-UAT Pflichtfragen).
-`agent-docs/runbooks/external-mock-vertraege.md` (DATEV/ELSTER/TSE/Bank/DSFinV-K Mock-Endpoints)
-unter Agent-Dokumentation verlinkt. Build grün: „Documentation built in 48.84 seconds — 0 Errors".
+## DOC-QA-SURFACE-001 - QA/Test-Docs und External-Mock-Verträge in MkDocs
 
-## Wave 19 — DOC-WORKFLOW-INDEX-001: Kuratierter Workflow-Index
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 3 QA-/Test-Dokumente mit Frontmatter versehen und in Build integriert; External-Mock-Verträge-Runbook in Agent-Dokumentation verlinkt.
+**Ziel:** Playwright-Auth-Anleitung, Browser-Use-Checklists und External-Mock-Verträge (DATEV/ELSTER/TSE/Bank/DSFinV-K) im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/quality-assurance/playwright-smoke-auth.md`, `docs/quality-assurance/browser-use-checklists.md`, `docs/agent-docs/runbooks/external-mock-vertraege.md` (nur Nav-Link), `mkdocs.yml`, `docs/agent-ops/slices/DOC-QA-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 48.84 s).
 
-**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27
+## DOC-WORKFLOW-INDEX-001 - Kuratierter Workflow-Index fuer Entwickler
 
-161 Workflow-Dokumente in `docs/workflows/` katalogisiert und als kuratierten Entwickler-Index
-in `docs/entwickler/workflow-index.md` veröffentlicht (7 Kategorien: Geschäftsprozess,
-Domain-Deepening, Process Kernel, Security ×34, NeuroCore ×24, Superglue ×56, Sonstiges).
-Quelldateien bleiben in docs/workflows/ ausgeschlossen; der Index ist im Build enthalten.
-Build grün: „Documentation built in 39.59 seconds — 0 Errors".
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 161 Workflow-Dokumente in docs/workflows/ in 7 Kategorien katalogisiert und als Entwickler-Index veroeffentlicht.
+**Ziel:** Alle Workflow-Dokumente auffindbar machen ohne sie direkt in den kuratierten Build zu ziehen.
+**Dateibesitz:** `docs/entwickler/workflow-index.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-WORKFLOW-INDEX-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 39.59 s); Quelldateien bleiben in docs/workflows/ ausgeschlossen.
 
-## Wave 18 — DOC-OPS-RUNBOOKS-001: Ops/Runbook-Dateien in MkDocs integrieren
+## DOC-USER-MANUAL-004 - Benutzerhandbuch vollstaendig
 
-**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27
+**Von:** Cursor - **Owner:** Cursor - **Stand:** abgeschlossen 2026-06-26
 
-Vier vom MkDocs-Build ausgeschlossene Operations-/Runbook-Dateien integriert und mit Frontmatter versehen:
-`docs/runbooks/ALERTS.md`, `DISASTER-RECOVERY.md`, `docs/operations/production-readiness-runbook.md`,
-`operations/dependency-and-compatibility-maintenance.md`. Neuer Admin-Nav-Abschnitt „Runbooks" in mkdocs.yml.
-Zwei Build-Bugs behoben: `anchor_linenums: false` + `auto_title: true` (Workaround pymdownx/Pygments-2.20
-`filename=None`-Crash). Build grün: „Documentation built in 22.02 seconds — 0 Errors".
+Generatorische Vollabdeckung des Benutzerhandbuchs fuer 851/851 Endnutzer-Routen,
+29 Fachkapitel, MkDocs-Navigation und In-App-Hilfe-Mapping. Fachliche
+Domain-How-tos bleiben fuer Tiefenwissen fuehrend; Screenshots/UAT sind
+operative Folgegates.
+
+## DOC-OPS-RUNBOOKS-001 - Ops/Runbook-Dateien in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Vier bisher ausgeschlossene Operations-/Runbook-Seiten mit Frontmatter versehen, in Navigation aufgenommen und zwei Build-Blocker behoben.
+**Ziel:** ALERTS, DISASTER-RECOVERY, production-readiness-runbook und dependency-and-compatibility-maintenance im Admin-Betriebsbereich der Doku zugaenglich machen.
+**Dateibesitz:** `docs/runbooks/ALERTS.md`, `docs/runbooks/DISASTER-RECOVERY.md`, `docs/operations/production-readiness-runbook.md`, `docs/operations/dependency-and-compatibility-maintenance.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-OPS-RUNBOOKS-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Runbook-Seiten haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen ohne Pygments-/Jinja-Blocker (0 Errors, 22.02 s).
 
 ## DOC-USER-MANUAL-003 - Benutzerhandbuch Kern- und Spezialdomaenen
 
