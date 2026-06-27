@@ -80,6 +80,7 @@ exclude_docs: |
   !/index.md
   !/MASKEN.md
   /_internal/
+  !/_internal/workflow-chains.md
   /analysis/
   /api/
   /agent-ops/
@@ -116,6 +117,9 @@ exclude_docs: |
   !/quality-assurance/traceability-matrix.md
   !/quality-assurance/playwright-smoke-auth.md
   !/quality-assurance/browser-use-checklists.md
+  !/quality-assurance/soll-ist-checks.md
+  !/quality-assurance/external-auditor-simulation-template.md
+  !/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
   /roadmap/
   /runbooks/
   !/runbooks/ALERTS.md
@@ -235,6 +239,10 @@ nav:
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
       - Playwright Auth (Smoke): quality-assurance/playwright-smoke-auth.md
       - Browser-Use Checklists: quality-assurance/browser-use-checklists.md
+      - Soll-Ist Checks: quality-assurance/soll-ist-checks.md
+      - Auditor Simulation Template: quality-assurance/external-auditor-simulation-template.md
+      - E2E CRUD Acceptance Matrix: quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
+      - Workflow-Ketten (intern): _internal/workflow-chains.md
       - UAT Checklisten:
           - Agrar: uat/checklisten/AGRAR.md
           - CRM: uat/checklisten/CRM.md

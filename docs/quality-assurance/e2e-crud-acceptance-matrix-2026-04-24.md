@@ -1,3 +1,14 @@
+---
+title: E2E CRUD Acceptance Matrix
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Abnahmematrix fuer End-to-End CRUD-Tests je Domain-Objekt — Testfaelle, Akzeptanzkriterien und Ergebnisstatus (Stand 2026-04-24).
+---
+
 # E2E CRUD Acceptance Matrix
 
 Stand: `2026-04-24`

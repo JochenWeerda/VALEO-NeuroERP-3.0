@@ -1,3 +1,14 @@
+---
+title: Soll-Ist Checks — Methodik
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Methodik fuer strukturierte Soll-Ist-Abweichungsanalysen je Workflow oder Card — Abnahmekriterien, Messung, Eskalation.
+---
+
 # Soll-Ist Checks
 
 ## Zweck

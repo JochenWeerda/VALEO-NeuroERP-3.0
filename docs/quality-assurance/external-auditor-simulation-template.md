@@ -1,3 +1,14 @@
+---
+title: External Auditor Simulation Template
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Template fuer interne Vorabnahmen aus Sicht eines externen Pruefers — Checklisten, Pruefschritte und Eskalationsregeln fuer QA-Prozesse.
+---
+
 # External Auditor Simulation Template
 
 ## Zweck
