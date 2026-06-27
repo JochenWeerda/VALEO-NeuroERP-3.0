@@ -106,6 +106,10 @@ exclude_docs: |
   /perf/
   /policies/
   /project-context/
+  !/project-context/system-overview.md
+  !/project-context/business-rules.md
+  !/project-context/module-map.md
+  !/project-context/domain-landhandel-und-agrarhandel.md
   /quality/
   /quality-assurance/
   !/quality-assurance/action-matrix-report.md
@@ -299,6 +303,10 @@ nav:
       - Maskenstandard (MASKEN): MASKEN.md
       - Glossar: benutzerhandbuch/glossar.md
       - Skripte & Generatoren: referenz/skripte-uebersicht.md
+      - System-Überblick: project-context/system-overview.md
+      - Business Rules: project-context/business-rules.md
+      - Module Map: project-context/module-map.md
+      - Domain Landhandel: project-context/domain-landhandel-und-agrarhandel.md
   - Grundlagen:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md
