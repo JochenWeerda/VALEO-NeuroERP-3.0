@@ -1,3 +1,14 @@
+---
+title: Domain — Landhandel und Agrarhandel
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Fachliche Realitaet des Landhandels/Agrarhandels — Grundlage fuer Prozessanalyse und Workflow-Validierung in VALEO NeuroERP.
+---
+
 # Domain Landhandel und Agrarhandel
 
 ## Zweck

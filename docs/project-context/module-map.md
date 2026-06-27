@@ -1,3 +1,14 @@
+---
+title: Module Map — Fachbereichs-Zuordnung
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Kurze Zuordnung der wichtigsten Fachbereiche zu Seiten, APIs und Prozessgrenzen fuer schnelle Orientierung.
+---
+
 # Module Map
 
 ## Zweck

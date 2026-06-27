@@ -1,3 +1,14 @@
+---
+title: UAT Checkliste — Sales Domain
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UAT-Abnahmekriterien fuer Sales-Domain — Angebote, Auftraege, Lieferscheine, Rechnungen.
+---
+
 # UAT Checkliste: Sales Domain
 
 ## Angebote-Liste (`/sales/angebote`)

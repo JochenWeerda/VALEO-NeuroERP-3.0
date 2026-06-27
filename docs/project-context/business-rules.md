@@ -1,3 +1,14 @@
+---
+title: Business Rules — Fachliche Leitregeln
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Wichtigste fachliche Leitregeln fuer Workflow-Analyse und Implementierungsentscheidungen in VALEO NeuroERP.
+---
+
 # Business Rules
 
 ## Zweck

@@ -1,5 +1,23 @@
 # Active Workboard
 
+## DOC-PROJECT-CONTEXT-001 - Schluessel-Projektkontextdokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Vier Projektkontextdokumente (System-Overview, Business Rules, Module Map, Domain Landhandel) mit Frontmatter versehen und unter Referenz im Docs-Build veroeffentlicht.
+**Ziel:** Fachliche Orientierungsdokumente fuer Agenten und Entwickler im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/project-context/system-overview.md`, `business-rules.md`, `module-map.md`, `domain-landhandel-und-agrarhandel.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-PROJECT-CONTEXT-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 38.14 s).
+
+## DOC-UAT-CHECKLISTS-001 - UAT-Domain-Checklisten in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Fuenf UAT-Abnahme-Checklisten (Agrar, CRM, Finance, Inventory, Sales) mit Frontmatter versehen und im Entwickler-Bereich unter UAT Checklisten veroeffentlicht.
+**Ziel:** Faehigkeitsrelevante Abnahmekriterien fuer QA und Entwickler im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/uat/checklisten/AGRAR.md`, `CRM.md`, `FINANCE.md`, `INVENTORY.md`, `SALES.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-UAT-CHECKLISTS-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle fuenf Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 26.19 s).
+
 ## DOC-DEPLOYMENT-RUNBOOKS-001 - Deployment-Runbooks in MkDocs integrieren
 
 **Von:** Claude Code

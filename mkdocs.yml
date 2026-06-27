@@ -106,6 +106,10 @@ exclude_docs: |
   /perf/
   /policies/
   /project-context/
+  !/project-context/system-overview.md
+  !/project-context/business-rules.md
+  !/project-context/module-map.md
+  !/project-context/domain-landhandel-und-agrarhandel.md
   /quality/
   /quality-assurance/
   !/quality-assurance/action-matrix-report.md
@@ -123,6 +127,11 @@ exclude_docs: |
   /standards/
   /testing/
   /uat/
+  !/uat/checklisten/AGRAR.md
+  !/uat/checklisten/CRM.md
+  !/uat/checklisten/FINANCE.md
+  !/uat/checklisten/INVENTORY.md
+  !/uat/checklisten/SALES.md
   /user/
   /valeo-reference/
   /warehouse/
@@ -210,6 +219,12 @@ nav:
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
       - Playwright Auth (Smoke): quality-assurance/playwright-smoke-auth.md
       - Browser-Use Checklists: quality-assurance/browser-use-checklists.md
+      - UAT Checklisten:
+          - Agrar: uat/checklisten/AGRAR.md
+          - CRM: uat/checklisten/CRM.md
+          - Finance: uat/checklisten/FINANCE.md
+          - Inventory: uat/checklisten/INVENTORY.md
+          - Sales: uat/checklisten/SALES.md
       - Architektur:
           - Index: architecture/index.md
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md
@@ -288,6 +303,10 @@ nav:
       - Maskenstandard (MASKEN): MASKEN.md
       - Glossar: benutzerhandbuch/glossar.md
       - Skripte & Generatoren: referenz/skripte-uebersicht.md
+      - System-Überblick: project-context/system-overview.md
+      - Business Rules: project-context/business-rules.md
+      - Module Map: project-context/module-map.md
+      - Domain Landhandel: project-context/domain-landhandel-und-agrarhandel.md
   - Grundlagen:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md

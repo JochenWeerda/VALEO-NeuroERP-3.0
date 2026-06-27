@@ -135,6 +135,31 @@ def upgrade() -> None:
             created_at          TIMESTAMPTZ     DEFAULT NOW()
         )
     """))
+    for ddl in [
+        "ALTER TABLE domain_erp.bank_matches ADD COLUMN IF NOT EXISTS bank_line_id VARCHAR(64)",
+        "ALTER TABLE domain_erp.bank_matches ADD COLUMN IF NOT EXISTS invoice_id VARCHAR(64)",
+        "ALTER TABLE domain_erp.bank_matches ADD COLUMN IF NOT EXISTS match_score NUMERIC(5,4) DEFAULT 0",
+        "ALTER TABLE domain_erp.bank_matches ADD COLUMN IF NOT EXISTS matched_by VARCHAR(128)",
+        "ALTER TABLE domain_erp.bank_matches ADD COLUMN IF NOT EXISTS amount_diff NUMERIC(15,2) DEFAULT 0",
+        "ALTER TABLE domain_erp.bank_matches ADD COLUMN IF NOT EXISTS status VARCHAR(32) DEFAULT 'matched'",
+    ]:
+        conn.execute(text(ddl))
+    conn.execute(text("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_erp'
+                  AND table_name = 'bank_matches'
+                  AND column_name = 'statement_line_id'
+            ) THEN
+                UPDATE domain_erp.bank_matches
+                SET bank_line_id = statement_line_id
+                WHERE bank_line_id IS NULL AND statement_line_id IS NOT NULL;
+            END IF;
+        END
+        $$
+    """))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_bank_matches_bank_line
             ON domain_erp.bank_matches (bank_line_id)
