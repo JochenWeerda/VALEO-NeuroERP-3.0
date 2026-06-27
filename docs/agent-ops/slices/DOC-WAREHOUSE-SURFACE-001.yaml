@@ -1,7 +1,50 @@
 slice_id: DOC-WAREHOUSE-SURFACE-001
 title: "Warehouse/WM-AGRI-Dokumente in MkDocs-Site einbinden — Wave 28"
-status: done
+owner: Claude Code
+status: abgeschlossen
 wave: 28
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Warehouse-/WM-AGRI-Referenzdokumente in der kuratierten MkDocs-Site unter
+  Referenz > Warehouse / WM-AGRI auffindbar machen.
+file_ownership:
+  - docs/warehouse/folkerts-landhandel-hofplan.md
+  - docs/warehouse/handbuch-c-inventar.md
+  - docs/warehouse/agrar-silo-materialfluss-studio-baustein.md
+  - docs/warehouse/agri-silo-vendor-interface-research-2026-06-12.md
+  - docs/warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
+  - docs/warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-WAREHOUSE-SURFACE-001.yaml
+acceptance:
+  - Alle sechs Dokumente sind unter Referenz > Warehouse / WM-AGRI erreichbar.
+  - Frontmatter ist gueltig.
+  - MkDocs-Build laeuft ohne Fehler.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Hersteller- und Benchmark-Informationen koennen fachlich veralten.
+external_gates:
+  - Keine externen Gates; reine Dokumentationsauffindbarkeit.
+ai_harness:
+  fachlicher_vertrag: >-
+    Hofplan, Handbuch-Inventar, Silo-Baustein, Hersteller-Recherche,
+    Benchmark und Open-Source-Bausteine muessen als Warehouse-/WM-AGRI-
+    Referenz auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf Markdown-Frontmatter und MkDocs-Navigation begrenzt.
+  daten_vertrag: >-
+    Keine produktiven Daten oder Schemaaenderungen.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance pruefen Renderbarkeit, Navigation und Frontmatter.
+  security_vertrag: >-
+    Keine Secrets oder kundenproduktiven Anlagendaten in den eingebundenen Dokumenten.
+  betriebs_vertrag: >-
+    Warehouse-Referenzen muessen bei WM-AGRI-Umsetzungsslices nachgezogen werden.
+  dokumentations_vertrag: >-
+    Slice-YAML, Workboard und MkDocs-Nav referenzieren dieselben Dokumente.
 
 fachlicher_vertrag:
   ziel: >

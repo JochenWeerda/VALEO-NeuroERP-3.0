@@ -1,7 +1,49 @@
 slice_id: DOC-AGENTOPS-SURFACE-001
 title: "Agent-Ops-Koordinationsdokumente in MkDocs einbinden — Wave 30"
-status: done
+owner: Claude Code
+status: abgeschlossen
 wave: 30
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Agent-Ops-Koordinationsdokumente in der kuratierten MkDocs-Site unter
+  Agent-Dokumentation > Agent-Ops auffindbar machen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/session-start-checklist.md
+  - docs/agent-ops/task-slice-template.md
+  - docs/agent-ops/handoff-template.md
+  - docs/agent-ops/parallel-work-protocol.md
+  - docs/agent-ops/resume-packet-template.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-AGENTOPS-SURFACE-001.yaml
+acceptance:
+  - Alle sechs Dokumente sind unter Agent-Dokumentation > Agent-Ops erreichbar.
+  - Frontmatter ist gueltig.
+  - MkDocs-Build laeuft ohne Fehler.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Agent-Ops-Dokumente sind operative Regeln und muessen bei Protokollaenderungen synchron gehalten werden.
+external_gates:
+  - Keine externen Gates; reine Dokumentationsauffindbarkeit.
+ai_harness:
+  fachlicher_vertrag: >-
+    Workboard, Session-Start, Slice-Template, Handoff, Parallel-Protokoll und
+    Resume-Packet muessen als Agenten-Betriebsreferenz auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf Markdown-Frontmatter und MkDocs-Navigation begrenzt.
+  daten_vertrag: >-
+    Keine produktiven Daten oder Schemaaenderungen.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance pruefen Renderbarkeit, Navigation und Frontmatter.
+  security_vertrag: >-
+    Keine Secrets oder personenbezogenen Produktionsdaten in den Dokumenten.
+  betriebs_vertrag: >-
+    Agent-Ops-Regeln muessen bei Parallelarbeits- und Handoff-Aenderungen nachgezogen werden.
+  dokumentations_vertrag: >-
+    Slice-YAML, Workboard und MkDocs-Nav referenzieren dieselben Dokumente.
 
 fachlicher_vertrag:
   ziel: >
