@@ -185,13 +185,9 @@ exclude_docs: |
   !/architecture/context-architecture-revolution.md
   !/architecture/typescript-generic-architecture.md
   !/project-context/open-gaps-and-known-issues.md
-  !/project-context/agrar-erp-gap-matrix-2026-05-17.md
-  !/project-context/agrar-parity-matrix-2026-05-17.md
   !/project-context/ai-assisted-development-implementation-plan-2026-06-23.md
   !/project-context/ui-maskenbestand.md
   !/project-context/documentation-consolidation-2026-06-26.md
-  !/project-context/erp-reference-gap-analysis-amic-community-erp-fiori-2026-04-08.md
-  !/project-context/erp-reference-matrix-2026-04-12.md
 
 nav:
   - Start: index.md
@@ -393,11 +389,6 @@ nav:
       - UI-Maskenbestand: project-context/ui-maskenbestand.md
       - AI-Dev Implementierungsplan: project-context/ai-assisted-development-implementation-plan-2026-06-23.md
       - Doku-Konsolidierung 2026-06: project-context/documentation-consolidation-2026-06-26.md
-      - Gap-Analysen & Referenz:
-          - Agrar-ERP Gap-Matrix: project-context/agrar-erp-gap-matrix-2026-05-17.md
-          - Agrar-Paritaetsmatrix: project-context/agrar-parity-matrix-2026-05-17.md
-          - ERP Referenz Gap-Analyse: project-context/erp-reference-gap-analysis-amic-community-erp-fiori-2026-04-08.md
-          - ERP Referenzmatrix: project-context/erp-reference-matrix-2026-04-12.md
       - Warehouse / WM-AGRI:
           - Hofplan Folkerts Landhandel: warehouse/folkerts-landhandel-hofplan.md
           - Handbuch-C-Inventar: warehouse/handbuch-c-inventar.md

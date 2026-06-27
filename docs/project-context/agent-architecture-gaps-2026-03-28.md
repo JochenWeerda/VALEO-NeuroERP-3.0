@@ -1,3 +1,14 @@
+---
+title: Agentenarchitektur Gap-Analyse 2026-03-28
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: archiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: "ARCHIV (Stand 2026-03-28): Historische Lueckenanalyse basierend auf dem damaligen Architektur-Bild. Grossteils ueberholt durch ADR-007, ADR-019 und Agenten-Integration. Fuer aktuellen Stand siehe docs/agent-docs/ und docs/adr/."
+---
+
 # Agentenarchitektur - Gap-Analyse (2026-03-28)
 
 ## Kontext

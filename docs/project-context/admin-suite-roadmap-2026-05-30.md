@@ -1,3 +1,14 @@
+---
+title: VALEO Admin Suite Roadmap 2026-05-30
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: teilweise-umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: "TEILWEISE UMGESETZT (Konsolidierung 2026-06-26): Readiness-, Compliance-, Diagnostics-, Security- und Operations-Vertraege sind umgesetzt. Verbleibende offene Punkte nur noch gueltig wenn in Workboard oder aktivem Slice referenziert."
+---
+
 # VALEO Admin Suite Roadmap
 
 **Konsolidierungsstatus 2026-06-26:** Roadmap-Referenz. Teile der Admin-Suite
