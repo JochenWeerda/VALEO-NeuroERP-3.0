@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-ARCH-SURFACE-003 - Restliche Architekturdokumente und Open-Gaps in MkDocs
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sieben von architecture/index.md verlinkte Architektur-Konzeptdokumente und open-gaps-and-known-issues.md mit Frontmatter versehen und in MkDocs integriert; INFO-Warnungen fuer ausgeschlossene Links behoben.
+**Ziel:** Alle von architecture/index.md referenzierten Dokumente im Docs-Build auffindbar machen und Open-Gaps-Tracker unter Referenz veroeffentlichen.
+**Dateibesitz:** `docs/architecture/adr-clusters-and-epics.md`, `business-logic-architecture.md`, `module-resolution-architecture.md`, `react-lifecycle-architecture.md`, `KI-USABILITY-MICROSERVICES.md`, `context-architecture-revolution.md`, `typescript-generic-architecture.md`, `docs/project-context/open-gaps-and-known-issues.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ARCH-SURFACE-003.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle acht Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 26.45 s).
+
 ## DOC-ARCH-SURFACE-002 - Weitere Architekturdokumente in MkDocs integrieren
 
 **Von:** Claude Code

@@ -1,3 +1,14 @@
+---
+title: Context Architecture
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Architekturentwurf fuer Context-Management, Dependency Injection und Request-Lifecycle in VALEO NeuroERP.
+---
+
 # VALEO NeuroERP 3.0 - Context Architecture Revolution
 
 ## 🎯 **PROBLEM: Legacy API Context Issues**

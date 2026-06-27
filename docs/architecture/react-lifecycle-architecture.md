@@ -1,3 +1,14 @@
+---
+title: React Lifecycle Architecture
+type: explanation
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Architekturentwurf fuer React-Component-Lifecycle, State-Management und Query-Patterns in VALEO NeuroERP Frontend.
+---
+
 # VALEO NeuroERP 3.0 - React Lifecycle Architecture Revolution
 
 ## 🎯 **PROBLEM: React Lifecycle Conflicts**
@@ -34,7 +45,7 @@ export function useLifecycleManager(phases: LifecyclePhase) {
     useEffect(() => {
         isMountedRef.current = true;
         phases.mount();
-        
+
         return () => {
             isMountedRef.current = false;
             phases.unmount();
@@ -71,7 +82,7 @@ export function useRaceConditionPrevention() {
         }
 
         isProcessingRef.current = true;
-        
+
         try {
             const result = await asyncFunction();
             return result;
@@ -146,7 +157,7 @@ export function useOptimizedState<T>(initialValue: T) {
     const isUpdatingRef = useRef(false);
 
     const updateState = useCallback((newValue: T | ((prev: T) => T)) => {
-        const nextValue = typeof newValue === 'function' 
+        const nextValue = typeof newValue === 'function'
             ? (newValue as (prev: T) => T)(stateRef.current)
             : newValue;
 
@@ -155,7 +166,7 @@ export function useOptimizedState<T>(initialValue: T) {
         }
 
         updateQueueRef.current.push(nextValue);
-        
+
         if (!isUpdatingRef.current) {
             isUpdatingRef.current = true;
             requestAnimationFrame(() => {
