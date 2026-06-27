@@ -1,3 +1,14 @@
+---
+title: Quality & Governance Tooling — Einfuehrungsplan
+type: reference
+audience: [entwickler, betrieb]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Accepted-Status Einfuehrungsplan fuer Quality-Gates, Governance-Tooling und CI-Automatisierung in VALEO NeuroERP.
+---
+
 # Quality & Governance Tooling — Einführungsplan
 
 **Status:** Accepted

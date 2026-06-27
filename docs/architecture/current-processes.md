@@ -1,3 +1,14 @@
+---
+title: Ist-Prozesse
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Beschreibung der aktuellen Ist-Prozesse in VALEO NeuroERP 3.0 als Referenz fuer Workflow-Analyse.
+---
+
 # VALEO NeuroERP 3.0 – Ist-Prozesse
 
 ## Einleitung
