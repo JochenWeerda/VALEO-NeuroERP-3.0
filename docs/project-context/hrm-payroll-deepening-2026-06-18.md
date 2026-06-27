@@ -1,3 +1,14 @@
+---
+title: HRM Payroll Deepening 2026-06-18
+type: explanation
+audience: [entwickler, product]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Vertiefungsplan fuer den HRM-Payroll-Bereich — Vorlauf-, Pruef-, FIBU-/KORE- und Uebergabeschicht ohne Scheingenauigkeit fuer gesetzliche Lohnabrechnung (Slice HRM-PAYROLL-DEEP-001, Stand 2026-06-18).
+---
+
 # HRM Payroll Deepening
 
 ## Ergebnis

@@ -1,3 +1,14 @@
+---
+title: HR-Time Abwesenheit und Driver-Time-Layer 2026-05-07
+type: explanation
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Zielarchitektur fuer deutsche Arbeitszeit-/Abwesenheitsverwaltung im VALEO-Kontext — Entscheidung und Kandidatenbewertung fuer Lizenz-unproblematische Zeiterfassungsloesungen fuer 27 Mitarbeitende inkl. LKW-Fahrer.
+---
+
 # HR Time, Abwesenheit und Driver-Time-Layer
 
 ## Zweck

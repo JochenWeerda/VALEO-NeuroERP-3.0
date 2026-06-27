@@ -1,3 +1,14 @@
+---
+title: HR-Time UX Workflow Roadmap 2026-05-12
+type: explanation
+audience: [entwickler, product]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UX-Roadmap fuer klickarmes HR-Time-Arbeitscockpit — Prozessauffuehrung statt CRUD-Masken-Sammlung; Zielbild und Maskentypen fuer Zeiterfassung und Abwesenheit (Stand 2026-05-12).
+---
+
 # HR-Time UX Workflow Roadmap
 
 Stand: 2026-05-12

@@ -188,6 +188,16 @@ exclude_docs: |
   !/project-context/ai-assisted-development-implementation-plan-2026-06-23.md
   !/project-context/ui-maskenbestand.md
   !/project-context/documentation-consolidation-2026-06-26.md
+  !/project-context/hrm-payroll-deepening-2026-06-18.md
+  !/project-context/fibu-cutover-mapping-readiness-2026-04-24.md
+  !/project-context/hr-time-canonical-core-data-model-2026-05-08.md
+  !/project-context/hr-time-absence-driver-integration-2026-05-07.md
+  !/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md
+  !/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md
+  !/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md
+  !/project-context/integration-bootstrap-readiness-2026-04-12.md
+  !/project-context/rations-optimization-fan1-fani-spec-2026-04-21.md
+  !/project-context/ux-excellence-operating-standard-2026-05-13.md
 
 nav:
   - Start: index.md
@@ -389,6 +399,17 @@ nav:
       - UI-Maskenbestand: project-context/ui-maskenbestand.md
       - AI-Dev Implementierungsplan: project-context/ai-assisted-development-implementation-plan-2026-06-23.md
       - Doku-Konsolidierung 2026-06: project-context/documentation-consolidation-2026-06-26.md
+      - FiBu Cutover Readiness: project-context/fibu-cutover-mapping-readiness-2026-04-24.md
+      - Integration Bootstrap: project-context/integration-bootstrap-readiness-2026-04-12.md
+      - UX Excellence Standard: project-context/ux-excellence-operating-standard-2026-05-13.md
+      - Rationsoptimierung GfE-2023: project-context/rations-optimization-fan1-fani-spec-2026-04-21.md
+      - HRM & HR-Time:
+          - Payroll Deepening: project-context/hrm-payroll-deepening-2026-06-18.md
+          - HR-Time Kerndatenmodell: project-context/hr-time-canonical-core-data-model-2026-05-08.md
+          - HR-Time Abwesenheit/Driver: project-context/hr-time-absence-driver-integration-2026-05-07.md
+          - HR-Time Lastenheft/Roadmap: project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md
+          - HR-Time UX Workflow: project-context/hr-time-ux-workflow-roadmap-2026-05-12.md
+          - HRM Germany Gap-Plan: project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md
       - Warehouse / WM-AGRI:
           - Hofplan Folkerts Landhandel: warehouse/folkerts-landhandel-hofplan.md
           - Handbuch-C-Inventar: warehouse/handbuch-c-inventar.md

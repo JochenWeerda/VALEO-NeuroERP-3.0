@@ -1,3 +1,14 @@
+---
+title: HR-Time GAP Lastenheft und Roadmap 2026-05-08
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: VALEO-spezifisches Lastenheft fuer Arbeitszeit, Abwesenheit, Fahrerzeit, Dienstplanung und Landhandel-Saisonplanung — abgeleitet aus Benchmark gegen SAP und Oracle HRM (Stand 2026-05-08).
+---
+
 # HR-Time GAP, Lastenheft und Roadmap gegen marktführende ERP-Systeme HRM
 
 Stand: 2026-05-08

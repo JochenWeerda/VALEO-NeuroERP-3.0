@@ -1,3 +1,14 @@
+---
+title: Operational Rollout Scope 2026-04-09
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Rollout-Scope und Arbeitsmodell fuer operative Erstausrollung — Vorgang, Objekt, Ressourcenlage, Wirtschaftslage, Governance und Naechste-Aktion-Struktur (Stand 2026-04-09).
+---
+
 # Operational Rollout Scope 2026-04-09
 
 ## Ziel
