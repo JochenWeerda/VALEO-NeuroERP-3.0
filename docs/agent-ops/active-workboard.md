@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HR-TIME-ACTIONPANEL-001 - UX-M2 Detail-Aktionspanel Zeiten/Arbeitsplan
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Rechtes Detail-Aktionspanel in Zeiten- und Arbeitsplan-Tab implementiert; erscheint bei Row-Fokus ohne Tab-Wechsel; zeigt Mitarbeiter/Status/Compliance-Befunde/Aktionen. Admin-Suite-Roadmap auf umgesetzt korrigiert. tsc 0 Fehler.
+**Ziel:** UX-M2 (Aktionspanel) umsetzen: Row-Fokus zeigt Kontext und Aktionen direkt rechts — kein Tab-Wechsel, keine ID-Kopie noetig.
+**Dateibesitz:** `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `docs/agent-ops/slices/HR-TIME-ACTIONPANEL-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** onRowFocus → rechtes Panel; tsc 0 Fehler; UX-M2 als umgesetzt markiert.
+
 ## COV-RATCHET-007 - NATS-Projector Unit-Test + HR-TIME UX-M1 dokumentieren
 
 **Von:** Claude Code

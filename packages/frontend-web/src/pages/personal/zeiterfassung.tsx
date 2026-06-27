@@ -109,6 +109,8 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [campaignForm, setCampaignForm] = useState({ campaignCode: 'ERNTE-2026', name: 'Ernteannahme 2026', periodFrom: selectedDate, periodTo: selectedDate, locationCode: 'main', roleCode: 'lkw_fahrer', demand: '2', expectedVolume: '12000' })
   const [fieldForm, setFieldForm] = useState({ employeeRef: 'berater-1', customerRef: 'kunde-42', territoryCode: 'north', campaignCode: 'SAAT-2026', startsAt: `${selectedDate}T09:00:00+02:00`, endsAt: `${selectedDate}T11:00:00+02:00` })
   const [correctionForm, setCorrectionForm] = useState({ entryId: '', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', reason: 'Nachbearbeitung nach Pruefung', costCenter: 'LOG', workArea: 'Tour' })
+  const [selectedTimeEntry, setSelectedTimeEntry] = useState<ZeitEintrag | null>(null)
+  const [selectedWorkPlanItem, setSelectedWorkPlanItem] = useState<WorkPlanAssignment | null>(null)
 
   const startCorrection = (entry: ZeitEintrag) => {
     setCorrectionForm((prev) => ({
@@ -921,13 +923,66 @@ export default function ZeiterfassungPage(): JSX.Element {
                 </div>
               </CardHeader>
               <CardContent>
-                <DataTable data={filteredWorkPlanAssignments} columns={workPlanColumns} />
+                <DataTable data={filteredWorkPlanAssignments} columns={workPlanColumns} onRowFocus={setSelectedWorkPlanItem} />
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Praeferenz-Checks</CardTitle>
-              </CardHeader>
+            {selectedWorkPlanItem ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Arbeitsplan Detail</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Mitarbeiter</p>
+                    <p className="font-semibold">{selectedWorkPlanItem.employeeRef}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Eintrag</p>
+                    <p className="font-medium">{selectedWorkPlanItem.label}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Datum</p>
+                      <p className="font-mono text-sm">{selectedWorkPlanItem.datum}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Zeit</p>
+                      <p className="font-mono text-sm">{selectedWorkPlanItem.startTime ?? '-'} – {selectedWorkPlanItem.endTime ?? '-'}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={getStatusBadgeVariant(selectedWorkPlanItem.status)}>{selectedWorkPlanItem.status}</Badge>
+                    <Badge variant="outline">{selectedWorkPlanItem.sourceType}</Badge>
+                    <Badge variant={selectedWorkPlanItem.printReady ? 'outline' : 'destructive'}>
+                      {selectedWorkPlanItem.printReady ? 'druckbereit' : 'Druck blockiert'}
+                    </Badge>
+                  </div>
+                  {selectedWorkPlanItem.findings.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-sm text-muted-foreground">Planungschecks</p>
+                      <div className="space-y-1">
+                        {selectedWorkPlanItem.findings.map((finding) => (
+                          <div key={`${selectedWorkPlanItem.id}-${finding.code}`} className="rounded border p-2 text-xs">
+                            <Badge variant={getFindingBadgeVariant(finding.severity as DriverTimeFindingSeverity)} className="mb-1">{finding.severity}</Badge>
+                            <p className="font-mono">{finding.code}: {finding.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="border-t pt-3">
+                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={handlePrintWorkPlan}>
+                      <Printer className="h-4 w-4" />
+                      Arbeitsplan drucken
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Praeferenz-Checks</CardTitle>
+                </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -952,6 +1007,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                 ))}
               </CardContent>
             </Card>
+            )}
           </div>
         </TabsContent>
 
@@ -1041,18 +1097,88 @@ export default function ZeiterfassungPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="zeiten">
-          <Card>
-            <CardHeader>
-              <CardTitle>Klassische Arbeitszeit</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <DataTable data={filteredTimeEntries} columns={columns} />
-              <div className="mt-6 flex justify-between border-t pt-4 font-bold">
-                <span>Gesamt-Stunden Heute:</span>
-                <span>{gesamtStunden.toFixed(1)} h</span>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Klassische Arbeitszeit</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <DataTable data={filteredTimeEntries} columns={columns} onRowFocus={setSelectedTimeEntry} />
+                <div className="mt-6 flex justify-between border-t pt-4 font-bold">
+                  <span>Gesamt-Stunden Heute:</span>
+                  <span>{gesamtStunden.toFixed(1)} h</span>
+                </div>
+              </CardContent>
+            </Card>
+            {selectedTimeEntry ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Zeitbuchung Detail</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Mitarbeiter</p>
+                    <p className="font-semibold">{selectedTimeEntry.mitarbeiter}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Datum</p>
+                      <p className="font-mono text-sm">{new Date(selectedTimeEntry.datum).toLocaleDateString('de-DE')}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Stunden</p>
+                      <p className="font-semibold">{selectedTimeEntry.stunden} h</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Kommen</p>
+                      <p className="font-mono">{selectedTimeEntry.kommen}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Gehen</p>
+                      <p className="font-mono">{selectedTimeEntry.gehen}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Typ</p>
+                    <Badge variant={selectedTimeEntry.typ === 'Ueberstunden' ? 'destructive' : selectedTimeEntry.typ === 'Urlaub' ? 'secondary' : 'outline'}>
+                      {selectedTimeEntry.typ}
+                    </Badge>
+                  </div>
+                  {cockpit.complianceIssues.filter((issue) => issue.employeeRef === selectedTimeEntry.mitarbeiter).length > 0 && (
+                    <div>
+                      <p className="mb-1 text-sm text-muted-foreground">Compliance-Befunde</p>
+                      <div className="space-y-1">
+                        {cockpit.complianceIssues
+                          .filter((issue) => issue.employeeRef === selectedTimeEntry.mitarbeiter)
+                          .map((issue) => (
+                            <div key={`${issue.employeeRef}-${issue.code}`} className="rounded border p-2 text-xs">
+                              <Badge variant={getFindingBadgeVariant(issue.severity)} className="mb-1">{issue.severity}</Badge>
+                              <p>{issue.message}</p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-2 border-t pt-3">
+                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => startCorrection(selectedTimeEntry)}>
+                      <Pencil className="h-4 w-4" />
+                      Bearbeiten / Korrigieren
+                    </Button>
+                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => submitTimeEntry.mutate(selectedTimeEntry.id)} disabled={submitTimeEntry.isPending}>
+                      <Save className="h-4 w-4" />
+                      Zur Freigabe einreichen
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex items-center justify-center text-muted-foreground">
+                <CardContent className="py-8 text-center text-sm">
+                  Zeile auswaehlen fuer Details und Aktionen
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="payroll">
