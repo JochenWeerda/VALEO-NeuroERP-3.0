@@ -1,3 +1,14 @@
+---
+title: FiBu Cutover Mapping Readiness 2026-04-24
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Formaler Pruefpfad fuer Finanzbuchhaltungs-Cutover — Konten-, Steuer-, Kostenstellen- und Gegenkonto-Mappings muessen vor Produktivfreigabe fachlich genehmigt sein (Stand 2026-04-24).
+---
+
 # FIBU Cutover Mapping Readiness
 
 Stand: `2026-04-24`

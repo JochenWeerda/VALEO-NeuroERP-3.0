@@ -1,3 +1,14 @@
+---
+title: Integration Bootstrap Readiness 2026-04-12
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Repo-seitige Referenz fuer Integrations-Bootstrapping bei neuen Umgebungen — fehlende Secrets, Zielsystem-URLs und Betriebsparameter bei GitHub-Spiegeln oder frischen Deployments (Stand 2026-04-12).
+---
+
 # Integration Bootstrap Readiness
 
 Stand: `2026-04-12`

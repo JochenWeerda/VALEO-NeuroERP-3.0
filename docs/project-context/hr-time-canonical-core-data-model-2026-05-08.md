@@ -1,3 +1,14 @@
+---
+title: HR-Time Kanonisches Kerndatenmodell 2026-05-08
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Verbindliche Datenmodell-Basis fuer HR-Time-Slices — Zeiterfassung, Abwesenheit, Fahrerzeit, Dienstplanung und Saisonplanung auf einem gemeinsamen kanonischen Modell (Stand 2026-05-08).
+---
+
 # HR-Time kanonisches Kerndatenmodell
 
 Stand: 2026-05-08

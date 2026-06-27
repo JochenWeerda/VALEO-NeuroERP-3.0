@@ -1,3 +1,14 @@
+---
+title: Rationsoptimierung GfE-2023 / FAN1-FANi Spezifikation
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Freigegbene V1-Spezifikation fuer Rationsoptimierung auf GfE-2023-Basis — FAN1/FANi-Proteinbewertung, DLG-Referenzwerte und Fruehjahrsweidekorrekturen (Stand 2026-04-21, Slice RAT-OPT-001).
+---
+
 # Rations-Optimierung auf GfE-2023 / FAN1 ⇄ FANi
 
 Stand: `2026-04-21`

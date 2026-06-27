@@ -1,3 +1,14 @@
+---
+title: Deutsches HRM-Zielsystem und Gap-Plan 2026-05-13
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Vollstaendiger Gap-Plan und Zielsystem-Beschreibung fuer deutsches HRM-Betriebssystem in VALEO — erweitert HR-Time-Roadmap zu Buero- und ERP-HRM-Abdeckung (Stand 2026-05-13).
+---
+
 # Deutsches HRM-Zielsystem und Gap-Plan
 
 Stand: 2026-05-13
