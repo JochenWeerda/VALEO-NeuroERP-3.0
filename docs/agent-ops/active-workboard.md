@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## COV-RATCHET-010 - Quality-Gate Baseline nach CI-Messung korrigieren
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-27 — Quality-Gate-Folgefix auf `main`: Ratchet-Schwellen fuer zehn Pfade auf real gemessene CI-Coverage kalibriert, nachdem geschaetzte Schwellen den Gate-Lauf blockierten. OpenAPI-Drift separat mit `e35fb7798` bereinigt.
+**Ziel:** Kritischen Backend-Coverage-Ratchet wieder als belastbares Gate betreiben: Schwellen duerfen nicht ueber der zuletzt gemessenen CI-Coverage liegen; fachliche Vertiefung erfolgt danach ueber gezielte Tests.
+**Dateibesitz:** `scripts/check_critical_backend_coverage.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/COV-RATCHET-010.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** `python scripts/check_critical_backend_coverage.py` laeuft gegen Quality-Gate-Coverage wieder gruen; betroffene Pfade und Folgevertiefung sind in Open-Gaps dokumentiert.
+
 ## HR-TIME-WIZARD-001 - UX-M3 Gefuehrter Planungswizard (5 Schritte)
 
 **Von:** Claude Code
