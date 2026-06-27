@@ -1,0 +1,49 @@
+slice_id: DOC-QA-SURFACE-002
+title: "QA-Docs + Workflow-Chains Surface — Wave 27"
+status: done
+wave: 27
+
+fachlicher_vertrag:
+  ziel: >
+    Vier weitere QA- und interne Dokumentationsdateien (soll-ist-checks,
+    external-auditor-simulation-template, e2e-crud-acceptance-matrix,
+    _internal/workflow-chains) in die MkDocs-Site einbinden.
+  akzeptanzkriterien:
+    - Alle vier Dateien erreichbar unter Entwickler-Navigation
+    - Valide Frontmatter auf allen Dateien
+
+architektur_vertrag:
+  komponenten:
+    - docs/quality-assurance/soll-ist-checks.md
+    - docs/quality-assurance/external-auditor-simulation-template.md
+    - docs/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
+    - docs/_internal/workflow-chains.md
+  aenderungen:
+    - Frontmatter hinzugefuegt (soll-ist-checks, external-auditor, e2e-crud)
+    - exclude_docs Ausnahmen fuer alle vier Dateien
+    - Nav-Eintraege unter Entwickler
+
+daten_vertrag:
+  migrations: keine
+  schema_aenderungen: keine
+
+test_vertrag:
+  pruefschritte:
+    - mkdocs build muss ohne ERROR abschliessen
+    - Alle vier Dateien muessen im Site-Output vorhanden sein
+
+security_vertrag:
+  datenschutz: keine personenbezogenen Daten betroffen
+  zugriff: oeffentliche Dokumentationssite
+
+betriebs_vertrag:
+  deployment: mkdocs build / gh-pages deploy
+  monitoring: keine spezifischen Alerting-Regeln
+
+dokumentations_vertrag:
+  workboard_eintrag: DOC-QA-SURFACE-002
+  nav_eintraege:
+    - Entwickler > Soll-Ist Checks
+    - Entwickler > Auditor Simulation Template
+    - Entwickler > E2E CRUD Acceptance Matrix
+    - Entwickler > Workflow-Ketten (intern)

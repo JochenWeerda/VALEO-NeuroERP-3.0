@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-QA-SURFACE-002 - QA-Docs und Workflow-Chains in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Drei QA-Dokumente (soll-ist-checks, external-auditor-simulation-template, e2e-crud-acceptance-matrix) mit Frontmatter versehen; _internal/workflow-chains.md (bereits frontmatter-versehen) per exclude_docs-Ausnahme eingebunden; alle vier Dateien unter Entwickler-Navigation veroeffentlicht.
+**Ziel:** Verbleibende QA-Methodik- und interne Workflow-Ketten-Dokumente fuer Entwickler und QA im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/quality-assurance/soll-ist-checks.md`, `external-auditor-simulation-template.md`, `e2e-crud-acceptance-matrix-2026-04-24.md`, `docs/_internal/workflow-chains.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-QA-SURFACE-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 18.39 s).
+
 ## DOC-ARCH-SURFACE-003 - Restliche Architekturdokumente und Open-Gaps in MkDocs
 
 **Von:** Claude Code
