@@ -155,9 +155,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
     # ── WF-COCKPIT-PERSIST-001 (2026-06-25) ──────────────────────────────────
     "services/wf_cockpit_persist_service.py": 0.75,        #  ~78% estimated
-    # wf_cockpit_nats_projector.py is intentionally not ratcheted yet: the
-    # current CI coverage artifact does not include it, so adding it here would
-    # create a non-actionable phantom gate instead of a measured baseline.
+    "services/wf_cockpit_nats_projector.py": 0.75,         #  COV-RATCHET-007 2026-06-27: echter Unit-Test (14 Tests, NATS-unabhaengig)
     "api/v1/endpoints/wf_cockpit_persist.py": 0.48,        #  48.6% measured in CI 2026-06-25
 
     # ── PORTAL-PREISSPIEGEL-001 (2026-06-25) ─────────────────────────────────

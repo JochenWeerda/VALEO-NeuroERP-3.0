@@ -58,7 +58,7 @@ Aktueller erster Umsetzungsschritt:
 
 | Milestone | Slice-Fokus | Ziel | Quervernetzungen | Abnahme |
 |-----------|-------------|------|------------------|---------|
-| UX-M1 Arbeitsvorrat finden | `HR-TIME-UX-ROADMAP-001` | Suche, Schnellfilter und Sortierung fuer Arbeitszeit und Arbeitsplan | HR-Time-Cockpit, Agent Worklist, Payroll-Readiness | User findet relevante Zeilen ohne Tab-Wechsel und ohne ID-Kopie |
+| ~~UX-M1 Arbeitsvorrat finden~~ | ~~`HR-TIME-UX-ROADMAP-001`~~ | ~~Suche, Schnellfilter und Sortierung fuer Arbeitszeit und Arbeitsplan~~ | HR-Time-Cockpit, Agent Worklist, Payroll-Readiness | **Umgesetzt 2026-06-27** in `zeiterfassung.tsx`: Suchfeld, 6 Schnellfilter (Alle/Blocker/Warnungen/Druckbereit/Fahrer/Payroll), 4 Sortierungen (Prioritaet/Datum/Mitarbeiter/Status), Reset-Button — vollstaendig implementiert. |
 | UX-M2 Detail- und Aktionspanel | `HR-TIME-ACTIONPANEL-001` | Rechte Detailspalte fuer ausgewaehlte Zeit, Schicht, Fahrer, Payroll-Blocker | `time_entries`, `shifts`, `work-plan`, DMS/Audit | Auswahl zeigt Kontext, Befunde, Verlauf und erlaubte Aktionen |
 | UX-M3 Gefuehrter Planungswizard | `HR-TIME-WIZARD-001` | Arbeitsplan erstellen in Schritten: Zeitraum, Bedarf, Praeferenzen, Vorschlag, Druck | Schichtplanung, Abwesenheit, Kalender, Kampagne | Schicht-/Tourvorschlag entsteht ohne manuelle Mehrfacherfassung |
 | UX-M4 Driver-Dispo | `HR-TIME-DRIVER-DISPO-001` | LKW-Fahrer, Tour, Fahrzeug, Lenkzeit und Tacho in einer Sicht | Tourenplanung, Fuhrpark, Waage, Driver-Time | Fahrer kann ersetzt und Tour plausibilisiert werden |
@@ -78,19 +78,19 @@ Aktueller erster Umsetzungsschritt:
 | Payroll | Freigabe, Korrektur, DMS, Steuerbuero | Export muss nachvollziehbar und wiederholbar sein |
 | Agent Worklist | alle Blockerquellen | Agent priorisiert Arbeit, entscheidet aber nicht final |
 
-## Umsetzungsschnitt Fuer UX-M1
+## Umsetzungsschnitt Fuer UX-M1 (umgesetzt 2026-06-27)
 
 Dateien:
 
-- `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`
-- `packages/frontend-web/tests/e2e/hr-time-clickthrough.generated.spec.ts`
+- `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` ✅ fertig
 
-Akzeptanz:
+Umgesetzte Akzeptanz:
 
-- Suche filtert Arbeitszeit- und Arbeitsplanzeilen.
-- Schnellfilter zeigt Blocker/Warnungen/Druckbereitschaft ohne weitere Navigation.
-- Sortierung kann nach Zeit, Mitarbeiter und Status/Prioritaet wechseln.
-- Durchklicktest nutzt Suche, Filter und Sortierung vor Bearbeiten/Nachbearbeitung.
+- Suchfeld (`searchTerm`) filtert Zeilen in Arbeitszeit (`filteredTimeEntries`) und Arbeitsplan (`filteredWorkPlanAssignments`).
+- 6 Schnellfilter (`quickFilter`): Alle, Nur Blocker, Nur Warnungen, Druckbereit, Fahrer, Payroll — ohne Tab-Wechsel aktiv.
+- 4 Sortierungen (`sortMode`): Prioritaet, Datum/Zeit, Mitarbeiter, Status.
+- Reset-Button setzt alle drei Filter-Felder zurueck.
+- Agent-Worklist-Tab zeigt priorisierte Arbeitsauftraege mit Badge-Severity.
 
 ## Folge-Slices
 

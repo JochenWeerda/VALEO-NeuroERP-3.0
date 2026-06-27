@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## COV-RATCHET-007 - NATS-Projector Unit-Test + HR-TIME UX-M1 dokumentieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 14 Unit-Tests fuer WfCockpitNatsProjector gruen (NATS-unabhaengig via MagicMock); Ratchet-Eintrag 75% gesetzt; HR-TIME UX-M1 und COVERAGE-001 in den Quelldokumenten als erledigt markiert.
+**Ziel:** Letzten ungeteseteten Kernpfad im Workflow-Cockpit durch echte Unit-Tests absichern; abgeschlossene Punkte korrekt in den Quellen berichtigen.
+**Dateibesitz:** `tests/test_wf_cockpit_nats_projector.py`, `scripts/check_critical_backend_coverage.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/COV-RATCHET-007.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** 14 Tests exit 0; Ratchet-Script enthaelt `wf_cockpit_nats_projector.py: 0.75`; UX-M1 in Roadmap als umgesetzt markiert.
+
 ## DOC-OPS-SEPARATION-001 - Trennung Dev-Gap-Track vs. operative Go-Live-Gates
 
 **Von:** Claude Code
