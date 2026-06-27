@@ -1,3 +1,14 @@
+---
+title: ERP Reference Matrix 2026-04-12
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: archiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: ERP-Referenzmatrix vom 2026-04-12 — vergleichende Bewertung von Funktionsbereichen und Abdeckungsgrad fuer VALEO NeuroERP 3.0.
+---
+
 # ERP Reference Matrix 2026-04-12
 
 Stand: `2026-04-12`
