@@ -434,6 +434,22 @@ def upgrade() -> None:
             CONSTRAINT uq_business_partners_tenant_number UNIQUE (tenant_id, partner_number)
         )
     """))
+    for ddl in [
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(64)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS partner_number VARCHAR(50)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS name VARCHAR(255)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS partner_type VARCHAR(32) DEFAULT 'both'",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS vat_id VARCHAR(30)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS tax_number VARCHAR(30)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS iban VARCHAR(34)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS bic VARCHAR(11)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS payment_terms INTEGER DEFAULT 30",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS credit_limit NUMERIC(15,2)",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT TRUE",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW()",
+        "ALTER TABLE domain_erp.business_partners ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()",
+    ]:
+        conn.execute(text(ddl))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_business_partners_tenant_active
             ON domain_erp.business_partners (tenant_id, active)
