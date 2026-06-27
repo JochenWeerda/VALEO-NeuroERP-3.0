@@ -489,9 +489,17 @@ export default function ZeiterfassungPage(): JSX.Element {
               <Printer className="mr-2 h-4 w-4" />
               Arbeitsplan drucken
             </Button>
-            <Button variant="outline" size="sm" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCreatePayroll}
+              disabled={createPayrollExport.isPending || cockpit.payrollReadiness.status !== 'ready' || cockpit.payrollReadiness.blockers.length > 0}
+              title={cockpit.payrollReadiness.blockers.length > 0 ? `${cockpit.payrollReadiness.blockers.length} Blocker vor Export loesen` : undefined}
+            >
               <FileDown className="mr-2 h-4 w-4" />
-              Payroll vorbereiten
+              {cockpit.payrollReadiness.blockers.length > 0
+                ? `${cockpit.payrollReadiness.blockers.length} Blocker offen`
+                : 'Payroll vorbereiten'}
             </Button>
           </div>
         </div>
@@ -721,9 +729,14 @@ export default function ZeiterfassungPage(): JSX.Element {
                 <CardTitle>Nächste Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+                <Button
+                  className="w-full justify-start gap-2"
+                  variant="outline"
+                  onClick={handleCreatePayroll}
+                  disabled={createPayrollExport.isPending || cockpit.payrollReadiness.status !== 'ready' || cockpit.payrollReadiness.blockers.length > 0}
+                >
                   <FileDown className="h-4 w-4" />
-                  Payroll-Paket erzeugen
+                  {cockpit.payrollReadiness.blockers.length > 0 ? `${cockpit.payrollReadiness.blockers.length} Blocker loesen` : 'Payroll-Paket erzeugen'}
                 </Button>
                 <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreateShift} disabled={createShift.isPending}>
                   <CalendarDays className="h-4 w-4" />
@@ -1183,30 +1196,61 @@ export default function ZeiterfassungPage(): JSX.Element {
 
         <TabsContent value="payroll">
           <div className="space-y-4">
+            {cockpit.payrollReadiness.blockers.length > 0 ? (
+              <div className="flex items-start gap-3 rounded-md border border-destructive/50 bg-destructive/5 p-4">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <div className="flex-1">
+                  <p className="font-semibold text-destructive">Export gesperrt — {cockpit.payrollReadiness.blockers.length} Blocker offen</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Alle Blocker muessen behoben oder begruendet sein, bevor das Exportpaket erstellt werden kann.</p>
+                  <div className="mt-3 space-y-2">
+                    {cockpit.payrollReadiness.blockers.map((blocker, index) => (
+                      <div key={`${blocker}-${index}`} className="flex items-center gap-2 rounded border border-destructive/30 bg-background px-3 py-2">
+                        <Badge variant="destructive" className="shrink-0">Blocker</Badge>
+                        <span className="text-sm">{blocker}</span>
+                        <Button size="sm" variant="outline" className="ml-auto gap-1 text-xs" onClick={() => setActiveTab('steuerung')}>
+                          Pruefen
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-4">
+                <CheckCircle2 className="h-5 w-5 text-emerald-700" />
+                <div className="flex-1">
+                  <p className="font-semibold text-emerald-800">Export freigegeben</p>
+                  <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
+                </div>
+                <Button size="sm" className="gap-2" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+                  <FileDown className="h-4 w-4" />
+                  Export erstellen
+                </Button>
+              </div>
+            )}
             <Card>
               <CardHeader>
-                <CardTitle>Payroll-Readiness</CardTitle>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle>Payroll-Readiness</CardTitle>
+                  <Badge variant={cockpit.payrollReadiness.status === 'ready' ? 'outline' : 'destructive'}>
+                    {cockpit.payrollReadiness.status}
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.status}</p>
-                  </div>
-                  <div>
                     <p className="text-sm text-muted-foreground">Bereite Eintraege</p>
-                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.readyEntries}</p>
+                    <p className="text-xl font-semibold text-emerald-700">{cockpit.payrollReadiness.readyEntries}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Blockierte Eintraege</p>
-                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.blockedEntries}</p>
+                    <p className="text-xl font-semibold text-destructive">{cockpit.payrollReadiness.blockedEntries}</p>
                   </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
-                <div className="space-y-2">
-                  {cockpit.payrollReadiness.blockers.map((blocker, index) => (
-                    <Badge key={`${blocker}-${index}`} variant="destructive">{blocker}</Badge>
-                  ))}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Offene Blocker</p>
+                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.blockers.length}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
