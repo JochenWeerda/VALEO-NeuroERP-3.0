@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HR-TIME-PAYROLL-CLOSE-001 - UX-M5 Payroll Closeout Gate
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Export-Gate implementiert: Button disabled wenn Blocker offen; Payroll-Tab mit Gate-Banner (per-Blocker + Direktlink Steuerung) und Freigabe-Banner; tsc 0 Fehler.
+**Ziel:** Export-Button sperren solange Blocker nicht geloest; klare per-Blocker-Auflösung ohne Tab-Suche.
+**Dateibesitz:** `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-PAYROLL-CLOSE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Export-Button disabled bei Blockern; Gate-Banner sichtbar; tsc 0; UX-M5 als umgesetzt markiert.
+
 ## HR-TIME-ACTIONPANEL-001 - UX-M2 Detail-Aktionspanel Zeiten/Arbeitsplan
 
 **Von:** Claude Code
