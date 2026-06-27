@@ -1,7 +1,47 @@
 slice_id: DOC-AGENTOPS-SURFACE-002
 title: "Weitere Agent-Ops-Skill-Dokumente in MkDocs einbinden — Wave 31"
-status: done
+owner: Claude Code
+status: abgeschlossen
 wave: 31
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Weitere Agent-Ops- und Skill-Dokumente in der kuratierten MkDocs-Site unter
+  Agent-Dokumentation > Agent-Ops auffindbar machen.
+file_ownership:
+  - docs/agent-ops/README.md
+  - docs/agent-ops/autogoal-skill.md
+  - docs/agent-ops/goal-skill.md
+  - docs/agent-ops/agent-orchestrator-pilot.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-AGENTOPS-SURFACE-002.yaml
+acceptance:
+  - Alle vier Dokumente sind unter Agent-Dokumentation > Agent-Ops erreichbar.
+  - Frontmatter ist gueltig.
+  - MkDocs-Build laeuft ohne Fehler.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Skill-Dokumentation kann mit der tatsaechlichen Agenten-Tooling-Implementierung auseinanderlaufen.
+external_gates:
+  - Keine externen Gates; reine Dokumentationsauffindbarkeit.
+ai_harness:
+  fachlicher_vertrag: >-
+    Agent-Ops-README, /goal, /autogoal und Orchestrator-Pilot muessen als
+    operative Agentenreferenz auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf Markdown-Frontmatter und MkDocs-Navigation begrenzt.
+  daten_vertrag: >-
+    Keine produktiven Daten oder Schemaaenderungen.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance pruefen Renderbarkeit, Navigation und Frontmatter.
+  security_vertrag: >-
+    Keine Secrets oder personenbezogenen Produktionsdaten in den Dokumenten.
+  betriebs_vertrag: >-
+    Skill- und Orchestrator-Dokumentation muss bei Agenten-Workflow-Aenderungen nachgezogen werden.
+  dokumentations_vertrag: >-
+    Slice-YAML, Workboard und MkDocs-Nav referenzieren dieselben Dokumente.
 
 fachlicher_vertrag:
   ziel: >
