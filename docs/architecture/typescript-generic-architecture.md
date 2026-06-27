@@ -1,3 +1,14 @@
+---
+title: TypeScript Generic Architecture
+type: explanation
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Architekturentwurf fuer TypeScript-Generics, Type-Safety und generierte Typen in VALEO NeuroERP Frontend.
+---
+
 # VALEO NeuroERP 3.0 - TypeScript Generic Architecture Revolution
 
 ## 🎯 **PROBLEM: Complex Generic Constraints**

@@ -1,3 +1,14 @@
+---
+title: ADR Clusters and Epics
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Gruppierung aller ADRs nach Cluster und Epic — Uebersicht fuer strategische Architekturentscheidungen in VALEO NeuroERP.
+---
+
 # ADR Clusters and Epics
 
 ## Zweck

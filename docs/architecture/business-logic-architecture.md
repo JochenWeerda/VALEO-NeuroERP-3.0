@@ -1,3 +1,14 @@
+---
+title: Business Logic Architecture
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Architekturentwurf fuer die Business-Logic-Schicht — Canonical Commands, Policy-Engine, Workflow-Orchestrierung.
+---
+
 # VALEO NeuroERP 3.0 - Business Logic Architecture Revolution
 
 ## 🎯 **PROBLEM: Enterprise Business Logic Conflicts**

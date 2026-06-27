@@ -1,3 +1,14 @@
+---
+title: Open Gaps and Known Issues
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
+---
+
 # Open Gaps and Known Issues
 
 ## Zweck

@@ -1,3 +1,14 @@
+---
+title: KI Usability — Modul als Microservices
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Konzept fuer KI-taugliche Modul-Architektur als Microservices — Frontend-Komponenten und Backend-Services.
+---
+
 # KI Usability – Modul als Microservices (Frontend & Backend)
 
 **Ziel:** Einheitliche KI-gestützte Usability (Sprachsteuerung, Intents, Shortcuts) über alle Masken – wie aus einem Guss mit PageToolbar und Tastaturkürzeln. Umsetzung als **Microservices** (Backend) und **einheitliche Frontend-Integration**.
