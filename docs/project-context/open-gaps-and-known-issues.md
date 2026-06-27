@@ -466,6 +466,46 @@ ADR-Nav: `python scripts/generate_adr_nav.py` nach neuer ADR-Datei (`DOC-MIGRATI
 
 ---
 
+## DOC-ARCH-STACK-001 — Architektur-Dokumentations-Stack (2026-06-27)
+
+ISO 42010 + arc42 + C4 + ERD + Sequenzdiagramme eingeführt ([ADR-036](../adr/adr-036-architecture-documentation-stack.md)).
+
+**Ergebnis:**
+
+- `docs/architecture/arc42/` — 12 Hub-Kapitel
+- `docs/architecture/views/` — Stakeholder-Matrix, C4 Context/Container, Enterprise-Landkarte, ERD, Component CRM/Agrar/Finance, 3 Sequenzdiagramme
+- `docs/entwickler/container-inventory.md` — Generator `scripts/generate_container_inventory.py`
+- `docs/README.md` — Agent-Einstieg repariert
+- ADR-Index 031–036 vervollständigt
+
+**Fortlaufend:** Bei neuem `docker-compose`-Service Generator + C4 Container prüfen. CI: `docs.yml` + `check_all_doc_generators.sh`.
+
+### Optional (2026-06-27) — abgeschlossen
+
+- P1 Component-Diagramme: Einkauf/Lager, DMS/Compliance
+- UML `classDiagram` Canonical Core
+- Production-Stack in C4 Container (Prometheus, Grafana, Loki)
+- CI-Gate: `generate_container_inventory.py --check` in `docs.yml` und Quality-Gate Meta-Check
+
+---
+
+## ARCH-OS-001 — Architecture Operating System MVP (2026-06-27)
+
+Agentensteuerbare Architektur ([ADR-037](../adr/adr-037-structurizr-c4-source-of-truth.md)).
+
+**Ergebnis:**
+
+- `docs/architecture/c4/workspace.dsl` — primäre C4-Quelle
+- `config/architecture-index.yaml` — generierter Domänen-Index
+- `docs/architecture/domains/` — CRM (Pilot), Finance, Agrar, Inventory, DMS/Compliance
+- `docs/architecture/agents/architecture-protocol.md` — Before/During/After
+- `pnpm arch:render|validate|drift` — CLI + quality-gate
+- `config/architecture-domain-prefixes.yaml` — **895/895** Routen, **205/205** Services, **391/391** Endpoints gemappt (Stand 2026-06-27)
+
+**Fortlaufend:** Structurizr-CLI optional für PNG; Component-Diagramme schrittweise in DSL migrieren; bei neuen Routes/Services/Endpoints Prefix in `architecture-domain-prefixes.yaml` ergänzen (`--require-complete`).
+
+---
+
 ## Konsolidiertes Restbacklog (Stand 2026-06-26)
 
 Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert):

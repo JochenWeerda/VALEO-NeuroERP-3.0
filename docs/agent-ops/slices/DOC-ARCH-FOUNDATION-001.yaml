@@ -1,0 +1,39 @@
+slice_id: DOC-ARCH-FOUNDATION-001
+title: "Architektur-Doku Fundament — ADR-036, Index, Agent-Einstieg"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  ADR-Index vervollstaendigen (031-036), architecture/index auf Wave 104,
+  docs/README.md reparieren, ADR-036 Architektur-Dokumentations-Stack anlegen.
+file_ownership:
+  - docs/README.md
+  - docs/adr/README.md
+  - docs/adr/adr-036-architecture-documentation-stack.md
+  - docs/architecture/index.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ARCH-FOUNDATION-001.yaml
+acceptance:
+  - ADR-031 bis ADR-036 im adr/README.md indexiert; Doppelnummern dokumentiert.
+  - architecture/index.md referenziert Waves 1-104 und Architektur-Sichten-Tabelle.
+  - docs/README.md existiert als Agent-Einstieg.
+  - ADR-036 accepted; generate_adr_nav.py enthaelt ADR-036.
+tests:
+  - python scripts/generate_adr_nav.py --check
+  - mkdocs build
+risks:
+  - ADR-Doppelnummern bleiben historisch; keine Renumbering in diesem Slice.
+external_gates:
+  - Keine.
+ai_harness:
+  fachlicher_vertrag: >-
+    Architektur-Entscheidungs- und Navigationsbasis muss fuer Agenten vertrauenswuerdig sein.
+  architektur_vertrag: Nur Doku; kein Runtime-Code.
+  daten_vertrag: Keine Secrets in Architektur-Docs.
+  test_vertrag: MkDocs-Build und ADR-Nav-Generator gruen.
+  security_vertrag: Keine Credentials in Doku.
+  betriebs_vertrag: Bei neuer ADR README und generate_adr_nav nachziehen.
+  dokumentations_vertrag: Workboard, Slice-YAML, open-gaps DOC-ARCH-STACK-001 Abschnitt.
+build_result: "ADR-Nav updated; mkdocs build 0 Errors"

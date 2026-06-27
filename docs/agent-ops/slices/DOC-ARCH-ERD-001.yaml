@@ -1,0 +1,32 @@
+slice_id: DOC-ARCH-ERD-001
+title: "ERD Canonical Domain Model (Mermaid)"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Mermaid erDiagram aus ADR-003 Kernaggregaten inkl. Agrar-Pflichtaggregate.
+file_ownership:
+  - docs/architecture/views/erd-canonical-domain.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ARCH-ERD-001.yaml
+acceptance:
+  - erDiagram mit Kernentitaeten und Beziehungen aus ADR-003.
+  - Verweis auf datenmodell-tenancy und ADR-020/034.
+  - In MkDocs-Navigation.
+tests:
+  - mkdocs build
+risks:
+  - Logisches Modell; physisches Schema in Alembic kann abweichen.
+external_gates:
+  - Keine.
+ai_harness:
+  fachlicher_vertrag: Einheitliches Domänenmodell visuell fuer Integratoren.
+  architektur_vertrag: Abgeleitet aus ADR-003; keine zweite Wahrheit.
+  daten_vertrag: Keine Mandantendaten.
+  test_vertrag: MkDocs rendert erDiagram.
+  security_vertrag: Keine Secrets.
+  betriebs_vertrag: Bei ADR-003-Erweiterung ERD nachziehen.
+  dokumentations_vertrag: arc42 Querschnitt verlinkt ERD.
+build_result: "Canonical ERD published"

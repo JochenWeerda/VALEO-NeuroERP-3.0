@@ -1,0 +1,39 @@
+slice_id: DOC-ARCH-C4-002
+title: "C4 Container + generate_container_inventory.py"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  C4 Container Diagramm aus docker-compose.yml; Generator fuer
+  container-inventory.md mit --check Drift-Gate.
+file_ownership:
+  - docs/architecture/views/c4-02-containers.md
+  - docs/entwickler/container-inventory.md
+  - scripts/generate_container_inventory.py
+  - docs/referenz/skripte-uebersicht.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ARCH-C4-002.yaml
+acceptance:
+  - c4-02-containers.md mit Mermaid C4Container und CRM-Cluster-Tabelle.
+  - generate_container_inventory.py parst docker-compose.yml (27 Services).
+  - python scripts/generate_container_inventory.py --check exit 0.
+  - Container-Inventar in Entwickler-Navigation.
+tests:
+  - python scripts/generate_container_inventory.py
+  - python scripts/generate_container_inventory.py --check
+  - mkdocs build
+risks:
+  - docker-compose Aenderungen erfordern Regenerierung und ggf. C4-Update.
+external_gates:
+  - Keine.
+ai_harness:
+  fachlicher_vertrag: Deploybare Bausteine abgleichbar mit Code-Wahrheit.
+  architektur_vertrag: Generator analog generate_code_inventories.py.
+  daten_vertrag: Keine Secrets aus compose env in Doku.
+  test_vertrag: --check Drift-Gate gruen nach Generator-Lauf.
+  security_vertrag: compose env nicht in generierte Seite.
+  betriebs_vertrag: Bei neuem compose-Service Generator + C4 pruefen.
+  dokumentations_vertrag: skripte-uebersicht.md listet Generator.
+build_result: "27 services; container inventory drift check OK"

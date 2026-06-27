@@ -1,0 +1,22 @@
+slice_id: ARCH-OS-002
+title: "Architecture OS — architecture-index.yaml Generator"
+owner: Cursor
+status: abgeschlossen
+wave: 27
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  generate_architecture_index.py erzeugt config/architecture-index.yaml
+  aus Route/Endpoint/Service/Container-Inventaren mit Domain-Mapping.
+file_ownership:
+  - scripts/generate_architecture_index.py
+  - config/architecture-index.yaml
+  - config/architecture-index.overrides.yaml
+acceptance:
+  - Index generiert mit domains.crm u.a.
+  - --check in check_all_doc_generators.sh
+tests:
+  - python scripts/generate_architecture_index.py --check
+ai_harness:
+  architektur_vertrag: Index ist generiert, nicht handgeschrieben
+  test_vertrag: Generator --check gruen

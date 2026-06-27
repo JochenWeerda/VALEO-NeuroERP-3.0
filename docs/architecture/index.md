@@ -44,6 +44,46 @@ Diese Datei ist eine `abgeleitete Sicht` auf die Architektur. Der operative Deli
 | [ADR-027](../adr/adr-027-process-kernel-event-namenskonvention.md) | Process-Kernel Event-Namenskonvention | Accepted | Process Core |
 | [ADR-028](../adr/adr-028-workflow-access-control-und-delegation.md) | Workflow Access Control und Delegation | Accepted | Process Reliability |
 | [ADR-029](../adr/adr-029-process-betrieb-timeout-batch-archiv-metriken.md) | Process-Betrieb — Timeout, Batch, Archiv und Metriken | Accepted | Process Reliability |
+| [ADR-031](../adr/adr-031-standardmaske-vs-spezialmaske.md) | Standardmaske vs Spezialmaske | Accepted | UX & Process UI |
+| [ADR-032](../adr/adr-032-auth-enforcement-router-global-dependency.md) | Auth-Enforcement Router Global Dependency | Accepted | Tenant & Governance |
+| [ADR-033](../adr/adr-033-rollback-strategie-get-db.md) | Rollback-Strategie get_db() | Accepted | Process Reliability |
+| [ADR-034](../adr/adr-034-tenant-isolation-klassifizierungssystem.md) | Tenant-Isolation-Klassifizierung | Accepted | Tenant & Governance |
+| [ADR-035](../adr/adr-035-kein-workflow-designer.md) | Kein Workflow-Designer | Accepted | Process Core |
+| [ADR-036](../adr/adr-036-architecture-documentation-stack.md) | Architektur-Dokumentations-Stack | Accepted | Foundations |
+| [ADR-037](../adr/adr-037-structurizr-c4-source-of-truth.md) | Structurizr DSL primäre C4-Quelle | Accepted | Foundations |
+
+## Architecture OS (agentensteuerbar)
+
+| Artefakt | Pfad |
+|---|---|
+| Maschinenlesbarer Index | [`config/architecture-index.yaml`](../../config/architecture-index.yaml) |
+| Structurizr DSL | [c4/workspace.dsl](c4/workspace.dsl) |
+| Agent Protocol | [agents/architecture-protocol.md](agents/architecture-protocol.md) |
+| Domain Packs | [domains/crm/](domains/crm/README.md), [finance/](domains/finance/README.md), [agrar/](domains/agrar/README.md), [inventory/](domains/inventory/README.md), [dms-compliance/](domains/dms-compliance/README.md) |
+| Drift Gates | [quality-gates/architecture-drift-checks.md](quality-gates/architecture-drift-checks.md) |
+
+CLI: `pnpm arch:render` · `pnpm arch:validate` · `pnpm arch:drift`
+
+## Architektur-Sichten (ISO 42010 / C4 / arc42)
+
+Siehe [ADR-036](../adr/adr-036-architecture-documentation-stack.md) und [ADR-037](../adr/adr-037-structurizr-c4-source-of-truth.md).
+
+| Sicht | Dokument |
+|---|---|
+| Stakeholder & Concerns | [stakeholder-concerns.md](views/stakeholder-concerns.md) |
+| Viewpoint-Katalog | [viewpoint-catalog.md](views/viewpoint-catalog.md) |
+| C4 System Context | [c4-01-system-context.md](views/c4-01-system-context.md) |
+| C4 Container | [c4-02-containers.md](views/c4-02-containers.md) |
+| Enterprise-Landkarte | [enterprise-landscape.md](views/enterprise-landscape.md) |
+| C4 Component CRM | [components/c4-crm.md](views/components/c4-crm.md) |
+| C4 Component Agrar | [components/c4-agrar.md](views/components/c4-agrar.md) |
+| C4 Component Finance | [components/c4-finance.md](views/components/c4-finance.md) |
+| C4 Component Einkauf/Lager | [components/c4-procurement-inventory.md](views/components/c4-procurement-inventory.md) |
+| C4 Component DMS/Compliance | [components/c4-dms-compliance.md](views/components/c4-dms-compliance.md) |
+| ERD Canonical Domain | [erd-canonical-domain.md](views/erd-canonical-domain.md) |
+| UML Klassendiagramm Core | [uml-canonical-domain-class.md](views/uml-canonical-domain-class.md) |
+| Sequenzdiagramme | [sequences/](views/sequences/) |
+| arc42 (Hub) | [arc42/01-einfuehrung.md](arc42/01-einfuehrung.md) |
 
 ## Themencluster
 
@@ -148,7 +188,7 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 
 ## Process Kernel Delivery
 
-- [Process Kernel Status (Waves 1–67)](process-kernel/STATUS.md)
+- [Process Kernel Status (Waves 1–104)](process-kernel/STATUS.md)
 - [Delivery Map (Wave→Gap)](process-kernel/DELIVERY-MAP.md)
 
 ### Abgeschlossene Waves (Kernmodule)

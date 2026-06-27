@@ -1,0 +1,26 @@
+slice_id: DOC-ARCH-CI-001
+title: "Container-Inventar CI-Gate + Production Compose"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  generate_container_inventory.py in docs.yml und check_all_doc_generators.sh;
+  Production-Stack (prometheus, grafana, loki) im Generator und C4 Container.
+file_ownership:
+  - scripts/generate_container_inventory.py
+  - scripts/check_all_doc_generators.sh
+  - .github/workflows/docs.yml
+  - docs/architecture/views/c4-02-containers.md
+  - docs/entwickler/container-inventory.md
+  - docs/agent-ops/slices/DOC-ARCH-CI-001.yaml
+acceptance:
+  - docs.yml fuehrt generate_container_inventory.py --check aus.
+  - check_all_doc_generators.sh enthaelt Container-Check.
+  - Generator parst docker-compose.yml und docker-compose.production.yml.
+  - C4 Container enthaelt Production-Observability-Abschnitt.
+tests:
+  - python scripts/generate_container_inventory.py --check
+  - bash scripts/check_all_doc_generators.sh --check
+build_result: "CI gate wired; dev+prod compose in inventory"

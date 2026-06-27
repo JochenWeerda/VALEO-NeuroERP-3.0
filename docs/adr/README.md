@@ -37,7 +37,27 @@ Die MkDocs-Sidebar listet alle ADRs einzeln (Generator: `python scripts/generate
 - [ADR-027 Process-Kernel Event-Namenskonvention](adr-027-process-kernel-event-namenskonvention.md)
 - [ADR-028 Workflow Access Control und Delegation](adr-028-workflow-access-control-und-delegation.md)
 - [ADR-029 Process-Betrieb — Timeout, Batch, Archiv und Metriken](adr-029-process-betrieb-timeout-batch-archiv-metriken.md)
+- [ADR-031 Standardmaske vs Spezialmaske](adr-031-standardmaske-vs-spezialmaske.md)
+- [ADR-032 Auth-Enforcement über Router-Level Global Dependency](adr-032-auth-enforcement-router-global-dependency.md)
+- [ADR-033 Rollback-Strategie — Zentral in get_db()](adr-033-rollback-strategie-get-db.md)
+- [ADR-034 Tenant-Isolation-Klassifizierungssystem](adr-034-tenant-isolation-klassifizierungssystem.md)
+- [ADR-035 Kein interaktiver Workflow-Designer](adr-035-kein-workflow-designer.md)
+- [ADR-036 Architektur-Dokumentations-Stack](adr-036-architecture-documentation-stack.md)
+- [ADR-037 Structurizr C4 Source of Truth](adr-037-structurizr-c4-source-of-truth.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
+
+## Hinweis zu Doppelnummern
+
+Einige ADRs teilen sich historische Nummern (parallele Entscheidungsstränge):
+
+| Nummer | Datei A | Datei B |
+|---|---|---|
+| ADR-014 | [Integrationsgrenzen](adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md) | [Service-Layer-Pattern](adr-014-service-layer-pattern.md) |
+| ADR-015 | [Analytics-Datenprodukt](adr-015-analytics-benchmark-datenproduktmodell.md) | [Auth-Enforcement-Strategie](adr-015-auth-enforcement-strategie.md) |
+| ADR-016 | [IoT/Telemetrie](adr-016-iot-telemetrie-modell.md) | [Pagination-Standard](adr-016-pagination-standard.md) |
+| ADR-017 | [Pricing-Marktdaten](adr-017-governance-pricing-marktdatenquellen.md) | [Error-Response-Format](adr-017-error-response-format.md) |
+
+ADR-030 ist **nicht vergeben** (Lücke in der Nummerierung).
 
 ## Referenzen
 
