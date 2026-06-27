@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-AGENTOPS-SURFACE-002 - Weitere Agent-Ops-Skill-Docs in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Vier weitere Agent-Ops-Dokumente (README/Ueberblick, autogoal-skill, goal-skill, agent-orchestrator-pilot) mit Frontmatter versehen und im Agent-Ops-Unterabschnitt veroeffentlicht.
+**Ziel:** Agent-Skill-Dokumentation und Orchestrator-Pilotbeschreibung fuer Agenten und Entwickler im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/agent-ops/README.md`, `autogoal-skill.md`, `goal-skill.md`, `agent-orchestrator-pilot.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-AGENTOPS-SURFACE-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 26.38 s).
+
 ## DOC-AGENTOPS-SURFACE-001 - Agent-Ops-Koordinationsdokumente in MkDocs integrieren
 
 **Von:** Claude Code
