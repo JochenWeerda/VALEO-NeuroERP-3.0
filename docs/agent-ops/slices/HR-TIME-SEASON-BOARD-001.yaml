@@ -1,0 +1,42 @@
+slice_id: HR-TIME-SEASON-BOARD-001
+title: "HR-TIME UX-M7 — Saison-Leitstand 7-Tage-Heatmap"
+status: umgesetzt
+wave: 40
+date: 2026-06-27
+owner: Claude Code
+goal: >-
+  Neuer Saison-Leitstand-Tab mit 7-Tage-Heatmap: Engpaesse durch Kampagnen,
+  Blocker, Warnungen, Schulferien und Brueckentage werden vor der Woche sichtbar.
+  Kein neuer API-Aufruf — nur bereits geladene workPlan/campaignCapacity/absences-Daten.
+file_ownership:
+  - packages/frontend-web/src/pages/personal/zeiterfassung.tsx
+  - docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md
+  - docs/agent-ops/slices/HR-TIME-SEASON-BOARD-001.yaml
+acceptance:
+  - Neuer Tab "Saison-Leitstand" in TabsList und TabsContent.
+  - 7-Spalten-Grid zeigt je Tag: Datum, Schulferien/Bruecktag-Marker, aktive Kampagnen,
+    Blocker-/Warnungs-Badges, Farbkodierung (rot/gelb/gruen).
+  - Darunter Kampagnen-Tabelle und Abwesenheiten-Tabelle.
+  - tsc --noEmit exit 0.
+  - UX-M7 in hr-time-ux-workflow-roadmap als umgesetzt markiert.
+tests:
+  - tsc --noEmit (exit 0 verified)
+ai_harness:
+  fachlicher_vertrag: >-
+    Heatmap aggregiert workPlan.assignments nach Datum mit Blocker/Warnungs-Severity.
+    Kampagnen-Perioden werden per DateRange-Filter (periodFrom <= day <= periodTo) gemappt.
+    Schulferien/Brueckentage aus dem workPlan-Query-Context hardcodiert (Beispiel-Marker).
+  architektur_vertrag: >-
+    Performance-Regel eingehalten: kein neuer API-Call; nur bereits geladene
+    workPlan/campaignCapacity/absences-Daten aus bestehenden Queries.
+  daten_vertrag: >-
+    Keine DB-Aenderungen. Nur UI-seitige Aggregation.
+  test_vertrag: >-
+    TypeScript 0 Fehler.
+  security_vertrag: >-
+    Keine neuen API-Calls, keine Credentials.
+  betriebs_vertrag: >-
+    Heatmap zeigt nur bereits geladene Periode (selectedDate + 6 Tage).
+    Volle Saison-Ansicht (Monat/Jahr) ist UX-M7-Folge-Slice.
+  dokumentations_vertrag: >-
+    hr-time-ux-workflow-roadmap UX-M7 als umgesetzt markiert.

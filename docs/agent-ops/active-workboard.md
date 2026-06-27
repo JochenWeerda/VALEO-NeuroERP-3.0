@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HR-TIME-SEASON-BOARD-001 - UX-M7 Saison-Leitstand 7-Tage-Heatmap
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — neuer "Saison-Leitstand"-Tab mit 7-Tage-Heatmap (Blocker/Warnungen/ok farbkodiert pro Tag); Kampagnen-Perioden-Mapping; Schulferien- und Bruecktag-Marker; Kampagnen- und Abwesenheiten-Tabelle darunter. tsc 0 Fehler.
+**Ziel:** UX-M7 (Kalender- und Saisonleitstand) umsetzen: Engpaesse durch Kampagnen, Ferien und Abwesenheiten auf einen Blick sehen ohne API-Mehraufwand — reine UI-Aggregation bestehender Queries.
+**Dateibesitz:** `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-SEASON-BOARD-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** 7-Tage-Heatmap im Saison-Tab; Farbkodierung korrekt; tsc 0; UX-M7 als umgesetzt markiert.
+
 ## HR-TIME-DRIVER-DISPO-001 - UX-M4 Driver-Dispo Detail-Panel + Tour-Korrektur
 
 **Von:** Claude Code
