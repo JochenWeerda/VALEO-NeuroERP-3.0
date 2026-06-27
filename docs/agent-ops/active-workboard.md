@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-ARCH-SURFACE-001 - Schluessel-Architekturdokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Vier Architekturdokumente (Ist-Prozesse, Zielprozesse, Zielbild Landhandel ERP, Quality-Governance-Tooling) mit Frontmatter versehen und im Architektur-Abschnitt der Entwickler-Navigation veroeffentlicht.
+**Ziel:** Architektonische Orientierungsdokumente fuer Entwickler und Agenten im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/architecture/current-processes.md`, `target-processes.md`, `target-state-landhandel-erp.md`, `tooling-quality-governance.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ARCH-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 17.75 s).
+
 ## DOC-PROJECT-CONTEXT-001 - Schluessel-Projektkontextdokumente in MkDocs integrieren
 
 **Von:** Claude Code
