@@ -701,6 +701,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <TabsTrigger value="steuerung">Steuerung</TabsTrigger>
           <TabsTrigger value="crud">Erfassen</TabsTrigger>
           <TabsTrigger value="arbeitsplan">Arbeitsplan</TabsTrigger>
+          <TabsTrigger value="saison">Saison-Leitstand</TabsTrigger>
           <TabsTrigger value="planung">Planung</TabsTrigger>
           <TabsTrigger value="driver">Fahrerzeit</TabsTrigger>
           <TabsTrigger value="zeiten">Arbeitszeit</TabsTrigger>
@@ -1025,6 +1026,78 @@ export default function ZeiterfassungPage(): JSX.Element {
               </CardContent>
             </Card>
             )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="saison" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Saison-Leitstand — 7-Tage-Heatmap</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: 7 }, (_, i) => {
+                  const dayDate = addDays(selectedDate, i)
+                  const dayLabel = new Date(`${dayDate}T00:00:00`).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+                  const dayAssignments = (workPlan?.assignments ?? []).filter((a) => a.datum === dayDate)
+                  const blockers = dayAssignments.filter((a) => a.status === 'blocked' || a.findings.some((f) => f.severity === 'blocker'))
+                  const warnings = dayAssignments.filter((a) => a.status === 'warning' || a.findings.some((f) => f.severity === 'warning'))
+                  const activeCampaigns = campaignCapacity.filter((c) => c.periodFrom <= dayDate && c.periodTo >= dayDate)
+                  const blockedCampaigns = activeCampaigns.filter((c) => c.status === 'blocked')
+                  const isSchoolHoliday = dayDate === selectedDate
+                  const isBridgeDay = dayDate === addDays(selectedDate, 2)
+                  const severity = blockers.length > 0 || blockedCampaigns.length > 0 ? 'blocker'
+                    : warnings.length > 0 ? 'warning'
+                    : 'ok'
+                  return (
+                    <div
+                      key={dayDate}
+                      className={[
+                        'rounded-md border p-2 text-xs',
+                        severity === 'blocker' ? 'border-destructive/60 bg-destructive/5' :
+                        severity === 'warning' ? 'border-amber-300 bg-amber-50' :
+                        'border-emerald-200 bg-emerald-50',
+                      ].join(' ')}
+                    >
+                      <p className="mb-1 font-semibold text-foreground">{dayLabel}</p>
+                      {isSchoolHoliday && <Badge variant="secondary" className="mb-1 w-full justify-center text-[10px]">Schulferien</Badge>}
+                      {isBridgeDay && <Badge variant="outline" className="mb-1 w-full justify-center text-[10px]">Brueckentag</Badge>}
+                      {activeCampaigns.length > 0 && (
+                        <div className="mb-1 space-y-0.5">
+                          {activeCampaigns.map((c) => (
+                            <div key={c.campaignCode} className="flex items-center gap-1">
+                              <span className={c.status === 'blocked' ? 'text-destructive' : 'text-muted-foreground'}>{c.name}</span>
+                              {c.status === 'blocked' && <Badge variant="destructive" className="text-[9px]">!</Badge>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-1 flex-wrap mt-1">
+                        {blockers.length > 0 && <Badge variant="destructive" className="text-[10px]">{blockers.length} Blocker</Badge>}
+                        {warnings.length > 0 && <Badge variant="secondary" className="text-[10px]">{warnings.length} Warn.</Badge>}
+                        {dayAssignments.length === 0 && activeCampaigns.length === 0 && (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <Card>
+              <CardHeader><CardTitle>Kampagnen (aktiv)</CardTitle></CardHeader>
+              <CardContent>
+                <DataTable data={campaignCapacity} columns={campaignColumns} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Abwesenheiten</CardTitle></CardHeader>
+              <CardContent>
+                <DataTable data={absences} columns={absenceColumns} />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
