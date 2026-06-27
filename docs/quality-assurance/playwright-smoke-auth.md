@@ -1,3 +1,14 @@
+---
+title: Playwright Smoke — Auth (Dev / Preview / CI)
+type: how-to
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: SSO-only Login-Seite korrekt in Playwright-Tests handhaben — API-Token-Auth statt UI-Login.
+---
+
 # Playwright @smoke — Authentifizierung (Dev / Preview / CI)
 
 ## Problem

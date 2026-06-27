@@ -1,5 +1,15 @@
 # Active Workboard
 
+## Wave 20 — DOC-QA-SURFACE-001: QA/Test-Docs und External-Mock-Verträge
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27
+
+3 QA-/Test-Dokumente mit Frontmatter versehen und in MkDocs-Build integriert:
+`quality-assurance/playwright-smoke-auth.md` (SSO-only Auth-Strategie für Playwright),
+`quality-assurance/browser-use-checklists.md` (E2E-UAT Pflichtfragen).
+`agent-docs/runbooks/external-mock-vertraege.md` (DATEV/ELSTER/TSE/Bank/DSFinV-K Mock-Endpoints)
+unter Agent-Dokumentation verlinkt. Build grün: „Documentation built in 48.84 seconds — 0 Errors".
+
 ## Wave 19 — DOC-WORKFLOW-INDEX-001: Kuratierter Workflow-Index
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27

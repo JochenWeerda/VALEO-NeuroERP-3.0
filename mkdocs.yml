@@ -103,6 +103,8 @@ exclude_docs: |
   /quality-assurance/
   !/quality-assurance/action-matrix-report.md
   !/quality-assurance/traceability-matrix.md
+  !/quality-assurance/playwright-smoke-auth.md
+  !/quality-assurance/browser-use-checklists.md
   /roadmap/
   /runbooks/
   !/runbooks/ALERTS.md
@@ -192,6 +194,8 @@ nav:
       - Workflow-Index: entwickler/workflow-index.md
       - Action-Matrix-Report: quality-assurance/action-matrix-report.md
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
+      - Playwright Auth (Smoke): quality-assurance/playwright-smoke-auth.md
+      - Browser-Use Checklists: quality-assurance/browser-use-checklists.md
       - Architektur:
           - Index: architecture/index.md
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md
@@ -254,6 +258,7 @@ nav:
       - Tool-Katalog: agent-docs/tool-catalog.md
       - Guardrails: agent-docs/guardrails.md
       - ai_harness-Verträge: agent-docs/contracts.md
+      - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
   - Compliance:
       - Überblick: compliance/index.md
       - GoBD-Checkliste: compliance/gobd-checklist.md
