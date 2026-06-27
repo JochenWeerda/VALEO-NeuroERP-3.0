@@ -69,8 +69,8 @@ def create_haccp_plan(
         INSERT INTO domain_shared.futtermittel_haccp_plaene
             (id, tenant_id, bezeichnung, gueltigkeit_von, gueltigkeit_bis,
              gefahrenanalyse, ccp_liste, ueberwachung, korrekturen, verifizierung, aktiv)
-        VALUES (:id, :tid, :bez, :gv, :gb, :ga::jsonb, :ccp::jsonb,
-                :ue::jsonb, :ko::jsonb, :ver::jsonb, TRUE)
+        VALUES (:id, :tid, :bez, :gv, :gb, CAST(:ga AS jsonb), CAST(:ccp AS jsonb),
+                CAST(:ue AS jsonb), CAST(:ko AS jsonb), CAST(:ver AS jsonb), TRUE)
     """), {
         "id": plan_id, "tid": tenant_id,
         "bez": body.get("bezeichnung", ""),
@@ -101,11 +101,11 @@ def update_haccp_plan(
         "aktiv": "aktiv = :aktiv",
     }
     json_columns = {
-        "gefahrenanalyse": "gefahrenanalyse = :gefahrenanalyse::jsonb",
-        "ccp_liste": "ccp_liste = :ccp_liste::jsonb",
-        "ueberwachung": "ueberwachung = :ueberwachung::jsonb",
-        "korrekturen": "korrekturen = :korrekturen::jsonb",
-        "verifizierung": "verifizierung = :verifizierung::jsonb",
+        "gefahrenanalyse": "gefahrenanalyse = CAST(:gefahrenanalyse AS jsonb)",
+        "ccp_liste": "ccp_liste = CAST(:ccp_liste AS jsonb)",
+        "ueberwachung": "ueberwachung = CAST(:ueberwachung AS jsonb)",
+        "korrekturen": "korrekturen = CAST(:korrekturen AS jsonb)",
+        "verifizierung": "verifizierung = CAST(:verifizierung AS jsonb)",
     }
     assignments = []
     params: dict[str, Any] = {"id": plan_id, "tid": tenant_id}
@@ -169,7 +169,7 @@ def create_vlog_meldung(
             (id, tenant_id, rezeptur_id, meldedatum, menge_kg,
              rohstoff_liste, gvo_frei, zertifikat_nr, status, notiz)
         VALUES (:id, :tid, :rez, :md, :kg,
-                :rl::jsonb, :gvo, :zert, 'erstellt', :notiz)
+                CAST(:rl AS jsonb), :gvo, :zert, 'erstellt', :notiz)
     """), {
         "id": meldung_id, "tid": tenant_id,
         "rez": body.get("rezeptur_id"),

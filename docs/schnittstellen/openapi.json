@@ -252857,11 +252857,11 @@
           },
           {
             "in": "query",
-            "name": "new_status",
+            "name": "status",
             "required": true,
             "schema": {
               "pattern": "^(erstellt|unterwegs|zugestellt|storniert)$",
-              "title": "New Status",
+              "title": "Status",
               "type": "string"
             }
           },
