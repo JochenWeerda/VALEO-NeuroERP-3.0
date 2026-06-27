@@ -1,3 +1,14 @@
+---
+title: Domain Parity Roadmap 2026-04-24
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: "WEITGEHEND UMGESETZT: Paritaets-Roadmap fuer ERP-Domain-Vertiefung (Stand 2026-05-05). Die wesentlichen Paritaets-Luecken wurden durch DOM-004-Wellen und fachliche Vertiefungsslices geschlossen. Aktueller Stand in open-gaps-and-known-issues.md."
+---
+
 # Domain Parity Roadmap
 
 Stand: `2026-05-05`
