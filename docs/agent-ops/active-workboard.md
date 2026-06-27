@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-WAREHOUSE-SURFACE-001 - Warehouse/WM-AGRI-Dokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sechs Warehouse-/WM-AGRI-Forschungsdokumente (Hofplan Folkerts Landhandel, Handbuch-C-Inventar, Silo-Baustein, Hersteller-Recherche, Benchmark, Open-Source-Bausteine) mit Frontmatter versehen und als Unterabschnitt Warehouse/WM-AGRI unter Referenz veroeffentlicht.
+**Ziel:** WM-AGRI-Recherche- und Referenzdokumente fuer Entwickler und Agenten im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/warehouse/folkerts-landhandel-hofplan.md`, `handbuch-c-inventar.md`, `agrar-silo-materialfluss-studio-baustein.md`, `agri-silo-vendor-interface-research-2026-06-12.md`, `agri-silo-material-flow-benchmark-2026-06-12.md`, `reusable-open-source-silo-material-flow-2026-06-12.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-WAREHOUSE-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sechs Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 18.33 s).
+
 ## DOC-QA-SURFACE-002 - QA-Docs und Workflow-Chains in MkDocs integrieren
 
 **Von:** Claude Code

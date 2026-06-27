@@ -1,3 +1,14 @@
+---
+title: Wiederverwendbare Open-Source-Bausteine Silo/Materialfluss
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Recherche wiederverwendbarer Open-Source-Pakete fuer Silo- und Materialfluss-Visualisierung — Abgleich mit Repo-Dependencies und WM-AGRI-SILO-001.
+---
+
 # Open-Source-Bausteine: Silo-, Materialfluss-, Karten-Visualisierung
 
 **Datum:** 2026-06-12 â€” Abgleich mit Repo-Dependencies und Architekturentscheid WM-AGRI-SILO-001.

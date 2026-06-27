@@ -139,6 +139,12 @@ exclude_docs: |
   /user/
   /valeo-reference/
   /warehouse/
+  !/warehouse/folkerts-landhandel-hofplan.md
+  !/warehouse/handbuch-c-inventar.md
+  !/warehouse/agrar-silo-materialfluss-studio-baustein.md
+  !/warehouse/agri-silo-vendor-interface-research-2026-06-12.md
+  !/warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
+  !/warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
   /wiki/
   /workflows/
   /architecture/process-kernel/wave-*/
@@ -347,6 +353,13 @@ nav:
       - Module Map: project-context/module-map.md
       - Domain Landhandel: project-context/domain-landhandel-und-agrarhandel.md
       - Open Gaps & Known Issues: project-context/open-gaps-and-known-issues.md
+      - Warehouse / WM-AGRI:
+          - Hofplan Folkerts Landhandel: warehouse/folkerts-landhandel-hofplan.md
+          - Handbuch-C-Inventar: warehouse/handbuch-c-inventar.md
+          - Silo-Baustein (Studio): warehouse/agrar-silo-materialfluss-studio-baustein.md
+          - Hersteller-Recherche Silo: warehouse/agri-silo-vendor-interface-research-2026-06-12.md
+          - Benchmark Agrar-Silo: warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
+          - Open-Source Silo/Materialfluss: warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
   - Grundlagen:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md
