@@ -1,3 +1,14 @@
+---
+title: Canary-Rollout Leitfaden
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Stufenweiser Rollout Staging → Prod 10% → 100% mit Smoke-Tests und automatischem Rollback.
+---
+
 # Canary-Rollout Leitfaden (Staging → Prod 10% → 100%)
 
 ## Voraussetzungen

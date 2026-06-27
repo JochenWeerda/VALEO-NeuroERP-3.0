@@ -28,3 +28,25 @@ risks:
   - Approval/ELSTER-Flow hat viele Action-Handler; Regression nur manuell oder E2E abdeckbar.
 external_gates:
   - ELSTER-Testzugang fuer echte Abgabe-Validierung.
+ai_harness:
+  fachlicher_vertrag: >-
+    Die UStVA-Maske darf API-Responses nicht doppelt entpacken und muss
+    Lade-/Submitfehler fuer FIBU/Steuerpruefung sichtbar machen.
+  architektur_vertrag: >-
+    Frontend nutzt den kanonischen apiClient statt Legacy-Axios in der UStVA-
+    Maske; ELSTER-Produktionsgate bleibt getrennt.
+  daten_vertrag: >-
+    Nur UStVA-Response-Payloads und Statusinformationen werden normalisiert;
+    keine echten ELSTER-Zertifikate oder Steuerdaten in Tests.
+  test_vertrag: >-
+    TypeScript-Pruefung und gezielte Code-Suche sichern, dass keine
+    AxiosResponse-Leaks verbleiben.
+  security_vertrag: >-
+    Keine produktiven ELSTER-Zugangsdaten, Zertifikate oder Secrets im Code
+    oder in der Dokumentation.
+  betriebs_vertrag: >-
+    Produktiver ELSTER-Submit bleibt ein externes Betriebs- und
+    Steuerberater-Gate.
+  dokumentations_vertrag: >-
+    Card, Open-Gaps und Slice-YAML halten den geschlossenen CMP-001-P1/P2-Stand
+    synchron.

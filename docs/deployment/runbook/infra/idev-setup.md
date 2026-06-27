@@ -1,3 +1,14 @@
+---
+title: InfraStat IDEV Produktiv-Setup
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Secrets, Helm-Values und Migrations-Setup für InfraStat IDEV in der Produktion.
+---
+
 # InfraStat IDEV Produktiv-Setup
 
 ## 1. Secrets erstellen
@@ -27,7 +38,7 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
 ## 4. Alerts/Monitoring
 - Prometheus-ConfigMap (`prometheus-alerts.yaml`) aktivieren (`alerts.infrastatEnabled=true`).
 - Alertmanager-Routing für `component=infrastat` konfigurieren.
-- Smoke-Test: `kubectl port-forward svc/valeo-erp-infrastat 5200` → `curl /metrics` und Alerts mithilfe von `promtool test rules`. 
+- Smoke-Test: `kubectl port-forward svc/valeo-erp-infrastat 5200` → `curl /metrics` und Alerts mithilfe von `promtool test rules`.
 
 ## 5. Smoke-Test (IDEV)
 1. Port-Forward:

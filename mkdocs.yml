@@ -88,7 +88,14 @@ exclude_docs: |
   /config/
   /data/
   /db/
+  /deployment/helm/
   /deployment/
+  !/deployment/gitops/argocd.md
+  !/deployment/runbook/infra/canary-rollout.md
+  !/deployment/runbook/infra/idev-setup.md
+  !/deployment/runbook/security/secrets-inventory.md
+  !/deployment/runbook/compliance/zoll-setup.md
+  !/deployment/runbook/frontend/epcis-ui.md
   /design/
   /hrm-go-live-templates/
   /integrations/
@@ -184,6 +191,13 @@ nav:
           - Disaster Recovery: runbooks/DISASTER-RECOVERY.md
           - Production-Readiness: operations/production-readiness-runbook.md
           - Dependency-Pflege: operations/dependency-and-compatibility-maintenance.md
+      - Deployment:
+          - ArgoCD / GitOps: deployment/gitops/argocd.md
+          - Canary-Rollout: deployment/runbook/infra/canary-rollout.md
+          - InfraStat IDEV Setup: deployment/runbook/infra/idev-setup.md
+          - Secrets (Inventory): deployment/runbook/security/secrets-inventory.md
+          - Zoll / Exportkontrolle: deployment/runbook/compliance/zoll-setup.md
+          - Frontend EPCIS UI: deployment/runbook/frontend/epcis-ui.md
   - Entwickler:
       - Überblick: entwickler/index.md
       - Lokales Setup: entwickler/lokales-setup.md

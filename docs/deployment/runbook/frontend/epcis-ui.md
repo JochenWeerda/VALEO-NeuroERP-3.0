@@ -1,3 +1,14 @@
+---
+title: Frontend — EPCIS Eventliste & KPI-Widget
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Deployment und Konfiguration der EPCIS-Eventliste und KPI-Widget-Komponenten im Frontend.
+---
+
 # Frontend – EPCIS Eventliste & KPI-Widget
 
 ## Übersicht
