@@ -301,6 +301,76 @@ def test_auto_book_lot_link_returns_ok_false_for_missing_lot():
 
 
 @pytest.mark.unit
+def test_score_cell_for_lot_returns_none_for_gesperrt():
+    from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService as Svc
+    cell = {"qs_status": "gesperrt", "capacity_kg": "10000", "current_stock_kg": "0"}
+    lot = {"id": "l1", "article_id": "art-1"}
+    assert Svc._score_cell_for_lot(cell, lot, "silo-1", Decimal("100")) is None
+
+
+def test_score_cell_for_lot_returns_none_for_material_conflict():
+    from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService as Svc
+    cell = {"qs_status": "frei", "current_material_id": "art-2", "current_lot_id": None, "capacity_kg": "10000", "current_stock_kg": "0", "legacy_silo_id": None}
+    lot = {"id": "l1", "article_id": "art-1"}
+    assert Svc._score_cell_for_lot(cell, lot, "silo-1", Decimal("100")) is None
+
+
+def test_score_cell_for_lot_returns_none_for_lot_conflict():
+    from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService as Svc
+    cell = {"qs_status": "frei", "current_material_id": None, "current_lot_id": "other-lot", "capacity_kg": "10000", "current_stock_kg": "0", "legacy_silo_id": None}
+    lot = {"id": "l1", "article_id": "art-1"}
+    assert Svc._score_cell_for_lot(cell, lot, "silo-1", Decimal("100")) is None
+
+
+def test_score_cell_for_lot_returns_none_for_capacity_overflow():
+    from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService as Svc
+    cell = {"qs_status": "frei", "current_material_id": None, "current_lot_id": None, "capacity_kg": "1000", "current_stock_kg": "900", "legacy_silo_id": None}
+    lot = {"id": "l1", "article_id": "art-1"}
+    assert Svc._score_cell_for_lot(cell, lot, "silo-1", Decimal("200")) is None
+
+
+def test_score_cell_for_lot_boosts_legacy_silo_match():
+    from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService as Svc
+    cell = {"qs_status": "frei", "current_material_id": None, "current_lot_id": None, "capacity_kg": "10000", "current_stock_kg": "0", "legacy_silo_id": "silo-1"}
+    lot = {"id": "l1", "article_id": "art-1"}
+    score = Svc._score_cell_for_lot(cell, lot, "silo-1", Decimal("100"))
+    assert score is not None
+    assert score >= 100
+
+
+def test_score_cell_for_lot_no_legacy_match():
+    from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService as Svc
+    cell = {"qs_status": "frei", "current_material_id": None, "current_lot_id": None, "capacity_kg": "10000", "current_stock_kg": "0", "legacy_silo_id": "other-silo"}
+    lot = {"id": "l1", "article_id": "art-1"}
+    score = Svc._score_cell_for_lot(cell, lot, "silo-1", Decimal("100"))
+    assert score is not None
+    assert score < 100
+
+
+def test_resolve_active_lot_raises_without_any_ref():
+    svc = AgriLotLinkBookingService(MagicMock(), "t1", trace_hooks_enabled=False)
+    with pytest.raises(ValueError, match="lot_id"):
+        svc._resolve_active_lot(lot_id=None, ticket_ref=None, acceptance_ref=None)
+
+
+def test_resolve_active_lot_by_lot_id():
+    lot = _row(id="l1", silo_id="s1", virtual_lot_number="VL1", source_ticket_id="t1",
+               article_id="art1", quantity_tons=Decimal("5"), status="active", silo_number="S1")
+    db = MagicMock()
+    db.execute.return_value.fetchone.return_value = lot
+    svc = AgriLotLinkBookingService(db, "t1", trace_hooks_enabled=False)
+    result = svc._resolve_active_lot(lot_id="l1", ticket_ref=None, acceptance_ref=None)
+    assert result["id"] == "l1"
+
+
+def test_resolve_active_lot_not_found_raises():
+    db = MagicMock()
+    db.execute.return_value.fetchone.return_value = None
+    svc = AgriLotLinkBookingService(db, "t1", trace_hooks_enabled=False)
+    with pytest.raises(ValueError, match="Kein aktives Silo-Lot"):
+        svc._resolve_active_lot(lot_id="missing", ticket_ref=None, acceptance_ref=None)
+
+
 def test_suggest_lot_link_prefers_legacy_silo_match():
     lot = _row(
         id="lot-1",
