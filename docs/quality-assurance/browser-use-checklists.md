@@ -1,3 +1,14 @@
+---
+title: Browser-Use Checklists (E2E / UAT)
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Pflichtfragen und UI/CRUD-Abnahmekriterien für Workflow-Cards — priorisierte E2E-Matrix.
+---
+
 # Browser-Use Checklists
 
 ## Zweck

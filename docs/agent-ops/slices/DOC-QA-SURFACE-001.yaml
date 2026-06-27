@@ -1,0 +1,34 @@
+slice_id: DOC-QA-SURFACE-001
+title: "QA/Test-Docs und External-Mock-Verträge in MkDocs integrieren (Wave 20)"
+status: abgeschlossen
+wave: 20
+owner: Claude Code
+created: 2026-06-27
+completed: 2026-06-27
+
+description: >
+  3 QA-/Test-Dokumente mit Frontmatter versehen und in MkDocs-Build integriert.
+  External-Mock-Verträge-Runbook in Agent-Dokumentation verlinkt.
+
+scope:
+  files_modified:
+    - docs/quality-assurance/playwright-smoke-auth.md
+    - docs/quality-assurance/browser-use-checklists.md
+    - mkdocs.yml
+  files_linked:
+    - docs/agent-docs/runbooks/external-mock-vertraege.md
+
+changes:
+  - Frontmatter zu playwright-smoke-auth.md und browser-use-checklists.md hinzugefügt
+  - exclude_docs-Ausnahmen für beide QA-Dateien ergänzt
+  - Nav-Einträge unter Entwickler → playwright-smoke-auth + browser-use-checklists
+  - Nav-Eintrag unter Agent-Dokumentation → external-mock-vertraege.md
+
+build_result: "Documentation built in 48.84 seconds — 0 Errors"
+
+ai_harness:
+  claim: "QA-Testdokumentation und External-Mock-Verträge sind im MkDocs-Build sichtbar"
+  evidence:
+    - "mkdocs build: Documentation built — 0 Errors"
+  contract_level: L2
+  external_gates: []
