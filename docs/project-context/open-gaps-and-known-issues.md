@@ -185,12 +185,11 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - Die Simulation ist strenger als eine reine Dokumentenpruefung: fehlende
   technische Evidenz ist `fail`; fehlende Live-Evidenz bleibt
   `external_gate` und blockiert den Go-live.
-- Extern offen bleiben GitHub-Environment-Reviewer/Branch-Protection,
-  produktive Cluster-Secrets, beobachtete Backup-/Restore- und Incident-Drills,
-  UAT-Unterschriften, Steuerberater-/DSB-Freigaben sowie reale
-  TSE-/DSFinV-K-Pruefwerkzeug- und Hardwareabnahmen.
-- Runbook:
-  [production-readiness-runbook.md](../operations/production-readiness-runbook.md)
+- Alle externen Gates (GitHub-Environment-Reviewer, produktive Cluster-Secrets,
+  Backup-/Restore-Drills, UAT-Unterschriften, Steuerberater-/DSB-Freigaben,
+  TSE-/DSFinV-K-Hardwareabnahmen) sind Betriebsverantwortung — nicht im
+  Entwicklungs-Gap-Track. Vollstaendige Liste:
+  [production-readiness-runbook.md → Externe Go-Live Gates](../operations/production-readiness-runbook.md#externe-go-live-gates)
 
 - **Lagerbewegungs-Altpfade:** `INV-STOCK-MOVEMENTS-001` (2026-06-11) hat
   `articles.py` und `pos_retoure.py` auf `inventory_stock_movements` umgestellt.
@@ -224,7 +223,7 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
   - **DOM-DOC-004** (Nachweisraum): Artefakt-Upload/Versionierung/Freigabe, Bescheid/Rueckmeldung/Wiedervorlage, GoBD-Exportpaket + Paperless-Liveprobe (`docflow_{artifact,followup,gobd}_service.py`).
   - **DOM-PROC-004** (P2P): 3-Wege-Match (Rechnungsstufe), Folgeaktionen/Reklamation, ERS, RFQ→PO (`procurement_match_service.py`, `rfq_service.py`).
   - **DOM-SUPPLY-004** (Lieferkette): durchgaengige Rueckverfolgbarkeit, Ketten-Event-Log, Lot-Folgeaktionen (Sperre/QS-Freigabe/Schwund), Ketten-Storno.
-  - **Extern gegated (ehrlich, kein Schein-OK):** zertifizierter DATEV-EXTF + Steuerberater-Cutover, DMS-/Paperless-Liveprobe (`PAPERLESS_URL`), reale Rohware-/Waage-/Druck-UAT-Unterschriften.
+  - **Extern gegated (Betriebsverantwortung):** zertifizierter DATEV-EXTF + Steuerberater-Cutover, DMS-/Paperless-Liveprobe, reale UAT-Unterschriften — siehe Runbook.
 - Erste Codewelle aktiv: FIBU-Abschluss, Rechnungsabgleich, Kontraktsteuerung, moderner CRM-Stamm, Servicefall, Dokumentenablage, Meldewesen sowie Waage/Tourenplanung nutzen bereits gemeinsame Domain-Zusammenfassungen fuer Operator-, Uebergabe- und Nachweisdruck.
 - Zweite Codewelle eingezogen: `fibu/schnittstellen-center.tsx`, `charge/wareneingang.tsx`, `einkauf/rechnungseingang.tsx`, `kontrakte/KontraktPositionsmonitor.tsx`, `crm/opportunity-detail.tsx` und `fibu/atlas.tsx`.
 - Dritte Codewelle aktiv: `finance/mahnwesen.tsx`, `fibu/zahlungslaeufe.tsx`, `waage/wiegeschein-detail.tsx`, `annahme/rohware.tsx`, `logistik/frachtbriefe.tsx`, `einkauf/lieferanten-dokumente.tsx`, `einkauf/anlieferavis.tsx`, `einkauf/auftragsbestaetigung.tsx`, `kontrakte/FrmKontraktDetail.tsx`, `kontrakte/KontraktAlarmDashboard.tsx`, `crm/kontakt-management.tsx` und `dokumente/ablage.tsx`.
@@ -244,28 +243,24 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - Die Zielarchitektur ist dokumentiert in [hr-time-absence-driver-integration-2026-05-07.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/hr-time-absence-driver-integration-2026-05-07.md).
 - Lizenzlinie: `urlaubsverwaltung/urlaubsverwaltung` wird wegen Apache-2.0 als Abwesenheitskandidat geprueft; AGPL-/GPL-Zeiterfassung wird nicht als VALEO-Codebasis uebernommen.
 - **Repo-seitig abgeschlossen (2026-05-16)**: Pilot-Slice implementiert — `domain_hr.driver_time_events`-Tabelle (Migration `driver_time_events_20260516`), CRUD-Endpoints `POST/GET/PATCH/DELETE /api/v1/personal/driver-time/events`, Abwesenheitskollisions-Check `GET /api/v1/personal/driver-time/events/absences/collisions`. Tour-/Fahrzeugbezug (`vehicle_id`, `tour_ref`) und Quellenfeld (`source`: MANUAL/TACHO/IMPORT/SYSTEM) sind im Datenmodell abgebildet.
-- Offene externe Risiken (nicht repo-seitig loesbar): Rechtspruefung Arbeitszeitgesetz, Anbieter-AVV/DPA, Tacho-/Telematik-Schnittstellen-Anbindung, Payroll-/DATEV-Zielformat.
+- Externe Abhaengigkeiten (Rechtspruefung ArbZG, Anbieter-AVV/DPA, Tacho-/Telematik-Anbindung, Payroll-/DATEV-Zielformat) sind Betriebsverantwortung — siehe [production-readiness-runbook.md](../operations/production-readiness-runbook.md#externe-go-live-gates).
 
 ---
 
-## P4 - Externe Abhaengigkeiten (nicht repo-seitig loesbar)
+## Externe Go-Live Gates (Betriebsverantwortung)
 
-### HRM/Payroll-Exportprofile - Stand 2026-06-18
+Operative Abhaengigkeiten ausserhalb des Repo-Scopes werden **nicht** im
+Entwicklungs-Gap-Track gefuehrt. Die vollstaendige Checkliste aller externen
+Gates (Live-Credentials, FIBU-Cutover-Mappings, HRM/Payroll-Freigaben,
+UAT-Unterschriften, Steuerberater-/DSB-Abnahmen, Restore-Drills) ist
+konsolidiert im Runbook:
 
-- Repo-seitig vertieft: `HRM-PAYROLL-DEEP-001` und `INT-ACCOUNTING-EXPORT-PROFILES-001` liefern Payroll-Vorlaufdaten, Monats-Closeout-Preview, AN-/AG-Anteile, FIBU-/KORE-Buchungssaetze, DATEV-kompatible und kanzleisoftware-neutrale Exportprofile mit Pruefsummen-, Audit- und Korrekturvertrag.
-- Nicht repo-seitig schliessbar bleiben: amtlicher BMF-PAP, ELStAM, DEUEV, SV-Meldewesen, DATEV-/Herstellerfreigabe, Steuerberater-Testimport je Profil, produktive Lohnarten-/Sachkonten-/KOST1-/KOST2-Freigabe und reale Periodensperre im Betriebsprozess.
+➡ [production-readiness-runbook.md → Externe Go-Live Gates](../operations/production-readiness-runbook.md#externe-go-live-gates)
 
-### EXT-001: Live-Credentials und Zielsystem-URLs
-
-- Superglue-Connectors, L3-Import, Erstinstallation und Finance-Export brauchen produktive Tenant-Secrets, Zielsystem-URLs und Ops-Alerting-Werte, die ausserhalb des Repos gepflegt werden.
-- Repo-seitig vollstaendig vorbereitet: `.env.example`, `scripts/check_integration_bootstrap.py` und [integration-bootstrap-readiness-2026-04-12.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/integration-bootstrap-readiness-2026-04-12.md).
-- `python scripts/check_integration_bootstrap.py --probe-plan` zeigt je Integration den produktionsnahen Live-Pruefpfad inklusive Ziel, Command-Hinweis und Blockern.
-- `python scripts/check_integration_bootstrap.py --strict-live` blockiert, solange ein Probe nicht `ready` ist.
-
-### EXT-002: FIBU-Mappings fuer Cutover
-
-- Fachlich freigegebene Konten-/Steuer-/Kostenstellen-Mappings fuer die ERP-Migration stehen noch aus.
-- Repo-seitig vollstaendig vorbereitet: `config/fibu_cutover_mapping.template.yaml` plus `python scripts/check_fibu_cutover_mapping.py --mapping <datei> --strict`.
+Repo-seitige Vorbereitungen (Scripts, Templates, Gates) sind vollstaendig:
+- `scripts/check_integration_bootstrap.py --probe-plan` zeigt Live-Pruefpfade
+- `scripts/check_integration_bootstrap.py --strict-live` blockiert bei nicht-bereiten Probes
+- `config/fibu_cutover_mapping.template.yaml` + `scripts/check_fibu_cutover_mapping.py --strict`
 
 ---
 

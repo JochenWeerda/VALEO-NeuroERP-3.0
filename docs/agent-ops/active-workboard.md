@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-OPS-SEPARATION-001 - Trennung Dev-Gap-Track vs. operative Go-Live-Gates
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — P4-Abschnitt aus open-gaps-and-known-issues.md entfernt; alle externen Gates konsolidiert im Runbook unter neuem Abschnitt "Externe Go-Live Gates" mit fuenf Gate-Tabellen (Infra, Integration, HRM, UAT, Compliance).
+**Ziel:** Operative Abhaengigkeiten (Live-Credentials, UAT-Unterschriften, Steuerberater-Freigaben, Restore-Drills) aus dem Entwicklungs-Gap-Track herausloesen und als Betriebsverantwortung im Production-Readiness-Runbook konsolidieren.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/operations/production-readiness-runbook.md`, `docs/agent-ops/slices/DOC-OPS-SEPARATION-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** open-gaps-and-known-issues.md hat keinen P4-Abschnitt mehr; Runbook hat vollstaendige Gate-Tabellen mit Runbook-Anker `#externe-go-live-gates`.
+
 ## DOC-PROJECT-CONTEXT-002 - Weitere Projekt-Kontext-Docs in MkDocs integrieren
 
 **Von:** Claude Code
