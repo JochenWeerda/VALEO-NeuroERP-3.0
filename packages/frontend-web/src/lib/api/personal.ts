@@ -777,6 +777,24 @@ export function useDriverTimeSummary(datum?: string) {
   })
 }
 
+export type DriverTimeEventPatch = {
+  vehicle_id?: string | null
+  tour_ref?: string | null
+  notes?: string | null
+}
+
+export function useUpdateDriverTimeEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ eventId, data }: { eventId: string; data: DriverTimeEventPatch }) =>
+      (await apiClient.patch(`/api/v1/personal/driver-time/events/${eventId}`, data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.driverTimeSummary() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
 export function useTimeCockpit(datum?: string) {
   return useQuery({
     queryKey: personalKeys.timeCockpit(datum),

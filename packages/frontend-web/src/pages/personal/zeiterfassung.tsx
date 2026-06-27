@@ -27,6 +27,7 @@ import {
   useShifts,
   useSubmitTimeEntry,
   useTimeCockpit,
+  useUpdateDriverTimeEvent,
   useWorkPlan,
   useZeiterfassung,
   type Absence,
@@ -111,6 +112,9 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [correctionForm, setCorrectionForm] = useState({ entryId: '', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', reason: 'Nachbearbeitung nach Pruefung', costCenter: 'LOG', workArea: 'Tour' })
   const [selectedTimeEntry, setSelectedTimeEntry] = useState<ZeitEintrag | null>(null)
   const [selectedWorkPlanItem, setSelectedWorkPlanItem] = useState<WorkPlanAssignment | null>(null)
+  const [selectedDriverEvent, setSelectedDriverEvent] = useState<DriverTimeEvent | null>(null)
+  const [driverPatchForm, setDriverPatchForm] = useState({ vehicleId: '', tourRef: '', notes: '' })
+  const updateDriverTimeEvent = useUpdateDriverTimeEvent()
 
   const startCorrection = (entry: ZeitEintrag) => {
     setCorrectionForm((prev) => ({
@@ -1099,14 +1103,127 @@ export default function ZeiterfassungPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="driver">
-          <Card>
-            <CardHeader>
-              <CardTitle>Driver-Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DataTable data={driverRows} columns={driverColumns} />
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle>Driver-Dispo</CardTitle>
+                  <div className="flex gap-2">
+                    {driverBlocker > 0 && <Badge variant="destructive">{driverBlocker} Blocker</Badge>}
+                    {driverWarnings > 0 && <Badge variant="secondary">{driverWarnings} Warnungen</Badge>}
+                    <Badge variant="outline">{fahrzeitStunden.toFixed(2)} h Fahrzeit</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  data={driverRows}
+                  columns={driverColumns}
+                  onRowFocus={(row) => {
+                    setSelectedDriverEvent(row)
+                    setDriverPatchForm({ vehicleId: row.fahrzeug ?? '', tourRef: row.tour ?? '', notes: '' })
+                  }}
+                />
+              </CardContent>
+            </Card>
+            {selectedDriverEvent ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Fahrer-Detail / Tour-Plausibilitaet</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fahrer</p>
+                      <p className="font-semibold">{selectedDriverEvent.fahrer}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Datum</p>
+                      <p className="font-mono text-sm">{selectedDriverEvent.datum}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Tour</p>
+                      <p className="font-mono text-sm">{selectedDriverEvent.tour ?? '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fahrzeug</p>
+                      <p className={selectedDriverEvent.fahrzeug ? 'font-mono text-sm' : 'text-sm text-destructive'}>
+                        {selectedDriverEvent.fahrzeug ?? 'fehlt'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Zeit</p>
+                      <p className="font-mono text-sm">{selectedDriverEvent.start} – {selectedDriverEvent.ende}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Dauer</p>
+                      <p className="font-semibold">{selectedDriverEvent.dauer.toFixed(2)} h</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="outline">{selectedDriverEvent.taetigkeit}</Badge>
+                    <Badge variant="outline">{selectedDriverEvent.quelle}</Badge>
+                  </div>
+                  {selectedDriverEvent.findings.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-sm font-medium text-muted-foreground">Plausibilitaets-Checks</p>
+                      <div className="space-y-1">
+                        {selectedDriverEvent.findings.map((finding) => (
+                          <div key={`${selectedDriverEvent.id}-${finding.code}`} className="rounded border p-2 text-xs">
+                            <Badge variant={getFindingBadgeVariant(finding.severity)} className="mb-1">{finding.severity}</Badge>
+                            <p>{finding.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-2 border-t pt-3">
+                    <p className="text-sm font-medium">Tour / Fahrzeug korrigieren</p>
+                    <Input
+                      placeholder="Fahrzeug-ID"
+                      value={driverPatchForm.vehicleId}
+                      onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, vehicleId: e.target.value }))}
+                    />
+                    <Input
+                      placeholder="Tour-Referenz"
+                      value={driverPatchForm.tourRef}
+                      onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, tourRef: e.target.value }))}
+                    />
+                    <Input
+                      placeholder="Notiz (optional)"
+                      value={driverPatchForm.notes}
+                      onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, notes: e.target.value }))}
+                    />
+                    <Button
+                      size="sm"
+                      className="w-full gap-2"
+                      disabled={updateDriverTimeEvent.isPending}
+                      onClick={() => {
+                        if (!selectedDriverEvent) return
+                        updateDriverTimeEvent.mutate({
+                          eventId: selectedDriverEvent.id,
+                          data: {
+                            vehicle_id: driverPatchForm.vehicleId || null,
+                            tour_ref: driverPatchForm.tourRef || null,
+                            notes: driverPatchForm.notes || null,
+                          },
+                        })
+                      }}
+                    >
+                      <Save className="h-4 w-4" />
+                      Tour / Fahrzeug speichern
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex items-center justify-center">
+                <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                  Fahrer-Zeile auswaehlen fuer Detail und Tour-Korrektur
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="zeiten">

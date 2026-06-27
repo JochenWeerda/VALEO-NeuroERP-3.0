@@ -1,0 +1,43 @@
+slice_id: HR-TIME-DRIVER-DISPO-001
+title: "HR-TIME UX-M4 — Driver-Dispo: Fahrer/Tour/Fahrzeug in einer Sicht + Tour-Korrektur"
+status: umgesetzt
+wave: 39
+date: 2026-06-27
+owner: Claude Code
+goal: >-
+  LKW-Fahrer, Tour, Fahrzeug, Lenkzeit und Plausibilitaets-Checks in einer Sicht.
+  Fahrer-Zeile fokussieren zeigt Detail-Panel mit Tour-Korrekturformular
+  (PATCH /driver-time/events/{id}). Blocker/Warnungen als KPI-Badges im Tab-Header.
+file_ownership:
+  - packages/frontend-web/src/lib/api/personal.ts
+  - packages/frontend-web/src/pages/personal/zeiterfassung.tsx
+  - docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md
+  - docs/agent-ops/slices/HR-TIME-DRIVER-DISPO-001.yaml
+acceptance:
+  - Driver-Tab Header zeigt Blocker/Warnungen/Fahrzeit-Badges.
+  - Row-Fokus oeffnet Detail-Panel mit Fahrer/Tour/Fahrzeug/Dauer/Plausibilitaets-Checks.
+  - Tour/Fahrzeug-Korrekturformular sendet PATCH mit isPending-Guard.
+  - useUpdateDriverTimeEvent Hook in personal.ts mit onSuccess-Invalidation.
+  - tsc --noEmit exit 0.
+  - UX-M4 in hr-time-ux-workflow-roadmap als umgesetzt markiert.
+tests:
+  - tsc --noEmit (exit 0 verified)
+ai_harness:
+  fachlicher_vertrag: >-
+    Fahrer kann Tour-Referenz und Fahrzeug-ID korrigieren ohne Tab-Wechsel.
+    Plausibilitaets-Checks zeigen alle Findings des DriverTimeEvent.
+  architektur_vertrag: >-
+    useUpdateDriverTimeEvent als neuer Mutations-Hook in personal.ts.
+    PATCH-Endpoint /api/v1/personal/driver-time/events/{id} bereits vorhanden.
+    Mutation-Lifecycle-Invariant (CLAUDE.md): isPending + disabled.
+  daten_vertrag: >-
+    PATCH schreibt vehicle_id, tour_ref, notes in domain_hr.driver_time_events.
+    onSuccess invalidiert driverTimeSummary und timeCockpit.
+  test_vertrag: >-
+    TypeScript 0 Fehler. Mutation-Guard via isPending.
+  security_vertrag: >-
+    Tenant-Isolation via backend. Kein Secret-Leak. Nur authentifizierte Nutzer.
+  betriebs_vertrag: >-
+    Tour/Fahrzeug-Korrektur ist idempotent. Leere Felder senden null (kein Loeschen).
+  dokumentations_vertrag: >-
+    hr-time-ux-workflow-roadmap UX-M4 als umgesetzt markiert.

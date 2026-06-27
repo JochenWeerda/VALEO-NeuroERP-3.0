@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HR-TIME-DRIVER-DISPO-001 - UX-M4 Driver-Dispo Detail-Panel + Tour-Korrektur
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Driver-Tab mit KPI-Badges, Row-Fokus-Detail-Panel (Plausibilitaets-Checks, Findings), Tour/Fahrzeug-Korrektur via PATCH; `useUpdateDriverTimeEvent` Hook; tsc 0 Fehler.
+**Ziel:** LKW-Fahrer/Tour/Fahrzeug/Plausibilitaet in einer Sicht; Dispatcher kann Tour/Fahrzeug ohne Tab-Wechsel korrigieren.
+**Dateibesitz:** `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-DRIVER-DISPO-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Detail-Panel bei Row-Fokus; PATCH-Mutation mit isPending-Guard; tsc 0; UX-M4 markiert.
+
 ## HR-TIME-PAYROLL-CLOSE-001 - UX-M5 Payroll Closeout Gate
 
 **Von:** Claude Code
