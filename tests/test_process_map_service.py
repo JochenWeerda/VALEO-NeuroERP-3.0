@@ -95,3 +95,35 @@ def test_to_dict_structure(svc: ProcessMapService) -> None:
     assert "step_id" in step
     assert "step_type" in step
     assert "audit_relevant" in step
+
+
+def test_get_p2p_and_pos_map(svc: ProcessMapService) -> None:
+    p2p = svc.get_process_map(ProcessDomain.P2P)
+    assert p2p.domain == ProcessDomain.P2P
+    pos = svc.get_process_map(ProcessDomain.POS)
+    assert pos.domain == ProcessDomain.POS
+    assert len(pos.steps) >= 3
+
+
+def test_external_gates_filtered_by_domain(svc: ProcessMapService) -> None:
+    all_gates = svc.list_external_gates()
+    o2c_gates = svc.list_external_gates(domain=ProcessDomain.O2C)
+    assert len(o2c_gates) <= len(all_gates)
+    assert all(g["domain"] == ProcessDomain.O2C.value for g in o2c_gates)
+
+
+def test_external_gates_unknown_domain_returns_all(svc: ProcessMapService) -> None:
+    # COMPLIANCE not in _PROCESS_MAPS → falls back to all maps
+    all_gates = svc.list_external_gates()
+    compliance_gates = svc.list_external_gates(domain=ProcessDomain.COMPLIANCE)
+    assert len(compliance_gates) == len(all_gates)
+
+
+def test_process_step_to_dict_fields(svc: ProcessMapService) -> None:
+    pm = svc.get_process_map(ProcessDomain.O2C)
+    step_dict = pm.steps[0].to_dict()
+    assert "step_id" in step_dict
+    assert "name" in step_dict
+    assert "verantwortlich" in step_dict
+    assert "externe_systeme" in step_dict
+    assert "nachfolger" in step_dict
