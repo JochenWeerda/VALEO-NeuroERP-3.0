@@ -94,20 +94,38 @@ def update_haccp_plan(
     tenant_id: str = Depends(_tenant),
 ) -> dict[str, Any]:
     import json
-    fields = []
+    scalar_columns = {
+        "bezeichnung": "bezeichnung = :bezeichnung",
+        "gueltigkeit_von": "gueltigkeit_von = :gueltigkeit_von",
+        "gueltigkeit_bis": "gueltigkeit_bis = :gueltigkeit_bis",
+        "aktiv": "aktiv = :aktiv",
+    }
+    json_columns = {
+        "gefahrenanalyse": "gefahrenanalyse = :gefahrenanalyse::jsonb",
+        "ccp_liste": "ccp_liste = :ccp_liste::jsonb",
+        "ueberwachung": "ueberwachung = :ueberwachung::jsonb",
+        "korrekturen": "korrekturen = :korrekturen::jsonb",
+        "verifizierung": "verifizierung = :verifizierung::jsonb",
+    }
+    assignments = []
     params: dict[str, Any] = {"id": plan_id, "tid": tenant_id}
-    for col in ("bezeichnung", "gueltigkeit_von", "gueltigkeit_bis", "aktiv"):
+    for col, assignment in scalar_columns.items():
         if col in body:
-            fields.append(f"{col} = :{col}")
+            assignments.append(assignment)
             params[col] = body[col]
-    for col in ("gefahrenanalyse", "ccp_liste", "ueberwachung", "korrekturen", "verifizierung"):
+    for col, assignment in json_columns.items():
         if col in body:
-            fields.append(f"{col} = :{col}::jsonb")
+            assignments.append(assignment)
             params[col] = json.dumps(body[col])
-    if not fields:
+    if not assignments:
         raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
+    sql = (
+        "UPDATE domain_shared.futtermittel_haccp_plaene SET "
+        + ", ".join(assignments)
+        + " WHERE id = :id AND tenant_id = :tid"
+    )
     db.execute(
-        text(f"UPDATE domain_shared.futtermittel_haccp_plaene SET {', '.join(fields)} WHERE id = :id AND tenant_id = :tid"),
+        text(sql),
         params,
     )
     db.commit()
