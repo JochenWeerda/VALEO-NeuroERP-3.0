@@ -32,5 +32,19 @@ actions:
     e2e_tag: "@smoke"
     status: gap
 
+  - action_id: fibu-005
+    label: "Umsatzsteuervoranmeldung exportieren"
+    route_prefix: "export/umsatzsteuervoranmeldung"
+    api_method: "POST /export/umsatzsteuervoranmeldung"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: fibu-006
+    label: "UStVA Kurzroute exportieren"
+    route_prefix: "export/ustva"
+    api_method: "POST /export/ustva"
+    e2e_tag: "-"
+    status: gap
+
 open_gaps:
   - "fibu-001/002/003/004: Alle FiBu-Aktionen noch ohne E2E (externe Assessoren für DATEV)"

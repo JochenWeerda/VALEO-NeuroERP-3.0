@@ -5,23 +5,23 @@ type: reference
 audience: [qa, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-06-27
 version: 3.0.0
 ---
 
 # Action-Matrix-Report
 
-> Generiert via `scripts/generate_action_matrix_report.py` · 2026-06-26 20:45:54 UTC
+> Generiert via `scripts/generate_action_matrix_report.py` · 2026-06-27 06:03:28 UTC
 
 ## Übersicht
 
 | Metrik | Wert |
 |---|---|
 | Prozessketten | 8 |
-| Aktionen gesamt | 26 |
+| Aktionen gesamt | 38 |
 | Green (E2E @critical/@smoke grün) | 2 |
 | Partial (E2E vorhanden, nicht @critical) | 4 |
-| Gap (keine E2E) | 20 |
+| Gap (keine E2E) | 32 |
 
 ## Administration & Betrieb (`admin`)
 
@@ -31,6 +31,12 @@ version: 3.0.0
 | ID | Aktion | Route | Status | E2E-Tag |
 |---|---|---|---|---|
 | `admin-001` | Administration (Stammdaten, Setup, Monitoring) | `admin` | GAP | `-` |
+| `admin-002` | Executive Dashboard | `management/executive-dashboard` | GAP | `-` |
+| `admin-003` | Live-Monitoring | `system/live-monitor` | GAP | `-` |
+| `admin-004` | Artikel-Stammdaten | `stammdaten/artikel` | GAP | `-` |
+| `admin-005` | Mobile Scanner | `mobile/scanner` | GAP | `-` |
+| `admin-006` | Public Verify | `public/verify` | GAP | `-` |
+| `admin-007` | Firmeneinrichtung | `setup/firma` | GAP | `-` |
 
 **Offene Gaps:**
 
@@ -60,6 +66,8 @@ version: 3.0.0
 | `fibu-002` | Offene Posten anzeigen / ausziffern | `fibu/offene-posten` | GAP | `@smoke` |
 | `fibu-003` | Periodenabschluss durchführen | `fibu/periodenabschluss` | GAP | `@smoke` |
 | `fibu-004` | DATEV-Export erstellen | `fibu/datev` | GAP | `@smoke` |
+| `fibu-005` | Umsatzsteuervoranmeldung exportieren | `export/umsatzsteuervoranmeldung` | GAP | `-` |
+| `fibu-006` | UStVA Kurzroute exportieren | `export/ustva` | GAP | `-` |
 
 **Offene Gaps:**
 
@@ -76,6 +84,8 @@ version: 3.0.0
 | `o2c-002` | Lieferschein aus Auftrag generieren | `verkauf/lieferschein` | GREEN | `@critical` |
 | `o2c-003` | Ausgangsrechnung stellen | `verkauf/rechnung` | PARTIAL | `@smoke` |
 | `o2c-004` | Zahlung buchen / OP ausziffern | `fibu/offene-posten` | GAP | `@smoke` |
+| `o2c-005` | Vertreterprovisionen pruefen | `crm/vertreterprovisionen` | GAP | `-` |
+| `o2c-006` | Vertreterstamm pflegen | `crm/vertreterstamm` | GAP | `-` |
 
 **Offene Gaps:**
 
@@ -125,6 +135,8 @@ version: 3.0.0
 | `qs-002` | Laborergebnis erfassen | `lager/qs-leitstand` | GAP | `@smoke` |
 | `qs-003` | Charge freigeben / sperren | `lager/qs-leitstand` | GAP | `@smoke` |
 | `qs-004` | Reklamation anlegen | `lager/qs-leitstand` | GAP | `@smoke` |
+| `qs-005` | Datenschutz-Compliance pruefen | `compliance/datenschutz` | GAP | `-` |
+| `qs-006` | GoBD-Compliance pruefen | `compliance/gobd` | GAP | `-` |
 
 **Offene Gaps:**
 
@@ -147,4 +159,4 @@ version: 3.0.0
 
 - wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E
 
-*Stand: 2026-06-26 20:45:54 UTC · 26 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
+*Stand: 2026-06-27 06:03:28 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*

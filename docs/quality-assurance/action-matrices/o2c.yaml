@@ -32,6 +32,20 @@ actions:
     e2e_tag: "@smoke"
     status: gap
 
+  - action_id: o2c-005
+    label: "Vertreterprovisionen pruefen"
+    route_prefix: "crm/vertreterprovisionen"
+    api_method: "GET /crm/vertreterprovisionen"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: o2c-006
+    label: "Vertreterstamm pflegen"
+    route_prefix: "crm/vertreterstamm"
+    api_method: "GET /crm/vertreterstamm"
+    e2e_tag: "-"
+    status: gap
+
 open_gaps:
   - "o2c-003: Rechnungs-PDF-Generierung noch ohne @critical"
   - "o2c-004: Zahlungseingang-Buchung noch ohne E2E"

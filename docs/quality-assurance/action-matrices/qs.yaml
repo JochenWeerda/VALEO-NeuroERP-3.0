@@ -32,5 +32,19 @@ actions:
     e2e_tag: "@smoke"
     status: gap
 
+  - action_id: qs-005
+    label: "Datenschutz-Compliance pruefen"
+    route_prefix: "compliance/datenschutz"
+    api_method: "GET /compliance/datenschutz"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: qs-006
+    label: "GoBD-Compliance pruefen"
+    route_prefix: "compliance/gobd"
+    api_method: "GET /compliance/gobd"
+    e2e_tag: "-"
+    status: gap
+
 open_gaps:
   - "qs-001/002/003/004: QS-Kette komplett ohne E2E"
