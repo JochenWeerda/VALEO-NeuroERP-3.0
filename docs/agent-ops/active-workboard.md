@@ -1,5 +1,15 @@
 # Active Workboard
 
+## Wave 19 — DOC-WORKFLOW-INDEX-001: Kuratierter Workflow-Index
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27
+
+161 Workflow-Dokumente in `docs/workflows/` katalogisiert und als kuratierten Entwickler-Index
+in `docs/entwickler/workflow-index.md` veröffentlicht (7 Kategorien: Geschäftsprozess,
+Domain-Deepening, Process Kernel, Security ×34, NeuroCore ×24, Superglue ×56, Sonstiges).
+Quelldateien bleiben in docs/workflows/ ausgeschlossen; der Index ist im Build enthalten.
+Build grün: „Documentation built in 39.59 seconds — 0 Errors".
+
 ## Wave 18 — DOC-OPS-RUNBOOKS-001: Ops/Runbook-Dateien in MkDocs integrieren
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-27

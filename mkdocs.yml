@@ -189,6 +189,7 @@ nav:
       - Konventionen: entwickler/konventionen.md
       - Test-Strategie: entwickler/test-strategie.md
       - Service-Inventar: entwickler/service-inventory.md
+      - Workflow-Index: entwickler/workflow-index.md
       - Action-Matrix-Report: quality-assurance/action-matrix-report.md
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
       - Architektur:
