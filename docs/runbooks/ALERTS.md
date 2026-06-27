@@ -1,3 +1,14 @@
+---
+title: Alert-Handling Runbook
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Behandlung von Prometheus-Alerts für VALEO NeuroERP (ErrorRate, Latenz, SSE, DB).
+---
+
 # Alert Handling Runbook
 
 ## Überblick
@@ -139,7 +150,7 @@ psql -h $DB_HOST -U $DB_USER -d valeo_erp -c "SELECT 1;"
 
 ## Alert-Konfiguration (Prometheus)
 
-```yaml
+```text
 groups:
   - name: valeo-erp-alerts
     interval: 30s
@@ -151,8 +162,7 @@ groups:
           severity: critical
         annotations:
           summary: "High error rate detected"
-          description: "Error rate is {{ $value | humanizePercentage }}"
-      
+          description: "Error rate is { { $value | humanizePercentage } }"
       - alert: LatencyHigh
         expr: histogram_quantile(0.95, rate(api_request_duration_seconds_bucket[5m])) > 0.5
         for: 5m
@@ -160,8 +170,7 @@ groups:
           severity: warning
         annotations:
           summary: "High latency detected"
-          description: "P95 latency is {{ $value }}s"
-      
+          description: "P95 latency is { { $value } }s"
       - alert: SSEDisconnectsHigh
         expr: increase(sse_connections_active[5m]) < -10
         for: 5m
@@ -169,7 +178,6 @@ groups:
           severity: warning
         annotations:
           summary: "High SSE disconnect rate"
-      
       - alert: DatabaseDown
         expr: up{job="valeo-erp"} == 0
         for: 1m

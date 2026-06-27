@@ -1,8 +1,20 @@
+---
+title: Disaster-Recovery Runbook
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: RPO < 24h, RTO < 4h. Backup-Strategie, DR-Szenarien, Rollback-Plan für VALEO NeuroERP.
+---
+
 # Disaster Recovery Runbook
 
 ## Überblick
 
-**RPO (Recovery Point Objective):** < 24 Stunden  
+**RPO (Recovery Point Objective):** < 24 Stunden
+
 **RTO (Recovery Time Objective):** < 4 Stunden
 
 ## Backup-Strategie
@@ -11,7 +23,7 @@
 
 - **Häufigkeit:** Täglich um 02:00 UTC
 - **Retention:** 30 Tage (täglich), 12 Monate (monatlich)
-- **Speicherort:** 
+- **Speicherort:**
   - Primary: `/backups/postgresql/`
   - Secondary: S3/Azure Blob Storage
 - **Skript:** `scripts/backup-db.sh`
@@ -161,7 +173,8 @@ psql -h $DB_HOST -U $DB_USER -d postgres -c "DROP DATABASE valeo_erp_temp;"
 4. Document findings
 5. Update runbook if needed
 
-**Last Test:** [Date]  
+**Last Test:** [Date]
+
 **Next Test:** [Date]
 
 ---
