@@ -1,0 +1,41 @@
+id: DOC-OPS-SEPARATION-001
+title: "Trennung Entwicklungs-Gap-Track vs. operative Go-Live-Gates"
+status: umgesetzt
+wave: 35
+date: 2026-06-27
+owner: Claude Code
+
+claim: >
+  Operative Abhängigkeiten (externe Live-Gates, UAT-Unterschriften,
+  Behördenabnahmen, Steuerberater-Freigaben) werden nicht mehr im
+  Entwicklungs-Gap-Track geführt. Sie sind konsolidiert im Production-Readiness-Runbook.
+
+contracts:
+  scope: |
+    - docs/project-context/open-gaps-and-known-issues.md (P4-Abschnitt umgebaut,
+      Querverweise auf externe Gates durch kompakte Runbook-Verweise ersetzt)
+    - docs/operations/production-readiness-runbook.md (neuer Abschnitt
+      "Externe Go-Live Gates" mit vollstaendigen Gate-Tabellen)
+  out_of_scope: |
+    - Kein Code geaendert
+    - Keine neuen Abhaengigkeiten eingefuehrt
+  acceptance: |
+    - open-gaps-and-known-issues.md enthaelt keinen P4-Abschnitt mehr
+    - production-readiness-runbook.md hat Abschnitt "Externe Go-Live Gates"
+      mit Gate-Tabellen fuer Infra, Integration, HRM, UAT und Compliance
+    - Alle Querverweise in open-gaps-and-known-issues.md zeigen auf Runbook-Anker
+
+changes:
+  - file: docs/project-context/open-gaps-and-known-issues.md
+    type: refactor
+    description: >
+      P4-Abschnitt durch kompakten Verweis auf Runbook ersetzt;
+      "Extern offen bleiben"-Texte in PROD-READINESS-001 und HR-TIME-001
+      durch einzeilige Runbook-Verweise ersetzt; DOM-004 "extern gegated"-Note
+      verschlankt.
+  - file: docs/operations/production-readiness-runbook.md
+    type: addition
+    description: >
+      Neuer Abschnitt "Externe Go-Live Gates" mit fuenf Gate-Tabellen:
+      Infrastruktur/Deployment, Integration/Schnittstellen, HRM/Payroll,
+      UAT/Abnahmen, Externe Behoerden/Compliance.
