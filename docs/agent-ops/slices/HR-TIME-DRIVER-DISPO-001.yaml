@@ -22,6 +22,11 @@ acceptance:
   - UX-M4 in hr-time-ux-workflow-roadmap als umgesetzt markiert.
 tests:
   - tsc --noEmit (exit 0 verified)
+risks:
+  - UI-Korrekturformular braucht spaeter dedizierte E2E-Abdeckung gegen echte Backend-Validierung.
+  - Tour-/Fahrzeug-Korrekturen muessen fachlich mit Disposition und Audit abgestimmt bleiben.
+external_gates:
+  - Keine externen Gates; Frontend-UX- und Dokumentationsslice.
 ai_harness:
   fachlicher_vertrag: >-
     Fahrer kann Tour-Referenz und Fahrzeug-ID korrigieren ohne Tab-Wechsel.

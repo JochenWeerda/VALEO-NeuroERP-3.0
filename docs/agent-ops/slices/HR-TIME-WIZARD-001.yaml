@@ -26,6 +26,11 @@ acceptance:
   - UX-M3 in hr-time-ux-workflow-roadmap als umgesetzt markiert.
 tests:
   - tsc --noEmit (exit 0 verified)
+risks:
+  - Platzhalter-employeeRef darf nicht als finale Disposition missverstanden werden.
+  - Wizard braucht spaeter E2E-Abdeckung fuer Validierung, Vorschau und Mutation.
+external_gates:
+  - Keine externen Gates; Frontend-UX- und Dokumentationsslice.
 ai_harness:
   fachlicher_vertrag: >-
     Wizard erstellt WorkPlanAssignment-Eintraege pro Rolle und Headcount-Zahl.

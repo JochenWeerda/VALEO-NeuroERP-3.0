@@ -21,6 +21,11 @@ acceptance:
   - UX-M7 in hr-time-ux-workflow-roadmap als umgesetzt markiert.
 tests:
   - tsc --noEmit (exit 0 verified)
+risks:
+  - Heatmap nutzt aktuell nur die geladene 7-Tage-Periode; Monats-/Saisonblick bleibt Folgeausbau.
+  - Hardcodierte Ferien-/Brueckentag-Marker muessen spaeter durch Kalenderdaten ersetzt werden.
+external_gates:
+  - Keine externen Gates; Frontend-UX- und Dokumentationsslice.
 ai_harness:
   fachlicher_vertrag: >-
     Heatmap aggregiert workPlan.assignments nach Datum mit Blocker/Warnungs-Severity.

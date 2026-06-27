@@ -21,6 +21,11 @@ acceptance:
   - UX-M5 in hr-time-ux-workflow-roadmap als umgesetzt markiert.
 tests:
   - tsc --noEmit (exit 0 verified)
+risks:
+  - UI-Gate ersetzt keine serverseitige Payroll-Export-Sperre.
+  - Payroll-Freigabe braucht spaeter fachliche UAT-Abnahme mit Lohnabrechnung.
+external_gates:
+  - Steuerberater-/Payroll-Freigabe bleibt operatives Go-Live-Gate im Production-Readiness-Runbook.
 ai_harness:
   fachlicher_vertrag: >-
     Erfordert cockpit.payrollReadiness.status === 'ready' UND blockers.length === 0
