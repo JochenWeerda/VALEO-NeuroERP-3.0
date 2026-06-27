@@ -1,34 +1,51 @@
 slice_id: DOC-QA-SURFACE-001
-title: "QA/Test-Docs und External-Mock-Verträge in MkDocs integrieren (Wave 20)"
+title: "QA/Test-Docs und External-Mock-Vertraege in MkDocs integrieren (Wave 20)"
+owner: Claude Code
 status: abgeschlossen
 wave: 20
-owner: Claude Code
 created: 2026-06-27
 completed: 2026-06-27
-
-description: >
-  3 QA-/Test-Dokumente mit Frontmatter versehen und in MkDocs-Build integriert.
-  External-Mock-Verträge-Runbook in Agent-Dokumentation verlinkt.
-
-scope:
-  files_modified:
-    - docs/quality-assurance/playwright-smoke-auth.md
-    - docs/quality-assurance/browser-use-checklists.md
-    - mkdocs.yml
-  files_linked:
-    - docs/agent-docs/runbooks/external-mock-vertraege.md
-
-changes:
-  - Frontmatter zu playwright-smoke-auth.md und browser-use-checklists.md hinzugefügt
-  - exclude_docs-Ausnahmen für beide QA-Dateien ergänzt
-  - Nav-Einträge unter Entwickler → playwright-smoke-auth + browser-use-checklists
-  - Nav-Eintrag unter Agent-Dokumentation → external-mock-vertraege.md
-
-build_result: "Documentation built in 48.84 seconds — 0 Errors"
-
+goal: >-
+  Playwright-Auth-Anleitung, Browser-Use-Checklists und External-Mock-Vertraege
+  (DATEV/ELSTER/TSE/Bank/DSFinV-K) im kuratierten Docs-Build auffindbar machen.
+file_ownership:
+  - docs/quality-assurance/playwright-smoke-auth.md
+  - docs/quality-assurance/browser-use-checklists.md
+  - docs/agent-docs/runbooks/external-mock-vertraege.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-QA-SURFACE-001.yaml
+acceptance:
+  - playwright-smoke-auth.md und browser-use-checklists.md haben gueltiges Frontmatter.
+  - Beide QA-Dateien sind in der Entwickler-Navigation eingebunden.
+  - external-mock-vertraege.md ist unter Agent-Dokumentation verlinkt.
+  - MkDocs-Build laeuft fehlerfrei.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Browser-Use-Checklists koennen veralten, wenn E2E-Matrix aktualisiert wird.
+external_gates:
+  - Keine externen Gates; reine Dokumentationsauffindbarkeit.
 ai_harness:
-  claim: "QA-Testdokumentation und External-Mock-Verträge sind im MkDocs-Build sichtbar"
-  evidence:
-    - "mkdocs build: Documentation built — 0 Errors"
-  contract_level: L2
-  external_gates: []
+  fachlicher_vertrag: >-
+    QA- und Test-Dokumentation (Playwright-Auth, E2E-Checklists, Mock-Vertraege)
+    muss fuer Entwickler und QA-Teams im kuratierten Docs-Build auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf MkDocs-/Markdown-Struktur begrenzt; keine
+    Runtime-Aenderung.
+  daten_vertrag: >-
+    QA-Dokumente enthalten Testanweisungen und Checklisten; keine produktiven
+    Secrets oder Echtdaten.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance sichern Frontmatter, Navigation und
+    Renderbarkeit ab.
+  security_vertrag: >-
+    External-Mock-Vertraege beschreiben nur simulierte Endpunkte mit
+    simulated-true-Antworten; keine produktiven Credentials.
+  betriebs_vertrag: >-
+    QA-Checklisten und Mock-Vertraege sind Entwicklungs- und Testressourcen;
+    reale Abnahmen bleiben manuell.
+  dokumentations_vertrag: >-
+    MkDocs-Nav, Slice-YAML und Workboard muessen die integrierten QA-Dokumente
+    gemeinsam referenzieren.
+build_result: "Documentation built in 48.84 seconds - 0 Errors"

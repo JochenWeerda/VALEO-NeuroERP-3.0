@@ -1,3 +1,14 @@
+---
+title: Secrets-Handling — SealedSecrets & ExternalSecrets
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Sichere Verwaltung von Eskalations- und Betriebssecrets via SealedSecrets/ExternalSecrets für Inventory-Module.
+---
+
 # Secrets-Handling für Inventory: SealedSecrets & ExternalSecrets
 
 Dieses Runbook beschreibt, wie Eskalations- und Betriebs-Secrets (z. B. `INVENTORY_TEAMS_WEBHOOK_URL`) sicher verwaltet werden.
