@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-06-27
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -182,12 +182,15 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `feed_chain_quality_lot_20260613` | FEED-CHAIN-003 — quality_lot_profiles + quality_release_decisions (domain_ops). |
 | `feed_chain_verbrauch_20260612` | Futtermittel-Produktionsauftrag: Verbrauchs-Snapshot + Charge-Referenz. |
 | `feed_produktion_lifecycle_20260623` | DOM-FEED-PROD-004 — Mischfutter Produktionsauftrag, Rezeptur, QS-Log |
+| `feed_qs_wf_cockpit_repair_20260626` | FEED-QS-001 + WF-COCKPIT-002: Futtermittel-QS-Tabellen + domain_workflow sicherstellen. |
 | `feldbuch_schlag_massnahme_20260226` | Add feldbuch_schlaege and feldbuch_massnahmen to domain_agrar |
 | `ff7b1a7899b4_add_customer_inquiries_table` | add_customer_inquiries_table |
 | `fibu_connector_asset_ledger_rename_20260301` | FIBU Connector: QUADRIGA → ASSET_LEDGER (geschützter Name entfernt) |
 | `fibu_connector_framework_20260301` | FIBU Connector Framework: Profile, Runs, Run-Items (domain_erp) |
+| `final_single_head_merge_20260626` | Final single-head merge: alle Repair-Wellen in einen Head zusammenführen. |
 | `finance_agrar_sales_repair_20260626` | BULK-REPAIR-001: Finance + Agrar + Sales Batch-Repair-Migration Wave 11. |
 | `finance_followup_exports_einkauf_uq_20260406` | finance_followup_exports + optional unique (tenant_id, bestellnummer) |
+| `finance_hr_einkauf_repair_20260626` | FINANCE-HR-EINKAUF-REPAIR-001: Finance + HR + Einkauf Batch-Repair Wave 12. |
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
 | `flow_spine_instances_20260326` | Flow Spine Instance persistence table |
 | `flow_spine_lifecycle_20260417` | Extend flow spine instances with lifecycle state and timeline events |
