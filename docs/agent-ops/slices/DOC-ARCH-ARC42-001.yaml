@@ -1,0 +1,36 @@
+slice_id: DOC-ARCH-ARC42-001
+title: "arc42-Skelett + ISO-42010 Stakeholder/Viewpoints"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  12 arc42 Hub-Kapitel und ISO-42010 Matrix (stakeholder-concerns,
+  viewpoint-catalog) ohne Content-Duplikation — Verweise auf bestehende Docs.
+file_ownership:
+  - docs/architecture/arc42/*.md
+  - docs/architecture/views/stakeholder-concerns.md
+  - docs/architecture/views/viewpoint-catalog.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ARCH-ARC42-001.yaml
+acceptance:
+  - arc42 Kapitel 01-12 existieren als duenne Hub-Seiten mit Frontmatter.
+  - Stakeholder-Concerns-Viewpoints-Matrix verlinkt alle Sichten.
+  - MkDocs-Navigation enthaelt arc42- und Sichten-Unterabschnitt.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Hub-Seiten koennen veralten wenn Ziel-Links umbenannt werden.
+external_gates:
+  - Keine.
+ai_harness:
+  fachlicher_vertrag: Ordnungsrahmen ISO 42010 + arc42 fuer alle Stakeholder.
+  architektur_vertrag: Hub-and-Spoke; keine Duplikation von target-state/ADRs.
+  daten_vertrag: Nur Architekturwissen.
+  test_vertrag: MkDocs build + governance check.
+  security_vertrag: Keine produktiven Infra-Secrets.
+  betriebs_vertrag: Bei neuer Sicht viewpoint-catalog erweitern.
+  dokumentations_vertrag: architecture/index.md verlinkt Sichten-Tabelle.
+build_result: "arc42 12 chapters + ISO42010 matrix in MkDocs nav"

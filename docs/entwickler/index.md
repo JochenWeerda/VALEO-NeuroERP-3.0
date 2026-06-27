@@ -21,6 +21,17 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 | Error-Handling & Mutation-Invarianten | [Konventionen](konventionen.md) |
 | pytest, Vitest, Playwright | [Test-Strategie](test-strategie.md) |
 | Backend-Service-Module (Inventar) | [Service-Inventar](service-inventory.md) |
+| Docker-Container (Inventar) | [Container-Inventar](container-inventory.md) |
+
+## Architektur-Sichten
+
+| Sicht | Seite |
+|---|---|
+| arc42 Hub | [architecture/arc42/01-einfuehrung.md](../architecture/arc42/01-einfuehrung.md) |
+| C4 System Context | [architecture/views/c4-01-system-context.md](../architecture/views/c4-01-system-context.md) |
+| C4 Container | [architecture/views/c4-02-containers.md](../architecture/views/c4-02-containers.md) |
+| UML Klassendiagramm | [architecture/views/uml-canonical-domain-class.md](../architecture/views/uml-canonical-domain-class.md) |
+| ADR-036 Dokumentations-Stack | [adr-036](../adr/adr-036-architecture-documentation-stack.md) |
 
 ## Architektur & Entscheidungen
 

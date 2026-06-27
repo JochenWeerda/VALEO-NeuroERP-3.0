@@ -1,0 +1,21 @@
+slice_id: DOC-ARCH-UML-001
+title: "UML classDiagram — Canonical Domain Core"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  UML-Klassendiagramm (Mermaid classDiagram) fuer ADR-003 Kernaggregate inkl.
+  zentraler Operationen — ergaenzt ERD, kein Full-ERP-Klassendiagramm.
+file_ownership:
+  - docs/architecture/views/uml-canonical-domain-class.md
+  - mkdocs.yml
+  - docs/architecture/arc42/06-laufzeitsicht.md
+  - docs/agent-ops/slices/DOC-ARCH-UML-001.yaml
+acceptance:
+  - classDiagram mit Kernaggregaten aus ADR-003.
+  - Verlinkt von viewpoint-catalog und arc42 Kap. 6.
+tests:
+  - mkdocs build
+build_result: "UML class diagram published"

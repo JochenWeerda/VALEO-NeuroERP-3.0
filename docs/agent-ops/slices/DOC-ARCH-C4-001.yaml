@@ -1,0 +1,33 @@
+slice_id: DOC-ARCH-C4-001
+title: "C4 System Context (Level 1)"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  C4 System Context Diagramm mit externen Systemen (L3, DATEV, ELSTER, Fiskaly,
+  Keycloak, Paperless, Superglue, Webshop, Waage) als Mermaid C4Context.
+file_ownership:
+  - docs/architecture/views/c4-01-system-context.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ARCH-C4-001.yaml
+acceptance:
+  - c4-01-system-context.md mit Mermaid C4Context und Detailreferenzen.
+  - Externe Systeme aus Plan abgedeckt; Verweis auf process-map und ADR-014.
+  - In MkDocs-Navigation unter Sichten.
+tests:
+  - mkdocs build
+risks:
+  - Externe Systeme koennen sich aendern; Context bei neuer Integration aktualisieren.
+external_gates:
+  - Keine.
+ai_harness:
+  fachlicher_vertrag: Integratoren sehen Gesamtumgebung auf einen Blick.
+  architektur_vertrag: Level 1 only; keine Container-Details.
+  daten_vertrag: Keine Live-Credentials.
+  test_vertrag: MkDocs rendert Mermaid C4.
+  security_vertrag: Keine Secrets in Diagramm.
+  betriebs_vertrag: Bei neuer externer Integration Context aktualisieren.
+  dokumentations_vertrag: arc42 Kap. 3 verlinkt c4-01.
+build_result: "C4 Context diagram published"

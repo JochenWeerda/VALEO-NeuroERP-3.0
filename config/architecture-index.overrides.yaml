@@ -1,0 +1,19 @@
+# Optional overrides for architecture-index.yaml (Status, Owner, manual corrections).
+# Wird beim Generieren in config/architecture-index.yaml gemerged.
+
+status:
+  architecture_os_mvp: active
+  last_review: 2026-06-27
+
+domains:
+  crm:
+    status: pilot
+    owner: domain/crm
+  finance:
+    status: active
+  agrar:
+    status: active
+  inventory:
+    status: active
+  dms-compliance:
+    status: active

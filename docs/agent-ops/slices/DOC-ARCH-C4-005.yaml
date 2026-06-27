@@ -1,0 +1,21 @@
+slice_id: DOC-ARCH-C4-005
+title: "C4 Component — Einkauf/Lager + DMS/Compliance (P1 optional)"
+owner: Cursor
+status: abgeschlossen
+wave: 26
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  P1 Component-Diagramme fuer Einkauf/Lager (P2P, inventory-service) und
+  DMS/Compliance (Paperless, GoBD, Regulatory).
+file_ownership:
+  - docs/architecture/views/components/c4-procurement-inventory.md
+  - docs/architecture/views/components/c4-dms-compliance.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ARCH-C4-005.yaml
+acceptance:
+  - Zwei Component-Diagramme mit Mermaid flowchart.
+  - MkDocs-Navigation und architecture/index aktualisiert.
+tests:
+  - mkdocs build
+build_result: "P1 component diagrams published"

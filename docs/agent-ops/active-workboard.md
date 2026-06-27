@@ -11,6 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-ARCH-STACK — Architektur-Dokumentations-Stack (ISO 42010 + arc42 + C4)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-27 — Plan „Architektur-Dokumentation IST + Umsetzung“ vollstaendig: ADR-036, arc42 (12 Kapitel), ISO-42010-Matrix, C4 Context/Container/Components, Enterprise-Landkarte, ERD, 3 Sequenzdiagramme, Container-Inventar-Generator.
+**Ziel:** Formale Architektursichten ergaenzen Process Kernel + ADRs ohne Tool-Bruch (Mermaid in MkDocs).
+**Dateibesitz:** `docs/architecture/arc42/`, `docs/architecture/views/`, `docs/adr/adr-036-architecture-documentation-stack.md`, `docs/README.md`, `scripts/generate_container_inventory.py`, `docs/entwickler/container-inventory.md`, `mkdocs.yml`, Slices `DOC-ARCH-FOUNDATION-001` … `DOC-ARCH-SEQ-001`, `docs/project-context/open-gaps-and-known-issues.md` (Abschnitt DOC-ARCH-STACK-001).
+**Abnahme:** Alle 8 Slices abgeschlossen; optional P1-Components, UML-Klassen, Production-C4, CI-Gate (2026-06-27) nachgezogen; `mkdocs build` 0 Errors; `generate_container_inventory.py --check` OK.
+
+| Slice | Inhalt |
+|---|---|
+| DOC-ARCH-FOUNDATION-001 | ADR-036, Index, docs/README.md |
+| DOC-ARCH-ARC42-001 | arc42 Hub + ISO-42010 |
+| DOC-ARCH-C4-001 | System Context |
+| DOC-ARCH-C4-002 | Container + Generator |
+| DOC-ARCH-C4-003 | Enterprise-Landkarte |
+| DOC-ARCH-C4-004 | Component CRM/Agrar/Finance |
+| DOC-ARCH-ERD-001 | Canonical ERD |
+| DOC-ARCH-SEQ-001 | Sequenz O2C/Agrar/Auth |
+| DOC-ARCH-C4-005 | Component Einkauf/Lager + DMS/Compliance (optional) |
+| DOC-ARCH-UML-001 | UML classDiagram Canonical Core (optional) |
+| DOC-ARCH-CI-001 | Container-Drift CI-Gate (optional) |
+
 ## LOADTEST-STAGING-GATE-001 - Erntepeak-Lasttest als externes Gate haerten
 
 **Von:** Codex
@@ -5140,3 +5163,22 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 - Traceability: 123 Slices geparst, 2% Coverage (Phase 1 dokumentiert Lücken)
 - Nutzer: QS-Handbuch, Release-Notes, 50 INAPP-Mappings
 - Agent: Proposals persistent in DB, 18 MCP-Tools mit data_classification
+
+---
+
+## ARCH-OS — Architecture Operating System (2026-06-27)
+
+**Stand:** abgeschlossen — Structurizr DSL, Index-Generator, Domain Packs, Agent Protocol, CI-Gates.
+
+| Slice | Status | Deliverable |
+|---|---|---|
+| ARCH-OS-001 | abgeschlossen | ADR-037, `workspace.dsl`, `render_c4_views.py`, generierte C4 L1/L2 |
+| ARCH-OS-002 | abgeschlossen | `generate_architecture_index.py`, `config/architecture-index.yaml` |
+| ARCH-OS-003 | abgeschlossen | CRM Domain Pack, `architecture-protocol.md`, AGENTS.md |
+| ARCH-OS-004 | abgeschlossen | `pnpm arch:*`, `architecture_drift_check.py`, quality-gate |
+| ARCH-OS-005 | abgeschlossen | Domain Packs Finance, Inventory, Agrar |
+| ARCH-OS-006 | abgeschlossen | Domain Pack DMS/Compliance |
+
+**CLI:** `pnpm arch:render` · `pnpm arch:validate` · `pnpm arch:drift`
+
+**Agent-Einstieg:** `config/architecture-index.yaml` + [architecture-protocol.md](../architecture/agents/architecture-protocol.md) + [Rollout-Prompt](../architecture/agents/architecture-os-rollout-prompt.md) (Copy-Paste für neue Sessions)

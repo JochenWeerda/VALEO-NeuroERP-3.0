@@ -9,6 +9,9 @@ on:
       - "scripts/docs-staleness-check.cjs"
       - "scripts/generate_adr_nav.py"
       - "scripts/generate_code_inventories.py"
+      - "scripts/generate_container_inventory.py"
+      - "docker-compose.yml"
+      - "docker-compose.production.yml"
       - "app/api/v1/endpoints/**"
       - "app/services/**"
       - "alembic/versions/**"
@@ -23,6 +26,9 @@ on:
       - "scripts/docs-staleness-check.cjs"
       - "scripts/generate_adr_nav.py"
       - "scripts/generate_code_inventories.py"
+      - "scripts/generate_container_inventory.py"
+      - "docker-compose.yml"
+      - "docker-compose.production.yml"
       - "app/api/v1/endpoints/**"
       - "app/services/**"
       - "alembic/versions/**"
@@ -59,6 +65,9 @@ jobs:
 
       - name: Code inventory drift check
         run: python scripts/generate_code_inventories.py --check
+
+      - name: Container inventory drift check
+        run: python scripts/generate_container_inventory.py --check
 
       - name: Build documentation site
         run: python -m mkdocs build --site-dir site
