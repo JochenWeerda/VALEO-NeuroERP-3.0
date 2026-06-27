@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOADTEST-STAGING-GATE-001 - Erntepeak-Lasttest als externes Gate haerten
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-27 — Scheduled `Lasttest Erntepeak (Gap 037)` scheiterte an nicht aufloesbarem `staging.valeo-erp.de` und leerem `API_DEV_TOKEN`; Workflow prueft jetzt `STAGING_URL`, Token und DNS vor k6-Start und dokumentiert fehlende externe Voraussetzungen neutral.
+**Ziel:** Lasttest-Gate darf Infrastruktur-/Secret-Luecken nicht als Produkt-Performancefehler melden; manuelle Lasttests bleiben hart und schlagen bei fehlender Zielkonfiguration fehl.
+**Dateibesitz:** `.github/workflows/load-test.yml`, `docs/operations/production-readiness-runbook.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/LOADTEST-STAGING-GATE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Schedule ohne Staging/Token/DNS endet erfolgreich mit Summary als externes Gate; manuelle `harvest-peak`-Ausfuehrung verlangt gueltiges Ziel und Token; Runbook fuehrt das Gate.
+
 ## COV-RATCHET-010 - Quality-Gate Baseline nach CI-Messung korrigieren
 
 **Von:** Codex
