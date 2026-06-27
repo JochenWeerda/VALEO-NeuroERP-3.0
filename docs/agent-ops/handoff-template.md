@@ -1,3 +1,14 @@
+---
+title: Handoff Template
+type: reference
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Standardvorlage fuer Agenten-Uebergaben zwischen Claude- und Codex-Sitzungen — enthaltene Felder, Pflichtabschnitte, Briefing-Format.
+---
+
 # Handoff Template
 
 ```markdown

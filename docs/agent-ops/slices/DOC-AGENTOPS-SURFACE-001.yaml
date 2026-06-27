@@ -1,0 +1,52 @@
+slice_id: DOC-AGENTOPS-SURFACE-001
+title: "Agent-Ops-Koordinationsdokumente in MkDocs einbinden — Wave 30"
+status: done
+wave: 30
+
+fachlicher_vertrag:
+  ziel: >
+    Sechs Agent-Ops-Koordinationsdokumente (active-workboard, session-start-checklist,
+    task-slice-template, handoff-template, parallel-work-protocol, resume-packet-template)
+    mit Frontmatter versehen und unter Agent-Dokumentation > Agent-Ops veroeffentlichen.
+  akzeptanzkriterien:
+    - Alle sechs Dateien erreichbar unter Agent-Dokumentation > Agent-Ops
+    - Valide Frontmatter auf allen Dateien
+
+architektur_vertrag:
+  komponenten:
+    - docs/agent-ops/active-workboard.md
+    - docs/agent-ops/session-start-checklist.md
+    - docs/agent-ops/task-slice-template.md
+    - docs/agent-ops/handoff-template.md
+    - docs/agent-ops/parallel-work-protocol.md
+    - docs/agent-ops/resume-packet-template.md
+  aenderungen:
+    - Frontmatter hinzugefuegt (alle sechs Dateien)
+    - exclude_docs Ausnahmen fuer alle sechs Dateien
+    - Nav-Unterabschnitt Agent-Ops unter Agent-Dokumentation
+
+daten_vertrag:
+  migrations: keine
+  schema_aenderungen: keine
+
+test_vertrag:
+  pruefschritte:
+    - mkdocs build muss ohne ERROR abschliessen
+
+security_vertrag:
+  datenschutz: keine personenbezogenen Daten betroffen
+  zugriff: oeffentliche Dokumentationssite
+
+betriebs_vertrag:
+  deployment: mkdocs build / gh-pages deploy
+  monitoring: keine
+
+dokumentations_vertrag:
+  workboard_eintrag: DOC-AGENTOPS-SURFACE-001
+  nav_eintraege:
+    - Agent-Dokumentation > Agent-Ops > Active Workboard
+    - Agent-Dokumentation > Agent-Ops > Session Start Checklist
+    - Agent-Dokumentation > Agent-Ops > Task Slice Template
+    - Agent-Dokumentation > Agent-Ops > Handoff Template
+    - Agent-Dokumentation > Agent-Ops > Parallel Work Protocol
+    - Agent-Dokumentation > Agent-Ops > Resume Packet Template

@@ -1,3 +1,14 @@
+---
+title: Session Start Checklist
+type: reference
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Pflichtschritte beim Start einer neuen Agenten-Sitzung — Workboard lesen, Memory laden, Branch pruefen, Governance-Gates.
+---
+
 # Session Start Checklist
 
 ## Zweck
