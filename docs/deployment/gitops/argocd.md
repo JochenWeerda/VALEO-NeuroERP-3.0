@@ -1,4 +1,15 @@
-﻿# ArgoCD / GitOps Integration
+﻿---
+title: ArgoCD / GitOps Integration
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: App-of-Apps GitOps-Setup mit ArgoCD für VALEO NeuroERP — Root-Application, Child-Apps, K8s-Deployment.
+---
+
+# ArgoCD / GitOps Integration
 
 ## Zielbild
 - App-of-Apps mit Root-Application in Namespace `argocd`
