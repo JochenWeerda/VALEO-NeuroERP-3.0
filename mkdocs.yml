@@ -86,6 +86,12 @@ exclude_docs: |
   /analysis/
   /api/
   /agent-ops/
+  !/agent-ops/active-workboard.md
+  !/agent-ops/session-start-checklist.md
+  !/agent-ops/task-slice-template.md
+  !/agent-ops/handoff-template.md
+  !/agent-ops/parallel-work-protocol.md
+  !/agent-ops/resume-packet-template.md
   /archive/
   /cards/
   !/cards/README.md
@@ -342,6 +348,13 @@ nav:
       - Guardrails: agent-docs/guardrails.md
       - ai_harness-Verträge: agent-docs/contracts.md
       - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
+      - Agent-Ops:
+          - Active Workboard: agent-ops/active-workboard.md
+          - Session Start Checklist: agent-ops/session-start-checklist.md
+          - Task Slice Template: agent-ops/task-slice-template.md
+          - Handoff Template: agent-ops/handoff-template.md
+          - Parallel Work Protocol: agent-ops/parallel-work-protocol.md
+          - Resume Packet Template: agent-ops/resume-packet-template.md
   - Compliance:
       - Überblick: compliance/index.md
       - GoBD-Checkliste: compliance/gobd-checklist.md

@@ -1,4 +1,24 @@
+---
+title: Active Workboard
+type: reference
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
+---
+
 # Active Workboard
+
+## DOC-AGENTOPS-SURFACE-001 - Agent-Ops-Koordinationsdokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sechs Agent-Ops-Koordinationsdokumente (active-workboard, session-start-checklist, task-slice-template, handoff-template, parallel-work-protocol, resume-packet-template) mit Frontmatter versehen und als Unterabschnitt Agent-Ops unter Agent-Dokumentation veroeffentlicht.
+**Ziel:** Agenten-Koordinationsinfrastruktur fuer Claude- und Codex-Sitzungen im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `session-start-checklist.md`, `task-slice-template.md`, `handoff-template.md`, `parallel-work-protocol.md`, `resume-packet-template.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-AGENTOPS-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sechs Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 24.92 s).
 
 ## DOC-CARDS-SURFACE-001 - Cards-Konzept und interne Inventar-Docs in MkDocs integrieren
 
