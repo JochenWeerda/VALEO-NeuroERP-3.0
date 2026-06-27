@@ -1,5 +1,5 @@
 ---
-title: Dokumente und Belegarchiv
+title: Preise und Kalkulation
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,13 +8,13 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# Dokumente und Belegarchiv
+# Preise und Kalkulation
 
-DMS, Versand, Archivierung.
+Preislisten, Kalkulation, Konditionen.
 
 ## Ziel
 
-Sie arbeiten sicher in allen Masken des Bereichs **Dokumente und Belegarchiv** — von der Navigation
+Sie arbeiten sicher in allen Masken des Bereichs **Preise und Kalkulation** — von der Navigation
 bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
@@ -25,28 +25,30 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **5** App-Routen
+Vollständige Abdeckung: **7** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Artefakt Freigabe | `/docflow/artefakt-freigabe` | `@/pages/docflow/artefakt-freigabe` |
-| Gobd Export | `/docflow/gobd-export` | `@/pages/docflow/gobd-export` |
-| Nachweisraum | `/docflow/nachweisraum` | `@/pages/docflow/nachweisraum` |
-| Wiedervorlagen | `/docflow/wiedervorlagen` | `@/pages/docflow/wiedervorlagen` |
-| Ablage | `/dokumente/ablage` | `@/pages/dokumente/ablage` |
+| Historie | `/preise/historie` | `@/pages/preise/historie` |
+| Individualpreise | `/preise/individualpreise` | `@/pages/preise/individualpreise` |
+| Kalkulation | `/preise/kalkulation` | `@/pages/preise/kalkulation` |
+| Konditionen | `/preise/konditionen` | `@/pages/preise/konditionen` |
+| Rabattgruppen | `/preise/rabattgruppen` | `@/pages/preise/rabattgruppen` |
+| Zu Abschlaggruppen | `/preise/zu-abschlaggruppen` | `@/pages/preise/zu-abschlaggruppen` |
+| Pricing | `/pricing` | `@/pages/pricing` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Artefakt Freigabe
+### Historie
 
-**Route:** `/docflow/artefakt-freigabe` · **Modul:** `@/pages/docflow/artefakt-freigabe`
+**Route:** `/preise/historie` · **Modul:** `@/pages/preise/historie`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Artefakt Freigabe** öffnen (`/docflow/artefakt-freigabe`).
+1. Sidebar oder Suche: **Historie** öffnen (`/preise/historie`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -61,13 +63,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Gobd Export
+### Individualpreise
 
-**Route:** `/docflow/gobd-export` · **Modul:** `@/pages/docflow/gobd-export`
+**Route:** `/preise/individualpreise` · **Modul:** `@/pages/preise/individualpreise`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Gobd Export** öffnen (`/docflow/gobd-export`).
+1. Sidebar oder Suche: **Individualpreise** öffnen (`/preise/individualpreise`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -82,13 +84,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Nachweisraum
+### Kalkulation
 
-**Route:** `/docflow/nachweisraum` · **Modul:** `@/pages/docflow/nachweisraum`
+**Route:** `/preise/kalkulation` · **Modul:** `@/pages/preise/kalkulation`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Nachweisraum** öffnen (`/docflow/nachweisraum`).
+1. Sidebar oder Suche: **Kalkulation** öffnen (`/preise/kalkulation`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -103,13 +105,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Wiedervorlagen
+### Konditionen
 
-**Route:** `/docflow/wiedervorlagen` · **Modul:** `@/pages/docflow/wiedervorlagen`
+**Route:** `/preise/konditionen` · **Modul:** `@/pages/preise/konditionen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Wiedervorlagen** öffnen (`/docflow/wiedervorlagen`).
+1. Sidebar oder Suche: **Konditionen** öffnen (`/preise/konditionen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -124,13 +126,55 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Ablage
+### Rabattgruppen
 
-**Route:** `/dokumente/ablage` · **Modul:** `@/pages/dokumente/ablage`
+**Route:** `/preise/rabattgruppen` · **Modul:** `@/pages/preise/rabattgruppen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Ablage** öffnen (`/dokumente/ablage`).
+1. Sidebar oder Suche: **Rabattgruppen** öffnen (`/preise/rabattgruppen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Zu Abschlaggruppen
+
+**Route:** `/preise/zu-abschlaggruppen` · **Modul:** `@/pages/preise/zu-abschlaggruppen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Zu Abschlaggruppen** öffnen (`/preise/zu-abschlaggruppen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Pricing
+
+**Route:** `/pricing` · **Modul:** `@/pages/pricing`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Pricing** öffnen (`/pricing`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.

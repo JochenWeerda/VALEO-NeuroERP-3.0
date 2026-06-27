@@ -1,3 +1,14 @@
+---
+title: Zoll / Exportkontrolle — Produktiv-Setup
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Secrets, Konfiguration und Migrations-Setup für Zoll/Exportkontrolle in der Produktion.
+---
+
 # Zoll / Exportkontrolle – Produktiv-Setup
 
 ## 1. Secrets anlegen
@@ -21,8 +32,8 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
 
 ## 3. Workflow-Policies
 
-- `services/compliance/zoll/app/workflows/registration.py` registriert `export_clearance`.  
-- Rollen/Approvals im Workflow-Service prüfen (`tenant=zoll`).  
+- `services/compliance/zoll/app/workflows/registration.py` registriert `export_clearance`.
+- Rollen/Approvals im Workflow-Service prüfen (`tenant=zoll`).
 - Optional: Policy-Overrides via `packages/frontend-web/src/pages/policy-manager`.
 
 ## 4. Smoke-Test
@@ -48,7 +59,7 @@ helm upgrade --install valeo-erp ./k8s/helm/valeo-erp \
 - Prometheus Queries:
   - `zoll_sanctions_refresh_total`
   - `zoll_screening_status_total`
-- Alertmanager-Routing `component=zoll`.  
+- Alertmanager-Routing `component=zoll`.
 - Backoff-Status via `zoll_sanctions_refresh_backoff_minutes`.
 
 

@@ -1,5 +1,50 @@
 # Active Workboard
 
+## DOC-DEPLOYMENT-RUNBOOKS-001 - Deployment-Runbooks in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sechs Deployment-Dokumente (ArgoCD/GitOps, Canary-Rollout, IDEV-Setup, Secrets, Zoll, Frontend EPCIS) mit Frontmatter versehen und unter Admin → Deployment in Navigation aufgenommen.
+**Ziel:** Betriebsrelevante Deployment-Runbooks fuer Admins und Entwickler auffindbar machen.
+**Dateibesitz:** `docs/deployment/gitops/argocd.md`, `docs/deployment/runbook/infra/canary-rollout.md`, `docs/deployment/runbook/infra/idev-setup.md`, `docs/deployment/runbook/security/secrets-inventory.md`, `docs/deployment/runbook/compliance/zoll-setup.md`, `docs/deployment/runbook/frontend/epcis-ui.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-DEPLOYMENT-RUNBOOKS-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sechs Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 25.66 s).
+
+## DOC-QA-SURFACE-001 - QA/Test-Docs und External-Mock-Verträge in MkDocs
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 3 QA-/Test-Dokumente mit Frontmatter versehen und in Build integriert; External-Mock-Verträge-Runbook in Agent-Dokumentation verlinkt.
+**Ziel:** Playwright-Auth-Anleitung, Browser-Use-Checklists und External-Mock-Verträge (DATEV/ELSTER/TSE/Bank/DSFinV-K) im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/quality-assurance/playwright-smoke-auth.md`, `docs/quality-assurance/browser-use-checklists.md`, `docs/agent-docs/runbooks/external-mock-vertraege.md` (nur Nav-Link), `mkdocs.yml`, `docs/agent-ops/slices/DOC-QA-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 48.84 s).
+
+## DOC-WORKFLOW-INDEX-001 - Kuratierter Workflow-Index fuer Entwickler
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 161 Workflow-Dokumente in docs/workflows/ in 7 Kategorien katalogisiert und als Entwickler-Index veroeffentlicht.
+**Ziel:** Alle Workflow-Dokumente auffindbar machen ohne sie direkt in den kuratierten Build zu ziehen.
+**Dateibesitz:** `docs/entwickler/workflow-index.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-WORKFLOW-INDEX-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 39.59 s); Quelldateien bleiben in docs/workflows/ ausgeschlossen.
+
+## DOC-USER-MANUAL-004 - Benutzerhandbuch vollstaendig
+
+**Von:** Cursor - **Owner:** Cursor - **Stand:** abgeschlossen 2026-06-26
+
+Generatorische Vollabdeckung des Benutzerhandbuchs fuer 851/851 Endnutzer-Routen,
+29 Fachkapitel, MkDocs-Navigation und In-App-Hilfe-Mapping. Fachliche
+Domain-How-tos bleiben fuer Tiefenwissen fuehrend; Screenshots/UAT sind
+operative Folgegates.
+
+## DOC-OPS-RUNBOOKS-001 - Ops/Runbook-Dateien in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Vier bisher ausgeschlossene Operations-/Runbook-Seiten mit Frontmatter versehen, in Navigation aufgenommen und zwei Build-Blocker behoben.
+**Ziel:** ALERTS, DISASTER-RECOVERY, production-readiness-runbook und dependency-and-compatibility-maintenance im Admin-Betriebsbereich der Doku zugaenglich machen.
+**Dateibesitz:** `docs/runbooks/ALERTS.md`, `docs/runbooks/DISASTER-RECOVERY.md`, `docs/operations/production-readiness-runbook.md`, `docs/operations/dependency-and-compatibility-maintenance.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-OPS-RUNBOOKS-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Runbook-Seiten haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen ohne Pygments-/Jinja-Blocker (0 Errors, 22.02 s).
+
 ## DOC-USER-MANUAL-003 - Benutzerhandbuch Kern- und Spezialdomaenen
 
 **Von:** Cursor
@@ -17,6 +62,22 @@
 **Ziel:** POS/Kasse, Logistik, Compliance/Meldewesen, Personal/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion als Endnutzer-How-tos in `docs/benutzerhandbuch/` ergaenzen.
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
+
+## Wave 15 — WF-COCKPIT-RETRY-001: Retry + Kompensationspfad
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+
+`retry_instance()` + `compensate_instance()` in `WorkflowCockpitPersistService` implementiert. Neue Endpoints `POST /workflow/cockpit-db/instances/{id}/retry` (FAILED/blocked → retry_pending) und `POST /workflow/cockpit-db/instances/{id}/compensate` (→ compensated). Schliesst letztes offenes Sub-Item aus VALEO-WF-COCKPIT-001.
+
+## Wave 14 — COV-RATCHET-009 + CRM-LEGACY-Abschluss + Stale-Gap-Cleanup
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+
+**COV-RATCHET-009**: `futtermittel_qs.py` und `psm_proplanta.py` in Coverage-Ratchet aufgenommen (Wave-13-Endpoints, 40%-Baseline). Test `test_futtermittel_qs.py` mit 8 Unit-/Endpoint-Tests fuer HACCP/VLOG/QS-Pruefpunkte geschrieben.
+
+**CRM-LEGACY-API-MIGRATE-001 abgeschlossen**: Verifikation Wave 14 — CRM-Seiten (`kontakt-management.tsx`, `kunden-liste.tsx`, `lieferanten-liste.tsx`) haben keine `@/lib/axios`-Imports; `/api/v1/crm/`-Pfade durchgaengig.
+
+**Stale open-gaps bereinigt**: CMP-UStVA-Bug geschlossen (Code-Nachweis), WM-AGRI Zielzellen-Vorschlag als abgeschlossen markiert (retroaktiv WM-AGRI-MAP-001).
 
 ## Wave 13 — WF-COCKPIT-002 + FEED-QS-001 + RUNTIME-KAT-E-002
 

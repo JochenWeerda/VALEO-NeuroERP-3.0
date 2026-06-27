@@ -1,3 +1,14 @@
+---
+title: Production-Readiness Runbook
+type: runbook
+audience: [betrieb, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Fail-closed Freigabemodell, simulierte Prüferprofile, externe Gates für VALEO NeuroERP Go-Live.
+---
+
 # Production Readiness Runbook
 
 Stand: 2026-06-09

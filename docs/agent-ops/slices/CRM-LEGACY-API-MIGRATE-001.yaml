@@ -1,8 +1,13 @@
 slice_id: CRM-LEGACY-API-MIGRATE-001
 title: "CRM Legacy axios → /api/v1/crm/"
 owner: —
-status: offen
+status: abgeschlossen
 updated: 2026-06-26
+closed: 2026-06-26
+closed_reason: >-
+  Gap-Verifikation Wave 14 2026-06-26: CRM-Seiten (kontakt-management.tsx,
+  kunden-liste.tsx, lieferanten-liste.tsx) haben keine @/lib/axios-Imports.
+  crm.ts nutzt bereits /api/v1/crm/. Akzeptanzkriterien erfuellt.
 coordination: >-
   Aus CRM-001 Card. @/lib/api/crm.ts nutzt bereits /api/v1/crm/; verbleibende
   Masken mit @/lib/axios schrittweise migrieren. Kein Proxy-Entfernen in
@@ -32,3 +37,25 @@ risks:
   - vite.config Proxy /api/crm bleibt bis alle Call-Sites umgestellt sind.
 external_gates:
   - Keine externe Abnahme; interne API-Konsistenz.
+ai_harness:
+  fachlicher_vertrag: >-
+    CRM-Listen und Kontaktmanagement muessen Kunden-, Lieferanten- und
+    Kommunikationsdaten ueber die kanonischen CRM-API-Pfade laden.
+  architektur_vertrag: >-
+    Legacy-Axios-Pfade werden zugunsten von apiClient/TanStack-Hooks und
+    /api/v1/crm/* ersetzt, ohne den Vite-Proxy vorschnell zu entfernen.
+  daten_vertrag: >-
+    CRM-Listen werden ueber normalisierte List-Responses entpackt; keine
+    produktiven Kundendaten in Tests oder Doku.
+  test_vertrag: >-
+    TypeScript und rg-Pruefung sichern die migrierten Call-Sites gegen
+    Legacy-Importe ab.
+  security_vertrag: >-
+    Auth- und Tenant-Kontext bleiben im apiClient gebuendelt; keine Tokens in
+    Doku oder Fixtures.
+  betriebs_vertrag: >-
+    Die Migration ist ein internes Kompatibilitaets-Gate; fachliche CRM-UAT
+    bleibt separat.
+  dokumentations_vertrag: >-
+    CRM-Card, Workflow, Open-Gaps und Slice-YAML dokumentieren den finalen
+    Legacy-API-Stand konsistent.

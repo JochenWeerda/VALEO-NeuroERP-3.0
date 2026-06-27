@@ -119,6 +119,23 @@ def upgrade() -> None:
             created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW()
         )
     """))
+    for ddl in [
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS tenant_id VARCHAR",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS article_id VARCHAR",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS warehouse_id VARCHAR",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS movement_type VARCHAR(30)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS quantity NUMERIC(14,3)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS unit VARCHAR(20)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS reference_type VARCHAR(60)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS reference_id VARCHAR(64)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS charge VARCHAR(80)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS bin_id VARCHAR(64)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS booked_at TIMESTAMPTZ DEFAULT NOW()",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS booked_by VARCHAR(100)",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS notes TEXT",
+        "ALTER TABLE domain_inventory.inventory_stock_movements ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW()",
+    ]:
+        conn.execute(text(ddl))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_inv_stock_movements_tenant_article
             ON domain_inventory.inventory_stock_movements (tenant_id, article_id, booked_at)

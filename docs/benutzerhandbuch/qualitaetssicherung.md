@@ -1,69 +1,353 @@
 ---
-title: Qualitätssicherung – Proben, Freigabe, Reklamation
+title: Qualitätssicherung
 type: how-to
 audience: [endnutzer, power-user]
-owner: Claude Code
+owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.0.0
+version: 3.2.0
 ---
 
-# Qualitätssicherung – Proben, Freigabe, Reklamation
+# Qualitätssicherung
 
-Der QS-Leitstand steuert den Qualitätsprozess von der Probe-Entnahme über die
-Laboranalyse bis zur Chargen-Freigabe oder -Sperrung.
+Proben, Labor, QS-Leitstand, Reklamation.
+
+## Ziel
+
+Sie arbeiten sicher in allen Masken des Bereichs **Qualitätssicherung** — von der Navigation
+bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
 
-- Modul **Qualitätssicherung** ist für den Mandanten freigeschaltet.
-- Laborparameter und Prüfpläne sind als Stammdaten vorhanden.
+- Gültige Anmeldung und Mandant (`X-Tenant-ID`).
+- Modul für diesen Fachbereich ist installiert (siehe Administration → Module).
+- Ihre Rolle hat Lese- bzw. Schreibberechtigung für die jeweilige Maske.
 
-## 1. QS-Probe anlegen
+## Maskenregister
 
-1. *Lager → QS-Leitstand* → **Neue Probe**.
-2. Charge/Partie auswählen, Probenanzahl und Entnahmepunkt erfassen.
-3. Zuständiges Labor und Prüfplan wählen.
-4. **Speichern** — Probe erhält Status *In Prüfung*.
+Vollständige Abdeckung: **14** App-Routen
+(0 explizit in der Sidebar-Navigation).
 
-## 2. Laborergebnis erfassen
+| Maske | Route | Modul |
+|-------|-------|-------|
+| :Id | `/labor/probe/:id` | `@/pages/labor/proben-liste` |
+| Neu | `/labor/probe/neu` | `@/pages/labor/proben-liste` |
+| Proben | `/labor/proben` | `@/pages/labor/proben-liste` |
+| Proben Liste | `/labor/proben-liste` | `@/pages/labor/proben-liste` |
+| Ausnahme Neu | `/qualitaet/ausnahme-neu` | `@/pages/qualitaet/ausnahmen` |
+| Ausnahmen | `/qualitaet/ausnahmen` | `@/pages/qualitaet/ausnahmen` |
+| Labor | `/qualitaet/labor` | `@/pages/qualitaet/labor-liste` |
+| Labor Auftrag | `/qualitaet/labor-auftrag` | `@/pages/qualitaet/labor-auftrag` |
+| Labor Detail | `/qualitaet/labor-detail` | `@/pages/qualitaet/labor-detail` |
+| Labor Liste | `/qualitaet/labor-liste` | `@/pages/qualitaet/labor-liste` |
+| :Id | `/qualitaet/labor/:id` | `@/pages/qualitaet/labor-detail` |
+| Reklamation Detail | `/qualitaet/reklamation-detail` | `@/pages/qualitaet/reklamation-detail` |
+| :Id | `/qualitaet/reklamation/:id` | `@/pages/qualitaet/reklamation-detail` |
+| Reklamationen | `/qualitaet/reklamationen` | `@/pages/qualitaet/reklamationen` |
 
-1. Probe öffnen → *Ergebnis erfassen*.
-2. Messwerte je Parameter eingeben (z. B. Feuchte, Protein, Mykotoxine).
-3. Abgleich mit Grenzwerten erfolgt automatisch.
-4. Bei Überschreitung: Warnung erscheint, Freigabe-Button gesperrt.
+## Masken im Detail
 
-## 3. Charge freigeben oder sperren
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-| Situation | Aktion | Folge |
-|---|---|---|
-| Alle Grenzwerte eingehalten | **Freigeben** | Charge disponierbar |
-| Einzelne Überschreitung | **Bedingt freigeben** + Kommentar | Charge mit Vermerk |
-| Kritische Überschreitung | **Sperren** | Charge nicht disponierbar |
+### :Id
 
-## 4. Reklamation anlegen
+**Route:** `/labor/probe/:id` · **Modul:** `@/pages/labor/proben-liste`
 
-1. *QS-Leitstand → Reklamationen* → **Neue Reklamation**.
-2. Betroffene Charge/Lieferant angeben, Fehlerart und Menge erfassen.
-3. Maßnahmen festlegen (Rücksendung, Gutschrift, Nachlieferung).
-4. **Abschließen** sobald Maßnahmen erledigt.
+**Schritte:**
 
-## QS im Agrar-Kontext
+1. Sidebar oder Suche: **:Id** öffnen (`/labor/probe/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
 
-Bei Ernte-Annahme wird die Probe direkt am **Wiegeschein** angelegt.
-Ergebnisse beeinflussen automatisch die **Abrechnungsgrundlage** (Zu-/Abschläge
-für Qualitätsparameter wie Feuchte, Protein, Hektolitergewicht).
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
 
-## Häufige Fehler
+**Häufige Fehler:**
 
-- **Freigabe-Button grau:** Laborergebnis noch nicht vollständig erfasst.
-- **Charge trotz Freigabe nicht disponierbar:** Bestandsbuchung prüfen (Einlagerung?).
-- **Reklamation ohne Lieferantenbezug:** Lieferanten-Stammdaten prüfen.
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Neu
+
+**Route:** `/labor/probe/neu` · **Modul:** `@/pages/labor/proben-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Neu** öffnen (`/labor/probe/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Proben
+
+**Route:** `/labor/proben` · **Modul:** `@/pages/labor/proben-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Proben** öffnen (`/labor/proben`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Proben Liste
+
+**Route:** `/labor/proben-liste` · **Modul:** `@/pages/labor/proben-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Proben Liste** öffnen (`/labor/proben-liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Ausnahme Neu
+
+**Route:** `/qualitaet/ausnahme-neu` · **Modul:** `@/pages/qualitaet/ausnahmen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Ausnahme Neu** öffnen (`/qualitaet/ausnahme-neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Ausnahmen
+
+**Route:** `/qualitaet/ausnahmen` · **Modul:** `@/pages/qualitaet/ausnahmen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Ausnahmen** öffnen (`/qualitaet/ausnahmen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Labor
+
+**Route:** `/qualitaet/labor` · **Modul:** `@/pages/qualitaet/labor-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Labor** öffnen (`/qualitaet/labor`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Labor Auftrag
+
+**Route:** `/qualitaet/labor-auftrag` · **Modul:** `@/pages/qualitaet/labor-auftrag`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Labor Auftrag** öffnen (`/qualitaet/labor-auftrag`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Labor Detail
+
+**Route:** `/qualitaet/labor-detail` · **Modul:** `@/pages/qualitaet/labor-detail`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Labor Detail** öffnen (`/qualitaet/labor-detail`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Labor Liste
+
+**Route:** `/qualitaet/labor-liste` · **Modul:** `@/pages/qualitaet/labor-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Labor Liste** öffnen (`/qualitaet/labor-liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/qualitaet/labor/:id` · **Modul:** `@/pages/qualitaet/labor-detail`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/qualitaet/labor/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Reklamation Detail
+
+**Route:** `/qualitaet/reklamation-detail` · **Modul:** `@/pages/qualitaet/reklamation-detail`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Reklamation Detail** öffnen (`/qualitaet/reklamation-detail`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/qualitaet/reklamation/:id` · **Modul:** `@/pages/qualitaet/reklamation-detail`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/qualitaet/reklamation/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Reklamationen
+
+**Route:** `/qualitaet/reklamationen` · **Modul:** `@/pages/qualitaet/reklamationen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Reklamationen** öffnen (`/qualitaet/reklamationen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
 ## Quellen und Reverse-Pflege
 
-- `docs/benutzerhandbuch/annahme.md`: Probe an Wiegeschein, Qualitätsabschläge.
-- `docs/benutzerhandbuch/lager.md`: Chargenfreigabe und Bestandsbuchung.
-- `docs/agent-ops/slices/DOM-QS-004.yaml`: QS-Vertiefung Reklamation/Labor.
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
 
-Reverse-Pflege: Bei Grenzwerten, Freigabestatus oder Reklamationsworkflow diese
-Seite und QS-Workflow-Doku aktualisieren.
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

@@ -105,6 +105,10 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
     "api/v1/endpoints/rohware_sammelabrechnung.py": 0.32,  #  35% measured — Sammelabrechnung
 
+    # ── COV-RATCHET-009 (2026-06-26): Welle-13-Endpoints ────────────────────
+    "api/v1/endpoints/futtermittel_qs.py": 0.40,       # FEED-QS-001: HACCP/VLOG/QS-Pruefpunkte
+    "domains/agrar/api/psm_proplanta.py": 0.40,        # RUNTIME-KAT-E-002: Proplanta 503-Fix
+
     # ── COV-RATCHET-008 (2026-06-26): Welle-9-Endpoints ─────────────────────
     "api/v1/endpoints/einkauf_lieferschein.py": 0.45,  # EINKAUF-LS-REPAIR-001: GET/POST/PATCH Lieferschein
 

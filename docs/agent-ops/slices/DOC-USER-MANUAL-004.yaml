@@ -1,0 +1,56 @@
+slice_id: DOC-USER-MANUAL-004
+title: Benutzerhandbuch vollständig — alle Nav-Masken und Routen
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-26
+coordination: >-
+  Reiner Doku-Slice. Generator deckt route-inventory.gen.json (851 Endnutzer-Routen)
+  vollständig ab; Legacy-Kapitel mit Screenshots behalten Intro.
+goal: >-
+  Vollständiges Benutzerhandbuch ohne ausgelassene Masken: Kapitel pro Fachdomäne,
+  Maskenregister + Detailabschnitte pro Route, MkDocs-Nav, In-App-Hilfe-Mapping.
+file_ownership:
+  - docs/benutzerhandbuch/**
+  - scripts/generate_benutzerhandbuch_full.py
+  - scripts/generate_inapp_help_map.py
+  - mkdocs.yml
+  - packages/frontend-web/src/lib/docs-help.ts
+  - docs/agent-ops/slices/DOC-USER-MANUAL-004.yaml
+acceptance:
+  - 851/851 Endnutzer-Routen in Handbuch-Kapiteln (generate_benutzerhandbuch_full.py --check = 0 sonstige).
+  - 29 Fachkapitel in mkdocs.yml und index.md.
+  - generate_inapp_help_map.py leitet HELP_MAP aus CHAPTERS ab.
+  - mkdocs build und docs-governance-check grün.
+tests:
+  - python scripts/generate_benutzerhandbuch_full.py --check
+  - python scripts/generate_inapp_help_map.py
+  - node scripts/docs-governance-check.cjs
+  - mkdocs build
+risks:
+  - Generatorische Handbuchseiten koennen fachlich zu knapp sein; Domain-How-tos bleiben fuer Tiefenwissen fuehrend.
+  - Screenshots und UAT je Maske sind nicht automatisch durch Routenabdeckung erledigt.
+external_gates:
+  - Fachliche UAT der generierten Handbuchabdeckung je Domaene.
+completed_at: 2026-06-26
+ai_harness:
+  fachlicher_vertrag: >-
+    Endnutzer sollen fuer jede freigegebene Navigation/Routing-Maske einen
+    auffindbaren Handbuch-Einstieg erhalten.
+  architektur_vertrag: >-
+    Das Handbuch wird aus Route-/Kapitel-Metadaten generiert und bleibt mit
+    In-App-Hilfe sowie MkDocs-Navigation synchron.
+  daten_vertrag: >-
+    Route-Inventar, Kapiteldefinitionen und bestehende Handbuchseiten sind die
+    Quellen; keine Produktionsdaten.
+  test_vertrag: >-
+    Generator-Check, In-App-Hilfe-Generator, Docs-Governance und MkDocs-Build
+    pruefen Vollstaendigkeit und Renderbarkeit.
+  security_vertrag: >-
+    Handbuch und Help-Map enthalten keine Secrets, Tokens oder echte
+    Personen-/Mandantendaten.
+  betriebs_vertrag: >-
+    Screenshots, Rollout-Kommunikation und fachliche UAT bleiben operative
+    Folgegates.
+  dokumentations_vertrag: >-
+    Bei Routen-, Kapitel- oder Help-Map-Aenderungen muessen Generator,
+    Handbuch, mkdocs.yml und Slice-YAML gemeinsam nachgezogen werden.

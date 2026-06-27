@@ -1,0 +1,54 @@
+slice_id: DOC-DEPLOYMENT-RUNBOOKS-001
+title: "Deployment-Runbooks in MkDocs integrieren (Wave 21)"
+owner: Claude Code
+status: abgeschlossen
+wave: 21
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Sechs bisher ausgeschlossene Deployment-Dokumente in die kuratierte
+  MkDocs-Struktur aufnehmen und fuer Admins/Entwickler unter Admin → Deployment
+  auffindbar machen.
+file_ownership:
+  - docs/deployment/gitops/argocd.md
+  - docs/deployment/runbook/infra/canary-rollout.md
+  - docs/deployment/runbook/infra/idev-setup.md
+  - docs/deployment/runbook/security/secrets-inventory.md
+  - docs/deployment/runbook/compliance/zoll-setup.md
+  - docs/deployment/runbook/frontend/epcis-ui.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-DEPLOYMENT-RUNBOOKS-001.yaml
+acceptance:
+  - Alle sechs Dateien haben gueltiges Frontmatter.
+  - MkDocs-Navigation enthaelt alle Dateien unter Admin → Deployment.
+  - MkDocs-Build laeuft fehlerfrei.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Deployment-Runbooks beschreiben produktive Infrastruktur; Secrets und reale Credentials duerfen nicht eingecheckt werden.
+external_gates:
+  - Betriebsfreigabe der beschriebenen Deployment-Prozesse im Produktivbetrieb.
+ai_harness:
+  fachlicher_vertrag: >-
+    Deployment-Runbooks (GitOps, Canary, Secrets, Compliance, Frontend) muessen
+    fuer Betriebsteams im kuratierten Docs-Portal auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf MkDocs-/Markdown-Struktur und Build-Konfiguration
+    begrenzt; keine Runtime-Aenderung.
+  daten_vertrag: >-
+    Runbooks enthalten nur Betriebsanweisungen und Konfigurationsvorlagen;
+    keine produktiven Secrets oder Echtdaten.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance sichern Frontmatter, Navigation und
+    Renderbarkeit ab.
+  security_vertrag: >-
+    Alle eingecheckten Runbooks duerfen nur Platzhalter-Credentials und
+    generische Konfigurationsbeispiele enthalten.
+  betriebs_vertrag: >-
+    Deployment-Runbooks beschreiben das Betriebsvorgehen; reale Freigaben
+    und Produktiv-Deployments bleiben externe Gates.
+  dokumentations_vertrag: >-
+    MkDocs-Nav, Slice-YAML und Workboard muessen die integrierten
+    Deployment-Runbooks gemeinsam referenzieren.
+build_result: "Documentation built in 25.66 seconds - 0 Errors"

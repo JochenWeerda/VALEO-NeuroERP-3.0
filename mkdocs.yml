@@ -48,7 +48,8 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.highlight:
-      anchor_linenums: true
+      anchor_linenums: false
+      auto_title: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
@@ -87,12 +88,21 @@ exclude_docs: |
   /config/
   /data/
   /db/
+  /deployment/helm/
   /deployment/
+  !/deployment/gitops/argocd.md
+  !/deployment/runbook/infra/canary-rollout.md
+  !/deployment/runbook/infra/idev-setup.md
+  !/deployment/runbook/security/secrets-inventory.md
+  !/deployment/runbook/compliance/zoll-setup.md
+  !/deployment/runbook/frontend/epcis-ui.md
   /design/
   /hrm-go-live-templates/
   /integrations/
   /migration/
   /operations/
+  !/operations/production-readiness-runbook.md
+  !/operations/dependency-and-compatibility-maintenance.md
   /perf/
   /policies/
   /project-context/
@@ -100,8 +110,12 @@ exclude_docs: |
   /quality-assurance/
   !/quality-assurance/action-matrix-report.md
   !/quality-assurance/traceability-matrix.md
+  !/quality-assurance/playwright-smoke-auth.md
+  !/quality-assurance/browser-use-checklists.md
   /roadmap/
   /runbooks/
+  !/runbooks/ALERTS.md
+  !/runbooks/DISASTER-RECOVERY.md
   /schemas/
   /screenshots/
   /setup/
@@ -128,23 +142,33 @@ nav:
   - Benutzerhandbuch:
       - Überblick: benutzerhandbuch/index.md
       - Einstieg: benutzerhandbuch/einstieg.md
+      - Dashboard und Workflows: benutzerhandbuch/dashboard-workflows.md
+      - Wissensbasis und Kundenportal: benutzerhandbuch/wissensbasis-kundenportal.md
       - Ernteannahme: benutzerhandbuch/annahme.md
       - Agrar-Kontrakte: benutzerhandbuch/agrar-kontrakte.md
+      - Agrar-Warenwirtschaft: benutzerhandbuch/agrar-warenwirtschaft.md
       - Verkauf (Auftrag → Rechnung): benutzerhandbuch/verkauf.md
       - Einkauf: benutzerhandbuch/einkauf.md
+      - Vertreter und Provisionen: benutzerhandbuch/vertreter-provisionen.md
+      - CRM und Marketing: benutzerhandbuch/crm.md
+      - Preise und Kalkulation: benutzerhandbuch/preise-kalkulation.md
+      - Artikel und Stammdaten: benutzerhandbuch/artikel-stammdaten.md
       - Lager: benutzerhandbuch/lager.md
-      - Logistik und Touren: benutzerhandbuch/logistik.md
       - Futtermittel und Produktion: benutzerhandbuch/futtermittel-produktion.md
+      - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
+      - Compliance und Meldewesen: benutzerhandbuch/compliance-meldewesen.md
+      - NaWaRo: benutzerhandbuch/nawaro.md
+      - Streckengeschäft: benutzerhandbuch/strecke-handelsgeschaeft.md
+      - Logistik und Touren: benutzerhandbuch/logistik.md
+      - Fuhrpark: benutzerhandbuch/fuhrpark.md
       - Finanzbuchhaltung: benutzerhandbuch/finanzbuchhaltung.md
       - Controlling und Kostenrechnung: benutzerhandbuch/controlling-kostenrechnung.md
       - POS und Kasse: benutzerhandbuch/pos-kasse.md
       - Personal, Zeit und Lohn: benutzerhandbuch/personal-lohn.md
-      - CRM: benutzerhandbuch/crm.md
-      - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
-      - Compliance und Meldewesen: benutzerhandbuch/compliance-meldewesen.md
-      - NaWaRo: benutzerhandbuch/nawaro.md
       - Genossenschaft: benutzerhandbuch/genossenschaft.md
       - Dokumente und Belegarchiv: benutzerhandbuch/dokumente-belegarchiv.md
+      - Reports und Analytics: benutzerhandbuch/reports-analytics.md
+      - Service und Support: benutzerhandbuch/service-support.md
       - Release Notes: benutzerhandbuch/release-notes.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md
@@ -162,6 +186,18 @@ nav:
       - Skalierung & Performance: admin/skalierung-performance.md
       - PDF-Branding: admin/BRANDING.md
       - Nummernkreise: admin/NUMBERING.md
+      - Runbooks:
+          - Alert-Handling: runbooks/ALERTS.md
+          - Disaster Recovery: runbooks/DISASTER-RECOVERY.md
+          - Production-Readiness: operations/production-readiness-runbook.md
+          - Dependency-Pflege: operations/dependency-and-compatibility-maintenance.md
+      - Deployment:
+          - ArgoCD / GitOps: deployment/gitops/argocd.md
+          - Canary-Rollout: deployment/runbook/infra/canary-rollout.md
+          - InfraStat IDEV Setup: deployment/runbook/infra/idev-setup.md
+          - Secrets (Inventory): deployment/runbook/security/secrets-inventory.md
+          - Zoll / Exportkontrolle: deployment/runbook/compliance/zoll-setup.md
+          - Frontend EPCIS UI: deployment/runbook/frontend/epcis-ui.md
   - Entwickler:
       - Überblick: entwickler/index.md
       - Lokales Setup: entwickler/lokales-setup.md
@@ -169,8 +205,11 @@ nav:
       - Konventionen: entwickler/konventionen.md
       - Test-Strategie: entwickler/test-strategie.md
       - Service-Inventar: entwickler/service-inventory.md
+      - Workflow-Index: entwickler/workflow-index.md
       - Action-Matrix-Report: quality-assurance/action-matrix-report.md
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
+      - Playwright Auth (Smoke): quality-assurance/playwright-smoke-auth.md
+      - Browser-Use Checklists: quality-assurance/browser-use-checklists.md
       - Architektur:
           - Index: architecture/index.md
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md
@@ -233,6 +272,7 @@ nav:
       - Tool-Katalog: agent-docs/tool-catalog.md
       - Guardrails: agent-docs/guardrails.md
       - ai_harness-Verträge: agent-docs/contracts.md
+      - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
   - Compliance:
       - Überblick: compliance/index.md
       - GoBD-Checkliste: compliance/gobd-checklist.md

@@ -1,5 +1,5 @@
 ---
-title: NaWaRo-Meldungen
+title: NaWaRo
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,65 +8,126 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# NaWaRo-Meldungen
+# NaWaRo
 
-Nachwachsende Rohstoffe (NaWaRo) erfordern Vertrags-, Flächen- und Liefermeldungen
-gegenüber Behörden und Partnern. Diese Anleitung beschreibt den operativen Ablauf
-im ERP.
+Verträge, Anbauflächen, Mitteilungen.
 
-!!! warning "Externe Meldepflicht"
-    Fachliche Freigabe der Meldung gegenüber Behörde/Verbund bleibt eine externe
-    Gate — das ERP stellt Daten, Vorschau und Export bereit.
+## Ziel
+
+Sie arbeiten sicher in allen Masken des Bereichs **NaWaRo** — von der Navigation
+bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
 
-- Modul **NaWaRo** ist freigeschaltet.
-- Verträge, Anbauflächen und Lieferanten-/Mitgliederstammdaten sind gepflegt.
-- Erntekampagne und Erntefenster sind konfiguriert.
+- Gültige Anmeldung und Mandant (`X-Tenant-ID`).
+- Modul für diesen Fachbereich ist installiert (siehe Administration → Module).
+- Ihre Rolle hat Lese- bzw. Schreibberechtigung für die jeweilige Maske.
 
-## Verträge und Anbauflächen pflegen
+## Maskenregister
 
-1. Öffnen Sie *Agrar* → *NaWaRo* → *Verträge*.
-2. Prüfen Sie Vertragspartner, Kultur, Fläche und Kampagnenbezug.
-3. Öffnen Sie *Anbauflächen* und gleichen Sie Flächen mit Schlag-/Mitgliedsdaten ab.
-4. Ergänzen Sie fehlende Raps-Profile oder Sonderkulturen in *Raps-Profil*.
+Vollständige Abdeckung: **4** App-Routen
+(0 explizit in der Sidebar-Navigation).
 
-## Mitteilung vorbereiten und drucken
+| Maske | Route | Modul |
+|-------|-------|-------|
+| Anbauflaechen | `/nawaro/anbauflaechen` | `@/pages/nawaro/anbauflaechen` |
+| Mitteilung Drucken | `/nawaro/mitteilung-drucken` | `@/pages/nawaro/mitteilung-drucken` |
+| Raps Profil | `/nawaro/raps-profil` | `@/pages/nawaro/raps-profil` |
+| Vertraege | `/nawaro/vertraege` | `@/pages/nawaro/vertraege` |
 
-1. Öffnen Sie *NaWaRo* → *Mitteilung drucken*.
-2. Wählen Sie Kampagne, Vertrag und Meldezeitraum.
-3. Prüfen Sie Mengen, Flächen und Parteidaten in der Vorschau.
-4. Exportieren oder drucken Sie die Mitteilung (CSV/HTML je nach Maske).
-5. Archivieren Sie den Export im Belegarchiv.
+## Masken im Detail
 
-## Streckengeschäft und Übersichten
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-1. Für Streckenlieferungen: *Logistik/Strecke* → *NaWaRo-Verträge prüfen*.
-2. Öffnen Sie *NaWaRo-Übersicht* für aggregierte Liefer- und Vertragsstände.
-3. Drucken Sie Ernterklärung oder Übersicht für interne Freigabe.
-4. Klären Sie Abweichungen zwischen Vertrag, Lieferung und Annahme vor der Meldung.
+### Anbauflaechen
 
-## Ergebnis
+**Route:** `/nawaro/anbauflaechen` · **Modul:** `@/pages/nawaro/anbauflaechen`
 
-- Verträge, Flächen und Lieferungen sind für NaWaRo-Meldungen konsistent.
-- Mitteilungen lassen sich nachvollziehbar exportieren und archivieren.
-- Strecken- und Annahmedaten sind vor Behördenmeldung abgestimmt.
+**Schritte:**
 
-## Häufige Fehler
+1. Sidebar oder Suche: **Anbauflaechen** öffnen (`/nawaro/anbauflaechen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
 
-| Fehler | Ursache | Behebung |
-| --- | --- | --- |
-| Mitteilung leer | Keine Verträge/Flächen zur Kampagne | Stammdaten und Kampagne prüfen |
-| Fläche stimmt nicht | Schlagkartei nicht synchron | Anbauflächen und Feldbuch abgleichen |
-| Liefermenge abweichend | Annahme nicht zugeordnet | Annahme/Vertrag verknüpfen |
-| Export blockiert | Pflichtfelder fehlen | Vorschau-Hinweise ausfüllen |
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Mitteilung Drucken
+
+**Route:** `/nawaro/mitteilung-drucken` · **Modul:** `@/pages/nawaro/mitteilung-drucken`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Mitteilung Drucken** öffnen (`/nawaro/mitteilung-drucken`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Raps Profil
+
+**Route:** `/nawaro/raps-profil` · **Modul:** `@/pages/nawaro/raps-profil`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Raps Profil** öffnen (`/nawaro/raps-profil`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Vertraege
+
+**Route:** `/nawaro/vertraege` · **Modul:** `@/pages/nawaro/vertraege`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Vertraege** öffnen (`/nawaro/vertraege`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
 ## Quellen und Reverse-Pflege
 
-- `packages/frontend-web/src/app/navigation/domains/operations.tsx`: NaWaRo-Menü.
-- `packages/frontend-web/src/lib/nawaro-communication.ts`: Export/Vorschau-Helfer.
-- `docs/agent-ops/slices/TAIL-NAWARO-001.yaml`: Dubletten-/Export-Verifikation.
-- `docs/benutzerhandbuch/annahme.md`: Lieferbezug Ernteannahme.
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
 
-Reverse-Pflege: Bei neuen NaWaRo-Meldefeldern, Exportformaten oder
-Strecken-Prüfregeln diese Seite und `nawaro-communication.ts` gemeinsam pflegen.
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

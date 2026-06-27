@@ -5,7 +5,7 @@ audience: [endnutzer, power-user]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.1.0
+version: 3.2.0
 ---
 
 # Benutzerhandbuch
@@ -16,25 +16,35 @@ Muster: Ziel, Voraussetzungen, Schritte, Ergebnis und haeufige Fehler.
 
 ## Bereiche
 
-- [**Einstieg**](einstieg.md) - Anmeldung, Mandantenwahl, Navigation, Tastatur.
-- [**Annahme**](annahme.md) - LKW-Registrierung, Waage, Qualitaet, Ernteannahme.
-- [**Agrar-Kontrakte**](agrar-kontrakte.md) - Kontrakt, Erfüllung, Fixierung, Settlement.
-- [**Verkauf**](verkauf.md) - Auftrag, Lieferschein, Rechnung.
-- [**Einkauf**](einkauf.md) - Bestellung, Wareneingang, 3-Wege-Match.
-- [**Lager**](lager.md) - Bestand, Umlagerung, Inventur, Silo.
-- [**Logistik und Touren**](logistik.md) - Tourplanung, Frachtbrief, ePOD.
-- [**Futtermittel und Produktion**](futtermittel-produktion.md) - Einzelfutter, Rezept, Produktionsauftrag, Charge.
-- [**Finanzbuchhaltung**](finanzbuchhaltung.md) - Offene Posten, Mahnwesen, Zahlungen.
-- [**Controlling und Kostenrechnung**](controlling-kostenrechnung.md) - Kostenstellen, BAB, Umlagen, Abschluss.
-- [**POS und Kasse**](pos-kasse.md) - Bon, Zahlungsarten, TSE, Tagesabschluss.
-- [**Personal, Zeit und Lohn**](personal-lohn.md) - Zeiterfassung, Abwesenheit, Payroll, Lohn-Connector.
-- [**CRM**](crm.md) - Kontakte, Leads, Aktivitaeten.
-- [**Qualitaetssicherung**](qualitaetssicherung.md) - Proben, Labor, Charge, Reklamation.
-- [**Compliance und Meldewesen**](compliance-meldewesen.md) - Register, Jobs, PCN/UFI, UStVA.
-- [**NaWaRo**](nawaro.md) - Verträge, Anbauflächen, Mitteilungen, Streckenprüfung.
-- [**Genossenschaft**](genossenschaft.md) - Mitglieder, Geschäftsanteile.
-- [**Dokumente und Belegarchiv**](dokumente-belegarchiv.md) - QM-Dokumente, Versand, Archiv.
-- [**Release Notes**](release-notes.md) - Anwenderrelevante Aenderungen.
+- [**Einstieg**](einstieg.md) - Anmeldung, Mandantenwahl, Navigation.
+- [**Dashboard und Workflows**](dashboard-workflows.md) - Leitstand, Flow Spine, Freigaben, Prozessüberwachung, KI-Copilot. (35 Masken).
+- [**Wissensbasis und Kundenportal**](wissensbasis-kundenportal.md) - Interne Wissensdatenbank und externes Kundenportal. (20 Masken).
+- [**Ernteannahme und Waage**](annahme.md) - LKW, Waage, Qualität, Hofliste, Wiegung. (19 Masken).
+- [**Agrar-Kontrakte**](agrar-kontrakte.md) - Kontrakt, Fixierung, Erfüllung, Settlement. (23 Masken).
+- [**Agrar-Warenwirtschaft**](agrar-warenwirtschaft.md) - PSM, Düngung, Saatgut, Feldbuch, Tierhaltung, Agrar-Stammdaten. (88 Masken).
+- [**Verkauf (Auftrag bis Rechnung)**](verkauf.md) - O2C-Belegkette, Angebot, Auftrag, Lieferschein, Rechnung. (57 Masken).
+- [**Einkauf und Beschaffung**](einkauf.md) - P2P, Bestellung, Wareneingang, Lieferantenbewertung, Bestell-Inbox. (78 Masken).
+- [**Vertreter und Provisionen**](vertreter-provisionen.md) - Außendienst, Vertreterstamm, Provisionsabrechnung. (2 Masken).
+- [**CRM und Marketing**](crm.md) - Kontakte, Leads, Kampagnen, DSGVO, KIM, Termine. (107 Masken).
+- [**Preise und Kalkulation**](preise-kalkulation.md) - Preislisten, Kalkulation, Konditionen. (7 Masken).
+- [**Artikel und Stammdaten**](artikel-stammdaten.md) - Artikelstamm, Chargen, Warengruppen, Etikettendruck. (18 Masken).
+- [**Lager und Bestände**](lager.md) - Bestand, Bewegungen, Inventur, Silo, Verladung, Rückverfolgbarkeit. (33 Masken).
+- [**Futtermittel und Produktion**](futtermittel-produktion.md) - Rezeptur, Produktionsauftrag, Chargen. (43 Masken).
+- [**Qualitätssicherung**](qualitaetssicherung.md) - Proben, Labor, QS-Leitstand, Reklamation. (14 Masken).
+- [**Compliance und Meldewesen**](compliance-meldewesen.md) - Register, Meldungen, GoBD, PCN/UFI, ESG, EUDR. (35 Masken).
+- [**NaWaRo**](nawaro.md) - Verträge, Anbauflächen, Mitteilungen. (4 Masken).
+- [**Streckengeschäft**](strecke-handelsgeschaeft.md) - Streckenhandel, Dokumente, Abrechnung. (12 Masken).
+- [**Logistik und Touren**](logistik.md) - Disposition, Touren, Frachtbriefe, Fahrer. (16 Masken).
+- [**Fuhrpark**](fuhrpark.md) - Fahrzeuge, Wartung, Kosten, Tankstelle. (14 Masken).
+- [**Finanzbuchhaltung**](finanzbuchhaltung.md) - Hauptbuch, OP, Zahlungen, Abschluss, Bank, Mahnwesen, Schnittstellen. (121 Masken).
+- [**Controlling und Kostenrechnung**](controlling-kostenrechnung.md) - Kostenstellen, Umlagen, Auswertungen. (7 Masken).
+- [**POS und Kasse**](pos-kasse.md) - Bon, Zahlungsarten, Tagesabschluss. (17 Masken).
+- [**Personal, Zeit und Lohn**](personal-lohn.md) - Zeiterfassung, Abwesenheit, Schichtplan, Lohnabrechnung. (18 Masken).
+- [**Genossenschaft**](genossenschaft.md) - Mitglieder, Geschäftsanteile, Dividende. (2 Masken).
+- [**Dokumente und Belegarchiv**](dokumente-belegarchiv.md) - DMS, Versand, Archivierung. (5 Masken).
+- [**Reports und Analytics**](reports-analytics.md) - Standardreports, KPI-Dashboards, Statistik. (15 Masken).
+- [**Service und Support**](service-support.md) - Servicefälle, Projekte, Schäden, Wartung, Versicherungen, Energie. (24 Masken).
+- [**Release Notes**](release-notes.md) - Anwenderrelevante Änderungen.
 - [**Glossar**](glossar.md) - Fachbegriffe Landhandel/Agrar.
 - [**In-App-Hilfe**](in-app-hilfe.md) - kontextsensitive Deep-Links.
 

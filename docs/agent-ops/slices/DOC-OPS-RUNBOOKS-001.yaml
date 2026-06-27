@@ -1,0 +1,70 @@
+slice_id: DOC-OPS-RUNBOOKS-001
+title: "Ops/Runbook-Dateien in MkDocs integrieren (Wave 18)"
+owner: Claude Code
+status: abgeschlossen
+wave: 18
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Vier bisher ausgeschlossene Operations-/Runbook-Seiten in die kuratierte
+  MkDocs-Struktur aufnehmen und Build-Blocker im Dokumentations-Tooling
+  beseitigen.
+file_ownership:
+  - docs/runbooks/ALERTS.md
+  - docs/runbooks/DISASTER-RECOVERY.md
+  - docs/operations/production-readiness-runbook.md
+  - docs/operations/dependency-and-compatibility-maintenance.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-OPS-RUNBOOKS-001.yaml
+acceptance:
+  - Alle vier Runbook-/Operations-Seiten haben gueltiges Frontmatter.
+  - MkDocs-Navigation enthaelt die Seiten im Admin-/Betriebsbereich.
+  - MkDocs-Build laeuft ohne die vorherigen Pygments-/Jinja-Blocker.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Runbooks koennen operative Gates beschreiben, duerfen aber keine externen Freigaben als erledigt darstellen.
+external_gates:
+  - Betriebsfreigabe der beschriebenen Runbooks im Produktivbetrieb.
+description: >-
+  Vier bisher vom MkDocs-Build ausgeschlossene Operations-/Runbook-Dateien
+  wurden integriert, mit Frontmatter versehen und im Admin-Bereich der Doku
+  verlinkt. Ausserdem wurden zwei MkDocs-Build-Bugs behoben.
+scope:
+  files_modified:
+    - docs/runbooks/ALERTS.md
+    - docs/runbooks/DISASTER-RECOVERY.md
+    - docs/operations/production-readiness-runbook.md
+    - docs/operations/dependency-and-compatibility-maintenance.md
+    - mkdocs.yml
+changes:
+  - Frontmatter zu allen vier Dateien hinzugefuegt.
+  - exclude_docs-Ausnahmen in mkdocs.yml fuer alle vier Dateien ergaenzt.
+  - Neuer Runbooks-Abschnitt unter Admin & Betrieb in der Navigation ergaenzt.
+  - anchor_linenums auf false gesetzt.
+  - auto_title true in pymdownx.highlight ergaenzt.
+  - Jinja2-Expressions in ALERTS.md escaped.
+build_result: "Documentation built in 22.02 seconds - 0 Errors"
+ai_harness:
+  fachlicher_vertrag: >-
+    Betriebs- und Bereitschaftsrunbooks muessen fuer Admins im
+    Benutzerhandbuch-/Betriebsportal auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf MkDocs-/Markdown-Struktur und Build-Konfiguration
+    begrenzt; keine Runtime-Aenderung.
+  daten_vertrag: >-
+    Runbooks enthalten nur Betriebsanweisungen und keine produktiven Secrets
+    oder Echtdaten.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance sichern Frontmatter, Navigation und
+    Renderbarkeit ab.
+  security_vertrag: >-
+    Beispiele duerfen keine Tokens, Zertifikate oder produktiven
+    Infrastrukturdetails offenlegen.
+  betriebs_vertrag: >-
+    Runbooks beschreiben Betriebsvorgehen; reale Betriebsfreigaben bleiben
+    externe Gates.
+  dokumentations_vertrag: >-
+    MkDocs-Nav, Slice-YAML und Workboard muessen die integrierten Runbooks
+    gemeinsam referenzieren.

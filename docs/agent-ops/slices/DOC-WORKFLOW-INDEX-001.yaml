@@ -1,0 +1,60 @@
+slice_id: DOC-WORKFLOW-INDEX-001
+title: "Kuratierter Workflow-Index fuer Entwickler (Wave 19)"
+owner: Claude Code
+status: abgeschlossen
+wave: 19
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Alle Workflow-Dokumente unter docs/workflows/ in einem kuratierten Entwickler-
+  Index auffindbar machen, ohne die ausgeschlossenen Quelldokumente direkt in
+  die MkDocs-Navigation zu ziehen.
+file_ownership:
+  - docs/entwickler/workflow-index.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-WORKFLOW-INDEX-001.yaml
+acceptance:
+  - Workflow-Index enthaelt alle aktuell gefundenen Workflow-Dokumente.
+  - Index ist in der Entwickler-Navigation eingebunden.
+  - Quelldokumente unter docs/workflows/ bleiben vom kuratierten Build ausgeschlossen.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Index kann veralten, wenn neue Workflow-Dateien ohne Nachziehen angelegt werden.
+external_gates:
+  - Keine externen Gates; reine Dokumentationsauffindbarkeit.
+description: >-
+  161 Workflow-Dokumente in docs/workflows/ katalogisiert und als kuratierten
+  Entwickler-Index in docs/entwickler/workflow-index.md veroeffentlicht.
+  Kategorien: Geschaeftsprozess, Domain-Deepening, Process Kernel, Security,
+  NeuroCore, Superglue-Integration und Sonstiges.
+scope:
+  files_created:
+    - docs/entwickler/workflow-index.md
+  files_modified:
+    - mkdocs.yml
+changes:
+  - docs/entwickler/workflow-index.md mit vollstaendiger Tabelle aller 161 Workflow-Dokumente erstellt.
+  - mkdocs.yml Workflow-Index unter Entwickler-Nav ergaenzt.
+build_result: "Documentation built in 39.59 seconds - 0 Errors"
+ai_harness:
+  fachlicher_vertrag: >-
+    Entwickler und Agenten sollen vorhandene Workflow-Analysen schnell finden,
+    bevor neue Domaenenarbeit begonnen wird.
+  architektur_vertrag: >-
+    Der Index ist eine kuratierte MkDocs-Seite; die Roh-Workflow-Dateien bleiben
+    aus dem Build ausgeschlossen.
+  daten_vertrag: >-
+    Quelle ist das Dateiinventar unter docs/workflows/ mit Titel, Kategorie und
+    Kurzbeschreibung; keine Runtime-Daten.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance pruefen Index, Navigation und Frontmatter.
+  security_vertrag: >-
+    Der Index darf keine Secrets oder nicht freigegebenen Betriebsdaten
+    veroeffentlichen.
+  betriebs_vertrag: >-
+    Bei neuen Workflow-Dokumenten muss der Index im naechsten Doku-Slice
+    aktualisiert werden.
+  dokumentations_vertrag: >-
+    Workflow-Index, mkdocs.yml, Workboard und Slice-YAML bleiben synchron.

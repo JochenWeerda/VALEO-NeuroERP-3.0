@@ -1,0 +1,64 @@
+slice_id: WF-COCKPIT-RETRY-001
+title: "WF-Cockpit: Kontrollierter Retry + Kompensationspfad"
+owner: Claude Code
+status: abgeschlossen
+priority: P2
+wave: 15
+created: "2026-06-26"
+closed: "2026-06-26"
+goal: >-
+  Fehlgeschlagene oder extern blockierte Workflow-Instanzen kontrolliert erneut
+  starten oder als kompensiert abschliessen koennen.
+file_ownership:
+  - app/services/wf_cockpit_persist_service.py
+  - app/api/v1/endpoints/wf_cockpit_persist.py
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/WF-COCKPIT-RETRY-001.yaml
+acceptance:
+  - Retry setzt FAILED/blocked Instanzen auf retry_pending und schreibt ein Event.
+  - Compensation markiert Instanzen als compensated und schreibt ein Event.
+  - Endpoints liefern 200 fuer existente Instanzen und 404 fuer unbekannte IDs.
+tests:
+  - pytest tests/test_wf_cockpit_persist_api.py -q
+risks:
+  - Retry darf keine fachlichen Doppelbuchungen erzeugen; Domain-Aktionen bleiben idempotent.
+external_gates:
+  - Fachliche Freigabe von Kompensationsprozessen je Prozesskette.
+problem: >-
+  VALEO-WF-COCKPIT-001 nannte als offene Folgeslices kontrollierter Retry mit
+  Kompensationspfad. Es gab keine API-Endpoints, um FAILED/blocked
+  Prozessinstanzen neu zu starten oder als kompensiert zu markieren.
+solution: >-
+  WorkflowCockpitPersistService erhielt retry_instance() und
+  compensate_instance(); /workflow/cockpit-db stellt Retry- und
+  Compensation-Endpunkte bereit.
+endpoints_created:
+  - "POST /api/v1/workflow/cockpit-db/instances/{id}/retry"
+  - "POST /api/v1/workflow/cockpit-db/instances/{id}/compensate"
+files_changed:
+  - app/services/wf_cockpit_persist_service.py
+  - app/api/v1/endpoints/wf_cockpit_persist.py
+  - docs/agent-ops/slices/WF-COCKPIT-RETRY-001.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+ai_harness:
+  fachlicher_vertrag: >-
+    Operatoren koennen fehlgeschlagene Workflow-Instanzen kontrolliert neu
+    starten oder fachlich kompensieren.
+  architektur_vertrag: >-
+    Retry und Kompensation werden im persistenten Workflow-Cockpit-Service und
+    dedizierten API-Aktionen gekapselt.
+  daten_vertrag: >-
+    Statuswechsel werden als Events protokolliert; bestehende Instanzdaten
+    bleiben nachvollziehbar.
+  test_vertrag: >-
+    API-/Service-Tests sichern erlaubte Statuswechsel, 404-Faelle und
+    Event-Schreibung.
+  security_vertrag: >-
+    Keine Secrets; Zugriff und Rollenpruefung bleiben Teil des Cockpit-/API-
+    Betriebsmodells.
+  betriebs_vertrag: >-
+    Domain-spezifische Kompensationsfreigaben bleiben Prozessverantwortung und
+    sind nicht durch den generischen Endpoint ersetzt.
+  dokumentations_vertrag: >-
+    Open-Gaps und Slice-YAML dokumentieren den geschlossenen Retry-/Compensation-
+    Restpunkt.

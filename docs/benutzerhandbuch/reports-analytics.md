@@ -1,5 +1,5 @@
 ---
-title: Agrar-Kontrakte
+title: Reports und Analytics
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,13 +8,13 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# Agrar-Kontrakte
+# Reports und Analytics
 
-Kontrakt, Fixierung, Erfüllung, Settlement.
+Standardreports, KPI-Dashboards.
 
 ## Ziel
 
-Sie arbeiten sicher in allen Masken des Bereichs **Agrar-Kontrakte** — von der Navigation
+Sie arbeiten sicher in allen Masken des Bereichs **Reports und Analytics** — von der Navigation
 bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
@@ -25,46 +25,38 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **23** App-Routen
+Vollständige Abdeckung: **15** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Contracts | `/contracts` | `@/pages/contracts-v2` |
-| Contracts V2 | `/contracts-v2` | `@/pages/contracts-v2` |
-| Kontrakte | `/kontrakte` | `@/pages/kontrakte/LstKontraktUebersicht` |
-| :Id | `/kontrakte/:id` | `@/pages/kontrakte/FrmKontraktDetail` |
-| Frmkontraktdetail | `/kontrakte/FrmKontraktDetail` | `@/pages/kontrakte/FrmKontraktDetail` |
-| Frmkontraktprotokoll | `/kontrakte/FrmKontraktProtokoll` | `@/pages/kontrakte/FrmKontraktProtokoll` |
-| Kontraktalarmdashboard | `/kontrakte/KontraktAlarmDashboard` | `@/pages/kontrakte/KontraktAlarmDashboard` |
-| Kontraktpositionsmonitor | `/kontrakte/KontraktPositionsmonitor` | `@/pages/kontrakte/KontraktPositionsmonitor` |
-| Lstkontraktuebersicht | `/kontrakte/LstKontraktUebersicht` | `@/pages/kontrakte/LstKontraktUebersicht` |
-| Alarme | `/kontrakte/alarme` | `@/pages/kontrakte/KontraktAlarmDashboard` |
-| Dlgauswahlverkaufkontrakte | `/kontrakte/dlgauswahlverkaufkontrakte` | `@/pages/kontrakte/dlgauswahlverkaufkontrakte` |
-| Dlgkontraktumsaetze | `/kontrakte/dlgkontraktumsaetze` | `@/pages/kontrakte/dlgkontraktumsaetze` |
-| Dlgmatifpreisfixierung | `/kontrakte/dlgmatifpreisfixierung` | `@/pages/kontrakte/dlgmatifpreisfixierung` |
-| Kontrakt Alarm Dashboard | `/kontrakte/kontrakt-alarm-dashboard` | `@/pages/kontrakte/KontraktAlarmDashboard` |
-| Kontrakt Positionsmonitor | `/kontrakte/kontrakt-positionsmonitor` | `@/pages/kontrakte/KontraktPositionsmonitor` |
-| Kontrakt Uebersicht | `/kontrakte/kontrakt-uebersicht` | `@/pages/kontrakte/LstKontraktUebersicht` |
-| Kontraktklassen | `/kontrakte/kontraktklassen` | `@/pages/kontrakte/kontraktklassen` |
-| Mengenzeitraeume | `/kontrakte/mengenzeitraeume` | `@/pages/kontrakte/mengenzeitraeume` |
-| Neu | `/kontrakte/neu` | `@/pages/kontrakte/FrmKontraktDetail` |
-| Positionen | `/kontrakte/positionen` | `@/pages/kontrakte/KontraktPositionsmonitor` |
-| :Id | `/vertrag/:id` | `@/pages/kontrakte/FrmKontraktDetail` |
-| Neu | `/vertrag/neu` | `@/pages/kontrakte/FrmKontraktDetail` |
-| Rahmenvertraege | `/vertrag/rahmenvertraege` | `@/pages/vertrag/rahmenvertraege` |
+| Analytics | `/analytics` | `@/pages/analytics` |
+| Analyticsdashboardcharts | `/analytics/analyticsdashboardcharts` | `@/pages/analytics/analyticsdashboardcharts` |
+| Inventorybarchart | `/analytics/charts/inventorybarchart` | `@/pages/analytics/charts/inventorybarchart` |
+| Salestrendlinechart | `/analytics/charts/salestrendlinechart` | `@/pages/analytics/charts/salestrendlinechart` |
+| Reports | `/reports` | `@/pages/reports` |
+| Reportsdashboardcharts | `/reports/ReportsDashboardCharts` | `@/pages/reports/ReportsDashboardCharts` |
+| Customeranalyticscharts | `/reports/charts/customeranalyticscharts` | `@/pages/reports/charts/customeranalyticscharts` |
+| Financialanalyticscharts | `/reports/charts/financialanalyticscharts` | `@/pages/reports/charts/financialanalyticscharts` |
+| Productanalyticscharts | `/reports/charts/productanalyticscharts` | `@/pages/reports/charts/productanalyticscharts` |
+| Salesperformancecharts | `/reports/charts/salesperformancecharts` | `@/pages/reports/charts/salesperformancecharts` |
+| Trendanalyticscharts | `/reports/charts/trendanalyticscharts` | `@/pages/reports/charts/trendanalyticscharts` |
+| Deckungsbeitrag | `/reports/deckungsbeitrag` | `@/pages/reports/deckungsbeitrag` |
+| Lagerbestand | `/reports/lagerbestand` | `@/pages/reports/lagerbestand` |
+| Umsatz | `/reports/umsatz` | `@/pages/reports/umsatz` |
+| Bewegungen | `/statistik/bewegungen` | `@/pages/statistik/bewegungen` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Contracts
+### Analytics
 
-**Route:** `/contracts` · **Modul:** `@/pages/contracts-v2`
+**Route:** `/analytics` · **Modul:** `@/pages/analytics`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Contracts** öffnen (`/contracts`).
+1. Sidebar oder Suche: **Analytics** öffnen (`/analytics`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -79,13 +71,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Contracts V2
+### Analyticsdashboardcharts
 
-**Route:** `/contracts-v2` · **Modul:** `@/pages/contracts-v2`
+**Route:** `/analytics/analyticsdashboardcharts` · **Modul:** `@/pages/analytics/analyticsdashboardcharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Contracts V2** öffnen (`/contracts-v2`).
+1. Sidebar oder Suche: **Analyticsdashboardcharts** öffnen (`/analytics/analyticsdashboardcharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -100,13 +92,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kontrakte
+### Inventorybarchart
 
-**Route:** `/kontrakte` · **Modul:** `@/pages/kontrakte/LstKontraktUebersicht`
+**Route:** `/analytics/charts/inventorybarchart` · **Modul:** `@/pages/analytics/charts/inventorybarchart`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kontrakte** öffnen (`/kontrakte`).
+1. Sidebar oder Suche: **Inventorybarchart** öffnen (`/analytics/charts/inventorybarchart`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -121,13 +113,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### :Id
+### Salestrendlinechart
 
-**Route:** `/kontrakte/:id` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
+**Route:** `/analytics/charts/salestrendlinechart` · **Modul:** `@/pages/analytics/charts/salestrendlinechart`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/kontrakte/:id`).
+1. Sidebar oder Suche: **Salestrendlinechart** öffnen (`/analytics/charts/salestrendlinechart`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -142,13 +134,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Frmkontraktdetail
+### Reports
 
-**Route:** `/kontrakte/FrmKontraktDetail` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
+**Route:** `/reports` · **Modul:** `@/pages/reports`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Frmkontraktdetail** öffnen (`/kontrakte/FrmKontraktDetail`).
+1. Sidebar oder Suche: **Reports** öffnen (`/reports`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -163,13 +155,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Frmkontraktprotokoll
+### Reportsdashboardcharts
 
-**Route:** `/kontrakte/FrmKontraktProtokoll` · **Modul:** `@/pages/kontrakte/FrmKontraktProtokoll`
+**Route:** `/reports/ReportsDashboardCharts` · **Modul:** `@/pages/reports/ReportsDashboardCharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Frmkontraktprotokoll** öffnen (`/kontrakte/FrmKontraktProtokoll`).
+1. Sidebar oder Suche: **Reportsdashboardcharts** öffnen (`/reports/ReportsDashboardCharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -184,13 +176,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kontraktalarmdashboard
+### Customeranalyticscharts
 
-**Route:** `/kontrakte/KontraktAlarmDashboard` · **Modul:** `@/pages/kontrakte/KontraktAlarmDashboard`
+**Route:** `/reports/charts/customeranalyticscharts` · **Modul:** `@/pages/reports/charts/customeranalyticscharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kontraktalarmdashboard** öffnen (`/kontrakte/KontraktAlarmDashboard`).
+1. Sidebar oder Suche: **Customeranalyticscharts** öffnen (`/reports/charts/customeranalyticscharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -205,13 +197,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kontraktpositionsmonitor
+### Financialanalyticscharts
 
-**Route:** `/kontrakte/KontraktPositionsmonitor` · **Modul:** `@/pages/kontrakte/KontraktPositionsmonitor`
+**Route:** `/reports/charts/financialanalyticscharts` · **Modul:** `@/pages/reports/charts/financialanalyticscharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kontraktpositionsmonitor** öffnen (`/kontrakte/KontraktPositionsmonitor`).
+1. Sidebar oder Suche: **Financialanalyticscharts** öffnen (`/reports/charts/financialanalyticscharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -226,13 +218,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Lstkontraktuebersicht
+### Productanalyticscharts
 
-**Route:** `/kontrakte/LstKontraktUebersicht` · **Modul:** `@/pages/kontrakte/LstKontraktUebersicht`
+**Route:** `/reports/charts/productanalyticscharts` · **Modul:** `@/pages/reports/charts/productanalyticscharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Lstkontraktuebersicht** öffnen (`/kontrakte/LstKontraktUebersicht`).
+1. Sidebar oder Suche: **Productanalyticscharts** öffnen (`/reports/charts/productanalyticscharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -247,13 +239,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Alarme
+### Salesperformancecharts
 
-**Route:** `/kontrakte/alarme` · **Modul:** `@/pages/kontrakte/KontraktAlarmDashboard`
+**Route:** `/reports/charts/salesperformancecharts` · **Modul:** `@/pages/reports/charts/salesperformancecharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Alarme** öffnen (`/kontrakte/alarme`).
+1. Sidebar oder Suche: **Salesperformancecharts** öffnen (`/reports/charts/salesperformancecharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -268,13 +260,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Dlgauswahlverkaufkontrakte
+### Trendanalyticscharts
 
-**Route:** `/kontrakte/dlgauswahlverkaufkontrakte` · **Modul:** `@/pages/kontrakte/dlgauswahlverkaufkontrakte`
+**Route:** `/reports/charts/trendanalyticscharts` · **Modul:** `@/pages/reports/charts/trendanalyticscharts`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Dlgauswahlverkaufkontrakte** öffnen (`/kontrakte/dlgauswahlverkaufkontrakte`).
+1. Sidebar oder Suche: **Trendanalyticscharts** öffnen (`/reports/charts/trendanalyticscharts`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -289,13 +281,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Dlgkontraktumsaetze
+### Deckungsbeitrag
 
-**Route:** `/kontrakte/dlgkontraktumsaetze` · **Modul:** `@/pages/kontrakte/dlgkontraktumsaetze`
+**Route:** `/reports/deckungsbeitrag` · **Modul:** `@/pages/reports/deckungsbeitrag`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Dlgkontraktumsaetze** öffnen (`/kontrakte/dlgkontraktumsaetze`).
+1. Sidebar oder Suche: **Deckungsbeitrag** öffnen (`/reports/deckungsbeitrag`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -310,13 +302,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Dlgmatifpreisfixierung
+### Lagerbestand
 
-**Route:** `/kontrakte/dlgmatifpreisfixierung` · **Modul:** `@/pages/kontrakte/dlgmatifpreisfixierung`
+**Route:** `/reports/lagerbestand` · **Modul:** `@/pages/reports/lagerbestand`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Dlgmatifpreisfixierung** öffnen (`/kontrakte/dlgmatifpreisfixierung`).
+1. Sidebar oder Suche: **Lagerbestand** öffnen (`/reports/lagerbestand`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -331,13 +323,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kontrakt Alarm Dashboard
+### Umsatz
 
-**Route:** `/kontrakte/kontrakt-alarm-dashboard` · **Modul:** `@/pages/kontrakte/KontraktAlarmDashboard`
+**Route:** `/reports/umsatz` · **Modul:** `@/pages/reports/umsatz`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kontrakt Alarm Dashboard** öffnen (`/kontrakte/kontrakt-alarm-dashboard`).
+1. Sidebar oder Suche: **Umsatz** öffnen (`/reports/umsatz`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -352,181 +344,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kontrakt Positionsmonitor
+### Bewegungen
 
-**Route:** `/kontrakte/kontrakt-positionsmonitor` · **Modul:** `@/pages/kontrakte/KontraktPositionsmonitor`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kontrakt Positionsmonitor** öffnen (`/kontrakte/kontrakt-positionsmonitor`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kontrakt Uebersicht
-
-**Route:** `/kontrakte/kontrakt-uebersicht` · **Modul:** `@/pages/kontrakte/LstKontraktUebersicht`
+**Route:** `/statistik/bewegungen` · **Modul:** `@/pages/statistik/bewegungen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Kontrakt Uebersicht** öffnen (`/kontrakte/kontrakt-uebersicht`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Kontraktklassen
-
-**Route:** `/kontrakte/kontraktklassen` · **Modul:** `@/pages/kontrakte/kontraktklassen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kontraktklassen** öffnen (`/kontrakte/kontraktklassen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Mengenzeitraeume
-
-**Route:** `/kontrakte/mengenzeitraeume` · **Modul:** `@/pages/kontrakte/mengenzeitraeume`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Mengenzeitraeume** öffnen (`/kontrakte/mengenzeitraeume`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Neu
-
-**Route:** `/kontrakte/neu` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Neu** öffnen (`/kontrakte/neu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Positionen
-
-**Route:** `/kontrakte/positionen` · **Modul:** `@/pages/kontrakte/KontraktPositionsmonitor`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Positionen** öffnen (`/kontrakte/positionen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### :Id
-
-**Route:** `/vertrag/:id` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **:Id** öffnen (`/vertrag/:id`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Neu
-
-**Route:** `/vertrag/neu` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Neu** öffnen (`/vertrag/neu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Rahmenvertraege
-
-**Route:** `/vertrag/rahmenvertraege` · **Modul:** `@/pages/vertrag/rahmenvertraege`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Rahmenvertraege** öffnen (`/vertrag/rahmenvertraege`).
+1. Sidebar oder Suche: **Bewegungen** öffnen (`/statistik/bewegungen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
