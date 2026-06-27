@@ -1,3 +1,14 @@
+---
+title: Hersteller-Recherche Agrar-Lager / Silo / Mischung
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Sammelliste offener Hersteller- und Schnittstellen-Recherche fuer Agrar-Lager, Silo und Mischungsanlagen (Stand 2026-06-12, WM-AGRI-SILO-001).
+---
+
 # Offene Recherche: Hersteller & Schnittstellen (Agrar-Lager / Silo / Mischung)
 
 **Status:** Sammelliste â€” **keine** behaupteten Integrationen ohne belastbare Herstellerdokumentation im Projekt.
