@@ -263,6 +263,7 @@ Repo-seitige Vorbereitungen (Scripts, Templates, Gates) sind vollstaendig:
 - `scripts/check_integration_bootstrap.py --probe-plan` zeigt Live-Pruefpfade
 - `scripts/check_integration_bootstrap.py --strict-live` blockiert bei nicht-bereiten Probes
 - `config/fibu_cutover_mapping.template.yaml` + `scripts/check_fibu_cutover_mapping.py --strict`
+- `.github/workflows/load-test.yml` fuehrt den Erntepeak-Lasttest nur aus, wenn `STAGING_URL`, `API_DEV_TOKEN` und DNS-Aufloesung im Runner vorhanden sind; andernfalls wird das externe Gate neutral dokumentiert statt als Produktfehler gemeldet.
 
 ---
 

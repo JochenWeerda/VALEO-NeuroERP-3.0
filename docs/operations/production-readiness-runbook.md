@@ -191,6 +191,7 @@ Produktionsfreigabe dokumentiert vorliegen.
 | Monitoring-Alertmanager-URL und Grafana-Credentials setzen | Ops | `monitoring/prometheus/alerts-event-bus.yml` |
 | Erstmaligen Backup-/Restore-Drill durchfuehren und Ergebnis dokumentieren | Ops | Runbook Abschnitt "Rollback und Notfall" |
 | Wochentlichen Restore-Test als Produktions-Gate aktivieren | Ops | `.github/workflows/release-gates.yml` |
+| Staging-URL, DNS und API-Token fuer Erntepeak-Lasttest bereitstellen | Ops | `.github/workflows/load-test.yml`, `tests/load/harvest-peak.js` |
 
 ### Integration und Schnittstellen
 
