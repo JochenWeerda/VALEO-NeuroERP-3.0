@@ -3,10 +3,10 @@ title: VALEO Admin Suite Roadmap 2026-05-30
 type: reference
 audience: [entwickler, product]
 owner: Claude Code
-status: teilweise-umgesetzt
+status: umgesetzt
 last_reviewed: 2026-06-27
 version: 3.0.0
-description: "TEILWEISE UMGESETZT (Konsolidierung 2026-06-26): Readiness-, Compliance-, Diagnostics-, Security- und Operations-Vertraege sind umgesetzt. Verbleibende offene Punkte nur noch gueltig wenn in Workboard oder aktivem Slice referenziert."
+description: "UMGESETZT (Konsolidierung 2026-06-27): Repo-seitige MVP-Kette ADMIN-SUITE-001 bis ADMIN-SUITE-011 vollstaendig umgesetzt. Operative Go-Live-Gates (UAT, Restore-Drills, Live-Credentials) sind Betriebsverantwortung — gefuehrt im Production-Readiness-Runbook."
 ---
 
 # VALEO Admin Suite Roadmap
