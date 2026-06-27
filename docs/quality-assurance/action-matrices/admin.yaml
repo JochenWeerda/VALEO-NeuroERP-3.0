@@ -11,5 +11,47 @@ actions:
     e2e_tag: "-"
     status: gap
 
+  - action_id: admin-002
+    label: "Executive Dashboard"
+    route_prefix: "management/executive-dashboard"
+    api_method: "GET /management/executive-dashboard"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: admin-003
+    label: "Live-Monitoring"
+    route_prefix: "system/live-monitor"
+    api_method: "GET /system/live-monitor"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: admin-004
+    label: "Artikel-Stammdaten"
+    route_prefix: "stammdaten/artikel"
+    api_method: "GET /stammdaten/artikel"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: admin-005
+    label: "Mobile Scanner"
+    route_prefix: "mobile/scanner"
+    api_method: "GET /mobile/scanner"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: admin-006
+    label: "Public Verify"
+    route_prefix: "public/verify"
+    api_method: "GET /public/verify"
+    e2e_tag: "-"
+    status: gap
+
+  - action_id: admin-007
+    label: "Firmeneinrichtung"
+    route_prefix: "setup/firma"
+    api_method: "GET /setup/firma"
+    e2e_tag: "-"
+    status: gap
+
 open_gaps:
   - "Admin-Routen: bewusst Admin-Handbuch statt Endnutzer-E2E; Matrix-Eintrag fuer Top-50-Coverage"
