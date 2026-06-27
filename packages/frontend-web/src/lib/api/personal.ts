@@ -996,6 +996,28 @@ export function useWorkPlan(filters: { periodFrom: string; periodTo: string; hol
   })
 }
 
+export type WorkPlanAssignmentInput = {
+  datum: string
+  employeeRef: string
+  label: string
+  startTime?: string | null
+  endTime?: string | null
+  roleCode?: string | null
+  notes?: string | null
+}
+
+export function useCreateWorkPlanAssignment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: WorkPlanAssignmentInput) =>
+      (await apiClient.post<WorkPlanAssignment>('/api/v1/personal/work-plan/assignments', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.workPlan() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
 export function useHrmReadiness() {
   return useQuery({
     queryKey: personalKeys.hrmReadiness(),
