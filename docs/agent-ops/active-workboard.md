@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-ARCH-SURFACE-002 - Weitere Architekturdokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — DMS-Integration, AI-Dev-Standard, Architecture-Decision-Map und Agrar-Event-Contracts mit Frontmatter versehen und im Architektur-Abschnitt veroeffentlicht.
+**Ziel:** Integrations- und Standard-Architekturdokumente fuer Entwickler und Agenten im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/architecture/dms-paperless-integration.md`, `ai-assisted-enterprise-development-standard.md`, `architecture-decision-map.md`, `agrar-event-hook-contracts.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ARCH-SURFACE-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `docs-governance-check` gruen; `mkdocs build` gruen (0 Errors, 25.53 s).
+
 ## DOC-ARCH-SURFACE-001 - Schluessel-Architekturdokumente in MkDocs integrieren
 
 **Von:** Claude Code

@@ -1,3 +1,14 @@
+---
+title: DMS Integration — Paperless-ngx als Slave-Backend
+type: explanation
+audience: [entwickler, betrieb]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Architektur der Paperless-ngx-Integration als DMS-Backend — Dokumentenmanagement, Belegarchiv, API-Kontrakt.
+---
+
 # DMS Integration: Paperless-ngx als Slave-Backend
 
 ## 📋 Übersicht
@@ -74,7 +85,7 @@ DOCTYPE:{document_type}
 
 Beispiele für `business_object_type`:
 - `ORDER` - Auftrag
-- `INVOICE` - Rechnung  
+- `INVOICE` - Rechnung
 - `DELIVERY_NOTE` - Lieferschein
 - `OFFER` - Angebot
 - `CONTRACT` - Vertrag
@@ -203,14 +214,14 @@ sequenceDiagram
 
     Scanner->>Paperless: Dokument ablegen (Inbox)
     Paperless->>Paperless: OCR + Tagging
-    
+
     User->>NeuroERP: "Unzugeordnete Dokumente"
     NeuroERP->>DMS-Adapter: GET /dms/inbox
     DMS-Adapter->>Paperless: API: Dokumente ohne OBJ-Tag
     Paperless-->>DMS-Adapter: Liste
     DMS-Adapter-->>NeuroERP: Inbox-Liste
     NeuroERP-->>User: Dokumente anzeigen
-    
+
     User->>NeuroERP: "Verknüpfen mit Rechnung 4711"
     NeuroERP->>DMS-Adapter: POST /dms/documents/{id}/link
     DMS-Adapter->>Paperless: Tags setzen
@@ -272,7 +283,7 @@ paperless-tenant-b.neuroerp.local
 ```yaml
 services:
   # ... bestehende Services ...
-  
+
   paperless-redis:
     image: redis:7-alpine
     restart: unless-stopped

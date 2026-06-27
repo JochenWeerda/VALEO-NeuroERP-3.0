@@ -149,6 +149,10 @@ exclude_docs: |
   !/architecture/target-processes.md
   !/architecture/target-state-landhandel-erp.md
   !/architecture/tooling-quality-governance.md
+  !/architecture/dms-paperless-integration.md
+  !/architecture/ai-assisted-enterprise-development-standard.md
+  !/architecture/architecture-decision-map.md
+  !/architecture/agrar-event-hook-contracts.md
 
 nav:
   - Start: index.md
@@ -240,6 +244,10 @@ nav:
           - Zielprozesse: architecture/target-processes.md
           - Zielbild Landhandel ERP: architecture/target-state-landhandel-erp.md
           - Quality & Governance Tooling: architecture/tooling-quality-governance.md
+          - DMS / Paperless-ngx: architecture/dms-paperless-integration.md
+          - AI-Dev Standard: architecture/ai-assisted-enterprise-development-standard.md
+          - Architecture Decision Map: architecture/architecture-decision-map.md
+          - Agrar Event-Contracts: architecture/agrar-event-hook-contracts.md
       # adr-nav:begin (generated — scripts/generate_adr_nav.py; do not edit manually)
       - ADRs:
           - Index: adr/README.md
