@@ -1,0 +1,53 @@
+slice_id: DOC-UAT-CHECKLISTS-001
+title: "UAT-Domain-Checklisten in MkDocs integrieren (Wave 22)"
+owner: Claude Code
+status: abgeschlossen
+wave: 22
+created: 2026-06-27
+completed: 2026-06-27
+goal: >-
+  Fuenf UAT-Abnahme-Checklisten (Agrar, CRM, Finance, Inventory, Sales) fuer
+  Entwickler und QA-Teams im kuratierten Docs-Build auffindbar machen.
+file_ownership:
+  - docs/uat/checklisten/AGRAR.md
+  - docs/uat/checklisten/CRM.md
+  - docs/uat/checklisten/FINANCE.md
+  - docs/uat/checklisten/INVENTORY.md
+  - docs/uat/checklisten/SALES.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-UAT-CHECKLISTS-001.yaml
+acceptance:
+  - Alle fuenf UAT-Checklisten haben gueltiges Frontmatter.
+  - UAT-Checklisten sind in der Entwickler-Navigation unter UAT Checklisten eingebunden.
+  - MkDocs-Build laeuft fehlerfrei.
+tests:
+  - mkdocs build
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Checklisten koennen veralten, wenn neue UI-Seiten ohne Nachziehen ergaenzt werden.
+external_gates:
+  - Keine externen Gates; reine Dokumentationsauffindbarkeit.
+ai_harness:
+  fachlicher_vertrag: >-
+    UAT-Checklisten beschreiben die faehigkeitsrelevanten Abnahmekriterien fuer
+    Agrar, CRM, Finance, Inventory und Sales; sie muessen fuer QA und Entwickler
+    auffindbar sein.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf MkDocs-/Markdown-Struktur begrenzt; keine
+    Runtime-Aenderung.
+  daten_vertrag: >-
+    UAT-Checklisten enthalten Sichtpruef- und CRUD-Szenarien; keine produktiven
+    Daten oder Secrets.
+  test_vertrag: >-
+    MkDocs-Build und Docs-Governance pruefen Frontmatter, Navigation und
+    Renderbarkeit ab.
+  security_vertrag: >-
+    Checklisten duerfen keine produktiven Credentials, Endpoints oder
+    Mandanten-spezifischen Daten enthalten.
+  betriebs_vertrag: >-
+    Neue UAT-Szenarien muessen in den Checklisten nachgepflegt werden,
+    wenn Produktionsfunktionen hinzukommen.
+  dokumentations_vertrag: >-
+    MkDocs-Nav, Slice-YAML und Workboard muessen die UAT-Checklisten
+    gemeinsam referenzieren.
+build_result: "Documentation built in 26.19 seconds - 0 Errors"

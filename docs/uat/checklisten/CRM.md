@@ -1,3 +1,14 @@
+---
+title: UAT Checkliste — CRM Domain
+type: reference
+audience: [entwickler, qa]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UAT-Abnahmekriterien fuer CRM-Domain — Kontakte, Kunden, Kampagnen, Leads.
+---
+
 # UAT Checkliste: CRM Domain
 
 ## Kontakte-Liste (`/crm/kontakte-liste`)
