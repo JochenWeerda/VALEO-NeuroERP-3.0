@@ -124,6 +124,31 @@ def upgrade() -> None:
             finished_at             TIMESTAMPTZ
         )
     """))
+    for ddl in [
+        "ALTER TABLE domain_workflow.wf_cockpit_instances ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ DEFAULT NOW()",
+        "ALTER TABLE domain_workflow.wf_cockpit_instances ADD COLUMN IF NOT EXISTS finished_at TIMESTAMPTZ",
+        "ALTER TABLE domain_workflow.wf_cockpit_instances ADD COLUMN IF NOT EXISTS active_blocker_count INTEGER DEFAULT 0",
+        "ALTER TABLE domain_workflow.wf_cockpit_instances ADD COLUMN IF NOT EXISTS replayable BOOLEAN DEFAULT FALSE",
+    ]:
+        conn.execute(text(ddl))
+    conn.execute(text("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_workflow'
+                  AND table_name = 'wf_cockpit_instances'
+                  AND column_name = 'created_at'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_workflow.wf_cockpit_instances
+                    SET started_at = COALESCE(started_at, created_at, NOW())
+                    WHERE started_at IS NULL
+                $sql$;
+            END IF;
+        END
+        $$
+    """))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_wf_cockpit_instances_tenant_status
             ON domain_workflow.wf_cockpit_instances (tenant_id, status)
@@ -167,6 +192,43 @@ def upgrade() -> None:
             resolved_by             TEXT,
             created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
+    """))
+    for ddl in [
+        "ALTER TABLE domain_workflow.wf_cockpit_blockers ADD COLUMN IF NOT EXISTS reason TEXT DEFAULT ''",
+        "ALTER TABLE domain_workflow.wf_cockpit_blockers ADD COLUMN IF NOT EXISTS context JSONB",
+        "ALTER TABLE domain_workflow.wf_cockpit_blockers ADD COLUMN IF NOT EXISTS resolved_by TEXT",
+        "ALTER TABLE domain_workflow.wf_cockpit_blockers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW()",
+    ]:
+        conn.execute(text(ddl))
+    conn.execute(text("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_workflow'
+                  AND table_name = 'wf_cockpit_blockers'
+                  AND column_name = 'message'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_workflow.wf_cockpit_blockers
+                    SET reason = COALESCE(NULLIF(reason, ''), message, '')
+                    WHERE reason IS NULL OR reason = ''
+                $sql$;
+            END IF;
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'domain_workflow'
+                  AND table_name = 'wf_cockpit_blockers'
+                  AND column_name = 'since'
+            ) THEN
+                EXECUTE $sql$
+                    UPDATE domain_workflow.wf_cockpit_blockers
+                    SET created_at = COALESCE(created_at, since, NOW())
+                    WHERE created_at IS NULL
+                $sql$;
+            END IF;
+        END
+        $$
     """))
     conn.execute(text("""
         CREATE INDEX IF NOT EXISTS ix_wf_cockpit_blockers_instance
