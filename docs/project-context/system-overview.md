@@ -1,3 +1,14 @@
+---
+title: System Overview
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Kompakter Einstieg in System, Architektur und Dokumentationslogik fuer neue Bearbeiter und AI-Agenten.
+---
+
 # System Overview
 
 ## Zweck
