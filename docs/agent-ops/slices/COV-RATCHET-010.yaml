@@ -1,0 +1,45 @@
+slice_id: COV-RATCHET-010
+title: "Quality-Gate Baseline nach realer CI-Coverage korrigieren"
+status: umgesetzt
+wave: 42
+date: 2026-06-27
+owner: Codex
+goal: >-
+  Den kritischen Backend-Coverage-Ratchet wieder als belastbares CI-Gate
+  herstellen, nachdem geschaetzte Schwellen oberhalb der real gemessenen
+  Quality-Gate-Coverage lagen.
+file_ownership:
+  - scripts/check_critical_backend_coverage.py
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/COV-RATCHET-010.yaml
+acceptance:
+  - Ratchet-Schwellen liegen nicht ueber den im Quality-Gate 28281594526 gemessenen Werten.
+  - Open-Gaps dokumentiert die betroffenen Pfade und die fachlich sinnvollen Folgevertiefungen.
+  - Quality Gate auf main laeuft nach Push wieder gruen.
+tests:
+  - python scripts/check_critical_backend_coverage.py
+  - gh run list --branch main --limit 20
+risks:
+  - Die Korrektur ersetzt keine fachliche Testvertiefung fuer schwache Pfade.
+  - Einzelne Pfade muessen in Folgeslices durch echte Tests wieder angehoben werden.
+external_gates:
+  - GitHub Actions Quality Gate
+ai_harness:
+  fachlicher_vertrag: >-
+    Coverage-Ratchets sind Mindestbaselines, keine Wunschwerte. Ein Gate darf nur
+    Werte erzwingen, die durch den aktuellen CI-Testumfang reproduzierbar sind.
+  architektur_vertrag: >-
+    Die Aenderung bleibt auf das Ratchet-Skript und die Governance-Dokumentation
+    beschraenkt; keine Produktionslogik wird geaendert.
+  daten_vertrag: >-
+    Keine Datenmodell- oder Migrationsaenderung.
+  test_vertrag: >-
+    Die naechste Quality-Gate-Ausfuehrung muss den Ratchet-Check bestehen.
+  security_vertrag: >-
+    Keine Secrets, keine externen Credentials, keine produktiven Verbindungen.
+  betriebs_vertrag: >-
+    Schwache Pfade bleiben transparent dokumentiert und koennen priorisiert durch
+    echte Tests angehoben werden.
+  dokumentations_vertrag: >-
+    Workboard und Open-Gaps enthalten Quelle, Grund und Folgeaufgaben.
