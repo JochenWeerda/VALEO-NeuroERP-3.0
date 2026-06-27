@@ -1,0 +1,36 @@
+slice_id: DOC-WORKFLOW-INDEX-001
+title: "Kuratierter Workflow-Index für Entwickler (Wave 19)"
+status: abgeschlossen
+wave: 19
+owner: Claude Code
+created: 2026-06-27
+completed: 2026-06-27
+
+description: >
+  161 Workflow-Dokumente in docs/workflows/ katalogisiert und als kuratierten
+  Entwickler-Index in docs/entwickler/workflow-index.md veröffentlicht.
+  Kategorien: Geschäftsprozess, Domain-Deepening, Process Kernel, Security (34),
+  NeuroCore (24), Superglue-Integration (56), Sonstiges.
+  Der Index ist im MkDocs-Build enthalten; die Quelldateien bleiben in
+  docs/workflows/ (weiterhin ausgeschlossen).
+
+scope:
+  files_created:
+    - docs/entwickler/workflow-index.md
+  files_modified:
+    - mkdocs.yml
+
+changes:
+  - docs/entwickler/workflow-index.md erstellt — vollständige Tabelle aller 161
+    Workflow-Dokumente, gruppiert in 7 Kategorien mit Kurzbeschreibungen
+  - mkdocs.yml: Workflow-Index unter Entwickler-Nav ergänzt
+
+build_result: "Documentation built in 39.59 seconds — 0 Errors"
+
+ai_harness:
+  claim: "Alle Workflow-Dokumente sind katalogisiert und im Docs-Build auffindbar"
+  evidence:
+    - "docs/entwickler/workflow-index.md mit 161 Einträgen erstellt"
+    - "mkdocs build: Documentation built — 0 Errors"
+  contract_level: L2
+  external_gates: []
