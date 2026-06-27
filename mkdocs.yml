@@ -145,6 +145,10 @@ exclude_docs: |
   !/architecture/process-kernel/DELIVERY-MAP.md
   !/architecture/process-map.md
   !/architecture/ai-data-classification.md
+  !/architecture/current-processes.md
+  !/architecture/target-processes.md
+  !/architecture/target-state-landhandel-erp.md
+  !/architecture/tooling-quality-governance.md
 
 nav:
   - Start: index.md
@@ -232,6 +236,10 @@ nav:
           - Lieferkarte: architecture/process-kernel/DELIVERY-MAP.md
           - ERP Prozesskarte: architecture/process-map.md
           - KI-Datenklassen-Policy: architecture/ai-data-classification.md
+          - Ist-Prozesse: architecture/current-processes.md
+          - Zielprozesse: architecture/target-processes.md
+          - Zielbild Landhandel ERP: architecture/target-state-landhandel-erp.md
+          - Quality & Governance Tooling: architecture/tooling-quality-governance.md
       # adr-nav:begin (generated — scripts/generate_adr_nav.py; do not edit manually)
       - ADRs:
           - Index: adr/README.md

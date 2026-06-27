@@ -1,3 +1,14 @@
+---
+title: Zielbild VALEO Landhandel ERP
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Strategisches Zielbild des VALEO ERP fuer Landhandel und Agrargenossenschaften — Kernprozesse, Differenzierung, Nicht-Ziele.
+---
+
 # Zielbild VALEO Landhandel ERP
 
 **Stand:** 2026-03-11

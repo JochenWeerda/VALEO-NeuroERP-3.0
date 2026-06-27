@@ -1,3 +1,14 @@
+---
+title: Zielprozesse und Workflow-Blueprint
+type: explanation
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Leitprinzipien und Workflow-Blueprint fuer die Zielprozesse von VALEO NeuroERP 3.0.
+---
+
 # VALEO NeuroERP 3.0 – Zielprozesse und Workflow-Blueprint
 
 ## Leitprinzipien
