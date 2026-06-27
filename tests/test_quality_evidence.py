@@ -78,3 +78,59 @@ def test_get_drift_status_fallback(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
     resp = _client.get("/api/v1/admin/quality-evidence/drift", headers=_HEADERS)
     assert resp.status_code == 200
     assert resp.json()["summary"]["total_drift_items"] == 0
+
+
+@pytest.mark.unit
+def test_get_quality_evidence_uses_drift_fallback_when_no_release_artifact(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import app.api.v1.endpoints.quality_evidence as qe
+
+    artifacts = tmp_path / "artifacts2"
+    artifacts.mkdir()
+    drift = {
+        "generated_at": "2026-06-26T12:00:00+00:00",
+        "summary": {"total_drift_items": 3},
+    }
+    (artifacts / "doc_drift_report.json").write_text(json.dumps(drift), encoding="utf-8")
+    monkeypatch.setattr(qe, "ARTIFACTS", artifacts)
+
+    resp = _client.get("/api/v1/admin/quality-evidence/", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["overall_status"] == "fail"
+    assert body["source"] == "artifacts/doc_drift_report.json"
+
+
+@pytest.mark.unit
+def test_get_quality_evidence_drift_zero_items_is_pass(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import app.api.v1.endpoints.quality_evidence as qe
+
+    artifacts = tmp_path / "artifacts3"
+    artifacts.mkdir()
+    drift = {
+        "generated_at": "2026-06-26T12:00:00+00:00",
+        "summary": {"total_drift_items": 0},
+    }
+    (artifacts / "doc_drift_report.json").write_text(json.dumps(drift), encoding="utf-8")
+    monkeypatch.setattr(qe, "ARTIFACTS", artifacts)
+
+    resp = _client.get("/api/v1/admin/quality-evidence/", headers=_HEADERS)
+    assert resp.status_code == 200
+    assert resp.json()["overall_status"] == "pass"
+
+
+@pytest.mark.unit
+def test_get_drift_status_503_when_no_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import app.api.v1.endpoints.quality_evidence as qe
+
+    empty = tmp_path / "empty2"
+    empty.mkdir()
+    monkeypatch.setattr(qe, "ARTIFACTS", empty)
+
+    resp = _client.get("/api/v1/admin/quality-evidence/drift", headers=_HEADERS)
+    assert resp.status_code == 503
