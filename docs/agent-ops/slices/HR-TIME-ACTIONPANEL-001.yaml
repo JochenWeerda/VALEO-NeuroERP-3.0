@@ -22,6 +22,11 @@ acceptance:
   - admin-suite-roadmap Status auf umgesetzt korrigiert.
 tests:
   - tsc --noEmit (exit 0 verified)
+risks:
+  - Detailpanel kann bei kuenftigen DataTable-Aenderungen erneut entkoppeln.
+  - Fachliche Druck-/Einreichungsflows brauchen spaeter zusaetzliche E2E-Abdeckung.
+external_gates:
+  - Keine externen Gates; Frontend-UX- und Dokumentationsslice.
 ai_harness:
   fachlicher_vertrag: >-
     Panel zeigt nur bereits geladene Query-Daten (Performance-Regel aus

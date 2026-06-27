@@ -21,6 +21,11 @@ acceptance:
   - COVERAGE-001 in open-gaps-and-known-issues.md mit COV-RATCHET-007-Eintrag aktualisiert.
 tests:
   - pytest tests/test_wf_cockpit_nats_projector.py (14 Tests, exit 0)
+risks:
+  - Ratchet-Schwelle muss nach weiteren CI-Coverage-Laeufen ggf. angehoben werden.
+  - Unit-Tests ersetzen keinen echten NATS-Integrationstest.
+external_gates:
+  - Keine externen Gates; Unit-Test- und Dokumentationsslice.
 ai_harness:
   fachlicher_vertrag: >-
     Der NATS-Projector ist der einzige ungetestate Kernpfad im Workflow-Cockpit.
