@@ -1,0 +1,9 @@
+slice_id: UIX-BUNDLE-GATE-013
+title: Mask Bundle Budget CI
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-28
+goal: check_mask_bundle_budget.ts after frontend build in quality-gate.
+acceptance:
+  - Script measures gzip sizes from dist
+  - CI step after pnpm build

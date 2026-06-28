@@ -1,0 +1,10 @@
+slice_id: UIX-FAST-RENDERER-010
+title: Fast Renderer Refactor on RenderPlan
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-28
+goal: UniversalMaskRenderer consumes RenderPlan via Fast*Renderer components.
+acceptance:
+  - plan prop on UniversalMaskRenderer
+  - Pilot pages use usePilotRenderPlan
+  - Vitest UniversalMaskRenderer green

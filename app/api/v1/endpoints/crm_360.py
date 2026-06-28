@@ -291,6 +291,28 @@ def _fetch_customer_tab_items(
     return normalized, []
 
 
+def _paginate_items(
+    items: list[dict[str, Any]],
+    *,
+    page: int = 1,
+    limit: int = 25,
+    q: str | None = None,
+) -> tuple[list[dict[str, Any]], int]:
+    filtered = items
+    if q:
+        needle = q.casefold()
+        filtered = [
+            row
+            for row in items
+            if any(needle in str(value).casefold() for value in row.values())
+        ]
+    safe_limit = max(1, min(limit, 50))
+    safe_page = max(1, page)
+    start = (safe_page - 1) * safe_limit
+    end = start + safe_limit
+    return filtered[start:end], len(filtered)
+
+
 @router.get(
     "/{customer_id}/tabs/{tab_key}",
     response_model=dict[str, Any],
@@ -301,6 +323,9 @@ async def get_customer_tab_data(
     customer_id: str,
     tab_key: str,
     tenant_id: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
     """Limitierte Tab-Listen fuer den Universal Mask Generator (read-only)."""
@@ -325,10 +350,14 @@ async def get_customer_tab_data(
         tab_key=tab_key,
         kunden_nr=customer.get("kunden_nr"),
     )
+    paged_items, total = _paginate_items(items, page=page, limit=limit, q=q)
     return {
         "tab_key": tab_key,
         "table_key": table_key,
-        "items": items,
+        "items": paged_items,
+        "page": page,
+        "limit": limit,
+        "total": total,
     }
 
 

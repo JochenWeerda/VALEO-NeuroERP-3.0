@@ -13,14 +13,14 @@ description: Paritaetsmatrix Legacy OrderEditor vs. Universal Mask Generator (Sa
 
 Referenz fuer Wave 32 (`UIX-SALES-PARITY-008`).
 
-| Legacy (OrderEditorLegacyPage) | Generator-Tab | Inhalt | API | Status |
-|---|---|---|---|---|
-| Kopf / Kunde / Belegnr. | `kopf` | Auftragskopf-Felder | `GET /api/v1/sales/orders/{id}` | partial |
-| Positionen-Grid | `positionen` | Positionsliste | `GET .../tabs/positionen` | partial |
-| Liefertermin / Versand | `lieferung` | Kopf-Felder + Lieferscheinliste | Summary + `GET .../tabs/lieferung` | partial |
-| Lieferschein anlegen | — | Mutation | Legacy only | gap |
-| Druck / DMS / Belegfolge | — | Aktionen | Legacy only | gap |
-| Rechnungsbelege | `dokumente` | LS mit Rechnungsnr. | `GET .../tabs/dokumente` | partial |
+| Legacy (OrderEditorLegacyPage) | Generator-Tab | Inhalt | API | RenderPlan | Status |
+|---|---|---|---|---|---|
+| Kopf / Kunde / Belegnr. | `kopf` | Auftragskopf-Felder | `GET /api/v1/sales/orders/{id}` | compiled | partial |
+| Positionen-Grid | `positionen` | Positionsliste | `GET .../tabs/positionen` | lazy table plan | partial |
+| Liefertermin / Versand | `lieferung` | Kopf-Felder + Lieferscheinliste | Summary + `GET .../tabs/lieferung` | lazy table plan | partial |
+| Lieferschein anlegen | — | Mutation | Legacy only | — | gap |
+| Druck / DMS / Belegfolge | — | Aktionen | Legacy only | — | gap |
+| Rechnungsbelege | `dokumente` | LS mit Rechnungsnr. | `GET .../tabs/dokumente` | lazy table plan | partial |
 
 ## Lazy-Load Vertrag
 

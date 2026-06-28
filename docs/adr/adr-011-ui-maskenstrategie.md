@@ -99,6 +99,22 @@ Verbindliche Pilotregeln:
 - **Perf Gate (30):** `scripts/check_mask_performance_contract.ts` prueft
   `requires_lazy_tabs`, `lookup_min_chars >= 2`, `initial_payload_budget_kb`.
 
+### Erweiterung 2026-06-28: RenderPlan Engine (Waves 33–40)
+
+Der Universal Mask Generator darf MaskSchema nicht bei jedem Render neu interpretieren.
+Stattdessen gilt:
+
+1. `SchemaCompiler` uebersetzt `ScreenDefinition` + Summary/Auth-Kontext in einen
+   flachen, immutable `RenderPlan`.
+2. `RenderPlanCache` (LRU) keyed by `screenId`, `schemaVersion`, `tenant`, `role`,
+   `permissions`, `featureFlags`.
+3. `UniversalMaskRenderer` konsumiert den Plan ueber spezialisierte Fast-Renderer
+   (kein generischer Meta-Renderer).
+4. Bundle- und Render-Budgets werden in CI gemessen (`check_mask_bundle_budget.ts`,
+   Playwright perf smoke).
+
+Referenz: `docs/architecture/uix/render-plan-architecture.md`.
+
 ## Consequences
 Positiv:
 - Klarere Entscheidung zwischen Wiederverwendung und Spezial-UI
