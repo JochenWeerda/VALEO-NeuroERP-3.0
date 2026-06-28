@@ -1,0 +1,70 @@
+slice_id: UIX-MASK-FRAMEWORK-001
+title: Universal Mask Generator with Translation Layer Skeleton
+owner: Codex
+status: reserved
+created_at: 2026-06-28
+coordination: >-
+  Structural UI architecture slice. Avoids overlap with completed UX rollout
+  slices by focusing on a canonical generator skeleton, temporary translation
+  layer, metadata-driven rendering, lazy loading, screen summaries, virtual
+  tables and architecture contracts. No unrelated UX surface refactors.
+goal: >-
+  Establish a canonical ScreenDefinition/MaskSchema and UniversalMaskRenderer
+  skeleton on top of the existing mask-builder, introduce a temporary adapter
+  layer for legacy MaskConfig/CRM mask JSON, add lazy tabs and virtual table
+  primitives, extend the mask registry with generator metadata, and prove the
+  path with a non-breaking CRM mask pilot contract.
+file_ownership:
+  - app/core/mask_classification.py
+  - app/api/v1/endpoints/mask_registry.py
+  - app/api/v1/endpoints/crm_360.py
+  - packages/frontend-web/package.json
+  - packages/frontend-web/src/components/mask-builder/**
+  - packages/frontend-web/src/components/ui/LazyTabs.tsx
+  - packages/frontend-web/src/components/ui/VirtualDataTable.tsx
+  - packages/frontend-web/src/features/crm-masks/**
+  - packages/frontend-web/src/lib/api/crm-screen-summary.ts
+  - docs/adr/adr-011-ui-maskenstrategie.md
+  - docs/architecture/domains/crm/README.md
+  - docs/architecture/domains/agrar/README.md
+  - docs/architecture/domains/inventory/README.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - ADR-011 documents MaskSchema, visualization-layer separation and UIX metadata.
+  - The migration contract explicitly uses a temporary adapter layer before direct ScreenDefinition delivery.
+  - Mask registry exposes UIX metadata for classified masks without breaking existing callers.
+  - Frontend has reusable ScreenDefinition types, adapter, LazyTabs, VirtualDataTable and UniversalMaskRenderer exports.
+  - CRM pilot can render an existing customer/lead mask schema through the universal renderer.
+  - CRM screen-summary API exposes compact initial payload contract for a customer context.
+tests:
+  - pnpm --dir packages/frontend-web type-check
+  - pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx src/__tests__/components/ui/LazyTabs.test.tsx src/__tests__/components/ui/VirtualDataTable.test.tsx
+  - python -m pytest tests/test_mask_registry_uix.py tests/test_crm_screen_summary.py -q
+risks:
+  - Full migration of all ERP masks is intentionally out of scope for this first slice.
+  - Existing completed UX rollout must not be reopened or overlaid with new visual patterns.
+ai_harness:
+  fachlicher_vertrag: >-
+    ERP masks should be described by a neutral schema, while rendering, data access,
+    permissions and workflow presentation remain reusable platform concerns.
+  architektur_vertrag: >-
+    Significant Architecture-OS change; extends accepted ADR-011 and existing
+    mask-builder instead of creating a parallel renderer stack.
+  daten_vertrag: >-
+    Screen summary payload is compact, tenant-scoped, read-only and versioned;
+    table and lookup data stay paginated or search-limited.
+  test_vertrag: >-
+    Add unit tests for schema validation, adapter, renderer primitives and
+    backend contract tests for registry metadata plus CRM screen summary.
+  security_vertrag: >-
+    Preserve existing auth/tenant dependencies, do not expose PII beyond the
+    existing CRM mask context, and keep mutation paths unchanged.
+  betriebs_vertrag: >-
+    Architecture is additive and rollbackable by leaving old mask pages in place;
+    performance budgets are documented for later CI enforcement.
+  dokumentations_vertrag: >-
+    Update ADR, Workboard, Domain Packs and Open-Gaps with scope, rollout status
+    and remaining migration work.
+external_gates:
+  - not_applicable
