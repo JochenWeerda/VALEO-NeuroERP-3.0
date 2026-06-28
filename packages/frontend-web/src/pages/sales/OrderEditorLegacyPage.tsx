@@ -1225,7 +1225,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
   // ── JSX ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50" data-testid="legacy-order-editor">
       {/* Header */}
       <div className="bg-green-700 text-white px-4 py-2">
         <h1 className="text-lg font-bold">AUFTRAGS-ERFASSUNG</h1>

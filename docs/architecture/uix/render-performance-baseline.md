@@ -32,9 +32,26 @@ Stand: 2026-06-28 (Wave 38 / UIX-PERF-MEASURE-014)
 ## Messung lokal
 
 ```bash
+# Verhaltens-Smoke (lazy tabs, virtual table) — aktiv
 cd packages/frontend-web
 pnpm build
 cd ../..
 npx ts-node scripts/check_mask_bundle_budget.ts
 VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true npx playwright test tests/e2e/mask-render-performance.spec.ts
+```
+
+## A/B PoC Legacy vs. RenderPlan — geparkt
+
+**Status:** geparkt (2026-06-28) — wartet auf stabile Frontend-Baseline nach 428-Fehler-Fix.
+
+Vorbereitet, aber noch nicht als Proof-of-Concept abgeschlossen:
+
+- Playwright: `tests/e2e/mask-render-ab-benchmark.spec.ts` (standardmaessig `test.skip`, Opt-in via `MASK_AB_BENCHMARK=1`)
+- Benchmark-Route: `/dev/mask-benchmark/:domain/:variant/:id`
+- Skript: `pnpm benchmark:mask-render-ab` (schreibt nach `evidence/perf/mask-render-ab.latest.json`)
+
+Aktivierung wenn Baseline gruen:
+
+```bash
+MASK_AB_BENCHMARK=1 pnpm benchmark:mask-render-ab
 ```

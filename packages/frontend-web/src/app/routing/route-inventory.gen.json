@@ -1541,6 +1541,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/workflow/mask-benchmark/MaskBenchmarkRoute",
+      "path": "dev/mask-benchmark/:domain/:variant/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/disposition/liste",
       "path": "disposition",
       "source": "alias"
@@ -2891,7 +2896,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/kontrakte/FrmKontraktDetail",
+      "module": "@/pages/kontrakte/KontraktDetailRoute",
       "path": "kontrakte/:id",
       "source": "alias"
     },
@@ -4553,6 +4558,7 @@
     "rfqId",
     "taskId",
     "type",
+    "variant",
     "workflowId"
   ]
 }
