@@ -405,9 +405,9 @@ export default function KreditorenStammPage(): JSX.Element {
         }>('/api/v1/crm/sanktionspruefung', { name, land })
         const result = res as Record<string, unknown>
         if (result?.treffer) {
-          toast.error(`Sanktionstreffer: ${result.ergebnis}`)
+          toast.error(`Sanktionstreffer: ${String(result.ergebnis ?? '')}`)
         } else {
-          toast.success(`Sanktionsprüfung OK: ${result?.ergebnis ?? 'Kein Treffer'}`)
+          toast.success(`Sanktionsprüfung OK: ${String(result?.ergebnis ?? 'Kein Treffer')}`)
         }
       } catch (_rawErr: unknown) {
         const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }

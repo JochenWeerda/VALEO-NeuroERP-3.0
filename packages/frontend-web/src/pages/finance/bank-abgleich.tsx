@@ -421,7 +421,7 @@ export default function BankAbgleichPage(): JSX.Element {
           }>
         }
         const res = await apiClient.post<ImportResult>(
-          `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}`,
+          `/api/v1/finance/bank-statements/import?format=${String(format ?? '')}&bank_account_id=${String(formData.kontoId ?? '')}&tenant_id=${String(encodeURIComponent(tenantId) ?? '')}`,
           uploadFormData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         )
@@ -445,7 +445,7 @@ export default function BankAbgleichPage(): JSX.Element {
         formData.gebuchteUmsaetze = umsaetze.reduce((sum, u) => sum + Number((u as Record<string, unknown>).betrag || 0), 0)
         formData.nichtZugeordnet = umsaetze.filter(u => !u.zugeordnet).length
         formData.zugeordnet = umsaetze.filter(u => u.zugeordnet).length
-        formData.abgleichsDifferenz = Math.abs(formData.startSaldo + formData.gebuchteUmsaetze - formData.endSaldo)
+        formData.abgleichsDifferenz = Math.abs(Number(formData.startSaldo) + Number(formData.gebuchteUmsaetze) - formData.endSaldo)
         formData.statementId = result.statement_id
         formData.importErrors = result.import_errors || []
 
@@ -461,7 +461,8 @@ export default function BankAbgleichPage(): JSX.Element {
             description: `${result.error_lines} ${t('crud.messages.linesWithErrors')}`,
           })
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({
           variant: 'destructive',
           title: t('crud.messages.importError'),
@@ -506,7 +507,7 @@ export default function BankAbgleichPage(): JSX.Element {
       })
 
       formData.regelAngewendet = regelStats
-      formData.zugeordnet = (formData.zugeordnet || 0) + zugeordnetCount
+      formData.zugeordnet = (Number(formData.zugeordnet) || 0) + zugeordnetCount
       formData.nichtZugeordnet = formData.zuordnungData.length - formData.zugeordnet
 
       toast({
@@ -526,7 +527,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
       try {
         const res = await apiClient.post<ReconcileResult>(
-          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=false`
+          `/api/v1/finance/bank-reconciliation/${String(formData.statementId ?? '')}/reconcile?bank_account_id=${String(formData.kontoId ?? '')}&tenant_id=${String(encodeURIComponent(tenantId) ?? '')}&auto_book=false`
         )
         const result = res.data
 
@@ -554,7 +555,8 @@ export default function BankAbgleichPage(): JSX.Element {
           formData.differences = result.differences
           formData.bookingSuggestions = result.booking_suggestions
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({
           variant: 'destructive',
           title: t('crud.messages.reconciliationError'),
@@ -578,7 +580,7 @@ export default function BankAbgleichPage(): JSX.Element {
       }
       try {
         const res = await apiClient.post<ReconcileResult>(
-          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=true`
+          `/api/v1/finance/bank-reconciliation/${String(formData.statementId ?? '')}/reconcile?bank_account_id=${String(formData.kontoId ?? '')}&tenant_id=${String(encodeURIComponent(tenantId) ?? '')}&auto_book=true`
         )
         const result = res.data
         formData.zugeordnet = result.line_counts?.matched || formData.zugeordnet || 0
@@ -587,7 +589,8 @@ export default function BankAbgleichPage(): JSX.Element {
         toast({ title: t('crud.messages.reconciliationBooked'), description: t('crud.messages.reconciliationBookedDesc') })
         setIsDirty(false)
         navigate('/finance/bank')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -600,7 +603,8 @@ export default function BankAbgleichPage(): JSX.Element {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_reconciliation', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.export'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }

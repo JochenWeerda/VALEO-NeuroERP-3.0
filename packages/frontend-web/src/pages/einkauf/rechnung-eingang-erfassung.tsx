@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Einkauf-Rechnung-Eingang-Erfassung
  * 1:1 Nachbau der zvoove EINKAUF-RECHNUNG-Maske
  */
@@ -322,7 +322,8 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       setState((p) => ({ ...p, id: resp.id, belegNr: resp.beleg_nr || p.belegNr }))
       push('Rechnung gespeichert')
       return resp.id
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${err.response?.data?.detail || err.message}`)
       return null
     }
@@ -333,7 +334,10 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
     try {
       await apiClient.delete(`/api/v1/einkauf/rechnungen/${state.id}`)
       push('Rechnung gelöscht'); setShowDeleteDialog(false); navigate('/einkauf')
-    } catch (err: any) { push(`Fehler: ${err.response?.data?.detail || err.message}`) }
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+      push(`Fehler: ${err.response?.data?.detail || err.message}`)
+    }
   }
 
   /** Beleg drucken und buchen: Speichern, dann Workflow Prüfen → Freigeben → Verbuchen. */
@@ -356,7 +360,8 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       await apiClient.post(`${base}/${encodeURIComponent(id)}/freigeben`)
       await apiClient.post(`${base}/${encodeURIComponent(id)}/verbuchen`)
       push('Beleg verbucht.')
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Buchung: ${err.response?.data?.detail || err.message}`)
     } finally {
       setIsSaving(false)
@@ -422,7 +427,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                           try {
                             const items: Record<string, unknown>[] = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/rechnungen')
                             const idx = rechnungId ? items.findIndex(r => r.id === rechnungId) : -1
-                            if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${items[idx + 1].id}`)
+                            if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${items[idx + 1].id as string}`)
                             else push('Kein vorheriger Beleg vorhanden.')
                           } catch { push('Rechnungen konnten nicht geladen werden.') }
                         }}>
@@ -586,9 +591,12 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                       mwstKz: '1', mwstSatz: 19, rabatt: 0, lager: '', lagerhalle: '', lagerfach: '', info: ''
                       }))
                     }))
-                    push(`${lsList.length} Lieferschein(e) gefunden — LS ${ls.ls_nummer ?? ls.id} übernommen.`)
+                    push(`${lsList.length} Lieferschein(e) gefunden — LS ${String(ls.ls_nummer ?? ls.id ?? '')} übernommen.`)
                   }
-                } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+                } catch (_rawErr: unknown) {
+                  const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+                  push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+                }
               }}>
               → Lieferschein-Auswahl
             </a>

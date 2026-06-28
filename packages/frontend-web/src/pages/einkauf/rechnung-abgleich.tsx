@@ -135,13 +135,13 @@ export default function RechnungAbgleichPage(): JSX.Element {
         return
       }
 
-      const purchaseOrder = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${invoiceBestellungId}`)
+      const purchaseOrder = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${String(invoiceBestellungId ?? '')}`)
 
       // Lade Wareneingang (falls vorhanden)
       let goodsReceipt = null
       if (invoiceWareneingangId) {
         try {
-          goodsReceipt = await apiClient.get<Record<string, unknown>>(`/api/purchase-workflow/orders/${invoiceBestellungId}/goods-receipt/${invoiceWareneingangId}`)
+          goodsReceipt = await apiClient.get<Record<string, unknown>>(`/api/purchase-workflow/orders/${String(invoiceBestellungId ?? '')}/goods-receipt/${String(invoiceWareneingangId ?? '')}`)
         } catch {
           // Wareneingang optional — Abgleich läuft auch ohne WE-Daten
         }
@@ -156,7 +156,8 @@ export default function RechnungAbgleichPage(): JSX.Element {
         item => item.exceptions.length > 0 && Math.abs(item.varianceAmount) > (purchaseOrder.totalAmount * toleranceConfig.price / 100)
       )
       setBlocked(hasBlockingExceptions && match.overallStatus !== 'matched')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -348,7 +349,8 @@ export default function RechnungAbgleichPage(): JSX.Element {
       })
 
       navigate('/einkauf/rechnungseingaenge-liste')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.approveError', { entityType: entityTypeLabel }),
@@ -487,7 +489,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
                 onValueChange={setSelectedInvoiceId}
                 options={invoices.map((inv) => ({
                   value: inv.id,
-                  label: `${inv.rechnungsNummer} - ${inv.lieferantName || ''}`,
+                  label: `${String(inv.rechnungsNummer ?? '')} - ${String(inv.lieferantName ?? '')}`,
                 }))}
                 placeholder={t('crud.fields.selectInvoice')}
               />

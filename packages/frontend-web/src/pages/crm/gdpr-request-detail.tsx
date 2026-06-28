@@ -268,7 +268,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
           <CardContent className="pt-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="font-medium">{t(`crud.actions.${entry.action}`, { defaultValue: entry.action })}</div>
+                <div className="font-medium">{t(`crud.actions.${String(entry.action)}`, { defaultValue: entry.action as string })}</div>
                 <div className="text-sm text-muted-foreground mt-1">
                   {entry.old_status && (
                     <span className="line-through text-red-600">
@@ -414,7 +414,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
         const url = window.URL.createObjectURL(res.data as Blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `gdpr-export-${id}.${data?.response_file_format || 'json'}`
+        link.download = `gdpr-export-${id}.${String(data?.response_file_format ?? 'json')}`
         link.click()
         window.URL.revokeObjectURL(url)
         toast({ title: t('crud.messages.downloadStarted') })

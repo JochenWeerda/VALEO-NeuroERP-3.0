@@ -387,7 +387,7 @@ export default function KundenListePage(): JSX.Element {
     try {
       const csvHeader = `${t('crud.fields.company')};${t('crud.fields.city')};${t('crud.fields.phone')};${t('crud.fields.email')};${t('crud.fields.totalRevenue')};${t('crud.fields.status')}\n`
       const csvContent = data.map(customer =>
-        `"${customer.firma || `${customer.vorname} ${customer.nachname}`}";"${customer.plz} ${customer.ort}";"${customer.telefon || ''}";"${customer.email || ''}";"${customer.umsatzGesamt || 0}";"${t(`status.${customer.status || 'active'}`, { defaultValue: customer.status || 'aktiv' })}"`
+        `"${String(customer.firma ?? `${String(customer.vorname ?? '')} ${String(customer.nachname ?? '')}`)}";"${String(customer.plz ?? '')} ${String(customer.ort ?? '')}";"${String(customer.telefon ?? '')}";"${String(customer.email ?? '')}";"${String(customer.umsatzGesamt ?? 0)}";"${t(`status.${String(customer.status ?? 'active')}`, { defaultValue: String(customer.status ?? 'aktiv') })}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

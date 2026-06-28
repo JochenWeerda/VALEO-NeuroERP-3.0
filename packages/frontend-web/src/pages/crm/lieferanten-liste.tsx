@@ -293,7 +293,7 @@ export default function LieferantenListePage(): JSX.Element {
       }
       const header = 'Firma;Ort;Land;E-Mail;Zahlungsbedingungen;Rabatt;Status\n'
       const rows = exportData.map(l =>
-        `"${l.firma}";"${l.plz || ''} ${l.ort || ''}";"${l.land || ''}";"${l.email || ''}";"${l.zahlungsbedingungen || '30 Tage'}";"${l.rabatt || 0}";"${l.status || 'aktiv'}"`
+        `"${String(l.firma ?? '')}";"${String(l.plz ?? '')} ${String(l.ort ?? '')}";"${String(l.land ?? '')}";"${String(l.email ?? '')}";"${String(l.zahlungsbedingungen ?? '30 Tage')}";"${String(l.rabatt ?? 0)}";"${String(l.status ?? 'aktiv')}"`
       ).join('\n')
       const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
@@ -400,7 +400,7 @@ export default function LieferantenListePage(): JSX.Element {
     try {
       const csvHeader = 'Firma;Ort;Land;Telefon;E-Mail;Z-Bedingungen;Rabatt;Min-Bestellwert;Lieferzeit;QS-Zert;Bio-Zert;Gesamtumsatz;Status\n'
       const csvContent = data.map(lieferant =>
-        `"${lieferant.firma}";"${lieferant.plz} ${lieferant.ort}";"${lieferant.land || ''}";"${lieferant.telefon || ''}";"${lieferant.email || ''}";"${lieferant.zahlungsbedingungen || '30 Tage'}";"${lieferant.rabatt || 0}";"${lieferant.mindestbestellwert || 0}";"${lieferant.lieferzeit || 0}";"${lieferant.qualitaetszertifikat ? 'Ja' : 'Nein'}";"${lieferant.bioZertifiziert ? 'Ja' : 'Nein'}";"${lieferant.umsatzGesamt || 0}";"${lieferant.status || 'aktiv'}"`
+        `"${String(lieferant.firma ?? '')}";"${String(lieferant.plz ?? '')} ${String(lieferant.ort ?? '')}";"${String(lieferant.land ?? '')}";"${String(lieferant.telefon ?? '')}";"${String(lieferant.email ?? '')}";"${String(lieferant.zahlungsbedingungen ?? '30 Tage')}";"${String(lieferant.rabatt ?? 0)}";"${String(lieferant.mindestbestellwert ?? 0)}";"${String(lieferant.lieferzeit ?? 0)}";"${lieferant.qualitaetszertifikat ? 'Ja' : 'Nein'}";"${lieferant.bioZertifiziert ? 'Ja' : 'Nein'}";"${String(lieferant.umsatzGesamt ?? 0)}";"${String(lieferant.status ?? 'aktiv')}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

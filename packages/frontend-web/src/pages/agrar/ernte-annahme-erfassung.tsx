@@ -572,7 +572,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         })
 
         push('Ernte-Annahme geladen')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
       }
     }
@@ -698,7 +699,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       }
       push('Ernte-Annahme erfolgreich gespeichert')
       return response.id
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null
     } finally {
@@ -720,7 +722,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       // Lade aktualisierte Daten
       const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler bei der Berechnung: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -755,7 +758,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push(`Abschlagrechnung berechnet. Bruttobetrag: ${brutto}`)
       const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -768,7 +772,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push(`Endabrechnung berechnet. Bruttobetrag: ${brutto}`)
       const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -849,7 +854,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         ...prev,
         releaseStatus: response.release_status as HarvestAcceptanceState['releaseStatus'],
       }))
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler bei der Freigabe: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)
@@ -1060,7 +1066,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       }))
 
       push('Daten vom vorherigen Annahmeschein übernommen')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -1083,7 +1090,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push('Ernte-Annahme erfolgreich gelöscht')
       setShowDeleteDialog(false)
       navigate('/agrar/ernte')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Löschen: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)

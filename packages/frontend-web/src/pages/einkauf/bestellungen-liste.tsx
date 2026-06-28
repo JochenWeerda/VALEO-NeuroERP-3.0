@@ -359,7 +359,7 @@ export default function BestellungenListePage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/einkauf/bestellungen/${item.id}`)
+      navigate(`/einkauf/bestellungen/${item.id as string}`)
     } else if (action === 'freigeben' && item) {
       await withPending(String(item.id), async () => {
         try {

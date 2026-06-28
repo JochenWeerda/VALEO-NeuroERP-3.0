@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Einkauf-Anfrage-Erfassung
  * 1:1 Nachbau der zvoove ANFRAGE-Maske
  */
@@ -231,7 +231,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
             : null,
         }))
         push('Anfrage geladen')
-      } catch (err: any) {
+      } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler beim Laden: ${err.response?.data?.detail || err.message}`)
       }
     })()
@@ -314,7 +315,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
       setState((p) => ({ ...p, id: resp.id, anfrageNr: resp.anfrage_nr || p.anfrageNr }))
       push('Anfrage gespeichert')
       return resp.id
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${err.response?.data?.detail || err.message}`)
       return null
     } finally {
@@ -333,7 +335,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
       push('Anfrage gelöscht')
       setShowDeleteDialog(false)
       navigate('/einkauf')
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${err.response?.data?.detail || err.message}`)
     }
   }
@@ -770,8 +773,11 @@ export default function AnfrageErfassungPage(): JSX.Element {
                 const resp = state.id
                   ? await apiClient.patch(`/api/v1/einkauf/anfragen/${state.id}`, payload)
                   : await apiClient.post('/api/v1/einkauf/anfragen', payload)
-                push(`Lieferanten-Angebot gesendet (${(resp as Record<string, unknown>)?.anfrageNr ?? 'OK'})`)
-              } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+                push(`Lieferanten-Angebot gesendet (${String((resp as Record<string, unknown>)?.anfrageNr ?? 'OK')})`)
+              } catch (_rawErr: unknown) {
+                const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+                push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+              }
             }}>
             <Send className="h-4 w-4" />Lieferanten-Angebot
           </Button>

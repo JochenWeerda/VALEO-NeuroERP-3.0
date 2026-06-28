@@ -449,7 +449,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
           positionSerienNr: '',
         })
         push('Lieferschein geladen')
-      } catch (err: any) {
+      } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler beim Laden: ${err.response?.data?.detail || err.message}`)
       }
     }
@@ -644,7 +645,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       setState((prev) => ({ ...prev, positionen: combined }))
       setShowImportBestellungDialog(false)
       push(`${mapped.length} Position(en) aus Bestellung übernommen.`)
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Laden der Bestellung: ${err.response?.data?.detail ?? err.message}`)
     }
   }
@@ -709,7 +711,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       setState((prev) => ({ ...prev, id: response.id, lieferscheinNr: response.lieferschein_nr }))
       push('Lieferschein erfolgreich gespeichert')
       return response.id
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Speichern: ${err.response?.data?.detail || err.message}`)
       return null
     }
@@ -741,7 +744,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       await apiClient.post(`/api/v1/einkauf/lieferscheine/${id}/print?${params.toString()}`)
       push('Lieferschein erfolgreich gedruckt')
       setShowPrintDialog(false)
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Drucken: ${err.response?.data?.detail || err.message}`)
     } finally {
       setIsSaving(false)
@@ -762,7 +766,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       push('Lieferschein erfolgreich gelöscht')
       setShowDeleteDialog(false)
       navigate('/einkauf')
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Löschen fehlgeschlagen: ${err.response?.data?.detail || err.message}`)
     }
   }
@@ -950,7 +955,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                         positionSerienNr: '',
                       }))
                       push('Daten vom vorherigen Lieferschein übernommen.')
-                    } catch (err: any) {
+                    } catch (_rawErr: unknown) {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
                       push(`Fehler: ${err.response?.data?.detail ?? err.message}`)
                     }
                   }}

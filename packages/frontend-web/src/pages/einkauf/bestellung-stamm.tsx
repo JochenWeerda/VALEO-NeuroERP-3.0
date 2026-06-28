@@ -321,7 +321,7 @@ export default function BestellungStammPage(): JSX.Element {
       // Update mit Version-Incrementierung
       const updateData = {
         ...formData,
-        version: (formData.version || 0) + 1,
+        version: (Number(formData.version) || 0) + 1,
       }
 
       await saveData(updateData)

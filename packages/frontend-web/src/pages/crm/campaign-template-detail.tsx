@@ -196,7 +196,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
         title: getSuccessMessage(t, isNew ? 'create' : 'update', entityType),
       })
       if (isNew && data?.id) {
-        navigate(`/crm/campaign-template/${data.id}`)
+        navigate(`/crm/campaign-template/${data.id as string}`)
       } else {
         navigate('/crm/campaign-templates')
       }

@@ -184,11 +184,11 @@ export default function CampaignTemplatesPage(): JSX.Element {
     if (action === 'create') {
       navigate('/crm/campaign-template/new')
     } else if (action === 'edit' && item) {
-      navigate(`/crm/campaign-template/${item.id}`)
+      navigate(`/crm/campaign-template/${item.id as string}`)
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/api/v1/crm/campaigns/templates/${item.id}`)
+          await apiClient.delete(`/api/v1/crm/campaigns/templates/${item.id as string}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })
@@ -202,7 +202,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'duplicate' && item) {
       try {
-        const response = await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id}/duplicate`)
+        const response = await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id as string}/duplicate`)
         if (response.data) {
           toast({
             title: t('crud.messages.templateDuplicated'),
@@ -217,7 +217,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'activate' && item) {
       try {
-        await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id}/activate`)
+        await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id as string}/activate`)
         toast({
           title: t('crud.messages.templateActivated'),
         })
@@ -230,7 +230,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'deactivate' && item) {
       try {
-        await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id}/deactivate`)
+        await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id as string}/deactivate`)
         toast({
           title: t('crud.messages.templateDeactivated'),
         })

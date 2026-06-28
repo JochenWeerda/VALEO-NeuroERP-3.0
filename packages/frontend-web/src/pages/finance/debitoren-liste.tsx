@@ -202,7 +202,8 @@ async function triggerExportDownload(entity: string, format: string, toastFn: (o
     a.click()
     URL.revokeObjectURL(url)
     toastFn({ title: 'Export erstellt', description: 'Download gestartet.' })
-  } catch (e: any) {
+  } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
     toastFn({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
   }
 }
@@ -230,7 +231,7 @@ export default function DebitorenListePage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/finance/debitoren/${item.id}`)
+      navigate(`/finance/debitoren/${String(item.id ?? '')}`)
     }
   })
 
@@ -242,7 +243,7 @@ export default function DebitorenListePage(): JSX.Element {
         setData((response.data as Record<string, unknown>).data || [])
         setTotal((response.data as Record<string, unknown>).total || 0)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({ variant: 'destructive', title: t('crud.messages.loadDataError'), description: error?.message })
     } finally {
       setLoading(false)
@@ -263,7 +264,8 @@ export default function DebitorenListePage(): JSX.Element {
         await api.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
         toast({ title: 'Mahnlauf gestartet', description: 'Mahnungen werden erstellt.' })
         loadData()
-      } catch (e: any) {
+      } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
       }
     }
@@ -271,11 +273,12 @@ export default function DebitorenListePage(): JSX.Element {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
       try {
         for (const item of items) {
-          if (item.id) await api.patch(`/api/v1/finance/debtors/${item.id}`, { is_active: false })
+          if (item.id) await api.patch(`/api/v1/finance/debtors/${String(item.id ?? '')}`, { is_active: false })
         }
         toast({ title: 'Gesperrt', description: `${items.length} Debitor(en) gesperrt.`, variant: 'destructive' })
         loadData()
-      } catch (e: any) {
+      } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
       }
     }
@@ -329,7 +332,8 @@ export default function DebitorenListePage(): JSX.Element {
       const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
       toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
       loadData()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
     e.target.value = ''

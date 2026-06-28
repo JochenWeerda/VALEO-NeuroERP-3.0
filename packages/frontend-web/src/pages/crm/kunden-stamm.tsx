@@ -439,7 +439,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/crm/gdpr-request/${req.id}`)}
+                    onClick={() => navigate(`/crm/gdpr-request/${req.id as string}`)}
                   >
                     {t('crud.actions.details')}
                   </Button>
@@ -543,7 +543,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
                     </Badge>
                     <Badge variant="outline">{channelLabels[consent.channel] || consent.channel}</Badge>
                     <span className="text-sm text-muted-foreground">
-                      {t(`crud.consentTypes.${consent.consent_type}`)}
+                      {t(`crud.consentTypes.${String(consent.consent_type)}`)}
                     </span>
                   </div>
                   {consent.granted_at && (
@@ -561,7 +561,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/crm/consent/${consent.id}`)}
+                    onClick={() => navigate(`/crm/consent/${consent.id as string}`)}
                   >
                     {t('crud.actions.details')}
                   </Button>

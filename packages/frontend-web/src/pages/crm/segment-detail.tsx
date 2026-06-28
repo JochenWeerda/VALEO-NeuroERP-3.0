@@ -284,7 +284,7 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.conversionRate')}</div>
-                <div className="font-medium">{perf.conversion_rate ? `${perf.conversion_rate}%` : '-'}</div>
+                <div className="font-medium">{perf.conversion_rate ? `${String(perf.conversion_rate)}%` : '-'}</div>
               </div>
             </div>
           </CardContent>
@@ -373,7 +373,7 @@ export default function SegmentDetailPage(): JSX.Element {
           const members = response.data || []
           const csvHeader = `${t('crud.entities.contact')};${t('crud.fields.addedAt')}\n`
           const csvContent = members.map(member =>
-            `"${member.contact_id || ''}";"${formatDate(member.added_at)}"`
+            `"${String(member.contact_id ?? '')}";"${formatDate(member.added_at as string)}"`
           ).join('\n')
 
           const csv = csvHeader + csvContent

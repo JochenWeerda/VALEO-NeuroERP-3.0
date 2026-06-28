@@ -216,7 +216,7 @@ export default function InventoryReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {stockLevels?.categories && Object.entries(stockLevels.categories).map(([category, data]: [string, any]) => (
+                  {stockLevels?.categories && Object.entries(stockLevels.categories).map(([category, data]: [string, Record<string, unknown>]) => (
                     <TableRow key={category}>
                       <TableCell className="font-medium">{category}</TableCell>
                       <TableCell className="text-right">{data.count}</TableCell>
