@@ -16,11 +16,11 @@ import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 
 const createKontaktListConfig = (handlers: {
-  exportSelected: (items: any[]) => void
-  emailSelected: (items: any[]) => void
-  callSelected: (items: any[]) => void
-  meetingSelected: (items: any[]) => void
-  deactivateSelected: (items: any[]) => void
+  exportSelected: (items: Record<string, unknown>[]) => void
+  emailSelected: (items: Record<string, unknown>[]) => void
+  callSelected: (items: Record<string, unknown>[]) => void
+  meetingSelected: (items: Record<string, unknown>[]) => void
+  deactivateSelected: (items: Record<string, unknown>[]) => void
 }): ListConfig => ({
   title: 'Kontakt-Management',
   subtitle: 'Zentrales Management aller Kunden- und Lieferanten-Kontakte',
@@ -228,7 +228,7 @@ const createKontaktListConfig = (handlers: {
 
 export default function KontaktManagementPage(): JSX.Element {
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Record<string, unknown>[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const importInputRef = useRef<HTMLInputElement>(null)
@@ -265,15 +265,15 @@ export default function KontaktManagementPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
       navigate(`/crm/kontakte/${item.id}`)
     }
   })
 
   const handleCreate = () => navigate('/crm/kontakte/new')
-  const handleEdit = (item: any) => { void handleAction('edit', item) }
-  const handleDelete = (item: any) => {
+  const handleEdit = (item: Record<string, unknown>) => { void handleAction('edit', item) }
+  const handleDelete = (item: Record<string, unknown>) => {
     if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
     void withPending(String(item.id), async () => {
       try {
@@ -289,12 +289,12 @@ export default function KontaktManagementPage(): JSX.Element {
     })
   }
 
-  const handleExport = (rows: any[] = data) => {
+  const handleExport = (rows: Record<string, unknown>[] = data) => {
     try {
       const csvHeader = 'Name;Firma;E-Mail;Telefon;Mobil;Abteilung;Prioritaet;Status\n'
       const csvContent = rows
         .map(
-          (kontakt: any) =>
+          kontakt =>
             `"${kontakt.name}";"${kontakt.firma || ''}";"${kontakt.email || ''}";"${kontakt.telefon || ''}";"${kontakt.mobil || ''}";"${kontakt.abteilung || ''}";"${kontakt.prioritaet || ''}";"${kontakt.status || 'aktiv'}"`,
         )
         .join('\n')
@@ -322,7 +322,7 @@ export default function KontaktManagementPage(): JSX.Element {
     }
   }
 
-  const ensureSelection = (items: any[]): boolean => {
+  const ensureSelection = (items: Record<string, unknown>[]): boolean => {
     if (items.length > 0) return true
     toast({
       variant: 'destructive',

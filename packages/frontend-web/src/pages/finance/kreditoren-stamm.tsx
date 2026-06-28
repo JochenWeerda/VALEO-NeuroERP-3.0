@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -13,7 +13,7 @@ import { toast } from 'sonner'
 import { apiClient } from '@/lib/api-client'
 import { useTenant } from '@/hooks/useTenant'
 
-const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createKreditorenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
   type: 'object-page',
@@ -157,22 +157,22 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           name: 'zahlungsziel',
           label: t('crud.fields.paymentDueDays'),
           type: 'number'
-        } as any,
+        } as Field,
         {
           name: 'skontoTage',
           label: t('crud.fields.discountDays'),
           type: 'number'
-        } as any,
+        } as Field,
         {
           name: 'skontoProzent',
           label: t('crud.fields.discountPercent'),
           type: 'number'
-        } as any,
+        } as Field,
         {
           name: 'kreditlimit',
           label: t('crud.fields.creditLimit'),
           type: 'number'
-        } as any
+        } as Field
       ],
       layout: 'grid',
       columns: 2
@@ -307,7 +307,7 @@ export default function KreditorenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
+  const [formData, setFormData] = useState<Record<string, unknown>>({})
   const entityType = 'creditor'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
   const kreditorenConfig = createKreditorenConfig(t, entityTypeLabel)
@@ -318,7 +318,7 @@ export default function KreditorenStammPage(): JSX.Element {
     id: 'new'
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(kreditorenConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(kreditorenConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast.error(Object.values(errors).join(', '))
   }
@@ -336,7 +336,7 @@ export default function KreditorenStammPage(): JSX.Element {
           updatedData.bic = result.bic
         }
         setFormData(updatedData)
-        setData(updatedData as any)
+        setData(updatedData as Record<string, unknown>)
         toast.success(t('crud.messages.ibanLookupSuccess', { 
           defaultValue: 'Bankinformationen automatisch ausgefüllt',
           bankName: result.bank_name 
@@ -365,7 +365,7 @@ export default function KreditorenStammPage(): JSX.Element {
     }
   }, [formData?.iban, performLookup])
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -403,7 +403,7 @@ export default function KreditorenStammPage(): JSX.Element {
           geprueft_am: string
           hinweis: string
         }>('/api/v1/crm/sanktionspruefung', { name, land })
-        const result = res as any
+        const result = res as Record<string, unknown>
         if (result?.treffer) {
           toast.error(`Sanktionstreffer: ${result.ergebnis}`)
         } else {
@@ -413,7 +413,7 @@ export default function KreditorenStammPage(): JSX.Element {
         const msg = e.response?.data?.detail ?? e.message
         toast.error(`Sanktionsprüfung fehlgeschlagen: ${msg}`)
       }
-    } else if (action === 'export') {
+    } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'creditors', format: 'pdf', id: formData?.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -426,7 +426,7 @@ export default function KreditorenStammPage(): JSX.Element {
   })
 
   // Handle form data changes for IBAN lookup
-  const handleFormChange = (newData: any) => {
+  const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
     
@@ -456,11 +456,11 @@ export default function KreditorenStammPage(): JSX.Element {
         updatedData.bic = lookupData.bic
       }
       setFormData(updatedData)
-      setData(updatedData as any)
+      setData(updatedData as Record<string, unknown>)
     }
   }, [lookupData, formData, setData])
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

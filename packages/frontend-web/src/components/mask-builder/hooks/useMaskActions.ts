@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
 interface ActionHandler {
-  (_action: string, _data?: any): Promise<void> | void
+  (_action: string, _data?: Record<string, unknown>): Promise<void> | void
 }
 
 export function useMaskActions(onAction?: ActionHandler) {
@@ -11,7 +11,7 @@ export function useMaskActions(onAction?: ActionHandler) {
   const loadingRef = useRef<string | null>(null)
   const [loadingActionKey, setLoadingActionKey] = useState<string | null>(null)
 
-  const handleAction = useCallback(async (actionKey: string, data?: any) => {
+  const handleAction = useCallback(async (actionKey: string, data?: Record<string, unknown>) => {
     if (loadingRef.current !== null) return
     loadingRef.current = actionKey
     setLoadingActionKey(actionKey)
@@ -63,13 +63,13 @@ export function useMaskActions(onAction?: ActionHandler) {
     }
   }, [onAction, toast])
 
-  const confirmAction = useCallback((actionKey: string, message: string, data?: any) => {
+  const confirmAction = useCallback((actionKey: string, message: string, data?: Record<string, unknown>) => {
     if (window.confirm(message)) {
       return handleAction(actionKey, data)
     }
   }, [handleAction])
 
-  const handleBulkAction = useCallback(async (actionKey: string, items: any[], data?: any) => {
+  const handleBulkAction = useCallback(async (actionKey: string, items: Record<string, unknown>[], data?: Record<string, unknown>) => {
     if (items.length === 0) {
       toast({
         title: "Keine Elemente ausgewählt",

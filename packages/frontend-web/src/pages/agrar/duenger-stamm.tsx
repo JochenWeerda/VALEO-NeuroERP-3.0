@@ -181,13 +181,13 @@ const DuengerStammPage: React.FC = () => {
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: async (data: any) => { const r = await apiClient.post('/api/v1/agrar/duenger', data); return r.data },
+    mutationFn: async (data: Record<string, unknown>) => { const r = await apiClient.post('/api/v1/agrar/duenger', data); return r.data },
     onSuccess: () => {
       toast.success('Dünger erfolgreich erstellt');
       queryClient.invalidateQueries({ queryKey: ['duenger'] });
       navigate('/agrar/duenger-liste');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Fehler beim Erstellen: ${error.message}`);
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
@@ -196,12 +196,12 @@ const DuengerStammPage: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => { const r = await apiClient.put(`/api/v1/agrar/duenger/${id}`, data); return r.data },
+    mutationFn: async ({ id, data }: { id: string; data: Record<string, unknown> }) => { const r = await apiClient.put(`/api/v1/agrar/duenger/${id}`, data); return r.data },
     onSuccess: () => {
       toast.success('Dünger erfolgreich aktualisiert');
       queryClient.invalidateQueries({ queryKey: ['duenger', id] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
@@ -242,7 +242,7 @@ const DuengerStammPage: React.FC = () => {
   }, [duenger]);
 
   // Form Handlers
-  const handleInputChange = (field: keyof DuengerFormData, value: any) => {
+  const handleInputChange = (field: keyof DuengerFormData, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));

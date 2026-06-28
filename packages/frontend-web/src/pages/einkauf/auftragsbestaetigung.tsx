@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createAuftragsbestaetigungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.tooltips.fields.orderConfirmation'),
   type: 'object-page',
@@ -60,7 +60,7 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
             { key: 'positionId', label: t('crud.fields.item'), type: 'text', required: true },
             { key: 'bestaetigterTermin', label: t('crud.fields.confirmedDate'), type: 'date', required: true },
             { key: 'abweichung', label: t('crud.fields.deviation'), type: 'text' }
-          ] as any,
+          ] as Field[],
           helpText: t('crud.tooltips.fields.dateDeviations')
         }
       ]
@@ -78,7 +78,7 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
             { key: 'urspruenglicherPreis', label: t('crud.fields.originalPrice'), type: 'number', required: true },
             { key: 'neuerPreis', label: t('crud.fields.newPrice'), type: 'number', required: true },
             { key: 'begruendung', label: t('crud.fields.reason'), type: 'text' }
-          ] as any,
+          ] as Field[],
           helpText: t('crud.tooltips.fields.priceDeviations')
         }
       ]
@@ -180,7 +180,7 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
           }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       await saveData(formData)

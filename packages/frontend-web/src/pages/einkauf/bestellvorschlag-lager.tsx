@@ -119,8 +119,8 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       if (filterArtikelNr) p.set('artikelNr', filterArtikelNr)
       p.set('nur_unter_meldebestand', 'false')
       const qs = p.toString() ? `?${p.toString()}` : ''
-      const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)
-      const rows = (data || []).map((r: any) => ({
+      const data = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)
+      const rows = (data || []).map(r => ({
         id: r.article_id,
         artikelNr: r.artikel_nr || '',
         bezeichnung: r.artikel_bezeichnung || '',
@@ -166,10 +166,10 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       }] : [])
       // Kontrakte nachladen
       try {
-        const data = await apiClient.get<any[]>(
+        const data = await apiClient.get<Record<string, unknown>[]>(
           `/api/v1/einkauf/kontrakte?lieferant_id=${encodeURIComponent(selected.lieferant_id || '')}&status=aktiv`
         )
-        setKontrakte((data || []).map((k: any) => ({
+        setKontrakte((data || []).map(k => ({
           kontraktNr: k.kontraktnummer || '',
           lieferant: k.lieferant_id || '',
           restMenge: k.offene_menge ?? 0,
@@ -645,7 +645,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
               })
               push('Anfrage erstellt und an Lieferanten weitergeleitet.')
             } catch (e: any) {
-              push(`Fehler: ${(e as any).response?.data?.detail ?? (e as any).message}`)
+              push(`Fehler: ${(e as Record<string, unknown>).response?.data?.detail ?? (e as Record<string, unknown>).message}`)
             }
           }}>
           Anfrage erstellen

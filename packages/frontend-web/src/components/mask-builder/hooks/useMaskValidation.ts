@@ -11,13 +11,13 @@ export function useMaskValidation(schema?: unknown) {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const { toast } = useToast()
 
-  const validate = useCallback((data: any): ValidationResult => {
+  const validate = useCallback((data: Record<string, unknown>): ValidationResult => {
     const result = validateSchemaLike(schema, data)
     setValidationErrors(result.errors)
     return result
   }, [schema])
 
-  const validateField = useCallback((field: string, value: any): string | null => {
+  const validateField = useCallback((field: string, value: unknown): string | null => {
     if (!schema) return null
     const errorMessage = validateSchemaField(schema, field, value)
     setValidationErrors(prev => {

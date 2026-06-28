@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+﻿import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { apiClient } from '@/lib/api-client'
@@ -13,7 +13,7 @@ import { api } from '@/lib/axios'
 // API Client für Debitoren (Liste)
 
 // Konfiguration für Debitoren ListReport (wird in Komponente mit i18n erstellt)
-const createDebitorenListConfig = (t: any): ListConfig => ({
+const createDebitorenListConfig = (t: TFunction): ListConfig => ({
   title: t('crud.fields.debtorsList'),
   subtitle: t('crud.fields.debtorsListSubtitle'),
   type: 'list-report',
@@ -211,7 +211,7 @@ export default function DebitorenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const importInputRef = useRef<HTMLInputElement>(null)
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Record<string, unknown>[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const baseConfig = createDebitorenListConfig(t) as ListConfig & {
@@ -228,7 +228,7 @@ export default function DebitorenListePage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
       navigate(`/finance/debitoren/${item.id}`)
     }
@@ -239,8 +239,8 @@ export default function DebitorenListePage(): JSX.Element {
     try {
       const response = await apiClient.get('/api/v1/finance/debitoren')
       if (response.data) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
+        setData((response.data as Record<string, unknown>).data || [])
+        setTotal((response.data as Record<string, unknown>).total || 0)
       }
     } catch (error: any) {
       toast({ variant: 'destructive', title: t('crud.messages.loadDataError'), description: error?.message })
@@ -253,11 +253,11 @@ export default function DebitorenListePage(): JSX.Element {
     const onExportBulk = async () => {
       await triggerExportDownload('debtors', 'csv', toast)
     }
-    const onReminder = async (items: any[]) => {
+    const onReminder = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
       toast({ title: 'Zahlungserinnerung', description: `Für ${items.length} Debitoren wird Erinnerung erstellt.` })
     }
-    const onDunning = async (items: any[]) => {
+    const onDunning = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
       try {
         await api.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
@@ -267,7 +267,7 @@ export default function DebitorenListePage(): JSX.Element {
         toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
       }
     }
-    const onBlock = async (items: any[]) => {
+    const onBlock = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
       try {
         for (const item of items) {
@@ -299,11 +299,11 @@ export default function DebitorenListePage(): JSX.Element {
     navigate('/finance/debitoren/new')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     handleAction('edit', item)
   }
 
-  const handleDelete = (item: any) => {
+  const handleDelete = item => {
     if (!confirm(t('crud.messages.confirmDeleteDebtor', { name: item.kunde }))) return
     void withPending(String(item.id), async () => {
       try {

@@ -111,8 +111,7 @@ export function useVoiceIntent(options: UseVoiceIntentOptions = {}) {
     // vendor-prefixed experimental API — no stable TS types yet
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Recognition = ((window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition) as new () => any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recognition: any = new Recognition()
+    const recognition = new Recognition()
     recognition.lang = 'de-DE'
     recognition.continuous = false
     recognition.interimResults = false

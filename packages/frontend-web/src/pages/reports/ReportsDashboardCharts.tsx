@@ -4,10 +4,10 @@ type ReportType = 'sales-performance' | 'customer-analytics' | 'product-analytic
 
 type ReportChartsProps = {
   selectedReport: ReportType
-  data: any
+  data: unknown
 }
 
-const chartModules: Record<ReportType, React.LazyExoticComponent<(props: { data: any }) => JSX.Element>> = {
+const chartModules: Record<ReportType, React.LazyExoticComponent<(props: { data: unknown }) => JSX.Element>> = {
   'sales-performance': lazy(() => import('@/pages/reports/charts/SalesPerformanceCharts')),
   'customer-analytics': lazy(() => import('@/pages/reports/charts/CustomerAnalyticsCharts')),
   'product-analytics': lazy(() => import('@/pages/reports/charts/ProductAnalyticsCharts')),

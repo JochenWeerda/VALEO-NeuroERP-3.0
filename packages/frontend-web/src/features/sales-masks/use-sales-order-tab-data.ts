@@ -7,6 +7,9 @@ export type SalesOrderTabDataResponse = {
   tab_key: string
   table_key: string
   items: Record<string, unknown>[]
+  page?: number
+  limit?: number
+  total?: number
 }
 
 function resolveTabEndpoint(
@@ -21,6 +24,8 @@ export function useSalesOrderTabData(
   orderId: string,
   activeTabKey: string | undefined,
   tabEndpoints: Record<string, string> | undefined,
+  page = 1,
+  limit = 25,
 ) {
   const normalizedKey = activeTabKey ?? ''
   const endpoint = SALES_ORDER_PILOT_LAZY_DATA_TABS.has(normalizedKey)
@@ -28,12 +33,14 @@ export function useSalesOrderTabData(
     : undefined
 
   return useQuery({
-    queryKey: [...salesKeys.order(orderId), 'tab-data', normalizedKey],
+    queryKey: [...salesKeys.order(orderId), 'tab-data', normalizedKey, page, limit],
     queryFn: async () => {
       if (!endpoint) {
         throw new Error('Tab endpoint missing for lazy tab data request')
       }
-      const response = await apiClient.get<SalesOrderTabDataResponse>(endpoint)
+      const response = await apiClient.get<SalesOrderTabDataResponse>(endpoint, {
+        params: { page, limit },
+      })
       return response.data
     },
     enabled: Boolean(orderId && endpoint),

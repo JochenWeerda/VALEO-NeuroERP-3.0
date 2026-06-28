@@ -9,7 +9,7 @@ type FormFieldContextValue = {
 
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
-const FormField = ({ name, ...props }: any) => {
+const FormField = ({ name, ...props }: { name: string; [key: string]: unknown }) => {
   return (
     <FormFieldContext.Provider value={{ name }}>
       <Controller name={name} {...props} />

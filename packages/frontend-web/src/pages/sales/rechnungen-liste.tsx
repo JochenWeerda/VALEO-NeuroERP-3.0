@@ -189,7 +189,7 @@ export default function RechnungenListePage(): JSX.Element {
     { key: 'evidence', label: 'Nachweis', available: filteredRechnungen.length > 0, hint: 'Rechnungsnummer, Auftrag, Status und Faelligkeit bilden den Nachweis.' },
   ]
 
-  const handleImport = async (importData: any[]) => {
+  const handleImport = async (importData: Record<string, unknown>[]) => {
     try {
       for (const row of importData) {
         const doc = {

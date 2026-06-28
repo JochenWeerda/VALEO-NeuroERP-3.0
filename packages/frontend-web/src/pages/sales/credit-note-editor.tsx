@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -47,7 +47,7 @@ const creditNoteRoleProfiles: Array<{ id: CreditNoteRoleFocus; label: string; de
   },
 ]
 
-const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createCreditNoteConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: `${t('crud.actions.create')}/${t('crud.actions.edit')} ${entityTypeLabel}`,
   subtitle: t('crud.tooltips.fields.creditNote'),
   type: 'object-page',
@@ -290,7 +290,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
     id: id ?? 'new'
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(creditNoteConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(creditNoteConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
@@ -362,7 +362,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
   const hasReason = Boolean(creditNote.reason)
   const hasReasonText = Boolean(String(creditNote.reasonText ?? '').trim())
   const hasLines = lines.length > 0
-  const hasAmount = Number(creditNote.totalGross ?? 0) > 0 || lines.some((line: any) => Number(line?.price ?? 0) > 0)
+  const hasAmount = Number(creditNote.totalGross ?? 0) > 0 || lines.some(line => Number(line?.price ?? 0) > 0)
   const hasPaymentPath = Boolean(creditNote.paymentTerms && creditNote.dueDate)
   const isCancelled = creditNote.status === 'cancelled'
   const isCreditNoteReady = hasCustomer && hasReason && hasLines && hasAmount && hasPaymentPath && !isCancelled

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -12,7 +12,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createKasseConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.dailyClosing'),
   type: 'object-page',
@@ -105,17 +105,17 @@ const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       key: 'bewegungen',
       label: t('crud.fields.cashMovements'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'bewegungen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <KassenbewegungenTable
           data={_data.bewegungen || []}
           onChange={(bewegungen) => {
-            const sollEinlagen = bewegungen.filter((b: any) => b.typ === 'einlage').reduce((sum: number, b: any) => sum + (b.betrag || 0), 0)
-            const sollAuszahlungen = bewegungen.filter((b: any) => b.typ === 'auszahlung').reduce((sum: number, b: any) => sum + (b.betrag || 0), 0)
+            const sollEinlagen = bewegungen.filter(b => b.typ === 'einlage').reduce((sum, b) => sum + Number((b as Record<string, unknown>).betrag || 0), 0)
+            const sollAuszahlungen = bewegungen.filter(b => b.typ === 'auszahlung').reduce((sum, b) => sum + Number((b as Record<string, unknown>).betrag || 0), 0)
             const istEinlagen = sollEinlagen // Vereinfacht - in Realität würden Ist-Werte manuell erfasst
             const istAuszahlungen = sollAuszahlungen
             const endbestand = (_data.anfangsbestand || 0) + istEinlagen - istAuszahlungen
@@ -139,12 +139,12 @@ const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       key: 'kassensturz',
       label: t('crud.fields.cashCount'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'kassensturz_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <KassensturzForm
           data={_data.kassensturz || {
             scheine: {},
@@ -222,12 +222,12 @@ const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       update: '/api/v1/finance/cash/{id}',
       delete: '/api/v1/finance/cash/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
 // Kassenbewegungen-Tabelle Komponente
-function KassenbewegungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function KassenbewegungenTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const { t } = useTranslation()
   const addBewegung = () => {
     onChange([..._data, {
@@ -239,7 +239,7 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: any[], onChang
     }])
   }
 
-  const updateBewegung = (index: number, field: string, value: any) => {
+  const updateBewegung = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -341,9 +341,9 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: any[], onChang
 
 // Kassensturz-Form Komponente
 function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
-  data: any,
+  data: Record<string, unknown>,
   erwarteterBestand: number,
-  onChange: (_data: any) => void
+  onChange: (_data: Record<string, unknown>) => void
 }) {
   const { t } = useTranslation()
   const scheine = [500, 200, 100, 50, 20, 10, 5].map(s => s.toString())
@@ -447,7 +447,8 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
 export default function KassePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [isDirty, setIsDirty] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
+
   const entityType = 'cash'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kasse')
   const kasseConfig = createKasseConfig(t, entityTypeLabel)
@@ -457,7 +458,7 @@ export default function KassePage(): JSX.Element {
     id: 'new'
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(kasseConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(kasseConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({
       variant: 'destructive',
@@ -466,7 +467,7 @@ export default function KassePage(): JSX.Element {
     })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'add-movement') {
       // Neue Bewegung hinzufügen wird in der Tabelle behandelt
       toast({
@@ -507,7 +508,8 @@ export default function KassePage(): JSX.Element {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveCashClosingFirst') })
         return
-      }
+      }
+
       try {
         await apiClient.post('/api/v1/finance/cash/close-day', { id: formData.id, ...formData })
         toast({ title: t('crud.messages.dailyClosingPerformed'), description: t('crud.messages.cashClosingClosed') })
@@ -556,7 +558,8 @@ export default function KassePage(): JSX.Element {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveCashClosingFirst') })
         return
-      }
+      }
+
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'cash', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -568,7 +571,7 @@ export default function KassePage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('approve', formData)
   }
 

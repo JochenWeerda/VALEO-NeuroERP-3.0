@@ -1,6 +1,6 @@
-import { Suspense, lazy, useState, useEffect } from 'react'
+﻿import { Suspense, lazy, useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 
@@ -21,7 +21,7 @@ const CampaignDetailPerformanceChart = lazy(() =>
 )
 
 
-function validateCampaignForm(formData: Record<string, any>, t: any): { valid: boolean; errors: string[] } {
+function validateCampaignForm(formData: Record<string, unknown>, t: TFunction): { valid: boolean; errors: string[] } {
   const errorMessage = t('crud.messages.validationError')
   const errors: string[] = []
   const name = String(formData.name ?? '').trim()
@@ -41,7 +41,7 @@ function validateCampaignForm(formData: Record<string, any>, t: any): { valid: b
   return { valid: errors.length === 0, errors }
 }
 
-const createCampaignConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createCampaignConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
   type: 'object-page',
@@ -126,15 +126,15 @@ const createCampaignConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
 
 function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
   const { t } = useTranslation()
-  const [recipients, setRecipients] = useState<any[]>([])
+  const [recipients, setRecipients] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadRecipients = async () => {
       try {
-        const response = await apiClient.get<any[] | { items?: any[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
+        const response = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
         const data = response.data
-        setRecipients(Array.isArray(data) ? data : ((data as { items?: any[] }).items ?? []))
+        setRecipients(Array.isArray(data) ? data : ((data as { items?: Record<string, unknown>[] }).items ?? []))
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Empfänger', description: error?.message })
       } finally {
@@ -148,11 +148,11 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
   if (recipients.length === 0) return <div className="p-4 text-muted-foreground">{t('crud.messages.noRecipients')}</div>
 
   const columns = [
-    { key: 'email' as const, label: t('crud.fields.email'), render: (recipient: any) => recipient.email || '-' },
+    { key: 'email' as const, label: t('crud.fields.email'), render: (recipient: Record<string, unknown>) => (recipient.email as string) || '-' },
     {
       key: 'status' as const,
       label: t('crud.fields.status'),
-      render: (recipient: any) => {
+      render: (recipient: Record<string, unknown>) => {
         const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
           pending: 'secondary',
           sent: 'outline',
@@ -160,14 +160,14 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
           bounced: 'destructive',
           failed: 'destructive',
         }
-        return <Badge variant={statusVariants[recipient.status] || 'secondary'}>{recipient.status || '-'}</Badge>
+        return <Badge variant={statusVariants[recipient.status as string] || 'secondary'}>{(recipient.status as string) || '-'}</Badge>
       },
     },
-    { key: 'sent_at' as const, label: t('crud.fields.sentAt'), render: (recipient: any) => (recipient.sent_at ? formatDate(recipient.sent_at) : '-') },
-    { key: 'opened_at' as const, label: t('crud.fields.openedAt'), render: (recipient: any) => (recipient.opened_at ? formatDate(recipient.opened_at) : '-') },
-    { key: 'clicked_at' as const, label: t('crud.fields.clickedAt'), render: (recipient: any) => (recipient.clicked_at ? formatDate(recipient.clicked_at) : '-') },
-    { key: 'open_count' as const, label: t('crud.fields.openCount'), render: (recipient: any) => recipient.open_count || 0 },
-    { key: 'click_count' as const, label: t('crud.fields.clickCount'), render: (recipient: any) => recipient.click_count || 0 },
+    { key: 'sent_at' as const, label: t('crud.fields.sentAt'), render: (recipient: Record<string, unknown>) => (recipient.sent_at ? formatDate(recipient.sent_at as string) : '-') },
+    { key: 'opened_at' as const, label: t('crud.fields.openedAt'), render: (recipient: Record<string, unknown>) => (recipient.opened_at ? formatDate(recipient.opened_at as string) : '-') },
+    { key: 'clicked_at' as const, label: t('crud.fields.clickedAt'), render: (recipient: Record<string, unknown>) => (recipient.clicked_at ? formatDate(recipient.clicked_at as string) : '-') },
+    { key: 'open_count' as const, label: t('crud.fields.openCount'), render: (recipient: Record<string, unknown>) => (recipient.open_count as number) || 0 },
+    { key: 'click_count' as const, label: t('crud.fields.clickCount'), render: (recipient: Record<string, unknown>) => (recipient.click_count as number) || 0 },
   ]
 
   return <DataTable data={recipients} columns={columns} />
@@ -175,17 +175,17 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
 
 function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
   const { t } = useTranslation()
-  const [performance, setPerformance] = useState<any[]>([])
+  const [performance, setPerformance] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
-  const [metrics, setMetrics] = useState<any>(null)
+  const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get<{ timeline?: any[] }>(`/api/v1/crm/campaigns/${campaignId}/analytics`)
+        const response = await apiClient.get<{ timeline?: unknown[] }>(`/api/v1/crm/campaigns/${campaignId}/analytics`)
         const perfData = response.data
         setPerformance(Array.isArray(perfData?.timeline) ? perfData.timeline : [])
-        const campaignResponse = await apiClient.get<any>(`/api/v1/crm/campaigns/${campaignId}`)
+        const campaignResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/campaigns/${campaignId}`)
         setMetrics(campaignResponse.data)
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance', description: error?.message })
@@ -243,15 +243,15 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
 
 function CampaignEventsList({ campaignId }: { campaignId: string }) {
   const { t } = useTranslation()
-  const [events, setEvents] = useState<any[]>([])
+  const [events, setEvents] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const response = await apiClient.get<any[] | { items?: any[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
+        const response = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
         const evData = response.data
-        setEvents(Array.isArray(evData) ? evData : ((evData as { items?: any[] }).items ?? []))
+        setEvents(Array.isArray(evData) ? evData : ((evData as { items?: Record<string, unknown>[] }).items ?? []))
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Events', description: error?.message })
       } finally {
@@ -268,7 +268,7 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
     {
       key: 'event_type' as const,
       label: t('crud.fields.eventType'),
-      render: (event: any) => {
+      render: (event: Record<string, unknown>) => {
         const typeLabels: Record<string, string> = {
           sent: t('crud.campaigns.events.sent'),
           delivered: t('crud.campaigns.events.delivered'),
@@ -277,11 +277,11 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
           bounced: t('crud.campaigns.events.bounced'),
           converted: t('crud.campaigns.events.converted'),
         }
-        return <Badge variant="outline">{typeLabels[event.event_type] || event.event_type}</Badge>
+        return <Badge variant="outline">{typeLabels[event.event_type as string] || (event.event_type as string)}</Badge>
       },
     },
-    { key: 'timestamp' as const, label: t('crud.fields.timestamp'), render: (event: any) => formatDate(event.timestamp) },
-    { key: 'recipient_id' as const, label: t('crud.entities.recipient'), render: (event: any) => event.recipient_id || '-' },
+    { key: 'timestamp' as const, label: t('crud.fields.timestamp'), render: (event: Record<string, unknown>) => formatDate(event.timestamp as string) },
+    { key: 'recipient_id' as const, label: t('crud.entities.recipient'), render: (event: Record<string, unknown>) => (event.recipient_id as string) || '-' },
   ]
 
   return <DataTable data={events} columns={columns} />
@@ -301,7 +301,7 @@ export default function CampaignDetailPage(): JSX.Element {
 
   const { data, saveData, isLoading: dataLoading } = useMaskData({ apiUrl: campaignConfig.api.baseUrl, id: id || undefined })
   
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       const validationResult = validateCampaignForm(formData, t)

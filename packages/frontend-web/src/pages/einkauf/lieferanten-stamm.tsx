@@ -182,7 +182,7 @@ export default function LieferantenStammPage(): JSX.Element {
 
   const [loading, setLoading] = useState(false)
   const [duplicateCheckDialogOpen, setDuplicateCheckDialogOpen] = useState(false)
-  const [duplicateResults, setDuplicateResults] = useState<any[]>([])
+  const [duplicateResults, setDuplicateResults] = useState<Record<string, unknown>[]>([])
   const [blockDialogOpen, setBlockDialogOpen] = useState(false)
   const [blockReason, setBlockReason] = useState('')
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
@@ -221,12 +221,12 @@ export default function LieferantenStammPage(): JSX.Element {
     setLoading(true)
     try {
       // Versuche verschiedene API-Endpunkte
-      let response: any
+      let response: Record<string, unknown>
       try {
-        response = (await apiClient.get<any>(`/api/v1/crm/business-partners/${id}?type=supplier`)) as any
+        response = (await apiClient.get<Record<string, unknown>>(`/api/v1/crm/business-partners/${id}?type=supplier`))
       } catch (e1) {
         try {
-          response = (await apiClient.get<any>(`/api/v1/einkauf/lieferanten/${id}`)) as any
+          response = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/lieferanten/${id}`))
         } catch (e2) {
           toast({
             variant: 'destructive',
@@ -353,8 +353,8 @@ export default function LieferantenStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const results = (await apiClient.get<any[]>(`/api/v1/crm/business-partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)) as unknown as any[]
-      const duplicates = results.filter((s: any) => 
+      const results = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/business-partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)) as unknown as Record<string, unknown>[]
+      const duplicates = results.filter(s => 
         s.id !== lieferant.id && 
         (s.name?.toLowerCase().includes(lieferant.name.toLowerCase()) || 
          s.name?.toLowerCase() === lieferant.name.toLowerCase())
@@ -1530,7 +1530,7 @@ export default function LieferantenStammPage(): JSX.Element {
 }
 
 // New Contact Form Component
-function NewContactForm({ onSave, onCancel }: { onSave: (contact: any) => void; onCancel: () => void }) {
+function NewContactForm({ onSave, onCancel }: { onSave: (contact: Record<string, unknown>) => void; onCancel: () => void }) {
   const { t } = useTranslation()
   const [contact, setContact] = useState({ name: '', email: '', telefon: '', funktion: '' })
 
@@ -1585,7 +1585,7 @@ function NewContactForm({ onSave, onCancel }: { onSave: (contact: any) => void; 
 }
 
 // New Bank Account Form Component
-function NewBankAccountForm({ onSave, onCancel }: { onSave: (bank: any) => void; onCancel: () => void }) {
+function NewBankAccountForm({ onSave, onCancel }: { onSave: (bank: Record<string, unknown>) => void; onCancel: () => void }) {
   const { t } = useTranslation()
   const [bank, setBank] = useState({ iban: '', bic: '', bankName: '', kontoinhaber: '', isDefault: false })
 
@@ -1651,7 +1651,7 @@ function NewBankAccountForm({ onSave, onCancel }: { onSave: (bank: any) => void;
 }
 
 // New Classification Form Component
-function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: any) => void; onCancel: () => void }) {
+function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: Record<string, unknown>) => void; onCancel: () => void }) {
   const { t } = useTranslation()
   const [klass, setKlass] = useState({ typ: '', wert: '' })
 

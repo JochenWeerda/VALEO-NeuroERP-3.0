@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -15,7 +15,7 @@ import { useAnlieferavis, type Anlieferavis, einkaufKeys } from '@/lib/api/einka
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createAnlieferavisConfig = (t: any): ListConfig => ({
+const createAnlieferavisConfig = (t: TFunction): ListConfig => ({
   title: 'Anlieferavis',
   subtitle: 'Lieferavise fuer Wareneingangsvorbereitung',
   type: 'list-report',
@@ -108,7 +108,7 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
   actions: []
 })
 
-async function bulkAvisMutation(selectedItems: any[], action: 'send' | 'confirm' | 'cancel', allowedStatuses: string[]) {
+async function bulkAvisMutation(selectedItems: Record<string, unknown>[], action: 'send' | 'confirm' | 'cancel', allowedStatuses: string[]) {
   let ok = 0
   const errors: string[] = []
   const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
@@ -135,7 +135,7 @@ export default function AnlieferavisListePage(): JSX.Element {
         key: 'senden',
         label: 'Senden',
         type: 'primary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkAvisMutation(selectedItems, 'send', ['ANGEKUENDIGT'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
           if (result.ok > 0) {
@@ -149,7 +149,7 @@ export default function AnlieferavisListePage(): JSX.Element {
         key: 'bestaetigen',
         label: 'Bestaetigen',
         type: 'secondary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkAvisMutation(selectedItems, 'confirm', ['ANGEKUENDIGT', 'GESENDET'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
           if (result.ok > 0) {
@@ -163,7 +163,7 @@ export default function AnlieferavisListePage(): JSX.Element {
         key: 'stornieren',
         label: 'Stornieren',
         type: 'danger',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkAvisMutation(selectedItems, 'cancel', ['ANGEKUENDIGT', 'GESENDET', 'BESTAETIGT'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
           if (result.ok > 0) {
@@ -230,13 +230,13 @@ export default function AnlieferavisListePage(): JSX.Element {
     navigate('/einkauf/anlieferavis/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     if (item?.id) {
       navigate(`/einkauf/anlieferavis/${item.id}`)
     }
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Anlieferavis' }))) return
     try {

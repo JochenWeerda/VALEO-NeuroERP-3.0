@@ -97,7 +97,7 @@ export function useWorkflowStatus(workflowId: string) {
     initialData: null,
     refetchInterval: (query) => {
       // Stop polling if workflow is completed or rejected
-      const data = query.state.data as any
+      const data = query.state.data as Record<string, unknown>
       if (data?.status === 'completed' || data?.status === 'rejected') {
         return false
       }
@@ -127,7 +127,7 @@ export function useTriggerWorkflow() {
         runtime: response.data.runtime,
       }
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.status(data.workflow_id) })
     },
   })

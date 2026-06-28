@@ -155,6 +155,7 @@ describe('UniversalSalesOrderPilotPage', () => {
         'order-1',
         'positionen',
         summaryFixture.tab_endpoints,
+        1,
       )
     })
   })
@@ -191,6 +192,7 @@ describe('UniversalSalesOrderPilotPage', () => {
         'order-1',
         'lieferung',
         summaryFixture.tab_endpoints,
+        1,
       )
     })
   })

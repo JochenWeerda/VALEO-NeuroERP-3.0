@@ -110,7 +110,7 @@ export default function DuengerListePage(): JSX.Element {
     let filtered = duengerList.items
 
     if (safetyFilter !== 'all-safety') {
-      filtered = filtered.filter((item: any) => {
+      filtered = filtered.filter(item => {
         if (safetyFilter === 'wassergefaehrdend') return item.wassergefaehrdend
         if (safetyFilter === 'gefahrstoff') return item.gefahrstoff_klasse
         if (safetyFilter === 'safe') return !item.wassergefaehrdend && !item.gefahrstoff_klasse
@@ -121,7 +121,7 @@ export default function DuengerListePage(): JSX.Element {
     return filtered
   }, [duengerList, safetyFilter])
 
-  const getSafetyBadges = (item: any) => {
+  const getSafetyBadges = item => {
     const badges = []
 
     if (item.gefahrstoff_klasse) {
@@ -162,7 +162,7 @@ export default function DuengerListePage(): JSX.Element {
     return badges
   }
 
-  const getApprovalStatus = (item: any) => {
+  const getApprovalStatus = item => {
     const hasDmv = item.dmv_nummer
     const hasEu = item.eu_zulassung
     const expiryDate = item.ablauf_zulassung ? new Date(item.ablauf_zulassung) : null
@@ -189,7 +189,7 @@ export default function DuengerListePage(): JSX.Element {
     return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Keine Zulassung</Badge>
   }
 
-  const getNpkDisplay = (item: any) => {
+  const getNpkDisplay = item => {
     const n = item.n_gehalt || 0
     const p = item.p_gehalt || 0
     const k = item.k_gehalt || 0
@@ -346,7 +346,7 @@ export default function DuengerListePage(): JSX.Element {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.map((item: any) => (
+                  {filteredData.map(item => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.artikelnummer}</TableCell>
                       <TableCell>{item.name}</TableCell>

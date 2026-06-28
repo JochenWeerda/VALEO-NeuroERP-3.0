@@ -65,7 +65,7 @@ export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
           '/api/v1/einkauf/frachtauftraege',
         )
         const raw = res.data
-        return Array.isArray(raw) ? raw : (raw as any)?.data || []
+        return Array.isArray(raw) ? raw : (raw as Record<string, unknown>)?.data || []
       } catch {
         return []
       }

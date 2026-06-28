@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -61,11 +61,11 @@ const purchaseRoleProfiles: Array<{ id: PurchaseRoleFocus; label: string; descri
 ]
 
 const createBestellungenConfig = (
-  t: any,
+  t: TFunction,
   entityTypeLabel: string,
-  onBulkPrint?: (items: any[]) => void,
-  onBulkApprove?: (items: any[]) => void,
-  onBulkCancel?: (items: any[]) => void,
+  onBulkPrint?: (items: Record<string, unknown>[]) => void,
+  onBulkApprove?: (items: Record<string, unknown>[]) => void,
+  onBulkCancel?: (items: Record<string, unknown>[]) => void,
 ): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
@@ -205,12 +205,12 @@ export default function BestellungenListePage(): JSX.Element {
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
   const [roleFocus, setRoleFocus] = useState<PurchaseRoleFocus>('all')
-  const handleBulkPrint = (items: any[]) => {
+  const handleBulkPrint = (items: Record<string, unknown>[]) => {
     if (!items?.length) {
       toast({ title: t('crud.actions.print'), description: 'Bitte Bestellungen auswählen.', variant: 'destructive' })
       return
     }
-    const rows = items.map((o: any) =>
+    const rows = items.map(o =>
       `<tr><td>${escapeHtml(o.purchaseOrderNumber ?? o.id)}</td><td>${escapeHtml(o.supplier ?? o.subject ?? '')}</td><td>${escapeHtml(o.status ?? '')}</td><td>${escapeHtml(o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString('de-DE') : '')}</td><td>${escapeHtml(o.totalAmount != null ? `${Number(o.totalAmount).toFixed(2)} EUR` : '')}</td></tr>`
     ).join('')
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bestellungen</title></head><body><h1>Bestellungen (${items.length})</h1><table border="1" cellpadding="4"><thead><tr><th>Bestellnr.</th><th>Lieferant</th><th>Status</th><th>Lieferdatum</th><th>Betrag</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:1em">Erstellt: ${escapeHtml(new Date().toLocaleString('de-DE'))}</p></body></html>`
@@ -226,7 +226,7 @@ export default function BestellungenListePage(): JSX.Element {
       toast({ title: t('crud.actions.print'), description: 'Pop-up blockiert. Bitte Pop-ups erlauben und erneut versuchen.', variant: 'destructive' })
     }
   }
-  const handleBulkApprove = async (items: any[]) => {
+  const handleBulkApprove = async (items: Record<string, unknown>[]) => {
     if (items.length === 0) return
     for (const item of items) {
       try {
@@ -238,7 +238,7 @@ export default function BestellungenListePage(): JSX.Element {
     }
     if (items.length > 1) toast({ title: 'Bulk-Freigabe', description: `${items.length} Bestellungen freigegeben.` })
   }
-  const handleBulkCancel = async (items: any[]) => {
+  const handleBulkCancel = async (items: Record<string, unknown>[]) => {
     if (items.length === 0) return
     const reason = prompt(`Stornierungsgrund für ${items.length} Bestellung(en):`)
     if (!reason) return
@@ -259,15 +259,15 @@ export default function BestellungenListePage(): JSX.Element {
   const cancelMutation = useCancelPurchaseOrder()
 
   const data = orders ?? []
-  const draftCount = data.filter((order: any) => order.status === 'ENTWURF').length
-  const approvedCount = data.filter((order: any) => order.status === 'FREIGEGEBEN').length
-  const orderedCount = data.filter((order: any) => order.status === 'BESTELLT').length
-  const partialCount = data.filter((order: any) => order.status === 'TEILGELIEFERT').length
-  const deliveredCount = data.filter((order: any) => order.status === 'GELIEFERT').length
-  const cancelledCount = data.filter((order: any) => order.status === 'STORNIERT').length
-  const totalAmount = data.reduce((sum: number, order: any) => sum + Number(order.totalAmount || 0), 0)
+  const draftCount = data.filter(order => order.status === 'ENTWURF').length
+  const approvedCount = data.filter(order => order.status === 'FREIGEGEBEN').length
+  const orderedCount = data.filter(order => order.status === 'BESTELLT').length
+  const partialCount = data.filter(order => order.status === 'TEILGELIEFERT').length
+  const deliveredCount = data.filter(order => order.status === 'GELIEFERT').length
+  const cancelledCount = data.filter(order => order.status === 'STORNIERT').length
+  const totalAmount = data.reduce((sum, order) => sum + Number((order as Record<string, unknown>).totalAmount || 0), 0)
   const today = new Date().toISOString().split('T')[0]
-  const overdueCount = data.filter((order: any) =>
+  const overdueCount = data.filter(order =>
     order.deliveryDate && new Date(order.deliveryDate).toISOString().split('T')[0] < today && !['GELIEFERT', 'STORNIERT'].includes(String(order.status)),
   ).length
   const activeCount = data.length - cancelledCount
@@ -357,7 +357,7 @@ export default function BestellungenListePage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/bestellungen/${item.id}`)
     } else if (action === 'freigeben' && item) {
@@ -387,7 +387,7 @@ export default function BestellungenListePage(): JSX.Element {
     navigate('/einkauf/bestellungen/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: Record<string, unknown>) => {
     handleAction('edit', item)
   }
 

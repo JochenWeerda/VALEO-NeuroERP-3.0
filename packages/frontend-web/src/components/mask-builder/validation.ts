@@ -44,11 +44,11 @@ function getFieldError(field: Field, value: unknown): string | null {
     if (numericValue === null) {
       return `${field.label} muss eine Zahl sein`
     }
-    if (typeof (field as any).min === 'number' && numericValue < (field as any).min) {
-      return `${field.label} muss mindestens ${(field as any).min} sein`
+    if (typeof (field as Record<string, unknown>).min === 'number' && numericValue < (field as Record<string, unknown>).min) {
+      return `${field.label} muss mindestens ${(field as Record<string, unknown>).min} sein`
     }
-    if (typeof (field as any).max === 'number' && numericValue > (field as any).max) {
-      return `${field.label} darf hoechstens ${(field as any).max} sein`
+    if (typeof (field as Record<string, unknown>).max === 'number' && numericValue > (field as Record<string, unknown>).max) {
+      return `${field.label} darf hoechstens ${(field as Record<string, unknown>).max} sein`
     }
     return null
   }
@@ -67,17 +67,17 @@ function getFieldError(field: Field, value: unknown): string | null {
     return `${field.label} ist erforderlich`
   }
 
-  const minLength = (field as any).minLength
+  const minLength = (field as Record<string, unknown>).minLength
   if (typeof minLength === 'number' && trimmedValue.length < minLength) {
     return `${field.label} muss mindestens ${minLength} Zeichen haben`
   }
 
-  const maxLength = (field as any).maxLength
+  const maxLength = (field as Record<string, unknown>).maxLength
   if (typeof maxLength === 'number' && trimmedValue.length > maxLength) {
     return `${field.label} darf hoechstens ${maxLength} Zeichen haben`
   }
 
-  const pattern = (field as any).pattern
+  const pattern = (field as Record<string, unknown>).pattern
   if (typeof pattern === 'string' && !(new RegExp(pattern).test(trimmedValue))) {
     return `${field.label} hat ein ungueltiges Format`
   }

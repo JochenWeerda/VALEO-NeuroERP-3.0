@@ -234,7 +234,7 @@ function normalizeArticleLookup(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-function extractArticleLookupCandidates(payload: any): ArticleLookupCandidate[] {
+function extractArticleLookupCandidates(payload: Record<string, unknown>): ArticleLookupCandidate[] {
   if (Array.isArray(payload)) return payload
   if (Array.isArray(payload?.items)) return payload.items
   if (Array.isArray(payload?.data?.items)) return payload.data.items
@@ -480,7 +480,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         let customer: Customer | null = null
         if (ha.customer_id) {
           try {
-            const { data: customerData } = await apiClient.get<any>(`/api/v1/crm/customers/${ha.customer_id}`)
+            const { data: customerData } = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${ha.customer_id}`)
             customer = {
               id: customerData.id,
               customerNumber: customerData.customer_number || customerData.customerNumber || '',
@@ -867,7 +867,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   }
 
   // Artikel auswählen
-  const handleArticleSelect = (article: any): void => {
+  const handleArticleSelect = (article: Record<string, unknown>): void => {
     setState((prev) => ({
       ...prev,
       articleId: article.id,
@@ -961,7 +961,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       let customer: Customer | null = null
       if (response.customer_id) {
         try {
-          const customerData = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+          const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
           customer = {
             id: customerData.id,
             customerNumber: customerData.customer_number || customerData.customerNumber || '',

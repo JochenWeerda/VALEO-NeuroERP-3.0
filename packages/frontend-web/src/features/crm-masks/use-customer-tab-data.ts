@@ -7,6 +7,9 @@ export type CustomerTabDataResponse = {
   tab_key: string
   table_key: string
   items: Record<string, unknown>[]
+  page?: number
+  limit?: number
+  total?: number
 }
 
 function resolveTabEndpoint(
@@ -29,6 +32,8 @@ export function useCustomerTabData(
   customerId: string,
   activeTabKey: string | undefined,
   tabEndpoints: Record<string, string> | undefined,
+  page = 1,
+  limit = 25,
 ) {
   const normalizedKey = activeTabKey ?? ''
   const hasLazyData =
@@ -37,12 +42,14 @@ export function useCustomerTabData(
   const endpoint = hasLazyData ? resolveTabEndpoint(normalizedKey, tabEndpoints) : undefined
 
   return useQuery({
-    queryKey: [...crmKeys.customer(customerId), 'tab-data', normalizedKey],
+    queryKey: [...crmKeys.customer(customerId), 'tab-data', normalizedKey, page, limit],
     queryFn: async () => {
       if (!endpoint) {
         throw new Error('Tab endpoint missing for lazy tab data request')
       }
-      const response = await apiClient.get<CustomerTabDataResponse>(endpoint)
+      const response = await apiClient.get<CustomerTabDataResponse>(endpoint, {
+        params: { page, limit },
+      })
       return response.data
     },
     enabled: Boolean(customerId && endpoint),

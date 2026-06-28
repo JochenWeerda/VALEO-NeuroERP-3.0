@@ -6,10 +6,10 @@ interface UseMaskDataOptions {
   apiUrl: string
   id?: string
   autoLoad?: boolean
-  transformResponse?: (_data: any) => any
+  transformResponse?: (_data: unknown) => unknown
 }
 
-export function useMaskData<T = any>({ apiUrl, id, autoLoad = true, transformResponse }: UseMaskDataOptions) {
+export function useMaskData<T = unknown>({ apiUrl, id, autoLoad = true, transformResponse }: UseMaskDataOptions) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

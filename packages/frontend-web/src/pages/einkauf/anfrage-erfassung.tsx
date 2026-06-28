@@ -107,10 +107,10 @@ function LieferantSuchDialog({
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<any[]>('/api/v1/crm/customers', {
+      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers', {
         params: { search: search.trim(), limit: 30 },
       })
-      setResults((data || []).map((c: any) => ({
+      setResults((data || []).map(c => ({
         id: c.id,
         lieferantNr: c.customer_number || '',
         name: c.company_name || c.name || '',
@@ -220,7 +220,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
     if (!anfrageId) return
     void (async () => {
       try {
-        const data = await apiClient.get<any>(`/api/v1/einkauf/anfragen/${anfrageId}`)
+        const data = await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${anfrageId}`)
         setState((p) => ({
           ...p, id: data.id, anfrageNr: data.anfrage_nr || '',
           anfrageDat: data.anfrage_datum?.substring(0, 10) || today(),
@@ -243,7 +243,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
     return { gesamt, gewicht }
   }, [state.positionen])
 
-  const handleArticleSelect = (article: any): void => {
+  const handleArticleSelect = (article: Record<string, unknown>): void => {
     setCurrentPos((p) => ({
       ...p,
       artikelNr: article.article_number || article.articleNumber || '',
@@ -305,7 +305,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
           kontrakt_nr: p.kontraktNr || null,
         })),
       }
-      let resp: any
+      let resp: Record<string, unknown>
       if (state.id) {
         resp = await apiClient.patch(`/api/v1/einkauf/anfragen/${state.id}`, payload)
       } else {
@@ -394,7 +394,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                     e.preventDefault()
                     try {
                       const items = await apiClient.get<{ id: string }[]>('/api/v1/einkauf/anfragen')
-                      const idx = anfrageId ? items.findIndex((a: any) => a.id === anfrageId) : -1
+                      const idx = anfrageId ? items.findIndex(a => a.id === anfrageId) : -1
                       if (idx + 1 < items.length) {
                         navigate(`/einkauf/anfragen/${items[idx + 1].id}`)
                       } else {
@@ -770,7 +770,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                 const resp = state.id
                   ? await apiClient.patch(`/api/v1/einkauf/anfragen/${state.id}`, payload)
                   : await apiClient.post('/api/v1/einkauf/anfragen', payload)
-                push(`Lieferanten-Angebot gesendet (${(resp as any)?.anfrageNr ?? 'OK'})`)
+                push(`Lieferanten-Angebot gesendet (${(resp as Record<string, unknown>)?.anfrageNr ?? 'OK'})`)
               } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
             }}>
             <Send className="h-4 w-4" />Lieferanten-Angebot

@@ -183,7 +183,7 @@ export default function InventoryReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {alerts?.alerts?.slice(0, 10).map((alert: any) => (
+                  {alerts?.alerts?.slice(0, 10).map(alert => (
                     <TableRow key={alert.article_id}>
                       <TableCell>{alert.name}</TableCell>
                       <TableCell>{alert.current_stock}</TableCell>
@@ -237,7 +237,7 @@ export default function InventoryReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {alerts?.alerts?.map((alert: any) => (
+                {alerts?.alerts?.map(alert => (
                   <div key={alert.article_id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <div className="font-medium">{alert.name}</div>
@@ -262,7 +262,7 @@ export default function InventoryReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {replenishment?.suggestions?.map((suggestion: any) => (
+                {replenishment?.suggestions?.map(suggestion => (
                   <div key={suggestion.article_id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <div className="font-medium">{suggestion.name}</div>

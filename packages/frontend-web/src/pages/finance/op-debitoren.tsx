@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -45,7 +45,7 @@ function mapOpenItemApiToForm(row: Record<string, unknown>): Record<string, unkn
   }
 }
 
-const createOpDebitorenConfig = (t: any, entityTypeLabel: string, customerOptions: Array<{ value: string; label: string }>): MaskConfig => ({
+const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customerOptions: Array<{ value: string; label: string }>): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.opKreditoren.subtitle'),
   type: 'object-page',
@@ -155,17 +155,17 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string, customerOption
       key: 'zahlungen',
       label: t('crud.fields.payments'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'zahlungen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <ZahlungenTable
           data={_data.zahlungen || []}
           gesamtBetrag={_data.betrag || 0}
           onChange={(zahlungen) => {
-            const totalPaid = zahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
+            const totalPaid = zahlungen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).betrag || 0), 0)
             onChange({
               ..._data,
               zahlungen,
@@ -204,8 +204,8 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string, customerOption
       key: 'ausgleichshistorie',
       label: t('crud.fields.settlementHistory') ?? 'Ausgleichshistorie',
       fields: [],
-      customRender: (tabData: any) => tabData?.id ? <SettlementsList opId={tabData.id} t={t} /> : <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'OP speichern, um die Ausgleichshistorie zu sehen.'}</p>
-    } as any,
+      customRender: (tabData: Record<string, unknown>) => tabData?.id ? <SettlementsList opId={tabData.id} t={t} /> : <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'OP speichern, um die Ausgleichshistorie zu sehen.'}</p>
+    } as Field,
     {
       key: 'notizen',
       label: t('crud.fields.notes'),
@@ -235,16 +235,16 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string, customerOption
       update: '/api/v1/finance/open-items/{id}',
       delete: '/api/v1/finance/open-items/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
 // Zahlungen-Tabelle Komponente
 function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
-  data: any[],
+  data: Record<string, unknown>[],
   gesamtBetrag: number,
-  onChange: (_data: any[]) => void,
-  t: any
+  onChange: (_data: Record<string, unknown>[]) => void,
+  t: TFunction
 }) {
   const addZahlung = () => {
     onChange([..._data, {
@@ -255,7 +255,7 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
     }])
   }
 
-  const updateZahlung = (index: number, field: string, value: any) => {
+  const updateZahlung = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -471,12 +471,12 @@ export default function OPDebitorenPage(): JSX.Element {
     transformResponse: (raw) => mapOpenItemApiToForm(raw as Record<string, unknown>),
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(opDebitorenConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(opDebitorenConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast.error(`${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`)
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'zahlung') {
       // Zahlung buchen - fügt automatisch eine neue Zahlung hinzu
       const newZahlung = {
@@ -487,7 +487,7 @@ export default function OPDebitorenPage(): JSX.Element {
       }
 
       const updatedZahlungen = [...(formData.zahlungen || []), newZahlung]
-      const totalPaid = updatedZahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
+      const totalPaid = updatedZahlungen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).betrag || 0), 0)
 
       formData.zahlungen = updatedZahlungen
       formData.offen = (formData.betrag || 0) - totalPaid
@@ -509,7 +509,7 @@ export default function OPDebitorenPage(): JSX.Element {
       }
 
       const updatedZahlungen = [...(formData.zahlungen || []), skontoZahlung]
-      const totalPaid = updatedZahlungen.reduce((sum: number, z: any) => sum + (z.betrag || 0), 0)
+      const totalPaid = updatedZahlungen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).betrag || 0), 0)
 
       formData.zahlungen = updatedZahlungen
       formData.offen = (formData.betrag || 0) - totalPaid
@@ -608,7 +608,7 @@ export default function OPDebitorenPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('ausgleich', formData)
   }
 

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -28,7 +28,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
   type: 'object-page',
@@ -170,7 +170,7 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
               label: t('crud.fields.dueDate'),
               type: 'date'
             }
-          ] as any,
+          ] as Field[],
           helpText: t('crud.fields.items')
         }
       ]
@@ -234,7 +234,7 @@ export default function BestellungStammPage(): JSX.Element {
   const [stornoDialogOpen, setStornoDialogOpen] = useState(false)
   const [stornoReason, setStornoReason] = useState('')
   const [approvalRequired, setApprovalRequired] = useState(false)
-  const [originalData, setOriginalData] = useState<any>(null)
+  const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null)
   const [sendDialogOpen, setSendDialogOpen] = useState(false)
   const [sendMethod, setSendMethod] = useState<'email' | 'portal'>('email')
   const [sendLanguage, setSendLanguage] = useState<'de' | 'en'>('de')
@@ -261,8 +261,8 @@ export default function BestellungStammPage(): JSX.Element {
     entityType: 'purchaseOrder',
     entityId: id || '',
     fetchAuditTrail: async (entityType: string, entityId: string) => {
-      const response = (await apiClient.get<any[]>(`/api/v1/audit/logs?entity_type=${entityType}&entity_id=${entityId}&limit=50`)) as unknown as any[]
-      return (response || []).map((log: any) => ({
+      const response = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/audit/logs?entity_type=${entityType}&entity_id=${entityId}&limit=50`)) as unknown as Record<string, unknown>[]
+      return (response || []).map(log => ({
         id: log.id,
         timestamp: new Date(log.timestamp),
         action: log.action,
@@ -294,7 +294,7 @@ export default function BestellungStammPage(): JSX.Element {
     }
   }, [data, originalData])
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       // Prüfe ob Genehmigung erforderlich ist
@@ -353,7 +353,7 @@ export default function BestellungStammPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (key: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (key: string, formData: Record<string, unknown>) => {
     const purchaseOrderId = id || formData?.id || data?.id || data?.nummer || data?.purchaseOrderNumber
     if (key === 'freigeben') {
       if (!purchaseOrderId) {

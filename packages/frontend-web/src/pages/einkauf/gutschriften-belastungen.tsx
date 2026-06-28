@@ -223,7 +223,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       } catch {
         // Fallback: openAmount bleibt aus Rechnung
       }
-      const invoices: APInvoice[] = rawList.map((inv: any) => {
+      const invoices: APInvoice[] = rawList.map(inv => {
         const nr = inv.number ?? inv.id ?? ''
         const openFromOp = openItemsMap[nr]
         return {
@@ -440,7 +440,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
     }))
   }
 
-  const updateMemoItem = (index: number, field: keyof MemoItem, value: any) => {
+  const updateMemoItem = (index: number, field: keyof MemoItem, value: unknown) => {
     const updatedItems = [...memoData.items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
     

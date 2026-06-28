@@ -19,8 +19,8 @@ export interface ChangeLog {
   userName?: string;
   timestamp: Date | string;
   changedFields?: string[];
-  oldValue?: Record<string, any>;
-  newValue?: Record<string, any>;
+  oldValue?: Record<string, unknown>;
+  newValue?: Record<string, unknown>;
 }
 
 export interface CrudAuditTrailPanelProps {

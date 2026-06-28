@@ -253,7 +253,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
         key: 'recalculate',
         label: 'Nährwerte neu berechnen',
         type: 'secondary' as const,
-        onClick: async (items: any[]) => {
+        onClick: async (items: Record<string, unknown>[]) => {
           try {
             await api.post('/api/v1/futter/mischfuttermittel/recalculate', { ids: items.map((i) => i.id) })
             queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
@@ -267,7 +267,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
         key: 'delete',
         label: 'Löschen',
         type: 'danger' as const,
-        onClick: async (items: any[]) => {
+        onClick: async (items: Record<string, unknown>[]) => {
           if (!confirm(`${items.length} Mischfuttermittel wirklich löschen?`)) return
           const result = await bulkDeleteFutterItems('mischfuttermittel', items.map((item) => item.id))
           queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
@@ -285,11 +285,11 @@ export default function MischfuttermittelListePage(): JSX.Element {
     navigate('/futtermittel/mischfuttermittel/stamm/new')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(`Mischfuttermittel "${item.name}" wirklich löschen?`)) return
     try {
@@ -316,7 +316,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
       const res = await api.post('/api/v1/futter/import/mischfuttermittel', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
       toast({
         title: 'Import abgeschlossen',
         description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,

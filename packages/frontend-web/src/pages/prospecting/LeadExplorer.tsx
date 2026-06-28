@@ -100,7 +100,7 @@ export default function LeadExplorer(): JSX.Element {
         minPotential,
         zipCodeStart: zipCodeStart || undefined,
         zipCodeEnd: zipCodeEnd || undefined,
-        source: source as any,
+        source: source as string,
         segment: segment === 'all' ? undefined : segment,
         onlyNewProspects,
         onlyHighPriority,

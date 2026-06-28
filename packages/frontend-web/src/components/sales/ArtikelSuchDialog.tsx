@@ -87,9 +87,9 @@ export function ArtikelSuchDialog({
       params.append('search', debouncedSearchTerm)
       params.append('limit', '50')
 
-      const response = await apiClient.get<any>('/api/v1/articles', { params })
+      const response = await apiClient.get<Record<string, unknown>>('/api/v1/articles', { params })
 
-      let items: any[] = []
+      let items: Record<string, unknown>[] = []
       if (Array.isArray(response)) {
         items = response
       } else if (response?.items && Array.isArray(response.items)) {
@@ -102,15 +102,15 @@ export function ArtikelSuchDialog({
 
       if (items.length === 0 && response) {
         for (const key of Object.keys(response)) {
-          if (Array.isArray((response as any)[key])) {
-            items = (response as any)[key]
+          if (Array.isArray((response as Record<string, unknown>)[key])) {
+            items = (response as Record<string, unknown>)[key]
             break
           }
         }
       }
 
       // Map backend article format to frontend format
-      return items.map((a: any) => ({
+      return items.map(a => ({
         id: a.id,
         articleNumber: a.article_number || a.articleNumber || '',
         description: (a.name || a.description || '').trim(),
@@ -132,7 +132,7 @@ export function ArtikelSuchDialog({
     },
     enabled: open && debouncedSearchTerm.length >= 2,
     staleTime: 30_000,
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error) => {
       if (error?.response?.status === 401) {
         return false
       }
@@ -145,15 +145,15 @@ export function ArtikelSuchDialog({
     let result = articles
     
     if (activeTab === 'group') {
-      result = result.filter((a: any) => a.articleGroup || a.article_group)
+      result = result.filter(a => a.articleGroup || a.article_group)
     } else if (activeTab === 'selection') {
-      result = result.filter((a: any) => a.selection || a.is_selected)
+      result = result.filter(a => a.selection || a.is_selected)
     } else if (activeTab === 'variants') {
-      result = result.filter((a: any) => a.isVariant || a.is_variant || a.parent_article_id)
+      result = result.filter(a => a.isVariant || a.is_variant || a.parent_article_id)
     }
 
     if (pool === 'A') {
-      result = result.filter((a: any) => a.isAlternative || a.is_alternative)
+      result = result.filter(a => a.isAlternative || a.is_alternative)
     }
     
     // Apply blocked articles filter

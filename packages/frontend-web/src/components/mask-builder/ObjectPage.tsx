@@ -16,13 +16,13 @@ import { createMaskResolver, getFieldName, getFieldsFromMaskConfig } from './val
 
 interface ObjectPageProps {
   config: MaskConfig
-  data?: any
-  onChange?: (_data: any) => void
-  onSave: (_data: any) => Promise<void>
+  data?: Record<string, unknown>
+  onChange?: (_data: Record<string, unknown>) => void
+  onSave: (_data: Record<string, unknown>) => Promise<void>
   onCancel: () => void
   isLoading?: boolean
   /** When provided, toolbar action buttons call this with (actionKey, formData) instead of action.onClick */
-  onAction?: (_actionKey: string, _formData: any) => void | Promise<void>
+  onAction?: (_actionKey: string, _formData: Record<string, unknown>) => void | Promise<void>
   /** Key of the action currently loading (disables that button and shows spinner) */
   loadingActionKey?: string | null
   /** Enable golden-ratio split layout (61.8% / 38.2%) for the active tab content */
@@ -161,7 +161,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     }
   }
 
-  const onSubmit = async (formData: any) => {
+  const onSubmit = async (formData: Record<string, unknown>) => {
     try {
       await onSave(formData)
       setIsDirty(false)
@@ -362,7 +362,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
   const renderTabContent = (tab: MaskTab) => {
     if (typeof tab.customRender === 'function') {
-      return tab.customRender(watch(), (nextData: any) => {
+      return tab.customRender(watch(), (nextData: Record<string, unknown>) => {
         reset(nextData)
         if (onChange) {
           onChange(nextData)
@@ -500,7 +500,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
               {Object.entries(errors).map(([key, err]) => (
                 <li key={key} className="text-sm text-destructive">
                   <a href={`#${key}`} className="underline hover:no-underline">
-                    {(err as any)?.message ?? key}
+                    {(err as Error)?.message ?? key}
                   </a>
                 </li>
               ))}

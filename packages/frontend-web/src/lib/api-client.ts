@@ -2,7 +2,7 @@
  * API Client
  * Axios-basierter HTTP-Client mit Interceptors
  */
-import axios, { type AxiosInstance, type AxiosResponse, isAxiosError } from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, isAxiosError } from 'axios'
 import { auth } from './auth'
 
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
@@ -119,27 +119,27 @@ class APIClient {
   }
 
   async get<T, D = unknown>(url: string, config?: Parameters<AxiosInstance['get']>[1]): Promise<ApiResult<T>> {
-    const response = await this.client.get<T, AxiosResponse<T>, D>(url, config as any)
+    const response = await this.client.get<T, AxiosResponse<T>, D>(url, config as AxiosRequestConfig)
     return wrapResponseData(response)
   }
 
   async post<T, D = unknown>(url: string, data?: D, config?: Parameters<AxiosInstance['post']>[2]): Promise<ApiResult<T>> {
-    const response = await this.client.post<T, AxiosResponse<T>, D>(url, data, config as any)
+    const response = await this.client.post<T, AxiosResponse<T>, D>(url, data, config as AxiosRequestConfig)
     return wrapResponseData(response)
   }
 
   async put<T, D = unknown>(url: string, data?: D, config?: Parameters<AxiosInstance['put']>[2]): Promise<ApiResult<T>> {
-    const response = await this.client.put<T, AxiosResponse<T>, D>(url, data, config as any)
+    const response = await this.client.put<T, AxiosResponse<T>, D>(url, data, config as AxiosRequestConfig)
     return wrapResponseData(response)
   }
 
   async patch<T, D = unknown>(url: string, data?: D, config?: Parameters<AxiosInstance['patch']>[2]): Promise<ApiResult<T>> {
-    const response = await this.client.patch<T, AxiosResponse<T>, D>(url, data, config as any)
+    const response = await this.client.patch<T, AxiosResponse<T>, D>(url, data, config as AxiosRequestConfig)
     return wrapResponseData(response)
   }
 
   async delete<T, D = unknown>(url: string, config?: Parameters<AxiosInstance['delete']>[1]): Promise<ApiResult<T>> {
-    const response = await this.client.delete<T, AxiosResponse<T>, D>(url, config as any)
+    const response = await this.client.delete<T, AxiosResponse<T>, D>(url, config as AxiosRequestConfig)
     return wrapResponseData(response)
   }
 }

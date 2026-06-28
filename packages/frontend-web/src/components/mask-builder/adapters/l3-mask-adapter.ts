@@ -72,16 +72,16 @@ interface L3MaskConfig {
   }
   views: L3View[]
   validation?: {
-    rules: Record<string, any>
+    rules: Record<string, unknown>
   }
   ui?: {
     responsive: boolean
-    breakpoints: Record<string, any>
-    touch?: Record<string, any>
-    performance?: Record<string, any>
-    offline?: Record<string, any>
-    lowAttentionMode?: Record<string, any>
-    a11y?: Record<string, any>
+    breakpoints: Record<string, unknown>
+    touch?: Record<string, unknown>
+    performance?: Record<string, unknown>
+    offline?: Record<string, unknown>
+    lowAttentionMode?: Record<string, unknown>
+    a11y?: Record<string, unknown>
   }
   ai?: {
     enabled: boolean
@@ -106,7 +106,7 @@ interface L3MaskConfig {
       severity?: string
       message?: string
     }>
-    ragPanels?: Record<string, any>
+    ragPanels?: Record<string, unknown>
     mcp?: {
       tools: Array<{
         name: string
@@ -118,7 +118,7 @@ interface L3MaskConfig {
       enabled: boolean
       weightedSuggestions: Record<string, string[]>
     }
-    serverEndpoints?: Record<string, any>
+    serverEndpoints?: Record<string, unknown>
   }
 }
 

@@ -105,7 +105,7 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
     id: 'new',
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(futtermittelConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(futtermittelConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({
       variant: 'destructive',
@@ -114,7 +114,7 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
     })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -142,7 +142,7 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

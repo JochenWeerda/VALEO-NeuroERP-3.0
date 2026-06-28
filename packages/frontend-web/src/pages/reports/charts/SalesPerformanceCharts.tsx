@@ -1,6 +1,6 @@
 import { SimpleComparisonBars } from '@/components/charts/SimpleComparisonBars'
 
-export default function SalesPerformanceCharts({ data }: { data: any }): JSX.Element {
+export default function SalesPerformanceCharts({ data }: { data: unknown }): JSX.Element {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <section className="rounded-lg border bg-card p-4">

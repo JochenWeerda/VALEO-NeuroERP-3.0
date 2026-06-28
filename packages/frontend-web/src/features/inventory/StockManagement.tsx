@@ -294,7 +294,7 @@ export function StockManagement() {
 
 interface StockMovementFormProps {
   article: Article | null;
-  warehouses: any[];
+  warehouses: Record<string, unknown>[];
   onSubmit: (_movement: StockMovementForm) => void;
   isSubmitting: boolean;
   onCancel: () => void;

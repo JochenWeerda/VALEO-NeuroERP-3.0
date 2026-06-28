@@ -106,7 +106,7 @@ export default function KontaktDetailPage(): JSX.Element {
     }
   }
 
-  const updateField = (field: keyof Contact, value: any) => {
+  const updateField = (field: keyof Contact, value: unknown) => {
     setContact(prev => ({ ...prev, [field]: value }))
   }
 

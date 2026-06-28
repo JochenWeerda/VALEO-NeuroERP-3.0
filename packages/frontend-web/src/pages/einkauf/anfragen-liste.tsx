@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -15,7 +15,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createAnfragenConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.managePurchaseRequests'),
@@ -171,7 +171,7 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
 })
 
 async function bulkRequestMutation(
-  selectedItems: any[],
+  selectedItems: Record<string, unknown>[],
   endpointSuffix: 'send' | 'convert-to-order',
   allowedStatuses: string[],
 ): Promise<{ ok: number; errors: string[]; createdOrderId?: string; createdOrderNumber?: string }> {
@@ -229,7 +229,7 @@ export default function AnfragenListePage(): JSX.Element {
         label: t('crud.actions.approve'),
         labelKey: 'crud.actions.approve',
         type: 'primary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkRequestMutation(selectedItems, 'send', ['ENTWURF', 'OFFEN'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.anfragen() })
           if (result.ok > 0) {
@@ -244,7 +244,7 @@ export default function AnfragenListePage(): JSX.Element {
         label: t('crud.actions.convertToOrder'),
         labelKey: 'crud.actions.convertToOrder',
         type: 'secondary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkRequestMutation(selectedItems, 'convert-to-order', ['FREIGEGEBEN', 'ANGEBOTSPHASE'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.anfragen() })
           if (result.ok > 0) {
@@ -269,13 +269,13 @@ export default function AnfragenListePage(): JSX.Element {
     navigate('/einkauf/anfrage/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     if (item?.id) {
       navigate(`/einkauf/anfragen/${item.id}`)
     }
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
@@ -290,7 +290,7 @@ export default function AnfragenListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.requestNumber')};${t('crud.fields.requester')};${t('crud.fields.product')};${t('crud.fields.quantity')};${t('crud.fields.status')}\n`
-      const csvContent = data.map((anfrage: any) =>
+      const csvContent = data.map(anfrage =>
         `"${anfrage.anfrageNummer}";"${anfrage.anforderer}";"${anfrage.artikel}";"${anfrage.menge}";"${anfrage.status}"`
       ).join('\n')
 

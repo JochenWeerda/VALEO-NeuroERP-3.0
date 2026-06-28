@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -58,7 +58,7 @@ const procurementRoleProfiles: Array<{ id: ProcurementRoleFocus; label: string; 
   },
 ]
 
-const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageInvoiceReceipts'),
@@ -192,8 +192,8 @@ async function bulkWorkflow(
     } catch (e: any) {
       err += 1
       messages.push(
-        (item as any).rechnungsNummer || item.id
-          ? `${(item as any).rechnungsNummer || item.id}: ${e?.response?.data?.detail || e?.message}`
+        ( item as Record<string, unknown>).rechnungsNummer || item.id
+          ? `${( item as Record<string, unknown>).rechnungsNummer || item.id}: ${e?.response?.data?.detail || e?.message}`
           : e?.response?.data?.detail || e?.message,
       )
     }
@@ -341,7 +341,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
         label: t('crud.actions.review'),
         labelKey: 'crud.actions.review',
         type: 'secondary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const { ok, err, messages } = await bulkWorkflow(
             selectedItems,
             'pruefen',
@@ -366,7 +366,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
         label: t('crud.actions.approve'),
         labelKey: 'crud.actions.approve',
         type: 'primary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const { ok, err, messages } = await bulkWorkflow(
             selectedItems,
             'freigeben',
@@ -391,7 +391,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
         label: t('crud.actions.post'),
         labelKey: 'crud.actions.post',
         type: 'primary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const { ok, err, messages } = await bulkWorkflow(
             selectedItems,
             'verbuchen',
@@ -418,13 +418,13 @@ export default function RechnungseingaengeListePage(): JSX.Element {
     navigate('/einkauf/rechnungseingang/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     if (item?.id) {
       navigate(`/einkauf/rechnungseingaenge/${item.id}`)
     }
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
@@ -439,7 +439,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.invoiceNumber')};${t('crud.entities.supplier')};${t('crud.fields.grossAmount')};${t('crud.fields.status')}\n`
-      const csvContent = data.map((rechnung: any) =>
+      const csvContent = data.map(rechnung =>
         `"${rechnung.rechnungsNummer}";"${rechnung.lieferant}";"${rechnung.bruttoBetrag}";"${rechnung.status}"`
       ).join('\n')
 
