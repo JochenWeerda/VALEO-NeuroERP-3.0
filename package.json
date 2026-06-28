@@ -99,7 +99,8 @@
     "test:e2e:full": "playwright test --grep @full --project=full",
     "test:e2e:fallback": "playwright test --grep @fallback --project=fallback-verification",
     "test:e2e:critical": "playwright test --config playwright.config.critical.ts",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "benchmark:mask-render-ab": "npx ts-node scripts/benchmark_mask_render_ab.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.48.0",
