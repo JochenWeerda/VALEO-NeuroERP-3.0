@@ -306970,6 +306970,153 @@
         ]
       }
     },
+    "/api/v1/sales/orders/{order_id}/screen-summary": {
+      "get": {
+        "operationId": "get_sales_order_screen_summary_api_v1_sales_orders__order_id__screen_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Sales Order Screen Summary Api V1 Sales Orders  Order Id  Screen Summary Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales order screen summary abrufen",
+        "tags": [
+          "sales",
+          "orders",
+          "sales",
+          "orders",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/sales/orders/{order_id}/tabs/{tab_key}": {
+      "get": {
+        "operationId": "get_sales_order_tab_data_api_v1_sales_orders__order_id__tabs__tab_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tab_key",
+            "required": true,
+            "schema": {
+              "title": "Tab Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Sales Order Tab Data Api V1 Sales Orders  Order Id  Tabs  Tab Key  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales order tab list data abrufen",
+        "tags": [
+          "sales",
+          "orders",
+          "sales",
+          "orders",
+          "screen-summary"
+        ]
+      }
+    },
     "/api/v1/sales/reports/monthly-revenue": {
       "get": {
         "description": "Monatliche Umsaetze fuer Dashboard-Charts.",
