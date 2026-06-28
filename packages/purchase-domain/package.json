@@ -12,12 +12,17 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   },
-  "keywords": ["erp", "purchase", "procurement", "domain"],
+  "keywords": [
+    "erp",
+    "purchase",
+    "procurement",
+    "domain"
+  ],
   "author": "VALEO-NeuroERP Team",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^20.0.0",
-    "fastify": "^4.24.0",
+    "fastify": "^5.7.2",
     "crypto": "^1.0.1",
     "nats": "^2.29.1",
     "uuid": "^9.0.0"
@@ -53,8 +58,13 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/src"],
-    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
     "collectCoverageFrom": [
       "src/**/*.ts",
       "!src/**/*.d.ts",
