@@ -1,0 +1,35 @@
+slice_id: UIX-SALES-PILOT-007
+title: Universal Mask Generator Sales Order Pilot
+owner: Cursor
+status: abgeschlossen
+completed_at: 2026-06-28
+created_at: 2026-06-28
+coordination: >-
+  Second domain pilot after UIX-CRM-PARITY-003. Read-only generator shell for existing
+  sales orders behind VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER; legacy order editor unchanged.
+goal: >-
+  Wire sales order detail to UniversalMaskRenderer with screen-summary-first flow and
+  lazy positions tab, without replacing the full order editor for create/workflow flows.
+file_ownership:
+  - packages/frontend-web/src/pages/sales/order-editor.tsx
+  - packages/frontend-web/src/pages/sales/OrderEditorLegacyPage.tsx
+  - packages/frontend-web/src/pages/sales/UniversalSalesOrderPilotPage.tsx
+  - packages/frontend-web/src/features/sales-masks/**
+  - packages/frontend-web/src/lib/api/sales.ts
+  - app/api/v1/endpoints/sales_orders.py
+  - app/core/screen_definitions.py
+  - app/core/mask_classification.py
+  - tests/test_sales_order_screen_summary.py
+  - packages/frontend-web/src/__tests__/pages/sales/**
+  - packages/frontend-web/tests/e2e/sales-universal-order-pilot.spec.ts
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/architecture/domains/crm/README.md
+acceptance:
+  - Feature flag switches to pilot only when editing an existing order id.
+  - screen-summary and positions tab endpoint deliver read-only data.
+  - Legacy editor remains default and for new orders / workflow entry.
+  - Unit and backend tests green.
+tests:
+  - "pnpm --dir packages/frontend-web test:run src/__tests__/pages/sales/universal-sales-order-pilot.test.tsx"
+  - "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -o addopts='' tests/test_sales_order_screen_summary.py -q"
