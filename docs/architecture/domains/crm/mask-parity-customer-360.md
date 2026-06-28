@@ -15,14 +15,14 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 
 **Legende:** `ok` = funktional abgedeckt | `partial` = read-only Teilmenge | `gap` = noch nicht im Generator
 
-| Legacy-Tab (mask-builder-customer.json) | Generator-Tab | Felder / Liste | API | Status |
-|---|---|---|---|---|
-| Stammdaten (`masterdata`) | `masterdata` | Stammdaten-Felder | `GET /api/v1/crm/customers/{id}` | ok |
-| Adresse & Kommunikation (`address`) | `address` | Adress-/Kommunikationsfelder | `GET /api/v1/crm/customers/{id}` | ok |
-| System (`system`) | `system` | Metadaten, Sperren, Notizen | `GET /api/v1/crm/customers/{id}` | partial |
-| Steuern (`tax`) | `tax` | Steuerkennzeichen | `GET /api/v1/crm/customers/{id}` | partial |
-| Qualitaet / Compliance (`quality_compliance`) | `quality_compliance` | Farm-IDs, DSGVO | `GET /api/v1/crm/customers/{id}` | partial |
-| Finanzen (`finance`) | `finance` | Felder + Offene Posten (Liste) | Summary + `GET .../tabs/dokumente` | partial |
+| Legacy-Tab (mask-builder-customer.json) | Generator-Tab | Felder / Liste | API | RenderPlan | Status |
+|---|---|---|---|---|---|
+| Stammdaten (`masterdata`) | `masterdata` | Stammdaten-Felder | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Adresse & Kommunikation (`address`) | `address` | Adress-/Kommunikationsfelder | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| System (`system`) | `system` | Metadaten, Sperren, Notizen | `GET /api/v1/crm/customers/{id}` | compiled | partial |
+| Steuern (`tax`) | `tax` | Steuerkennzeichen | `GET /api/v1/crm/customers/{id}` | compiled | partial |
+| Qualitaet / Compliance (`quality_compliance`) | `quality_compliance` | Farm-IDs, DSGVO | `GET /api/v1/crm/customers/{id}` | compiled | partial |
+| Finanzen (`finance`) | `finance` | Felder + Offene Posten (Liste) | Summary + `GET .../tabs/dokumente` | lazy table | partial |
 | Bank (`bank`) | `bank` | Bankverbindungen | `GET /api/v1/crm/customers/{id}` | partial |
 | Marketing (`marketing`) | `marketing` | Profile, Verteiler | `GET /api/v1/crm/customers/{id}` | partial |
 | Genossenschaft (`cooperative`) | `cooperative` | Anteile, Betriebsgruppen | `GET /api/v1/crm/customers/{id}` | partial |

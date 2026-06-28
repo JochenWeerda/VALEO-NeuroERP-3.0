@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-RENDER-PLAN-009 … UIX-ROLLOUT-TEMPLATE-016 — RenderPlan Performance Engine (Waves 33–40)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-28 — SchemaCompiler, RenderPlan-Cache, Fast Renderer, LookupField, server paging, Bundle-Gate, Perf-E2E; CRM/Sales auf RenderPlan.
+**Ziel:** Performance-orientiertes Maskenframework mit vorkompiliertem RenderPlan statt Runtime-Interpretation.
+**Abnahme:** compileRenderPlan + useRenderPlan; Pilot-Pages ohne grosses useMemo; CI bundle/perf gates; Doku render-plan-architecture + rollout-template.
+
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (Lieferung/Dokumente)
 
 **Von:** Cursor

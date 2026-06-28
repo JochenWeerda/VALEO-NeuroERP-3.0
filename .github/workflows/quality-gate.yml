@@ -285,6 +285,9 @@ jobs:
       - name: Build (smoke)
         run: pnpm --filter @valero-neuroerp/frontend-web build
 
+      - name: Mask bundle budget (UIX-BUNDLE-GATE-013)
+        run: npx ts-node scripts/check_mask_bundle_budget.ts
+
       - name: ERP-Domain tests (packages/erp-domain)
         run: pnpm --filter @valero-neuroerp/erp-domain test
         continue-on-error: false

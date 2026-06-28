@@ -349,6 +349,27 @@ def _fetch_delivery_notes_for_order(db: Session, order_id: str, tenant_id: str) 
         return []
 
 
+def _paginate_tab_items(
+    items: list[dict[str, Any]],
+    *,
+    page: int = 1,
+    limit: int = 25,
+    q: str | None = None,
+) -> tuple[list[dict[str, Any]], int]:
+    filtered = items
+    if q:
+        needle = q.casefold()
+        filtered = [
+            row
+            for row in items
+            if any(needle in str(value).casefold() for value in row.values())
+        ]
+    safe_limit = max(1, min(limit, 50))
+    safe_page = max(1, page)
+    start = (safe_page - 1) * safe_limit
+    return filtered[start : start + safe_limit], len(filtered)
+
+
 def _fetch_order_documents(db: Session, order_id: str, tenant_id: str) -> list[dict[str, Any]]:
     """Belege mit Rechnungsnummer aus Lieferscheinen des Auftrags (read-only)."""
     try:
@@ -408,34 +429,51 @@ async def get_sales_order_screen_summary(
 async def get_sales_order_tab_data(
     order_id: str,
     tab_key: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     _get_sales_order_row(db, order_id, tenant_id)
 
     if tab_key == "positionen":
-        items = _fetch_items(db, order_id, tenant_id)
+        items = [item.model_dump(mode="json") for item in _fetch_items(db, order_id, tenant_id)]
+        paged_items, total = _paginate_tab_items(items, page=page, limit=limit, q=q)
         return {
             "tab_key": tab_key,
             "table_key": "order_items",
-            "items": [item.model_dump(mode="json") for item in items],
+            "items": paged_items,
+            "page": page,
+            "limit": limit,
+            "total": total,
         }
 
     if tab_key == "lieferung":
+        items = _fetch_delivery_notes_for_order(db, order_id, tenant_id)
+        paged_items, total = _paginate_tab_items(items, page=page, limit=limit, q=q)
         return {
             "tab_key": tab_key,
             "table_key": "delivery_notes",
-            "items": _fetch_delivery_notes_for_order(db, order_id, tenant_id),
+            "items": paged_items,
+            "page": page,
+            "limit": limit,
+            "total": total,
         }
 
     if tab_key == "dokumente":
+        items = _fetch_order_documents(db, order_id, tenant_id)
+        paged_items, total = _paginate_tab_items(items, page=page, limit=limit, q=q)
         return {
             "tab_key": tab_key,
             "table_key": "order_documents",
-            "items": _fetch_order_documents(db, order_id, tenant_id),
+            "items": paged_items,
+            "page": page,
+            "limit": limit,
+            "total": total,
         }
 
-    return {"tab_key": tab_key, "table_key": tab_key, "items": []}
+    return {"tab_key": tab_key, "table_key": tab_key, "items": [], "page": page, "limit": limit, "total": 0}
 
 
 @router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED, summary="Sales order anlegen")
