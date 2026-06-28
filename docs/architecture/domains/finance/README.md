@@ -28,3 +28,11 @@ Finanzbuchhaltung, AP/AR, Abschluss, DATEV-Export, UStVA/ELSTER, POS/TSE.
 - [C4 Component Finance](../../views/components/c4-finance.md)
 - [fin-001 Workflow](../../../workflows/fin-001-finance-to-reporting.md)
 - Index: `config/architecture-index.yaml` → `domains.finance`
+
+## UIX / Universal Mask Generator
+
+Finance wird nicht als erster Pilot umgestellt, bleibt aber ein harter
+Interferenzbereich fuer GoBD, Audit, Freigabe und Export. Generatorfaehige
+Finance-Masken muessen Audit-/Evidence-Anforderungen im `ScreenDefinition`-
+Vertrag ausdruecken und duerfen keine schema-getriebenen Actions ohne
+Permission- und Tenant-Pruefung ausfuehren.

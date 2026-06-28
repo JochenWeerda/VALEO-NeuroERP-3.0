@@ -45,6 +45,293 @@ def _safe_query(db: Session, sql: str, params: dict) -> dict | None:
     return _query_one(db, sql, params)
 
 
+def _customer_tab_endpoint(customer_id: str, tab_key: str) -> str:
+    return f"/api/v1/crm/customers/{customer_id}/tabs/{tab_key}"
+
+
+def build_customer_screen_summary(
+    *,
+    customer_id: str,
+    tenant_id: str | None,
+    customer: dict[str, Any],
+    sales_ytd: float = 0.0,
+    open_items_total: float = 0.0,
+    recent_activity_count: int = 0,
+) -> dict[str, Any]:
+    credit_status = "warning" if open_items_total > 0 else "ok"
+    return {
+        "schema_version": 1,
+        "screen_id": "crm/customer-360",
+        "customer_id": customer_id,
+        "tenant_id": tenant_id,
+        "title": customer.get("name") or "Kunde",
+        "subtitle": customer.get("kunden_nr"),
+        "summary": {
+            "sales_ytd": sales_ytd,
+            "open_items_total": open_items_total,
+            "recent_activity_count": recent_activity_count,
+            "credit_status": credit_status,
+        },
+        "badges": [
+            {"key": "credit", "label": "Kredit", "tone": credit_status},
+            {"key": "generator", "label": "Generator Pilot", "tone": "neutral"},
+        ],
+        "available_tabs": [
+            "stammdaten",
+            "kontakte",
+            "angebote",
+            "auftraege",
+            "dokumente",
+            "aktivitaeten",
+            "historie",
+        ],
+        "tab_endpoints": {
+            "stammdaten": _customer_tab_endpoint(customer_id, "stammdaten"),
+            "kontakte": _customer_tab_endpoint(customer_id, "kontakte"),
+            "contacts": _customer_tab_endpoint(customer_id, "contacts"),
+            "finance": _customer_tab_endpoint(customer_id, "dokumente"),
+            "angebote": _customer_tab_endpoint(customer_id, "angebote"),
+            "auftraege": _customer_tab_endpoint(customer_id, "auftraege"),
+            "dokumente": _customer_tab_endpoint(customer_id, "dokumente"),
+            "aktivitaeten": _customer_tab_endpoint(customer_id, "aktivitaeten"),
+            "historie": _customer_tab_endpoint(customer_id, "historie"),
+        },
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "permission": "crm.customer.update"},
+            {"key": "create_activity", "label": "Aktivitaet anlegen", "permission": "crm.activity.create"},
+        ],
+        "performance": {
+            "initial_payload_budget_kb": 48,
+            "tabs_lazy": True,
+            "lookup_min_chars": 2,
+            "default_table_limit": 25,
+        },
+    }
+
+
+@router.get(
+    "/{customer_id}/screen-summary",
+    response_model=dict[str, Any],
+    tags=["crm", "customers", "screen-summary"],
+    summary="Customer screen summary abrufen",
+)
+async def get_customer_screen_summary(
+    customer_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Kompakter Startvertrag fuer den Universal Mask Generator.
+
+    Liefert nur Header, Kennzahlen, Badges und verfuegbare Tabs. Tab-Details
+    bleiben separate, limitierte Endpunkte.
+    """
+
+    customer = _query_one(
+        db,
+        """
+        SELECT id, name, kunden_nr
+        FROM domain_erp.business_partners
+        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
+        LIMIT 1
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    )
+    if customer is None:
+        raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
+
+    sales_row = _query_one(
+        db,
+        """
+        SELECT COALESCE(SUM(total_amount), 0)::float AS sales_ytd
+        FROM domain_crm.sales_orders
+        WHERE customer_id = :cid
+          AND (:tid IS NULL OR tenant_id::text = :tid)
+          AND created_at >= NOW() - INTERVAL '12 months'
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    ) or {}
+    open_items_row = _query_one(
+        db,
+        """
+        SELECT COALESCE(SUM(offen), 0)::float AS open_items_total
+        FROM domain_erp.offene_posten
+        WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+          AND (:tid IS NULL OR tenant_id::text = :tid)
+          AND op_status NOT IN ('bezahlt', 'storniert')
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    ) or {}
+    activity_row = _query_one(
+        db,
+        """
+        SELECT COUNT(*)::int AS recent_activity_count
+        FROM domain_crm.activities
+        WHERE customer_id = :cid
+          AND (:tid IS NULL OR tenant_id::text = :tid)
+          AND created_at >= NOW() - INTERVAL '90 days'
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    ) or {}
+
+    return build_customer_screen_summary(
+        customer_id=customer_id,
+        tenant_id=tenant_id,
+        customer=customer,
+        sales_ytd=float(sales_row.get("sales_ytd") or 0.0),
+        open_items_total=float(open_items_row.get("open_items_total") or 0.0),
+        recent_activity_count=int(activity_row.get("recent_activity_count") or 0),
+    )
+
+
+def _normalize_tab_key(tab_key: str) -> str:
+    aliases = {
+        "contacts": "kontakte",
+        "kontakte": "kontakte",
+        "stammdaten": "stammdaten",
+        "masterdata": "stammdaten",
+        "finance": "dokumente",
+    }
+    return aliases.get(tab_key, tab_key)
+
+
+def _fetch_customer_tab_items(
+    db: Session,
+    *,
+    customer_id: str,
+    tenant_id: str | None,
+    tab_key: str,
+    kunden_nr: str | None,
+) -> tuple[str, list[dict[str, Any]]]:
+    normalized = _normalize_tab_key(tab_key)
+
+    if normalized in {"stammdaten", "angebote", "historie"}:
+        return normalized, []
+
+    if normalized == "kontakte":
+        if not kunden_nr:
+            return "contacts_list", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(nachname, '') AS name,
+                   COALESCE(vorname, '') AS "firstName",
+                   COALESCE(position, '') AS position,
+                   COALESCE(email, '') AS email,
+                   COALESCE(telefon1, '') AS phone1
+            FROM public.kunden_ansprechpartner
+            WHERE kunden_nr = :kunden_nr
+            ORDER BY prioritaet NULLS LAST, nachname
+            LIMIT 25
+            """,
+            {"kunden_nr": kunden_nr},
+        )
+        return "contacts_list", rows
+
+    if normalized == "auftraege":
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   order_number,
+                   status,
+                   COALESCE(total_amount, 0)::float AS total_amount,
+                   created_at::text AS created_at
+            FROM domain_crm.sales_orders
+            WHERE customer_id = :cid
+              AND (:tid IS NULL OR tenant_id::text = :tid)
+            ORDER BY created_at DESC
+            LIMIT 25
+            """,
+            {"cid": customer_id, "tid": tenant_id},
+        )
+        return "recent_orders", rows
+
+    if normalized == "aktivitaeten":
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   activity_type,
+                   subject,
+                   COALESCE(assigned_to, '') AS assigned_to,
+                   created_at::text AS created_at
+            FROM domain_crm.activities
+            WHERE customer_id = :cid
+              AND (:tid IS NULL OR tenant_id::text = :tid)
+            ORDER BY created_at DESC
+            LIMIT 25
+            """,
+            {"cid": customer_id, "tid": tenant_id},
+        )
+        return "recent_activities", rows
+
+    if normalized == "dokumente":
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   rechnungsnr,
+                   faelligkeit::text AS faelligkeit,
+                   offen::float AS amount,
+                   GREATEST(0, (CURRENT_DATE - faelligkeit::date))::int AS days_overdue,
+                   op_status
+            FROM domain_erp.offene_posten
+            WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+              AND (:tid IS NULL OR tenant_id::text = :tid)
+              AND op_status NOT IN ('bezahlt', 'storniert')
+            ORDER BY faelligkeit ASC
+            LIMIT 25
+            """,
+            {"cid": customer_id, "tid": tenant_id},
+        )
+        table_key = "open_documents" if tab_key == "dokumente" else "open_items"
+        return table_key, rows
+
+    return normalized, []
+
+
+@router.get(
+    "/{customer_id}/tabs/{tab_key}",
+    response_model=dict[str, Any],
+    tags=["crm", "customers", "screen-summary"],
+    summary="Customer tab list data abrufen",
+)
+async def get_customer_tab_data(
+    customer_id: str,
+    tab_key: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Limitierte Tab-Listen fuer den Universal Mask Generator (read-only)."""
+
+    customer = _query_one(
+        db,
+        """
+        SELECT id, name, kunden_nr
+        FROM domain_erp.business_partners
+        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
+        LIMIT 1
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    )
+    if customer is None:
+        raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
+
+    table_key, items = _fetch_customer_tab_items(
+        db,
+        customer_id=customer_id,
+        tenant_id=tenant_id,
+        tab_key=tab_key,
+        kunden_nr=customer.get("kunden_nr"),
+    )
+    return {
+        "tab_key": tab_key,
+        "table_key": table_key,
+        "items": items,
+    }
+
+
 @router.get("/{customer_id}/360", response_model=Crm360Out, tags=["crm", "customers"], summary="Customer 360 abrufen")
 async def get_customer_360(
     customer_id: str,

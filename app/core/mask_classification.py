@@ -37,6 +37,20 @@ class ExplainabilityRequirement(str, Enum):
     OPTIONAL = "optional"       # Explainability optional
 
 
+class GeneratorAdapterType(str, Enum):
+    NATIVE = "native"
+    MASK_CONFIG = "maskConfig"
+    CRM_MASK_JSON = "crmMaskJson"
+    FORM_SCHEMA = "formSchema"
+    SPECIALIZED = "specialized"
+
+
+class MobileRenderMode(str, Enum):
+    DESKTOP_DENSE = "desktopDense"
+    TABLET_TOUCH = "tabletTouch"
+    MOBILE_STACK = "mobileStack"
+
+
 class MaskClassification(BaseModel):
     """Klassifizierung einer einzelnen ERP-Maske."""
 
@@ -50,6 +64,14 @@ class MaskClassification(BaseModel):
     requires_approval_ui: bool = False    # zeigt Freigabe-/Ablehnen-Buttons
     gobd_relevant: bool = False           # GoBD-Pflicht: Audit-Trail vorhanden?
     wave1_contract: bool = False          # nutzt Wave-1-Contract (semantic_status etc.)
+    generator_ready: bool = False         # kann ueber Universal Mask Generator laufen?
+    adapter_type: GeneratorAdapterType = GeneratorAdapterType.SPECIALIZED
+    mobile_mode: MobileRenderMode = MobileRenderMode.DESKTOP_DENSE
+    requires_lazy_tabs: bool = False
+    requires_virtual_tables: bool = False
+    lookup_min_chars: int = 2
+    initial_payload_budget_kb: int = 64
+    summary_endpoint: str | None = None
     notes: str | None = None
     schema_version: int = 1
 
@@ -215,6 +237,24 @@ def build_mask_registry() -> MaskRegistry:
             explainability=ExplainabilityRequirement.OPTIONAL,
             gobd_relevant=True,
             wave1_contract=False,
+        ),
+        MaskClassification(
+            mask_id="crm/customer-360",
+            route="/crm/customers/:id",
+            label="CRM 360 Kundenmaske",
+            domain=MaskDomain.CRM,
+            mask_class=MaskClass.B,
+            process_key="order-to-cash",
+            explainability=ExplainabilityRequirement.RECOMMENDED,
+            generator_ready=True,
+            adapter_type=GeneratorAdapterType.CRM_MASK_JSON,
+            mobile_mode=MobileRenderMode.MOBILE_STACK,
+            requires_lazy_tabs=True,
+            requires_virtual_tables=True,
+            lookup_min_chars=2,
+            initial_payload_budget_kb=48,
+            summary_endpoint="/api/v1/crm/customers/{customer_id}/screen-summary",
+            notes="Pilot fuer Universal Mask Generator mit temporaerer Uebersetzungsschicht.",
         ),
         MaskClassification(
             mask_id="workflow/sandbox",

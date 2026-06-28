@@ -1,8 +1,9 @@
 slice_id: UIX-CRM-PILOT-002
 title: Universal Mask Generator CRM Customer Pilot
 owner: Codex
-status: reserved
+status: abgeschlossen
 created_at: 2026-06-28
+completed_at: 2026-06-28
 coordination: >-
   Follow-up slice after UIX-MASK-FRAMEWORK-001. Owns only the CRM customer
   pilot wiring, feature-flag fallback, renderer hardening needed by the pilot,
@@ -35,11 +36,16 @@ acceptance:
   - Actions are hidden unless their permissions are present.
   - Unit, backend contract and documentation checks are recorded.
 tests:
-  - pnpm --dir packages/frontend-web test:run
-  - python -m pytest tests/test_crm_screen_summary.py tests/test_mask_registry_uix.py -q
-  - pnpm --dir packages/frontend-web type-check
+  - "PASS: pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx src/__tests__/components/ui/LazyTabs.test.tsx src/__tests__/components/ui/VirtualDataTable.test.tsx src/__tests__/pages/crm/universal-customer-mask-pilot.test.tsx src/__tests__/pages/crm/kunden-stamm-modern-switch.test.tsx"
+  - "PASS: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -o addopts='' tests/test_mask_registry_uix.py tests/test_crm_screen_summary.py -q"
+  - "PASS: VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true pnpm --dir packages/frontend-web exec playwright test tests/e2e/crm-universal-customer-mask-pilot.spec.ts --project=chromium"
+  - "PASS: pnpm --dir packages/frontend-web type-check"
 risks:
   - Full visual parity with every CRM 360 detail workflow is out of scope for this slice.
   - Existing dirty-tree files outside UIX ownership must not be included in the pilot changes.
+remaining_work:
+  - Run old-vs-generator fachliche Paritaetsabnahme with productive CRM sample data.
+  - Decide whether Customer Detail should move from query-param `?id=` to a canonical `/crm/customers/:id` route.
+  - Promote direct ScreenDefinition delivery only after the adapter pilot is stable.
 external_gates:
   - not_applicable
