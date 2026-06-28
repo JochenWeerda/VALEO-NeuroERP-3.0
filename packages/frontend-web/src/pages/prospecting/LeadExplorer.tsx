@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+﻿import { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { toast } from '@/hooks/use-toast'
 import { LeadCandidate, LeadSegment } from '@/types/prospecting'
@@ -140,7 +140,8 @@ export default function LeadExplorer(): JSX.Element {
       const status = await getGapPipelineStatus(refYear)
       setPipelineStatus(status)
       setPipelineError(null)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       // Fehler stillschweigend ignorieren, wenn Pipeline-Controls nicht angezeigt werden
       if (showPipelineControls) {
         // Nur Fehler anzeigen, wenn es kein Netzwerkfehler ist (dann ist der Server möglicherweise nicht erreichbar)
@@ -175,7 +176,8 @@ export default function LeadExplorer(): JSX.Element {
       }
       setPipelineSuccess(`Datei erfolgreich hochgeladen: ${result.filename} (${(result.size_bytes / 1024 / 1024).toFixed(1)} MB)`)
       await refreshPipelineStatus()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setPipelineError(e.message ?? 'Datei-Upload fehlgeschlagen')
       setSelectedFileName(null)
     } finally {
@@ -219,7 +221,8 @@ export default function LeadExplorer(): JSX.Element {
       }
       
       setPipelineSuccess(result.message || 'Pipeline erfolgreich gestartet')
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setPipelineError(e.message ?? 'Pipeline-Start fehlgeschlagen')
       setPipelineBusy(false)
       setPipelineProgress(null)
@@ -238,7 +241,8 @@ export default function LeadExplorer(): JSX.Element {
       const result = await runGapImport(refYear, csvPath)
       setPipelineSuccess(result.message || 'Import erfolgreich gestartet')
       await refreshPipelineStatus()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setPipelineError(e.message ?? 'Import-Start fehlgeschlagen')
     } finally {
       setPipelineBusy(false)
@@ -254,7 +258,8 @@ export default function LeadExplorer(): JSX.Element {
       setPipelineSuccess(result.message || 'Download von agrarzahlungen.de gestartet')
       // Wir setzen den Pfad, auch wenn der Download im Hintergrund läuft, damit der User weiß wo es landet
       setCsvPath(`data/gap/impdata${refYear}.csv`)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setPipelineError(e.message ?? 'Download-Start fehlgeschlagen')
     } finally {
       setPipelineBusy(false)
@@ -304,7 +309,8 @@ export default function LeadExplorer(): JSX.Element {
       // Status aktualisieren nach erfolgreichem Reset
       await refreshPipelineStatus()
       
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setPipelineError(e.message ?? 'GAP-Daten-Reset fehlgeschlagen')
     } finally {
       setPipelineBusy(false)

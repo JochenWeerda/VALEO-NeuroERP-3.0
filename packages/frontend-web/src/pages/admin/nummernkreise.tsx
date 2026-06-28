@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNumberRanges, useConfigureNumberRange, type NumberRangeConfigPayload } from '@/lib/api/number-ranges'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -46,7 +46,8 @@ export default function NummernkreisePage() {
       await configureMutation.mutateAsync(form)
       toast({ title: 'Nummernkreis gespeichert' })
       setShowDialog(false)
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         title: 'Fehler',
         description: err?.response?.data?.detail || err.message,

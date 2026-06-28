@@ -175,7 +175,8 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
             await apiClient.post(`/api/v1/einkauf/auftragsbestaetigungen/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
             toast({ title: 'Aktion ausgefuehrt', description: `Auftragsbestaetigung ${id} wurde aktualisiert.` })
             navigate('/einkauf/auftragsbestaetigungen')
-          } catch (error: any) {
+          } catch (_rawErr: unknown) {
+            const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
           }
   })
@@ -185,7 +186,8 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/auftragsbestaetigungen')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: error?.message })
     } finally {
       setLoading(false)

@@ -27,7 +27,8 @@ export default function LieferantenListePage(): JSX.Element {
       a.click()
       URL.revokeObjectURL(url)
       toast({ title: 'Export erstellt', description: 'Download gestartet.' })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Wiegeschein-Auswahl-Dialog für Ernte-Annahme
  */
 
@@ -101,7 +101,7 @@ export function WeighingTicketSelectionDialog({
           article_id: t.article_id || t.articleId || null,
           notes: t.notes || null,
         }))
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('[WeighingTicketSelectionDialog] Error fetching tickets:', err)
         return []
       }

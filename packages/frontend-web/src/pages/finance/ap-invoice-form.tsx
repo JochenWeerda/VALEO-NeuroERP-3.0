@@ -142,7 +142,8 @@ export default function APInvoiceFormPage(): JSX.Element {
       await apiClient.post(`/api/v1/finance/ap/invoices/${id}/post?posted_by=current_user`)
       push(t('finance.apInvoices.postSuccess', { defaultValue: 'Eingangsrechnung verbucht' }))
       await loadInvoice(id, false)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(
         error?.response?.data?.detail ||
           t('finance.apInvoices.postError', { defaultValue: 'Verbuchen fehlgeschlagen' })

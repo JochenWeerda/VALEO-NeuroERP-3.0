@@ -116,7 +116,8 @@ async function bulkAvisMutation(selectedItems: Record<string, unknown>[], action
     try {
       await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(item.id)}/${action}`)
       ok += 1
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       errors.push(`${item.avisNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
     }
   }
@@ -243,7 +244,8 @@ export default function AnlieferavisListePage(): JSX.Element {
       await apiClient.delete(`/api/v1/einkauf/anlieferavis/${item.id}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }

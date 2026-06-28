@@ -772,7 +772,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
       await mutationByMode[lifecycleDialog.mode].mutateAsync(payload)
       toast({ title: titleByMode[lifecycleDialog.mode], description: workspace?.case_number || workspace?.instance_label })
       closeLifecycleDialog()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       console.error('Lifecycle action failed:', e)
       toast({
         title: 'Fehler',

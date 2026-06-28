@@ -392,7 +392,8 @@ export default function RechnungseingangPage(): JSX.Element {
             await pruefenMutation.mutateAsync(data.id)
             toast({ title: t('crud.messages.success'), description: t('status.reviewed') })
             await loadData()
-          } catch (err: any) {
+          } catch (_rawErr: unknown) {
+            const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({
               variant: 'destructive',
               title: t('crud.messages.error'),
@@ -412,7 +413,8 @@ export default function RechnungseingangPage(): JSX.Element {
             await freigebenMutation.mutateAsync(data.id)
             toast({ title: t('crud.messages.success'), description: t('status.approved') })
             await loadData()
-          } catch (err: any) {
+          } catch (_rawErr: unknown) {
+            const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({
               variant: 'destructive',
               title: t('crud.messages.error'),
@@ -432,7 +434,8 @@ export default function RechnungseingangPage(): JSX.Element {
             await verbuchenMutation.mutateAsync(data.id)
             toast({ title: t('crud.messages.success'), description: t('status.posted') })
             await loadData()
-          } catch (err: any) {
+          } catch (_rawErr: unknown) {
+            const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({
               variant: 'destructive',
               title: t('crud.messages.error'),
@@ -467,7 +470,8 @@ export default function RechnungseingangPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/rechnungseingaenge')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: error?.message })
     } finally {
       setLoading(false)

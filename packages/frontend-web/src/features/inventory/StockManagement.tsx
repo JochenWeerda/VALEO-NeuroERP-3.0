@@ -243,6 +243,7 @@ export function StockManagement() {
                       <TableCell className="text-right">{article.min_stock || '-'}</TableCell>
                       <TableCell className="text-right">€{article.sales_price.toFixed(2)}</TableCell>
                       <TableCell>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <Badge variant={stockStatus.color as any}>
                           {stockStatus.status.replace('_', ' ')}
                         </Badge>

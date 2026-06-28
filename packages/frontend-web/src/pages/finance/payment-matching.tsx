@@ -173,7 +173,8 @@ export default function PaymentMatchingPage(): JSX.Element {
       setSelectedOpId('')
       setOpenItems([])
       await fetchUnmatchedPayments()
-    } catch (error: unknown) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       // Matching fehlgeschlagen - Benutzer wird per Toast benachrichtigt
       const errorMessage = error instanceof Error ? error.message : t('finance.payments.matchError')
       toast({

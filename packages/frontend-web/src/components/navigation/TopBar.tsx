@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState, useCallback, useRef } from 'react'
+﻿import { Suspense, lazy, useEffect, useState, useCallback, useRef } from 'react'
 import { clsx } from 'clsx'
 import { Link, useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
@@ -34,7 +34,9 @@ function ShortcutsToggleButton({ onToggle }: { onToggle: () => void }): JSX.Elem
   useEffect(() => {
     // Lade aktuellen Modus
     const updateMode = (): void => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (typeof (window as any).__getShortcutDisplayMode === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mode = (window as any).__getShortcutDisplayMode() || 'always'
         setDisplayMode(mode)
         

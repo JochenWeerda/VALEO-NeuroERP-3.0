@@ -277,7 +277,8 @@ export default function DunningEditorPage(): JSX.Element {
       try {
         await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
         toast({ title: t('crud.messages.dunningGenerated'), description: t('crud.messages.dunningGeneratedDesc', { level: formData?.dunningLevel ?? 1 }) })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -331,7 +332,8 @@ export default function DunningEditorPage(): JSX.Element {
           title: t('crud.messages.paymentBooked'),
           description: t('crud.messages.paymentBookedDesc'),
         })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({
           variant: 'destructive',
           title: t('crud.messages.paymentError'),
@@ -376,7 +378,8 @@ export default function DunningEditorPage(): JSX.Element {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'dunning', format: 'pdf', id })
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.pdfExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }

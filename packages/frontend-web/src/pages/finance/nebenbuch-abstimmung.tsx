@@ -61,11 +61,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         { params: { period } },
       )
       setReconciliationData(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.error'),
-        description: error?.response?.data?.detail || error.message || t('crud.messages.networkError'),
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || t('crud.messages.networkError'),
       })
     } finally {
       setLoading(false)
@@ -110,11 +110,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
       if (selectedAccount) await loadDetails(selectedAccount)
       await loadReconciliation()
       await loadSummary()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.error'),
-        description: error?.response?.data?.detail || error.message || 'Abstimmung fehlgeschlagen',
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || 'Abstimmung fehlgeschlagen',
       })
     } finally {
       setMatchingInProgress(false)
@@ -143,7 +143,8 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         title: 'Export erstellt',
         description: 'CSV wurde erfolgreich heruntergeladen.',
       })
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.error'),

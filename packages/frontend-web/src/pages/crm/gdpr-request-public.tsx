@@ -53,7 +53,8 @@ export default function GDPRRequestPublicPage(): JSX.Element {
       } else {
         throw new Error('Request failed')
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.requestError'),
@@ -84,7 +85,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
       } else {
         throw new Error('Request not found')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.requestNotFound'),

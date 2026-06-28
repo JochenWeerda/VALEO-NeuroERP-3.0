@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -79,7 +79,7 @@ export default function AuftraegeListePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<AuftragStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
-  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const [filterValues, setFilterValues] = useState<Record<string, unknown>>({})
   const [roleFocus, setRoleFocus] = useState<SalesRoleFocus>('all')
 
   const { data: auftraege = [] } = useAuftraege()

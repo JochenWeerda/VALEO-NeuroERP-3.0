@@ -112,7 +112,8 @@ async function bulkConfirmationMutation(selectedItems: Record<string, unknown>[]
     try {
       await apiClient.post(`/api/v1/einkauf/auftragsbestaetigungen/${encodeURIComponent(item.id)}/${action}`)
       ok += 1
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       errors.push(`${item.bestaetigungsNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
     }
   }
@@ -224,7 +225,8 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
       await apiClient.delete(`/api/v1/einkauf/auftragsbestaetigungen/${item.id}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }

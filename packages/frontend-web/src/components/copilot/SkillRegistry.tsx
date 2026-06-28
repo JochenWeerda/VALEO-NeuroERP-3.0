@@ -279,6 +279,7 @@ export class SkillExecutor {
       return { success: true, data: skill.output.schema as SkillResult<Id> }
     }
     // Type-safe execution with runtime type checking
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return skill.execute(params as any, context as any) as Promise<ExecutionResult<SkillResult<Id>>>
   }
 }

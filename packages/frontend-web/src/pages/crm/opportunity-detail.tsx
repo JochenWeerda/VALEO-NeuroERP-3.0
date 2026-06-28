@@ -298,8 +298,8 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
         if (response.data) {
           setHistory(response.data || [])
         }
-      } catch (error: any) {
-        toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
+      } catch (error: unknown) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: (error as Error).message })
       } finally {
         setLoading(false)
       }
@@ -462,7 +462,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const opportunityConfig = createOpportunityConfig(t, entityTypeLabel, customerOpts, contactOpts)
   const isNew = !id || id === 'neu' || id === 'new'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, unknown>>({
     apiUrl: opportunityConfig.api.baseUrl,
     id: id || undefined
   })
@@ -495,11 +495,11 @@ export default function OpportunityDetailPage(): JSX.Element {
     setLoading(true)
     try {
       await persistOpportunity(formData)
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),
-        description: error.message || t('crud.messages.unknownError')
+        description: (error as Error).message || t('crud.messages.unknownError')
       })
     } finally {
       setLoading(false)
@@ -521,11 +521,11 @@ export default function OpportunityDetailPage(): JSX.Element {
         setLoading(true)
         try {
           await persistOpportunity(formData)
-        } catch (error: any) {
+        } catch (error: unknown) {
           toast({
             variant: 'destructive',
             title: getErrorMessage(t, 'create', entityType),
-            description: error.message || t('crud.messages.unknownError')
+            description: (error as Error).message || t('crud.messages.unknownError')
           })
         } finally {
           setLoading(false)

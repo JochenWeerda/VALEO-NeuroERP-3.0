@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Accounting Period Management
  * FIBU-GL-05: Periodensteuerung
  * Verwaltung von Buchungsperioden (Öffnen/Sperren)
@@ -29,7 +29,7 @@ type AccountingPeriod = {
   end_date: string
   closed_at?: string
   closed_by?: string
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export default function PeriodsPage(): JSX.Element {
@@ -87,10 +87,10 @@ export default function PeriodsPage(): JSX.Element {
       setIsCreateDialogOpen(false)
       setNewPeriod({ tenant_id: 'default', period: '', start_date: '', end_date: '', status: 'OPEN' })
       await fetchPeriods()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: t('common.error'),
-        description: error?.response?.data?.detail || error.message || t('crud.feedback.createError', { entityType: 'Periode' }),
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || t('crud.feedback.createError', { entityType: 'Periode' }),
         variant: 'destructive',
       })
     }
@@ -121,10 +121,10 @@ export default function PeriodsPage(): JSX.Element {
       setSelectedPeriod(null)
       setCloseBy('')
       await fetchPeriods()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: t('common.error'),
-        description: error?.response?.data?.detail || error.message || t('finance.periods.closeError'),
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || t('finance.periods.closeError'),
         variant: 'destructive',
       })
     }
@@ -141,10 +141,10 @@ export default function PeriodsPage(): JSX.Element {
         description: `Periode ${period.period} wurde wieder geöffnet.`,
       })
       await fetchPeriods()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: t('common.error'),
-        description: error?.response?.data?.detail || error.message || 'Fehler beim Wiedereröffnen der Periode.',
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || 'Fehler beim Wiedereröffnen der Periode.',
         variant: 'destructive',
       })
     }

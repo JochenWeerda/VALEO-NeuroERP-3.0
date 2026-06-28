@@ -61,7 +61,8 @@ export default function SuspendedSalesPage(): JSX.Element {
       setRemovedSaleIds((prev) => new Set(prev).add(saleId))
       void refetch()
       toast({ title: 'Pausierten Verkauf gelöscht.' })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }

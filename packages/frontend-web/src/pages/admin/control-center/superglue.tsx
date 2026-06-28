@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AgentenIntegrationWorkspace } from '@/pages/admin/agenten-integration'
 import { Badge } from '@/components/ui/badge'
@@ -72,7 +72,8 @@ export default function AdminControlCenterSupergluePage(): JSX.Element {
       })
       await refetchAll()
       toast({ title: 'Connector Override gespeichert' })
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Fehler', description: err?.response?.data?.detail ?? err?.message, variant: 'destructive' })
     } finally {
       setPendingAction(null)
@@ -99,7 +100,8 @@ export default function AdminControlCenterSupergluePage(): JSX.Element {
       })
       await refetchAll()
       toast({ title: 'Policy Override gespeichert' })
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Fehler', description: err?.response?.data?.detail ?? err?.message, variant: 'destructive' })
     } finally {
       setPendingAction(null)
@@ -116,7 +118,8 @@ export default function AdminControlCenterSupergluePage(): JSX.Element {
       })
       await refetchAll()
       toast({ title: 'Credentials als vorbereitet markiert' })
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Fehler', description: err?.response?.data?.detail ?? err?.message, variant: 'destructive' })
     } finally {
       setPendingAction(null)

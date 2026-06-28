@@ -44,7 +44,8 @@ export default function WorkflowApprovalPage(): JSX.Element {
 
       // Navigate to success page or workflows list
       navigate('/workflows/history')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: 'Genehmigung fehlgeschlagen', description: error?.message })
     }
   }
@@ -63,7 +64,8 @@ export default function WorkflowApprovalPage(): JSX.Element {
       })
 
       navigate('/workflows/history')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: 'Ablehnung fehlgeschlagen', description: error?.message })
     }
   }

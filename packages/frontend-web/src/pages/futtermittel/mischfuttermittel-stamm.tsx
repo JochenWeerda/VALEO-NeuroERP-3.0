@@ -207,7 +207,8 @@ export default function MischfuttermittelStammPage(): JSX.Element {
             `OMD: ${result.omd_fan1_pct}% (${result.omd_methode})`,
           ].join(' | '),
         })
-      } catch (e: any) {
+      } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ title: 'Berechnung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
       }
       return
