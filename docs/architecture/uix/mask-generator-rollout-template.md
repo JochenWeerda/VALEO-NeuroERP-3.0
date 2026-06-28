@@ -27,7 +27,7 @@ Referenz-Slices: CRM (`UIX-CRM-PILOT-002`), Sales (`UIX-SALES-PILOT-007`), Rende
 
 1. CRM 360 (abgeschlossen)
 2. Sales Order (abgeschlossen)
-3. Agrar — Ernte/Contract (nächster Kandidat)
+3. Agrar — Ernte/Contract (abgeschlossen: Kontrakt-Pilot Wave 41)
 4. Inventory — Bestand/Lagerbewegung
 5. Finance — AP/AR Object Pages
 

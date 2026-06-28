@@ -21,5 +21,15 @@ def test_get_sales_order_screen_definition() -> None:
     assert definition["performance"]["requiresLazyTabs"] is True
 
 
+def test_get_agrar_kontrakt_screen_definition() -> None:
+    definition = get_screen_definition("agrar/kontrakte")
+
+    assert definition is not None
+    assert definition["id"] == "agrar/kontrakte"
+    assert definition["domain"] == "agrar"
+    assert definition["summaryEndpoint"].endswith("/screen-summary")
+    assert len(definition["tabs"]) == 3
+
+
 def test_get_screen_definition_unknown_mask_returns_none() -> None:
     assert get_screen_definition("unknown/mask") is None

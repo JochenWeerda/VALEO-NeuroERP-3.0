@@ -29,6 +29,16 @@ def test_mask_registry_exposes_generator_metadata_for_sales_pilot() -> None:
     assert sales_pilot.summary_endpoint == "/api/v1/sales/orders/{order_id}/screen-summary"
 
 
+def test_mask_registry_exposes_generator_metadata_for_agrar_kontrakt_pilot() -> None:
+    registry = build_mask_registry()
+    kontrakt_pilot = registry.get("agrar/kontrakte")
+
+    assert kontrakt_pilot is not None
+    assert kontrakt_pilot.generator_ready is True
+    assert kontrakt_pilot.requires_lazy_tabs is True
+    assert kontrakt_pilot.summary_endpoint == "/api/v1/kontrakte/{contract_id}/screen-summary"
+
+
 def test_mask_registry_keeps_defaults_for_non_generator_masks() -> None:
     registry = build_mask_registry()
     mask = registry.get("finance/ap-invoice-form")

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 
 export type KontraktType = 'EINKAUF' | 'ZUKAUF' | 'VERKAUF'
@@ -140,6 +141,40 @@ export type UmsaetzeResponse = {
   verk_menge: number
 }
 
+export type KontraktScreenSummary = {
+  schema_version: number
+  screen_id: string
+  contract_id: string
+  tenant_id: string
+  title: string
+  subtitle?: string | null
+  summary: {
+    line_count: number
+    rest_quantity: number
+    total_quantity: number
+    unit: string
+    status: string
+    contract_type: string
+    valid_to?: string | null
+  }
+  available_tabs: string[]
+  tab_endpoints: Record<string, string>
+  actions: Array<{ key: string; label: string; permission?: string }>
+  performance: {
+    initial_payload_budget_kb: number
+    tabs_lazy: boolean
+    lookup_min_chars: number
+    default_table_limit: number
+  }
+  party_name?: string | null
+}
+
+export const kontraktKeys = {
+  all: ['kontrakte'] as const,
+  detail: (id: string) => [...kontraktKeys.all, id] as const,
+  screenSummary: (id: string) => [...kontraktKeys.detail(id), 'screen-summary'] as const,
+}
+
 export async function listKontrakte(params: Record<string, string | number | boolean | undefined>): Promise<KontraktListResponse> {
   const search = new URLSearchParams()
   Object.entries(params).forEach(([k, v]) => {
@@ -151,6 +186,26 @@ export async function listKontrakte(params: Record<string, string | number | boo
 
 export async function getKontrakt(id: string): Promise<Kontrakt> {
   return apiClient.get<Kontrakt>(`/api/v1/kontrakte/${id}`)
+}
+
+export function useKontrakt(id: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: kontraktKeys.detail(id),
+    queryFn: () => getKontrakt(id),
+    enabled: Boolean(id) && (options?.enabled ?? true),
+  })
+}
+
+export function useKontraktScreenSummary(id: string) {
+  return useQuery({
+    queryKey: kontraktKeys.screenSummary(id),
+    queryFn: async () => {
+      const response = await apiClient.get<KontraktScreenSummary>(`/api/v1/kontrakte/${id}/screen-summary`)
+      return response.data
+    },
+    enabled: Boolean(id),
+    staleTime: 2 * 60 * 1000,
+  })
 }
 
 export async function createKontrakt(payload: Omit<Kontrakt, 'contract_id' | 'rest_quantity'>): Promise<Kontrakt> {
