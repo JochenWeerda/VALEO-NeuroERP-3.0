@@ -87,9 +87,47 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/kontrakte",
+        "domain": "agrar",
+        "mode": "detail",
+        "title": "Kontrakt",
+        "subtitle": "Agrar-Kontrakt",
+        "adapter": {
+            "type": "native",
+            "sourceId": "agrar/kontrakte",
+            "temporary": False,
+        },
+        "summaryEndpoint": "/api/v1/kontrakte/{contract_id}/screen-summary",
+        "tabs": [
+            {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
+            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True},
+            {"key": "umsaetze", "label": "Umsaetze", "lazy": True, "keepAlive": True},
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "kontrakt.update"},
+        ],
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 52,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "agrar",
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
+    "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
 }
 
 

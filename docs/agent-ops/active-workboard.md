@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-AGrar-PILOT-017 — Universal Mask Generator Agrar Kontrakt Pilot
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-28 — Kontrakt-Pilot hinter `VITE_ENABLE_UNIVERSAL_MASK_AGRAR_KONTRAKT`; screen-summary, lazy Positionen/Umsaetze; Legacy fuer Neuanlage; Sales order-editor Route-Switch repariert.
+**Ziel:** Dritte Domäne im Universal Mask Generator; Summary-first, read-only Pilot ohne Legacy-Ersatz.
+**Abnahme:** Flag + contract-id → Pilot; Neuanlage → Legacy; pytest/Vitest gruen; Paritaetsmatrix dokumentiert.
+
 ## UIX-RENDER-PLAN-009 … UIX-ROLLOUT-TEMPLATE-016 — RenderPlan Performance Engine (Waves 33–40)
 
 **Von:** Cursor

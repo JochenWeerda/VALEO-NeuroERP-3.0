@@ -158,6 +158,183 @@ async def get_kontrakt(
     return contract_to_dict(contract, line_out, rest.contract_rest)
 
 
+def _kontrakt_tab_endpoint(contract_id: str, tab_key: str) -> str:
+    return f"/api/v1/kontrakte/{contract_id}/tabs/{tab_key}"
+
+
+def _paginate_tab_items(
+    items: list[dict[str, Any]],
+    *,
+    page: int = 1,
+    limit: int = 25,
+    q: str | None = None,
+) -> tuple[list[dict[str, Any]], int]:
+    filtered = items
+    if q:
+        needle = q.casefold()
+        filtered = [
+            row
+            for row in items
+            if any(needle in str(value).casefold() for value in row.values())
+        ]
+    safe_limit = max(1, min(limit, 50))
+    safe_page = max(1, page)
+    start = (safe_page - 1) * safe_limit
+    return filtered[start : start + safe_limit], len(filtered)
+
+
+def _format_optional_date(value: Any) -> str | None:
+    if value is None:
+        return None
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
+def build_kontrakt_screen_summary(
+    *,
+    contract_id: str,
+    tenant_id: str,
+    contract: dict[str, Any],
+    line_count: int,
+    party_name: str | None = None,
+) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "screen_id": "agrar/kontrakte",
+        "contract_id": contract_id,
+        "tenant_id": tenant_id,
+        "title": contract.get("contract_no") or "Kontrakt",
+        "subtitle": party_name or contract.get("party_id"),
+        "summary": {
+            "line_count": line_count,
+            "rest_quantity": float(contract.get("rest_quantity") or 0.0),
+            "total_quantity": float(contract.get("total_quantity") or 0.0),
+            "unit": str(contract.get("unit") or ""),
+            "status": str(contract.get("status") or "OFFEN"),
+            "contract_type": str(contract.get("contract_type") or ""),
+            "valid_to": _format_optional_date(contract.get("valid_to")),
+        },
+        "available_tabs": ["kopf", "positionen", "umsaetze"],
+        "tab_endpoints": {
+            "positionen": _kontrakt_tab_endpoint(contract_id, "positionen"),
+            "umsaetze": _kontrakt_tab_endpoint(contract_id, "umsaetze"),
+        },
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "permission": "kontrakt.update"},
+        ],
+        "performance": {
+            "initial_payload_budget_kb": 52,
+            "tabs_lazy": True,
+            "lookup_min_chars": 2,
+            "default_table_limit": 25,
+        },
+        "party_name": party_name,
+    }
+
+
+@router.get(
+    "/{contract_id}/screen-summary",
+    response_model=dict[str, Any],
+    tags=["kontrakte", "screen-summary"],
+    summary="Kontrakt screen summary abrufen",
+)
+async def get_kontrakt_screen_summary(
+    contract_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    _require_roles(user, KontraktSecurityService.ROLE_LESEN, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    contract = db.query(KonContract).filter(KonContract.tenant_id == tenant_id, KonContract.contract_id == contract_id).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    rest = KontraktRestmengenService(db).compute_rest(tenant_id, contract_id)
+    lines = db.query(KonContractLine).filter(
+        KonContractLine.tenant_id == tenant_id, KonContractLine.contract_id == contract_id
+    ).order_by(KonContractLine.position_no.asc()).all()
+    line_out = [line_to_dict(line, rest.line_rest.get(line.line_id)) for line in lines]
+    contract_payload = contract_to_dict(contract, line_out, rest.contract_rest)
+    party_name = PartyLookupAdapter(db).get_name(contract.party_id)
+    return build_kontrakt_screen_summary(
+        contract_id=contract_id,
+        tenant_id=tenant_id,
+        contract=contract_payload,
+        line_count=len(line_out),
+        party_name=party_name,
+    )
+
+
+@router.get(
+    "/{contract_id}/tabs/{tab_key}",
+    response_model=dict[str, Any],
+    tags=["kontrakte", "screen-summary"],
+    summary="Kontrakt tab list data abrufen",
+)
+async def get_kontrakt_tab_data(
+    contract_id: str,
+    tab_key: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    _require_roles(user, KontraktSecurityService.ROLE_LESEN, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    contract = db.query(KonContract).filter(KonContract.tenant_id == tenant_id, KonContract.contract_id == contract_id).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    if tab_key == "positionen":
+        rest = KontraktRestmengenService(db).compute_rest(tenant_id, contract_id)
+        lines = db.query(KonContractLine).filter(
+            KonContractLine.tenant_id == tenant_id, KonContractLine.contract_id == contract_id
+        ).order_by(KonContractLine.position_no.asc()).all()
+        items = [line_to_dict(line, rest.line_rest.get(line.line_id)) for line in lines]
+        paged_items, total = _paginate_tab_items(items, page=page, limit=limit, q=q)
+        return {
+            "tab_key": tab_key,
+            "table_key": "contract_lines",
+            "items": paged_items,
+            "page": page,
+            "limit": limit,
+            "total": total,
+        }
+
+    if tab_key == "umsaetze":
+        rows = db.query(KonContractMovement).filter(
+            KonContractMovement.tenant_id == tenant_id, KonContractMovement.contract_id == contract_id
+        ).order_by(KonContractMovement.movement_date.desc())
+        rows = rows.filter(KonContractMovement.is_archived.is_(False))
+        items = [
+            {
+                "movement_id": r.movement_id,
+                "line_id": r.line_id,
+                "order_no": r.order_no,
+                "delivery_note_no": r.delivery_note_no,
+                "invoice_no": r.invoice_no,
+                "movement_date": _format_optional_date(r.movement_date),
+                "quantity": float(r.quantity or 0),
+                "unit_price": float(r.unit_price) if r.unit_price is not None else None,
+                "route_no": r.route_no,
+                "is_invoiced": bool(r.is_invoiced),
+            }
+            for r in rows.all()
+        ]
+        paged_items, total = _paginate_tab_items(items, page=page, limit=limit, q=q)
+        return {
+            "tab_key": tab_key,
+            "table_key": "contract_movements",
+            "items": paged_items,
+            "page": page,
+            "limit": limit,
+            "total": total,
+        }
+
+    return {"tab_key": tab_key, "table_key": tab_key, "items": [], "page": page, "limit": limit, "total": 0}
+
+
 # ── Create ────────────────────────────────────────────────────────────────────
 
 def _position_guard_check(db: Session, tenant_id: str, payload: KonContractIn, user: User) -> None:
