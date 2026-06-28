@@ -62,6 +62,14 @@ Status: abgeschlossen — `GET /api/v1/masks/{mask_id}/screen-definition`, `useS
 
 Status: abgeschlossen — `scripts/check_mask_performance_contract.ts` im Quality-Gate; Registry-Feld `lookup_min_chars`.
 
+## UIX-SALES-PILOT-007 - Sales Order Generator Pilot (2026-06-28)
+
+Status: abgeschlossen — Verkaufsauftrag hinter `VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER` fuer bestehende Auftraege.
+
+- Geliefert: screen-summary + positions tab API, UniversalSalesOrderPilotPage, Route-Switch in order-editor.
+- Legacy: voller OrderEditorLegacyPage fuer Neuanlage, Workflow-Einstieg und Flag aus.
+- Restarbeit: Liefer-/Dokument-Tabs, Mutationen, fachliche Paritaet mit OrderEditorLegacyPage.
+
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
