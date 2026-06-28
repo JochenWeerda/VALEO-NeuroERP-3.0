@@ -5,6 +5,10 @@
       "path": "hilfe"
     },
     {
+      "module": "@/pages/workflow/mask-benchmark/MaskBenchmarkRoute",
+      "path": "dev/mask-benchmark/:domain/:variant/:id"
+    },
+    {
       "module": "@/pages/stammdaten/artikel-stoffstrom",
       "path": "stammdaten/artikel-stoffstrom"
     },

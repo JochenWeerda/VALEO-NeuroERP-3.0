@@ -496,7 +496,7 @@ export default function FrmKontraktDetail(): JSX.Element {
   useKeyboardShortcuts(shortcuts)
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-testid="legacy-kontrakt-detail">
     <div className="space-y-4 p-6">
       {workflowContext ? (
         <WorkflowEntryBanner

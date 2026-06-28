@@ -1,0 +1,12 @@
+slice_id: UIX-MASK-AB-BENCH-018
+title: Mask Render A/B Benchmark (Legacy vs. Pilot)
+owner: offen
+status: geparkt
+created_at: 2026-06-28
+blocked_by: Frontend-Baseline stabil (428-Fehler-Fix)
+goal: Playwright A/B PoC mit gemessenen Shell/API/DOM-Metriken fuer Sales + Kontrakt.
+acceptance:
+  - mask-render-ab-benchmark.spec.ts gruen mit MASK_AB_BENCHMARK=1
+  - evidence/perf/mask-render-ab.latest.json mit Vergleichswerten
+  - render-performance-baseline.md mit A/B-Tabelle
+notes: Spec und Infrastruktur vorbereitet; standardmaessig test.skip bis Baseline gruen.

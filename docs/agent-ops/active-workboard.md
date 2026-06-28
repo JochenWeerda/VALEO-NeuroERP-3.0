@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-MASK-AB-BENCH-018 — A/B Render Benchmark (Legacy vs. Pilot)
+
+**Von:** Cursor
+**Owner:** offen
+**Stand:** geparkt 2026-06-28 — wartet auf stabile Frontend-Baseline (428-Fehler-Fix durch Claude Code).
+**Ziel:** Messbarer Proof-of-Concept: Shell-Ready-Zeit, initiale API-Bytes, DOM-Zeilen Legacy vs. RenderPlan-Pilot (Sales + Kontrakt).
+**Dateibesitz:** `packages/frontend-web/tests/e2e/mask-render-ab-benchmark.spec.ts`, `tests/e2e/helpers/mask-*`, `scripts/benchmark_mask_render_ab.ts`, `pages/workflow/mask-benchmark/MaskBenchmarkRoute.tsx`, `docs/architecture/uix/render-performance-baseline.md`
+**Abnahme:** `MASK_AB_BENCHMARK=1 pnpm benchmark:mask-render-ab` gruen; Report in `evidence/perf/`; Baseline-Doku mit gemessenen Zahlen.
+
 ## UIX-AGrar-PILOT-017 — Universal Mask Generator Agrar Kontrakt Pilot
 
 **Von:** Cursor
