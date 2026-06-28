@@ -134,7 +134,7 @@ export default function AktivitaetDetailPage(): JSX.Element {
     }
   }
 
-  const updateField = (field: keyof Activity, value: any) => {
+  const updateField = (field: keyof Activity, value: unknown) => {
     setActivity(prev => ({ ...prev, [field]: value }))
   }
 

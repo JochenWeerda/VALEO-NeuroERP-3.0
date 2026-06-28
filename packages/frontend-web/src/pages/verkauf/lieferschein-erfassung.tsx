@@ -347,7 +347,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         let customer: Customer | null = null
         if (response.customer_id) {
           try {
-            const customerData = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
             customer = {
               id: customerData.id,
               customerNumber: customerData.customer_number || customerData.customerNumber || '',
@@ -371,7 +371,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             let artikelGefahrgutPunkte = 0
             if (pos.artikel_id) {
               try {
-                const artikelResponse = await apiClient.get<any>(`/api/v1/articles/${pos.artikel_id}`)
+                const artikelResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${pos.artikel_id}`)
                 artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
                 artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
                   artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
@@ -432,7 +432,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         const branchId = response.branch_id
         if (branchId) {
           try {
-            const branch = await apiClient.get<any>(`/api/v1/admin/branches/${branchId}`)
+            const branch = await apiClient.get<Record<string, unknown>>(`/api/v1/admin/branches/${branchId}`)
             niederlassung = branch.branch_number || 0
             // Cache speichern
             setBranchCache((prev) => new Map(prev).set(niederlassung, branchId))
@@ -549,7 +549,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         }))
         if (order.customer_id) {
           try {
-            const customerResponse = await apiClient.get<any>(`/api/v1/crm/customers/${order.customer_id}`)
+            const customerResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${order.customer_id}`)
             const cd = customerResponse?.data ?? customerResponse
             if (!cd) throw new Error('Empty customer detail response')
             setState((prev) => ({
@@ -690,13 +690,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     // Lade Vorgänger-Belege für den ausgewählten Kunden (Angebote + Aufträge + Portal-Bestellungen)
     try {
       const [ordersResp, quotesResp, portalResp] = await Promise.allSettled([
-        apiClient.get<any>('/api/v1/sales/orders', { params: { customer_id: customer.id, limit: 20 } }),
-        apiClient.get<any>('/api/v1/sales/quotes', { params: { customer_id: customer.id, limit: 20 } }),
-        apiClient.get<any>('/api/v1/portal/bestellungen', { params: { customer_id: customer.id, status: 'bestellt', limit: 20 } }),
+        apiClient.get<Record<string, unknown>>('/api/v1/sales/orders', { params: { customer_id: customer.id, limit: 20 } }),
+        apiClient.get<Record<string, unknown>>('/api/v1/sales/quotes', { params: { customer_id: customer.id, limit: 20 } }),
+        apiClient.get<Record<string, unknown>>('/api/v1/portal/bestellungen', { params: { customer_id: customer.id, status: 'bestellt', limit: 20 } }),
       ])
 
       const orders = ordersResp.status === 'fulfilled' ? (ordersResp.value.items || ordersResp.value || []) : []
-      const mapped = orders.map((o: any) => ({
+      const mapped = orders.map(o => ({
         id: o.id,
         bestellNr: o.order_number || o.orderNumber || '',
         datum: o.created_at
@@ -757,7 +757,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   // Artikel auswählen
-  const handleArticleSelect = (article: any): void => {
+  const handleArticleSelect = (article: Record<string, unknown>): void => {
     // API gibt zurück: article_number, name, description, sales_price, mehrwertsteuer_prozent, unit
     const mwstProzent = article.mehrwertsteuer_prozent || article.mwstProzent || 19
     const articleId = article.id
@@ -1116,7 +1116,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       '/api/v1/sales/delivery-notes',
       { params: { limit: 100 } }
     )
-    return Array.isArray(list) ? list : (list as any)?.data ?? []
+    return Array.isArray(list) ? list : (list as Record<string, unknown>)?.data ?? []
   }
   const handleLieferscheinSuchenOpen = async (): Promise<void> => {
     try {
@@ -1158,7 +1158,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     let cancelled = false
     apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
       .then((res) => {
-        const list = (res as any)?.data ?? res
+        const list = (res as Record<string, unknown>)?.data ?? res
         if (!cancelled && Array.isArray(list)) setBranchesList(list)
       })
       .catch(() => {})
@@ -1168,7 +1168,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const handleNiederlassungOpen = async (): Promise<void> => {
     try {
       const res = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
-      const list = (res as any)?.data ?? res
+      const list = (res as Record<string, unknown>)?.data ?? res
       setBranchesList(Array.isArray(list) ? list : [])
       setShowNiederlassungDialog(true)
     } catch (e: any) {
@@ -1512,7 +1512,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         let customer: Customer | null = null
         if (response.customer_id) {
           try {
-            const customerData = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
             customer = {
               id: customerData.id,
               customerNumber: customerData.customer_number || customerData.customerNumber || '',
@@ -1540,7 +1540,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             let artikelGefahrgutPunkte = 0
             if (pos.artikel_id) {
               try {
-                const artikelResponse = await apiClient.get<any>(`/api/v1/articles/${pos.artikel_id}`)
+                const artikelResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${pos.artikel_id}`)
                 artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
                 artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
                   artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
@@ -1648,7 +1648,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             let artikelGefahrgutPunkte = 0
             if (pos.artikel_id) {
               try {
-                const artikelResponse = await apiClient.get<any>(`/api/v1/articles/${pos.artikel_id}`)
+                const artikelResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${pos.artikel_id}`)
                 artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
                 artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
                   artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)

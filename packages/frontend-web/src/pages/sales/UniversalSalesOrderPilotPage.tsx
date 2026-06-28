@@ -1,17 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams, useSearchParams } from '@/app/routing/typed-router'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import {
-  UniversalMaskRenderer,
-  adaptMaskConfigToScreenDefinition,
-  type ScreenDefinition,
-  type ScreenSummaryItem,
-  type ScreenTabDefinition,
-} from '@/components/mask-builder'
+import { UniversalMaskRenderer, type ScreenSummaryItem, type ScreenTabDefinition } from '@/components/mask-builder'
 import { mapSalesOrderToMask } from '@/features/sales-masks/mappers'
 import { SALES_ORDER_MASK_OBJECT_PAGE_CONFIG } from '@/features/sales-masks/sales-order-mask-support'
 import { SALES_ORDER_PILOT_TAB_TABLES } from '@/features/sales-masks/sales-order-tab-tables'
 import { mapTabDataToTables, useSalesOrderTabData } from '@/features/sales-masks/use-sales-order-tab-data'
+import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
+import { usePilotRenderPlan } from '@/features/mask-pilot/use-pilot-render-plan'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useSalesOrder, useSalesOrderScreenSummary } from '@/lib/api/sales'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -41,67 +37,39 @@ export default function UniversalSalesOrderPilotPage(): JSX.Element {
   const { id: routeId } = useParams<{ id?: string }>()
   const [searchParams] = useSearchParams()
   const id = routeId ?? searchParams.get('id') ?? undefined
-  const [activeTabKey, setActiveTabKey] = useState<string | undefined>(undefined)
+  const { activeTabKey, tablePage, onTabChange } = useMaskPilotState()
 
   const summaryQuery = useSalesOrderScreenSummary(id ?? '')
   const nativeScreenQuery = useScreenDefinition('sales/sales-order', { enabled: Boolean(id) })
   const orderQuery = useSalesOrder(id ?? '', { enabled: Boolean(summaryQuery.data) })
-  const tabDataQuery = useSalesOrderTabData(id ?? '', activeTabKey, summaryQuery.data?.tab_endpoints)
+  const tabDataQuery = useSalesOrderTabData(
+    id ?? '',
+    activeTabKey,
+    summaryQuery.data?.tab_endpoints,
+    tablePage,
+  )
 
-  const screen = useMemo(() => {
-    const adapted = adaptMaskConfigToScreenDefinition(
-      {
-        ...SALES_ORDER_MASK_OBJECT_PAGE_CONFIG,
-        title: summaryQuery.data?.title ?? 'Verkaufsauftrag Generator Pilot',
-        subtitle: summaryQuery.data?.subtitle ?? orderQuery.data?.order_number,
-      },
-      {
-        id: 'sales/sales-order',
-        domain: 'sales',
-        sourceId: 'sales-order-mask-inline',
-        summaryEndpoint: id ? `/api/v1/sales/orders/${id}/screen-summary` : undefined,
-      },
-    )
+  const summaryItems = useMemo(
+    () => buildSummaryItems(summaryQuery.data),
+    [summaryQuery.data],
+  )
 
-    const nativeBase: ScreenDefinition | undefined = nativeScreenQuery.data
-    const definition: ScreenDefinition = nativeBase
-      ? {
-          ...adapted,
-          ...nativeBase,
-          adapter: nativeBase.adapter,
-          performance: nativeBase.performance,
-          layout: nativeBase.layout,
-          summaryEndpoint: nativeBase.summaryEndpoint ?? adapted.summaryEndpoint,
-          tabs: enrichTabsWithTables(adapted.tabs ?? []),
-          fields: adapted.fields,
-        }
-      : { ...adapted, tabs: enrichTabsWithTables(adapted.tabs ?? []) }
-
-    return {
-      ...definition,
-      title: summaryQuery.data?.title ?? definition.title,
-      subtitle: summaryQuery.data?.subtitle ?? definition.subtitle,
-      summary: buildSummaryItems(summaryQuery.data),
-      actions: summaryQuery.data?.actions.map((action) => ({
-        key: action.key,
-        label: action.label,
-        kind: action.key === 'edit' ? 'primary' as const : 'secondary' as const,
-        permission: action.permission,
-      })) ?? [],
-      layout: {
-        preferredMode: 'desktopDense' as const,
-        mobileMode: 'mobileStack' as const,
-        touchTargetPx: 44,
-      },
-      performance: {
-        ...definition.performance,
-        initialPayloadBudgetKb: summaryQuery.data?.performance.initial_payload_budget_kb ?? 56,
-        requiresLazyTabs: true,
-        requiresVirtualTables: true,
-        lookupMinChars: summaryQuery.data?.performance.lookup_min_chars ?? 2,
-      },
-    }
-  }, [id, nativeScreenQuery.data, orderQuery.data?.order_number, summaryQuery.data])
+  const { plan } = usePilotRenderPlan({
+    screenId: 'sales/sales-order',
+    domain: 'sales',
+    maskConfig: {
+      ...SALES_ORDER_MASK_OBJECT_PAGE_CONFIG,
+      title: summaryQuery.data?.title ?? 'Verkaufsauftrag Generator Pilot',
+      subtitle: summaryQuery.data?.subtitle ?? orderQuery.data?.order_number,
+    },
+    entityId: id,
+    summaryEndpointPrefix: '/api/v1/sales/orders',
+    summary: summaryQuery.data,
+    nativeScreen: nativeScreenQuery.data,
+    enrichTabs: enrichTabsWithTables,
+    summaryItems,
+    enabled: Boolean(id),
+  })
 
   const data = useMemo(() => {
     const base = mapSalesOrderToMask(orderQuery.data)
@@ -115,10 +83,6 @@ export default function UniversalSalesOrderPilotPage(): JSX.Element {
     return base
   }, [orderQuery.data, summaryQuery.data?.customer_name])
   const tables = useMemo(() => mapTabDataToTables(tabDataQuery.data), [tabDataQuery.data])
-  const allowedPermissions = useMemo(
-    () => summaryQuery.data?.actions.flatMap((action) => action.permission ? [action.permission] : []) ?? [],
-    [summaryQuery.data],
-  )
 
   if (!id) {
     return (
@@ -159,14 +123,15 @@ export default function UniversalSalesOrderPilotPage(): JSX.Element {
           Tab-Daten werden geladen...
         </div>
       ) : null}
-      <UniversalMaskRenderer
-        screen={screen}
-        data={data}
-        tables={tables}
-        allowedPermissions={allowedPermissions}
-        onTabChange={setActiveTabKey}
-        onAction={() => undefined}
-      />
+      {plan ? (
+        <UniversalMaskRenderer
+          plan={plan}
+          data={data}
+          tables={tables}
+          onTabChange={onTabChange}
+          onAction={() => undefined}
+        />
+      ) : null}
     </div>
   )
 }

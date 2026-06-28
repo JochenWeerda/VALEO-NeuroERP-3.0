@@ -126,7 +126,7 @@ export default function OpKreditorenPage(): JSX.Element {
       setCreateOpen(false)
       setFormData(defaultForm)
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.response?.data?.detail ?? 'Anlage fehlgeschlagen')
     },
   })
@@ -141,7 +141,7 @@ export default function OpKreditorenPage(): JSX.Element {
       setSelectedItem(null)
       setFormData(defaultForm)
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.response?.data?.detail ?? 'Aktualisierung fehlgeschlagen')
     },
   })
@@ -152,7 +152,7 @@ export default function OpKreditorenPage(): JSX.Element {
       await queryClient.invalidateQueries({ queryKey: ['finance', 'open-items', 'kreditoren'] })
       toast.success('Offener Posten wurde gelöscht.')
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.response?.data?.detail ?? 'Löschen fehlgeschlagen')
     },
   })
@@ -168,7 +168,7 @@ export default function OpKreditorenPage(): JSX.Element {
       setSettleReference('')
       setSettleAmount(0)
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.response?.data?.detail ?? 'Ausgleich fehlgeschlagen')
     },
   })
@@ -189,7 +189,7 @@ export default function OpKreditorenPage(): JSX.Element {
         toast.success(`Sammelausgleich: ${res.data.success_count} Posten ausgeglichen.`)
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.response?.data?.detail ?? 'Sammelausgleich fehlgeschlagen')
     },
   })

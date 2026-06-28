@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -21,7 +21,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createRechnungseingangConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.process'),
   type: 'object-page',
@@ -233,7 +233,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
               label: t('crud.fields.total'),
               type: 'number'
             }
-          ] as any,
+          ] as Field[],
           helpText: t('crud.tooltips.fields.invoiceItems')
         }
       ]
@@ -269,7 +269,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
               label: `${t('crud.fields.total')  } (€)`,
               type: 'number'
             }
-          ] as any,
+          ] as Field[],
           helpText: t('crud.tooltips.fields.deviations')
         },
         {
@@ -462,7 +462,7 @@ export default function RechnungseingangPage(): JSX.Element {
     navigate,
   ])
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       await saveData(formData)

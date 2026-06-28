@@ -207,7 +207,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         key: 'recall',
         label: 'Recall einleiten',
         type: 'danger' as const,
-        onClick: async (items: any[]) => {
+        onClick: async (items: Record<string, unknown>[]) => {
           if (!confirm(`Rückruf für ${items.length} Charge(n) einleiten?`)) return
           let ok = 0; let err = 0
           for (const item of items) {
@@ -228,7 +228,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         key: 'trace',
         label: 'Rückverfolgung',
         type: 'secondary' as const,
-        onClick: (items: any[]) => {
+        onClick: (items: Record<string, unknown>[]) => {
           if (items.length === 0) return
           if (items.length === 1) {
             navigate(`/charge/rueckverfolgung?chargeId=${items[0].id}`)
@@ -245,11 +245,11 @@ export default function ChargeVerfolgungPage(): JSX.Element {
     navigate('/futtermittel/chargen/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) navigate(`/futtermittel/chargen/${item.id}`)
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich löschen?`)) return
     try {
@@ -276,7 +276,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       const res = await api.post('/api/v1/futter/import/chargen', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
       toast({
         title: 'Import abgeschlossen',
         description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,

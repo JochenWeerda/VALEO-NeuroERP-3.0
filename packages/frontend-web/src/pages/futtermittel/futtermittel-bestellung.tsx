@@ -84,7 +84,7 @@ const bestellungWizardConfig: WizardConfig = {
               label: 'Wunschtermin',
               type: 'date'
             }
-          ] as any,
+          ] as Field[],
           helpText: 'Fügen Sie alle gewünschten Futtermittel hinzu'
         }
       ]
@@ -136,12 +136,12 @@ export default function FuttermittelBestellungPage(): JSX.Element {
     apiUrl: bestellungWizardConfig.api.baseUrl
   })
 
-  const validate = (formData: any) => validateFields(bestellungWizardConfig.steps.flatMap((step) => step.fields), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(bestellungWizardConfig.steps.flatMap((step) => step.fields), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const handleComplete = async (formData: any) => {
+  const handleComplete = async (formData: Record<string, unknown>) => {
     const errors = validate(formData)
     if (Object.keys(errors).length > 0) {
       showValidationToast(errors)

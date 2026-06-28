@@ -5,13 +5,13 @@ import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
 const CHART_HEIGHT = 300
 const formatCurrencyLabel = (value: number | string): [string, string] => [`${Number(value).toLocaleString('de-DE')} EUR`, 'Wert']
 
-export default function CustomerAnalyticsCharts({ data }: { data: any }): JSX.Element {
+export default function CustomerAnalyticsCharts({ data }: { data: unknown }): JSX.Element {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Card className="p-4">
         <h4 className="mb-2 font-semibold">Top Kunden nach Umsatz</h4>
         <SimpleComparisonBars
-          data={(data?.topCustomers ?? []).slice(0, 5).map((item: any) => ({
+          data={(data?.topCustomers ?? []).slice(0, 5).map(item => ({
             name: String(item.customerId),
             value: Number(item.totalRevenue ?? 0),
             color: '#3B82F6',

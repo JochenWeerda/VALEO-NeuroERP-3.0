@@ -76,7 +76,7 @@ const abschlussConfig: MaskConfig = {
           required: true,
           placeholder: '2025-01',
           pattern: '^\\d{4}-\\d{2}$'
-         } as any,
+         } as Field,
         {
           name: 'abschlussTyp',
           label: 'Abschluss-Typ',
@@ -219,12 +219,12 @@ const abschlussConfig: MaskConfig = {
       key: 'abgrenzungen',
       label: 'Abgrenzungen',
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'abgrenzungen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <AbgrenzungenTable
           data={_data.rechnungsabgrenzungsposten || []}
           onChange={(rechnungsabgrenzungsposten) => onChange({ ..._data, rechnungsabgrenzungsposten })}
@@ -235,12 +235,12 @@ const abschlussConfig: MaskConfig = {
       key: 'rueckstellungen',
       label: 'Rückstellungen',
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'rueckstellungen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <RueckstellungenTable
           data={_data.rueckstellungen || []}
           onChange={(rueckstellungen) => onChange({ ..._data, rueckstellungen })}
@@ -305,12 +305,12 @@ const abschlussConfig: MaskConfig = {
       update: '/api/v1/finance/closing-checklists/{id}',
       delete: '/api/v1/finance/closing-checklists/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 }
 
 // Abgrenzungen-Tabelle Komponente
-function AbgrenzungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function AbgrenzungenTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const addPosten = () => {
     onChange([..._data, {
       beschreibung: '',
@@ -319,7 +319,7 @@ function AbgrenzungenTable({ data: _data, onChange }: { data: any[], onChange: (
     }])
   }
 
-  const updatePosten = (index: number, field: string, value: any) => {
+  const updatePosten = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -400,7 +400,7 @@ function AbgrenzungenTable({ data: _data, onChange }: { data: any[], onChange: (
 }
 
 // Rückstellungen-Tabelle Komponente
-function RueckstellungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function RueckstellungenTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const addRueckstellung = () => {
     onChange([..._data, {
       beschreibung: '',
@@ -409,7 +409,7 @@ function RueckstellungenTable({ data: _data, onChange }: { data: any[], onChange
     }])
   }
 
-  const updateRueckstellung = (index: number, field: string, value: any) => {
+  const updateRueckstellung = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -492,8 +492,9 @@ export default function AbschlussPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const workflowContext = readWorkflowEntryContext(searchParams)
-  const [isDirty, setIsDirty] = useState(false)
-  const [workspaceData, setWorkspaceData] = useState<any>({})
+  const [isDirty, setIsDirty] = useState(false)
+
+  const [workspaceData, setWorkspaceData] = useState<Record<string, unknown>>({})
   const [roleFocus, setRoleFocus] = useState<CloseRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const { data: fibuCockpit } = useFibuCockpit()
@@ -502,7 +503,7 @@ export default function AbschlussPage(): JSX.Element {
   const { data, loading } = useMaskData({
     apiUrl: abschlussConfig.api.baseUrl,
     id: 'new',
-    transformResponse: (response: any) => {
+    transformResponse: (response: unknown) => {
       if (response?.data) {
         return {
           ...response.data,
@@ -529,7 +530,7 @@ export default function AbschlussPage(): JSX.Element {
   const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(abschlussConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(abschlussConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({
       variant: 'destructive',
@@ -538,14 +539,14 @@ export default function AbschlussPage(): JSX.Element {
     })
   }
 
-  const buildClosingActionPayload = (formData: any) => ({
+  const buildClosingActionPayload = (formData: Record<string, unknown>) => ({
     checklist_id: formData?.id || undefined,
     period: formData?.periode,
     closing_type: formData?.abschlussTyp,
     actor: currentActor,
   })
 
-  const applyWorkspaceResponse = (response: any) => {
+  const applyWorkspaceResponse = response => {
     const payload = response?.data ?? response
     if (!payload) {
       return
@@ -570,8 +571,9 @@ export default function AbschlussPage(): JSX.Element {
     })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
-    if (action === 'calculate') {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
+    if (action === 'calculate') {
+
       try {
         const response = await apiClient.post('/api/v1/finance/closing/calculate', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
@@ -590,7 +592,8 @@ export default function AbschlussPage(): JSX.Element {
       }
       return
     }
-    if (action === 'approve') {
+    if (action === 'approve') {
+
       try {
         const response = await apiClient.post('/api/v1/finance/closing/approve', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
@@ -605,7 +608,8 @@ export default function AbschlussPage(): JSX.Element {
       if (Object.keys(errors).length > 0) {
         showValidationToast(errors)
         return
-      }
+      }
+
       try {
         const response = await apiClient.post('/api/v1/finance/closing/run', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
@@ -619,7 +623,8 @@ export default function AbschlussPage(): JSX.Element {
       return
     }
     if (action === 'lock') {
-      if (!confirm('Abschluss sperren? Diese Aktion kann nicht rückgängig gemacht werden.')) return
+      if (!confirm('Abschluss sperren? Diese Aktion kann nicht rückgängig gemacht werden.')) return
+
       try {
         const response = await apiClient.post('/api/v1/finance/closing/lock', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
@@ -630,7 +635,8 @@ export default function AbschlussPage(): JSX.Element {
       }
       return
     }
-    if (action === 'export') {
+    if (action === 'export') {
+
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'closing', format: 'pdf' })
         if (res?.url) window.open(res.url, '_blank')
@@ -642,7 +648,7 @@ export default function AbschlussPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('close', formData)
   }
 

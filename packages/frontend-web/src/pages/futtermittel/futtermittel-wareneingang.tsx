@@ -125,7 +125,7 @@ const wareneingangWizardConfig: WizardConfig = {
               label: 'QS-Freigabe',
               type: 'boolean'
             }
-          ] as any,
+          ] as Field[],
           helpText: 'Erfassen Sie jede Charge separat mit Qualitätsdaten'
         }
       ]
@@ -234,12 +234,12 @@ export default function FuttermittelWareneingangPage(): JSX.Element {
     apiUrl: wareneingangWizardConfig.api.baseUrl
   })
 
-  const validate = (formData: any) => validateFields(wareneingangWizardConfig.steps.flatMap((step) => step.fields), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(wareneingangWizardConfig.steps.flatMap((step) => step.fields), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const handleComplete = async (formData: any) => {
+  const handleComplete = async (formData: Record<string, unknown>) => {
     const errors = validate(formData)
     if (Object.keys(errors).length > 0) {
       showValidationToast(errors)

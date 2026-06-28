@@ -79,16 +79,16 @@ export function CustomerSelectionDialog({
   const { data: customers = [], isLoading, error: fetchError } = useQuery({
     queryKey: ['crm', 'customers', 'search', debouncedSearch],
     queryFn: async () => {
-      const response = await apiClient.get<any>('/api/v1/crm/customers/', {
+      const response = await apiClient.get<Record<string, unknown>>('/api/v1/crm/customers/', {
         params: { search: debouncedSearch, limit: 50 },
       })
-      let items: any[] = []
+      let items: Record<string, unknown>[] = []
       if (Array.isArray(response)) {
         items = response
       } else if (response?.items && Array.isArray(response.items)) {
         items = response.items
       }
-      return items.map((c: any): Customer => ({
+      return items.map((c): Customer => ({
         id: c.id,
         customerNumber: c.customer_number || c.customerNumber || '',
         name: (c.company_name || c.name || '').trim(),

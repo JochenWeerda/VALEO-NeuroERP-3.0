@@ -23,7 +23,7 @@ const kontenplanSchema = z.object({
   periode: z.string().regex(/^\d{4}-\d{2}$/, "Periode muss YYYY-MM Format haben")
 })
 
-const validateKontenplanForm = (formData: any): { isValid: boolean; errors: Record<string, string> } => {
+const validateKontenplanForm = (formData: Record<string, unknown>): { isValid: boolean; errors: Record<string, string> } => {
   const parsed = kontenplanSchema.safeParse(formData ?? {})
   if (parsed.success) {
     return { isValid: true, errors: {} }
@@ -92,7 +92,7 @@ const kontenplanConfig: MaskConfig = {
           required: true,
           placeholder: '2025-01',
           pattern: '^\\d{4}-\\d{2}$'
-         } as any
+         } as Field
       ],
       layout: 'grid',
       columns: 2
@@ -192,13 +192,13 @@ const kontenplanConfig: MaskConfig = {
       update: '/api/v1/finance/chart-of-accounts/{id}',
       delete: '/api/v1/finance/chart-of-accounts/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 }
 
 export default function KontenplanPage(): JSX.Element {
   const navigate = useNavigate()
-  const [isDirty, setIsDirty] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: kontenplanConfig.api.baseUrl,
@@ -206,7 +206,7 @@ export default function KontenplanPage(): JSX.Element {
   })
 
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const isValid = validateKontenplanForm(formData)
       if (!isValid.isValid) {
@@ -222,7 +222,7 @@ export default function KontenplanPage(): JSX.Element {
       }
       return
     }
-    if (action === 'validate') {
+    if (action === 'validate') {
       try {
         await apiClient.post('/api/v1/finance/chart-of-accounts/validate', formData ?? {})
         toast({ title: 'Validierung erfolgreich' })
@@ -232,7 +232,7 @@ export default function KontenplanPage(): JSX.Element {
       }
       return
     }
-    if (action === 'export') {
+    if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/finance/chart-of-accounts/datev-export', formData ?? {})
         if (res?.url) window.open(res.url, '_blank')
@@ -244,7 +244,7 @@ export default function KontenplanPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

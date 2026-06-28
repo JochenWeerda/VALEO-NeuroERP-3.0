@@ -107,30 +107,30 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
     await Promise.all(
       sources.map(async (typ) => {
         try {
-          let response: any[] = []
+          let response: Record<string, unknown>[] = []
           if (typ === 'angebot') {
-            const r = await apiClient.get<any>('/api/v1/sales/quotes', {
+            const r = await apiClient.get<Record<string, unknown>>('/api/v1/sales/quotes', {
               params: { customer_id: customerId, limit: 20 },
             })
             response = r.items || r || []
           } else if (typ === 'auftrag') {
-            const r = await apiClient.get<any>('/api/v1/sales/orders', {
+            const r = await apiClient.get<Record<string, unknown>>('/api/v1/sales/orders', {
               params: { customer_id: customerId, limit: 20 },
             })
             response = r.items || r || []
           } else if (typ === 'portalbestellung') {
-            const r = await apiClient.get<any>('/api/v1/portal/bestellungen', {
+            const r = await apiClient.get<Record<string, unknown>>('/api/v1/portal/bestellungen', {
               params: { customer_id: customerId, status: 'bestellt', limit: 20 },
             })
             response = Array.isArray(r) ? r : (r.items || r.data || [])
           } else {
-            const r = await apiClient.get<any>('/api/v1/sales/delivery-notes', {
+            const r = await apiClient.get<Record<string, unknown>>('/api/v1/sales/delivery-notes', {
               params: { customer_id: customerId, limit: 20 },
             })
             response = r.items || r || []
           }
 
-          const docs: BelegDokument[] = response.map((d: any) => ({
+          const docs: BelegDokument[] = response.map(d => ({
             id: d.id,
             typ,
             nummer: d.order_number || d.quote_number || d.delivery_note_number || d.id,
@@ -164,9 +164,9 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
       let positionen: BelegfolgePosition[] = []
 
       if (beleg.typ === 'auftrag') {
-        const r = await apiClient.get<any>(`/api/v1/sales/orders/${beleg.id}`)
+        const r = await apiClient.get<Record<string, unknown>>(`/api/v1/sales/orders/${beleg.id}`)
         const items = r.items || []
-        positionen = items.map((item: any) => ({
+        positionen = items.map(item => ({
           artikelNr: item.article_number || '',
           artikelId: item.artikel_id || null,
           bezeichnung: item.description || '',
@@ -179,10 +179,10 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
           ekPreis: item.purchase_price || 0,
         }))
       } else if (beleg.typ === 'portalbestellung') {
-        const r = await apiClient.get<any>(`/api/v1/portal/bestellungen/${beleg.id}`)
+        const r = await apiClient.get<Record<string, unknown>>(`/api/v1/portal/bestellungen/${beleg.id}`)
         // Portal-Bestellungen können Positionen-Array oder Einzelartikel-Struktur haben
         const items = r.positionen || r.items || (r.artikel ? [r] : [])
-        positionen = items.map((item: any) => ({
+        positionen = items.map(item => ({
           artikelNr: item.artikelnummer || item.artikel_nr || item.artikel || '',
           artikelId: item.artikel_id || null,
           bezeichnung: item.name || item.bezeichnung || item.artikel || '',
@@ -195,9 +195,9 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
           ekPreis: 0,
         }))
       } else if (beleg.typ === 'angebot') {
-        const r = await apiClient.get<any>(`/api/v1/sales/quotes/${beleg.id}`)
+        const r = await apiClient.get<Record<string, unknown>>(`/api/v1/sales/quotes/${beleg.id}`)
         const items = r.items || r.positionen || []
-        positionen = items.map((item: any) => ({
+        positionen = items.map(item => ({
           artikelNr: item.article_number || item.artikel_nr || '',
           artikelId: item.artikel_id || null,
           bezeichnung: item.description || item.bezeichnung || '',
@@ -210,9 +210,9 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
           ekPreis: item.purchase_price || 0,
         }))
       } else {
-        const r = await apiClient.get<any>(`/api/v1/sales/delivery-notes/${beleg.id}`)
+        const r = await apiClient.get<Record<string, unknown>>(`/api/v1/sales/delivery-notes/${beleg.id}`)
         const items = r.positionen || []
-        positionen = items.map((item: any) => ({
+        positionen = items.map(item => ({
           artikelNr: item.artikel_nr || '',
           artikelId: item.artikel_id || null,
           bezeichnung: item.bezeichnung || '',

@@ -1,0 +1,9 @@
+slice_id: UIX-ROLLOUT-TEMPLATE-016
+title: Sales RenderPlan and Domain Rollout Template
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-28
+goal: Sales pilot on RenderPlan plus rollout template for Agrar/Inventory/Finance.
+acceptance:
+  - UniversalSalesOrderPilotPage on RenderPlan
+  - mask-generator-rollout-template.md

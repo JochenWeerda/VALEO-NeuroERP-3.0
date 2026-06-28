@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -21,7 +21,7 @@ import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 
 // Konfiguration für Buchungserfassung ObjectPage (wird in Komponente mit i18n erstellt)
-const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createBuchungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.manualBooking'),
   type: 'object-page',
@@ -63,7 +63,7 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-        } as any,
+        } as Field,
         {
           name: 'buchungstext',
           label: t('crud.fields.bookingText'),
@@ -79,17 +79,17 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       key: 'buchungszeilen',
       label: t('crud.fields.bookingLines'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'buchungszeilen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <BuchungszeilenTable
           data={_data.buchungszeilen || []}
           onChange={(zeilen) => {
-            const gesamtSoll = zeilen.reduce((sum: number, z: any) => sum + (z.soll || 0), 0)
-            const gesamtHaben = zeilen.reduce((sum: number, z: any) => sum + (z.haben || 0), 0)
+            const gesamtSoll = zeilen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).soll || 0), 0)
+            const gesamtHaben = zeilen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).haben || 0), 0)
             onChange({
               ..._data,
               buchungszeilen: zeilen,
@@ -141,7 +141,7 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           type: 'file',
           accept: '.pdf,.jpg,.jpeg,.png',
           helpText: t('crud.tooltips.fields.gobdDocumentArchiving')
-        } as any
+        } as Field
       ]
     }
   ],
@@ -160,12 +160,12 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       update: '/api/v1/journal-entries/{id}',
       delete: '/api/v1/journal-entries/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
 // Buchungszeilen-Tabelle Komponente
-function BuchungszeilenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const { t } = useTranslation()
   const addRow = () => {
     onChange([..._data, {
@@ -179,7 +179,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: any[], onChange:
     }])
   }
 
-  const updateRow = (index: number, field: string, value: any) => {
+  const updateRow = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -299,7 +299,8 @@ export default function BuchungserfassungPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [isStornoDialogOpen, setIsStornoDialogOpen] = useState(false)
   const [isStornoLoading, setIsStornoLoading] = useState(false)
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
+
   const entityType = 'booking'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Buchungserfassung')
   const buchungConfig = createBuchungConfig(t, entityTypeLabel)
@@ -319,10 +320,10 @@ export default function BuchungserfassungPage(): JSX.Element {
     differenz: 0,
     buchungszeilen: [],
   }
-  const [latestFormData, setLatestFormData] = useState<any>(null)
+  const [latestFormData, setLatestFormData] = useState<Record<string, unknown> | null>(null)
   const formData = { ...initialFormData, ...(data ?? {}) }
 
-  const validate = (formData: any) => {
+  const validate = (formData: Record<string, unknown>) => {
     const errors = validateFields(getFieldsFromMaskConfig(buchungConfig), formData ?? {})
     const buchungszeilen = Array.isArray(formData?.buchungszeilen) ? formData.buchungszeilen : []
 
@@ -359,13 +360,14 @@ export default function BuchungserfassungPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
         showValidationToast(errors)
         return
-      }
+      }
+
       try {
         const period = String(formData?.periode ?? '').trim()
         if (period) {
@@ -427,7 +429,8 @@ export default function BuchungserfassungPage(): JSX.Element {
       }
       setIsStornoDialogOpen(true)
     }
-    if (action === 'export') {
+    if (action === 'export') {
+
       try {
         const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'journal_entries', format: 'datev' })).data
         if (res?.url) window.open(res.url, '_blank')
@@ -439,7 +442,7 @@ export default function BuchungserfassungPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

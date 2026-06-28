@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -16,7 +16,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createDunningConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
   type: 'object-page',
@@ -267,7 +267,7 @@ export default function DunningEditorPage(): JSX.Element {
     isPaid ? { label: 'Zahlung eingegangen', detail: data?.paymentDate || '' } : null,
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(dunningConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(dunningConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }

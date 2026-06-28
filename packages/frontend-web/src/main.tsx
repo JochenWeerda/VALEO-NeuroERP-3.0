@@ -11,9 +11,9 @@ const AppRuntime = lazy(() =>
 const rootElement = document.getElementById('root')
 
 if (rootElement instanceof HTMLElement) {
-  const existingRoot = (rootElement as any).__reactRoot ?? null
+  const existingRoot = (rootElement as Record<string, unknown>).__reactRoot ?? null
   const root = existingRoot ?? ReactDOM.createRoot(rootElement)
-  ;(rootElement as any).__reactRoot = root
+  ;(rootElement as Record<string, unknown>).__reactRoot = root
 
   root.render(
     <StrictMode>

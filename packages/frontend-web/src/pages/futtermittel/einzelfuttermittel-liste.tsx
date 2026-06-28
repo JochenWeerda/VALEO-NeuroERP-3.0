@@ -182,7 +182,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
         key: 'export',
         label: 'Exportieren',
         type: 'secondary' as const,
-        onClick: (items: any[]) => {
+        onClick: (items: Record<string, unknown>[]) => {
           void triggerFutterExport('futtermittel_einzel', `Einzelfuttermittel (${items.length})`)
         }
       },
@@ -190,7 +190,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
         key: 'delete',
         label: 'Löschen',
         type: 'danger' as const,
-        onClick: async (items: any[]) => {
+        onClick: async (items: Record<string, unknown>[]) => {
           if (!confirm(`${items.length} Einzelfuttermittel wirklich löschen?`)) return
           const result = await bulkDeleteFutterItems('einzelfuttermittel', items.map((item) => item.id))
           queryClient.invalidateQueries({ queryKey: ['futter', 'einzel'] })
@@ -208,11 +208,11 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
     navigate('/futtermittel/einzelfuttermittel/stamm/new')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) navigate(`/futtermittel/einzelfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(`Einzelfuttermittel "${item.name}" wirklich löschen?`)) return
     try {
@@ -239,7 +239,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
       const res = await api.post('/api/v1/futter/import/einzelfuttermittel', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
       toast({
         title: 'Import abgeschlossen',
         description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,

@@ -315,7 +315,7 @@ export const articleService = {
 
   async getArticleStock(articleId: string, branch_id?: string, tenant_id?: string) {
     const params = { branch_id, tenant_id }
-    const response = await apiClient.get<any>(`/api/v1/articles/${articleId}/stock`, { params })
+    const response = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${articleId}/stock`, { params })
     return response.data
   },
 
@@ -327,7 +327,7 @@ export const articleService = {
     limit?: number
     tenant_id?: string
   }) {
-    const response = await apiClient.get<any>(`/api/v1/articles/${articleId}/stock-movements`, { params })
+    const response = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${articleId}/stock-movements`, { params })
     return response.data
   },
 
@@ -344,22 +344,22 @@ export const articleService = {
       skip: params?.offset,
       tenant_id: params?.tenant_id,
     }
-    const response = await apiClient.get<any>('/api/v1/nutrient-compositions', { params: queryParams })
+    const response = await apiClient.get<Record<string, unknown>>('/api/v1/nutrient-compositions', { params: queryParams })
     return response.data
   },
 
   async getNutrientComposition(id: string) {
-    const response = await apiClient.get<any>(`/api/v1/nutrient-compositions/${id}`)
+    const response = await apiClient.get<Record<string, unknown>>(`/api/v1/nutrient-compositions/${id}`)
     return response.data
   },
 
-  async createNutrientComposition(data: any) {
-    const response = await apiClient.post<any>('/api/v1/nutrient-compositions', data)
+  async createNutrientComposition(data: Record<string, unknown>) {
+    const response = await apiClient.post<Record<string, unknown>>('/api/v1/nutrient-compositions', data)
     return response.data
   },
 
-  async updateNutrientComposition(id: string, data: any) {
-    const response = await apiClient.put<any>(`/api/v1/nutrient-compositions/${id}`, data)
+  async updateNutrientComposition(id: string, data: Record<string, unknown>) {
+    const response = await apiClient.put<Record<string, unknown>>(`/api/v1/nutrient-compositions/${id}`, data)
     return response.data
   },
 
@@ -369,7 +369,7 @@ export const articleService = {
 
   async searchNutrientCompositions(q: string, limit?: number, tenant_id?: string) {
     const params = { q, limit, tenant_id }
-    const response = await apiClient.get<any>('/api/v1/nutrient-compositions/search', { params })
+    const response = await apiClient.get<Record<string, unknown>>('/api/v1/nutrient-compositions/search', { params })
     return response.data
   }
 }

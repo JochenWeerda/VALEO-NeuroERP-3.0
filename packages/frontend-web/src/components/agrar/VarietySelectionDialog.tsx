@@ -55,7 +55,7 @@ export function VarietySelectionDialog({
     queryFn: async () => {
       try {
         const res = await apiClient.get<Variety[]>('/api/v1/agrar/varieties')
-        return Array.isArray(res) ? res : (res as any)?.items ?? []
+        return Array.isArray(res) ? res : (res as Record<string, unknown>)?.items ?? []
       } catch {
         return []
       }

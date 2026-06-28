@@ -170,7 +170,7 @@ export const ENTITY_TYPE_MAPPINGS: Record<string, string> = {
 /**
  * Get entity type key from entity object or string
  */
-export function getEntityTypeKey(entity: any | string): string {
+export function getEntityTypeKey(entity: Record<string, unknown> | string): string {
   if (typeof entity === 'string') {
     return entity.toLowerCase();
   }

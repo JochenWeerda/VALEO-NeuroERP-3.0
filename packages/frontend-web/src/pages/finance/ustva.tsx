@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -36,7 +36,7 @@ const vatRoleProfiles: Array<{ id: VatRoleFocus; label: string; description: str
   { id: 'management', label: 'Leitung', description: 'Abgabestatus, Stopper und Restrisiken entscheiden.' },
 ]
 
-const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.createAndSubmitUstva'),
   type: 'object-page',
@@ -52,7 +52,7 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as any,
+         } as Field,
         {
           name: 'voranmeldungszeitraum',
           label: t('crud.fields.declarationPeriod'),
@@ -232,12 +232,12 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       key: 'abweichungen',
       label: t('crud.fields.deviations'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'abweichungen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <AbweichungenTable
           data={_data.abweichungen || []}
           onChange={(abweichungen) => onChange({ ..._data, abweichungen })}
@@ -306,12 +306,12 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       update: '/api/v1/finance/vat-return/{id}',
       delete: '/api/v1/finance/vat-return/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
 // Abweichungen-Tabelle Komponente
-function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function AbweichungenTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const { t } = useTranslation()
   const addAbweichung = () => {
     onChange([..._data, {
@@ -322,7 +322,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
     }])
   }
 
-  const updateAbweichung = (index: number, field: string, value: any) => {
+  const updateAbweichung = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -445,7 +445,7 @@ export default function UStVAPage(): JSX.Element {
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
   const [isDirty, setIsDirty] = useState(false)
-  const [workspaceData, setWorkspaceData] = useState<any>({})
+  const [workspaceData, setWorkspaceData] = useState<Record<string, unknown>>({})
   const [roleFocus, setRoleFocus] = useState<VatRoleFocus>('all')
   const entityType = 'ustva'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Umsatzsteuervoranmeldung')
@@ -458,7 +458,7 @@ export default function UStVAPage(): JSX.Element {
     transformResponse: (payload: Record<string, unknown>) => mapVatReturnPayload(payload) ?? payload,
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(ustvaConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(ustvaConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
@@ -471,7 +471,7 @@ export default function UStVAPage(): JSX.Element {
     setWorkspaceData(mapped)
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'calculate') {
       try {
         const result = await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
@@ -586,7 +586,7 @@ export default function UStVAPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('submit', formData)
   }
 
@@ -650,7 +650,7 @@ export default function UStVAPage(): JSX.Element {
     },
     {
       label: 'Steuerwerte und Abweichungen klaeren',
-      done: deviations.length === 0 || deviations.every((item: any) => item.grund),
+      done: deviations.length === 0 || deviations.every(item => item.grund),
       hint: deviations.length > 0 ? `${deviations.length} Abweichung(en) mit Begruendung pruefen.` : 'Keine Abweichungen im Arbeitsstand erfasst.',
     },
     {

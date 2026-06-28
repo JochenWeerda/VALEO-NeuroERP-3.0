@@ -10,7 +10,7 @@ export interface EpcisEvent {
   lot_id?: string | null
   sku?: string | null
   quantity?: number | null
-  extensions?: Record<string, any> | null
+  extensions?: Record<string, unknown> | null
   created_at: string
 }
 
@@ -27,7 +27,7 @@ export interface CreateEpcisEvent {
   lot_id?: string
   sku?: string
   quantity?: number
-  extensions?: Record<string, any>
+  extensions?: Record<string, unknown>
   idempotency_key?: string
 }
 

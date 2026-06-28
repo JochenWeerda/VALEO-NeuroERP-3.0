@@ -22,10 +22,10 @@ export interface CrudPrintButtonProps {
   disabled?: boolean;
   isLoading?: boolean;
   // For list printing
-  listData?: any[];
+  listData?: Record<string, unknown>[];
   listColumns?: Array<{ header: string; field: string }>;
   // For detail printing
-  detailEntity?: any;
+  detailEntity?: Record<string, unknown>;
   printTitle?: string;
 }
 

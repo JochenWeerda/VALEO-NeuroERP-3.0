@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -15,7 +15,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.managePurchaseOffers'),
@@ -148,7 +148,7 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
 })
 
 async function bulkOfferMutation(
-  selectedItems: any[],
+  selectedItems: Record<string, unknown>[],
   endpointSuffix: 'review' | 'approve' | 'reject' | 'convert-to-order',
   allowedStatuses: string[],
 ): Promise<{ ok: number; errors: string[]; createdOrderId?: string; createdOrderNumber?: string }> {
@@ -206,7 +206,7 @@ export default function AngeboteListePage(): JSX.Element {
         label: t('crud.actions.review'),
         labelKey: 'crud.actions.review',
         type: 'secondary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkOfferMutation(selectedItems, 'review', ['ERFASST', 'OFFEN', 'ENTWURF'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
           if (result.ok > 0) {
@@ -221,7 +221,7 @@ export default function AngeboteListePage(): JSX.Element {
         label: t('crud.actions.approve'),
         labelKey: 'crud.actions.approve',
         type: 'primary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkOfferMutation(selectedItems, 'approve', ['GEPRUEFT', 'GENEHMIGT'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
           if (result.ok > 0) {
@@ -236,7 +236,7 @@ export default function AngeboteListePage(): JSX.Element {
         label: t('crud.actions.reject'),
         labelKey: 'crud.actions.reject',
         type: 'danger',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkOfferMutation(selectedItems, 'reject', ['ERFASST', 'GEPRUEFT', 'GENEHMIGT', 'OFFEN'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
           if (result.ok > 0) {
@@ -251,7 +251,7 @@ export default function AngeboteListePage(): JSX.Element {
         label: t('crud.actions.convertToOrder'),
         labelKey: 'crud.actions.convertToOrder',
         type: 'secondary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkOfferMutation(selectedItems, 'convert-to-order', ['GEPRUEFT', 'GENEHMIGT'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
           if (result.ok > 0) {
@@ -276,13 +276,13 @@ export default function AngeboteListePage(): JSX.Element {
     navigate('/einkauf/angebot/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     if (item?.id) {
       navigate(`/einkauf/angebote/${item.id}`)
     }
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
@@ -297,7 +297,7 @@ export default function AngeboteListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.offerNumber')};${t('crud.entities.supplier')};${t('crud.fields.product')};${t('crud.fields.price')};${t('crud.fields.status')}\n`
-      const csvContent = data.map((angebot: any) =>
+      const csvContent = data.map(angebot =>
         `"${angebot.angebotNummer}";"${angebot.lieferant}";"${angebot.artikel}";"${angebot.preis}";"${angebot.status}"`
       ).join('\n')
 

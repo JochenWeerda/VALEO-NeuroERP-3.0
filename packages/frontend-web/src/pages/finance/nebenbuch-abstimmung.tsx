@@ -24,10 +24,10 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const [loading, setLoading] = useState(false)
   const [ledgerType, setLedgerType] = useState<string>('AR')
   const [period, setPeriod] = useState<string>(new Date().toISOString().slice(0, 7))
-  const [reconciliationData, setReconciliationData] = useState<any>(null)
-  const [summary, setSummary] = useState<any>(null)
+  const [reconciliationData, setReconciliationData] = useState<Record<string, unknown> | null>(null)
+  const [summary, setSummary] = useState<Record<string, unknown> | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null)
-  const [details, setDetails] = useState<any[]>([])
+  const [details, setDetails] = useState<Record<string, unknown>[]>([])
   const [exporting, setExporting] = useState(false)
   const [matchingInProgress, setMatchingInProgress] = useState(false)
 
@@ -75,7 +75,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadDetails = async (accountNumber: string) => {
     setSelectedAccount(accountNumber)
     try {
-      const { data } = await apiClient.get<any[]>(
+      const { data } = await apiClient.get<Record<string, unknown>[]>(
         `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details`,
         { params: { account_number: accountNumber, period } },
       )
@@ -158,7 +158,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
     { value: 'AP', label: `${t('crud.entities.creditor')} (AP)` },
     { value: 'BANK', label: t('crud.fields.bankAccount') },
   ]
-  const unbalancedAccounts = Number(summary?.unbalanced_accounts ?? reconciliationData?.entries?.filter((entry: any) => !entry.is_balanced).length ?? 0)
+  const unbalancedAccounts = Number(summary?.unbalanced_accounts ?? reconciliationData?.entries?.filter(entry => !entry.is_balanced).length ?? 0)
   const operationalStatus = normalizeOperationalStatus(
     unbalancedAccounts > 0 ? 'eskaliert' : reconciliationData ? 'in_pruefung' : 'offen'
   )
@@ -328,7 +328,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reconciliationData.entries.map((entry: any) => (
+                {reconciliationData.entries.map(entry => (
                   <TableRow key={entry.account_number}>
                     <TableCell className="font-medium">{entry.account_number}</TableCell>
                     <TableCell>{entry.account_name}</TableCell>
@@ -381,11 +381,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               </CardTitle>
               <Button
                 size="sm"
-                disabled={matchingInProgress || !details.some((d: any) => !d.matched)}
+                disabled={matchingInProgress || !details.some(d => !d.matched)}
                 onClick={() => {
                   const unmatchedIds = details
-                    .filter((d: any) => !d.matched && d.entry_id)
-                    .map((d: any) => d.entry_id)
+                    .filter(d => !d.matched && d.entry_id)
+                    .map(d => d.entry_id)
                   matchEntries(unmatchedIds)
                 }}
               >
@@ -407,7 +407,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {details.map((detail: any) => (
+                {details.map(detail => (
                   <TableRow key={detail.entry_id}>
                     <TableCell>{detail.entry_number}</TableCell>
                     <TableCell>{detail.entry_date}</TableCell>

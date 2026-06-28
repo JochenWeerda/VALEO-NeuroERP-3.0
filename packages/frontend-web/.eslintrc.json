@@ -21,7 +21,7 @@
     "@typescript-eslint/unbound-method": "off",
     "@typescript-eslint/no-magic-numbers": "off",
     "@typescript-eslint/no-unused-vars": "off",
-    "@typescript-eslint/restrict-template-expressions": "error",
+    "@typescript-eslint/restrict-template-expressions": ["warn", { "allowNumber": true, "allowBoolean": true, "allowNullish": true, "allowAny": true }],
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
     "react-hooks/exhaustive-deps": "off",

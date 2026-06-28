@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { apiClient } from '@/lib/api-client'
@@ -14,7 +14,7 @@ import { useTenant } from '@/hooks/useTenant'
 // API Client
 
 // Konfiguration für Segmente ListReport
-const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createSegmentsConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageSegments'),
@@ -130,7 +130,7 @@ export default function SegmentsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Record<string, unknown>[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const entityType = 'segment'
@@ -147,7 +147,7 @@ export default function SegmentsPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
       navigate(`/crm/segment/${item.id}`)
     } else if (action === 'delete' && item) {
@@ -186,7 +186,7 @@ export default function SegmentsPage(): JSX.Element {
       
       if (response.data) {
         const raw = response.data
-        const items = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && Array.isArray((raw as { items?: unknown[] }).items) ? (raw as { items: any[] }).items : [])
+        const items = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && Array.isArray((raw as { items?: unknown[] }).items) ? (raw as { items: Record<string, unknown>[] }).items : [])
         const totalCount = Array.isArray(raw) ? raw.length : (raw && typeof raw === 'object' && typeof (raw as { total?: number }).total === 'number' ? (raw as { total: number }).total : items.length)
         setData(items)
         setTotal(totalCount)
@@ -212,7 +212,7 @@ export default function SegmentsPage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.name')};${t('crud.fields.type')};${t('crud.fields.status')};${t('crud.fields.memberCount')};${t('crud.fields.createdAt')}\n`
-      const csvContent = data.map((item: any) =>
+      const csvContent = data.map(item =>
         `"${item.name || ''}";"${item.type || ''}";"${item.status || ''}";"${item.member_count || 0}";"${item.created_at || ''}"`
       ).join('\n')
 
@@ -247,7 +247,7 @@ export default function SegmentsPage(): JSX.Element {
       isLoading={loading}
       pendingRows={pendingRows}
       onAction={handleAction}
-      onBulkAction={async (key: string, items: any[]) => {
+      onBulkAction={async (key: string, items: Record<string, unknown>[]) => {
         if (key === 'calculate' && items.length) {
           try {
             for (const item of items) {

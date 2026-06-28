@@ -144,14 +144,14 @@ export default function WareneingangPage(): JSX.Element {
 
   const loadPurchaseOrders = async () => {
     try {
-      const rows = (await apiClient.get<any[]>('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')) as unknown as any[]
-      setPurchaseOrders(rows.map((po: any) => ({
+      const rows = (await apiClient.get<Record<string, unknown>[]>('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')) as unknown as Record<string, unknown>[]
+      setPurchaseOrders(rows.map(po => ({
         id: po.id,
         number: po.purchaseOrderNumber || po.number,
         supplierId: po.supplierId || '',
         supplierName: po.subject || po.supplierName || '',
         status: po.status,
-        items: (po.items || []).map((line: any) => ({
+        items: (po.items || []).map(line => ({
           id: line.id || `${po.id}-${line.articleId || line.description}`,
           productId: line.articleId || line.productId || '',
           productName: line.description || line.productName || '',
@@ -172,14 +172,14 @@ export default function WareneingangPage(): JSX.Element {
   const loadPurchaseOrder = async (orderId: string) => {
     setLoading(true)
     try {
-      const po: any = await apiClient.get<any>(`/api/v1/purchase-orders/${orderId}`)
+      const po = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${orderId}`)
       setPurchaseOrder({
         id: po.id,
         number: po.purchaseOrderNumber || po.number,
         supplierId: po.supplierId || '',
         supplierName: po.subject || po.supplierName || '',
         status: po.status,
-        items: (po.items || []).map((line: any) => ({
+        items: (po.items || []).map(line => ({
           id: line.id || `${po.id}-${line.articleId || line.description}`,
           productId: line.articleId || line.productId || '',
           productName: line.description || line.productName || '',
@@ -189,7 +189,7 @@ export default function WareneingangPage(): JSX.Element {
           price: Number(line.unitPrice || line.price || 0),
         })),
       })
-      const items: GoodsReceiptItem[] = (po.items || []).map((item: any) => ({
+      const items: GoodsReceiptItem[] = (po.items || []).map(item => ({
         purchaseOrderItemId: item.id || `${po.id}-${item.articleId || item.description}`,
         receivedQuantity: 0,
         acceptedQuantity: 0,
@@ -210,7 +210,7 @@ export default function WareneingangPage(): JSX.Element {
       setLoading(false)
     }
   }
-  const updateReceiptItem = (index: number, field: keyof GoodsReceiptItem, value: any) => {
+  const updateReceiptItem = (index: number, field: keyof GoodsReceiptItem, value: unknown) => {
     setReceiptData(prev => {
       const newItems = [...prev.items]
       newItems[index] = { ...newItems[index], [field]: value }

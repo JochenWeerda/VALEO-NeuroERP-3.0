@@ -74,7 +74,7 @@ export function SemanticSearch() {
         const data = response.data
 
         // Transform to SearchResults
-        const searchResults: SearchResult[] = (data as any).results?.map((r: any) => ({
+        const searchResults: SearchResult[] = ((data as Record<string, unknown>).results as Record<string, unknown>[] | undefined)?.map(r => ({
           id: r.id || r.metadata?.id || 'unknown',
           type: r.metadata?.type || 'document',
           title: r.metadata?.name || r.document || 'Unbekannt',

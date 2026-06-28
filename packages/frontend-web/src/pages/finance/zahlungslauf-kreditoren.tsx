@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -39,7 +39,7 @@ const financeRoleProfiles: Array<{ id: FinanceRoleFocus; label: string; descript
   { id: 'management', label: 'Leitung', description: 'Freigabestatus, Stopper, Risiko und Entscheidung.' },
 ]
 
-const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.createAndApproveSepaPayments'),
   type: 'object-page',
@@ -121,17 +121,17 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'zahlungen',
       label: t('crud.fields.payments'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'zahlungen_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <ZahlungenTable
           data={_data.zahlungen || []}
           onChange={(zahlungen) => {
             // Berechne Gesamtbetrag mit Skonto
-            const gesamtBetrag = zahlungen.reduce((sum: number, z: any) => {
+            const gesamtBetrag = zahlungen.reduce((sum: number, z) => {
               const betrag = z.betrag || 0
               const skontoBetrag = z.skontoGenutzt && z.skontoBetrag ? z.skontoBetrag : 0
               return sum + betrag - skontoBetrag
@@ -190,7 +190,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'approve',
       label: t('crud.actions.approve'),
       type: 'primary',
-      onClick: async (data: any) => {
+      onClick: async (data: Record<string, unknown>) => {
         if (!data.id) {
           toast({
             variant: 'destructive',
@@ -227,7 +227,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'sepaPreview',
       label: t('crud.actions.sepaPreview'),
       type: 'secondary',
-      onClick: async (data: any) => {
+      onClick: async (data: Record<string, unknown>) => {
         if (!data.id) {
           toast({
             variant: 'destructive',
@@ -253,7 +253,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'sepaExport',
       label: t('crud.actions.sepaExport'),
       type: 'primary',
-      onClick: async (data: any) => {
+      onClick: async (data: Record<string, unknown>) => {
         if (!data.id) {
           toast({
             variant: 'destructive',
@@ -299,7 +299,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'checkReturns',
       label: t('crud.actions.checkReturns'),
       type: 'secondary',
-      onClick: async (data: any) => {
+      onClick: async (data: Record<string, unknown>) => {
         if (!data.id) {
           toast({
             variant: 'destructive',
@@ -309,9 +309,9 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          const res = await apiClient.get<any>(`/api/v1/finance/payment-runs/${data.id}`)
+          const res = await apiClient.get<Record<string, unknown>>(`/api/v1/finance/payment-runs/${data.id}`)
           const run = res.data
-          const returnedCount = (run?.payments ?? []).filter((p: any) => p.status === 'returned').length
+          const returnedCount = (run?.payments ?? []).filter(p => p.status === 'returned').length
           if (returnedCount > 0) {
             toast({
               variant: 'destructive',
@@ -343,12 +343,12 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       update: '/api/v1/finance/payment-runs/{id}',
       delete: '/api/v1/finance/payment-runs/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
 // Zahlungen-Tabelle Komponente
-function ZahlungenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const { t } = useTranslation()
   const addZahlung = () => {
     onChange([..._data, {
@@ -364,7 +364,7 @@ function ZahlungenTable({ data: _data, onChange }: { data: any[], onChange: (_da
     }])
   }
 
-  const updateZahlung = async (index: number, field: string, value: any) => {
+  const updateZahlung = async (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     
     // Format IBAN if field is iban
@@ -538,7 +538,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
+  const [formData, setFormData] = useState<Record<string, unknown>>({})
   const [roleFocus, setRoleFocus] = useState<FinanceRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const entityType = 'paymentRun'
@@ -548,7 +548,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { data, loading, saveData, updateData } = useMaskData({
     apiUrl: zahlungslaufConfig.api.baseUrl,
     id: 'new',
-    transformResponse: (response: any) => {
+    transformResponse: (response: unknown) => {
       // Transform API response to match frontend format
       if (response.data) {
         return {
@@ -576,7 +576,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     }
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(zahlungslaufConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(zahlungslaufConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast.error(`${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`)
   }
@@ -607,7 +607,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   }
 
   // Handle form data changes
-  const handleFormChange = (newData: any) => {
+  const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
     
@@ -620,7 +620,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'add-payment') {
       // Neue Zahlung hinzufügen wird in der Tabelle behandelt
       // Dieser Button ist redundant, da die Tabelle ihren eigenen Button hat
@@ -706,7 +706,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('execute', formData)
   }
 
@@ -721,7 +721,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const payments = Array.isArray(effectiveData?.zahlungen) ? effectiveData.zahlungen : []
   const totalAmount = Number(effectiveData?.gesamtBetrag || 0)
   const paymentCount = Number(effectiveData?.anzahlZahlungen || payments.length || 0)
-  const skontoCount = payments.filter((payment: any) => payment.skontoGenutzt && Number(payment.skontoBetrag || 0) > 0).length
+  const skontoCount = payments.filter(payment => payment.skontoGenutzt && Number(payment.skontoBetrag || 0) > 0).length
   const operationalStatus = normalizeOperationalStatus(
     effectiveData?.status === 'executed'
       ? 'abgeschlossen'

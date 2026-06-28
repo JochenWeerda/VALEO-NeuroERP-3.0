@@ -31,11 +31,11 @@ export interface BaseField {
   placeholderKey?: string
   helpText?: string
   helpTextKey?: string
-  validation?: any
-  defaultValue?: any
-  default?: any
+  validation?: unknown
+  defaultValue?: unknown
+  default?: unknown
   rows?: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface TextField extends BaseField {
@@ -85,7 +85,7 @@ export interface Tab {
   fields: Field[]
   layout?: 'grid' | 'flex'
   columns?: number
-  customRender?: (_data: any, _onChange: (_data: any) => void) => React.ReactNode
+  customRender?: (_data: Record<string, unknown>, _onChange: (_data: Record<string, unknown>) => void) => React.ReactNode
 }
 
 export interface Action {
@@ -94,9 +94,9 @@ export interface Action {
   labelKey?: string
   type?: 'primary' | 'secondary' | 'danger' | 'default' | 'destructive' | 'outline'
   icon?: string
-  onClick?: (..._args: any[]) => unknown | Promise<unknown>
+  onClick?: (..._args: unknown[]) => unknown | Promise<unknown>
   disabled?: boolean
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface MaskConfig {
@@ -117,7 +117,7 @@ export interface MaskConfig {
       delete?: string
     }
   }
-  validation?: any
+  validation?: unknown
   permissions?: string[]
 }
 
@@ -126,14 +126,14 @@ export interface WizardStep {
   title: string
   description?: string
   fields: Field[]
-  validation?: any
+  validation?: unknown
   isOptional?: boolean
 }
 
 export interface WizardConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   type: 'wizard'
   steps: WizardStep[]
-  onComplete: (_data: any) => void
+  onComplete: (_data: Record<string, unknown>) => void
 }
 
 export interface ListColumn {
@@ -142,6 +142,7 @@ export interface ListColumn {
   labelKey?: string
   sortable?: boolean
   filterable?: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (_value: any, _row: any) => React.ReactNode
 }
 
@@ -172,7 +173,7 @@ export interface WorklistItem {
   priority: 'low' | 'medium' | 'high' | 'urgent'
   dueDate?: string
   assignedTo?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface WorklistAction {
@@ -207,7 +208,7 @@ export interface OverviewCard {
 export interface OverviewChart {
   title: string
   type: 'line' | 'bar' | 'pie' | 'area'
-  data: any[]
+  data: unknown[]
   xAxis?: string
   yAxis?: string
 }

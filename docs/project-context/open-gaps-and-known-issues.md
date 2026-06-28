@@ -62,6 +62,10 @@ Status: abgeschlossen — `GET /api/v1/masks/{mask_id}/screen-definition`, `useS
 
 Status: abgeschlossen — `scripts/check_mask_performance_contract.ts` im Quality-Gate; Registry-Feld `lookup_min_chars`.
 
+## UIX-RENDER-PLAN-009 — RenderPlan Engine (2026-06-28)
+
+Status: abgeschlossen — SchemaCompiler, LRU-Cache, useRenderPlan, ADR-011 + render-plan-architecture.md.
+
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 
 Status: abgeschlossen — Lazy Tabs `lieferung` (Lieferscheinliste) und `dokumente` (Rechnungsbelege) via tab API.

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -21,7 +21,7 @@ import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createLastschriftenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.collectSepaDirectDebits'),
   type: 'object-page',
@@ -105,16 +105,16 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
       key: 'lastschriften',
       label: t('crud.fields.directDebits'),
       fields: [],
-    } as any,
+    } as Field,
     {
       key: 'lastschriften_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <LastschriftenTable
           data={_data.lastschriften || []}
           onChange={(lastschriften) => {
-            const gesamtBetrag = lastschriften.reduce((sum: number, l: any) => sum + (l.betrag || 0), 0)
+            const gesamtBetrag = lastschriften.reduce((sum, l) => sum + Number((l as Record<string, unknown>).betrag || 0), 0)
             onChange({
               ..._data,
               lastschriften,
@@ -181,11 +181,11 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
       update: '/api/v1/finance/direct-debits/{id}',
       delete: '/api/v1/finance/direct-debits/{id}',
     },
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin'],
 })
 
-function LastschriftenTable({ data: _data, onChange }: { data: any[]; onChange: (_data: any[]) => void }) {
+function LastschriftenTable({ data: _data, onChange }: { data: Record<string, unknown>[]; onChange: (_data: Record<string, unknown>[]) => void }) {
   const { t } = useTranslation()
 
   const addLastschrift = () => {
@@ -206,7 +206,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[]; onChange: 
     ])
   }
 
-  const updateLastschrift = async (index: number, field: string, value: any) => {
+  const updateLastschrift = async (index: number, field: string, value: unknown) => {
     const newData = [..._data]
 
     if (field === 'iban' && value) {
@@ -385,7 +385,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
+  const [formData, setFormData] = useState<Record<string, unknown>>({})
   const entityType = 'directDebit'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lastschriften Debitoren')
   const lastschriftenConfig = createLastschriftenConfig(t, entityTypeLabel)
@@ -420,7 +420,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const directDebits = Array.isArray(safeFormData.lastschriften) ? safeFormData.lastschriften : []
   const debitCount = Number(safeFormData.anzahlLastschriften || directDebits.length || 0)
   const totalAmount = Number(safeFormData.gesamtBetrag || 0)
-  const missingMandates = directDebits.filter((entry: any) => !entry.mandatReferenz || !entry.mandatDatum).length
+  const missingMandates = directDebits.filter(entry => !entry.mandatReferenz || !entry.mandatDatum).length
   const operationalStatus = normalizeOperationalStatus(
     safeFormData.status === 'ausgefuehrt'
       ? 'abgeschlossen'
@@ -465,12 +465,12 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     },
   ]
 
-  const validate = (currentFormData: any) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), currentFormData ?? {})
+  const validate = (currentFormData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), currentFormData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const handleFormChange = (newData: any) => {
+  const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
 
@@ -500,16 +500,16 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, currentFormData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, currentFormData: Record<string, unknown>) => {
     if (action === 'add-direct-debit') {
       toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefuegt.' })
       return
     }
 
     if (action === 'validate-mandates') {
-      const lastschriften: any[] = currentFormData?.lastschriften ?? []
+      const lastschriften: Record<string, unknown>[] = currentFormData?.lastschriften ?? []
       const errors: string[] = []
-      lastschriften.forEach((ls: any, idx: number) => {
+      lastschriften.forEach(ls, idx => {
         if (!ls.iban) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
         if (!ls.bic) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
         if (!ls.mandatReferenz) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)
@@ -646,7 +646,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (currentFormData: any) => {
+  const handleSave = async (currentFormData: Record<string, unknown>) => {
     const errors = validate(currentFormData)
     if (Object.keys(errors).length > 0) {
       showValidationToast(errors)

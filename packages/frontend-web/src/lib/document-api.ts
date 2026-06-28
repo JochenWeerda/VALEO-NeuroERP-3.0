@@ -15,7 +15,7 @@ export type DocumentType =
 
 export interface DocumentListResponse {
   ok: boolean
-  data: any[]
+  data: unknown[]
   total: number
   skip: number
   limit: number
@@ -23,7 +23,7 @@ export interface DocumentListResponse {
 
 export interface DocumentResponse {
   ok: boolean
-  data?: any
+  data?: unknown
   number?: string
   error?: string
 }
@@ -35,7 +35,7 @@ export async function listDocuments(
   docType: DocumentType,
   skip = 0,
   limit = 100,
-  filters?: Record<string, any>
+  filters?: Record<string, string>
 ): Promise<DocumentListResponse> {
   try {
     const params = new URLSearchParams({
@@ -93,7 +93,7 @@ export async function getDocument(
  */
 export async function saveDocument(
   docType: DocumentType,
-  document: any
+  document: unknown
 ): Promise<DocumentResponse> {
   try {
     const response = await fetch(`/api/mcp/documents/${docType}`, {
@@ -120,7 +120,7 @@ export async function saveDocument(
 export async function updateDocument(
   docType: DocumentType,
   docNumber: string,
-  updates: any
+  updates: unknown
 ): Promise<DocumentResponse> {
   try {
     const response = await fetch(`/api/mcp/documents/${docType}/${docNumber}`, {

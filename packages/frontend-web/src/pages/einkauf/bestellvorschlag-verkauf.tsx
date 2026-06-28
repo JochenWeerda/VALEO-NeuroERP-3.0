@@ -113,8 +113,8 @@ export default function BestellvorschlagVerkaufPage(): JSX.Element {
       if (filterVon) p.set('vonDatum', filterVon)
       if (filterBis) p.set('bisDatum', filterBis)
       const qs = p.toString() ? `?${p.toString()}` : ''
-      const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)
-      setArtikel((data || []).map((r: any) => ({
+      const data = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)
+      setArtikel((data || []).map(r => ({
         id: r.article_id,
         artikelNr: r.artikel_nr || '',
         bezeichnung: r.artikel_bezeichnung || '',

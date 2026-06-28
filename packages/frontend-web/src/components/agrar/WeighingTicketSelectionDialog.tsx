@@ -65,9 +65,9 @@ export function WeighingTicketSelectionDialog({
       }
       
       try {
-        const response = await apiClient.get<any>('/api/v1/weighing-tickets', { params })
+        const response = await apiClient.get<Record<string, unknown>>('/api/v1/weighing-tickets', { params })
         
-        let items: any[] = []
+        let items: Record<string, unknown>[] = []
         if (Array.isArray(response)) {
           items = response
         } else if (response?.items && Array.isArray(response.items)) {
@@ -80,9 +80,9 @@ export function WeighingTicketSelectionDialog({
           }
         }
         
-        return items.map((t: any) => ({
-          id: t.id,
-          ticket_number: t.ticket_number || t.ticketNumber || '',
+        return items.map((t: Record<string, unknown>) => ({
+          id: t.id as string,
+          ticket_number: (t.ticket_number || t.ticketNumber || '') as string,
           scale_id: t.scale_id || t.scaleId || null,
           vehicle_plate: t.vehicle_plate || t.vehiclePlate || null,
           gross_weight: t.gross_weight || t.grossWeight || null,

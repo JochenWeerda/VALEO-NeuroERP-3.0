@@ -108,8 +108,8 @@ export default function BestellvorschlagRohwarePage(): JSX.Element {
       if (filterStichtag) p.set('stichtag', filterStichtag)
       if (filterNiederlassung) p.set('niederlassung_id', filterNiederlassung)
       const qs = p.toString() ? `?${p.toString()}` : ''
-      const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)
-      setArtikel((data || []).map((r: any) => ({
+      const data = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)
+      setArtikel((data || []).map(r => ({
         id: r.article_id,
         artikelNr: r.artikel_nr || '',
         bezeichnung: r.artikel_bezeichnung || '',

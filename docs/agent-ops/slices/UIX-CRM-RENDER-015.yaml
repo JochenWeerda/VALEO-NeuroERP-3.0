@@ -1,0 +1,9 @@
+slice_id: UIX-CRM-RENDER-015
+title: CRM Pilot on RenderPlan
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-28
+goal: UniversalCustomerMaskPilotPage fully on RenderPlan pipeline.
+acceptance:
+  - usePilotRenderPlan + plan prop
+  - No legacy screen useMemo merge

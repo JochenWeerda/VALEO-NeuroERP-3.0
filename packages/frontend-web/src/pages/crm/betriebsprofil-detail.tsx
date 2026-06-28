@@ -109,7 +109,7 @@ export default function BetriebsprofilePage(): JSX.Element {
     }
   }
 
-  const updateField = (field: keyof FarmProfile, value: any) => {
+  const updateField = (field: keyof FarmProfile, value: unknown) => {
     setFarmProfile(prev => ({ ...prev, [field]: value }))
   }
 

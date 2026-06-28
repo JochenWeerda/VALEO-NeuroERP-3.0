@@ -117,13 +117,13 @@ const SaatgutStammPage: React.FC = () => {
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: async (data: any) => { const r = await apiClient.post('/api/v1/agrar/saatgut', data); return r.data },
+    mutationFn: async (data: Record<string, unknown>) => { const r = await apiClient.post('/api/v1/agrar/saatgut', data); return r.data },
     onSuccess: () => {
       toast.success('Saatgut erfolgreich erstellt');
       queryClient.invalidateQueries({ queryKey: ['saatgut'] });
       navigate('/agrar/saatgut-liste');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Fehler beim Erstellen: ${error.message}`);
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
@@ -132,12 +132,12 @@ const SaatgutStammPage: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => { const r = await apiClient.put(`/api/v1/agrar/saatgut/${id}`, data); return r.data },
+    mutationFn: async ({ id, data }: { id: string; data: Record<string, unknown> }) => { const r = await apiClient.put(`/api/v1/agrar/saatgut/${id}`, data); return r.data },
     onSuccess: () => {
       toast.success('Saatgut erfolgreich aktualisiert');
       queryClient.invalidateQueries({ queryKey: ['saatgut', id] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
@@ -171,7 +171,7 @@ const SaatgutStammPage: React.FC = () => {
   }, [saatgut]);
 
   // Form Handlers
-  const handleInputChange = (field: keyof SaatgutFormData, value: any) => {
+  const handleInputChange = (field: keyof SaatgutFormData, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));

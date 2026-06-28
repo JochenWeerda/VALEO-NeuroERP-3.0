@@ -18,7 +18,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
   
   const handleTrigger = async (): Promise<void> => {
     try {
-      const result = await triggerWorkflow.mutateAsync('00000000-0000-0000-0000-000000000001') as any
+      const result = await triggerWorkflow.mutateAsync("00000000-0000-0000-0000-000000000001") as Record<string, unknown>
       setLastWorkflowId(result.workflow_id)
       
       // Navigate to approval page

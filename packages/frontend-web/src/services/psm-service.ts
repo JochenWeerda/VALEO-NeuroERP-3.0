@@ -101,7 +101,7 @@ class PsmService {
   async syncFromBvl(bvlPsmId: string): Promise<{
     current: PsmDto;
     bvl: PsmDto;
-    diff: Record<string, { current: any; bvl: any }>;
+    diff: Record<string, { current: unknown; bvl: unknown }>;
   }> {
     const response = await fetch(`${this.baseUrl}/bvl-sync`, {
       method: 'POST',

@@ -225,7 +225,7 @@ export function InventoryDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {replenishment.suggestions.slice(0, 5).map((suggestion: any) => (
+              {replenishment.suggestions.slice(0, 5).map(suggestion => (
                 <div key={suggestion.article_id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{suggestion.name}</div>

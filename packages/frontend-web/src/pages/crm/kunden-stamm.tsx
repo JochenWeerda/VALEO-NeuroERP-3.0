@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
@@ -39,7 +39,7 @@ function resolveKundenNr(id: string, formData: Record<string, unknown> | null | 
   return id
 }
 
-const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createKundenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
   type: 'object-page',
@@ -337,7 +337,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
-  const [requests, setRequests] = useState<any[]>([])
+  const [requests, setRequests] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
   // gdprApiClient → apiClient
 
@@ -457,7 +457,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
-  const [consents, setConsents] = useState<any[]>([])
+  const [consents, setConsents] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
   // consentApiClient → apiClient
 
@@ -589,7 +589,7 @@ function ContactsList({ customerId }: { customerId?: string }) {
   // Filtere Kontakte nach customer_id (falls API das nicht direkt unterstützt)
   const contacts = (contactsData?.data || []).filter((contact: Contact) => 
     (contact.company?.toLowerCase().includes(customerId?.toLowerCase() || '') || 
-     (contact as any).customer_id === customerId)
+     (contact as Record<string, unknown>).customer_id === customerId)
   )
 
   const columns = [
@@ -686,12 +686,12 @@ export default function KundenStammPage(): JSX.Element {
     id: id || 'new'
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(kundenConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(kundenConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -716,7 +716,7 @@ export default function KundenStammPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

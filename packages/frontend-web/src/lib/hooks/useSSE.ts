@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 
 export type SSEMessage = {
   event?: string
-  data: any
+  data: unknown
   timestamp?: string
 }
 

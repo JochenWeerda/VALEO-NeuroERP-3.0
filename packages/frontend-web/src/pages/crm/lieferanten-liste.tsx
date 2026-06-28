@@ -1,6 +1,6 @@
-import { useMemo, useRef } from 'react'
+﻿import { useMemo, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -11,7 +11,7 @@ import { unwrapCrmListPage, type CrmListEnvelope } from '@/lib/api/crm-list-resp
 import { toast } from '@/hooks/use-toast'
 
 // Konfiguration für Lieferanten ListReport
-const createLieferantenListConfig = (t: any): ListConfig => ({
+const createLieferantenListConfig = (t: TFunction): ListConfig => ({
   title: t('crud.entities.suppliers', { defaultValue: 'Lieferanten-Liste' }),
   subtitle: t('crud.subtitles.manageSuppliers', { defaultValue: 'Übersicht aller Lieferanten und deren Konditionen' }),
   type: 'list-report',
@@ -285,14 +285,14 @@ export default function LieferantenListePage(): JSX.Element {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'lieferanten'] })
 
   const lieferantenListConfig = useMemo(() => {
-    const onExportBulk = async (items: any[]) => {
+    const onExportBulk = async (items: Record<string, unknown>[]) => {
       const exportData = items.length > 0 ? items : data
       if (exportData.length === 0) {
         toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
         return
       }
       const header = 'Firma;Ort;Land;E-Mail;Zahlungsbedingungen;Rabatt;Status\n'
-      const rows = exportData.map((l: any) =>
+      const rows = exportData.map(l =>
         `"${l.firma}";"${l.plz || ''} ${l.ort || ''}";"${l.land || ''}";"${l.email || ''}";"${l.zahlungsbedingungen || '30 Tage'}";"${l.rabatt || 0}";"${l.status || 'aktiv'}"`
       ).join('\n')
       const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
@@ -305,12 +305,12 @@ export default function LieferantenListePage(): JSX.Element {
       toast({ title: 'Export erstellt', description: `${exportData.length} Lieferanten exportiert.` })
     }
 
-    const onNewsletter = async (items: any[]) => {
+    const onNewsletter = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) {
         toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
         return
       }
-      const emails = items.map((l: any) => l.email).filter(Boolean)
+      const emails = items.map(l => l.email).filter(Boolean)
       if (emails.length === 0) {
         toast({ title: 'Keine E-Mail-Adressen', description: 'Für die ausgewählten Lieferanten sind keine E-Mail-Adressen hinterlegt.', variant: 'destructive' })
         return
@@ -331,17 +331,17 @@ export default function LieferantenListePage(): JSX.Element {
       }
     }
 
-    const onAudit = async (items: any[]) => {
+    const onAudit = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) {
         toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
         return
       }
       // Audit-Planung: navigiere zu Audit-Erstellung mit vorausgefüllten Lieferanten
-      const ids = items.map((l: any) => l.id).filter(Boolean)
+      const ids = items.map(l => l.id).filter(Boolean)
       navigate(`/crm/audits/neu?lieferanten=${ids.join(',')}`)
     }
 
-    const onBlock = async (items: any[]) => {
+    const onBlock = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) {
         toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
         return
@@ -378,11 +378,11 @@ export default function LieferantenListePage(): JSX.Element {
     navigate('/crm/lieferanten/stamm/new')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     navigate(`/crm/lieferanten/stamm/${item.id}`)
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${item.firma}" wirklich löschen?` }))) {
       try {
         await apiClient.delete(`/api/v1/crm/business-partners/${item.id}`)
@@ -399,7 +399,7 @@ export default function LieferantenListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = 'Firma;Ort;Land;Telefon;E-Mail;Z-Bedingungen;Rabatt;Min-Bestellwert;Lieferzeit;QS-Zert;Bio-Zert;Gesamtumsatz;Status\n'
-      const csvContent = data.map((lieferant: any) =>
+      const csvContent = data.map(lieferant =>
         `"${lieferant.firma}";"${lieferant.plz} ${lieferant.ort}";"${lieferant.land || ''}";"${lieferant.telefon || ''}";"${lieferant.email || ''}";"${lieferant.zahlungsbedingungen || '30 Tage'}";"${lieferant.rabatt || 0}";"${lieferant.mindestbestellwert || 0}";"${lieferant.lieferzeit || 0}";"${lieferant.qualitaetszertifikat ? 'Ja' : 'Nein'}";"${lieferant.bioZertifiziert ? 'Ja' : 'Nein'}";"${lieferant.umsatzGesamt || 0}";"${lieferant.status || 'aktiv'}"`
       ).join('\n')
 

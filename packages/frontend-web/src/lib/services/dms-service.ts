@@ -59,7 +59,7 @@ export interface SearchOptions {
 
 // ==================== Helper Functions ====================
 
-function snakeToCamel(obj: any): any {
+function snakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {
   if (obj === null || typeof obj !== 'object') {
     return obj
   }
@@ -72,7 +72,7 @@ function snakeToCamel(obj: any): any {
     const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
     acc[camelKey] = snakeToCamel(obj[key])
     return acc
-  }, {} as any)
+  }, {} as Record<string, unknown>)
 }
 
 function getHeaders(tenantId: string): HeadersInit {

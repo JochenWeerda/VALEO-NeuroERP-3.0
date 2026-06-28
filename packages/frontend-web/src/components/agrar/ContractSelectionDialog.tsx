@@ -60,9 +60,9 @@ export function ContractSelectionDialog({
       }
       
       try {
-        const response = await apiClient.get<any>('/api/v1/agrar/contracts', { params })
+        const response = await apiClient.get<Record<string, unknown>>('/api/v1/agrar/contracts', { params })
         
-        let items: any[] = []
+        let items: Record<string, unknown>[] = []
         if (Array.isArray(response)) {
           items = response
         } else if (response?.items && Array.isArray(response.items)) {
@@ -75,7 +75,7 @@ export function ContractSelectionDialog({
           }
         }
         
-        return items.map((c: any) => ({
+        return items.map(c => ({
           id: c.id,
           contract_number: c.contract_number || c.contractNumber || '',
           contract_type: c.contract_type || c.contractType || 'buy',

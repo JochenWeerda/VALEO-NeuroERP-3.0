@@ -88,12 +88,12 @@ export default function ProcurementReportsPage(): JSX.Element {
   const toleranceReports = standardReports?.toleranceReports ?? []
 
   const spendAnalysis = {
-    totalSpend: spendByCategory.reduce((sum: number, item: any) => sum + Number(item.amount || item.betrag || 0), 0),
+    totalSpend: spendByCategory.reduce((sum, item) => sum + Number(item.amount || item.betrag || 0), 0),
     period: new Date().toISOString().slice(0, 7),
     byCategory: spendByCategory,
   }
 
-  const handleExport = (reportType: string, data: any) => {
+  const handleExport = (reportType: string, data: Record<string, unknown>) => {
     try {
       let csvHeader = ''
       let csvContent = ''
@@ -103,7 +103,7 @@ export default function ProcurementReportsPage(): JSX.Element {
           csvHeader = `${t('crud.fields.orderNumber')};${t('crud.entities.supplier')};${t('crud.fields.status')};${t('crud.fields.deliveryDate')};${t('crud.fields.totalAmount')}\n`
           csvContent = data
             .map(
-              (order: any) =>
+              order =>
                 `"${order.purchaseOrderNumber || ''}";"${order.supplierName || order.supplierId || ''}";"${order.status || ''}";"${order.deliveryDate || ''}";"${order.totalAmount || 0}"`,
             )
             .join('\n')
@@ -111,14 +111,14 @@ export default function ProcurementReportsPage(): JSX.Element {
         case 'spend':
           csvHeader = `${t('crud.fields.category')};${t('crud.fields.amount')};${t('crud.fields.percentage')}\n`
           csvContent = data
-            .map((item: any) => `"${item.category || item.kategorie}";"${item.amount || item.betrag || 0}";"${item.percentage || item.anteil || 0}%"`)
+            .map(item => `"${item.category || item.kategorie}";"${item.amount || item.betrag || 0}";"${item.percentage || item.anteil || 0}%"`)
             .join('\n')
           break
         case 'performance':
           csvHeader = `${t('crud.entities.supplier')};${t('crud.fields.onTimeDelivery')};${t('crud.fields.quality')};${t('crud.fields.priceCompetitiveness')};${t('crud.fields.service')};${t('crud.fields.overallScore')}\n`
           csvContent = data
             .map(
-              (supplier: any) =>
+              supplier =>
                 `"${supplier.supplier || ''}";"${supplier.onTimeDelivery || 0}%";"${supplier.qualityScore || 0}";"${supplier.priceScore || 0}";"${supplier.serviceScore || 0}";"${supplier.overallScore || 0}"`,
             )
             .join('\n')
@@ -126,7 +126,7 @@ export default function ProcurementReportsPage(): JSX.Element {
         case 'tolerance':
           csvHeader = `${t('crud.fields.orderNumber')};${t('crud.fields.type')};${t('crud.fields.deviation')}\n`
           csvContent = data
-            .map((item: any) => `"${item.purchaseOrderNumber || ''}";"${item.type || ''}";"${item.deviation || 0}"`)
+            .map(item => `"${item.purchaseOrderNumber || ''}";"${item.type || ''}";"${item.deviation || 0}"`)
             .join('\n')
           break
       }
@@ -206,7 +206,7 @@ export default function ProcurementReportsPage(): JSX.Element {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {openOrders.map((order: any) => (
+                    {openOrders.map(order => (
                       <TableRow key={order.id || order.purchaseOrderNumber}>
                         <TableCell><code className="text-sm">{order.purchaseOrderNumber || '-'}</code></TableCell>
                         <TableCell>{order.supplierName || order.supplierId || '-'}</TableCell>
@@ -268,7 +268,7 @@ export default function ProcurementReportsPage(): JSX.Element {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {spendByCategory.map((item: any, idx: number) => (
+                    {spendByCategory.map(item, idx => (
                       <TableRow key={idx}>
                         <TableCell>{item.category || item.kategorie}</TableCell>
                         <TableCell className="text-right">{formatNumber(item.amount || item.betrag || 0, 0)} EUR</TableCell>
@@ -309,7 +309,7 @@ export default function ProcurementReportsPage(): JSX.Element {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {supplierPerformance.map((supplier: any, idx: number) => (
+                    {supplierPerformance.map(supplier, idx => (
                       <TableRow key={idx}>
                         <TableCell>{supplier.supplier}</TableCell>
                         <TableCell className="text-right">{supplier.onTimeDelivery || 0}%</TableCell>
@@ -350,7 +350,7 @@ export default function ProcurementReportsPage(): JSX.Element {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {toleranceReports.map((item: any, idx: number) => (
+                    {toleranceReports.map(item, idx => (
                       <TableRow key={idx}>
                         <TableCell><code className="text-sm">{item.purchaseOrderNumber || '-'}</code></TableCell>
                         <TableCell><Badge variant="outline">{item.type || '-'}</Badge></TableCell>
