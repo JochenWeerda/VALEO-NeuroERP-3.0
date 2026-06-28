@@ -24,9 +24,11 @@ test.describe('Sales Universal Order Pilot', () => {
             status: 'open',
             delivery_date: '2026-07-15',
           },
-          available_tabs: ['kopf', 'positionen', 'lieferung'],
+          available_tabs: ['kopf', 'positionen', 'lieferung', 'dokumente'],
           tab_endpoints: {
             positionen: '/api/v1/sales/orders/e2e-order/tabs/positionen',
+            lieferung: '/api/v1/sales/orders/e2e-order/tabs/lieferung',
+            dokumente: '/api/v1/sales/orders/e2e-order/tabs/dokumente',
           },
           actions: [{ key: 'edit', label: 'Bearbeiten', permission: 'sales.order.update' }],
           performance: {
@@ -35,6 +37,27 @@ test.describe('Sales Universal Order Pilot', () => {
             lookup_min_chars: 2,
             default_table_limit: 25,
           },
+        }),
+      })
+    })
+
+    await page.route(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/lieferung$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          tab_key: 'lieferung',
+          table_key: 'delivery_notes',
+          items: [
+            {
+              id: 'dn-1',
+              delivery_note_number: 'LS-E2E-1',
+              delivery_date: '2026-07-10',
+              status: 'open',
+              invoice_number: '',
+              is_delivered: false,
+            },
+          ],
         }),
       })
     })
@@ -98,5 +121,14 @@ test.describe('Sales Universal Order Pilot', () => {
     await page.getByRole('tab', { name: /positionen/i }).click()
     await tabResponse
     await expect(page.getByRole('button', { name: /Weizen Premium/i })).toBeVisible()
+  })
+
+  test('loads delivery notes after lieferung tab switch', async ({ page }) => {
+    const tabResponse = page.waitForResponse(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/lieferung$/)
+    await page.goto('/sales/order-editor/e2e-order', { waitUntil: 'domcontentloaded' })
+
+    await page.getByRole('tab', { name: /lieferung/i }).click()
+    await tabResponse
+    await expect(page.getByRole('button', { name: /LS-E2E-1/i })).toBeVisible()
   })
 })

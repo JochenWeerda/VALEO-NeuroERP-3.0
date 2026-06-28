@@ -19,6 +19,8 @@ def test_sales_order_screen_summary_contract() -> None:
     assert payload["screen_id"] == "sales/sales-order"
     assert payload["summary"]["item_count"] == 3
     assert payload["tab_endpoints"]["positionen"].endswith("/sales/orders/order-1/tabs/positionen")
+    assert payload["tab_endpoints"]["lieferung"].endswith("/sales/orders/order-1/tabs/lieferung")
+    assert "dokumente" in payload["available_tabs"]
     assert payload["performance"]["tabs_lazy"] is True
 
 

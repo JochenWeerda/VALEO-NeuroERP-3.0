@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (Lieferung/Dokumente)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-28 — Lazy Tabs `lieferung` und `dokumente` via tab_endpoints; Paritaetsmatrix; Vitest/pytest/Playwright gruen.
+**Ziel:** Sales-Pilot von Positionen-only zu Liefer-/Dokument-Paritaet erweitern ohne Legacy-Mutationen zu ersetzen.
+**Abnahme:** tab_endpoints fuer lieferung/dokumente; Lazy-Load bei Tab-Wechsel; Paritaetsmatrix dokumentiert; Legacy unberuehrt.
+
 ## UIX-SALES-PILOT-007 - Universal Mask Generator Sales Order Pilot
 
 **Von:** Cursor

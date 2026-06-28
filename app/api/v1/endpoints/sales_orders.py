@@ -283,9 +283,11 @@ def build_sales_order_screen_summary(
             "status": str(order.get("status") or "open"),
             "delivery_date": delivery_label,
         },
-        "available_tabs": ["kopf", "positionen", "lieferung"],
+        "available_tabs": ["kopf", "positionen", "lieferung", "dokumente"],
         "tab_endpoints": {
             "positionen": _sales_order_tab_endpoint(order_id, "positionen"),
+            "lieferung": _sales_order_tab_endpoint(order_id, "lieferung"),
+            "dokumente": _sales_order_tab_endpoint(order_id, "dokumente"),
         },
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "permission": "sales.order.update"},
@@ -319,6 +321,59 @@ def _fetch_customer_name(db: Session, customer_id: str | None, tenant_id: str) -
     except Exception:
         db.rollback()
         return None
+
+
+def _fetch_delivery_notes_for_order(db: Session, order_id: str, tenant_id: str) -> list[dict[str, Any]]:
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT id::text AS id,
+                       delivery_note_number,
+                       status,
+                       delivery_date::text AS delivery_date,
+                       COALESCE(invoice_number, '') AS invoice_number,
+                       is_delivered
+                FROM domain_sales.delivery_notes
+                WHERE sales_order_id = :order_id
+                  AND tenant_id = :tenant_id
+                ORDER BY delivery_date DESC NULLS LAST, created_at DESC
+                LIMIT 25
+                """
+            ),
+            {"order_id": order_id, "tenant_id": tenant_id},
+        ).mappings().all()
+        return [dict(row) for row in rows]
+    except Exception:
+        db.rollback()
+        return []
+
+
+def _fetch_order_documents(db: Session, order_id: str, tenant_id: str) -> list[dict[str, Any]]:
+    """Belege mit Rechnungsnummer aus Lieferscheinen des Auftrags (read-only)."""
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT id::text AS id,
+                       COALESCE(invoice_number, delivery_note_number) AS beleg_nr,
+                       delivery_date::text AS beleg_datum,
+                       status,
+                       invoice_number
+                FROM domain_sales.delivery_notes
+                WHERE sales_order_id = :order_id
+                  AND tenant_id = :tenant_id
+                  AND (invoice_number IS NOT NULL AND invoice_number <> '')
+                ORDER BY delivery_date DESC NULLS LAST
+                LIMIT 25
+                """
+            ),
+            {"order_id": order_id, "tenant_id": tenant_id},
+        ).mappings().all()
+        return [dict(row) for row in rows]
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get(
@@ -358,15 +413,29 @@ async def get_sales_order_tab_data(
 ):
     _get_sales_order_row(db, order_id, tenant_id)
 
-    if tab_key != "positionen":
-        return {"tab_key": tab_key, "table_key": tab_key, "items": []}
+    if tab_key == "positionen":
+        items = _fetch_items(db, order_id, tenant_id)
+        return {
+            "tab_key": tab_key,
+            "table_key": "order_items",
+            "items": [item.model_dump(mode="json") for item in items],
+        }
 
-    items = _fetch_items(db, order_id, tenant_id)
-    return {
-        "tab_key": tab_key,
-        "table_key": "order_items",
-        "items": [item.model_dump(mode="json") for item in items],
-    }
+    if tab_key == "lieferung":
+        return {
+            "tab_key": tab_key,
+            "table_key": "delivery_notes",
+            "items": _fetch_delivery_notes_for_order(db, order_id, tenant_id),
+        }
+
+    if tab_key == "dokumente":
+        return {
+            "tab_key": tab_key,
+            "table_key": "order_documents",
+            "items": _fetch_order_documents(db, order_id, tenant_id),
+        }
+
+    return {"tab_key": tab_key, "table_key": tab_key, "items": []}
 
 
 @router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED, summary="Sales order anlegen")

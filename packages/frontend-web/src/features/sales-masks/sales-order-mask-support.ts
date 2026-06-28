@@ -37,6 +37,12 @@ export const SALES_ORDER_MASK_OBJECT_PAGE_CONFIG: MaskConfig = {
         { name: 'order.delivery_address', label: 'Lieferadresse', type: 'textarea', readonly: true },
       ],
     },
+    {
+      key: 'dokumente',
+      label: 'Dokumente',
+      columns: 1,
+      fields: [],
+    },
   ],
   actions: [],
   api: {

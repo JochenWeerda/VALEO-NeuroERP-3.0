@@ -45,9 +45,11 @@ const summaryFixture = {
     status: 'open',
     delivery_date: '2026-07-01',
   },
-  available_tabs: ['kopf', 'positionen', 'lieferung'],
+  available_tabs: ['kopf', 'positionen', 'lieferung', 'dokumente'],
   tab_endpoints: {
     positionen: '/api/v1/sales/orders/order-1/tabs/positionen',
+    lieferung: '/api/v1/sales/orders/order-1/tabs/lieferung',
+    dokumente: '/api/v1/sales/orders/order-1/tabs/dokumente',
   },
   actions: [{ key: 'edit', label: 'Bearbeiten', permission: 'sales.order.update' }],
   performance: {
@@ -152,6 +154,42 @@ describe('UniversalSalesOrderPilotPage', () => {
       expect(mockedUseSalesOrderTabData).toHaveBeenLastCalledWith(
         'order-1',
         'positionen',
+        summaryFixture.tab_endpoints,
+      )
+    })
+  })
+
+  it('loads delivery tab data on tab switch', async () => {
+    const user = userEvent.setup()
+    mockedUseSalesOrder.mockReturnValue({
+      data: {
+        id: 'order-1',
+        tenant_id: 'tenant-1',
+        order_number: 'SO-100',
+        subject: 'Weizen Lieferung',
+        total_amount: 1500,
+        currency: 'EUR',
+        status: 'open',
+        items: [],
+        version: 1,
+      },
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useSalesOrder>)
+    mockedUseSalesOrderScreenSummary.mockReturnValue({
+      data: summaryFixture,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useSalesOrderScreenSummary>)
+
+    render(<UniversalSalesOrderPilotPage />)
+
+    await user.click(screen.getByRole('tab', { name: /lieferung/i }))
+
+    await waitFor(() => {
+      expect(mockedUseSalesOrderTabData).toHaveBeenLastCalledWith(
+        'order-1',
+        'lieferung',
         summaryFixture.tab_endpoints,
       )
     })
