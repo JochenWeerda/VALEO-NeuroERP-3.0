@@ -41,7 +41,7 @@ pyjwt==2.13.0
 python-jose==3.4.0
 
 # Configuration
-python-dotenv>=1.0.0,<2.0.0
+python-dotenv>=1.2.2,<2.0.0
 
 # Redis for caching
 redis==6.2.0
