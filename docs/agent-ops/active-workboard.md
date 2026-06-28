@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator with Translation Layer Skeleton
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-28 - Claim fuer extreme metadata-driven UIX-Architektur: canonical ScreenDefinition/MaskSchema, temporaere Uebersetzungsschicht fuer Legacy-Masken, UniversalMaskRenderer-Skelett, LazyTabs, VirtualDataTable, CRM Screen-Summary-Pilot und ADR-/Domain-Pack-Nachzug.
+**Ziel:** VALEO-Masken langfristig ueber einen neutralen Generator mit getrennten Daten-/Permission-/Workflow-Vertraegen und wiederverwendbarem Visualisierungslayer fuehren; alte Masken bleiben aktiv, bis Adapter-Paritaet und Performance belegt sind.
+**Dateibesitz:** `app/core/mask_classification.py`, `app/api/v1/endpoints/mask_registry.py`, `app/api/v1/endpoints/crm_360.py`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/components/ui/LazyTabs.tsx`, `packages/frontend-web/src/components/ui/VirtualDataTable.tsx`, `packages/frontend-web/src/features/crm-masks/**`, `packages/frontend-web/src/lib/api/crm-screen-summary.ts`, `docs/adr/adr-011-ui-maskenstrategie.md`, Domain Packs CRM/Agrar/Inventory, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
+**Abnahme:** Generator-/Adapter-Vertrag dokumentiert; UIX-/Generator-Metadaten im Mask Registry Contract; UniversalMaskRenderer/LazyTabs/VirtualDataTable/Adapter getestet; CRM-Screen-Summary-Endpunkt getestet; ADR-011 und Doku aktualisiert; Typecheck und relevante Unit-/Backendtests gruen.
+
 ## DOC-ARCH-STACK — Architektur-Dokumentations-Stack (ISO 42010 + arc42 + C4)
 
 **Von:** Cursor
