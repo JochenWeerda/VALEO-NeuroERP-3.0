@@ -12,7 +12,7 @@ import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
 export interface CSVImportProps {
-  onImport: (data: any[]) => Promise<void>
+  onImport: (data: Record<string, unknown>[]) => Promise<void>
   expectedColumns?: string[]
   entityName: string
 }
@@ -21,11 +21,11 @@ export function CSVImport({ onImport, expectedColumns, entityName }: CSVImportPr
   const { t } = useTranslation()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [preview, setPreview] = useState<any[]>([])
+  const [preview, setPreview] = useState<Record<string, unknown>[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const parseCSV = (text: string): any[] => {
+  const parseCSV = (text: string): Record<string, unknown>[] => {
     const lines = text.split('\n').filter(line => line.trim())
     if (lines.length === 0) return []
 
@@ -35,7 +35,7 @@ export function CSVImport({ onImport, expectedColumns, entityName }: CSVImportPr
     // Rest als Daten
     const data = lines.slice(1).map(line => {
       const values = line.split(';').map(v => v.trim().replace(/^"|"$/g, ''))
-      const row: any = {}
+      const row: Record<string, unknown> = {}
       headers.forEach((header, index) => {
         row[header] = values[index] || ''
       })
@@ -45,7 +45,7 @@ export function CSVImport({ onImport, expectedColumns, entityName }: CSVImportPr
     return data
   }
 
-  const validateData = (data: any[]): string[] => {
+  const validateData = (data: Record<string, unknown>[]): string[] => {
     const validationErrors: string[] = []
     
     if (expectedColumns) {
@@ -203,7 +203,7 @@ export function CSVImport({ onImport, expectedColumns, entityName }: CSVImportPr
                 <tbody>
                   {preview.map((row, index) => (
                     <tr key={index}>
-                      {Object.values(row).map((value: any, colIndex) => (
+                      {Object.values(row).map(value, colIndex => (
                         <td key={colIndex} className="px-2 py-1 border-b">
                           {String(value)}
                         </td>

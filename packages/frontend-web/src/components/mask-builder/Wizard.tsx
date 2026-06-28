@@ -14,7 +14,7 @@ import { createMaskResolver, getFieldName, getFieldsFromWizardStep } from './val
 
 interface WizardProps {
   config: WizardConfig
-  onComplete: (_data: any) => void
+  onComplete: (_data: Record<string, unknown>) => void
   onCancel: () => void
   isLoading?: boolean
 }

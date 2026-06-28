@@ -9,6 +9,7 @@ export { default as OverviewPage } from './OverviewPage'
 export { UniversalMaskRenderer } from './UniversalMaskRenderer'
 export * from './renderers'
 export * from './schema'
+export * from './render-plan'
 export { adaptMaskConfigToScreenDefinition } from './adapters/mask-config-adapter'
 
 // export * from './fields' // Not implemented yet

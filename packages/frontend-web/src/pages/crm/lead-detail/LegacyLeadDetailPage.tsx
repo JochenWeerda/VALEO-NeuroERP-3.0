@@ -110,7 +110,7 @@ function LegacyLeadDetailPage(): JSX.Element {
     }
   }
 
-  const updateField = (field: keyof Lead, value: any) => {
+  const updateField = (field: keyof Lead, value: unknown) => {
     setLead(prev => ({ ...prev, [field]: value }))
   }
 

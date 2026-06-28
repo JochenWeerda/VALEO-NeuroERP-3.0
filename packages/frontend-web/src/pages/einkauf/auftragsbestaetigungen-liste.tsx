@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+﻿import { useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -15,7 +15,7 @@ import { useAuftragsbestaetigungen, type Auftragsbestaetigung, einkaufKeys } fro
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createAuftragsbestaetigungenConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageOrderConfirmations'),
@@ -104,7 +104,7 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
   actions: []
 })
 
-async function bulkConfirmationMutation(selectedItems: any[], action: 'review' | 'confirm', allowedStatuses: string[]) {
+async function bulkConfirmationMutation(selectedItems: Record<string, unknown>[], action: 'review' | 'confirm', allowedStatuses: string[]) {
   let ok = 0
   const errors: string[] = []
   const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
@@ -179,7 +179,7 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
         label: t('crud.actions.review'),
         labelKey: 'crud.actions.review',
         type: 'secondary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkConfirmationMutation(selectedItems, 'review', ['OFFEN'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
           if (result.ok > 0) {
@@ -194,7 +194,7 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
         label: t('crud.actions.confirm'),
         labelKey: 'crud.actions.confirm',
         type: 'primary',
-        onClick: async (selectedItems: any[]) => {
+        onClick: async (selectedItems: Record<string, unknown>[]) => {
           const result = await bulkConfirmationMutation(selectedItems, 'confirm', ['OFFEN', 'GEPRUEFT'])
           queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
           if (result.ok > 0) {
@@ -211,13 +211,13 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
     navigate('/einkauf/auftragsbestaetigung/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     if (item?.id) {
       navigate(`/einkauf/auftragsbestaetigungen/${item.id}`)
     }
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
@@ -232,7 +232,7 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.confirmationNumber')};${t('crud.entities.purchaseOrder')};${t('crud.entities.supplier')};${t('crud.fields.status')}\n`
-      const csvContent = data.map((ab: any) =>
+      const csvContent = data.map(ab =>
         `"${ab.bestaetigungsNummer}";"${ab.bestellung?.nummer || ''}";"${ab.lieferant}";"${ab.status}"`
       ).join('\n')
 

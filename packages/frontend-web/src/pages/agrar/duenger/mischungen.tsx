@@ -107,7 +107,7 @@ export default function DuengerMischungenPage(): JSX.Element {
     }))
   }
 
-  const updateKomponente = (index: number, field: keyof MischungsKomponente, value: any) => {
+  const updateKomponente = (index: number, field: keyof MischungsKomponente, value: unknown) => {
     const updatedKomponenten = [...mischung.komponenten]
     updatedKomponenten[index] = { ...updatedKomponenten[index], [field]: value }
 

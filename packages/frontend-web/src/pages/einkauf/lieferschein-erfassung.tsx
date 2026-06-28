@@ -169,10 +169,10 @@ function LieferantSuchDialog({
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<any[]>('/api/v1/crm/customers', {
+      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers', {
         params: { search: search.trim(), limit: 30 },
       })
-      const mapped: Lieferant[] = (data || []).map((c: any) => ({
+      const mapped: Lieferant[] = (data || []).map(c => ({
         id: c.id,
         lieferantNr: c.customer_number || c.customerNumber || '',
         name: c.company_name || c.name || '',
@@ -481,7 +481,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   }
 
   // Artikel ausgewählt
-  const handleArticleSelect = (article: any): void => {
+  const handleArticleSelect = (article: Record<string, unknown>): void => {
     const ep = article.purchase_price || article.purchasePrice || article.sales_price || 0
     setCurrentPos((prev) => ({
       ...prev,

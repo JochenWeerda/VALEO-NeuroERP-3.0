@@ -14,7 +14,7 @@ const ReportsDashboardCharts = lazy(() =>
 type ReportType = 'sales-performance' | 'customer-analytics' | 'product-analytics' | 'financial-analytics' | 'trend-analytics'
 
 interface ReportData {
-  data: any
+  data: unknown
   metadata?: {
     reportType: string
     generatedAt: string
@@ -25,15 +25,15 @@ interface ReportData {
   averageOrderValue?: number
   totalUniqueCustomers?: number
   totalUniqueProducts?: number
-  conversionRates?: any
-  topCustomers?: any[]
-  topProductsByRevenue?: any[]
-  topProductsByQuantity?: any[]
-  customerAcquisitionTrends?: any[]
-  revenue?: any
-  outstandingPayments?: any
-  revenueTrends?: any[]
-  orderVolumeTrends?: any[]
+  conversionRates?: unknown
+  topCustomers?: unknown[]
+  topProductsByRevenue?: unknown[]
+  topProductsByQuantity?: unknown[]
+  customerAcquisitionTrends?: unknown[]
+  revenue?: unknown
+  outstandingPayments?: unknown
+  revenueTrends?: unknown[]
+  orderVolumeTrends?: unknown[]
 }
 
 const REPORT_TYPES = [

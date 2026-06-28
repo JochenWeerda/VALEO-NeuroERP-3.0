@@ -69,7 +69,7 @@ function buildRequestPositions(request: EinkaufAnfragePrefill, fallback: Bestell
   return [{ artikel, menge, einheit: 't', preis: 0 }]
 }
 
-function buildContractPositions(contract: any, fallback: BestellungData['positionen']): BestellungData['positionen'] {
+function buildContractPositions(contract: Record<string, unknown>, fallback: BestellungData['positionen']): BestellungData['positionen'] {
   const artikel = String(contract.commodity || '').trim()
   const contractedQuantity = Number(contract.qty?.contracted ?? 0)
   if (!artikel) {
@@ -167,7 +167,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadRequisitionData = async (id: string) => {
     try {
-      const req: any = (await apiClient.get<any>(`/api/v1/einkauf/anfragen/${id}`)).data
+      const req = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${id}`)).data
       if (req) {
         setBestellung(prev => ({
           ...prev,
@@ -192,7 +192,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadContractData = async (id: string) => {
     try {
-      const contract: any = (await apiClient.get<any>(`/api/v1/contracts/${id}`)).data
+      const contract: Record<string, unknown> = (await apiClient.get<Record<string, unknown>>(`/api/v1/contracts/${id}`)).data
       if (contract) {
         setBestellung(prev => ({
           ...prev,
@@ -219,7 +219,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadRFQData = async (id: string) => {
     try {
-      const rfq: any = (await apiClient.get<any>(`/api/v1/einkauf/anfragen/${id}`)).data
+      const rfq = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${id}`)).data
       if (rfq) {
         setBestellung(prev => ({
           ...prev,

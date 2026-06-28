@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -17,7 +17,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 
 // Zod-Schema für Debitoren-Stammdaten (wird in Komponente mit i18n erstellt)
-const createDebitorenSchema = (t: any) => z.object({
+const createDebitorenSchema = (t: TFunction) => z.object({
   debtor_number: z.string().regex(/^\d{6,8}$/, t('crud.messages.validationError')),
   company_name: z.string().min(1, t('crud.messages.validationError')),
   contact_person: z.string().optional(),
@@ -57,7 +57,7 @@ const createDebitorenSchema = (t: any) => z.object({
   notes: z.string().optional()
 })
 
-const validateDebitorenForm = (formData: any, t: any): { isValid: boolean; errors: Record<string, string> } => {
+const validateDebitorenForm = (formData: Record<string, unknown>, t: TFunction): { isValid: boolean; errors: Record<string, string> } => {
   const parsed = createDebitorenSchema(t).safeParse(formData ?? {})
   if (parsed.success) {
     return { isValid: true, errors: {} }
@@ -74,7 +74,7 @@ const validateDebitorenForm = (formData: any, t: any): { isValid: boolean; error
 }
 
 // Konfiguration für Debitoren-Stammdaten ObjectPage (wird in Komponente mit i18n erstellt)
-const createDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createDebitorenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
   type: 'object-page',
@@ -214,22 +214,22 @@ const createDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
           name: 'payment_terms_days',
           label: t('crud.fields.paymentDueDays'),
           type: 'number'
-        } as any,
+        } as Field,
         {
           name: 'discount_days',
           label: t('crud.fields.discountDays'),
           type: 'number'
-        } as any,
+        } as Field,
         {
           name: 'discount_percent',
           label: t('crud.fields.discountPercent'),
           type: 'number'
-        } as any,
+        } as Field,
         {
           name: 'credit_limit',
           label: t('crud.fields.creditLimit'),
           type: 'number'
-        } as any
+        } as Field
       ],
       layout: 'grid',
       columns: 2
@@ -261,7 +261,7 @@ const createDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
       update: '/api/v1/finance/debtors/{id}',
       delete: '/api/v1/finance/debtors/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -270,7 +270,7 @@ export default function DebitorenStammPage(): JSX.Element {
   const navigate = useNavigate()
   const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
+  const [formData, setFormData] = useState<Record<string, unknown>>({})
   const entityType = 'debtor'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Debitor')
   const debitorenConfig = createDebitorenConfig(t, entityTypeLabel)
@@ -337,7 +337,7 @@ export default function DebitorenStammPage(): JSX.Element {
   }, [lookupData, formData, updateData])
 
   // Handle form data changes for IBAN lookup
-  const handleFormChange = (newData: any) => {
+  const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
     
@@ -355,7 +355,7 @@ export default function DebitorenStammPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const isValid = validateDebitorenForm(formData, t)
       if (!isValid.isValid) {
@@ -386,7 +386,7 @@ export default function DebitorenStammPage(): JSX.Element {
       } else {
         toast.error(Object.values(isValid.errors).join(', '))
       }
-    } else if (action === 'export') {
+    } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'debtors', format: 'pdf', id: formData?.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -398,7 +398,7 @@ export default function DebitorenStammPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

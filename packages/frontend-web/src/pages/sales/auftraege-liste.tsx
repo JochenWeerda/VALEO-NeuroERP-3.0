@@ -237,7 +237,7 @@ export default function AuftraegeListePage(): JSX.Element {
     },
   ]
 
-  const handleImport = async (importData: any[]) => {
+  const handleImport = async (importData: Record<string, unknown>[]) => {
     try {
       for (const row of importData) {
         const doc = {

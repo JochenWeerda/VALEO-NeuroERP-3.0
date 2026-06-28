@@ -20,7 +20,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
   const [step, setStep] = useState<'request' | 'status' | 'download'>('request')
   const [loading, setLoading] = useState(false)
   const [requestId, setRequestId] = useState<string>('')
-  const [statusData, setStatusData] = useState<any>(null)
+  const [statusData, setStatusData] = useState<Record<string, unknown> | null>(null)
   
   const [formData, setFormData] = useState({
     contact_id: '',

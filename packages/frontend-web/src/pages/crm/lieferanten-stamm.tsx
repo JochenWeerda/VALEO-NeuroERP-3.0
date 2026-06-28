@@ -202,7 +202,7 @@ const lieferantenConfig: MaskConfig = {
           label: 'Produktpalette',
           type: 'multiselect',
           helpText: 'Produktbereiche des Lieferanten'
-        } as any
+        } as Field
       ]
     },
     {
@@ -286,12 +286,12 @@ export default function LieferantenStammPage(): JSX.Element {
     id: 'new'
   })
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(lieferantenConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(lieferantenConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -316,7 +316,7 @@ export default function LieferantenStammPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

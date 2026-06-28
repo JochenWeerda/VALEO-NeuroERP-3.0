@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -20,7 +20,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createAnfrageConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.create'),
   type: 'object-page',
@@ -180,7 +180,7 @@ export default function AnfrageStammPage(): JSX.Element {
   const [convertDialogOpen, setConvertDialogOpen] = useState(false)
   const [sendRfqDialogOpen, setSendRfqDialogOpen] = useState(false)
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([])
-  const [availableSuppliers, setAvailableSuppliers] = useState<any[]>([])
+  const [availableSuppliers, setAvailableSuppliers] = useState<Record<string, unknown>[]>([])
   const [sendMethod, setSendMethod] = useState<'email' | 'portal'>('email')
   const entityType = 'purchaseRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
@@ -195,7 +195,7 @@ export default function AnfrageStammPage(): JSX.Element {
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const suppliers = (await apiClient.get<any[] | { data?: any[] }>('/api/v1/crm/business-partners?type=supplier')).data
+        const suppliers = (await apiClient.get<Record<string, unknown>[] | { data?: Record<string, unknown>[] }>('/api/v1/crm/business-partners?type=supplier')).data
         setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])
       } catch {
         // Lieferantenliste im RFQ-Dialog bleibt leer — kein Blocker für den Nutzer
@@ -206,7 +206,7 @@ export default function AnfrageStammPage(): JSX.Element {
     }
   }, [sendRfqDialogOpen])
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       // Status-Transition validieren

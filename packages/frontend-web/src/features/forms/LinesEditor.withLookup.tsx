@@ -64,9 +64,9 @@ export function LinesEditorWithLookup<ColumnName extends string>({
       return {
         ...row,
         [ARTICLE_COLUMN_NAME as ColumnName]: item.id,
-        cost: item.cost ?? (row as any).cost,
-        price: (row as any).price ?? price,
-      } as any
+        cost: item.cost ?? (row as Record<string, unknown>).cost,
+        price: (row as Record<string, unknown>).price ?? price,
+      } as Record<string, unknown>
     })
 
     onChange(nextRows)

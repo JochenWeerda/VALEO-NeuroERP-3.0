@@ -1,19 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams } from '@/app/routing/typed-router'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import {
-  UniversalMaskRenderer,
-  adaptMaskConfigToScreenDefinition,
-  type ScreenDefinition,
-  type ScreenSummaryItem,
-  type ScreenTabDefinition,
-} from '@/components/mask-builder'
+import { UniversalMaskRenderer, type ScreenSummaryItem, type ScreenTabDefinition } from '@/components/mask-builder'
 import {
   CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
 } from '@/features/crm-masks/customer-mask-support'
 import { CUSTOMER_PILOT_TAB_TABLES } from '@/features/crm-masks/customer-tab-tables'
 import { mapCustomerToMask } from '@/features/crm-masks/mappers'
 import { mapTabDataToTables, useCustomerTabData } from '@/features/crm-masks/use-customer-tab-data'
+import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
+import { usePilotRenderPlan } from '@/features/mask-pilot/use-pilot-render-plan'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useCustomer, useCustomerScreenSummary } from '@/lib/api/crm'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -45,15 +41,6 @@ function enrichTabsWithTables(tabs: ScreenTabDefinition[]): ScreenTabDefinition[
   }))
 }
 
-function mergeSupplementalTabs(tabs: ScreenTabDefinition[], availableTabs: string[] | undefined): ScreenTabDefinition[] {
-  const existing = new Set(tabs.map((tab) => tab.key))
-  const supplemental = CRM360_SUPPLEMENTAL_TABS.filter((tab) => {
-    if (existing.has(tab.key)) return false
-    return !availableTabs || availableTabs.includes(tab.key)
-  })
-  return [...tabs, ...supplemental]
-}
-
 function getCustomerIdFromSearch(): string | undefined {
   if (typeof window === 'undefined') return undefined
   return new URLSearchParams(window.location.search).get('id') ?? undefined
@@ -62,79 +49,42 @@ function getCustomerIdFromSearch(): string | undefined {
 function UniversalCustomerMaskPilotPage(): JSX.Element {
   const { id: routeId } = useParams<{ id?: string }>()
   const id = routeId ?? getCustomerIdFromSearch()
-  const [activeTabKey, setActiveTabKey] = useState<string | undefined>(undefined)
+  const { activeTabKey, tablePage, onTabChange } = useMaskPilotState()
   const summaryQuery = useCustomerScreenSummary(id ?? '')
   const nativeScreenQuery = useScreenDefinition('crm/customer-360', { enabled: Boolean(id) })
   const customerQuery = useCustomer(id ?? '', { enabled: Boolean(summaryQuery.data) })
-  const tabDataQuery = useCustomerTabData(id ?? '', activeTabKey, summaryQuery.data?.tab_endpoints)
+  const tabDataQuery = useCustomerTabData(
+    id ?? '',
+    activeTabKey,
+    summaryQuery.data?.tab_endpoints,
+    tablePage,
+  )
 
-  const screen = useMemo(() => {
-    const adapted = adaptMaskConfigToScreenDefinition(
-      {
-        ...CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
-        title: summaryQuery.data?.title ?? customerQuery.data?.name ?? 'Kundenstamm Generator Pilot',
-        subtitle: summaryQuery.data?.subtitle ?? 'Universal Mask Generator Pilot',
-      },
-      {
-        id: 'crm/customer-360',
-        domain: 'crm',
-        sourceId: 'mask-builder-customer.json',
-        summaryEndpoint: id ? `/api/v1/crm/customers/${id}/screen-summary` : undefined,
-      },
-    )
+  const summaryItems = useMemo(
+    () => buildSummaryItems(summaryQuery.data),
+    [summaryQuery.data],
+  )
 
-    const nativeBase: ScreenDefinition | undefined = nativeScreenQuery.data
-    const definition: ScreenDefinition = nativeBase
-      ? {
-          ...adapted,
-          ...nativeBase,
-          adapter: nativeBase.adapter,
-          performance: nativeBase.performance,
-          layout: nativeBase.layout,
-          summaryEndpoint: nativeBase.summaryEndpoint ?? adapted.summaryEndpoint,
-          tabs: adapted.tabs,
-          fields: adapted.fields,
-        }
-      : adapted
-
-    const tabs = mergeSupplementalTabs(
-      enrichTabsWithTables(definition.tabs ?? adapted.tabs ?? []),
-      summaryQuery.data?.available_tabs,
-    )
-
-    return {
-      ...definition,
-      tabs,
-      title: summaryQuery.data?.title ?? definition.title,
-      subtitle: summaryQuery.data?.subtitle ?? definition.subtitle,
-      summary: buildSummaryItems(summaryQuery.data),
-      actions: summaryQuery.data?.actions.map((action) => ({
-        key: action.key,
-        label: action.label,
-        kind: action.key === 'edit' ? 'primary' as const : 'secondary' as const,
-        permission: action.permission,
-      })) ?? [],
-      layout: {
-        preferredMode: 'desktopDense' as const,
-        mobileMode: 'mobileStack' as const,
-        touchTargetPx: 44,
-      },
-      performance: {
-        ...definition.performance,
-        initialPayloadBudgetKb: summaryQuery.data?.performance.initial_payload_budget_kb ?? 48,
-        requiresLazyTabs: true,
-        requiresVirtualTables: true,
-        lookupMinChars: summaryQuery.data?.performance.lookup_min_chars ?? 2,
-      },
-    }
-  }, [customerQuery.data?.name, id, nativeScreenQuery.data, summaryQuery.data])
+  const { plan } = usePilotRenderPlan({
+    screenId: 'crm/customer-360',
+    domain: 'crm',
+    maskConfig: {
+      ...CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
+      title: summaryQuery.data?.title ?? customerQuery.data?.name ?? 'Kundenstamm Generator Pilot',
+      subtitle: summaryQuery.data?.subtitle ?? 'Universal Mask Generator Pilot',
+    },
+    entityId: id,
+    summaryEndpointPrefix: '/api/v1/crm/customers',
+    summary: summaryQuery.data,
+    nativeScreen: nativeScreenQuery.data,
+    supplementalTabs: CRM360_SUPPLEMENTAL_TABS,
+    enrichTabs: enrichTabsWithTables,
+    summaryItems,
+    enabled: Boolean(id),
+  })
 
   const data = useMemo(() => mapCustomerToMask(customerQuery.data), [customerQuery.data])
   const tables = useMemo(() => mapTabDataToTables(tabDataQuery.data), [tabDataQuery.data])
-  const allowedPermissions = useMemo(
-    () => summaryQuery.data?.actions.flatMap((action) => action.permission ? [action.permission] : []) ?? [],
-    [summaryQuery.data],
-  )
 
   if (!id) {
     return (
@@ -178,14 +128,15 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
           Tab-Daten werden geladen...
         </div>
       ) : null}
-      <UniversalMaskRenderer
-        screen={screen}
-        data={data}
-        tables={tables}
-        allowedPermissions={allowedPermissions}
-        onTabChange={setActiveTabKey}
-        onAction={() => undefined}
-      />
+      {plan ? (
+        <UniversalMaskRenderer
+          plan={plan}
+          data={data}
+          tables={tables}
+          onTabChange={onTabChange}
+          onAction={() => undefined}
+        />
+      ) : null}
     </div>
   )
 }

@@ -67,7 +67,7 @@ const ListReport: React.FC<ListReportProps> = ({
   const [sortField, setSortField] = useState(config.defaultSort?.field || '')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(config.defaultSort?.direction || 'asc')
   const [currentPage, setCurrentPage] = useState(1)
-  const [selectedItems, setSelectedItems] = useState<any[]>([])
+  const [selectedItems, setSelectedItems] = useState<Record<string, unknown>[]>([])
 
   const pageSize = config.pageSize || 25
   const totalPages = Math.ceil(total / pageSize)

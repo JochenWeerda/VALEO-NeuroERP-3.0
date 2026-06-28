@@ -2843,8 +2843,8 @@ function Workbench({
     return tourStep === idx ? { outline: `2.5px solid ${C.accent}`, outlineOffset: '2px' } : {}
   }
 
-  const maeKg = (result?.forage_performance as any)?.supplemented?.milk_from_energy_kg as number | undefined
-  const mapKg = (result?.forage_performance as any)?.supplemented?.milk_from_protein_kg as number | undefined
+  const maeKg = (result?.forage_performance as Record<string, unknown>)?.supplemented?.milk_from_energy_kg as number | undefined
+  const mapKg = (result?.forage_performance as Record<string, unknown>)?.supplemented?.milk_from_protein_kg as number | undefined
   const maeMapDiff = (maeKg != null && mapKg != null) ? Math.abs(maeKg - mapKg) : null
   const maeMapStatus: 'success' | 'warn' | 'error' =
     maeMapDiff == null ? 'warn' : maeMapDiff <= 2 ? 'success' : maeMapDiff <= 5 ? 'warn' : 'error'
@@ -3110,7 +3110,7 @@ function Workbench({
           <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>KPI Status</div>
           <div className="grid grid-cols-2 gap-2">
             {kpis.map((kpi, i) => (
-              <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }} title={(kpi as any).title}>
+              <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }} title={(kpi as Record<string, unknown>).title}>
                 <div className="text-[10px] uppercase mb-1" style={{ color: C.muted }}>{kpi.label}</div>
                 <div className="text-[15px] font-bold">{kpi.value}</div>
                 <div
@@ -3762,7 +3762,7 @@ function computeTierwohlScore(dlg: DlgIndicators | null | undefined): {
     { label: 'aNDFom-GF erfüllt', ok: dlg != null ? dlg.andfom_gf_kgdm >= 0.19 : false },
     { label: 'pabKH ≤ 210 g/kg TM', ok: dlg != null ? dlg.pabkh_kgdm <= 0.21 : false },
     { label: 'RMD im Zielbereich', ok: dlg?.rmd_gn_kgdm != null ? dlg.rmd_gn_kgdm >= -1.5 && dlg.rmd_gn_kgdm <= 1 : false },
-    { label: 'XL ≤ 40 g/kg TM', ok: dlg != null ? (dlg as any).xl_kgdm == null || (dlg as any).xl_kgdm <= 0.04 : true },
+    { label: 'XL ≤ 40 g/kg TM', ok: dlg != null ? (dlg as Record<string, unknown>).xl_kgdm == null || (dlg as Record<string, unknown>).xl_kgdm <= 0.04 : true },
   ]
   const score = criteria.filter((c) => c.ok).length
   const status: 'green' | 'yellow' | 'red' = score >= 5 ? 'green' : score >= 3 ? 'yellow' : 'red'

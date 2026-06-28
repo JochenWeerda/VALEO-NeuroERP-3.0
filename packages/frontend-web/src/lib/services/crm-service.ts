@@ -83,42 +83,42 @@ export interface FarmProfile {
 }
 
 // Helper: API Response (snake_case) zu Frontend Model (camelCase) transformieren
-function transformFarmProfile(apiData: any): FarmProfile {
+function transformFarmProfile(apiData: Record<string, unknown>): FarmProfile {
   return {
-    id: apiData.id,
-    farmName: apiData.farm_name || apiData.farmName || '',
-    owner: apiData.owner || '',
-    totalArea: apiData.total_area ?? apiData.totalArea ?? 0,
-    crops: apiData.crops || [],
-    livestock: apiData.livestock || [],
-    location: apiData.location,
-    certifications: apiData.certifications || [],
-    notes: apiData.notes,
-    createdAt: apiData.created_at || apiData.createdAt || '',
-    updatedAt: apiData.updated_at || apiData.updatedAt || '',
+    id: String(apiData.id ?? ''),
+    farmName: String(apiData.farm_name ?? apiData.farmName ?? ''),
+    owner: String(apiData.owner ?? ''),
+    totalArea: Number(apiData.total_area ?? apiData.totalArea ?? 0),
+    crops: (apiData.crops as FarmProfile['crops']) || [],
+    livestock: (apiData.livestock as FarmProfile['livestock']) || [],
+    location: apiData.location as FarmProfile['location'],
+    certifications: (apiData.certifications as string[]) || [],
+    notes: apiData.notes !== undefined ? String(apiData.notes) : undefined,
+    createdAt: String(apiData.created_at ?? apiData.createdAt ?? ''),
+    updatedAt: String(apiData.updated_at ?? apiData.updatedAt ?? ''),
   }
 }
 
-function transformActivity(apiData: any): Activity {
+function transformActivity(apiData: Record<string, unknown>): Activity {
   return {
-    id: apiData.id,
-    type: apiData.type || 'note',
-    title: apiData.title || '',
-    customer: apiData.customer || apiData.customer_name || '',
-    contactPerson: apiData.contact_person || apiData.contactPerson || '',
-    date: apiData.date || apiData.scheduled_at || '',
-    status: apiData.status || 'planned',
-    assignedTo: apiData.assigned_to || apiData.assignedTo || '',
-    description: apiData.description,
-    mainTopics: (apiData.main_topics || apiData.mainTopics || []).map((item: unknown) => String(item)),
-    ordersPlaced: (apiData.orders_placed || apiData.ordersPlaced || []).map((item: unknown) => String(item)),
-    followUpActions: (apiData.follow_up_actions || apiData.followUpActions || []).map((item: unknown) => String(item)),
-    createdAt: apiData.created_at || apiData.createdAt || '',
-    updatedAt: apiData.updated_at || apiData.updatedAt || '',
+    id: String(apiData.id ?? ''),
+    type: (apiData.type as Activity['type']) || 'note',
+    title: String(apiData.title ?? ''),
+    customer: String(apiData.customer ?? apiData.customer_name ?? ''),
+    contactPerson: String(apiData.contact_person ?? apiData.contactPerson ?? ''),
+    date: String(apiData.date ?? apiData.scheduled_at ?? ''),
+    status: (apiData.status as Activity['status']) || 'planned',
+    assignedTo: String(apiData.assigned_to ?? apiData.assignedTo ?? ''),
+    description: apiData.description !== undefined ? String(apiData.description) : undefined,
+    mainTopics: ((apiData.main_topics ?? apiData.mainTopics ?? []) as unknown[]).map((item) => String(item)),
+    ordersPlaced: ((apiData.orders_placed ?? apiData.ordersPlaced ?? []) as unknown[]).map((item) => String(item)),
+    followUpActions: ((apiData.follow_up_actions ?? apiData.followUpActions ?? []) as unknown[]).map((item) => String(item)),
+    createdAt: String(apiData.created_at ?? apiData.createdAt ?? ''),
+    updatedAt: String(apiData.updated_at ?? apiData.updatedAt ?? ''),
   }
 }
 
-function unwrapItem<T>(payload: any): T {
+function unwrapItem<T>(payload: unknown): T {
   if (payload && typeof payload === 'object' && 'data' in payload) {
     return payload.data as T
   }
@@ -135,17 +135,17 @@ export const crmService = {
   },
 
   async getContact(id: string) {
-    const response = await apiClient.get<any>(`/api/v1/crm/contacts/${id}`)
+    const response = await apiClient.get<Contact>(`/api/v1/crm/contacts/${id}`)
     return unwrapItem<Contact>(response.data)
   },
 
   async createContact(data: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<any>('/api/v1/crm/contacts', data)
+    const response = await apiClient.post<Contact>('/api/v1/crm/contacts', data)
     return unwrapItem<Contact>(response.data)
   },
 
   async updateContact(id: string, data: Partial<Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<any>(`/api/v1/crm/contacts/${id}`, data)
+    const response = await apiClient.put<Contact>(`/api/v1/crm/contacts/${id}`, data)
     return unwrapItem<Contact>(response.data)
   },
 
@@ -161,7 +161,7 @@ export const crmService = {
   },
 
   async getLead(id: string) {
-    const response = await apiClient.get<any>(`/api/v1/crm/leads/${id}`)
+    const response = await apiClient.get<Lead>(`/api/v1/crm/leads/${id}`)
     return unwrapItem<Lead>(response.data)
   },
 
@@ -169,17 +169,17 @@ export const crmService = {
   // Liste (/crm/lead-generierung/leads) und Detail müssen DIESELBE Quelle nutzen,
   // sonst läuft das Detail ins Leere (404 auf /crm/leads/{id}).
   async getFunnelLead(id: string) {
-    const response = await apiClient.get<any>(`/api/v1/crm/lead-generierung/leads/${id}`)
+    const response = await apiClient.get<Lead>(`/api/v1/crm/lead-generierung/leads/${id}`)
     return unwrapItem<Lead>(response.data)
   },
 
   async createLead(data: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<any>('/api/v1/crm/leads', data)
+    const response = await apiClient.post<Lead>('/api/v1/crm/leads', data)
     return unwrapItem<Lead>(response.data)
   },
 
   async updateLead(id: string, data: Partial<Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<any>(`/api/v1/crm/leads/${id}`, data)
+    const response = await apiClient.put<Lead>(`/api/v1/crm/leads/${id}`, data)
     return unwrapItem<Lead>(response.data)
   },
 
@@ -189,24 +189,24 @@ export const crmService = {
 
   // Activities
   async getActivities(params?: { search?: string; type?: string; status?: string; limit?: number; offset?: number }) {
-    const response = await apiClient.get<{ items?: any[]; total?: number }>('/api/v1/crm/activities', { params })
+    const response = await apiClient.get<{ items?: Record<string, unknown>[]; total?: number }>('/api/v1/crm/activities', { params })
     const items = response.data.items || []
     return { data: items.map(transformActivity), total: response.data.total || 0 }
   },
 
   async getActivity(id: string) {
-    const response = await apiClient.get<any>(`/api/v1/crm/activities/${id}`)
-    return transformActivity(unwrapItem<any>(response.data))
+    const response = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/activities/${id}`)
+    return transformActivity(unwrapItem<Record<string, unknown>>(response.data))
   },
 
   async createActivity(data: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<any>('/api/v1/crm/activities', data)
-    return transformActivity(unwrapItem<any>(response.data))
+    const response = await apiClient.post<Record<string, unknown>>('/api/v1/crm/activities', data)
+    return transformActivity(unwrapItem<Record<string, unknown>>(response.data))
   },
 
   async updateActivity(id: string, data: Partial<Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<any>(`/api/v1/crm/activities/${id}`, data)
-    return transformActivity(unwrapItem<any>(response.data))
+    const response = await apiClient.put<Record<string, unknown>>(`/api/v1/crm/activities/${id}`, data)
+    return transformActivity(unwrapItem<Record<string, unknown>>(response.data))
   },
 
   async deleteActivity(id: string) {
@@ -216,7 +216,7 @@ export const crmService = {
   // Betriebsprofile (Farm Profiles)
   async getFarmProfiles(params?: { search?: string; limit?: number; offset?: number }) {
     try {
-      const response = await apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/farm-profiles', { params })
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/farm-profiles', { params })
       // API gibt { items, total } zurück mit snake_case, Frontend erwartet { data, total } mit camelCase
       const transformedItems = (response.data.items || []).map(transformFarmProfile)
       return { data: transformedItems, total: response.data.total || 0 }
@@ -227,18 +227,18 @@ export const crmService = {
   },
 
   async getFarmProfile(id: string) {
-    const response = await apiClient.get<any>(`/api/v1/crm/farm-profiles/${id}`)
-    return transformFarmProfile(unwrapItem<any>(response.data))
+    const response = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/farm-profiles/${id}`)
+    return transformFarmProfile(unwrapItem<Record<string, unknown>>(response.data))
   },
 
   async createFarmProfile(data: Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<any>('/api/v1/crm/farm-profiles', data)
-    return transformFarmProfile(unwrapItem<any>(response.data))
+    const response = await apiClient.post<Record<string, unknown>>('/api/v1/crm/farm-profiles', data)
+    return transformFarmProfile(unwrapItem<Record<string, unknown>>(response.data))
   },
 
   async updateFarmProfile(id: string, data: Partial<Omit<FarmProfile, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<any>(`/api/v1/crm/farm-profiles/${id}`, data)
-    return transformFarmProfile(unwrapItem<any>(response.data))
+    const response = await apiClient.put<Record<string, unknown>>(`/api/v1/crm/farm-profiles/${id}`, data)
+    return transformFarmProfile(unwrapItem<Record<string, unknown>>(response.data))
   },
 
   async deleteFarmProfile(id: string) {

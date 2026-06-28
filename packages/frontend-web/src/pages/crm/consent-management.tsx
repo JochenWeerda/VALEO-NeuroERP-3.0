@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListReport } from '@/components/mask-builder'
@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
 // Konfiguration für Consent-Management ListReport
-const createConsentConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageConsents'),
@@ -187,11 +187,11 @@ const createConsentConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   permissions: ['crm.read', 'consent.read', 'consent.write']
 })
 
-function getSuccessMessage(t: any, action: string, entityType: string): string {
+function getSuccessMessage(t: TFunction, action: string, entityType: string): string {
   return t(`crud.messages.${action}Success`, { entityType })
 }
 
-function getErrorMessage(t: any, action: string, entityType: string): string {
+function getErrorMessage(t: TFunction, action: string, entityType: string): string {
   return t(`crud.messages.${action}Error`, { entityType })
 }
 
@@ -207,7 +207,7 @@ export default function ConsentManagementPage(): JSX.Element {
     queryKey: ['crm', 'consents'],
     queryFn: async () => {
       const r = await apiClient.get('/api/v1/crm/consents')
-      const raw = r.data as any
+      const raw = r.data as Record<string, unknown>
       const items = Array.isArray(raw) ? raw : (raw.data || [])
       return { items, total: items.length }
     },
@@ -226,7 +226,7 @@ export default function ConsentManagementPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
       navigate(`/crm/consent/${item.id}`)
     } else if (action === 'delete' && item) {
@@ -267,7 +267,7 @@ export default function ConsentManagementPage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.contact')};${t('crud.fields.channel')};${t('crud.fields.consentType')};${t('crud.fields.status')};${t('crud.fields.grantedAt')};${t('crud.fields.source')}\n`
-      const csvContent = data.map((item: any) =>
+      const csvContent = data.map(item =>
         `"${item.contact_id || ''}";"${item.channel || ''}";"${item.consent_type || ''}";"${item.status || ''}";"${item.granted_at || ''}";"${item.source || ''}"`
       ).join('\n')
 

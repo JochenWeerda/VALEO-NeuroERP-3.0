@@ -246,10 +246,10 @@ export function useBuchungen(filters?: { datum_von?: string; datum_bis?: string;
       if (filters?.datum_von) params.entry_date_from = filters.datum_von
       if (filters?.datum_bis) params.entry_date_to = filters.datum_bis
       if (filters?.belegart) params.source = filters.belegart
-      const response = await apiClient.get<{ items: any[]; total: number }>(
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
         '/api/v1/journal-entries', { params }
       )
-      return (response.data.items ?? []).map((e: any): Buchung => ({
+      return (response.data.items ?? []).map((e): Buchung => ({
         id: e.id,
         belegnr: e.entry_number,
         datum: e.posting_date || e.entry_date,
@@ -268,7 +268,7 @@ export function useCreateBuchung() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (buchung: Omit<Buchung, 'id'>) => {
-      const response = await apiClient.post<{ data: any }>('/api/v1/journal-entries', buchung)
+      const response = await apiClient.post<{ data: unknown }>('/api/v1/journal-entries', buchung)
       return response.data
     },
     onSuccess: () => {
@@ -285,10 +285,10 @@ export function useKonten(filters?: { typ?: string }) {
     queryFn: async () => {
       const params: Record<string, string> = {}
       if (filters?.typ) params.account_type = filters.typ
-      const response = await apiClient.get<{ items: any[]; total: number }>(
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
         '/api/v1/chart-of-accounts', { params }
       )
-      return (response.data.items ?? []).map((a: any): Konto => ({
+      return (response.data.items ?? []).map((a): Konto => ({
         id: a.id,
         kontonummer: a.account_number,
         bezeichnung: a.account_name,
@@ -305,7 +305,7 @@ export function useKonto(kontonummer: string) {
   return useQuery({
     queryKey: [...fibuKeys.konten(), kontonummer],
     queryFn: async () => {
-      const response = await apiClient.get<{ items: any[] }>(
+      const response = await apiClient.get<{ items: Record<string, unknown>[] }>(
         `/api/v1/chart-of-accounts?account_number=${kontonummer}`
       )
       const a = response.data.items?.[0]
@@ -589,10 +589,10 @@ export function useDebitorenOP() {
   return useQuery({
     queryKey: [...fibuKeys.debitoren(), 'op'],
     queryFn: async () => {
-      const response = await apiClient.get<{ items: any[]; total: number }>(
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
         '/api/v1/finance/open-items?typ=debitor'
       )
-      return (response.data.items ?? []).map((item: any): DebitOP => ({
+      return (response.data.items ?? []).map((item): DebitOP => ({
         id: item.id,
         rechnungsnr: item.beleg_nummer ?? item.rechnungsnr ?? '',
         kunde: item.partner_name ?? item.kunde_name ?? '',
@@ -614,10 +614,10 @@ export function useKreditorenOP() {
   return useQuery({
     queryKey: [...fibuKeys.kreditoren(), 'op'],
     queryFn: async () => {
-      const response = await apiClient.get<{ items: any[]; total: number }>(
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
         '/api/v1/finance/open-items?typ=kreditor'
       )
-      return (response.data.items ?? []).map((item: any): KreditOP => ({
+      return (response.data.items ?? []).map((item): KreditOP => ({
         id: item.id,
         rechnungsnr: item.beleg_nummer ?? item.rechnungsnr ?? '',
         lieferant: item.partner_name ?? item.lieferant_name ?? '',
@@ -642,8 +642,8 @@ export function useHauptbuchBuchungen() {
   return useQuery({
     queryKey: [...fibuKeys.buchungen(), 'hauptbuch'],
     queryFn: async () => {
-      const response = await apiClient.get<{ items: any[]; total: number }>('/api/v1/journal-entries')
-      return (response.data.items ?? []).map((e: any): HauptbuchBuchung => ({
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/journal-entries')
+      return (response.data.items ?? []).map((e): HauptbuchBuchung => ({
         id: e.id,
         datum: e.posting_date || e.entry_date,
         belegnummer: e.entry_number,
@@ -686,10 +686,10 @@ export function useVerbindlichkeiten() {
   return useQuery({
     queryKey: [...fibuKeys.all, 'verbindlichkeiten'],
     queryFn: async () => {
-      const response = await apiClient.get<{ items: any[]; total: number }>(
+      const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
         '/api/v1/finance/open-items?typ=kreditor'
       )
-      return (response.data.items ?? []).map((item: any): Verbindlichkeit => ({
+      return (response.data.items ?? []).map((item): Verbindlichkeit => ({
         id: item.id,
         rechnungsNr: item.beleg_nummer ?? '',
         lieferant: item.partner_name ?? '',

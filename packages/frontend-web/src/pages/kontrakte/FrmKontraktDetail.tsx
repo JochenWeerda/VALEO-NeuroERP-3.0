@@ -312,7 +312,7 @@ export default function FrmKontraktDetail(): JSX.Element {
       const query = buildWorkflowResumeQuery(saved.contract_id)
       navigate(`/kontrakte/${saved.contract_id}${query ? `?${query}` : ''}`)
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast({ title: 'Fehler', description: err?.message || 'Speichern fehlgeschlagen', variant: 'destructive' })
     },
   })
@@ -346,7 +346,7 @@ export default function FrmKontraktDetail(): JSX.Element {
       toast({ title: 'Hedge angelegt', description: 'Die Hedge-Referenz wurde aus dem Kontrakt heraus erzeugt.' })
       setState((prev) => updateSteeringValue(prev, 'hedge_status', 'offen'))
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast({ title: 'Hedge fehlgeschlagen', description: err?.message || 'Hedge konnte nicht angelegt werden', variant: 'destructive' })
     },
   })
@@ -357,7 +357,7 @@ export default function FrmKontraktDetail(): JSX.Element {
       toast({ title: 'Geloescht' })
       navigate('/kontrakte')
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast({ title: 'Loeschen fehlgeschlagen', description: err?.message || '', variant: 'destructive' })
     },
   })

@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
+﻿import { useState, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { apiClient } from '@/lib/api-client'
@@ -57,12 +57,12 @@ const crmRoleProfiles: Array<{ id: CrmRoleFocus; label: string; description: str
 
 // Konfiguration für Opportunities ListReport (wird in Komponente mit i18n erstellt)
 const createOpportunitiesConfig = (
-  t: any,
+  t: TFunction,
   entityTypeLabel: string,
   handlers: {
-    convertToQuote: (items: any[]) => void
-    markAsWon: (items: any[]) => void
-    markAsLost: (items: any[]) => void
+    convertToQuote: (items: unknown[]) => void
+    markAsWon: (items: unknown[]) => void
+    markAsLost: (items: unknown[]) => void
   },
 ): ListConfig => ({
   title: entityTypeLabel,
@@ -91,7 +91,7 @@ const createOpportunitiesConfig = (
       labelKey: 'crud.entities.customer',
       sortable: true,
       filterable: true,
-      render: (value, item: any) => {
+      render: (value, item: Record<string, unknown>) => {
         const name = item?.customer_name ?? item?.customer?.name ?? value
         return name ? <span>{name}</span> : '-'
       }
@@ -255,7 +255,7 @@ const createOpportunitiesConfig = (
 export default function OpportunitiesListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Record<string, unknown>[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [roleFocus, setRoleFocus] = useState<CrmRoleFocus>('all')
@@ -273,9 +273,9 @@ export default function OpportunitiesListePage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/opportunity/${item.id}`)
+      navigate(`/crm/opportunity/${item.id as string}`)
     }
   })
 
@@ -284,8 +284,8 @@ export default function OpportunitiesListePage(): JSX.Element {
     try {
       const response = await apiClient.get('/api/v1/crm/opportunities')
       if (response.data) {
-        setData((response.data as any).items || [])
-        setTotal((response.data as any).total || 0)
+        setData((response.data as Record<string, unknown>).items || [])
+        setTotal((response.data as Record<string, unknown>).total || 0)
       }
     } catch (error) {
       toast({
@@ -306,7 +306,7 @@ export default function OpportunitiesListePage(): JSX.Element {
   }
 
   const updateSelectedOpportunities = async (
-    items: any[],
+    items: Record<string, unknown>[],
     payload: Record<string, unknown>,
     successTitle: string,
     successDescription: string,
@@ -334,7 +334,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     }
   }
 
-  const handleConvertToQuote = (items: any[]) => {
+  const handleConvertToQuote = (items: Record<string, unknown>[]) => {
     if (!items.length) {
       toast({
         variant: 'destructive',
@@ -359,7 +359,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     ).then(() => navigate('/crm/opportunities-kanban'))
   }
 
-  const handleMarkAsWon = (items: any[]) => {
+  const handleMarkAsWon = (items: Record<string, unknown>[]) => {
     void updateSelectedOpportunities(
       items,
       { status: 'closed_won', stage: 'closed_won' },
@@ -369,7 +369,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     )
   }
 
-  const handleMarkAsLost = (items: any[]) => {
+  const handleMarkAsLost = (items: Record<string, unknown>[]) => {
     void updateSelectedOpportunities(
       items,
       { status: 'closed_lost', stage: 'closed_lost' },
@@ -444,11 +444,11 @@ export default function OpportunitiesListePage(): JSX.Element {
     [t, entityTypeLabel],
   )
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     handleAction('edit', item)
   }
 
-  const handleDelete = (item: any) => {
+  const handleDelete = item => {
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     void withPending(String(item.id), async () => {
       try {
@@ -463,7 +463,7 @@ export default function OpportunitiesListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.number')};${t('crud.fields.name')};${t('crud.fields.stage')};${t('crud.fields.amount')};${t('crud.fields.probability')};${t('crud.fields.status')}\n`
-      const csvContent = data.map((opp: any) =>
+      const csvContent = data.map(opp =>
         `"${opp.number}";"${opp.name}";"${opp.stage}";"${opp.amount || 0}";"${opp.probability || 0}";"${opp.status}"`
       ).join('\n')
 

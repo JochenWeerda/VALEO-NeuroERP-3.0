@@ -7,7 +7,7 @@ export interface ApiResponse<T = any> {
   errors?: Record<string, string>
   error?: string
   id?: string | number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface PaginatedResponse<T = any> {
@@ -72,16 +72,16 @@ export class ApiClient {
     }
   }
 
-  async get<T = any>(
+  async get<T = unknown>(
     endpoint: string,
-    paramsOrConfig?: Record<string, any> | { params?: Record<string, any> },
+    paramsOrConfig?: Record<string, string> | { params?: Record<string, string> },
   ): Promise<ApiResponse<T>> {
     const params = paramsOrConfig && 'params' in paramsOrConfig ? paramsOrConfig.params : paramsOrConfig
-    const url = params ? `${endpoint}?${String(new URLSearchParams(params))}` : endpoint
+    const url = params ? `${endpoint}?${String(new URLSearchParams(params as Record<string, string>))}` : endpoint
     return this.request<T>(url)
   }
 
-  async post<T = any>(endpoint: string, data?: any, options: RequestInit & { params?: Record<string, any> } = {}): Promise<ApiResponse<T>> {
+  async post<T = unknown>(endpoint: string, data?: unknown, options: RequestInit & { params?: Record<string, string> } = {}): Promise<ApiResponse<T>> {
     const params = options.params ? `?${String(new URLSearchParams(options.params))}` : ''
     const { params: _params, ...requestOptions } = options
     return this.request<T>(`${endpoint}${params}`, {
@@ -91,7 +91,7 @@ export class ApiClient {
     })
   }
 
-  async put<T = any>(endpoint: string, data?: any, options: RequestInit & { params?: Record<string, any> } = {}): Promise<ApiResponse<T>> {
+  async put<T = unknown>(endpoint: string, data?: unknown, options: RequestInit & { params?: Record<string, string> } = {}): Promise<ApiResponse<T>> {
     const params = options.params ? `?${String(new URLSearchParams(options.params))}` : ''
     const { params: _params, ...requestOptions } = options
     return this.request<T>(`${endpoint}${params}`, {
@@ -101,7 +101,7 @@ export class ApiClient {
     })
   }
 
-  async patch<T = any>(endpoint: string, data?: any, options: RequestInit & { params?: Record<string, any> } = {}): Promise<ApiResponse<T>> {
+  async patch<T = unknown>(endpoint: string, data?: unknown, options: RequestInit & { params?: Record<string, string> } = {}): Promise<ApiResponse<T>> {
     const params = options.params ? `?${String(new URLSearchParams(options.params))}` : ''
     const { params: _params, ...requestOptions } = options
     return this.request<T>(`${endpoint}${params}`, {
@@ -111,7 +111,7 @@ export class ApiClient {
     })
   }
 
-  async delete<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'DELETE'
     })
@@ -148,7 +148,7 @@ export function getApiFieldErrors(response: ApiResponse): Record<string, string>
 }
 
 // Cache utilities (simple in-memory cache)
-const cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+const cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
 
 export function getCachedData<T>(key: string): T | null {
   const cached = cache.get(key)
@@ -162,7 +162,7 @@ export function getCachedData<T>(key: string): T | null {
   return cached.data
 }
 
-export function setCachedData(key: string, data: any, ttl = 5 * 60 * 1000): void {
+export function setCachedData(key: string, data: unknown, ttl = 5 * 60 * 1000): void {
   cache.set(key, { data, timestamp: Date.now(), ttl })
 }
 

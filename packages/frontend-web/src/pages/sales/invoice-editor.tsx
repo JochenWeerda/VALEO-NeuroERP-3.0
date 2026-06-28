@@ -136,7 +136,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     }
     void (async () => {
       try {
-        const { data: doc } = await apiClient.get(`/api/v1/docflow/${editId}`) as any
+        const { data: doc } = await apiClient.get(`/api/v1/docflow/${editId}`)
         setDocId(String(doc.id))
         setInvoice((prev) => ({
           ...prev,
@@ -145,7 +145,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           customerId: doc.customer_id ?? "",
           status: doc.status ?? prev.status,
           lines: Array.isArray(doc.items)
-            ? doc.items.map((it: any) => ({
+            ? doc.items.map(it => ({
                 article: it.article_number ?? "",
                 qty: Number(it.quantity ?? 0),
                 price: Number(it.unit_price ?? 0),
@@ -194,7 +194,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
         const { data: created } = await apiClient.post("/api/v1/docflow", {
           ...docPayload,
           idempotency_key: idempotencyKey,
-        }) as any
+        })
         setDocId(String((created as { id?: string }).id ?? ''))
       }
 

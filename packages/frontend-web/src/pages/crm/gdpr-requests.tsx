@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListReport } from '@/components/mask-builder'
@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
 // Konfiguration für GDPR-Requests ListReport
-const createGDPRRequestsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createGDPRRequestsConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageGDPRRequests'),
@@ -169,7 +169,7 @@ export default function GDPRRequestsPage(): JSX.Element {
     queryKey: ['crm', 'gdpr-requests'],
     queryFn: async () => {
       const r = await apiClient.get('/api/v1/gdpr/requests')
-      const raw = r.data as any
+      const raw = r.data as Record<string, unknown>
       const items = Array.isArray(raw) ? raw : (raw.data || [])
       return { items, total: items.length }
     },
@@ -188,7 +188,7 @@ export default function GDPRRequestsPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+  const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
       navigate(`/crm/gdpr-request/${item.id}`)
     } else if (action === 'delete' && item) {
@@ -219,7 +219,7 @@ export default function GDPRRequestsPage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.contact')};${t('crud.fields.requestType')};${t('crud.fields.status')};${t('crud.fields.requestedAt')};${t('crud.fields.completedAt')}\n`
-      const csvContent = data.map((item: any) =>
+      const csvContent = data.map(item =>
         `"${item.contact_id || ''}";"${item.request_type || ''}";"${item.status || ''}";"${item.requested_at || ''}";"${item.completed_at || ''}"`
       ).join('\n')
 

@@ -114,8 +114,8 @@ function LieferantSuchDialog({ open, onClose, onSelect }: {
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<any[]>('/api/v1/crm/customers', { params: { search: search.trim(), limit: 30 } })
-      setResults((data || []).map((c: any) => ({
+      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers', { params: { search: search.trim(), limit: 30 } })
+      setResults((data || []).map(c => ({
         id: c.id, name: c.company_name || c.name || '',
         kreditorAccount: c.customer_number || '', address: c.address,
       })))
@@ -230,7 +230,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
     return { netto, mwst1, mwst2, brutto }
   }, [state.positionen])
 
-  const handleArticleSelect = (article: any): void => {
+  const handleArticleSelect = (article: Record<string, unknown>): void => {
     const ep = article.purchase_price || article.sales_price || 0
     setCurrentPos((p) => ({
       ...p, artikelNr: article.article_number || '', artikelId: article.id || null,
@@ -313,7 +313,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
           kontrakt_nr: p.kontraktNr || null,
         })),
       }
-      let resp: any
+      let resp: Record<string, unknown>
       if (state.id) {
         resp = await apiClient.patch(`/api/v1/einkauf/rechnungen/${state.id}`, payload)
       } else {
@@ -420,8 +420,8 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                         onClick={async (e) => {
                           e.preventDefault()
                           try {
-                            const items: any[] = await apiClient.get<any[]>('/api/v1/einkauf/rechnungen')
-                            const idx = rechnungId ? items.findIndex((r: any) => r.id === rechnungId) : -1
+                            const items: Record<string, unknown>[] = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/rechnungen')
+                            const idx = rechnungId ? items.findIndex(r => r.id === rechnungId) : -1
                             if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${items[idx + 1].id}`)
                             else push('Kein vorheriger Beleg vorhanden.')
                           } catch { push('Rechnungen konnten nicht geladen werden.') }
@@ -567,7 +567,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                 e.preventDefault()
                 if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
                 try {
-                  const res: any[] = await apiClient.get<any[]>('/api/v1/einkauf/lieferscheine', {
+                  const res: Record<string, unknown>[] = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/lieferscheine', {
                     params: { lieferant_id: state.lieferant.id, status: 'offen' }
                   })
                   const lsList = Array.isArray(res) ? res : []
@@ -577,7 +577,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                   if (ls.positionen?.length) {
                     setState((prev) => ({
                       ...prev,
-                      positionen: ls.positionen.map((p: any, i: number) => ({
+                      positionen: ls.positionen.map(p, i => ({
                       id: crypto.randomUUID(), posNr: i + 1, liefArt: 'frei',
                       artikelNr: p.artikel_nr ?? '', lieferantArtikelNr: '',
                       artikelBezeichnung: p.bezeichnung ?? '', artikelBezeichnung2: '',

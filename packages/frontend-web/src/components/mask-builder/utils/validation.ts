@@ -15,7 +15,7 @@ export function isValidDate(dateString: string): boolean {
   return date instanceof Date && !isNaN(date.getTime())
 }
 
-export function isValidNumber(value: any, min?: number, max?: number): boolean {
+export function isValidNumber(value: unknown, min?: number, max?: number): boolean {
   const num = Number(value)
   if (isNaN(num)) return false
   if (min !== undefined && num < min) return false
@@ -109,7 +109,7 @@ export function validatePasswordStrength(password: string): {
   }
 }
 
-export function validateBusinessRules(data: any, rules: Record<string, (_value: any) => boolean>): Record<string, string> {
+export function validateBusinessRules(data: Record<string, unknown>, rules: Record<string, (_value: unknown) => boolean>): Record<string, string> {
   const errors: Record<string, string> = {}
 
   Object.entries(rules).forEach(([field, validator]) => {

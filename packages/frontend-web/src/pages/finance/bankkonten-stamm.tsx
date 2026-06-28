@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -16,7 +16,7 @@ import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Bankkonten-Stammdaten
-const createBankKontenSchema = (t: any) => z.object({
+const createBankKontenSchema = (t: TFunction) => z.object({
   account_number: z.string().min(1, t('crud.messages.validationError')),
   bank_name: z.string().min(1, t('crud.messages.validationError')),
   iban: z.string()
@@ -31,7 +31,7 @@ const createBankKontenSchema = (t: any) => z.object({
   is_active: z.boolean().default(true)
 })
 
-const validateBankKontenForm = (formData: any, t: any): { isValid: boolean; errors: Record<string, string> } => {
+const validateBankKontenForm = (formData: Record<string, unknown>, t: TFunction): { isValid: boolean; errors: Record<string, string> } => {
   const parsed = createBankKontenSchema(t).safeParse(formData ?? {})
   if (parsed.success) {
     return { isValid: true, errors: {} }
@@ -48,7 +48,7 @@ const validateBankKontenForm = (formData: any, t: any): { isValid: boolean; erro
 }
 
 // Konfiguration für Bankkonten-Stammdaten ObjectPage
-const createBankKontenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createBankKontenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.bankAccountMasterData'),
   type: 'object-page',
@@ -128,7 +128,7 @@ const createBankKontenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       update: '/api/v1/finance/bank-accounts/{id}',
       delete: '/api/v1/finance/bank-accounts/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -137,7 +137,7 @@ export default function BankKontenStammPage(): JSX.Element {
   const navigate = useNavigate()
   const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
+  const [formData, setFormData] = useState<Record<string, unknown>>({})
   const entityType = 'bankAccount'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bankkonto')
   const bankKontenConfig = createBankKontenConfig(t, entityTypeLabel)
@@ -215,7 +215,7 @@ export default function BankKontenStammPage(): JSX.Element {
   }, [lookupData, formData, updateData])
 
   // Handle form data changes for IBAN lookup
-  const handleFormChange = (newData: any) => {
+  const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
     
@@ -233,7 +233,7 @@ export default function BankKontenStammPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'save') {
       const isValid = validateBankKontenForm(formData, t)
       if (!isValid.isValid) {
@@ -264,7 +264,7 @@ export default function BankKontenStammPage(): JSX.Element {
       } else {
         toast.error(Object.values(isValid.errors).join(', '))
       }
-    } else if (action === 'export') {
+    } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_accounts', format: 'pdf', id: formData?.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -276,7 +276,7 @@ export default function BankKontenStammPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('save', formData)
   }
 

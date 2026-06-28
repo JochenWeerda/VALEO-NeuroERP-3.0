@@ -74,7 +74,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
         acc[key].total_expected_revenue += item.total_expected_revenue
         return acc
       }, {} as Record<string, any>)
-      return Object.values(grouped).sort((a: any, b: any) => a.period.localeCompare(b.period))
+      return Object.values(grouped).sort((a, b) => String((a as Record<string, unknown>).period).localeCompare(String((b as Record<string, unknown>).period)))
     }
 
     if (viewMode === 'stage') {
@@ -97,7 +97,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       acc[key].total_expected_revenue += item.total_expected_revenue
       return acc
     }, {} as Record<string, any>)
-    return Object.values(grouped).sort((a: any, b: any) => b.total_expected_revenue - a.total_expected_revenue)
+    return Object.values(grouped).sort((a, b) => Number((b as Record<string, unknown>).total_expected_revenue) - Number((a as Record<string, unknown>).total_expected_revenue))
   }, [forecastData, viewMode])
 
   const totals = useMemo(() => {
@@ -119,7 +119,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       return acc
     }, {} as Record<string, any>)
 
-    return Object.values(grouped).map((item: any) => ({
+    return Object.values(grouped).map(item => ({
       ...item,
       name: item.name === 'unknown' ? t('crud.forecast.unknown') : getStatusLabel(t, item.name, item.name),
     }))

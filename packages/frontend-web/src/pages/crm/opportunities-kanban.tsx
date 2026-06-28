@@ -54,7 +54,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [stages, setStages] = useState<any[]>([])
+  const [stages, setStages] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
   const [filterOwner, setFilterOwner] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
@@ -84,7 +84,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
       }
 
       // Load stages
-      const stagesResponse = await apiClient.get<any[]>('/api/v1/crm/opportunities/stages')
+      const stagesResponse = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/opportunities/stages')
       if (stagesResponse.data) {
         setStages(stagesResponse.data || [])
       }

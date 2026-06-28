@@ -75,7 +75,7 @@ export function useLocation(): {
   pathname: string
   search: string
   hash: string
-  state: any
+  state: unknown
   key: string
 } {
   const location = useTanStackLocation()

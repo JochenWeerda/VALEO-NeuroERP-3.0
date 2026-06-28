@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
@@ -23,7 +23,7 @@ import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 
 // Zod-Schema für Opportunities
-const createOpportunitySchema = (t: any) => z.object({
+const createOpportunitySchema = (t: TFunction) => z.object({
   number: z.string().optional(),
   name: z.string().min(1, t('crud.messages.validationError')),
   description: z.string().optional(),
@@ -45,7 +45,7 @@ const createOpportunitySchema = (t: any) => z.object({
   notes: z.string().optional(),
 })
 
-function validateOpportunityForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+function validateOpportunityForm(formData: unknown, t: TFunction): { valid: boolean; errors: string[] } {
   const result = createOpportunitySchema(t).safeParse(formData)
   return result.success
     ? { valid: true, errors: [] }
@@ -54,7 +54,7 @@ function validateOpportunityForm(formData: unknown, t: any): { valid: boolean; e
 
 // Konfiguration für Opportunity ObjectPage
 const createOpportunityConfig = (
-  t: any,
+  t: TFunction,
   entityTypeLabel: string,
   customerOptions: Array<{ value: string; label: string }> = [],
   contactOptions: Array<{ value: string; label: string }> = [],
@@ -288,7 +288,7 @@ const createOpportunityConfig = (
 // History Component
 function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
   const { t } = useTranslation()
-  const [history, setHistory] = useState<any[]>([])
+  const [history, setHistory] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -356,7 +356,7 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
 function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [quotes, setQuotes] = useState<any[]>([])
+  const [quotes, setQuotes] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -364,7 +364,7 @@ function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
       try {
         const response = await apiClient.get(`/api/v1/crm/opportunities/${opportunityId}/quotes`)
         if (response.data) {
-          setQuotes((response.data as any) || [])
+          setQuotes((response.data as Record<string, unknown>) || [])
         }
       } catch {
         setQuotes([])
@@ -432,7 +432,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: customersData } = useQuery({
     queryKey: ['crm', 'customers-lookup'],
     queryFn: async () => {
-      const r = await apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers')
+      const r = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers')
       return r.data?.items || []
     },
     staleTime: 10 * 60 * 1000,
@@ -440,7 +440,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: contactsData } = useQuery({
     queryKey: ['crm', 'contacts-lookup'],
     queryFn: async () => {
-      const r = await apiClient.get<any[] | { items?: any[] }>('/api/v1/crm/contacts')
+      const r = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>('/api/v1/crm/contacts')
       const items = Array.isArray(r.data) ? r.data : r.data?.items || []
       return items
     },
@@ -448,11 +448,11 @@ export default function OpportunityDetailPage(): JSX.Element {
   })
 
   const customerOpts = useMemo(() =>
-    (customersData || []).map((c: any) => ({ value: c.id, label: c.name || c.firma || c.id })),
+    (customersData || []).map(c => ({ value: c.id, label: c.name || c.firma || c.id })),
     [customersData],
   )
   const contactOpts = useMemo(() =>
-    (contactsData || []).map((c: any) => ({
+    (contactsData || []).map(c => ({
       value: c.id,
       label: [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email || c.id,
     })),
@@ -469,7 +469,7 @@ export default function OpportunityDetailPage(): JSX.Element {
 
 
   // Pure worker — no loading management. Callers own the guard.
-  const persistOpportunity = async (formData: any) => {
+  const persistOpportunity = async (formData: Record<string, unknown>) => {
     if (formData.amount && formData.probability) {
       formData.expected_revenue = formData.amount * (formData.probability / 100)
     }
@@ -491,7 +491,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   }
 
   // Button wrapper for direct Speichern action — owns the guard.
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       await persistOpportunity(formData)
@@ -512,7 +512,7 @@ export default function OpportunityDetailPage(): JSX.Element {
     }
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'convertToQuote') {
       if (id && id !== 'neu' && id !== 'new') {
         navigate(`/sales/angebot-erstellen?opportunityId=${id}`)

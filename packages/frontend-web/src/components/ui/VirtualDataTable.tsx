@@ -7,7 +7,8 @@ export interface VirtualDataTableColumn<T extends Record<string, unknown>> {
   label: string
   width?: number
   numeric?: boolean
-  render?: (_value: unknown, _row: T) => ReactNode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render?: (_value: any, _row: T) => ReactNode
 }
 
 interface VirtualDataTableProps<T extends Record<string, unknown>> {
@@ -82,7 +83,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   }
 
   return (
-    <div className="rounded-md border border-border">
+    <div className="rounded-md border border-border" data-testid="virtual-data-table">
       <div className="overflow-x-auto">
         <div className="min-w-full" style={{ width: 'max-content' }}>
           <div

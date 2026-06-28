@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 type RealtimeContextValue = {
   isConnected: boolean
-  subscribe: (_eventType: string, _handler: (_data: any) => void) => () => void
+  subscribe: (_eventType: string, _handler: (_data: unknown) => void) => () => void
 }
 
 const RealtimeContext = createContext<RealtimeContextValue | null>(null)
@@ -34,7 +34,7 @@ export function RealtimeProvider({
   enabled = true,
 }: RealtimeProviderProps) {
   const queryClient = useQueryClient()
-  const eventHandlers = React.useRef<Map<string, Set<(_data: any) => void>>>(
+  const eventHandlers = React.useRef<Map<string, Set<(_data: unknown) => void>>>(
     new Map()
   )
 
@@ -81,7 +81,7 @@ export function RealtimeProvider({
   })
 
   const subscribe = useCallback(
-    (eventType: string, handler: (_data: any) => void) => {
+    (eventType: string, handler: (_data: unknown) => void) => {
       if (!eventHandlers.current.has(eventType)) {
         eventHandlers.current.set(eventType, new Set())
       }

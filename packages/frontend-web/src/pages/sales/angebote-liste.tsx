@@ -124,7 +124,7 @@ export default function AngeboteListePage(): JSX.Element {
     return matchesSearch && matchesStatus
   })
 
-  const handleImport = async (importData: any[]) => {
+  const handleImport = async (importData: Record<string, unknown>[]) => {
     try {
       for (const row of importData) {
         // Transformiere CSV-Daten in Dokument-Format

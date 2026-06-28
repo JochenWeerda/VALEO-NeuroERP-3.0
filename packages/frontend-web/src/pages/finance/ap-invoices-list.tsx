@@ -169,7 +169,7 @@ export default function APInvoicesListPage(): JSX.Element {
                   description: t('finance.apInvoices.requestApprovalSuccess', { defaultValue: 'Freigabe wurde angefordert' }),
                 })
                 await refetch()
-              }).catch((e: any) => {
+              }).catch(e => {
                 const msg = e?.response?.data?.detail || t('finance.apInvoices.requestApprovalError', { defaultValue: 'Freigabeanforderung fehlgeschlagen' })
                 toast({ title: t('common.error'), description: msg, variant: 'destructive' })
               })}
@@ -187,7 +187,7 @@ export default function APInvoicesListPage(): JSX.Element {
                 await apiClient.post(`/api/v1/finance/ap/invoices/${row.original.number}/post?posted_by=current_user`)
                 toast({ title: t('common.success'), description: t('finance.apInvoices.postSuccess', { defaultValue: 'Eingangsrechnung verbucht' }) })
                 await refetch()
-              }).catch((e: any) => {
+              }).catch(e => {
                 const msg = e?.response?.data?.detail || t('finance.apInvoices.postError', { defaultValue: 'Verbuchen fehlgeschlagen' })
                 toast({ title: t('common.error'), description: msg, variant: 'destructive' })
               })}

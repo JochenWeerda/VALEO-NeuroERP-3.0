@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -20,14 +20,14 @@ import { DataTable } from '@/components/ui/data-table'
 // API Client
 
 // Zod-Schema für Segmente
-const createSegmentSchema = (t: any) => z.object({
+const createSegmentSchema = (t: TFunction) => z.object({
   name: z.string().min(1, t('crud.messages.validationError')),
   type: z.string().min(1, t('crud.messages.validationError')),
   status: z.string().optional(),
   description: z.string().optional(),
 })
 
-function validateSegmentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+function validateSegmentForm(formData: unknown, t: TFunction): { valid: boolean; errors: string[] } {
   const result = createSegmentSchema(t).safeParse(formData)
   return result.success
     ? { valid: true, errors: [] }
@@ -35,7 +35,7 @@ function validateSegmentForm(formData: unknown, t: any): { valid: boolean; error
 }
 
 // Konfiguration für Segment ObjectPage
-const createSegmentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createSegmentConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
   type: 'object-page',
@@ -175,13 +175,13 @@ const createSegmentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
 // Members List Component
 function SegmentMembersList({ segmentId }: { segmentId: string }) {
   const { t } = useTranslation()
-  const [members, setMembers] = useState<any[]>([])
+  const [members, setMembers] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const response = await apiClient.get<any[]>(`/api/v1/crm/segments/${segmentId}/members`)
+        const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/segments/${segmentId}/members`)
         if (response.data) {
           setMembers(response.data || [])
         }
@@ -208,17 +208,17 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
     {
       key: 'contact_id' as const,
       label: t('crud.entities.contact'),
-      render: (member: any) => member.contact_id || '-'
+      render: member => member.contact_id || '-'
     },
     {
       key: 'added_at' as const,
       label: t('crud.fields.addedAt'),
-      render: (member: any) => formatDate(member.added_at)
+      render: member => formatDate(member.added_at)
     },
     {
       key: 'added_by' as const,
       label: t('crud.fields.addedBy'),
-      render: (member: any) => member.added_by || '-'
+      render: member => member.added_by || '-'
     }
   ]
 
@@ -233,13 +233,13 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
 // Performance Component
 function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
   const { t } = useTranslation()
-  const [performance, setPerformance] = useState<any[]>([])
+  const [performance, setPerformance] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get<any[]>(`/api/v1/crm/segments/${segmentId}/performance`)
+        const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/segments/${segmentId}/performance`)
         if (response.data) {
           setPerformance(response.data || [])
         }
@@ -309,7 +309,7 @@ export default function SegmentDetailPage(): JSX.Element {
   })
 
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       // Validate
@@ -365,11 +365,11 @@ export default function SegmentDetailPage(): JSX.Element {
       }
     } else if (action === 'export') {
       try {
-        const response = await apiClient.get<any[]>(`/api/v1/crm/segments/${id}/members`)
+        const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/segments/${id}/members`)
         if (response.data) {
           const members = response.data || []
           const csvHeader = `${t('crud.entities.contact')};${t('crud.fields.addedAt')}\n`
-          const csvContent = members.map((member: any) =>
+          const csvContent = members.map(member =>
             `"${member.contact_id || ''}";"${formatDate(member.added_at)}"`
           ).join('\n')
 

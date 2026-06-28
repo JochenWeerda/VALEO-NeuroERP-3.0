@@ -1,6 +1,6 @@
-import { useMemo, useRef } from 'react'
+﻿import { useMemo, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 // Konfiguration für Kunden ListReport (wird in Komponente mit i18n erstellt)
-const createKundenListConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageCustomers'),
@@ -266,9 +266,9 @@ export default function KundenListePage(): JSX.Element {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'kunden'] })
 
   const kundenListConfig = useMemo(() => {
-    const onNewsletter = async (items: any[]) => {
+    const onNewsletter = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
-      const emails = items.map((k: any) => k.email).filter(Boolean)
+      const emails = items.map(k => k.email).filter(Boolean)
       if (emails.length === 0) {
         toast({ title: 'Keine E-Mail-Adressen', description: 'Für die ausgewählten Kunden sind keine E-Mail-Adressen hinterlegt.', variant: 'destructive' })
         return
@@ -288,7 +288,7 @@ export default function KundenListePage(): JSX.Element {
         })
       }
     }
-    const onBlock = async (items: any[]) => {
+    const onBlock = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
       try {
         await Promise.all(
@@ -344,7 +344,7 @@ export default function KundenListePage(): JSX.Element {
     navigate('/verkauf/kunde/neu')
   }
 
-  const handleEdit = (item: any) => {
+  const handleEdit = item => {
     void (async () => {
       // Verbrückte Kunden -> BP-Kundenstamm; sonst Schnellauswahl-Detail (echter Stamm).
       const bp = item.business_partner_id ?? null
@@ -369,7 +369,7 @@ export default function KundenListePage(): JSX.Element {
     })()
   }
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = async item => {
     if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
       try {
         await apiClient.delete(`/api/v1/crm/customers/${item.id}`)
@@ -386,7 +386,7 @@ export default function KundenListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.company')};${t('crud.fields.city')};${t('crud.fields.phone')};${t('crud.fields.email')};${t('crud.fields.totalRevenue')};${t('crud.fields.status')}\n`
-      const csvContent = data.map((customer: any) =>
+      const csvContent = data.map(customer =>
         `"${customer.firma || `${customer.vorname} ${customer.nachname}`}";"${customer.plz} ${customer.ort}";"${customer.telefon || ''}";"${customer.email || ''}";"${customer.umsatzGesamt || 0}";"${t(`status.${customer.status || 'active'}`, { defaultValue: customer.status || 'aktiv' })}"`
       ).join('\n')
 

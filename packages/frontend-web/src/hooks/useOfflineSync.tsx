@@ -6,7 +6,7 @@ interface OfflineQueueItem {
   id: string
   type: 'create' | 'update' | 'delete'
   entity: string
-  data: any
+  data: unknown
   timestamp: number
   retryCount: number
 }
@@ -203,7 +203,7 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}) {
 export function useOfflineMutation() {
   const { isOnline, addToQueue } = useOfflineSync()
 
-  const mutateAsync = useCallback(async (mutation: () => Promise<any>, offlineData: any) => {
+  const mutateAsync = useCallback(async (mutation: () => Promise<unknown>, offlineData: unknown) => {
     if (isOnline) {
       return await mutation()
     } else {

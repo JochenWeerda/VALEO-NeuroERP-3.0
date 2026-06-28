@@ -74,7 +74,7 @@ export default function CampaignBuilderPage(): JSX.Element {
   const [templates, setTemplates] = useState<CampaignTemplateSummary[]>([])
   const [segments, setSegments] = useState<CampaignSegmentSummary[]>([])
 
-  const steps: Array<{ key: CampaignBuilderStep; label: string; icon: any }> = [
+  const steps: Array<{ key: CampaignBuilderStep; label: string; icon: React.ComponentType }> = [
     { key: 'type', label: t('crud.campaigns.builder.steps.type'), icon: Settings },
     { key: 'template', label: t('crud.campaigns.builder.steps.template'), icon: Mail },
     { key: 'segment', label: t('crud.campaigns.builder.steps.segment'), icon: Users },
@@ -105,7 +105,7 @@ export default function CampaignBuilderPage(): JSX.Element {
     loadData()
   }, [tenantId])
 
-  const updateField = (field: keyof CampaignData, value: any) => {
+  const updateField = (field: keyof CampaignData, value: unknown) => {
     setCampaignData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -153,7 +153,7 @@ export default function CampaignBuilderPage(): JSX.Element {
   const handleCreate = async () => {
     setLoading(true)
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         tenant_id: tenantId,
         name: campaignData.name,
         description: campaignData.description,

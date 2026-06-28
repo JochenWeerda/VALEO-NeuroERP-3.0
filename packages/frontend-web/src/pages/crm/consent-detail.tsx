@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -17,7 +17,7 @@ import { ArrowLeft, History } from 'lucide-react'
 // API Client
 
 // Zod-Schema für Consents
-const createConsentSchema = (t: any) => z.object({
+const createConsentSchema = (t: TFunction) => z.object({
   contact_id: z.string().min(1, t('crud.messages.validationError')),
   channel: z.string().min(1, t('crud.messages.validationError')),
   consent_type: z.string().min(1, t('crud.messages.validationError')),
@@ -25,7 +25,7 @@ const createConsentSchema = (t: any) => z.object({
   expires_at: z.string().optional(),
 })
 
-function validateConsentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+function validateConsentForm(formData: unknown, t: TFunction): { valid: boolean; errors: string[] } {
   const result = createConsentSchema(t).safeParse(formData)
   return result.success
     ? { valid: true, errors: [] }
@@ -33,7 +33,7 @@ function validateConsentForm(formData: unknown, t: any): { valid: boolean; error
 }
 
 // Konfiguration für Consent ObjectPage
-const createConsentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createConsentConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
   type: 'object-page',
@@ -188,7 +188,7 @@ const createConsentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
 // History Component
 function ConsentHistoryTab({ consentId }: { consentId: string }) {
   const { t } = useTranslation()
-  const [history, setHistory] = useState<any[]>([])
+  const [history, setHistory] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -274,7 +274,7 @@ export default function ConsentDetailPage(): JSX.Element {
     id: id || undefined
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       // Validate

@@ -49,7 +49,7 @@ export default function RfqBidsPage(): JSX.Element {
   const navigate = useNavigate()
   const { rfqId } = useParams<{ rfqId: string }>()
   const [loading] = useState(false)
-  const [rfq, setRfq] = useState<any>(null)
+  const [rfq, setRfq] = useState<Record<string, unknown> | null>(null)
   const [bids, setBids] = useState<Bid[]>([])
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null)
   const [bidDialogOpen, setBidDialogOpen] = useState(false)
@@ -67,7 +67,7 @@ export default function RfqBidsPage(): JSX.Element {
     items: [] as Array<{ rfqItemId: string; quantity: number; unitPrice: number; deliveryDate: string; leadTime: number; notes: string }>,
     totalValue: 0, currency: 'EUR', paymentTerms: '', deliveryTerms: '', notes: '',
   })
-  const [availableSuppliers, setAvailableSuppliers] = useState<any[]>([])
+  const [availableSuppliers, setAvailableSuppliers] = useState<Record<string, unknown>[]>([])
   const supplierOptions = availableSuppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))
   const { data: bidsData, isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
     queryKey: ['einkauf', 'rfq-bids', rfqId],
@@ -84,8 +84,8 @@ export default function RfqBidsPage(): JSX.Element {
 
   useEffect(() => {
     if (rfqId) {
-      apiClient.get(`/api/v1/einkauf/anfragen/${rfqId}`).then((r: any) => setRfq(r as any)).catch(() => {})
-      apiClient.get('/api/v1/crm/business-partners').then((r: any) => {
+      apiClient.get(`/api/v1/einkauf/anfragen/${rfqId}`).then(r => setRfq(r as Record<string, unknown>)).catch(() => {})
+      apiClient.get('/api/v1/crm/business-partners').then(r => {
         setAvailableSuppliers(Array.isArray(r) ? r : [])
       }).catch(() => {})
     }
@@ -95,7 +95,7 @@ export default function RfqBidsPage(): JSX.Element {
     setNewBid({
       supplierId: '',
       supplierName: '',
-      items: rfq?.items?.map((item: any) => ({
+      items: rfq?.items?.map(item => ({
         rfqItemId: item.id || item.anfrageNummer,
         quantity: item.menge || 0,
         unitPrice: 0,

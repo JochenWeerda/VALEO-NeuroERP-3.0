@@ -63,8 +63,8 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
       if (filterSpedNr) params['spediteur_nr'] = filterSpedNr
       if (filterKundenNr) params['kunden_nr'] = filterKundenNr
 
-      const data = await apiClient.get<any[]>('/api/v1/einkauf/frachtauftraege', { params })
-      setItems((data || []).map((r: any) => ({
+      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/frachtauftraege', { params })
+      setItems((data || []).map(r => ({
         id: r.id,
         belegart: r.belegart || 'Lieferschein',
         belegNr: r.belegnummer || r.frachtauftrag_nr || '',

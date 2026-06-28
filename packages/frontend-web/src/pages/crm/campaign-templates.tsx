@@ -1,5 +1,5 @@
-import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+﻿import { useNavigate } from '@/app/routing/typed-router'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
 // Konfiguration für Campaign Templates ListReport
-const createTemplatesConfig = (t: any, entityTypeLabel: string, handleAction: (actionKey: string, data?: any) => Promise<void>): ListConfig => ({
+const createTemplatesConfig = (t: TFunction, entityTypeLabel: string, handleAction: (actionKey: string, data?: Record<string, unknown>) => Promise<void>): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageTemplates'),
@@ -126,19 +126,19 @@ const createTemplatesConfig = (t: any, entityTypeLabel: string, handleAction: (a
       key: 'edit',
       label: t('crud.actions.edit'),
       type: 'secondary',
-      onClick: (item: any) => handleAction('edit', item)
+      onClick: item => handleAction('edit', item)
     },
     {
       key: 'delete',
       label: t('crud.actions.delete'),
       type: 'danger',
-      onClick: (item: any) => handleAction('delete', item)
+      onClick: item => handleAction('delete', item)
     },
     {
       key: 'duplicate',
       label: t('crud.actions.duplicate'),
       type: 'secondary',
-      onClick: (item: any) => handleAction('duplicate', item)
+      onClick: item => handleAction('duplicate', item)
     }
   ],
   api: {
@@ -165,7 +165,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
     queryKey: ['crm', 'campaign-templates'],
     queryFn: async () => {
       const r = await apiClient.get('/api/v1/crm/campaigns/templates')
-      const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
+      const items = Array.isArray(r.data) ? r.data : (( r.data as Record<string, unknown>).data || [])
       return { items, total: items.length }
     },
     staleTime: 2 * 60 * 1000,
@@ -180,7 +180,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'campaign-templates'] })
 
-  const handleAction = async (action: string, item: any = null) => {
+  const handleAction = async (action: string, item: Record<string, unknown> = null) => {
     if (action === 'create') {
       navigate('/crm/campaign-template/new')
     } else if (action === 'edit' && item) {
@@ -255,7 +255,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.name')};${t('crud.fields.type')};${t('crud.fields.subject')};${t('crud.fields.isActive')};${t('crud.fields.usageCount')};${t('crud.fields.createdAt')}\n`
-      const csvContent = data.map((item: any) =>
+      const csvContent = data.map(item =>
         `"${item.name || ''}";"${item.type || ''}";"${item.subject || ''}";"${item.is_active ? t('status.active') : t('status.inactive')}";"${item.usage_count || 0}";"${item.created_at || ''}"`
       ).join('\n')
 

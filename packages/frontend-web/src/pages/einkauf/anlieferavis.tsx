@@ -70,7 +70,7 @@ const anlieferavisConfig: MaskConfig = {
             { key: 'menge', label: 'Menge', type: 'number', required: true },
             { key: 'chargenNummer', label: 'Charge-Nr.', type: 'text' },
             { key: 'verpackung', label: 'Verpackung', type: 'text' }
-          ] as any,
+          ] as Field[],
           helpText: 'Zu erwartende Lieferpositionen'
         }
       ]
@@ -130,7 +130,7 @@ export default function AnlieferavisPage(): JSX.Element {
           }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     setLoading(true)
     try {
       await saveData(formData)
@@ -155,7 +155,7 @@ export default function AnlieferavisPage(): JSX.Element {
   }
   const operationalStatus = normalizeOperationalStatus(data?.status)
   const avisOps = summarizeProcurementMatch({
-    exceptionsCount: Array.isArray(data?.positionen) ? data.positionen.filter((row: any) => !row?.chargenNummer).length : 0,
+    exceptionsCount: Array.isArray(data?.positionen) ? data.positionen.filter(row => !row?.chargenNummer).length : 0,
     variancePercentage: data?.status === 'STORNIERT' ? 12 : data?.status === 'BESTAETIGT' ? 0 : 5,
     autoApprovalEligible: data?.status === 'BESTAETIGT',
     hasGoodsReceipt: Boolean(data?.bestellungId),

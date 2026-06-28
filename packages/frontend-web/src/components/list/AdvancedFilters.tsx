@@ -21,8 +21,8 @@ export interface FilterConfig {
 
 export interface AdvancedFiltersProps {
   filters: FilterConfig[]
-  values: Record<string, any>
-  onChange: (values: Record<string, any>) => void
+  values: Record<string, unknown>
+  onChange: (values: Record<string, unknown>) => void
   onReset: () => void
 }
 
@@ -30,7 +30,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: unknown) => {
     onChange({ ...values, [key]: value })
   }
 

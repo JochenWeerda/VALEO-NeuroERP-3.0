@@ -74,7 +74,7 @@ export function useBulkActions({ docType, onSuccess }: UseBulkActionsOptions) {
     }
   }, [selectedItems, docType, toast, onSuccess])
 
-  const handleBulkExport = useCallback((data: any[]) => {
+  const handleBulkExport = useCallback((data: Record<string, unknown>[]) => {
     if (selectedItems.length === 0) {
       toast({
         title: 'Keine Auswahl',

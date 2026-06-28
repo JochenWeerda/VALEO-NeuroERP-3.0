@@ -97,7 +97,7 @@ export class OIDCClient {
     if (!user) return []
 
     // Try different claim locations
-    const profile = user.profile as any
+    const profile = user.profile as Record<string, unknown>
     const roles = 
       profile.roles || 
       profile.realm_access?.roles ||
@@ -122,7 +122,7 @@ export class OIDCClient {
     const user = await this.getUser()
     if (!user) return null
 
-    const profile = user.profile as any
+    const profile = user.profile as Record<string, unknown>
     return profile.tenant_id || profile.tid || '00000000-0000-0000-0000-000000000001'
   }
 

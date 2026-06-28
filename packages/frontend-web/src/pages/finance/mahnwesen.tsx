@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -40,7 +40,7 @@ const dunningRoleProfiles: Array<{ id: DunningRoleFocus; label: string; descript
   { id: 'management', label: 'Leitung', description: 'Rueckstandsrisiko, Eskalation und Inkassoentscheidung.' },
 ]
 
-const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createMahnwesenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
   type: 'object-page',
@@ -213,7 +213,7 @@ const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
       update: '/api/v1/finance/dunning/{id}',
       delete: '/api/v1/finance/dunning/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -311,7 +311,7 @@ export default function MahnwesenPage(): JSX.Element {
     { key: 'audit', label: 'Audit', available: true, hint: 'Mahnlage, Versand und Export bleiben nachvollziehbar.' },
   ]
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(mahnwesenConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(mahnwesenConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({
       variant: 'destructive',
@@ -320,7 +320,7 @@ export default function MahnwesenPage(): JSX.Element {
     })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'generate') {
       try {
         await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
@@ -416,7 +416,7 @@ export default function MahnwesenPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('send', formData)
   }
 

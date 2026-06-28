@@ -1,6 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -14,7 +14,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.bankReconciliation'),
   type: 'object-page',
@@ -41,14 +41,14 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as any,
+         } as Field,
         {
           name: 'camtFile',
           label: t('crud.fields.camtFile'),
           type: 'file',
           accept: '.xml,.camt,.940,.sta,.csv',
           helpText: t('crud.tooltips.fields.camtFile')
-        } as any,
+        } as Field,
         {
           name: 'abgleichsDatum',
           label: t('crud.fields.reconciliationDate'),
@@ -95,12 +95,12 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'zuordnung',
       label: t('crud.fields.assignment'),
       fields: []
-    } as any,
+    } as Field,
     {
       key: 'zuordnung_custom',
       label: '',
       fields: [],
-      customRender: (_data: any, onChange: (_data: any) => void) => (
+      customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <BankZuordnungTable
           data={_data.zuordnungData || []}
           onChange={(zuordnungData) => onChange({ ..._data, zuordnungData })}
@@ -115,9 +115,9 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           name: 'regelAngewendet',
           label: t('crud.fields.appliedRules'),
           type: 'custom',
-          customRender: (value: any) => (
+          customRender: (value: unknown) => (
             <div className="space-y-2">
-              {(value || []).map((regel: any, index: number) => (
+              {(value || []).map((regel, index) => (
                 <div key={index} className="flex justify-between p-2 bg-gray-50 rounded">
                   <span>{regel.regelName}</span>
                   <span>{regel.zugeordnet}/{regel.treffer} {t('crud.fields.matches')}</span>
@@ -132,10 +132,10 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
       key: 'import_protokoll',
       label: t('crud.fields.importLog', { defaultValue: 'Import-Protokoll' }),
       fields: [],
-      customRender: (_data: any) => (
+      customRender: (_data: Record<string, unknown>) => (
         <BankImportErrorList errors={_data.importErrors || []} />
       )
-    } as any,
+    } as Field,
     {
       key: 'abgleich',
       label: t('crud.fields.reconciliation'),
@@ -189,14 +189,14 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
       update: '/api/v1/finance/bank-statements/{id}',
       delete: '/api/v1/finance/bank-statements/{id}'
     }
-  } as any,
+  } as Field,
   permissions: ['fibu.read', 'fibu.write']
 })
 
 // Bank-Zuordnung Tabelle Komponente
-function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function BankZuordnungTable({ data: _data, onChange }: { data: Record<string, unknown>[], onChange: (_data: Record<string, unknown>[]) => void }) {
   const { t } = useTranslation()
-  const updateZuordnung = (index: number, field: string, value: any) => {
+  const updateZuordnung = (index: number, field: string, value: unknown) => {
     const newData = [..._data]
     newData[index] = { ...newData[index], [field]: value }
     onChange(newData)
@@ -358,7 +358,7 @@ export default function BankAbgleichPage(): JSX.Element {
     booking_suggestions?: unknown
   }
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(bankAbgleichConfig), formData ?? {})
+  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(bankAbgleichConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({
       variant: 'destructive',
@@ -367,7 +367,7 @@ export default function BankAbgleichPage(): JSX.Element {
     })
   }
 
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'import') {
       // Bank Statement Import - use real API
       if (!formData.camtFile) {
@@ -428,7 +428,7 @@ export default function BankAbgleichPage(): JSX.Element {
         const result = res.data
 
         // Transform API response to form data format
-        const umsaetze = result.lines.map((line: any) => ({
+        const umsaetze = result.lines.map((line: Record<string, unknown>) => ({
           datum: line.booking_date,
           betrag: parseFloat(line.amount),
           verwendungszweck: line.remittance_info || line.reference || '',
@@ -442,9 +442,9 @@ export default function BankAbgleichPage(): JSX.Element {
         formData.zuordnungData = umsaetze
         formData.startSaldo = parseFloat(result.opening_balance)
         formData.endSaldo = parseFloat(result.closing_balance)
-        formData.gebuchteUmsaetze = umsaetze.reduce((sum: number, u: any) => sum + u.betrag, 0)
-        formData.nichtZugeordnet = umsaetze.filter((u: any) => !u.zugeordnet).length
-        formData.zugeordnet = umsaetze.filter((u: any) => u.zugeordnet).length
+        formData.gebuchteUmsaetze = umsaetze.reduce((sum, u) => sum + Number((u as Record<string, unknown>).betrag || 0), 0)
+        formData.nichtZugeordnet = umsaetze.filter(u => !u.zugeordnet).length
+        formData.zugeordnet = umsaetze.filter(u => u.zugeordnet).length
         formData.abgleichsDifferenz = Math.abs(formData.startSaldo + formData.gebuchteUmsaetze - formData.endSaldo)
         formData.statementId = result.statement_id
         formData.importErrors = result.import_errors || []
@@ -489,7 +489,7 @@ export default function BankAbgleichPage(): JSX.Element {
       let zugeordnetCount = 0
       const regelStats = rules.map(regel => ({ regelName: regel.name, treffer: 0, zugeordnet: 0 }))
 
-      formData.zuordnungData.forEach((umsatz: any) => {
+      formData.zuordnungData.forEach(umsatz => {
         if (!umsatz.zugeordnet) {
           rules.forEach((regel, index) => {
             if (regel.pattern.test(umsatz.verwendungszweck)) {
@@ -607,7 +607,7 @@ export default function BankAbgleichPage(): JSX.Element {
     }
   })
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: Record<string, unknown>) => {
     await handleAction('book', formData)
   }
 
