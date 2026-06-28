@@ -118,7 +118,7 @@ async function bulkAvisMutation(selectedItems: Record<string, unknown>[], action
       ok += 1
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      errors.push(`${item.avisNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+      errors.push(`${String(item.avisNummer ?? item.id ?? '')}: ${error.response?.data?.detail ?? error.message}`)
     }
   }
   return { ok, errors }

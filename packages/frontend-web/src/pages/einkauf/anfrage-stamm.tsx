@@ -224,7 +224,7 @@ export default function AnfrageStammPage(): JSX.Element {
           toast({
             variant: 'destructive',
             title: t('crud.messages.validationError'),
-            description: `Ungültiger Status-Übergang: ${data.status} → ${formData.status}`,
+            description: `Ungültiger Status-Übergang: ${String(data.status ?? '')} → ${String(formData.status ?? '')}`,
           })
           setLoading(false)
           return
@@ -236,7 +236,8 @@ export default function AnfrageStammPage(): JSX.Element {
         title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }),
       })
       navigate('/einkauf/anfragen')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -272,7 +273,8 @@ export default function AnfrageStammPage(): JSX.Element {
 
       setApproveDialogOpen(false)
       loadData()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.approveError', { entityType: entityTypeLabel }),
@@ -313,7 +315,8 @@ export default function AnfrageStammPage(): JSX.Element {
       setRejectDialogOpen(false)
       setRejectReason('')
       loadData()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.cancelError', { entityType: entityTypeLabel }),
@@ -346,7 +349,8 @@ export default function AnfrageStammPage(): JSX.Element {
       })
 
       setConvertDialogOpen(false)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError', { entityType: entityTypeLabel }),
@@ -391,7 +395,8 @@ export default function AnfrageStammPage(): JSX.Element {
       setSendRfqDialogOpen(false)
       setSelectedSuppliers([])
       loadData()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.rfqSendError'),
@@ -641,7 +646,7 @@ export default function AnfrageStammPage(): JSX.Element {
                   availableSuppliers.map((supplier) => (
                     <div key={supplier.id} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`supplier-${supplier.id}`}
+                        id={`supplier-${String(supplier.id ?? '')}`}
                         checked={selectedSuppliers.includes(supplier.id)}
                         onCheckedChange={(checked) => {
                           if (checked) {
@@ -652,7 +657,7 @@ export default function AnfrageStammPage(): JSX.Element {
                         }}
                       />
                       <Label
-                        htmlFor={`supplier-${supplier.id}`}
+                        htmlFor={`supplier-${String(supplier.id ?? '')}`}
                         className="flex-1 cursor-pointer"
                       >
                         {supplier.name || supplier.legalName || supplier.id}

@@ -506,7 +506,7 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
+        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id as string}/approve`, {
           approved_by: currentActor,
         })
         applyVATReturnResponse(response as Record<string, unknown>)
@@ -545,7 +545,7 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
+        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id as string}/submit`, {
           submitted_by: currentActor,
         })
         applyVATReturnResponse(response as Record<string, unknown>)

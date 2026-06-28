@@ -214,7 +214,8 @@ async function triggerMischExport(): Promise<void> {
     a.click()
     URL.revokeObjectURL(url)
     toast({ title: 'Export erstellt', description: 'Mischfuttermittel als CSV heruntergeladen.' })
-  } catch (e: any) {
+  } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
     toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
   }
 }
@@ -258,7 +259,8 @@ export default function MischfuttermittelListePage(): JSX.Element {
             await api.post('/api/v1/futter/mischfuttermittel/recalculate', { ids: items.map((i) => i.id) })
             queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
             toast({ title: 'Nährwerte berechnet', description: `${items.length} Rezepturen neu berechnet.` })
-          } catch (e: any) {
+          } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
           }
         }
@@ -286,17 +288,18 @@ export default function MischfuttermittelListePage(): JSX.Element {
   }
 
   const handleEdit = (item: Record<string, unknown>) => {
-    if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
+    if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${String(item.id ?? '')}`)
   }
 
   const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
-    if (!confirm(`Mischfuttermittel "${item.name}" wirklich löschen?`)) return
+    if (!confirm(`Mischfuttermittel "${String(item.name ?? '')}" wirklich löschen?`)) return
     try {
-      await apiClient.delete(`/api/v1/futter/mischfuttermittel/${item.id}`)
-      toast({ title: 'Gelöscht', description: `${item.name} wurde gelöscht.` })
+      await apiClient.delete(`/api/v1/futter/mischfuttermittel/${String(item.id ?? '')}`)
+      toast({ title: 'Gelöscht', description: `${String(item.name ?? '')} wurde gelöscht.` })
       queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }
@@ -319,9 +322,10 @@ export default function MischfuttermittelListePage(): JSX.Element {
       const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
       toast({
         title: 'Import abgeschlossen',
-        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+        description: `${String(created ?? '')} neu, ${String(updated ?? '')} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
       })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
     e.target.value = ''

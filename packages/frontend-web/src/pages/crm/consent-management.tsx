@@ -228,12 +228,12 @@ export default function ConsentManagementPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/consent/${item.id}`)
+      navigate(`/crm/consent/${item.id as string}`)
     } else if (action === 'delete' && item) {
       if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
       await withPending(String(item.id), async () => {
         try {
-          await apiClient.delete(`/api/v1/crm/consents/${item.id}`)
+          await apiClient.delete(`/api/v1/crm/consents/${item.id as string}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
           invalidate()
         } catch {
@@ -243,7 +243,7 @@ export default function ConsentManagementPage(): JSX.Element {
     } else if (action === 'revoke' && item) {
       await withPending(String(item.id), async () => {
         try {
-          await apiClient.post(`/api/v1/crm/consents/${item.id}/revoke`)
+          await apiClient.post(`/api/v1/crm/consents/${item.id as string}/revoke`)
           toast({ title: t('crud.messages.consentRevoked') })
           invalidate()
         } catch {

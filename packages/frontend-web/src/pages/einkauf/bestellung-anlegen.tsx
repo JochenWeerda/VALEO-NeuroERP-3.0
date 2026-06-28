@@ -175,11 +175,11 @@ export default function BestellungAnlegenPage(): JSX.Element {
           liefertermin: req.faelligkeit || prev.liefertermin,
           positionen: buildRequestPositions(req, prev.positionen),
           notizen: mergeNotes(prev.notizen, [
-            req.anfrageNummer ? `Bedarfsmeldung ${req.anfrageNummer}` : '',
-            req.anforderer ? `Anforderer: ${req.anforderer}` : '',
+            req.anfrageNummer ? `Bedarfsmeldung ${String(req.anfrageNummer)}` : '',
+            req.anforderer ? `Anforderer: ${String(req.anforderer)}` : '',
           ]),
         }))
-        toast({ title: 'Bedarfsmeldung geladen', description: `Felder aus Bedarfsmeldung ${req.anfrageNummer || id} vorbelegt.` })
+        toast({ title: 'Bedarfsmeldung geladen', description: `Felder aus Bedarfsmeldung ${String(req.anfrageNummer ?? id)} vorbelegt.` })
       }
     } catch (error) {
       toast({
@@ -203,10 +203,10 @@ export default function BestellungAnlegenPage(): JSX.Element {
           zahlungsbedingung: contract.paymentTerms || prev.zahlungsbedingung,
           positionen: buildContractPositions(contract, prev.positionen),
           notizen: mergeNotes(prev.notizen, [
-            contract.contractNo ? `Vertragsbezug ${contract.contractNo}` : '',
+            contract.contractNo ? `Vertragsbezug ${String(contract.contractNo)}` : '',
           ]),
         }))
-        toast({ title: 'Vertrag geladen', description: `Felder aus Vertrag ${contract.contractNo || id} vorbelegt.` })
+        toast({ title: 'Vertrag geladen', description: `Felder aus Vertrag ${String(contract.contractNo ?? id)} vorbelegt.` })
       }
     } catch (error) {
       toast({
@@ -227,11 +227,11 @@ export default function BestellungAnlegenPage(): JSX.Element {
           liefertermin: rfq.faelligkeit || prev.liefertermin,
           positionen: buildRequestPositions(rfq, prev.positionen),
           notizen: mergeNotes(prev.notizen, [
-            rfq.anfrageNummer ? `RFQ-Bezug ${rfq.anfrageNummer}` : '',
-            rfq.status ? `RFQ-Status: ${rfq.status}` : '',
+            rfq.anfrageNummer ? `RFQ-Bezug ${String(rfq.anfrageNummer)}` : '',
+            rfq.status ? `RFQ-Status: ${String(rfq.status)}` : '',
           ]),
         }))
-        toast({ title: 'Anfrage geladen', description: `Felder aus Anfrage ${rfq.anfrageNummer || id} vorbelegt.` })
+        toast({ title: 'Anfrage geladen', description: `Felder aus Anfrage ${String(rfq.anfrageNummer ?? id)} vorbelegt.` })
       }
     } catch (error) {
       toast({

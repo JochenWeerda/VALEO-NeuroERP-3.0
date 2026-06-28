@@ -149,12 +149,12 @@ export default function SegmentsPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/segment/${item.id}`)
+      navigate(`/crm/segment/${item.id as string}`)
     } else if (action === 'delete' && item) {
       if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
       await withPending(String(item.id), async () => {
         try {
-          await apiClient.delete(`/api/v1/crm/segments/${item.id}`)
+          await apiClient.delete(`/api/v1/crm/segments/${item.id as string}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
           loadData()
         } catch {
@@ -163,7 +163,7 @@ export default function SegmentsPage(): JSX.Element {
       })
     } else if (action === 'calculate' && item) {
       try {
-        await apiClient.post(`/api/v1/crm/segments/${item.id}/calculate`, { force_full: false })
+        await apiClient.post(`/api/v1/crm/segments/${String(item.id ?? '')}/calculate`, { force_full: false })
         toast({
           title: t('crud.messages.segmentCalculated'),
         })
@@ -213,7 +213,7 @@ export default function SegmentsPage(): JSX.Element {
     try {
       const csvHeader = `${t('crud.fields.name')};${t('crud.fields.type')};${t('crud.fields.status')};${t('crud.fields.memberCount')};${t('crud.fields.createdAt')}\n`
       const csvContent = data.map(item =>
-        `"${item.name || ''}";"${item.type || ''}";"${item.status || ''}";"${item.member_count || 0}";"${item.created_at || ''}"`
+        `"${String(item.name ?? '')}";"${String(item.type ?? '')}";"${String(item.status ?? '')}";"${String(item.member_count ?? 0)}";"${String(item.created_at ?? '')}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent
@@ -251,7 +251,7 @@ export default function SegmentsPage(): JSX.Element {
         if (key === 'calculate' && items.length) {
           try {
             for (const item of items) {
-              await apiClient.post(`/api/v1/crm/segments/${item.id}/calculate`, { force_full: false })
+              await apiClient.post(`/api/v1/crm/segments/${item.id as string}/calculate`, { force_full: false })
             }
             toast({ title: t('crud.messages.segmentCalculated') })
             loadData()

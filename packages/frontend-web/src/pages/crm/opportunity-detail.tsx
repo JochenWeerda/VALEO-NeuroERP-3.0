@@ -595,7 +595,7 @@ export default function OpportunityDetailPage(): JSX.Element {
       items: [
         { label: 'Kunde', value: customerOpts.find((option) => option.value === data.customer_id)?.label || data.customer_id || 'Nicht zugeordnet' },
         { label: 'Betrag', value: data.amount ? formatCurrency(data.amount, data.currency || 'EUR') : 'Noch offen' },
-        { label: 'Wahrscheinlichkeit', value: data.probability != null ? `${data.probability}%` : 'Nicht bewertet' },
+        { label: 'Wahrscheinlichkeit', value: data.probability != null ? `${String(data.probability)}%` : 'Nicht bewertet' },
       ],
     },
     {

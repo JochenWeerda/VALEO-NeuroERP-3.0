@@ -322,7 +322,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     }
 
     try {
-      await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/opportunities/${item.id}`, payload)))
+      await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/opportunities/${item.id as string}`, payload)))
       toast({ title: successTitle, description: successDescription })
       await loadData()
     } catch (error) {
@@ -346,7 +346,7 @@ export default function OpportunitiesListePage(): JSX.Element {
 
     const lead = items[0]
     if (items.length === 1) {
-      navigate(`/sales/angebot-erstellen?opportunityId=${lead.id}`)
+      navigate(`/sales/angebot-erstellen?opportunityId=${lead.id as string}`)
       return
     }
 
@@ -423,7 +423,8 @@ export default function OpportunitiesListePage(): JSX.Element {
 
       toast({ title: 'Import abgeschlossen', description: `${created} Opportunities angelegt.` })
       await loadData()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: 'Import fehlgeschlagen',
@@ -464,7 +465,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     try {
       const csvHeader = `${t('crud.fields.number')};${t('crud.fields.name')};${t('crud.fields.stage')};${t('crud.fields.amount')};${t('crud.fields.probability')};${t('crud.fields.status')}\n`
       const csvContent = data.map(opp =>
-        `"${opp.number}";"${opp.name}";"${opp.stage}";"${opp.amount || 0}";"${opp.probability || 0}";"${opp.status}"`
+        `"${String(opp.number ?? '')}";"${String(opp.name ?? '')}";"${String(opp.stage ?? '')}";"${String(opp.amount ?? 0)}";"${String(opp.probability ?? 0)}";"${String(opp.status ?? '')}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

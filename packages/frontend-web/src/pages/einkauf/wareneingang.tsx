@@ -152,7 +152,7 @@ export default function WareneingangPage(): JSX.Element {
         supplierName: po.subject || po.supplierName || '',
         status: po.status,
         items: (po.items || []).map(line => ({
-          id: line.id || `${po.id}-${line.articleId || line.description}`,
+          id: line.id || `${String(po.id ?? '')}-${String(line.articleId ?? line.description ?? '')}`,
           productId: line.articleId || line.productId || '',
           productName: line.description || line.productName || '',
           quantityOrdered: Number(line.quantity || 0),
@@ -180,7 +180,7 @@ export default function WareneingangPage(): JSX.Element {
         supplierName: po.subject || po.supplierName || '',
         status: po.status,
         items: (po.items || []).map(line => ({
-          id: line.id || `${po.id}-${line.articleId || line.description}`,
+          id: line.id || `${String(po.id ?? '')}-${String(line.articleId ?? line.description ?? '')}`,
           productId: line.articleId || line.productId || '',
           productName: line.description || line.productName || '',
           quantityOrdered: Number(line.quantity || 0),
@@ -190,7 +190,7 @@ export default function WareneingangPage(): JSX.Element {
         })),
       })
       const items: GoodsReceiptItem[] = (po.items || []).map(item => ({
-        purchaseOrderItemId: item.id || `${po.id}-${item.articleId || item.description}`,
+        purchaseOrderItemId: item.id || `${String(po.id ?? '')}-${String(item.articleId ?? item.description ?? '')}`,
         receivedQuantity: 0,
         acceptedQuantity: 0,
         rejectedQuantity: 0,

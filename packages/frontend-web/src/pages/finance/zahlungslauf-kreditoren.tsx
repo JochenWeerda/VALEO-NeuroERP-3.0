@@ -132,8 +132,8 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           onChange={(zahlungen) => {
             // Berechne Gesamtbetrag mit Skonto
             const gesamtBetrag = zahlungen.reduce((sum: number, z) => {
-              const betrag = z.betrag || 0
-              const skontoBetrag = z.skontoGenutzt && z.skontoBetrag ? z.skontoBetrag : 0
+              const betrag = Number(z.betrag ?? 0)
+              const skontoBetrag = z.skontoGenutzt && z.skontoBetrag ? Number(z.skontoBetrag) : 0
               return sum + betrag - skontoBetrag
             }, 0)
             onChange({
@@ -209,12 +209,13 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
         }
         try {
           const actor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
-          await apiClient.post(`/api/v1/finance/payment-runs/${data.id}/approve`, { approved_by: actor })
+          await apiClient.post(`/api/v1/finance/payment-runs/${data.id as string}/approve`, { approved_by: actor })
           toast({
             title: t('crud.messages.paymentRunApproved'),
             description: t('crud.messages.paymentRunApprovedDesc')
           })
-        } catch (error: any) {
+        } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
           toast({
             variant: 'destructive',
             title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -237,10 +238,11 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           return
         }
         try {
-          const res = await apiClient.get(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`, { responseType: 'blob' })
+          const res = await apiClient.get(`/api/v1/finance/payment-runs/${data.id as string}/sepa-xml`, { responseType: 'blob' })
           const url = window.URL.createObjectURL(res.data as Blob)
           window.open(url, '_blank')
-        } catch (error: any) {
+        } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
           toast({
             variant: 'destructive',
             title: t('crud.messages.loadDataError'),
@@ -272,12 +274,12 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
         }
         try {
           const actor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
-          await apiClient.post(`/api/v1/finance/payment-runs/${data.id}/execute`, { executed_by: actor })
-          const sepaRes = await apiClient.get(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`, { responseType: 'blob' })
+          await apiClient.post(`/api/v1/finance/payment-runs/${data.id as string}/execute`, { executed_by: actor })
+          const sepaRes = await apiClient.get(`/api/v1/finance/payment-runs/${String(data.id ?? '')}/sepa-xml`, { responseType: 'blob' })
           const url = window.URL.createObjectURL(sepaRes.data as Blob)
           const a = document.createElement('a')
           a.href = url
-          a.download = `SEPA_${data.laufNummer || data.run_number || data.id}.xml`
+          a.download = `SEPA_${String(data.laufNummer ?? data.run_number ?? data.id ?? '')}.xml`
           document.body.appendChild(a)
           a.click()
           document.body.removeChild(a)
@@ -286,7 +288,8 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
             title: t('crud.messages.sepaExportSuccess'),
             description: t('crud.messages.sepaFileDownloaded')
           })
-        } catch (error: any) {
+        } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
           toast({
             variant: 'destructive',
             title: t('crud.messages.sepaExportError'),
@@ -309,7 +312,7 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           return
         }
         try {
-          const res = await apiClient.get<Record<string, unknown>>(`/api/v1/finance/payment-runs/${data.id}`)
+          const res = await apiClient.get<Record<string, unknown>>(`/api/v1/finance/payment-runs/${data.id as string}`)
           const run = res.data
           const returnedCount = (run?.payments ?? []).filter(p => p.status === 'returned').length
           if (returnedCount > 0) {
@@ -324,7 +327,8 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
               description: t('crud.messages.allPaymentsSuccessful')
             })
           }
-        } catch (error: any) {
+        } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
           toast({
             variant: 'destructive',
             title: t('crud.messages.loadDataError'),
@@ -645,7 +649,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/v1/finance/payment-runs/${formData.id}/sepa-xml`, '_blank')
+      window.open(`/api/v1/finance/payment-runs/${formData.id as string}/sepa-xml`, '_blank')
     } else if (action === 'approve') {
       // Freigeben
       if (!formData.id) {
@@ -658,13 +662,14 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
       }
 
       try {
-        await apiClient.post(`/api/v1/finance/payment-runs/${formData.id}/approve`, { approved_by: currentActor })
+        await apiClient.post(`/api/v1/finance/payment-runs/${formData.id as string}/approve`, { approved_by: currentActor })
         toast({
           title: t('crud.messages.approvalSuccess'),
           description: t('crud.messages.paymentRunApproved'),
         })
         window.location.reload()
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({
           variant: 'destructive',
           title: t('crud.messages.approvalError'),
@@ -702,7 +707,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/v1/finance/payment-runs/${formData.id}/sepa-xml`, '_blank')
+      window.open(`/api/v1/finance/payment-runs/${formData.id as string}/sepa-xml`, '_blank')
     }
   })
 

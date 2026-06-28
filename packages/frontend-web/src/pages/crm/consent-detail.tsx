@@ -225,7 +225,7 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
           <CardContent className="pt-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="font-medium">{t(`crud.actions.${entry.action}`, { defaultValue: entry.action })}</div>
+                <div className="font-medium">{t(`crud.actions.${String(entry.action)}`, { defaultValue: entry.action as string })}</div>
                 <div className="text-sm text-muted-foreground mt-1">
                   {entry.old_status && (
                     <span className="line-through text-red-600">

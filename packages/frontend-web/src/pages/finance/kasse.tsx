@@ -118,7 +118,7 @@ const createKasseConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
             const sollAuszahlungen = bewegungen.filter(b => b.typ === 'auszahlung').reduce((sum, b) => sum + Number((b as Record<string, unknown>).betrag || 0), 0)
             const istEinlagen = sollEinlagen // Vereinfacht - in Realität würden Ist-Werte manuell erfasst
             const istAuszahlungen = sollAuszahlungen
-            const endbestand = (_data.anfangsbestand || 0) + istEinlagen - istAuszahlungen
+            const endbestand = (Number(_data.anfangsbestand) || 0) + istEinlagen - istAuszahlungen
             const differenz = Math.abs(endbestand - (_data.endbestand || 0))
 
             onChange({

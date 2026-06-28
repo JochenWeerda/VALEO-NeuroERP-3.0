@@ -114,7 +114,7 @@ async function bulkConfirmationMutation(selectedItems: Record<string, unknown>[]
       ok += 1
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      errors.push(`${item.bestaetigungsNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+      errors.push(`${String(item.bestaetigungsNummer ?? item.id ?? '')}: ${error.response?.data?.detail ?? error.message}`)
     }
   }
   return { ok, errors }

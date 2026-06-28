@@ -265,7 +265,7 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
     onChange(_data.filter((_, i) => i !== index))
   }
 
-  const totalPaid = _data.reduce((sum, z) => sum + (z.betrag || 0), 0)
+  const totalPaid = _data.reduce((sum, z) => sum + (Number(z.betrag) || 0), 0)
   const remaining = gesamtBetrag - totalPaid
 
   return (
@@ -546,15 +546,16 @@ export default function OPDebitorenPage(): JSX.Element {
               notes: zahlung.typ === 'gutschrift' ? t('crud.entities.creditNote') : null
             }
 
-            await apiClient.post(`/api/v1/finance/open-items/${formData.id}/settle`, settlement)
+            await apiClient.post(`/api/v1/finance/open-items/${String(formData.id ?? '')}/settle`, settlement)
           }
 
           // OTC-011-P3: Toast mit OP-Nummer statt Navigation zu leerer Maske
           const opNr = formData.opNummer || formData.id || ''
-          toast.success(t('crud.messages.settlementSuccess') + (opNr ? ` (${opNr})` : ''))
+          toast.success(t('crud.messages.settlementSuccess') + (opNr ? ` (${String(opNr ?? '')})` : ''))
           setIsDirty(false)
           navigate('/finance/offene-posten')
-        } catch (error: any) {
+        } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
           toast.error(error.message || t('crud.messages.settlementError'))
         }
       } else {
@@ -577,7 +578,7 @@ export default function OPDebitorenPage(): JSX.Element {
 
       try {
         const today = new Date().toISOString().split('T')[0]
-        const nextLevel = (formData.mahnstufe || 0) + 1
+        const nextLevel = (Number(formData.mahnstufe ?? 0)) + 1
         await apiClient.post('/api/v1/finance/dunning', {
           op_id: formData.id,
           debtor_id: formData.debitorId || 'unknown',
@@ -588,7 +589,8 @@ export default function OPDebitorenPage(): JSX.Element {
         })
         formData.mahnstufe = nextLevel
         toast.success(t('crud.messages.dunningCreated', { level: formData.mahnstufe }))
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message ?? t('crud.messages.dunningError')
         toast.error(msg)
       }
@@ -601,7 +603,8 @@ export default function OPDebitorenPage(): JSX.Element {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'open_items', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
         toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast.error(msg)
       }

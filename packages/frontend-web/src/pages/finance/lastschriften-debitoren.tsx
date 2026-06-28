@@ -539,13 +539,14 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
           mandate_valid_count: number
           mandate_expired_count: number
           sepa_ready: boolean
-        }>(`/api/v1/finance/followup/lastschriften/${runId}/preview`)
+        }>(`/api/v1/finance/followup/lastschriften/${String(runId ?? '')}/preview`)
         const preview = response.data
         toast({
           title: t('crud.actions.sepaPreview', { defaultValue: 'SEPA-Vorschau' }),
           description: `${preview.debitor_count} Debitoren · ${preview.total_amount.toFixed(2)} € · ${preview.mandate_expired_count} abgelaufene Mandate`,
         })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -562,7 +563,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       try {
         const runId = currentFormData?.id
         if (runId) {
-          const response = await apiClient.post(`/api/v1/finance/direct-debits/${runId}/approve`, {
+          const response = await apiClient.post(`/api/v1/finance/direct-debits/${String(runId ?? '')}/approve`, {
             approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
           })
           setData(response.data)
@@ -579,7 +580,8 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         }
         setIsDirty(false)
         toast({ title: 'Freigegeben', description: 'Lastschriftlauf wurde freigegeben.' })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -596,7 +598,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       try {
         const runId = currentFormData?.id
         if (runId) {
-          const response = await apiClient.post(`/api/v1/finance/direct-debits/${runId}/execute`, {})
+          const response = await apiClient.post(`/api/v1/finance/direct-debits/${String(runId ?? '')}/execute`, {})
           setData(response.data)
         } else {
           const created = await saveData({ ...currentFormData, status: 'zur_freigabe' })
@@ -612,7 +614,8 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         }
         toast({ title: t('crud.messages.executed', { defaultValue: 'Zahlungslauf ausgefuehrt' }) })
         setIsDirty(false)
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -627,7 +630,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       }
       try {
         const response = await apiClient.post<{ export_id: string; download_url: string | null }>(
-          `/api/v1/finance/followup/lastschriften/${runId}/export`,
+          `/api/v1/finance/followup/lastschriften/${String(runId ?? '')}/export`,
           { format: 'sepa_xml' },
         )
         const result = response.data
@@ -639,7 +642,8 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
             description: `Export-ID: ${result.export_id}`,
           })
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }

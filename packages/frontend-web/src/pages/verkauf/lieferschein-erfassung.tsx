@@ -465,7 +465,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         })
 
         push('Lieferschein geladen')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
       }
     }
@@ -1094,7 +1095,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }))
       push('Lieferschein erfolgreich gespeichert')
       return response.id
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null
     }
@@ -1123,7 +1125,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       const list = await loadLsList()
       setLsList(list)
       setShowLieferscheinSuchenDialog(true)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
     }
   }
@@ -1136,7 +1139,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       } else {
         push('Kein vorheriger Lieferschein')
       }
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
     }
   }
@@ -1149,7 +1153,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       } else {
         push('Kein nächster Lieferschein')
       }
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
     }
   }
@@ -1171,7 +1176,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       const list = (res as Record<string, unknown>)?.data ?? res
       setBranchesList(Array.isArray(list) ? list : [])
       setShowNiederlassungDialog(true)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
     }
   }
@@ -1226,7 +1232,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       } else {
         push('Rechnung erstellt')
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Sofort-Rechnung fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)
@@ -1263,7 +1270,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         await apiClient.patch(`/api/v1/sales/delivery-notes/${state.id}`, { status: 'offen', is_printed: false })
         setState((prev) => ({ ...prev, statusGedruckt: false }))
         push('Lieferschein zur Korrektur geöffnet — Änderungen vornehmen und erneut speichern.')
-      } catch (e: any) {
+      } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Korrektur fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
       }
     }
@@ -1366,7 +1374,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       })
       setCurrentPosition(createEmptyCurrentPosition(10))
       setBestellungen([])
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)
@@ -1411,7 +1420,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push('Lieferschein erfolgreich gelöscht')
       setShowDeleteDialog(false)
       navigate('/verkauf')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Löschen fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -1458,7 +1468,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           ...prev,
           verfuegbar: Number(response.data.stock.total_available ?? 0),
         }))
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (cancelled) return
         setPositionContext(null)
         setPositionContextError(
@@ -1616,7 +1626,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         }
         
         push('Daten vom vorherigen Beleg übernommen')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },
@@ -1706,7 +1717,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         }))
         
         push(`${positionen.length} Positionen vom vorherigen Beleg übernommen`)
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },
