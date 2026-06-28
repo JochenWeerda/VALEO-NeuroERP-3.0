@@ -181321,6 +181321,157 @@
         ]
       }
     },
+    "/api/v1/crm/customers/{customer_id}/screen-summary": {
+      "get": {
+        "description": "Kompakter Startvertrag fuer den Universal Mask Generator.\n\nLiefert nur Header, Kennzahlen, Badges und verfuegbare Tabs. Tab-Details\nbleiben separate, limitierte Endpunkte.",
+        "operationId": "get_customer_screen_summary_api_v1_crm_customers__customer_id__screen_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Customer Screen Summary Api V1 Crm Customers  Customer Id  Screen Summary Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Customer screen summary abrufen",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/{tab_key}": {
+      "get": {
+        "description": "Limitierte Tab-Listen fuer den Universal Mask Generator (read-only).",
+        "operationId": "get_customer_tab_data_api_v1_crm_customers__customer_id__tabs__tab_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tab_key",
+            "required": true,
+            "schema": {
+              "title": "Tab Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Customer Tab Data Api V1 Crm Customers  Customer Id  Tabs  Tab Key  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Customer tab list data abrufen",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
     "/api/v1/crm/dashboard": {
       "get": {
         "operationId": "crm_dashboard_api_v1_crm_dashboard_get",
@@ -256205,6 +256356,74 @@
         "summary": "Marketing stats abrufen",
         "tags": [
           "Marketing"
+        ]
+      }
+    },
+    "/api/v1/masks/{mask_id}/screen-definition": {
+      "get": {
+        "description": "Liefert die native ScreenDefinition fuer Generator-faehige Masken.",
+        "operationId": "get_mask_screen_definition_api_v1_masks__mask_id__screen_definition_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mask_id",
+            "required": true,
+            "schema": {
+              "title": "Mask Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Mask Screen Definition Api V1 Masks  Mask Id  Screen Definition Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Native ScreenDefinition abrufen",
+        "tags": [
+          "ui",
+          "masks",
+          "screen-definition"
         ]
       }
     },
