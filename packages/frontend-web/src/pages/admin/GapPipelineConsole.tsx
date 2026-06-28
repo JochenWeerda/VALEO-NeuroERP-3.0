@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GAP Pipeline Console
  * Admin-Oberfläche zur Steuerung der GAP-Pipeline
  */
@@ -46,7 +46,8 @@ export default function GapPipelineConsole() {
       const s = await getGapPipelineStatus(year)
       setStatus(s)
       setError(null)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setError(e?.message ?? 'Status-Abruf fehlgeschlagen')
     }
   }
@@ -59,7 +60,8 @@ export default function GapPipelineConsole() {
       const result = await runGapYearPipeline(year, csvPath || undefined)
       setSuccess(result.message || 'Pipeline erfolgreich gestartet')
       await refreshStatus()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setError(e.message ?? 'Pipeline-Start fehlgeschlagen')
     } finally {
       setBusy(false)
@@ -78,7 +80,8 @@ export default function GapPipelineConsole() {
       const result = await runGapImport(year, csvPath)
       setSuccess(result.message || 'Import erfolgreich gestartet')
       await refreshStatus()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setError(e.message ?? 'Import-Start fehlgeschlagen')
     } finally {
       setBusy(false)
@@ -93,7 +96,8 @@ export default function GapPipelineConsole() {
       const result = await runGapCommand(command, year)
       setSuccess(result.message || `${command} erfolgreich gestartet`)
       await refreshStatus()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setError(e.message ?? `${command} fehlgeschlagen`)
     } finally {
       setBusy(false)
@@ -115,7 +119,8 @@ export default function GapPipelineConsole() {
         setYear(result.year)
       }
       setSuccess(result.message || `Datei erfolgreich hochgeladen: ${result.filename}`)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       setError(e.message ?? 'Datei-Upload fehlgeschlagen')
     } finally {
       setUploading(false)

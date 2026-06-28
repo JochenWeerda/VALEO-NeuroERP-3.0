@@ -168,7 +168,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
   const templateConfig = createTemplateConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, unknown>>({
     apiUrl: templateConfig.api.baseUrl,
     id: id || undefined
   })
@@ -200,7 +200,8 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
       } else {
         navigate('/crm/campaign-templates')
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

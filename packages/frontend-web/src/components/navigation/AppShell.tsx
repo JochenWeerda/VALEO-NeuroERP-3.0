@@ -1,4 +1,4 @@
-import { Suspense, lazy, type ReactNode, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+﻿import { Suspense, lazy, type ReactNode, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
 import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
 import { useFeature } from '@/hooks/useFeature'
@@ -50,13 +50,13 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
     // Zyklische Schaltlogik: always → hover → hidden → always
     // Warte kurz, falls die Funktion noch nicht initialisiert ist
     const cycleMode = (): void => {
-      if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
-        (window as any).__cycleShortcutDisplayMode()
+      if (typeof (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode === 'function') {
+        (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode()
       } else {
         // Retry nach kurzer Verzögerung
         setTimeout(() => {
-          if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
-            (window as any).__cycleShortcutDisplayMode()
+          if (typeof (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode === 'function') {
+            (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode()
           } else {
             console.warn('ShortcutHelpPanel cycle function not found')
           }

@@ -190,7 +190,8 @@ async function bulkRequestMutation(
       createdOrderId = createdOrderId || response.data?.purchaseOrderId
       createdOrderNumber = createdOrderNumber || response.data?.purchaseOrderNumber
       ok += 1
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       errors.push(`${item.anfrageNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
     }
   }
@@ -282,7 +283,8 @@ export default function AnfragenListePage(): JSX.Element {
       await apiClient.delete(`/api/v1/einkauf/anfragen/${item.id}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.anfragen() })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }

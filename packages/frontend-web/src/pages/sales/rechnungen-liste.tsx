@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -58,7 +58,7 @@ export default function RechnungenListePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<RechnungStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
-  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const [filterValues, setFilterValues] = useState<Record<string, unknown>>({})
   const [roleFocus, setRoleFocus] = useState<InvoiceListRoleFocus>('all')
 
   const { data: rechnungen = [] } = useRechnungen()

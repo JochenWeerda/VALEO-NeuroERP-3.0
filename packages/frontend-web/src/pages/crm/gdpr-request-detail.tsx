@@ -241,7 +241,8 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
       try {
         const response = await httpClient.get<unknown[]>(`/api/v1/gdpr/requests/${requestId}/history`)
         setHistory(response.data || [])
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
       } finally {
         setLoading(false)
@@ -311,7 +312,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
   const gdprRequestConfig = createGDPRRequestConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, unknown>>({
     apiUrl: gdprRequestConfig.api.baseUrl,
     id: id || undefined
   })
@@ -338,7 +339,8 @@ export default function GDPRRequestDetailPage(): JSX.Element {
         title: getSuccessMessage(t, isNew ? 'create' : 'update', entityType),
       })
       navigate('/crm/gdpr-requests')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

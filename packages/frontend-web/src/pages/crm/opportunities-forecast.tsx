@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+﻿import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { formatCurrency } from '@/components/mask-builder/utils/formatting'
@@ -27,6 +27,16 @@ interface ForecastData {
   total_expected_revenue: number
 }
 
+
+type ForecastGrouped = {
+  period?: string
+  stage?: string
+  owner?: string
+  count: number
+  total_amount: number
+  total_expected_revenue: number
+}
+type StageDistItem = { name: string; value: number }
 const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300']
 
 export default function OpportunitiesForecastPage(): JSX.Element {
@@ -73,8 +83,8 @@ export default function OpportunitiesForecastPage(): JSX.Element {
         acc[key].total_amount += item.total_amount
         acc[key].total_expected_revenue += item.total_expected_revenue
         return acc
-      }, {} as Record<string, any>)
-      return Object.values(grouped).sort((a, b) => String((a as Record<string, unknown>).period).localeCompare(String((b as Record<string, unknown>).period)))
+      }, {} as Record<string, ForecastGrouped>)
+      return Object.values(grouped).sort((a, b) => String(a.period).localeCompare(String(b.period)))
     }
 
     if (viewMode === 'stage') {
@@ -85,7 +95,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
         acc[key].total_amount += item.total_amount
         acc[key].total_expected_revenue += item.total_expected_revenue
         return acc
-      }, {} as Record<string, any>)
+      }, {} as Record<string, ForecastGrouped>)
       return Object.values(grouped)
     }
 
@@ -96,8 +106,8 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       acc[key].total_amount += item.total_amount
       acc[key].total_expected_revenue += item.total_expected_revenue
       return acc
-    }, {} as Record<string, any>)
-    return Object.values(grouped).sort((a, b) => Number((b as Record<string, unknown>).total_expected_revenue) - Number((a as Record<string, unknown>).total_expected_revenue))
+    }, {} as Record<string, ForecastGrouped>)
+    return Object.values(grouped).sort((a, b) => Number(b.total_expected_revenue) - Number(a.total_expected_revenue))
   }, [forecastData, viewMode])
 
   const totals = useMemo(() => {
@@ -117,7 +127,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       if (!acc[key]) acc[key] = { name: key, value: 0 }
       acc[key].value += item.total_expected_revenue
       return acc
-    }, {} as Record<string, any>)
+    }, {} as Record<string, ForecastGrouped>)
 
     return Object.values(grouped).map(item => ({
       ...item,

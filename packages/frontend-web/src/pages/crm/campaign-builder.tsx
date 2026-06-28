@@ -179,7 +179,8 @@ export default function CampaignBuilderPage(): JSX.Element {
         
         navigate(`/crm/campaign/${campaignId}`)
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError', { entityType: t('crud.entities.campaign') }),

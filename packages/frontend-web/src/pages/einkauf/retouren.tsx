@@ -257,7 +257,8 @@ export default function RetourenPage(): JSX.Element {
       
       await refetchReceipts()
       await refetchRetouren()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError'),

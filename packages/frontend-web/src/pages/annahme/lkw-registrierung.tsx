@@ -126,7 +126,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
           const id = await uploadAttachment(file)
           if (id) setAttachmentIds((prev) => [...prev, id])
         }
-      } catch (e: any) {
+      } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({
           title: 'Upload fehlgeschlagen',
           description: e.response?.data?.detail ?? e.message,
@@ -148,7 +149,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
           const id = await uploadAttachment(file)
           if (id) setAttachmentIds((prev) => [...prev, id])
         }
-      } catch (e: any) {
+      } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({
           title: 'Upload fehlgeschlagen',
           description: e.response?.data?.detail ?? e.message,
@@ -247,7 +249,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
         description: `${lkw.kennzeichen} - ${lkw.artikel} - wurde in die Warteschlange eingereiht.`,
       })
       navigate('/annahme/warteschlange')
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         title: 'Registrierung fehlgeschlagen',
         description: e.response?.data?.detail ?? e.message,

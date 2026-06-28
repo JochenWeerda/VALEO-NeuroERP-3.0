@@ -174,11 +174,12 @@ export async function getGapPipelineStatus(refYear: number, retries = 2): Promis
         }
 
         return response.json()
-      } catch (fetchError: any) {
+      } catch (fetchError: unknown) {
         clearTimeout(timeoutId)
         throw fetchError
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       if (attempt < retries && (error.name === 'TypeError' || error.name === 'AbortError' || error.message?.includes('Failed to fetch'))) {
         // Retry bei Netzwerkfehlern oder Timeouts
         await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))

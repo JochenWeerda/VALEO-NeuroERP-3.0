@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GoBD Audit Trail View
  * Zeigt alle Audit-Trail-Einträge mit Hash-Chain-Validierung
  * FIBU-COMP-01: GoBD / Audit Trail UI
@@ -31,7 +31,7 @@ type AuditLogEntry = {
   action: string
   entity_type: string
   entity_id: string
-  changes: Record<string, any>
+  changes: Record<string, unknown>
   ip_address?: string
   user_agent?: string
   correlation_id?: string

@@ -198,7 +198,8 @@ export default function DeliveryEditorNewPage(): JSX.Element {
         grossTotal: 0,
         total: 0,
       }))
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)

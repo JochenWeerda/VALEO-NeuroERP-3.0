@@ -361,7 +361,8 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
         } else {
           setRequests([])
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der DSGVO-Anfragen', description: error?.message })
       } finally {
         setLoading(false)
@@ -478,7 +479,8 @@ function ConsentsList({ contactId }: { contactId?: string }) {
         if (response.data) {
           setConsents(Array.isArray(response.data) ? response.data : [])
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Einwilligungen', description: error?.message })
       } finally {
         setLoading(false)

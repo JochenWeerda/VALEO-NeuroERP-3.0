@@ -578,7 +578,8 @@ export default function AbschlussPage(): JSX.Element {
         const response = await apiClient.post('/api/v1/finance/closing/calculate', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
         toast({ title: 'Berechnung abgeschlossen', description: 'Abschlusszahlen wurden berechnet.' })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
       }
       return
@@ -598,7 +599,8 @@ export default function AbschlussPage(): JSX.Element {
         const response = await apiClient.post('/api/v1/finance/closing/approve', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
         toast({ title: 'Abschluss freigegeben', description: 'Abschlussgenehmigung wurde erteilt.' })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
       }
       return
@@ -616,7 +618,8 @@ export default function AbschlussPage(): JSX.Element {
         toast({ title: 'Abschluss durchgeführt' })
         setIsDirty(false)
         navigate('/finance/abschluss')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: 'Fehler', description: msg })
       }
@@ -630,7 +633,8 @@ export default function AbschlussPage(): JSX.Element {
         applyWorkspaceResponse(response)
         toast({ title: 'Abschluss gesperrt', description: 'Die Periode wurde endgültig gesperrt.' })
         navigate('/finance/abschluss')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
       }
       return
@@ -641,7 +645,8 @@ export default function AbschlussPage(): JSX.Element {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'closing', format: 'pdf' })
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: 'Export erstellt' })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: 'Fehler', description: msg })
       }

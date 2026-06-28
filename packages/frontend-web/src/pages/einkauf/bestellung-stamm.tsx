@@ -336,11 +336,11 @@ export default function BestellungStammPage(): JSX.Element {
       })
 
       navigate('/einkauf/bestellungen')
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
-        description: error.response?.data?.detail || error.message,
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message,
       })
     } finally {
       setLoading(false)
@@ -423,11 +423,11 @@ export default function BestellungStammPage(): JSX.Element {
       setStornoDialogOpen(false)
       setStornoReason('')
       navigate('/einkauf/bestellungen')
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.cancelError', { entityType: entityTypeLabel }),
-        description: error.response?.data?.detail || error.message,
+        description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message,
       })
     } finally {
       setLoading(false)
@@ -776,11 +776,11 @@ export default function BestellungStammPage(): JSX.Element {
 
                   setSendDialogOpen(false)
                   setSendMessage('')
-                } catch (error: any) {
+                } catch (error: unknown) {
                   toast({
                     variant: 'destructive',
                     title: t('crud.messages.poSendError'),
-                    description: error?.response?.data?.detail || error.message,
+                    description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message,
                   })
                 } finally {
                   setLoading(false)

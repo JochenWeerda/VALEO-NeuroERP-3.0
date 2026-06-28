@@ -1,6 +1,6 @@
-// VALEO Mask Builder API Utilities
+﻿// VALEO Mask Builder API Utilities
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T | null
   success: boolean
   message?: string
@@ -10,7 +10,7 @@ export interface ApiResponse<T = any> {
   [key: string]: unknown
 }
 
-export interface PaginatedResponse<T = any> {
+export interface PaginatedResponse<T = unknown> {
   data: T[]
   total: number
   page: number
@@ -30,7 +30,7 @@ export class ApiClient {
     }
   }
 
-  private async request<T = any>(
+  private async request<T = unknown>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {

@@ -42,11 +42,15 @@ export function ShortcutHelpPanel({
     const expandFn = (): void => {
       setIsExpanded(true)
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(window as any).__toggleShortcutHelpPanel = toggleFn
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(window as any).__expandShortcutHelpPanel = expandFn
-    
+
     return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__toggleShortcutHelpPanel
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__expandShortcutHelpPanel
     }
   }, [])

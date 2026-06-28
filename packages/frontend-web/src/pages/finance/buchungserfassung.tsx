@@ -352,8 +352,8 @@ export default function BuchungserfassungPage(): JSX.Element {
       await apiClient.delete(`/api/v1/journal-entries/${entryId}`)
       toast({ title: t('crud.messages.deleteSuccess', { defaultValue: 'Buchung gelöscht' }) })
       navigate('/finance/buchungen')
-    } catch (error: any) {
-      const msg = error.response?.data?.detail ?? error.message
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail ?? (error as Error)?.message
       toast({ variant: 'destructive', title: t('common.error'), description: msg })
     } finally {
       setIsDeleteLoading(false)
@@ -398,8 +398,8 @@ export default function BuchungserfassungPage(): JSX.Element {
         toast({ title: isEditMode ? 'Buchung aktualisiert' : t('crud.messages.bookingValidationSuccess', { defaultValue: 'Buchung gebucht' }) })
         setIsDirty(false)
         navigate('/finance/buchungen')
-      } catch (error: any) {
-        const msg = error.response?.data?.detail ?? error.message
+      } catch (error: unknown) {
+        const msg = (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail ?? (error as Error)?.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
       return
@@ -435,8 +435,8 @@ export default function BuchungserfassungPage(): JSX.Element {
         const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'journal_entries', format: 'datev' })).data
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.datevExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
-      } catch (error: any) {
-        const msg = error.response?.data?.detail ?? error.message
+      } catch (error: unknown) {
+        const msg = (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail ?? (error as Error)?.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
     }

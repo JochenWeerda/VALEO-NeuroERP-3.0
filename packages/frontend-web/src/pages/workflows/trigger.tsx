@@ -23,7 +23,8 @@ export default function WorkflowTriggerPage(): JSX.Element {
       
       // Navigate to approval page
       navigate(`/workflows/approval/${result.workflow_id}`)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: 'Workflow-Start fehlgeschlagen', description: error?.message })
     }
   }

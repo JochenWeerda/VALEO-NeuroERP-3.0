@@ -185,7 +185,8 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
         if (response.data) {
           setMembers(response.data || [])
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Mitglieder', description: error?.message })
       } finally {
         setLoading(false)
@@ -243,7 +244,8 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
         if (response.data) {
           setPerformance(response.data || [])
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance-Daten', description: error?.message })
       } finally {
         setLoading(false)
@@ -303,7 +305,7 @@ export default function SegmentDetailPage(): JSX.Element {
   const segmentConfig = createSegmentConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, unknown>>({
     apiUrl: segmentConfig.api.baseUrl,
     id: id || undefined
   })
@@ -330,7 +332,8 @@ export default function SegmentDetailPage(): JSX.Element {
         title: getSuccessMessage(t, isNew ? 'create' : 'update', entityType),
       })
       navigate('/crm/segments')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

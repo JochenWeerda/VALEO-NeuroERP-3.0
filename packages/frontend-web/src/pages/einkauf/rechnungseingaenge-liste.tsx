@@ -189,7 +189,8 @@ async function bulkWorkflow(
     try {
       await apiClient.post(`${base}/${encodeURIComponent(item.id)}/${endpointSuffix}`)
       ok += 1
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       err += 1
       messages.push(
         ( item as Record<string, unknown>).rechnungsNummer || item.id
@@ -431,7 +432,8 @@ export default function RechnungseingaengeListePage(): JSX.Element {
       await apiClient.delete(`/api/v1/einkauf/rechnungen/${item.id}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }
