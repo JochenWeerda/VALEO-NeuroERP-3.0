@@ -2574,6 +2574,9 @@ importers:
         specifier: ^3.22.4
         version: 3.25.76
     devDependencies:
+      '@faker-js/faker':
+        specifier: ^9.8.0
+        version: 9.9.0
       '@types/amqplib':
         specifier: ^0.10.7
         version: 0.10.7
@@ -2637,9 +2640,6 @@ importers:
       eslint:
         specifier: ^8.45.0
         version: 8.57.1
-      faker:
-        specifier: ^6.6.6
-        version: 6.6.6
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.17)(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))
@@ -5427,6 +5427,10 @@ packages:
   '@expo/xcpretty@4.3.2':
     resolution: {integrity: sha512-ReZxZ8pdnoI3tP/dNnJdnmAk7uLT4FjsKDGW7YeDdvdOMz2XCQSmSCM9IWlrXuWtMF9zeSB6WJtEhCQ41gQOfw==}
     hasBin: true
+
+  '@faker-js/faker@9.9.0':
+    resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
+    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
 
   '@fast-csv/format@4.3.5':
     resolution: {integrity: sha512-8iRn6QF3I8Ak78lNAa+Gdl5MJJBM5vRHivFtMRUWINdevNo00K7OXxS2PshawLKTejVwieIlPmK5YlLu6w4u8A==}
@@ -11735,9 +11739,6 @@ packages:
 
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
-
-  faker@6.6.6:
-    resolution: {integrity: sha512-9tCqYEDHI5RYFQigXFwF1hnCwcWCOJl/hmll0lr5D2Ljjb0o4wphb69wikeJDz5qCEzXCoPvG6ss5SDP6IfOdg==}
 
   fast-check@3.23.2:
     resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
@@ -20541,6 +20542,8 @@ snapshots:
       find-up: 5.0.0
       js-yaml: 4.1.0
 
+  '@faker-js/faker@9.9.0': {}
+
   '@fast-csv/format@4.3.5':
     dependencies:
       '@types/node': 14.18.63
@@ -28904,8 +28907,6 @@ snapshots:
       type: 2.7.3
 
   extend@3.0.2: {}
-
-  faker@6.6.6: {}
 
   fast-check@3.23.2:
     dependencies:
