@@ -390,17 +390,17 @@ export default function CreditNoteEditorPage(): JSX.Element {
     {
       label: 'Grund und Positionen erfassen',
       done: hasReason && hasLines,
-      hint: hasReason && hasLines ? `${lines.length} Positionen mit Grund ${creditNote.reason}.` : 'Grund und mindestens eine Position sind Pflicht.',
+      hint: hasReason && hasLines ? `${lines.length} Positionen mit Grund ${String(creditNote.reason)}.` : 'Grund und mindestens eine Position sind Pflicht.',
     },
     {
       label: 'Betrag und Zahlungsfolge pruefen',
       done: hasAmount && hasPaymentPath,
-      hint: hasAmount && hasPaymentPath ? `Brutto ${Number(creditNote.totalGross ?? 0).toFixed(2)} und Faelligkeit ${creditNote.dueDate}.` : 'Betrag, Steuer, Zahlungsbedingung und Faelligkeit pruefen.',
+      hint: hasAmount && hasPaymentPath ? `Brutto ${Number(creditNote.totalGross ?? 0).toFixed(2)} und Faelligkeit ${String(creditNote.dueDate ?? '')}.` : 'Betrag, Steuer, Zahlungsbedingung und Faelligkeit pruefen.',
     },
     {
       label: 'Freigabe und Nachweis sichern',
       done: ['approved', 'sent', 'paid'].includes(String(creditNote.status)),
-      hint: creditNote.status ? `Status: ${creditNote.status}.` : 'Freigabe, Versand oder Druck als Nachweis festhalten.',
+      hint: creditNote.status ? `Status: ${String(creditNote.status)}.` : 'Freigabe, Versand oder Druck als Nachweis festhalten.',
     },
   ]
   const creditNoteCrudCapabilities = [

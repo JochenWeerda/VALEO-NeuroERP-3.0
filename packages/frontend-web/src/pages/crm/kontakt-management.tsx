@@ -267,17 +267,17 @@ export default function KontaktManagementPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/kontakte/${item.id}`)
+      navigate(`/crm/kontakte/${item.id as string}`)
     }
   })
 
   const handleCreate = () => navigate('/crm/kontakte/new')
   const handleEdit = (item: Record<string, unknown>) => { void handleAction('edit', item) }
   const handleDelete = (item: Record<string, unknown>) => {
-    if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
+    if (!confirm(`Kontakt "${String(item.name ?? '')}" wirklich loeschen?`)) return
     void withPending(String(item.id), async () => {
       try {
-        await apiClient.delete(`/api/v1/crm/contacts/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/contacts/${item.id as string}`)
         await loadData()
       } catch {
         toast({
@@ -295,7 +295,7 @@ export default function KontaktManagementPage(): JSX.Element {
       const csvContent = rows
         .map(
           kontakt =>
-            `"${kontakt.name}";"${kontakt.firma || ''}";"${kontakt.email || ''}";"${kontakt.telefon || ''}";"${kontakt.mobil || ''}";"${kontakt.abteilung || ''}";"${kontakt.prioritaet || ''}";"${kontakt.status || 'aktiv'}"`,
+            `"${String(kontakt.name ?? '')}";"${String(kontakt.firma ?? '')}";"${String(kontakt.email ?? '')}";"${String(kontakt.telefon ?? '')}";"${String(kontakt.mobil ?? '')}";"${String(kontakt.abteilung ?? '')}";"${String(kontakt.prioritaet ?? '')}";"${String(kontakt.status ?? 'aktiv')}"`,
         )
         .join('\n')
 
@@ -405,7 +405,7 @@ export default function KontaktManagementPage(): JSX.Element {
         deactivateSelected: async (items) => {
           if (!ensureSelection(items)) return
           try {
-            await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/contacts/${item.id}`, { status: 'inaktiv' })))
+            await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/contacts/${item.id as string}`, { status: 'inaktiv' })))
             toast({
               title: 'Kontakte deaktiviert',
               description: `${items.length} Kontakt(e) wurden auf inaktiv gesetzt.`,
@@ -428,7 +428,7 @@ export default function KontaktManagementPage(): JSX.Element {
     const seen = new Set<string>()
     let duplicates = 0
     for (const item of data) {
-      const key = `${item.email || ''}|${item.telefon || ''}`.toLowerCase()
+      const key = `${String(item.email ?? '')}|${String(item.telefon ?? '')}`.toLowerCase()
       if (!key || key === '|') continue
       if (seen.has(key)) duplicates += 1
       else seen.add(key)

@@ -170,7 +170,8 @@ async function triggerChargenExport(): Promise<void> {
     a.click()
     URL.revokeObjectURL(url)
     toast({ title: 'Export erstellt', description: 'Chargen-Daten als CSV heruntergeladen.' })
-  } catch (e: any) {
+  } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
     toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
   }
 }
@@ -212,7 +213,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
           let ok = 0; let err = 0
           for (const item of items) {
             try {
-              await api.patch(`/api/v1/futter/chargen/${item.id}`, { status: 'recall' })
+              await api.patch(`/api/v1/futter/chargen/${String(item.id ?? '')}`, { status: 'recall' })
               ok++
             } catch { err++ }
           }
@@ -231,7 +232,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         onClick: (items: Record<string, unknown>[]) => {
           if (items.length === 0) return
           if (items.length === 1) {
-            navigate(`/charge/rueckverfolgung?chargeId=${items[0].id}`)
+            navigate(`/charge/rueckverfolgung?chargeId=${String(items[0].id ?? '')}`)
             return
           }
           const selected = items.map((item) => item.id).join(',')
@@ -246,17 +247,18 @@ export default function ChargeVerfolgungPage(): JSX.Element {
   }
 
   const handleEdit = (item: Record<string, unknown>) => {
-    if (item?.id) navigate(`/futtermittel/chargen/${item.id}`)
+    if (item?.id) navigate(`/futtermittel/chargen/${String(item.id ?? '')}`)
   }
 
   const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
-    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich löschen?`)) return
+    if (!confirm(`Charge "${String(item.chargenNummer ?? item.id)}" wirklich löschen?`)) return
     try {
-      await api.delete(`/api/v1/futter/chargen/${item.id}`)
+      await api.delete(`/api/v1/futter/chargen/${String(item.id ?? '')}`)
       toast({ title: 'Gelöscht', description: 'Charge wurde gelöscht.' })
       queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }
@@ -279,9 +281,10 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
       toast({
         title: 'Import abgeschlossen',
-        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+        description: `${String(created ?? '')} neu, ${String(updated ?? '')} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
       })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
     e.target.value = ''

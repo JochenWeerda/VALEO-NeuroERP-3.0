@@ -103,7 +103,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
       const url = window.URL.createObjectURL(res.data as Blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `gdpr-export-${requestId}.${statusData?.response_file_format || 'json'}`
+      link.download = `gdpr-export-${requestId}.${String(statusData?.response_file_format ?? 'json')}`
       link.click()
       window.URL.revokeObjectURL(url)
       toast({
@@ -222,7 +222,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
                     <XCircle className="h-5 w-5" />
                   )}
                   <AlertDescription>
-                    <div className="font-medium mb-2">{t('crud.fields.status')}: {t(`status.${statusData.status}`)}</div>
+                    <div className="font-medium mb-2">{t('crud.fields.status')}: {t(`status.${String(statusData.status)}`)}</div>
                     {statusData.status === 'completed' && statusData.response_file_path && (
                       <Button onClick={handleDownload} className="mt-2">
                         <FileText className="h-4 w-4 mr-2" />

@@ -325,7 +325,8 @@ export default function MahnwesenPage(): JSX.Element {
       try {
         await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
         toast({ title: t('crud.messages.dunningGenerated'), description: t('crud.messages.dunningGeneratedDesc', { level: formData?.mahnstufe ?? 1 }) })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -344,7 +345,8 @@ export default function MahnwesenPage(): JSX.Element {
           title: t('crud.messages.dunningPreview', { defaultValue: 'Mahnwesen-Vorschau' }),
           description: `${preview.open_items_count} offene Posten, Gesamtrückstand: ${preview.total_overdue_amount.toFixed(2)} €`,
         })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -373,12 +375,13 @@ export default function MahnwesenPage(): JSX.Element {
         return
       }
       try {
-        await apiClient.put(`/api/v1/finance/dunning/${formData.id}/paid`, {
+        await apiClient.put(`/api/v1/finance/dunning/${String(formData.id ?? '')}/paid`, {
           betrag: formData.gesamtForderung || 0,
           datum: new Date().toISOString().split('T')[0],
         })
         toast({ title: t('crud.messages.paymentBooked'), description: t('crud.messages.paymentBookedDesc') })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('crud.messages.paymentError'), description: msg })
       }
@@ -388,9 +391,10 @@ export default function MahnwesenPage(): JSX.Element {
         return
       }
       try {
-        await apiClient.put(`/api/v1/finance/dunning/${formData.id}/send`)
+        await apiClient.put(`/api/v1/finance/dunning/${String(formData.id ?? '')}/send`)
         toast({ title: t('crud.messages.collectionHandedOver'), description: t('crud.messages.collectionHandedOverDesc') })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('crud.messages.collectionError'), description: msg })
       }
@@ -409,7 +413,8 @@ export default function MahnwesenPage(): JSX.Element {
             description: `Export-ID: ${result.export_id}`,
           })
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }

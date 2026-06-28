@@ -190,12 +190,12 @@ export default function GDPRRequestsPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/gdpr-request/${item.id}`)
+      navigate(`/crm/gdpr-request/${item.id as string}`)
     } else if (action === 'delete' && item) {
       if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
       await withPending(String(item.id), async () => {
         try {
-          await apiClient.delete(`/api/v1/gdpr/requests/${item.id}`)
+          await apiClient.delete(`/api/v1/gdpr/requests/${item.id as string}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
           invalidate()
         } catch {

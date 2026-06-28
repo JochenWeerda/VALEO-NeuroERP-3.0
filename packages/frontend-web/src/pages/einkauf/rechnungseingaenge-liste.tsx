@@ -194,7 +194,7 @@ async function bulkWorkflow(
       err += 1
       messages.push(
         ( item as Record<string, unknown>).rechnungsNummer || item.id
-          ? `${( item as Record<string, unknown>).rechnungsNummer || item.id}: ${e?.response?.data?.detail || e?.message}`
+          ? `${String(( item as Record<string, unknown>).rechnungsNummer ?? item.id ?? '')}: ${e?.response?.data?.detail ?? e?.message}`
           : e?.response?.data?.detail || e?.message,
       )
     }

@@ -459,7 +459,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         let customer: Customer | null = handoverCustomer
         if (response.customer_id) {
           try {
-            const customerResponse = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const customerResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
             const cd = customerResponse?.data ?? customerResponse
             if (!cd) throw new Error('Customer detail response is empty')
             customer = {
@@ -494,7 +494,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
           customer: customer ?? prev.customer,
           positionen: mapResponseItemsToPositionen(response.items ?? []),
         }))
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
       }
     }
@@ -519,7 +520,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
     let active = true
     const loadWorkflowCustomer = async (): Promise<void> => {
       try {
-        const cd = await apiClient.get<any>(`/api/v1/crm/customers/${workflowCustomerId}`)
+        const cd = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${workflowCustomerId}`)
         if (!active) return
         const customer: Customer = {
           id: cd.id ?? workflowCustomerId,
@@ -579,7 +580,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       }
       if (!bestellInboxId) return
       try {
-        const res = await apiClient.get<any>(`/api/v1/crm/bestell-inbox/${bestellInboxId}`)
+        const res = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/bestell-inbox/${bestellInboxId}`)
         const data = res.data ?? res
         const parsed = data?.parsed
         if (!active || !parsed?.positionen?.length) return
@@ -746,7 +747,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
     }))
     // Angebote für Kunden laden
     try {
-      const offers = await apiClient.get<any[]>(`/api/v1/sales/quotes?customer_id=${c.id}`)
+      const offers = await apiClient.get<Record<string, unknown>[]>(`/api/v1/sales/quotes?customer_id=${c.id}`)
       const mapped = (offers || []).map((o) => ({
         id: o.id,
         angebotNr: o.quote_number || o.number || o.id,
@@ -786,7 +787,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       const list = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
       setBranchesList(Array.isArray(list) ? list : [])
       setShowNiederlassungDialog(true)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
     }
   }
@@ -799,7 +801,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
     setShowVertreterDialog(false)
   }
 
-  function handleArticleSelect(article: any) {
+  function handleArticleSelect(article: Record<string, unknown>) {
     const listenpreis = article.sales_price || article.salesPrice || 0
     const ekPreis = article.purchase_price || article.purchasePrice || 0
     const artikelGewicht = article.weight || article.gewicht || 0
@@ -1007,7 +1009,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
     setIsSaving(true)
     try {
       await persistOrder()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Speichern fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)
@@ -1057,7 +1060,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       push('Auftrag erfolgreich gedruckt und gebucht')
       setState((prev) => ({ ...prev, statusGedruckt: true }))
       setShowPrintDialog(false)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -1080,7 +1084,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       push('Auftrag gelöscht')
       setShowDeleteDialog(false)
       navigate('/verkauf')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Löschen fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -1136,7 +1141,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         sourceOfferId: salesHandover.sourceOfferId,
         sourceOrderId: id,
       }))
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Erstellen des Lieferscheins: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)
@@ -1176,7 +1182,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       } else {
         push('Rechnung erstellt')
       }
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Sofort-Rechnung fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
     } finally {
       setIsSaving(false)
@@ -1204,7 +1211,8 @@ export default function OrderEditorLegacyPage(): JSX.Element {
           positionen: mapResponseItemsToPositionen(response.items || []),
         }))
         push('Daten vom vorherigen Auftrag übernommen')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },

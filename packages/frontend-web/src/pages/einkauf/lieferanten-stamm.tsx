@@ -272,7 +272,8 @@ export default function LieferantenStammPage(): JSX.Element {
           bemerkungen: data.notes || data.bemerkungen,
         })
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -330,7 +331,8 @@ export default function LieferantenStammPage(): JSX.Element {
     try {
       await persistLieferant()
       toast({ title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }) })
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -361,7 +363,8 @@ export default function LieferantenStammPage(): JSX.Element {
       )
       setDuplicateResults(duplicates)
       setDuplicateCheckDialogOpen(true)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -392,7 +395,8 @@ export default function LieferantenStammPage(): JSX.Element {
       })
       setBlockDialogOpen(false)
       setBlockReason('')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -414,7 +418,8 @@ export default function LieferantenStammPage(): JSX.Element {
       })
       setArchiveDialogOpen(false)
       navigate('/einkauf/lieferanten')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -1008,7 +1013,7 @@ export default function LieferantenStammPage(): JSX.Element {
                                     a.click()
                                     URL.revokeObjectURL(objectUrl)
                                     toast({ title: t('crud.messages.downloadInfo'), description: doc.dateiname })
-                                  } catch (error: any) {
+                                  } catch (error: unknown) {
                                     toast({
                                       title: t('crud.messages.downloadInfo'),
                                       description: 'Dokument konnte nicht geladen werden. Bitte DMS-Verbindung pruefen.',
@@ -1260,7 +1265,7 @@ export default function LieferantenStammPage(): JSX.Element {
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            navigate(`/einkauf/lieferant/${dup.id}`)
+                            navigate(`/einkauf/lieferant/${String(dup.id ?? '')}`)
                             setDuplicateCheckDialogOpen(false)
                           }}
                         >

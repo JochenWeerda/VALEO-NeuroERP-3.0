@@ -192,7 +192,7 @@ async function bulkRequestMutation(
       ok += 1
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      errors.push(`${item.anfrageNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+      errors.push(`${String(item.anfrageNummer ?? item.id ?? '')}: ${error.response?.data?.detail ?? error.message}`)
     }
   }
 

@@ -24,7 +24,7 @@ export default function DebitorenAPIPage(): JSX.Element {
       const result = await mahnenMutation.mutateAsync(id)
       toast({
         title: 'Mahnung erstellt',
-        description: `Mahnstufe ${( result as Record<string, unknown>).mahn_stufe || 1} wurde erstellt`,
+        description: `Mahnstufe ${String(( result as Record<string, unknown>).mahn_stufe ?? 1)} wurde erstellt`,
       })
     } catch (err) {
       toast({
