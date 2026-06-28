@@ -1,0 +1,45 @@
+slice_id: UIX-CRM-PILOT-002
+title: Universal Mask Generator CRM Customer Pilot
+owner: Codex
+status: reserved
+created_at: 2026-06-28
+coordination: >-
+  Follow-up slice after UIX-MASK-FRAMEWORK-001. Owns only the CRM customer
+  pilot wiring, feature-flag fallback, renderer hardening needed by the pilot,
+  pilot tests and documentation updates. Does not migrate Sales, Inventory,
+  Finance, Agrar or special operator masks.
+goal: >-
+  Connect the CRM customer/master data pilot to the Universal Mask Generator
+  behind a feature flag, translate the existing customer MaskConfig into a
+  temporary ScreenDefinition, load screen-summary before lazy tab details, and
+  prove desktop/mobile behavior without removing the legacy page.
+file_ownership:
+  - packages/frontend-web/src/pages/crm/kunden-stamm-modern/**
+  - packages/frontend-web/src/pages/crm/kunden-stamm-modern.tsx
+  - packages/frontend-web/src/features/crm-masks/**
+  - packages/frontend-web/src/components/mask-builder/**
+  - packages/frontend-web/src/lib/api/**
+  - packages/frontend-web/src/__tests__/components/mask-builder/**
+  - packages/frontend-web/src/__tests__/pages/crm/**
+  - tests/test_crm_screen_summary.py
+  - docs/adr/adr-011-ui-maskenstrategie.md
+  - docs/architecture/domains/crm/README.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Feature flag chooses Universal Generator pilot or legacy CRM customer page.
+  - Existing customer MaskConfig is adapted to ScreenDefinition with temporary adapter metadata.
+  - CRM screen summary is loaded as compact first payload before detail tab rendering.
+  - Lazy tabs render only the active tab and keep legacy fallback available.
+  - Renderer applies desktopDense, tabletTouch and mobileStack layout classes.
+  - Actions are hidden unless their permissions are present.
+  - Unit, backend contract and documentation checks are recorded.
+tests:
+  - pnpm --dir packages/frontend-web test:run
+  - python -m pytest tests/test_crm_screen_summary.py tests/test_mask_registry_uix.py -q
+  - pnpm --dir packages/frontend-web type-check
+risks:
+  - Full visual parity with every CRM 360 detail workflow is out of scope for this slice.
+  - Existing dirty-tree files outside UIX ownership must not be included in the pilot changes.
+external_gates:
+  - not_applicable

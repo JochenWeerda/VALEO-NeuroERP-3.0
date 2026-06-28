@@ -11,14 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-CRM-PILOT-002 - Universal Mask Generator CRM Customer Pilot
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-28 - Claim fuer produktive CRM-Kundenpilot-Anbindung des Universal Mask Generator hinter Feature Flag mit Legacy-Fallback, Summary-first-Datenfluss, Lazy Tabs, Mobile-Layout-Haertung und Playwright/Unit/Backend-Abnahme.
+**Ziel:** CRM Kundenstamm/360 als erste echte Maske ueber `ScreenDefinition` und `UniversalMaskRenderer` anbinden, ohne alte Maske zu ersetzen; Generator-Paritaet, Mobile-Verhalten und Performance-Vertrag messbar machen.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/**`, `packages/frontend-web/src/pages/crm/kunden-stamm-modern.tsx`, `packages/frontend-web/src/features/crm-masks/**`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/lib/api/**`, CRM-Pilot-Tests, `docs/adr/adr-011-ui-maskenstrategie.md`, `docs/architecture/domains/crm/README.md`, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
+**Abnahme:** Feature Flag schaltet Legacy vs. Universal Pilot; Customer MaskConfig wird temporaer adaptiert; Shell/Summary erscheinen vor Details; Tabs bleiben lazy; Permissions und Mobile-Modi sind getestet; Legacy-Fallback bleibt intakt; Doku und Open-Gaps aktualisiert.
+
 ## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator with Translation Layer Skeleton
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-28 - Claim fuer extreme metadata-driven UIX-Architektur: canonical ScreenDefinition/MaskSchema, temporaere Uebersetzungsschicht fuer Legacy-Masken, UniversalMaskRenderer-Skelett, LazyTabs, VirtualDataTable, CRM Screen-Summary-Pilot und ADR-/Domain-Pack-Nachzug.
+**Stand:** abgeschlossen 2026-06-28 - Skeleton geliefert: canonical ScreenDefinition/MaskSchema, temporaere Uebersetzungsschicht fuer Legacy-MaskConfig, UniversalMaskRenderer, LazyTabs, VirtualDataTable, CRM Screen-Summary-Pilot, Mask-Registry-UIX-Metadaten und ADR-/Domain-Pack-Nachzug.
 **Ziel:** VALEO-Masken langfristig ueber einen neutralen Generator mit getrennten Daten-/Permission-/Workflow-Vertraegen und wiederverwendbarem Visualisierungslayer fuehren; alte Masken bleiben aktiv, bis Adapter-Paritaet und Performance belegt sind.
-**Dateibesitz:** `app/core/mask_classification.py`, `app/api/v1/endpoints/mask_registry.py`, `app/api/v1/endpoints/crm_360.py`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/components/ui/LazyTabs.tsx`, `packages/frontend-web/src/components/ui/VirtualDataTable.tsx`, `packages/frontend-web/src/features/crm-masks/**`, `packages/frontend-web/src/lib/api/crm-screen-summary.ts`, `docs/adr/adr-011-ui-maskenstrategie.md`, Domain Packs CRM/Agrar/Inventory, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
-**Abnahme:** Generator-/Adapter-Vertrag dokumentiert; UIX-/Generator-Metadaten im Mask Registry Contract; UniversalMaskRenderer/LazyTabs/VirtualDataTable/Adapter getestet; CRM-Screen-Summary-Endpunkt getestet; ADR-011 und Doku aktualisiert; Typecheck und relevante Unit-/Backendtests gruen.
+**Dateibesitz:** `app/core/mask_classification.py`, `app/api/v1/endpoints/crm_360.py`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/components/ui/LazyTabs.tsx`, `packages/frontend-web/src/components/ui/VirtualDataTable.tsx`, `docs/adr/adr-011-ui-maskenstrategie.md`, Domain Packs CRM/Agrar/Inventory/Finance, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
+**Abnahme:** Generator-/Adapter-Vertrag dokumentiert; UIX-/Generator-Metadaten im Mask Registry Contract; UniversalMaskRenderer/LazyTabs/VirtualDataTable/Adapter getestet; CRM-Screen-Summary-Endpunkt getestet; ADR-011 und Doku aktualisiert. Frontend-Unit-Slice und Backend-Contract-Tests gruen; lokaler Frontend-Typecheck und direkter `tsc` liefen nach der Typkorrektur in 300s ohne Diagnose in den Timeout.
 
 ## DOC-ARCH-STACK — Architektur-Dokumentations-Stack (ISO 42010 + arc42 + C4)
 
