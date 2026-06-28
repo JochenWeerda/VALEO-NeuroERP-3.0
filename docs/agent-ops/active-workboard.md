@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-SALES-PILOT-007 - Universal Mask Generator Sales Order Pilot
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-28 — Verkaufsauftrag-Generator-Pilot hinter `VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER` (nur bestehende Auftraege); screen-summary, lazy Positionen, Legacy-Editor fuer Neuanlage.
+**Ziel:** Zweite Domäne im Universal Mask Generator; Summary-first, read-only Pilot ohne Legacy-Ersatz.
+**Abnahme:** Flag + order-id → Pilot; Neuanlage/Workflow → Legacy; Vitest/pytest gruen.
+
 ## UIX-CRM-PARITY-003 - CRM Customer 360 Lazy Tab Data Parity
 
 **Von:** Cursor

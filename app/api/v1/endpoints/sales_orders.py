@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from decimal import Decimal
 import json
-from typing import Optional
+from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
@@ -252,6 +252,121 @@ async def get_sales_order(
 ):
     row = _get_sales_order_row(db, order_id, tenant_id)
     return _row_to_order(row, _fetch_items(db, order_id, tenant_id))
+
+
+def _sales_order_tab_endpoint(order_id: str, tab_key: str) -> str:
+    return f"/api/v1/sales/orders/{order_id}/tabs/{tab_key}"
+
+
+def build_sales_order_screen_summary(
+    *,
+    order_id: str,
+    tenant_id: str,
+    order: dict[str, Any],
+    item_count: int,
+    customer_name: str | None = None,
+) -> dict[str, Any]:
+    delivery_date = order.get("delivery_date")
+    delivery_label = delivery_date.isoformat() if hasattr(delivery_date, "isoformat") else (
+        str(delivery_date) if delivery_date else None
+    )
+    return {
+        "schema_version": 1,
+        "screen_id": "sales/sales-order",
+        "order_id": order_id,
+        "tenant_id": tenant_id,
+        "title": order.get("subject") or order.get("order_number") or "Verkaufsauftrag",
+        "subtitle": order.get("order_number"),
+        "summary": {
+            "total_amount": float(order.get("total_amount") or 0.0),
+            "item_count": item_count,
+            "status": str(order.get("status") or "open"),
+            "delivery_date": delivery_label,
+        },
+        "available_tabs": ["kopf", "positionen", "lieferung"],
+        "tab_endpoints": {
+            "positionen": _sales_order_tab_endpoint(order_id, "positionen"),
+        },
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "permission": "sales.order.update"},
+        ],
+        "performance": {
+            "initial_payload_budget_kb": 56,
+            "tabs_lazy": True,
+            "lookup_min_chars": 2,
+            "default_table_limit": 25,
+        },
+        "customer_name": customer_name,
+    }
+
+
+def _fetch_customer_name(db: Session, customer_id: str | None, tenant_id: str) -> str | None:
+    if not customer_id:
+        return None
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT name
+                FROM domain_erp.business_partners
+                WHERE id = :cid AND tenant_id::text = :tid
+                LIMIT 1
+                """
+            ),
+            {"cid": customer_id, "tid": tenant_id},
+        ).mappings().first()
+        return str(row["name"]) if row and row.get("name") else None
+    except Exception:
+        db.rollback()
+        return None
+
+
+@router.get(
+    "/{order_id}/screen-summary",
+    response_model=dict[str, Any],
+    tags=["sales", "orders", "screen-summary"],
+    summary="Sales order screen summary abrufen",
+)
+async def get_sales_order_screen_summary(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = _get_sales_order_row(db, order_id, tenant_id)
+    items = _fetch_items(db, order_id, tenant_id)
+    customer_name = _fetch_customer_name(db, str(row.get("customer_id")) if row.get("customer_id") else None, tenant_id)
+    return build_sales_order_screen_summary(
+        order_id=order_id,
+        tenant_id=tenant_id,
+        order=row,
+        item_count=len(items),
+        customer_name=customer_name,
+    )
+
+
+@router.get(
+    "/{order_id}/tabs/{tab_key}",
+    response_model=dict[str, Any],
+    tags=["sales", "orders", "screen-summary"],
+    summary="Sales order tab list data abrufen",
+)
+async def get_sales_order_tab_data(
+    order_id: str,
+    tab_key: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _get_sales_order_row(db, order_id, tenant_id)
+
+    if tab_key != "positionen":
+        return {"tab_key": tab_key, "table_key": tab_key, "items": []}
+
+    items = _fetch_items(db, order_id, tenant_id)
+    return {
+        "tab_key": tab_key,
+        "table_key": "order_items",
+        "items": [item.model_dump(mode="json") for item in items],
+    }
 
 
 @router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED, summary="Sales order anlegen")

@@ -49,8 +49,46 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_sales_order_screen_definition() -> dict[str, Any]:
+    return {
+        "schemaVersion": 1,
+        "id": "sales/sales-order",
+        "domain": "sales",
+        "mode": "detail",
+        "title": "Verkaufsauftrag",
+        "subtitle": "Sales Order",
+        "adapter": {
+            "type": "native",
+            "sourceId": "sales/sales-order",
+            "temporary": False,
+        },
+        "summaryEndpoint": "/api/v1/sales/orders/{order_id}/screen-summary",
+        "tabs": [
+            {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
+            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True},
+            {"key": "lieferung", "label": "Lieferung", "lazy": True, "keepAlive": True},
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "sales.order.update"},
+        ],
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 56,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "sales",
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
+    "sales/sales-order": build_sales_order_screen_definition,
 }
 
 

@@ -79,6 +79,31 @@ export type SalesOffer = {
   version: number
 }
 
+export type SalesOrderScreenSummary = {
+  schema_version: 1
+  screen_id: 'sales/sales-order'
+  order_id: string
+  tenant_id?: string | null
+  title: string
+  subtitle?: string | null
+  summary: {
+    total_amount: number
+    item_count: number
+    status: string
+    delivery_date?: string | null
+  }
+  available_tabs: string[]
+  tab_endpoints?: Record<string, string>
+  actions: Array<{ key: string; label: string; permission?: string }>
+  customer_name?: string | null
+  performance: {
+    initial_payload_budget_kb: number
+    tabs_lazy: boolean
+    lookup_min_chars: number
+    default_table_limit: number
+  }
+}
+
 type PaginatedResponse<T> = {
   items: T[]
   total: number
@@ -149,6 +174,7 @@ export const salesKeys = {
   all: ['sales'] as const,
   orders: (filters?: Record<string, unknown>) => [...salesKeys.all, 'orders', filters] as const,
   order: (id: string) => [...salesKeys.all, 'orders', id] as const,
+  orderScreenSummary: (id: string) => [...salesKeys.order(id), 'screen-summary'] as const,
   offers: (filters?: Record<string, unknown>) => [...salesKeys.all, 'offers', filters] as const,
   offer: (id: string) => [...salesKeys.all, 'offers', id] as const,
   // legacy aliases
@@ -214,6 +240,31 @@ async function fetchOffers(params: Record<string, unknown> = {}): Promise<SalesO
 }
 
 // ── Hooks: Orders ─────────────────────────────────────────────────────────────
+
+async function fetchSalesOrder(id: string): Promise<SalesOrder> {
+  const resp = await apiClient.get<SalesOrder>(`/api/v1/sales/orders/${id}`)
+  return resp.data
+}
+
+export function useSalesOrder(id: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: salesKeys.order(id),
+    queryFn: () => fetchSalesOrder(id),
+    enabled: Boolean(id) && (options?.enabled ?? true),
+  })
+}
+
+export function useSalesOrderScreenSummary(id: string) {
+  return useQuery({
+    queryKey: salesKeys.orderScreenSummary(id),
+    queryFn: async () => {
+      const response = await apiClient.get<SalesOrderScreenSummary>(`/api/v1/sales/orders/${id}/screen-summary`)
+      return response.data
+    },
+    enabled: Boolean(id),
+    staleTime: 5 * 60 * 1000,
+  })
+}
 
 export function useSalesOrders(filters?: { status?: string; search?: string; customer_id?: string }) {
   return useQuery({
