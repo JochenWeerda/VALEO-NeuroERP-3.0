@@ -62,13 +62,20 @@ Status: abgeschlossen — `GET /api/v1/masks/{mask_id}/screen-definition`, `useS
 
 Status: abgeschlossen — `scripts/check_mask_performance_contract.ts` im Quality-Gate; Registry-Feld `lookup_min_chars`.
 
+## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
+
+Status: abgeschlossen — Lazy Tabs `lieferung` (Lieferscheinliste) und `dokumente` (Rechnungsbelege) via tab API.
+
+- Geliefert: tab_endpoints, `_fetch_delivery_notes_for_order`, `_fetch_order_documents`, Paritaetsmatrix `mask-parity-sales-order.md`.
+- Legacy: Mutationen (Speichern, LS anlegen, Druck) weiterhin OrderEditorLegacyPage.
+
 ## UIX-SALES-PILOT-007 - Sales Order Generator Pilot (2026-06-28)
 
 Status: abgeschlossen — Verkaufsauftrag hinter `VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER` fuer bestehende Auftraege.
 
 - Geliefert: screen-summary + positions tab API, UniversalSalesOrderPilotPage, Route-Switch in order-editor.
 - Legacy: voller OrderEditorLegacyPage fuer Neuanlage, Workflow-Einstieg und Flag aus.
-- Restarbeit: Liefer-/Dokument-Tabs, Mutationen, fachliche Paritaet mit OrderEditorLegacyPage.
+- Restarbeit: Mutationen, fachliche Voll-Paritaet mit OrderEditorLegacyPage.
 
 ## Zweck
 

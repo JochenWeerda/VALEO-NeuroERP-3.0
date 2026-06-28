@@ -67,6 +67,7 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
             {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True},
             {"key": "lieferung", "label": "Lieferung", "lazy": True, "keepAlive": True},
+            {"key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": True},
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "sales.order.update"},

@@ -1,0 +1,23 @@
+slice_id: UIX-SALES-PARITY-008
+title: Sales Order Lazy Tab Parity (Lieferung)
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-28
+goal: >-
+  Extend the sales order generator pilot with lazy delivery-note list data,
+  tab_endpoints for lieferung, and a documented parity matrix vs legacy editor.
+file_ownership:
+  - app/api/v1/endpoints/sales_orders.py
+  - packages/frontend-web/src/features/sales-masks/**
+  - packages/frontend-web/src/pages/sales/UniversalSalesOrderPilotPage.tsx
+  - tests/test_sales_order_screen_summary.py
+  - tests/test_sales_order_tab_data.py
+  - packages/frontend-web/src/__tests__/pages/sales/**
+  - packages/frontend-web/tests/e2e/sales-universal-order-pilot.spec.ts
+  - docs/architecture/domains/crm/mask-parity-sales-order.md
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance:
+  - lieferung tab loads delivery notes via tab API when activated.
+  - tab_endpoints includes lieferung; parity matrix documented.
+  - Tests updated; legacy editor unchanged.
