@@ -69,8 +69,8 @@ def create_haccp_plan(
         INSERT INTO domain_shared.futtermittel_haccp_plaene
             (id, tenant_id, bezeichnung, gueltigkeit_von, gueltigkeit_bis,
              gefahrenanalyse, ccp_liste, ueberwachung, korrekturen, verifizierung, aktiv)
-        VALUES (:id, :tid, :bez, :gv, :gb, :ga::jsonb, :ccp::jsonb,
-                :ue::jsonb, :ko::jsonb, :ver::jsonb, TRUE)
+        VALUES (:id, :tid, :bez, :gv, :gb, CAST(:ga AS jsonb), CAST(:ccp AS jsonb),
+                CAST(:ue AS jsonb), CAST(:ko AS jsonb), CAST(:ver AS jsonb), TRUE)
     """), {
         "id": plan_id, "tid": tenant_id,
         "bez": body.get("bezeichnung", ""),
@@ -94,20 +94,38 @@ def update_haccp_plan(
     tenant_id: str = Depends(_tenant),
 ) -> dict[str, Any]:
     import json
-    fields = []
+    scalar_columns = {
+        "bezeichnung": "bezeichnung = :bezeichnung",
+        "gueltigkeit_von": "gueltigkeit_von = :gueltigkeit_von",
+        "gueltigkeit_bis": "gueltigkeit_bis = :gueltigkeit_bis",
+        "aktiv": "aktiv = :aktiv",
+    }
+    json_columns = {
+        "gefahrenanalyse": "gefahrenanalyse = CAST(:gefahrenanalyse AS jsonb)",
+        "ccp_liste": "ccp_liste = CAST(:ccp_liste AS jsonb)",
+        "ueberwachung": "ueberwachung = CAST(:ueberwachung AS jsonb)",
+        "korrekturen": "korrekturen = CAST(:korrekturen AS jsonb)",
+        "verifizierung": "verifizierung = CAST(:verifizierung AS jsonb)",
+    }
+    assignments = []
     params: dict[str, Any] = {"id": plan_id, "tid": tenant_id}
-    for col in ("bezeichnung", "gueltigkeit_von", "gueltigkeit_bis", "aktiv"):
+    for col, assignment in scalar_columns.items():
         if col in body:
-            fields.append(f"{col} = :{col}")
+            assignments.append(assignment)
             params[col] = body[col]
-    for col in ("gefahrenanalyse", "ccp_liste", "ueberwachung", "korrekturen", "verifizierung"):
+    for col, assignment in json_columns.items():
         if col in body:
-            fields.append(f"{col} = :{col}::jsonb")
+            assignments.append(assignment)
             params[col] = json.dumps(body[col])
-    if not fields:
+    if not assignments:
         raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
+    sql = (
+        "UPDATE domain_shared.futtermittel_haccp_plaene SET "
+        + ", ".join(assignments)
+        + " WHERE id = :id AND tenant_id = :tid"
+    )
     db.execute(
-        text(f"UPDATE domain_shared.futtermittel_haccp_plaene SET {', '.join(fields)} WHERE id = :id AND tenant_id = :tid"),
+        text(sql),
         params,
     )
     db.commit()
@@ -151,7 +169,7 @@ def create_vlog_meldung(
             (id, tenant_id, rezeptur_id, meldedatum, menge_kg,
              rohstoff_liste, gvo_frei, zertifikat_nr, status, notiz)
         VALUES (:id, :tid, :rez, :md, :kg,
-                :rl::jsonb, :gvo, :zert, 'erstellt', :notiz)
+                CAST(:rl AS jsonb), :gvo, :zert, 'erstellt', :notiz)
     """), {
         "id": meldung_id, "tid": tenant_id,
         "rez": body.get("rezeptur_id"),

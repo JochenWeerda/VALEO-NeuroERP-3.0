@@ -1,4 +1,223 @@
+---
+title: Active Workboard
+type: reference
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
+---
+
 # Active Workboard
+
+## UIX-CRM-PARITY-003 - CRM Customer 360 Lazy Tab Data Parity
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — Lazy Tab-Daten, tab_endpoints, Paritaetsmatrix, Tests; Renderer-Lib, native ScreenDefinition und Perf-Gate in Waves 28–30 nachgezogen.
+**Ziel:** CRM-Pilot von renderbarer Shell zu 360-naher Paritaet: aktiver Tab laedt echte Listendaten nach, ohne Legacy-Maske zu ersetzen.
+**Abnahme:** Mindestens 4 Tabs mit Lazy-Load; tab_endpoints dokumentiert; Paritaetsmatrix; Vitest/pytest/Playwright gruen; Legacy-Fallback unberuehrt.
+
+## UIX-RENDERER-LIB-004 - Mask Builder Renderer Library
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — Field/Table/Summary/Action/Tab/Workflow-Renderer extrahiert; UniversalMaskRenderer als Orchestrator.
+**Ziel:** Visualisierungslayer aus Monolith loesen (Refactor-only).
+**Abnahme:** Vitest UniversalMaskRenderer unveraendert gruen; Diff = Move only.
+
+## UIX-DATA-CONTRACT-005 - Native ScreenDefinition API
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — GET /api/v1/masks/{id}/screen-definition, useScreenDefinition, crm/customer-360 nativ.
+**Ziel:** Backend liefert native ScreenDefinition; Adapter wird schrittweise Fallback.
+**Abnahme:** pytest test_mask_screen_definition gruen; Pilot nutzt native Metadaten wenn Endpoint 200.
+
+## UIX-PERF-GATE-006 - Mask Performance Contract CI
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — check_mask_performance_contract.ts im Quality-Gate; lookup_min_chars in Registry.
+**Ziel:** Performance-Vertrag operationalisieren.
+**Abnahme:** Script gruen fuer generator_ready Masken; CI-Schritt aktiv.
+
+## UIX-CRM-PILOT-002 - Universal Mask Generator CRM Customer Pilot
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-28 - CRM-Kundenpilot hinter `VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER` geliefert: UniversalMaskRenderer-Anbindung, Legacy-Fallback, Summary-first-Datenfluss, Permission-Action-Filter, Mobile-Layout-Haertung und Unit-/Backend-/Playwright-Abnahme.
+**Ziel:** CRM Kundenstamm/360 als erste echte Maske ueber `ScreenDefinition` und `UniversalMaskRenderer` anbinden, ohne alte Maske zu ersetzen; Generator-Paritaet, Mobile-Verhalten und Performance-Vertrag messbar machen.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/**`, `packages/frontend-web/src/pages/crm/kunden-stamm-modern.tsx`, `packages/frontend-web/src/features/crm-masks/**`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/lib/api/**`, CRM-Pilot-Tests, `docs/adr/adr-011-ui-maskenstrategie.md`, `docs/architecture/domains/crm/README.md`, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
+**Abnahme:** Feature Flag schaltet Legacy vs. Universal Pilot; Customer MaskConfig wird temporaer adaptiert; Shell/Summary erscheinen vor Details; Tabs bleiben lazy; Permissions und Mobile-Modi sind getestet; Legacy-Fallback bleibt intakt; Doku und Open-Gaps aktualisiert. Typecheck, Backend-Contracts und Playwright-Pilot-Smoke Desktop/Mobile gruen; globaler Visual-Tour-Teardown meldet bestehende Alt-Warnungen ausserhalb des Pilot-Scopes.
+
+## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator with Translation Layer Skeleton
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-28 - Skeleton geliefert: canonical ScreenDefinition/MaskSchema, temporaere Uebersetzungsschicht fuer Legacy-MaskConfig, UniversalMaskRenderer, LazyTabs, VirtualDataTable, CRM Screen-Summary-Pilot, Mask-Registry-UIX-Metadaten und ADR-/Domain-Pack-Nachzug.
+**Ziel:** VALEO-Masken langfristig ueber einen neutralen Generator mit getrennten Daten-/Permission-/Workflow-Vertraegen und wiederverwendbarem Visualisierungslayer fuehren; alte Masken bleiben aktiv, bis Adapter-Paritaet und Performance belegt sind.
+**Dateibesitz:** `app/core/mask_classification.py`, `app/api/v1/endpoints/crm_360.py`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/components/ui/LazyTabs.tsx`, `packages/frontend-web/src/components/ui/VirtualDataTable.tsx`, `docs/adr/adr-011-ui-maskenstrategie.md`, Domain Packs CRM/Agrar/Inventory/Finance, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
+**Abnahme:** Generator-/Adapter-Vertrag dokumentiert; UIX-/Generator-Metadaten im Mask Registry Contract; UniversalMaskRenderer/LazyTabs/VirtualDataTable/Adapter getestet; CRM-Screen-Summary-Endpunkt getestet; ADR-011 und Doku aktualisiert. Frontend-Unit-Slice und Backend-Contract-Tests gruen; lokaler Frontend-Typecheck und direkter `tsc` liefen nach der Typkorrektur in 300s ohne Diagnose in den Timeout.
+
+## DOC-ARCH-STACK — Architektur-Dokumentations-Stack (ISO 42010 + arc42 + C4)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-27 — Plan „Architektur-Dokumentation IST + Umsetzung“ vollstaendig: ADR-036, arc42 (12 Kapitel), ISO-42010-Matrix, C4 Context/Container/Components, Enterprise-Landkarte, ERD, 3 Sequenzdiagramme, Container-Inventar-Generator.
+**Ziel:** Formale Architektursichten ergaenzen Process Kernel + ADRs ohne Tool-Bruch (Mermaid in MkDocs).
+**Dateibesitz:** `docs/architecture/arc42/`, `docs/architecture/views/`, `docs/adr/adr-036-architecture-documentation-stack.md`, `docs/README.md`, `scripts/generate_container_inventory.py`, `docs/entwickler/container-inventory.md`, `mkdocs.yml`, Slices `DOC-ARCH-FOUNDATION-001` … `DOC-ARCH-SEQ-001`, `docs/project-context/open-gaps-and-known-issues.md` (Abschnitt DOC-ARCH-STACK-001).
+**Abnahme:** Alle 8 Slices abgeschlossen; optional P1-Components, UML-Klassen, Production-C4, CI-Gate (2026-06-27) nachgezogen; `mkdocs build` 0 Errors; `generate_container_inventory.py --check` OK.
+
+| Slice | Inhalt |
+|---|---|
+| DOC-ARCH-FOUNDATION-001 | ADR-036, Index, docs/README.md |
+| DOC-ARCH-ARC42-001 | arc42 Hub + ISO-42010 |
+| DOC-ARCH-C4-001 | System Context |
+| DOC-ARCH-C4-002 | Container + Generator |
+| DOC-ARCH-C4-003 | Enterprise-Landkarte |
+| DOC-ARCH-C4-004 | Component CRM/Agrar/Finance |
+| DOC-ARCH-ERD-001 | Canonical ERD |
+| DOC-ARCH-SEQ-001 | Sequenz O2C/Agrar/Auth |
+| DOC-ARCH-C4-005 | Component Einkauf/Lager + DMS/Compliance (optional) |
+| DOC-ARCH-UML-001 | UML classDiagram Canonical Core (optional) |
+| DOC-ARCH-CI-001 | Container-Drift CI-Gate (optional) |
+
+## LOADTEST-STAGING-GATE-001 - Erntepeak-Lasttest als externes Gate haerten
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-27 — Scheduled `Lasttest Erntepeak (Gap 037)` scheiterte an nicht aufloesbarem `staging.valeo-erp.de` und leerem `API_DEV_TOKEN`; Workflow prueft jetzt `STAGING_URL`, Token und DNS vor k6-Start und dokumentiert fehlende externe Voraussetzungen neutral.
+**Ziel:** Lasttest-Gate darf Infrastruktur-/Secret-Luecken nicht als Produkt-Performancefehler melden; manuelle Lasttests bleiben hart und schlagen bei fehlender Zielkonfiguration fehl.
+**Dateibesitz:** `.github/workflows/load-test.yml`, `docs/operations/production-readiness-runbook.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/LOADTEST-STAGING-GATE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Schedule ohne Staging/Token/DNS endet erfolgreich mit Summary als externes Gate; manuelle `harvest-peak`-Ausfuehrung verlangt gueltiges Ziel und Token; Runbook fuehrt das Gate.
+
+## COV-RATCHET-010 - Quality-Gate Baseline nach CI-Messung korrigieren
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-27 — Quality-Gate-Folgefix auf `main`: Ratchet-Schwellen fuer zehn Pfade auf real gemessene CI-Coverage kalibriert, nachdem geschaetzte Schwellen den Gate-Lauf blockierten. OpenAPI-Drift separat mit `e35fb7798` bereinigt.
+**Ziel:** Kritischen Backend-Coverage-Ratchet wieder als belastbares Gate betreiben: Schwellen duerfen nicht ueber der zuletzt gemessenen CI-Coverage liegen; fachliche Vertiefung erfolgt danach ueber gezielte Tests.
+**Dateibesitz:** `scripts/check_critical_backend_coverage.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/COV-RATCHET-010.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** `python scripts/check_critical_backend_coverage.py` laeuft gegen Quality-Gate-Coverage wieder gruen; betroffene Pfade und Folgevertiefung sind in Open-Gaps dokumentiert.
+
+## HR-TIME-WIZARD-001 - UX-M3 Gefuehrter Planungswizard (5 Schritte)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 5-Schritt-Inline-Wizard im Planung-Tab (Zeitraum → Bedarf → Praeferenzen → Vorschau → Abschluss); dynamische Bedarfszeilen; Fortschrittsbalken; `useCreateWorkPlanAssignment`-Hook; Mutation-Guard via `isPending`; tsc 0 Fehler.
+**Ziel:** UX-M3 (Gefuehrter Planungswizard): Arbeitsplan ohne manuelle Mehrfacherfassung erstellen — Schritt-fuer-Schritt-Fuehrer mit Vorschau vor Speichern.
+**Dateibesitz:** `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-WIZARD-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Wizard oeffnet auf Knopf; 5 Schritte navigierbar; Schritt 5 sendet POST; isPending-Guard aktiv; tsc 0; UX-M3 als umgesetzt markiert.
+
+## HR-TIME-SEASON-BOARD-001 - UX-M7 Saison-Leitstand 7-Tage-Heatmap
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — neuer "Saison-Leitstand"-Tab mit 7-Tage-Heatmap (Blocker/Warnungen/ok farbkodiert pro Tag); Kampagnen-Perioden-Mapping; Schulferien- und Bruecktag-Marker; Kampagnen- und Abwesenheiten-Tabelle darunter. tsc 0 Fehler.
+**Ziel:** UX-M7 (Kalender- und Saisonleitstand) umsetzen: Engpaesse durch Kampagnen, Ferien und Abwesenheiten auf einen Blick sehen ohne API-Mehraufwand — reine UI-Aggregation bestehender Queries.
+**Dateibesitz:** `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-SEASON-BOARD-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** 7-Tage-Heatmap im Saison-Tab; Farbkodierung korrekt; tsc 0; UX-M7 als umgesetzt markiert.
+
+## HR-TIME-DRIVER-DISPO-001 - UX-M4 Driver-Dispo Detail-Panel + Tour-Korrektur
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Driver-Tab mit KPI-Badges, Row-Fokus-Detail-Panel (Plausibilitaets-Checks, Findings), Tour/Fahrzeug-Korrektur via PATCH; `useUpdateDriverTimeEvent` Hook; tsc 0 Fehler.
+**Ziel:** LKW-Fahrer/Tour/Fahrzeug/Plausibilitaet in einer Sicht; Dispatcher kann Tour/Fahrzeug ohne Tab-Wechsel korrigieren.
+**Dateibesitz:** `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-DRIVER-DISPO-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Detail-Panel bei Row-Fokus; PATCH-Mutation mit isPending-Guard; tsc 0; UX-M4 markiert.
+
+## HR-TIME-PAYROLL-CLOSE-001 - UX-M5 Payroll Closeout Gate
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Export-Gate implementiert: Button disabled wenn Blocker offen; Payroll-Tab mit Gate-Banner (per-Blocker + Direktlink Steuerung) und Freigabe-Banner; tsc 0 Fehler.
+**Ziel:** Export-Button sperren solange Blocker nicht geloest; klare per-Blocker-Auflösung ohne Tab-Suche.
+**Dateibesitz:** `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/HR-TIME-PAYROLL-CLOSE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Export-Button disabled bei Blockern; Gate-Banner sichtbar; tsc 0; UX-M5 als umgesetzt markiert.
+
+## HR-TIME-ACTIONPANEL-001 - UX-M2 Detail-Aktionspanel Zeiten/Arbeitsplan
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Rechtes Detail-Aktionspanel in Zeiten- und Arbeitsplan-Tab implementiert; erscheint bei Row-Fokus ohne Tab-Wechsel; zeigt Mitarbeiter/Status/Compliance-Befunde/Aktionen. Admin-Suite-Roadmap auf umgesetzt korrigiert. tsc 0 Fehler.
+**Ziel:** UX-M2 (Aktionspanel) umsetzen: Row-Fokus zeigt Kontext und Aktionen direkt rechts — kein Tab-Wechsel, keine ID-Kopie noetig.
+**Dateibesitz:** `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `docs/agent-ops/slices/HR-TIME-ACTIONPANEL-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** onRowFocus → rechtes Panel; tsc 0 Fehler; UX-M2 als umgesetzt markiert.
+
+## COV-RATCHET-007 - NATS-Projector Unit-Test + HR-TIME UX-M1 dokumentieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — 14 Unit-Tests fuer WfCockpitNatsProjector gruen (NATS-unabhaengig via MagicMock); Ratchet-Eintrag 75% gesetzt; HR-TIME UX-M1 und COVERAGE-001 in den Quelldokumenten als erledigt markiert.
+**Ziel:** Letzten ungeteseteten Kernpfad im Workflow-Cockpit durch echte Unit-Tests absichern; abgeschlossene Punkte korrekt in den Quellen berichtigen.
+**Dateibesitz:** `tests/test_wf_cockpit_nats_projector.py`, `scripts/check_critical_backend_coverage.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `docs/agent-ops/slices/COV-RATCHET-007.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** 14 Tests exit 0; Ratchet-Script enthaelt `wf_cockpit_nats_projector.py: 0.75`; UX-M1 in Roadmap als umgesetzt markiert.
+
+## DOC-OPS-SEPARATION-001 - Trennung Dev-Gap-Track vs. operative Go-Live-Gates
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — P4-Abschnitt aus open-gaps-and-known-issues.md entfernt; alle externen Gates konsolidiert im Runbook unter neuem Abschnitt "Externe Go-Live Gates" mit fuenf Gate-Tabellen (Infra, Integration, HRM, UAT, Compliance).
+**Ziel:** Operative Abhaengigkeiten (Live-Credentials, UAT-Unterschriften, Steuerberater-Freigaben, Restore-Drills) aus dem Entwicklungs-Gap-Track herausloesen und als Betriebsverantwortung im Production-Readiness-Runbook konsolidieren.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/operations/production-readiness-runbook.md`, `docs/agent-ops/slices/DOC-OPS-SEPARATION-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** open-gaps-and-known-issues.md hat keinen P4-Abschnitt mehr; Runbook hat vollstaendige Gate-Tabellen mit Runbook-Anker `#externe-go-live-gates`.
+
+## DOC-PROJECT-CONTEXT-002 - Weitere Projekt-Kontext-Docs in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sieben weitere Projekt-Kontext-Dokumente (Agrar-ERP-Gap-Matrix, Agrar-Paritaetsmatrix, AI-Dev-Plan, UI-Maskenbestand, Doku-Konsolidierung, ERP-Referenz-Gap-Analyse, ERP-Referenzmatrix) mit Frontmatter versehen und als Referenz-Navigation veroeffentlicht.
+**Ziel:** Strategische Gap-Analysen, ERP-Referenzmatrizen und Projektkontextdokumente fuer Entwickler und Product im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/project-context/agrar-erp-gap-matrix-2026-05-17.md`, `agrar-parity-matrix-2026-05-17.md`, `ai-assisted-development-implementation-plan-2026-06-23.md`, `ui-maskenbestand.md`, `documentation-consolidation-2026-06-26.md`, `erp-reference-gap-analysis-amic-community-erp-fiori-2026-04-08.md`, `erp-reference-matrix-2026-04-12.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-PROJECT-CONTEXT-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sieben Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 38.98 s).
+
+## DOC-AGENTOPS-SURFACE-002 - Weitere Agent-Ops-Skill-Docs in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Vier weitere Agent-Ops-Dokumente (README/Ueberblick, autogoal-skill, goal-skill, agent-orchestrator-pilot) mit Frontmatter versehen und im Agent-Ops-Unterabschnitt veroeffentlicht.
+**Ziel:** Agent-Skill-Dokumentation und Orchestrator-Pilotbeschreibung fuer Agenten und Entwickler im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/agent-ops/README.md`, `autogoal-skill.md`, `goal-skill.md`, `agent-orchestrator-pilot.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-AGENTOPS-SURFACE-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 26.38 s).
+
+## DOC-AGENTOPS-SURFACE-001 - Agent-Ops-Koordinationsdokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sechs Agent-Ops-Koordinationsdokumente (active-workboard, session-start-checklist, task-slice-template, handoff-template, parallel-work-protocol, resume-packet-template) mit Frontmatter versehen und als Unterabschnitt Agent-Ops unter Agent-Dokumentation veroeffentlicht.
+**Ziel:** Agenten-Koordinationsinfrastruktur fuer Claude- und Codex-Sitzungen im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `session-start-checklist.md`, `task-slice-template.md`, `handoff-template.md`, `parallel-work-protocol.md`, `resume-packet-template.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-AGENTOPS-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sechs Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 24.92 s).
+
+## DOC-CARDS-SURFACE-001 - Cards-Konzept und interne Inventar-Docs in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Zwei Cards-Konzeptdokumente (README, card-template) mit Frontmatter versehen; zwei bereits frontmatter-versehene interne Inventar-Docs (_internal/cards-inventory, legacy-docs-inventory) per exclude_docs-Ausnahme eingebunden; Unterabschnitt Prozess-Cards unter Entwickler veroeffentlicht.
+**Ziel:** Interne Prozess-Audit-Infrastruktur (Cards-Konzept, Template, Inventar) fuer Entwickler und QA im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/cards/README.md`, `card-template.md`, `docs/_internal/cards-inventory.md`, `legacy-docs-inventory.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-CARDS-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 18.49 s).
+
+## DOC-WAREHOUSE-SURFACE-001 - Warehouse/WM-AGRI-Dokumente in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Sechs Warehouse-/WM-AGRI-Forschungsdokumente (Hofplan Folkerts Landhandel, Handbuch-C-Inventar, Silo-Baustein, Hersteller-Recherche, Benchmark, Open-Source-Bausteine) mit Frontmatter versehen und als Unterabschnitt Warehouse/WM-AGRI unter Referenz veroeffentlicht.
+**Ziel:** WM-AGRI-Recherche- und Referenzdokumente fuer Entwickler und Agenten im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/warehouse/folkerts-landhandel-hofplan.md`, `handbuch-c-inventar.md`, `agrar-silo-materialfluss-studio-baustein.md`, `agri-silo-vendor-interface-research-2026-06-12.md`, `agri-silo-material-flow-benchmark-2026-06-12.md`, `reusable-open-source-silo-material-flow-2026-06-12.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-WAREHOUSE-SURFACE-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle sechs Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 18.33 s).
+
+## DOC-QA-SURFACE-002 - QA-Docs und Workflow-Chains in MkDocs integrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-27 — Drei QA-Dokumente (soll-ist-checks, external-auditor-simulation-template, e2e-crud-acceptance-matrix) mit Frontmatter versehen; _internal/workflow-chains.md (bereits frontmatter-versehen) per exclude_docs-Ausnahme eingebunden; alle vier Dateien unter Entwickler-Navigation veroeffentlicht.
+**Ziel:** Verbleibende QA-Methodik- und interne Workflow-Ketten-Dokumente fuer Entwickler und QA im kuratierten Docs-Build auffindbar machen.
+**Dateibesitz:** `docs/quality-assurance/soll-ist-checks.md`, `external-auditor-simulation-template.md`, `e2e-crud-acceptance-matrix-2026-04-24.md`, `docs/_internal/workflow-chains.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-QA-SURFACE-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Alle vier Dateien haben gueltiges Frontmatter; `mkdocs build` gruen (0 Errors, 18.39 s).
 
 ## DOC-ARCH-SURFACE-003 - Restliche Architekturdokumente und Open-Gaps in MkDocs
 
@@ -4994,3 +5213,22 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 - Traceability: 123 Slices geparst, 2% Coverage (Phase 1 dokumentiert Lücken)
 - Nutzer: QS-Handbuch, Release-Notes, 50 INAPP-Mappings
 - Agent: Proposals persistent in DB, 18 MCP-Tools mit data_classification
+
+---
+
+## ARCH-OS — Architecture Operating System (2026-06-27)
+
+**Stand:** abgeschlossen — Structurizr DSL, Index-Generator, Domain Packs, Agent Protocol, CI-Gates.
+
+| Slice | Status | Deliverable |
+|---|---|---|
+| ARCH-OS-001 | abgeschlossen | ADR-037, `workspace.dsl`, `render_c4_views.py`, generierte C4 L1/L2 |
+| ARCH-OS-002 | abgeschlossen | `generate_architecture_index.py`, `config/architecture-index.yaml` |
+| ARCH-OS-003 | abgeschlossen | CRM Domain Pack, `architecture-protocol.md`, AGENTS.md |
+| ARCH-OS-004 | abgeschlossen | `pnpm arch:*`, `architecture_drift_check.py`, quality-gate |
+| ARCH-OS-005 | abgeschlossen | Domain Packs Finance, Inventory, Agrar |
+| ARCH-OS-006 | abgeschlossen | Domain Pack DMS/Compliance |
+
+**CLI:** `pnpm arch:render` · `pnpm arch:validate` · `pnpm arch:drift`
+
+**Agent-Einstieg:** `config/architecture-index.yaml` + [architecture-protocol.md](../architecture/agents/architecture-protocol.md) + [Rollout-Prompt](../architecture/agents/architecture-os-rollout-prompt.md) (Copy-Paste für neue Sessions)

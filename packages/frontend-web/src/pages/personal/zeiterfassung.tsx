@@ -27,8 +27,10 @@ import {
   useShifts,
   useSubmitTimeEntry,
   useTimeCockpit,
+  useUpdateDriverTimeEvent,
   useWorkPlan,
   useZeiterfassung,
+  useCreateWorkPlanAssignment,
   type Absence,
   type CalendarEvent,
   type CampaignCapacity,
@@ -109,6 +111,17 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [campaignForm, setCampaignForm] = useState({ campaignCode: 'ERNTE-2026', name: 'Ernteannahme 2026', periodFrom: selectedDate, periodTo: selectedDate, locationCode: 'main', roleCode: 'lkw_fahrer', demand: '2', expectedVolume: '12000' })
   const [fieldForm, setFieldForm] = useState({ employeeRef: 'berater-1', customerRef: 'kunde-42', territoryCode: 'north', campaignCode: 'SAAT-2026', startsAt: `${selectedDate}T09:00:00+02:00`, endsAt: `${selectedDate}T11:00:00+02:00` })
   const [correctionForm, setCorrectionForm] = useState({ entryId: '', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', reason: 'Nachbearbeitung nach Pruefung', costCenter: 'LOG', workArea: 'Tour' })
+  const [selectedTimeEntry, setSelectedTimeEntry] = useState<ZeitEintrag | null>(null)
+  const [selectedWorkPlanItem, setSelectedWorkPlanItem] = useState<WorkPlanAssignment | null>(null)
+  const [selectedDriverEvent, setSelectedDriverEvent] = useState<DriverTimeEvent | null>(null)
+  const [driverPatchForm, setDriverPatchForm] = useState({ vehicleId: '', tourRef: '', notes: '' })
+  const createWorkPlanAssignment = useCreateWorkPlanAssignment()
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4 | 5>(1)
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [wizardZeitraum, setWizardZeitraum] = useState({ von: selectedDate, bis: selectedDate })
+  const [wizardBedarf, setWizardBedarf] = useState([{ roleCode: 'lkw_fahrer', label: 'LKW-Fahrer', count: '1', startTime: '06:00', endTime: '14:00' }])
+  const [wizardPref, setWizardPref] = useState({ nightOk: false, requireLkw: false, notes: '' })
+  const updateDriverTimeEvent = useUpdateDriverTimeEvent()
 
   const startCorrection = (entry: ZeitEintrag) => {
     setCorrectionForm((prev) => ({
@@ -447,6 +460,30 @@ export default function ZeiterfassungPage(): JSX.Element {
     window.print()
   }
 
+  const handleWizardFinish = async () => {
+    const assignmentsToCreate = wizardBedarf.flatMap(row => {
+      const count = Math.max(1, parseInt(row.count, 10) || 1)
+      return Array.from({ length: count }, (_, i) => ({
+        datum: wizardZeitraum.von,
+        employeeRef: `tbd-${row.roleCode}-${i + 1}`,
+        label: row.label || row.roleCode,
+        startTime: row.startTime || null,
+        endTime: row.endTime || null,
+        roleCode: row.roleCode || null,
+        notes: wizardPref.notes || null,
+      }))
+    })
+    try {
+      for (const assignment of assignmentsToCreate) {
+        await createWorkPlanAssignment.mutateAsync(assignment)
+      }
+      setWizardOpen(false)
+      setWizardStep(1)
+    } catch {
+      // toast provided by query-level error handling
+    }
+  }
+
   if (isLoading || isCockpitLoading) {
     return (
       <div className="space-y-4 p-3 md:p-6">
@@ -487,9 +524,17 @@ export default function ZeiterfassungPage(): JSX.Element {
               <Printer className="mr-2 h-4 w-4" />
               Arbeitsplan drucken
             </Button>
-            <Button variant="outline" size="sm" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCreatePayroll}
+              disabled={createPayrollExport.isPending || cockpit.payrollReadiness.status !== 'ready' || cockpit.payrollReadiness.blockers.length > 0}
+              title={cockpit.payrollReadiness.blockers.length > 0 ? `${cockpit.payrollReadiness.blockers.length} Blocker vor Export loesen` : undefined}
+            >
               <FileDown className="mr-2 h-4 w-4" />
-              Payroll vorbereiten
+              {cockpit.payrollReadiness.blockers.length > 0
+                ? `${cockpit.payrollReadiness.blockers.length} Blocker offen`
+                : 'Payroll vorbereiten'}
             </Button>
           </div>
         </div>
@@ -687,6 +732,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <TabsTrigger value="steuerung">Steuerung</TabsTrigger>
           <TabsTrigger value="crud">Erfassen</TabsTrigger>
           <TabsTrigger value="arbeitsplan">Arbeitsplan</TabsTrigger>
+          <TabsTrigger value="saison">Saison-Leitstand</TabsTrigger>
           <TabsTrigger value="planung">Planung</TabsTrigger>
           <TabsTrigger value="driver">Fahrerzeit</TabsTrigger>
           <TabsTrigger value="zeiten">Arbeitszeit</TabsTrigger>
@@ -719,9 +765,14 @@ export default function ZeiterfassungPage(): JSX.Element {
                 <CardTitle>Nächste Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+                <Button
+                  className="w-full justify-start gap-2"
+                  variant="outline"
+                  onClick={handleCreatePayroll}
+                  disabled={createPayrollExport.isPending || cockpit.payrollReadiness.status !== 'ready' || cockpit.payrollReadiness.blockers.length > 0}
+                >
                   <FileDown className="h-4 w-4" />
-                  Payroll-Paket erzeugen
+                  {cockpit.payrollReadiness.blockers.length > 0 ? `${cockpit.payrollReadiness.blockers.length} Blocker loesen` : 'Payroll-Paket erzeugen'}
                 </Button>
                 <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreateShift} disabled={createShift.isPending}>
                   <CalendarDays className="h-4 w-4" />
@@ -921,13 +972,66 @@ export default function ZeiterfassungPage(): JSX.Element {
                 </div>
               </CardHeader>
               <CardContent>
-                <DataTable data={filteredWorkPlanAssignments} columns={workPlanColumns} />
+                <DataTable data={filteredWorkPlanAssignments} columns={workPlanColumns} onRowFocus={setSelectedWorkPlanItem} />
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Praeferenz-Checks</CardTitle>
-              </CardHeader>
+            {selectedWorkPlanItem ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Arbeitsplan Detail</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Mitarbeiter</p>
+                    <p className="font-semibold">{selectedWorkPlanItem.employeeRef}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Eintrag</p>
+                    <p className="font-medium">{selectedWorkPlanItem.label}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Datum</p>
+                      <p className="font-mono text-sm">{selectedWorkPlanItem.datum}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Zeit</p>
+                      <p className="font-mono text-sm">{selectedWorkPlanItem.startTime ?? '-'} – {selectedWorkPlanItem.endTime ?? '-'}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={getStatusBadgeVariant(selectedWorkPlanItem.status)}>{selectedWorkPlanItem.status}</Badge>
+                    <Badge variant="outline">{selectedWorkPlanItem.sourceType}</Badge>
+                    <Badge variant={selectedWorkPlanItem.printReady ? 'outline' : 'destructive'}>
+                      {selectedWorkPlanItem.printReady ? 'druckbereit' : 'Druck blockiert'}
+                    </Badge>
+                  </div>
+                  {selectedWorkPlanItem.findings.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-sm text-muted-foreground">Planungschecks</p>
+                      <div className="space-y-1">
+                        {selectedWorkPlanItem.findings.map((finding) => (
+                          <div key={`${selectedWorkPlanItem.id}-${finding.code}`} className="rounded border p-2 text-xs">
+                            <Badge variant={getFindingBadgeVariant(finding.severity as DriverTimeFindingSeverity)} className="mb-1">{finding.severity}</Badge>
+                            <p className="font-mono">{finding.code}: {finding.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="border-t pt-3">
+                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={handlePrintWorkPlan}>
+                      <Printer className="h-4 w-4" />
+                      Arbeitsplan drucken
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Praeferenz-Checks</CardTitle>
+                </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -952,10 +1056,194 @@ export default function ZeiterfassungPage(): JSX.Element {
                 ))}
               </CardContent>
             </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="saison" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Saison-Leitstand — 7-Tage-Heatmap</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: 7 }, (_, i) => {
+                  const dayDate = addDays(selectedDate, i)
+                  const dayLabel = new Date(`${dayDate}T00:00:00`).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+                  const dayAssignments = (workPlan?.assignments ?? []).filter((a) => a.datum === dayDate)
+                  const blockers = dayAssignments.filter((a) => a.status === 'blocked' || a.findings.some((f) => f.severity === 'blocker'))
+                  const warnings = dayAssignments.filter((a) => a.status === 'warning' || a.findings.some((f) => f.severity === 'warning'))
+                  const activeCampaigns = campaignCapacity.filter((c) => c.periodFrom <= dayDate && c.periodTo >= dayDate)
+                  const blockedCampaigns = activeCampaigns.filter((c) => c.status === 'blocked')
+                  const isSchoolHoliday = dayDate === selectedDate
+                  const isBridgeDay = dayDate === addDays(selectedDate, 2)
+                  const severity = blockers.length > 0 || blockedCampaigns.length > 0 ? 'blocker'
+                    : warnings.length > 0 ? 'warning'
+                    : 'ok'
+                  return (
+                    <div
+                      key={dayDate}
+                      className={[
+                        'rounded-md border p-2 text-xs',
+                        severity === 'blocker' ? 'border-destructive/60 bg-destructive/5' :
+                        severity === 'warning' ? 'border-amber-300 bg-amber-50' :
+                        'border-emerald-200 bg-emerald-50',
+                      ].join(' ')}
+                    >
+                      <p className="mb-1 font-semibold text-foreground">{dayLabel}</p>
+                      {isSchoolHoliday && <Badge variant="secondary" className="mb-1 w-full justify-center text-[10px]">Schulferien</Badge>}
+                      {isBridgeDay && <Badge variant="outline" className="mb-1 w-full justify-center text-[10px]">Brueckentag</Badge>}
+                      {activeCampaigns.length > 0 && (
+                        <div className="mb-1 space-y-0.5">
+                          {activeCampaigns.map((c) => (
+                            <div key={c.campaignCode} className="flex items-center gap-1">
+                              <span className={c.status === 'blocked' ? 'text-destructive' : 'text-muted-foreground'}>{c.name}</span>
+                              {c.status === 'blocked' && <Badge variant="destructive" className="text-[9px]">!</Badge>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-1 flex-wrap mt-1">
+                        {blockers.length > 0 && <Badge variant="destructive" className="text-[10px]">{blockers.length} Blocker</Badge>}
+                        {warnings.length > 0 && <Badge variant="secondary" className="text-[10px]">{warnings.length} Warn.</Badge>}
+                        {dayAssignments.length === 0 && activeCampaigns.length === 0 && (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <Card>
+              <CardHeader><CardTitle>Kampagnen (aktiv)</CardTitle></CardHeader>
+              <CardContent>
+                <DataTable data={campaignCapacity} columns={campaignColumns} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Abwesenheiten</CardTitle></CardHeader>
+              <CardContent>
+                <DataTable data={absences} columns={absenceColumns} />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
         <TabsContent value="planung" className="space-y-4">
+          {/* Planungswizard UX-M3 */}
+          {!wizardOpen ? (
+            <div className="flex justify-end">
+              <Button size="sm" className="gap-2" onClick={() => { setWizardOpen(true); setWizardStep(1) }}>
+                <Plus className="h-4 w-4" />
+                Neuen Arbeitsplan erstellen
+              </Button>
+            </div>
+          ) : (
+            <Card className="border-primary/40">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Arbeitsplan-Assistent — Schritt {wizardStep} von 5</CardTitle>
+                  <div className="flex gap-1">
+                    {([1, 2, 3, 4, 5] as const).map(s => (
+                      <div key={s} className={`h-2 w-8 rounded-full ${s <= wizardStep ? 'bg-primary' : 'bg-muted'}`} />
+                    ))}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {wizardStep === 1 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Zeitraum festlegen</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="mb-1 block text-xs">Von</Label>
+                        <Input type="date" value={wizardZeitraum.von} onChange={e => setWizardZeitraum(p => ({ ...p, von: e.target.value }))} />
+                      </div>
+                      <div>
+                        <Label className="mb-1 block text-xs">Bis</Label>
+                        <Input type="date" value={wizardZeitraum.bis} onChange={e => setWizardZeitraum(p => ({ ...p, bis: e.target.value }))} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {wizardStep === 2 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Rollenbedarf definieren</p>
+                    {wizardBedarf.map((row, idx) => (
+                      <div key={idx} className="grid grid-cols-5 gap-2">
+                        <Input placeholder="Rolle" value={row.roleCode} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, roleCode: e.target.value } : r))} />
+                        <Input placeholder="Bezeichnung" value={row.label} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, label: e.target.value } : r))} />
+                        <Input placeholder="Anzahl" type="number" min={1} value={row.count} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, count: e.target.value } : r))} />
+                        <Input placeholder="Von" type="time" value={row.startTime} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, startTime: e.target.value } : r))} />
+                        <Input placeholder="Bis" type="time" value={row.endTime} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, endTime: e.target.value } : r))} />
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => setWizardBedarf(b => [...b, { roleCode: '', label: '', count: '1', startTime: '06:00', endTime: '14:00' }])}>
+                      <Plus className="h-3 w-3" /> Zeile hinzufügen
+                    </Button>
+                  </div>
+                )}
+                {wizardStep === 3 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Präferenzen</p>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={wizardPref.nightOk} onChange={e => setWizardPref(p => ({ ...p, nightOk: e.target.checked }))} />
+                      Nachttouren möglich
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={wizardPref.requireLkw} onChange={e => setWizardPref(p => ({ ...p, requireLkw: e.target.checked }))} />
+                      LKW-Führerschein erforderlich
+                    </label>
+                    <Textarea placeholder="Hinweise zur Planung" rows={2} value={wizardPref.notes} onChange={e => setWizardPref(p => ({ ...p, notes: e.target.value }))} />
+                  </div>
+                )}
+                {wizardStep === 4 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Vorschau — zu erstellende Einträge</p>
+                    <div className="space-y-2">
+                      {wizardBedarf.map((row, idx) => (
+                        <div key={idx} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                          <span className="font-medium">{row.label || row.roleCode}</span>
+                          <span className="text-muted-foreground">{row.count}× · {row.startTime}–{row.endTime} · {wizardZeitraum.von}</span>
+                          <Badge variant="outline">{wizardPref.requireLkw ? 'LKW' : row.roleCode}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                    {wizardPref.notes && <p className="text-xs text-muted-foreground">Hinweis: {wizardPref.notes}</p>}
+                  </div>
+                )}
+                {wizardStep === 5 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Abschluss — Arbeitsplan anlegen</p>
+                    <div className="rounded-lg border bg-muted/30 p-4 text-sm space-y-1">
+                      <p><span className="font-medium">Zeitraum:</span> {wizardZeitraum.von} – {wizardZeitraum.bis}</p>
+                      <p><span className="font-medium">Rollen:</span> {wizardBedarf.length} Eintragsgruppe(n)</p>
+                      <p><span className="font-medium">Gesamtbedarf:</span> {wizardBedarf.reduce((s, r) => s + (parseInt(r.count, 10) || 1), 0)} Stellen</p>
+                    </div>
+                    <Button className="w-full gap-2" onClick={handleWizardFinish} disabled={createWorkPlanAssignment.isPending}>
+                      <CheckCircle2 className="h-4 w-4" />
+                      {createWorkPlanAssignment.isPending ? 'Wird angelegt…' : 'Arbeitsplan anlegen'}
+                    </Button>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setWizardOpen(false); setWizardStep(1) }}>Abbrechen</Button>
+                  <div className="flex gap-2">
+                    {wizardStep > 1 && (
+                      <Button variant="outline" size="sm" onClick={() => setWizardStep(s => (s - 1) as typeof s)}>Zurück</Button>
+                    )}
+                    {wizardStep < 5 && (
+                      <Button size="sm" onClick={() => setWizardStep(s => (s + 1) as typeof s)}>Weiter</Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid gap-4 xl:grid-cols-3">
             <Card>
               <CardHeader>
@@ -1030,57 +1318,271 @@ export default function ZeiterfassungPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="driver">
-          <Card>
-            <CardHeader>
-              <CardTitle>Driver-Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DataTable data={driverRows} columns={driverColumns} />
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle>Driver-Dispo</CardTitle>
+                  <div className="flex gap-2">
+                    {driverBlocker > 0 && <Badge variant="destructive">{driverBlocker} Blocker</Badge>}
+                    {driverWarnings > 0 && <Badge variant="secondary">{driverWarnings} Warnungen</Badge>}
+                    <Badge variant="outline">{fahrzeitStunden.toFixed(2)} h Fahrzeit</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  data={driverRows}
+                  columns={driverColumns}
+                  onRowFocus={(row) => {
+                    setSelectedDriverEvent(row)
+                    setDriverPatchForm({ vehicleId: row.fahrzeug ?? '', tourRef: row.tour ?? '', notes: '' })
+                  }}
+                />
+              </CardContent>
+            </Card>
+            {selectedDriverEvent ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Fahrer-Detail / Tour-Plausibilitaet</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fahrer</p>
+                      <p className="font-semibold">{selectedDriverEvent.fahrer}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Datum</p>
+                      <p className="font-mono text-sm">{selectedDriverEvent.datum}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Tour</p>
+                      <p className="font-mono text-sm">{selectedDriverEvent.tour ?? '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fahrzeug</p>
+                      <p className={selectedDriverEvent.fahrzeug ? 'font-mono text-sm' : 'text-sm text-destructive'}>
+                        {selectedDriverEvent.fahrzeug ?? 'fehlt'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Zeit</p>
+                      <p className="font-mono text-sm">{selectedDriverEvent.start} – {selectedDriverEvent.ende}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Dauer</p>
+                      <p className="font-semibold">{selectedDriverEvent.dauer.toFixed(2)} h</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="outline">{selectedDriverEvent.taetigkeit}</Badge>
+                    <Badge variant="outline">{selectedDriverEvent.quelle}</Badge>
+                  </div>
+                  {selectedDriverEvent.findings.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-sm font-medium text-muted-foreground">Plausibilitaets-Checks</p>
+                      <div className="space-y-1">
+                        {selectedDriverEvent.findings.map((finding) => (
+                          <div key={`${selectedDriverEvent.id}-${finding.code}`} className="rounded border p-2 text-xs">
+                            <Badge variant={getFindingBadgeVariant(finding.severity)} className="mb-1">{finding.severity}</Badge>
+                            <p>{finding.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-2 border-t pt-3">
+                    <p className="text-sm font-medium">Tour / Fahrzeug korrigieren</p>
+                    <Input
+                      placeholder="Fahrzeug-ID"
+                      value={driverPatchForm.vehicleId}
+                      onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, vehicleId: e.target.value }))}
+                    />
+                    <Input
+                      placeholder="Tour-Referenz"
+                      value={driverPatchForm.tourRef}
+                      onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, tourRef: e.target.value }))}
+                    />
+                    <Input
+                      placeholder="Notiz (optional)"
+                      value={driverPatchForm.notes}
+                      onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, notes: e.target.value }))}
+                    />
+                    <Button
+                      size="sm"
+                      className="w-full gap-2"
+                      disabled={updateDriverTimeEvent.isPending}
+                      onClick={() => {
+                        if (!selectedDriverEvent) return
+                        updateDriverTimeEvent.mutate({
+                          eventId: selectedDriverEvent.id,
+                          data: {
+                            vehicle_id: driverPatchForm.vehicleId || null,
+                            tour_ref: driverPatchForm.tourRef || null,
+                            notes: driverPatchForm.notes || null,
+                          },
+                        })
+                      }}
+                    >
+                      <Save className="h-4 w-4" />
+                      Tour / Fahrzeug speichern
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex items-center justify-center">
+                <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                  Fahrer-Zeile auswaehlen fuer Detail und Tour-Korrektur
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="zeiten">
-          <Card>
-            <CardHeader>
-              <CardTitle>Klassische Arbeitszeit</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <DataTable data={filteredTimeEntries} columns={columns} />
-              <div className="mt-6 flex justify-between border-t pt-4 font-bold">
-                <span>Gesamt-Stunden Heute:</span>
-                <span>{gesamtStunden.toFixed(1)} h</span>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Klassische Arbeitszeit</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <DataTable data={filteredTimeEntries} columns={columns} onRowFocus={setSelectedTimeEntry} />
+                <div className="mt-6 flex justify-between border-t pt-4 font-bold">
+                  <span>Gesamt-Stunden Heute:</span>
+                  <span>{gesamtStunden.toFixed(1)} h</span>
+                </div>
+              </CardContent>
+            </Card>
+            {selectedTimeEntry ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Zeitbuchung Detail</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Mitarbeiter</p>
+                    <p className="font-semibold">{selectedTimeEntry.mitarbeiter}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Datum</p>
+                      <p className="font-mono text-sm">{new Date(selectedTimeEntry.datum).toLocaleDateString('de-DE')}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Stunden</p>
+                      <p className="font-semibold">{selectedTimeEntry.stunden} h</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Kommen</p>
+                      <p className="font-mono">{selectedTimeEntry.kommen}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Gehen</p>
+                      <p className="font-mono">{selectedTimeEntry.gehen}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Typ</p>
+                    <Badge variant={selectedTimeEntry.typ === 'Ueberstunden' ? 'destructive' : selectedTimeEntry.typ === 'Urlaub' ? 'secondary' : 'outline'}>
+                      {selectedTimeEntry.typ}
+                    </Badge>
+                  </div>
+                  {cockpit.complianceIssues.filter((issue) => issue.employeeRef === selectedTimeEntry.mitarbeiter).length > 0 && (
+                    <div>
+                      <p className="mb-1 text-sm text-muted-foreground">Compliance-Befunde</p>
+                      <div className="space-y-1">
+                        {cockpit.complianceIssues
+                          .filter((issue) => issue.employeeRef === selectedTimeEntry.mitarbeiter)
+                          .map((issue) => (
+                            <div key={`${issue.employeeRef}-${issue.code}`} className="rounded border p-2 text-xs">
+                              <Badge variant={getFindingBadgeVariant(issue.severity)} className="mb-1">{issue.severity}</Badge>
+                              <p>{issue.message}</p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-2 border-t pt-3">
+                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => startCorrection(selectedTimeEntry)}>
+                      <Pencil className="h-4 w-4" />
+                      Bearbeiten / Korrigieren
+                    </Button>
+                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => submitTimeEntry.mutate(selectedTimeEntry.id)} disabled={submitTimeEntry.isPending}>
+                      <Save className="h-4 w-4" />
+                      Zur Freigabe einreichen
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex items-center justify-center text-muted-foreground">
+                <CardContent className="py-8 text-center text-sm">
+                  Zeile auswaehlen fuer Details und Aktionen
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="payroll">
           <div className="space-y-4">
+            {cockpit.payrollReadiness.blockers.length > 0 ? (
+              <div className="flex items-start gap-3 rounded-md border border-destructive/50 bg-destructive/5 p-4">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <div className="flex-1">
+                  <p className="font-semibold text-destructive">Export gesperrt — {cockpit.payrollReadiness.blockers.length} Blocker offen</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Alle Blocker muessen behoben oder begruendet sein, bevor das Exportpaket erstellt werden kann.</p>
+                  <div className="mt-3 space-y-2">
+                    {cockpit.payrollReadiness.blockers.map((blocker, index) => (
+                      <div key={`${blocker}-${index}`} className="flex items-center gap-2 rounded border border-destructive/30 bg-background px-3 py-2">
+                        <Badge variant="destructive" className="shrink-0">Blocker</Badge>
+                        <span className="text-sm">{blocker}</span>
+                        <Button size="sm" variant="outline" className="ml-auto gap-1 text-xs" onClick={() => setActiveTab('steuerung')}>
+                          Pruefen
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-4">
+                <CheckCircle2 className="h-5 w-5 text-emerald-700" />
+                <div className="flex-1">
+                  <p className="font-semibold text-emerald-800">Export freigegeben</p>
+                  <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
+                </div>
+                <Button size="sm" className="gap-2" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+                  <FileDown className="h-4 w-4" />
+                  Export erstellen
+                </Button>
+              </div>
+            )}
             <Card>
               <CardHeader>
-                <CardTitle>Payroll-Readiness</CardTitle>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle>Payroll-Readiness</CardTitle>
+                  <Badge variant={cockpit.payrollReadiness.status === 'ready' ? 'outline' : 'destructive'}>
+                    {cockpit.payrollReadiness.status}
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.status}</p>
-                  </div>
-                  <div>
                     <p className="text-sm text-muted-foreground">Bereite Eintraege</p>
-                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.readyEntries}</p>
+                    <p className="text-xl font-semibold text-emerald-700">{cockpit.payrollReadiness.readyEntries}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Blockierte Eintraege</p>
-                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.blockedEntries}</p>
+                    <p className="text-xl font-semibold text-destructive">{cockpit.payrollReadiness.blockedEntries}</p>
                   </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
-                <div className="space-y-2">
-                  {cockpit.payrollReadiness.blockers.map((blocker, index) => (
-                    <Badge key={`${blocker}-${index}`} variant="destructive">{blocker}</Badge>
-                  ))}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Offene Blocker</p>
+                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.blockers.length}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

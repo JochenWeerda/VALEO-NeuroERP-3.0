@@ -1,3 +1,14 @@
+---
+title: Parallel Work Protocol
+type: explanation
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Protokoll fuer parallele Arbeit zwischen Codex und Claude — Verantwortlichkeiten, Merge-Regeln, Konflikt-Vermeidung und Koordinationsschritte.
+---
+
 # Parallel Work Protocol
 
 ## Ziel

@@ -1,0 +1,17 @@
+slice_id: UIX-RENDERER-LIB-004
+title: Mask Builder Renderer Library Extraction
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-25
+completed_at: 2026-06-25
+goal: Extract visualization components from UniversalMaskRenderer without behavior change.
+file_ownership:
+  - packages/frontend-web/src/components/mask-builder/renderers/**
+  - packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/index.ts
+acceptance:
+  - FieldRenderer, TableRenderer, ScreenSummaryGrid, ActionBarRenderer, TabContentRenderer extracted.
+  - Lookup hint in FieldRenderer; WorkflowPanelRenderer placeholder present.
+  - UniversalMaskRenderer remains orchestrator; existing tests green.
+tests:
+  - "pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx"

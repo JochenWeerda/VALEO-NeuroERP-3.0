@@ -41,6 +41,9 @@ const COMPONENT_TO_FIELD_TYPE: Record<string, Field['type']> = {
 export const ENABLE_CUSTOMER_MASK_BUILDER_FORM =
   import.meta.env.VITE_ENABLE_MASK_BUILDER_CUSTOMER_FORM === 'true'
 
+export const ENABLE_UNIVERSAL_MASK_CUSTOMER =
+  import.meta.env.VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER === 'true'
+
 export const CUSTOMER_MASK_OBJECT_PAGE_CONFIG: MaskConfig = convertCustomerMaskToObjectPageConfig(
   customerMaskConfig as CustomerMaskConfig,
 )

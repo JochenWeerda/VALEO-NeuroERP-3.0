@@ -122,7 +122,7 @@ def create_frachtbrief(
 )
 def update_frachtbrief_status(
     fb_id: str,
-    new_status: str = Query(..., pattern="^(erstellt|unterwegs|zugestellt|storniert)$"),
+    new_status: str = Query(..., alias="status", pattern="^(erstellt|unterwegs|zugestellt|storniert)$"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> FrachtbriefOut:

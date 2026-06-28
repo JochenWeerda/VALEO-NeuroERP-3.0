@@ -1,3 +1,14 @@
+---
+title: /goal — Autonome Vollendung (Agent-Skill)
+type: reference
+audience: [agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Beschreibung des /goal-Skills fuer autonome Aufgaben-Vollendung — Aktivierung, Abbruchbedingungen und Schnittstelle zum autogoal-Skill.
+---
+
 # /goal — Autonome Vollendung (Agent-Skill)
 
 > **Cursor-Aktivierung:** Kopie unter `.cursor/skills/goal/SKILL.md` (lokal, gitignored).

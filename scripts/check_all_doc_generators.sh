@@ -18,6 +18,15 @@ python scripts/generate_openapi.py --check
 echo "== Code-Inventare"
 python scripts/generate_code_inventories.py --check
 
+echo "== Container-Inventar"
+python scripts/generate_container_inventory.py --check
+
+echo "== C4 Views (Structurizr DSL)"
+python scripts/render_c4_views.py --check
+
+echo "== Architecture Index"
+python scripts/generate_architecture_index.py --check --require-complete
+
 echo "== ADR-Navigation"
 python scripts/generate_adr_nav.py --check
 

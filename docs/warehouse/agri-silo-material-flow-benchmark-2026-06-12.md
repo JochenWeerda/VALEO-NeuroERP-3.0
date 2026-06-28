@@ -1,3 +1,14 @@
+---
+title: Benchmark Agrar-Silo / Materialfluss / QS
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Kurzstudie und Benchmark fuer Agrar-Silo-, Materialfluss- und Qualitaetssicherungs-Loesungen (Stand 2026-06-12).
+---
+
 # Benchmark: Agrar-Silo, Materialfluss, QS (Kurzstudie)
 
 **Datum:** 2026-06-12

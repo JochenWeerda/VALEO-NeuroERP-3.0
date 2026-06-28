@@ -1,3 +1,14 @@
+---
+title: Neuro Stack Gap Matrix 2026-03-29
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: archiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: "ARCHIV (Stand 2026-03-29): Historische Lueckenmatrix fuer Neuro-Stack-Komponenten. Groesstenteil veraltet — NC-Wellen haben die meisten Luecken geschlossen. Fuer aktuellen Stand siehe open-gaps-and-known-issues.md."
+---
+
 # Neuro Stack Gap Matrix (2026-03-29)
 
 **Letzte Doku-Synchronisation:** 2026-04-30 (Stammdaten: Verkaufseligibility mandantenkorrekt, CRM-CSV/Debitoren-Import Upsert + Dubletten E-Mail/USt-Id; Gap-Abschnitt Stammdaten aktualisiert).

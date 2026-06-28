@@ -4,7 +4,7 @@
 # Core FastAPI and async support
 fastapi==0.121.3
 uvicorn[standard]==0.24.0
-starlette==0.49.1
+starlette==1.3.1
 
 # Pydantic for data validation
 pydantic==2.11.7
@@ -18,13 +18,12 @@ asyncpg==0.30.0
 
 # HTTP client for backend communication
 httpx==0.28.1
-aiohttp==3.13.3
+aiohttp==3.14.1
 
 # AI/ML Core
-langchain==0.3.30
-langchain-community==0.3.27
-langgraph==0.6.11
-langgraph-checkpoint-sqlite==3.0.1
+langchain-core>=0.3.65,<2.0.0
+langgraph==1.2.4
+langgraph-checkpoint-sqlite==3.1.0
 openai==1.91.0
 
 # Vector Store & Embeddings
@@ -38,11 +37,11 @@ structlog==24.4.0
 prometheus-client==0.19.0
 
 # Security
-PyJWT==2.12.0
+pyjwt==2.13.0
 python-jose==3.4.0
 
 # Configuration
-python-dotenv>=1.0.0,<2.0.0
+python-dotenv>=1.2.2,<2.0.0
 
 # Redis for caching
 redis==6.2.0

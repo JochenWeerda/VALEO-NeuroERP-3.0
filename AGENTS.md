@@ -9,11 +9,15 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 ## Pflichtreihenfolge bei Session-Start
 
 1. [docs/README.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/README.md)
-2. [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
-3. [Agent Ops README](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/README.md)
-4. [Active Workboard](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/active-workboard.md)
-5. relevante Dateien unter `docs/project-context/`
-6. relevante Dateien unter `docs/workflows/` und `docs/quality-assurance/`
+2. Bei **strukturellen** Tasks (neue Services, Container, Domänen-Grenzen, API-Verträge):
+   - [`config/architecture-index.yaml`](config/architecture-index.yaml) + betroffenes Domain Pack unter `docs/architecture/domains/`
+   - [Architecture Agent Protocol](docs/architecture/agents/architecture-protocol.md)
+   - [Architecture OS Rollout-Prompt](docs/architecture/agents/architecture-os-rollout-prompt.md) — Copy-Paste-Prompt für Agent-Sessions
+3. [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
+4. [Agent Ops README](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/README.md)
+5. [Active Workboard](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/active-workboard.md)
+6. relevante Dateien unter `docs/project-context/`
+7. relevante Dateien unter `docs/workflows/` und `docs/quality-assurance/`
 
 ## Nicht verhandelbare Regeln
 
@@ -65,11 +69,15 @@ Wenn eine Session neu startet:
 
 ## Nuetzliche Repo-Befehle (ERP-Domain / Finanz)
 
+- **`pnpm arch:render`** — C4 Context/Container aus `workspace.dsl` generieren.
+- **`pnpm arch:validate`** — Architecture-Generatoren (C4, Index, Container) prüfen.
+- **`pnpm arch:drift`** — Domänen-Drift-Check (strict, CI).
 - **`pnpm test:erp-domain`** — Jest nur fuer `packages/erp-domain` (`*.spec.ts`).
 - **`pnpm migrate:erp-finanz`** — SQL `001_finance_core` + `003_finanz_tenant_id` (Verbindung: `ERP_DATABASE_URL` → `DATABASE_URL` → `CRM_DATABASE_URL`; `.env`-Laden siehe `tools/migration/run_sql_migration.ts`). Fachlich: [docs/erp-finanz-multitenancy.md](docs/erp-finanz-multitenancy.md).
 
 ## Verweise
 
+- [Architecture OS Rollout-Prompt](docs/architecture/agents/architecture-os-rollout-prompt.md) — Agenten-Prompt für strukturelle Arbeit
 - [Agent Ops README](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/README.md)
 - [Parallel Work Protocol](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/parallel-work-protocol.md)
 - [Handoff Template](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/handoff-template.md)

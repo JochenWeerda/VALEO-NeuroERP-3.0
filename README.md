@@ -3,7 +3,7 @@
 ![Deploy Staging](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml/badge.svg)
 ![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-3.0.0--alpha-blue)
+![Version](https://img.shields.io/badge/version-3.0.0--beta-orange)
 
 ---
 
@@ -16,41 +16,77 @@
 
 VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften und Landhandelsunternehmen. Der Fokus liegt auf prozessdurchgängiger Landhandels-Exzellenz, agentenfähiger Facharchitektur und schneller Prozess-UX — kein generisches Horizontal-ERP.
 
+---
+
 ### Aktueller Status
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-06-12` |
-| Produktreife | aktive Entwicklung, nicht allgemein produktionsreif |
-| Frontend TypeScript | 0 Fehler |
-| Backend-Testabdeckung | 64,85 % gesamt; 18/18 kritische Ratchet-Pfade grün |
-| Domänentiefe | `DOM-*-004`-Welle abgeschlossen: Kontrakte, O2C, FIBU, Beschaffung, Nachweisraum, Lieferkette je auf voller Tiefe ([Übersicht](docs/dom-004-spine-buildout-2026-06-12.md)) |
-| Alembic | 1 Head (`merge_doc_proc_20260612`) |
-| Service-Layer | Bekannte große Legacy-Endpunkte repo-seitig auf dedizierte Services nachgezogen |
-| Docker/Container | Erstinstallation, Keycloak-DB-Bootstrap und mehrere Healthcheck-/CRM-/Inventory-Fixes nachgezogen |
-| Production Release | Harte CI-/Security-Gates, SBOM, getrennte immutable Backend-/Frontend-Images, atomarer Helm-Rollout |
-| UAT | Abgenommen mit dokumentierten externen Gates; repo-seitige UAT-Auflagen nachgeliefert |
+| Doku-Stand | `2026-06-28` |
+| Produktreife | **Beta** — Kernprozesse operativ, externe Go-Live-Gates offen |
+| Frontend TypeScript | 0 Fehler (`tsc --noEmit`) |
+| Backend-Tests | > 9 500 gesammelt; reine Service-Logik-Tests Waves 83–101 (+380) |
+| Kritische Coverage-Ratchets | 33 Pfade grün (`scripts/check_critical_backend_coverage.py`) |
+| Backend-Gesamtabdeckung | 64,85 % (Ziel langfristig ≥ 80 %) |
+| OpenAPI-Routen | 3 041 Pfade mit `summary=` (100 %) |
+| Alembic | 1 Head (`final_single_head_merge_20260626`) — 55+ Parallel-Branches geschlossen |
+| Domänentiefe | DOM-\*-004 abgeschlossen: Kontrakte, O2C, FIBU, P2P, Nachweisraum, Lieferkette |
+| Architektur-Doku | arc42 (12 Kapitel), C4 Context/Container/Components, 036 ADRs |
+| Benutzerhandbuch | DOC-USER-MANUAL-004 Wave 17 — vollständig |
+| Runtime-API-Sweep | 1 059 GET-Endpunkte live getestet; bekannte 5xx repo-seitig geschlossen |
+| Workflow-Cockpit | MVP + Retry/Kompensation + NATS-Projektor + Dead-Letter-Sicht |
 
-Der belastbare Ist-Zustand liegt in:
+---
 
-- [Process Kernel Status](docs/architecture/process-kernel/STATUS.md)
-- [Open Gaps and Known Issues](docs/project-context/open-gaps-and-known-issues.md)
-- [Active Workboard](docs/agent-ops/active-workboard.md)
-- [UAT Master Plan](docs/uat/UAT-MASTER-PLAN.md)
-- [Production Readiness Runbook](docs/operations/production-readiness-runbook.md)
-- [Meridian Design Concept](docs/design/DESIGN-KONZEPT-1-MERIDIAN.md)
+### Reifegrad: Was fehlt bis Production?
+
+#### Repo-seitig bereit ✅
+- Breiter Domänenschnitt über 12+ ERP-Bereiche mit operativer Endlogik
+- OIDC-Auth, Multi-Tenancy, Bearer-Token-Enforcement, RFC-7807 Fehlermodell
+- Harte CI-Gates: TypeScript, ESLint, pytest-Ratchet, Security-Scan, SBOM
+- Unveränderliche SHA-Images, Helm-Rollout, `/healthz`/`/readyz`-Smoke
+- Alembic single head, idempotente Migrationen, Keycloak-DB-Bootstrap
+- GoBD-Nachweisraum, DATEV-Export, UStVA-Übermittlungs-Client
+- POS mit TSE-Simulation (Fiskaly-Anbindung vorbereitet)
+- Vollständige UAT-Dokumentation, Playwright-E2E-Evidence, Traceability-Matrix
+
+#### Externe Go-Live-Gates ⏳ (Betriebsverantwortung)
+| Gate | Zuständigkeit |
+|------|--------------|
+| Produktive Keycloak-/OIDC-Credentials | Betrieb |
+| TSE-Hardware-Abnahme & DSFinV-K-Zertifizierung | Betrieb / Fiskalisierungs-Provider |
+| ERiC/ELSTER-Live-Übermittlung | Steuerberater + DATEV-Cutover-Mapping |
+| DMS Paperless-ngx Live-Probe | Betrieb |
+| Staging-Domain + DNS + TLS-Zertifikat | Betrieb |
+| Backup-/Restore-Drill (15-min RTO) | Betrieb |
+| Erntepeak-Lasttest auf Staging | Betrieb (k6, `load-test.yml`) |
+| Reale UAT-Unterschriften | Fachbereich + Geschäftsführung |
+| DSGVO-DSB-Freigabe | Datenschutzbeauftragter |
+
+Die vollständige Gate-Liste: [`docs/operations/production-readiness-runbook.md`](docs/operations/production-readiness-runbook.md)
+
+---
 
 ### Was das System heute abdeckt
 
-- **12+ Fachdomänen**: Agrar (Ernteannahme, Kontrakte, Trocknungsregeln), Verkauf, Einkauf, Lager, Finanzen/FIBU, CRM, Logistik, Compliance, HRM, POS, Futtermittel/Rationsoptimierung
-- **Prozessdurchgängige Domänentiefe (`DOM-*-004`)** — operative Endlogik nachgezogen: Kontrakt-Fixierung/MATIF/Settlement, O2C Match→Kreditlimit→Storno/Gutschrift, FIBU Mahnlauf→Auszifferung→Periodenabschluss→DATEV, GoBD-Nachweisraum (Upload/Freigabe/Wiedervorlage/Export), P2P 3-Wege-Match/ERS/RFQ, Lieferketten-Rückverfolgbarkeit — je mit Live-UAT verifiziert ([Übersicht](docs/dom-004-spine-buildout-2026-06-12.md))
-- **Multi-Tenancy** via `X-Tenant-ID` Header, OIDC-Authentifizierung (Keycloak/Azure AD/Auth0)
-- **Prozesskernel** — Waves 1–104 abgeschlossen, 8564 Tests grün
-- **Service-Layer** — zentrale Refaktorierungswellen abgeschlossen; `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` sind auf dedizierte Services nachgezogen
-- **React-Frontend** mit Mask-Builder-Framework (ObjectPage, ListReport, Wizard, Worklist)
-- **Meridian UI** — Root-Theme aktiv, Navy-Sidebar, 56px Topbar, 44px Button/Input-Ziele und tokenisierte Dashboard-/ListReport-/Kernscreen-Muster
-- **Event-Bus** via NATS JetStream mit Outbox-Pattern
-- **Agent-Ops**, Voice-Kanal, RAG/Wissensbase, Superglue-Integration
+**12+ Fachdomänen mit operativer Tiefe:**
+
+| Domäne | Tiefe |
+|--------|-------|
+| Agrar | Ernteannahme, Waage, Kontrakte (MATIF/Fixing), Trocknungsregeln, Selbstabrechnung, Partie-Aggregation |
+| Verkauf (O2C) | Angebot → Auftrag → Lieferschein → Rechnung, Positions-Match, Kreditlimit, Storno/Gutschrift |
+| Einkauf (P2P) | RFQ → Bestellung → Wareneingang → 3-Wege-Match, ERS, Rechnungsprüfung |
+| Lager/WMS | Bestandsführung, Silozellen, Materialfluss, Chargen-Rückverfolgung, QS-Leitstand |
+| FIBU | Mahnlauf, OP-Auszifferung, Periodenabschluss, DATEV-Export, UStVA, Atlas/Zoll |
+| CRM / KIM | 360°-Cockpit (KIM), Kaufverhalten-Klassifikation, Auto-Capture (E-Mail/Telefon), TAPI |
+| Logistik | Frachtbriefe, Tourenplanung, ePOD, Fahrerzeiterfassung |
+| Compliance | GoBD-Nachweisraum, LkSG, DSGVO Art. 30/33, Gefahrgut, Zoll/Atlas, VVVO |
+| HRM | Personalakte, Abwesenheit (ArbZG), Zeiterfassung, Lohnabrechnung (DE), Planungswizard |
+| POS | Kassenabschluss, TSE-Simulation, DSFinV-K-Vorbereitung, Retoure |
+| Futtermittel | Rezeptur, Rationsoptimierung (Tierwohl), Produktionsfreigabe, Inventory-Link |
+| Agent-Ops / KI | Workflow-Cockpit, MCP-Tool-Registry, LLM-Gateway, Voice-Adapter, WhatsApp-Bestellassistent, RAG/Wissensbase |
+
+---
 
 ### Architektur
 
@@ -58,107 +94,124 @@ Der belastbare Ist-Zustand liegt in:
 |---------|-------------|
 | Frontend | React 18, TypeScript 5.5, Vite 5.4, Tailwind CSS, Radix UI, Zustand, TanStack Query |
 | Backend | Python 3.11+, FastAPI, SQLAlchemy 2.0, Alembic, Pydantic 2.x |
-| Datenbank | PostgreSQL 15+, Redis 7 |
-| Authentifizierung | OIDC / Keycloak / JWT |
-| Eventing | NATS JetStream (Outbox-Pattern) |
-| Infrastruktur | Docker Compose, Helm/Kubernetes-Pfade vorhanden |
-| Wissensschicht | ChromaDB/RAG, Agent-Ops, Superglue |
+| Datenbank | PostgreSQL 15+ (Multi-Schema), Redis 7 |
+| Authentifizierung | OIDC / Keycloak / Azure AD / Auth0, JWT RS256/JWKS |
+| Eventing | NATS JetStream (Outbox-Pattern, Workflow-Cockpit-Projektor) |
+| Infrastruktur | Docker Compose, Helm/Kubernetes, GitHub Actions CI/CD |
+| KI / Wissen | ChromaDB/RAG, MCP-Tool-Contracts, Superglue, LLM-Gateway (anbieterunabhängig) |
+| Design | Meridian UI (Navy-Sidebar, tokenisierte Farben, Mask-Builder-Framework) |
 
-Wichtige Verzeichnisse:
+**Wichtige Verzeichnisse:**
 
-- `packages/frontend-web/` — React-Frontend
-- `app/` — FastAPI-Backend, Services, Modelle, Endpoints
-- `app/services/` — Domain-Service-Klassen (thin-router pattern)
-- `modules/agrar/` — Agrar-Vertikalmodul
-- `alembic/` — Datenbankmigrationen
-- `docs/` — Architektur-, QA- und Delivery-Dokumentation
-- `scripts/` — Bootstrap-, Smoke- und Prüfskripte
+```
+app/                    FastAPI-Backend (Services, Modelle, Endpoints, Agent-Ops)
+app/services/           ~160 Domain-Service-Module (thin-router pattern)
+packages/frontend-web/  React-Frontend (Mask-Builder, Meridian-Shell)
+modules/agrar/          Agrar-Vertikalmodul
+alembic/                Datenbankmigrationen (single head)
+docs/                   Architektur (arc42, C4, ADRs), Handbuch, QA, Runbooks
+scripts/                Bootstrap-, Smoke-, Governance- und Prüfskripte
+```
 
-### Domänen-Schemas in PostgreSQL
+**PostgreSQL-Schemas:**
+`domain_shared` · `domain_crm` · `domain_erp` · `domain_inventory` · `domain_einkauf` · `domain_sales` · `domain_finance` · `domain_ops` · `domain_docflow` · `domain_agrar` · `domain_controlling` · `domain_hr` · `domain_logistics` · `domain_workflow`
 
-`domain_shared`, `domain_crm`, `domain_erp`, `domain_inventory`, `domain_einkauf`, `domain_sales`, `domain_finance`, `domain_ops`, `domain_docflow`, `domain_agrar`, `domain_controlling`
+---
 
 ### Schnellstart mit Docker
 
 **Voraussetzungen:** Docker Desktop, Git
 
 ```bash
-# Vollständiger Stack
+# Vollständiger Stack (Postgres, Redis, NATS, Keycloak, Backend, Frontend)
 docker compose up -d
 
-# Nur Backend + Postgres (leichtgewichtig)
+# Nur Backend + Postgres (leichtgewichtig für Entwicklung)
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-Lokale Endpunkte:
+Lokale Endpunkte nach `up`:
 
 | Dienst | URL |
 |--------|-----|
-| Frontend | http://localhost:3000 |
+| Frontend | http://localhost:3001 |
 | Backend API | http://localhost:8000 |
 | OpenAPI Docs | http://localhost:8000/docs |
 | Keycloak | http://localhost:8080 |
 | pgAdmin | http://localhost:5050 |
 
+---
+
 ### Lokale Entwicklung (ohne Docker)
 
 ```bash
-# Backend
+# Backend starten
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Datenbankmigrationen
+# Datenbankmigrationen (Erstinstallation: alle Tabellen anlegen)
 alembic upgrade head
 
 # Tests
-pytest
+pytest -m unit --no-cov          # Nur reine Logik-Unit-Tests (schnell, kein DB)
+pytest                            # Vollständige Suite
 pytest --cov=app --cov-report=term
 
 # Frontend
 cd packages/frontend-web
 npm install
-npm run dev   # Port 3001
+npm run dev                       # Port 3001, proxied → Backend :8000
+npm run build
+npm run lint
 ```
 
-### Erstinstallation und Migrationssicherheit
+---
+
+### Erstinstallation und Migrations-Sicherheit
 
 ```bash
+# DB initialisieren
 python scripts/init_db.py
+
+# Qualitäts-Gates prüfen
 python scripts/check_alembic_single_head.py
 python scripts/check_required_domain_schemas.py
+python scripts/check_critical_backend_coverage.py
+python scripts/check_toolchain_pins.py
+
+# TypeScript-Typen prüfen
 pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
 ```
 
-Docker-Smoke:
-
+Docker-Smoke (Windows):
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 -HostPort 55434
 ```
 
-### Reifegrad
+---
 
-**Belastbar vorhanden:**
-- Breiter Domänenschnitt über 12+ ERP-Bereiche
-- `DOM-*-004`-Tiefenwelle (Kontrakte, O2C, FIBU, Beschaffung, Nachweisraum, Lieferkette) auf voller Tiefe `.2`–`.5`, je mit reinen Logik-Unit-Tests und Live-UAT (mit DB-Restore) verifiziert
-- Prozesskernel mit Waves 1–104 abgeschlossen, 8564 Tests im letzten formalen Kernel-Status
-- Backend-Abdeckung 64,85 % im letzten formalen Kernel-Status; kritische Ratchet-Pfade grün
-- Service-Layer-Hauptwellen, Base-Worker/-Repository, Domain-Error-Konzept und dedizierte Services fuer die bekannten grossen Legacy-Endpunkte
-- Meridian-Shell und sichtbare Core-UI auf `localhost:3000`
-- HRM-Betriebsfreigabe-Gates mit ausfüllbaren Vorlagen
-- UAT-Dokumentation mit Masterplan, Traceability, API-Contracts und Playwright-UAT-Evidence
-- Abgesicherter Alembic-/Docker-Erstinstallationspfad inklusive Keycloak-Datenbank-Bootstrap
-- UX-Baukasten vollständig ausgerollt (Seitentyp-Logik)
+### Architektur-Dokumentation
 
-**Bewusst noch offen:**
-- Tiefe Modulunterseiten enthalten noch harte Tailwind-Farben und brauchen weitere Meridian-Slices
-- Externe Gates bleiben außerhalb des Repos: echte UAT-Unterschriften, Steuerberater-/DATEV-Mapping, DMS-Live-Probe, TSE-/DSFinV-K-Prüfwerkzeug, ERiC/ELSTER und Provider-Credentials
-- Fachliche Tiefe der Domänen ist nicht überall gleich und wird über Gap-/Parity-Dokumente weitergeführt
+| Dokument | Inhalt |
+|----------|--------|
+| [arc42](docs/architecture/arc42/) | 12-Kapitel-Architekturbeschreibung (ISO 42010) |
+| [C4-Diagramme](docs/architecture/c4/) | Context, Container, Components (Mermaid) |
+| [ADR-001…036](docs/adr/) | Architecture Decision Records |
+| [Benutzerhandbuch](docs/user-manual/) | Vollständiges deutsches Handbuch (Wave 17) |
+| [Admin-Dokumentation](docs/admin/) | Deployment, RBAC, Monitoring, Backup |
+| [Open Gaps](docs/project-context/open-gaps-and-known-issues.md) | Offene Punkte, technische Schulden |
+| [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) | Go-Live-Checkliste + externe Gates |
+| [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) | Wave-Übersicht Waves 1–104+ |
+| [Active Workboard](docs/agent-ops/active-workboard.md) | Laufende Arbeitsstände |
+| [MASKEN.md](docs/MASKEN.md) | UX-Standard Dokument-Konsistenzprinzip |
 
-Offene Punkte sind vollständig in [open-gaps-and-known-issues.md](docs/project-context/open-gaps-and-known-issues.md) dokumentiert.
+---
 
 ### Drittlizenzen
 
 Dieses Repository enthält Integrations-Support für `superglue-ai/superglue` (Lizenz: `FSL-1.1-Apache-2.0`).
 Lokaler Hinweis: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+
+---
 
 ### Lizenz
 
@@ -171,41 +224,77 @@ Lokaler Hinweis: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 
 VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives and grain trading companies. The focus is on end-to-end agricultural trading excellence, agent-capable domain architecture, and fast process UX — not a generic horizontal ERP.
 
+---
+
 ### Current Status
 
 | Metric | As of |
 |--------|-------|
-| Docs date | `2026-06-12` |
-| Maturity | active development, not generally production-ready |
-| Frontend TypeScript | 0 errors |
-| Backend test coverage | 64.85 % overall; 18/18 critical ratchet paths green |
-| Domain depth | `DOM-*-004` wave completed: contracts, O2C, accounting, procurement, evidence room, supply chain at full depth ([overview](docs/dom-004-spine-buildout-2026-06-12.md)) |
-| Alembic | 1 head (`merge_doc_proc_20260612`) |
-| Service layer | known large legacy endpoints have repo-side dedicated services |
-| Docker/containers | first install, Keycloak DB bootstrap and several healthcheck/CRM/Inventory fixes delivered |
-| Production release | hard CI/security gates, SBOM, separate immutable backend/frontend images, atomic Helm rollout |
-| UAT | accepted with documented external gates; repo-side UAT conditions delivered |
+| Docs date | `2026-06-28` |
+| Maturity | **Beta** — core processes operational, external go-live gates open |
+| Frontend TypeScript | 0 errors (`tsc --noEmit`) |
+| Backend tests | > 9,500 collected; pure service-logic tests Waves 83–101 (+380) |
+| Critical coverage ratchets | 33 paths green (`scripts/check_critical_backend_coverage.py`) |
+| Backend overall coverage | 64.85 % (long-term target ≥ 80 %) |
+| OpenAPI routes | 3,041 paths with `summary=` (100 %) |
+| Alembic | 1 head (`final_single_head_merge_20260626`) — 55+ parallel branches closed |
+| Domain depth | DOM-\*-004 completed: contracts, O2C, accounting, P2P, evidence room, supply chain |
+| Architecture docs | arc42 (12 chapters), C4 Context/Container/Components, 036 ADRs |
+| User manual | DOC-USER-MANUAL-004 Wave 17 — complete (German) |
+| Runtime API sweep | 1,059 GET endpoints live tested; known 5xx closed repo-side |
+| Workflow Cockpit | MVP + retry/compensation + NATS projector + dead-letter view |
 
-Authoritative status documents:
+---
 
-- [Process Kernel Status](docs/architecture/process-kernel/STATUS.md)
-- [Open Gaps and Known Issues](docs/project-context/open-gaps-and-known-issues.md)
-- [Active Workboard](docs/agent-ops/active-workboard.md)
-- [UAT Master Plan](docs/uat/UAT-MASTER-PLAN.md)
-- [Production Readiness Runbook](docs/operations/production-readiness-runbook.md)
-- [Meridian Design Concept](docs/design/DESIGN-KONZEPT-1-MERIDIAN.md)
+### Maturity: What's Missing for Production?
+
+#### Repo-side ready ✅
+- Broad domain coverage across 12+ ERP areas with operational end-logic
+- OIDC auth, multi-tenancy, bearer token enforcement, RFC-7807 error model
+- Hard CI gates: TypeScript, ESLint, pytest ratchet, security scan, SBOM
+- Immutable SHA images, Helm rollout, `/healthz`/`/readyz` smoke
+- Alembic single head, idempotent migrations, Keycloak DB bootstrap
+- GoBD evidence room, DATEV export, UStVA submission client
+- POS with TSE simulation (Fiskaly integration prepared)
+- Full UAT documentation, Playwright E2E evidence, traceability matrix
+
+#### External go-live gates ⏳ (operations responsibility)
+| Gate | Owner |
+|------|-------|
+| Production Keycloak/OIDC credentials | Operations |
+| TSE hardware acceptance & DSFinV-K certification | Operations / fiscal provider |
+| ERiC/ELSTER live submission | Tax advisor + DATEV cutover mapping |
+| DMS Paperless-ngx live probe | Operations |
+| Staging domain + DNS + TLS certificate | Operations |
+| Backup/restore drill (15-min RTO) | Operations |
+| Harvest-peak load test on staging | Operations (k6, `load-test.yml`) |
+| Real UAT signatures | Business + management |
+| GDPR data-protection-officer sign-off | DPO |
+
+Full gate list: [`docs/operations/production-readiness-runbook.md`](docs/operations/production-readiness-runbook.md)
+
+---
 
 ### What the System Covers Today
 
-- **12+ business domains**: Agrar (harvest acceptance, contracts, drying rules), Sales, Procurement, Inventory, Finance/Accounting, CRM, Logistics, Compliance, HRM, POS, Feed/Ration Optimization
-- **End-to-end domain depth (`DOM-*-004`)** — operational endgame logic delivered: contract fixing/MATIF/settlement, O2C match→credit limit→cancellation/credit note, accounting dunning→clearing→period close→DATEV, GoBD evidence room (upload/release/follow-up/export), P2P three-way match/ERS/RFQ, supply-chain traceability — each verified by live UAT ([overview](docs/dom-004-spine-buildout-2026-06-12.md))
-- **Multi-tenancy** via `X-Tenant-ID` header, OIDC authentication (Keycloak/Azure AD/Auth0)
-- **Process kernel** — Waves 1–104 completed, 8564 tests green
-- **Service layer** — central refactoring waves completed; `harvest_acceptance.py`, `agrar_settlements.py` and `docflow.py` are backed by dedicated services
-- **React frontend** with Mask Builder Framework (ObjectPage, ListReport, Wizard, Worklist)
-- **Meridian UI** — root theme active, navy sidebar, 56px top bar, 44px button/input targets and tokenized dashboard/list-report/core-screen patterns
-- **Event bus** via NATS JetStream with outbox pattern
-- **Agent-Ops**, voice channel, RAG/knowledge base, Superglue integration
+**12+ business domains with operational depth:**
+
+| Domain | Depth |
+|--------|-------|
+| Agrar | Harvest acceptance, weighing, contracts (MATIF/fixing), drying rules, self-billing, batch aggregation |
+| Sales (O2C) | Quote → order → delivery note → invoice, position match, credit limit, cancellation/credit note |
+| Procurement (P2P) | RFQ → PO → goods receipt → three-way match, ERS, invoice verification |
+| Inventory/WMS | Stock management, silo cells, material flow, lot traceability, QS control board |
+| Accounting | Dunning run, OP clearing, period close, DATEV export, UStVA, Atlas/customs |
+| CRM / KIM | 360° cockpit (KIM), buyer classification, auto-capture (email/phone), TAPI |
+| Logistics | Freight documents, route planning, ePOD, driver time tracking |
+| Compliance | GoBD evidence room, LkSG, GDPR Art. 30/33, hazmat, customs/Atlas, VVVO |
+| HRM | Personnel file, absence (ArbZG), time tracking, payroll (DE), planning wizard |
+| POS | Day-end closing, TSE simulation, DSFinV-K preparation, returns |
+| Feed/Rations | Recipe, ration optimization (animal welfare), production approval, inventory link |
+| Agent-Ops / AI | Workflow cockpit, MCP tool registry, LLM gateway, voice adapter, WhatsApp order assistant, RAG/knowledge base |
+
+---
 
 ### Architecture
 
@@ -213,107 +302,124 @@ Authoritative status documents:
 |-------|------------|
 | Frontend | React 18, TypeScript 5.5, Vite 5.4, Tailwind CSS, Radix UI, Zustand, TanStack Query |
 | Backend | Python 3.11+, FastAPI, SQLAlchemy 2.0, Alembic, Pydantic 2.x |
-| Database | PostgreSQL 15+, Redis 7 |
-| Auth | OIDC / Keycloak / JWT |
-| Eventing | NATS JetStream (outbox pattern) |
-| Infrastructure | Docker Compose, Helm/Kubernetes paths available |
-| Knowledge layer | ChromaDB/RAG, Agent-Ops, Superglue |
+| Database | PostgreSQL 15+ (multi-schema), Redis 7 |
+| Auth | OIDC / Keycloak / Azure AD / Auth0, JWT RS256/JWKS |
+| Eventing | NATS JetStream (outbox pattern, workflow cockpit projector) |
+| Infrastructure | Docker Compose, Helm/Kubernetes, GitHub Actions CI/CD |
+| AI / Knowledge | ChromaDB/RAG, MCP tool contracts, Superglue, LLM gateway (provider-agnostic) |
+| Design | Meridian UI (navy sidebar, tokenized colors, Mask Builder Framework) |
 
-Key directories:
+**Key directories:**
 
-- `packages/frontend-web/` — React frontend
-- `app/` — FastAPI backend, services, models, endpoints
-- `app/services/` — domain service classes (thin-router pattern)
-- `modules/agrar/` — Agrar vertical module
-- `alembic/` — database migrations
-- `docs/` — architecture, QA and delivery documentation
-- `scripts/` — bootstrap, smoke and validation scripts
+```
+app/                    FastAPI backend (services, models, endpoints, agent-ops)
+app/services/           ~160 domain service modules (thin-router pattern)
+packages/frontend-web/  React frontend (Mask Builder, Meridian shell)
+modules/agrar/          Agrar vertical module
+alembic/                Database migrations (single head)
+docs/                   Architecture (arc42, C4, ADRs), manual, QA, runbooks
+scripts/                Bootstrap, smoke, governance and validation scripts
+```
 
-### PostgreSQL Domain Schemas
+**PostgreSQL schemas:**
+`domain_shared` · `domain_crm` · `domain_erp` · `domain_inventory` · `domain_einkauf` · `domain_sales` · `domain_finance` · `domain_ops` · `domain_docflow` · `domain_agrar` · `domain_controlling` · `domain_hr` · `domain_logistics` · `domain_workflow`
 
-`domain_shared`, `domain_crm`, `domain_erp`, `domain_inventory`, `domain_einkauf`, `domain_sales`, `domain_finance`, `domain_ops`, `domain_docflow`, `domain_agrar`, `domain_controlling`
+---
 
 ### Quick Start with Docker
 
 **Prerequisites:** Docker Desktop, Git
 
 ```bash
-# Full stack
+# Full stack (Postgres, Redis, NATS, Keycloak, backend, frontend)
 docker compose up -d
 
-# Backend + Postgres only (lightweight)
+# Backend + Postgres only (lightweight for development)
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-Local endpoints:
+Local endpoints after `up`:
 
 | Service | URL |
 |---------|-----|
-| Frontend | http://localhost:3000 |
+| Frontend | http://localhost:3001 |
 | Backend API | http://localhost:8000 |
 | OpenAPI Docs | http://localhost:8000/docs |
 | Keycloak | http://localhost:8080 |
 | pgAdmin | http://localhost:5050 |
 
+---
+
 ### Local Development (without Docker)
 
 ```bash
-# Backend
+# Start backend
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Database migrations
+# Database migrations (first install: create all tables)
 alembic upgrade head
 
 # Tests
-pytest
+pytest -m unit --no-cov          # Pure logic unit tests only (fast, no DB)
+pytest                            # Full suite
 pytest --cov=app --cov-report=term
 
 # Frontend
 cd packages/frontend-web
 npm install
-npm run dev   # port 3001
+npm run dev                       # Port 3001, proxied → backend :8000
+npm run build
+npm run lint
 ```
+
+---
 
 ### First Install & Migration Safety
 
 ```bash
+# Initialize DB
 python scripts/init_db.py
+
+# Validate quality gates
 python scripts/check_alembic_single_head.py
 python scripts/check_required_domain_schemas.py
+python scripts/check_critical_backend_coverage.py
+python scripts/check_toolchain_pins.py
+
+# Check TypeScript types
 pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
 ```
 
-Docker smoke test:
-
+Docker smoke test (Windows):
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 -HostPort 55434
 ```
 
-### Maturity Assessment
+---
 
-**Solid and working:**
-- Broad domain coverage across 12+ ERP areas
-- `DOM-*-004` depth wave (contracts, O2C, accounting, procurement, evidence room, supply chain) at full depth `.2`–`.5`, each verified with pure-logic unit tests and live UAT (with DB restore)
-- Process kernel with Waves 1–104 completed, 8564 tests in the latest formal kernel status
-- Backend coverage 64.85 % in the latest formal kernel status; critical ratchet paths green
-- Main service-layer waves, BaseWorker/BaseRepository, domain error model and dedicated services for the known large legacy endpoints
-- Meridian shell and visible core UI on `localhost:3000`
-- HRM operating-release gates with fillable template packages
-- UAT documentation with master plan, traceability, API contracts and Playwright UAT evidence
-- Secured Alembic/Docker first-install path including Keycloak database bootstrap
-- UX component kit fully rolled out (page-type logic)
+### Architecture Documentation
 
-**Intentionally still open:**
-- Deep module pages still contain hard-coded Tailwind colors and need further Meridian slices
-- External gates remain outside the repository: real UAT signatures, tax-advisor/DATEV mapping, DMS live probe, TSE/DSFinV-K validation tooling, ERiC/ELSTER and provider credentials
-- Domain depth is not uniform across all areas and remains tracked through gap/parity documents
+| Document | Contents |
+|----------|----------|
+| [arc42](docs/architecture/arc42/) | 12-chapter architecture description (ISO 42010) |
+| [C4 diagrams](docs/architecture/c4/) | Context, Container, Components (Mermaid) |
+| [ADR-001…036](docs/adr/) | Architecture Decision Records |
+| [User Manual](docs/user-manual/) | Complete German user manual (Wave 17) |
+| [Admin Documentation](docs/admin/) | Deployment, RBAC, monitoring, backup |
+| [Open Gaps](docs/project-context/open-gaps-and-known-issues.md) | Open items, technical debt |
+| [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) | Go-live checklist + external gates |
+| [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) | Wave overview Waves 1–104+ |
+| [Active Workboard](docs/agent-ops/active-workboard.md) | Current work in progress |
+| [MASKEN.md](docs/MASKEN.md) | UX standard: document consistency principle |
 
-All open items are fully documented in [open-gaps-and-known-issues.md](docs/project-context/open-gaps-and-known-issues.md).
+---
 
 ### Third-Party Licenses
 
 This repository includes integration support for `superglue-ai/superglue` (license: `FSL-1.1-Apache-2.0`).
 Local attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+
+---
 
 ### License
 

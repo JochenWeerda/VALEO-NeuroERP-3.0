@@ -1,3 +1,14 @@
+---
+title: Grafik-Baustein Agrar-Silo / Materialfluss / Route (Studio-Prototyp)
+type: explanation
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Studio-Prototyp fuer Agrar-Silo- und Materialfluss-Visualisierung — Baustein-Beschreibung und Einbindung fuer WM-AGRI-SILO-001.
+---
+
 # Grafik-Baustein: Agrar-Silo, Materialfluss, Route (Studio-Prototyp)
 
 **Quelle:** Archiv `agrar-silo-materialfluss.zip` (Google AI Studio Export, Juni 2026), eingebunden als eigenstÃ¤ndiges Paket.

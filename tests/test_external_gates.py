@@ -53,3 +53,69 @@ def test_gate_status_helper_covers_all_meta_systems() -> None:
         assert status["label"]
         assert status["kategorie"]
         assert status["abgerufen_am"]
+
+
+@pytest.mark.unit
+def test_get_elster_gate_has_faellig_status() -> None:
+    resp = _client.get("/api/v1/external-gates/elster", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["system_id"] == "elster"
+    assert body["status"] == "faellig"
+    assert body["kategorie"] == "steuer"
+
+
+@pytest.mark.unit
+def test_get_bank_sepa_gate_has_warning_status() -> None:
+    resp = _client.get("/api/v1/external-gates/bank_sepa", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["system_id"] == "bank_sepa"
+    assert body["status"] == "warning"
+
+
+@pytest.mark.unit
+def test_get_tse_gate_has_ok_status() -> None:
+    resp = _client.get("/api/v1/external-gates/tse", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert "signatur_zaehler" in body
+
+
+@pytest.mark.unit
+def test_get_dms_gate_has_ok_status() -> None:
+    resp = _client.get("/api/v1/external-gates/dms", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert "nicht_archivierte_belege" in body
+
+
+@pytest.mark.unit
+def test_get_dsfinvk_gate() -> None:
+    resp = _client.get("/api/v1/external-gates/dsfinvk", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["system_id"] == "dsfinvk"
+    assert body["kategorie"] == "pos"
+
+
+@pytest.mark.unit
+def test_all_gates_status_summary_keys() -> None:
+    resp = _client.get("/api/v1/external-gates/", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    summary = body["status_zusammenfassung"]
+    all_statuses = {g["status"] for g in body["gates"]}
+    assert set(summary.keys()) == all_statuses
+    assert sum(summary.values()) == body["gesamt"]
+
+
+@pytest.mark.unit
+def test_all_gates_have_abgerufen_am_field() -> None:
+    resp = _client.get("/api/v1/external-gates/", headers=_HEADERS)
+    assert resp.status_code == 200
+    for gate in resp.json()["gates"]:
+        assert "abgerufen_am" in gate
+        assert gate["simulated"] is True

@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   readonly VITE_FEATURE_AGRAR?: string
   readonly VITE_ENABLE_COMMAND_PALETTE?: string
   readonly VITE_ENABLE_REALTIME_STATUS?: string
+  readonly VITE_ENABLE_MASK_BUILDER_CUSTOMER_FORM?: string
+  readonly VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER?: string
   readonly VITE_FLAGS_URL?: string
   readonly VITE_MCP_EVENTS_URL?: string
 }

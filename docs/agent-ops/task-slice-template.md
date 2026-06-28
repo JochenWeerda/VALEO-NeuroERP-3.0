@@ -1,3 +1,14 @@
+---
+title: Task Slice Template
+type: reference
+audience: [agent, entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Vorlage fuer Aufgaben-Slices mit 7-Vertrags-AI-Harness-Schema — Einstiegspunkt fuer neue Slices im VALEO-Projekt.
+---
+
 # Task Slice Template
 
 ```markdown

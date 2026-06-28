@@ -1,3 +1,14 @@
+---
+title: Resume Packet Template
+type: reference
+audience: [agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Template fuer Wiederaufnahme-Pakete bei Kontext-Komprimierung — Pflichtfelder, Abschnitte und Beispielstruktur fuer nahtlose Sitzungskontinuitaet.
+---
+
 # Resume Packet Template
 
 ```markdown

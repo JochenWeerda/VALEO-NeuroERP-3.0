@@ -76,6 +76,36 @@ critical_paths:
       - docs/architecture/
       - docs/agent-ops/
       - docs/entwickler/
+    generated_artifacts:
+      - config/architecture-index.yaml
+      - docs/architecture/views/c4-01-system-context.md
+      - docs/architecture/views/c4-02-containers.md
+
+  - path: docs/architecture/c4/
+    docs:
+      - docs/architecture/views/
+      - docs/architecture/agents/
+    generated_artifacts:
+      - docs/architecture/views/c4-01-system-context.md
+      - docs/architecture/views/c4-02-containers.md
+
+  - path: docs/architecture/domains/
+    docs:
+      - docs/architecture/
+      - config/architecture-index.yaml
+
+  - path: config/architecture-domain-prefixes.yaml
+    docs:
+      - config/architecture-index.yaml
+      - docs/architecture/agents/architecture-protocol.md
+    generated_artifacts:
+      - config/architecture-index.yaml
+
+  - path: config/architecture-index.overrides.yaml
+    docs:
+      - config/architecture-index.yaml
+    generated_artifacts:
+      - config/architecture-index.yaml
 
   # Events/Outbox-Dateien → AsyncAPI-Doku als Nachweis
   - path: app/

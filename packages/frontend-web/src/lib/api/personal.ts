@@ -777,6 +777,24 @@ export function useDriverTimeSummary(datum?: string) {
   })
 }
 
+export type DriverTimeEventPatch = {
+  vehicle_id?: string | null
+  tour_ref?: string | null
+  notes?: string | null
+}
+
+export function useUpdateDriverTimeEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ eventId, data }: { eventId: string; data: DriverTimeEventPatch }) =>
+      (await apiClient.patch(`/api/v1/personal/driver-time/events/${eventId}`, data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.driverTimeSummary() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
 export function useTimeCockpit(datum?: string) {
   return useQuery({
     queryKey: personalKeys.timeCockpit(datum),
@@ -975,6 +993,28 @@ export function useWorkPlan(filters: { periodFrom: string; periodTo: string; hol
     },
     placeholderData: EMPTY_WORK_PLAN,
     staleTime: 30_000,
+  })
+}
+
+export type WorkPlanAssignmentInput = {
+  datum: string
+  employeeRef: string
+  label: string
+  startTime?: string | null
+  endTime?: string | null
+  roleCode?: string | null
+  notes?: string | null
+}
+
+export function useCreateWorkPlanAssignment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: WorkPlanAssignmentInput) =>
+      (await apiClient.post<WorkPlanAssignment>('/api/v1/personal/work-plan/assignments', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.workPlan() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
   })
 }
 

@@ -1,3 +1,14 @@
+---
+title: Inventar — Externes Handbuch C-Laufwerk
+type: reference
+audience: [entwickler]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Rekursive Durchsuchung und Inventarisierung des externen Handbuch-Verzeichnisses (Warenfluss-Stichworte, Stand 2026-06-13).
+---
+
 # Inventar: externes Handbuch `C:\Handbuch`
 
 **Stand:** 2026-06-13 (rekursive Durchsuchung, Dateinamen + Stichwort-Strings in der Warenfluss-`.doc`)

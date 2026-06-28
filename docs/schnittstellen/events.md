@@ -17,6 +17,11 @@ version: 3.0.0
 VALEO NeuroERP publiziert fachliche Domänen-Events über das **Transactional Outbox Pattern**:
 Events werden atomar mit der fachlichen Änderung persistiert und über **NATS JetStream** ausgeliefert.
 
+**Architektur-Kontext:** Event-Publisher ist primär der `backend`-Container; NATS als
+Event-Bus — siehe [C4 Container](../architecture/views/c4-02-containers.md) und
+[ADR-036](../adr/adr-036-architecture-documentation-stack.md). AsyncAPI-Artefakte sind an
+dieselbe Container-Sicht gekoppelt (Slice `DOC-INTERFACES-001`).
+
 ## Namenskonvention
 
 ```

@@ -1,0 +1,20 @@
+slice_id: UIX-DATA-CONTRACT-005
+title: Native ScreenDefinition API
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-25
+completed_at: 2026-06-25
+goal: Deliver native ScreenDefinition from backend; frontend useScreenDefinition with adapter fallback.
+file_ownership:
+  - app/core/screen_definitions.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - app/api/v1/api.py
+  - packages/frontend-web/src/lib/api/masks.ts
+  - packages/frontend-web/src/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage.tsx
+  - tests/test_mask_screen_definition.py
+acceptance:
+  - GET /api/v1/masks/{mask_id}/screen-definition returns crm/customer-360 definition.
+  - adapter.temporary is false for native payload.
+  - Pilot prefers native metadata when endpoint succeeds.
+tests:
+  - "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -o addopts='' tests/test_mask_screen_definition.py -q"

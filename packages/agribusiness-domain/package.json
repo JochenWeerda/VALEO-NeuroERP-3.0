@@ -24,7 +24,7 @@
     "@valeo-neuroerp/sales-domain": "file:../sales-domain",
     "@valeo-neuroerp/inventory-domain": "file:../inventory-domain",
     "@valeo-neuroerp/purchase-domain": "file:../purchase-domain",
-    "fastify": "^4.28.1",
+    "fastify": "^5.7.2",
     "@fastify/swagger": "^8.0.0",
     "@fastify/swagger-ui": "^4.0.0",
     "zod": "^3.23.8",
@@ -36,7 +36,7 @@
     "@types/uuid": "^10.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.3",
-    "vitest": "^1.5.0",
-    "@vitest/coverage-v8": "^1.5.0"
+    "vitest": "^3.2.6",
+    "@vitest/coverage-v8": "^3.2.6"
   }
 }

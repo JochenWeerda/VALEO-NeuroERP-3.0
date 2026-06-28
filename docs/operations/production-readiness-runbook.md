@@ -173,3 +173,64 @@ python scripts/release_evidence_report.py --fail-on-red
 Läuft als letzter Step in `.github/workflows/release-gates.yml`.
 `--fail-on-red`: Exit 1 wenn mindestens eine Dimension `fail` hat.
 WARN-Dimensionen blockieren nicht, erscheinen aber im Report.
+
+---
+
+## Externe Go-Live Gates {#externe-go-live-gates}
+
+Diese Punkte liegen ausserhalb des Repo-Scopes und sind **Betriebsverantwortung**.
+Sie tauchen nicht im Entwicklungs-Gap-Track auf. Der Nachweis je Gate muss vor
+Produktionsfreigabe dokumentiert vorliegen.
+
+### Infrastruktur und Deployment
+
+| Gate | Verantwortung | Repo-Vorbereitung |
+|------|--------------|-------------------|
+| GitHub-Environment `production` Reviewer/Branch-Protection setzen | DevOps/Ops | `.github/workflows/valeo-erp-deployment.yml` |
+| Produktive Cluster-Secrets befuellen (`valeo-erp-runtime`, `valeo-erp-database`) | Ops | `k8s/helm/valeo-erp/values-production.yaml`, `.env.example` |
+| Monitoring-Alertmanager-URL und Grafana-Credentials setzen | Ops | `monitoring/prometheus/alerts-event-bus.yml` |
+| Erstmaligen Backup-/Restore-Drill durchfuehren und Ergebnis dokumentieren | Ops | Runbook Abschnitt "Rollback und Notfall" |
+| Wochentlichen Restore-Test als Produktions-Gate aktivieren | Ops | `.github/workflows/release-gates.yml` |
+| Staging-URL, DNS und API-Token fuer Erntepeak-Lasttest bereitstellen | Ops | `.github/workflows/load-test.yml`, `tests/load/harvest-peak.js` |
+
+### Integration und Schnittstellen
+
+| Gate | Verantwortung | Repo-Vorbereitung |
+|------|--------------|-------------------|
+| Produktive Tenant-Secrets und Zielsystem-URLs eintragen | Betrieb/IT | `scripts/check_integration_bootstrap.py --probe-plan` |
+| Superglue-Connectors live smoke bestaetigen | Betrieb/IT | `scripts/check_integration_bootstrap.py --strict-live` |
+| Fachlich freigegebene FIBU-Cutover-Mappings (Konten/Steuer/Kostenstellen) liefern | Steuerberater | `config/fibu_cutover_mapping.template.yaml`, `scripts/check_fibu_cutover_mapping.py --strict` |
+
+### HRM und Payroll
+
+| Gate | Verantwortung | Repo-Vorbereitung |
+|------|--------------|-------------------|
+| Amtlicher BMF-PAP, ELStAM, DEUEV, SV-Meldewesen — Rechtsgueltigkeit pruefen | Steuerberater/Kanzlei | `HRM-PAYROLL-DEEP-001` Exportprofile im Repo bereit |
+| DATEV-/Herstellerfreigabe fuer Exportprofil einholen | Steuerberater/DATEV | Exportprofil mit Pruefsumme repo-seitig fertig |
+| Produktive Lohnarten-/Sachkonten-/KOST1-/KOST2-Freigabe | Betrieb/Steuerberater | Freigabeworkflow im HR-Cockpit |
+| Reale Periodensperre im Betriebsprozess durchfuehren | Betrieb/HR | `finance/mahnwesen.tsx`, Payroll-Closeout-Preview |
+| Rechtspruefung Arbeitszeitgesetz (Fahrerzeit / §21a ArbZG) | Anwalt/Steuerberater | `domain_hr.driver_time_events` im Repo |
+| Anbieter-AVV/DPA fuer Tacho-/Telematik-Schnittstelle abschliessen | Betrieb/Datenschutz | — |
+
+### UAT und Abnahmen
+
+| Gate | Verantwortung | Repo-Vorbereitung |
+|------|--------------|-------------------|
+| UAT-Unterschriften: Rohware/Waage/Druck im Zielbetrieb | Betrieb/Anwender | UAT-Skripte in `scripts/uat/` |
+| DMS-/Paperless-Liveprobe (`PAPERLESS_URL` gesetzt, Dokument hochgeladen) | IT/Betrieb | `docflow_{artifact,gobd}_service.py` |
+| Zertifizierter DATEV-EXTF-Export mit Steuerberater-Testimport | Steuerberater | `finance_datev_service.py`, DATEV-Export-Endpoint |
+| TSE-Hersteller- und DSFinV-K-Pruefwerkzeugabnahme | POS-Anbieter/Betrieb | `pos/fiskalisierung.py`, DSFinV-K-Export |
+| Kassen-Nachschau-Simulation im Zielbetrieb | Steuerberater/Betrieb | `scripts/simulate_external_assessors.py` |
+| Datenschutz-AVV, DSFA-Unterschrift und DSB-Freigabe | DSB/Anwalt | DSGVO-Modul vollstaendig im Repo |
+
+### Externe Behoerden und Compliance
+
+| Gate | Verantwortung | Hinweis |
+|------|--------------|---------|
+| GoBD-konforme Erstaufzeichnung im Echtbetrieb bestaetigen | Steuerberater | GoBD-Aenderung 14.07.2025 beachten |
+| KassenSichV-Konformitaet im Livebetrieb nachweisen | Betrieb/Kassenhersteller | KassenSichV zuletzt geaendert 14.01.2026 |
+| BSI IT-Grundschutz / ISO-27001 Erstbewertung | IT-Sicherheit/Betrieb | Simulation via `simulate_external_assessors.py` |
+
+> **Tracking:** Diese Gate-Liste wird nicht im `open-gaps-and-known-issues.md` gefuehrt.
+> Fortschritt wird operativ ausserhalb des Repos dokumentiert (z. B. Freigabe-Protokoll,
+> Ticket-System). Der Repo-Stand gilt als vollstaendig vorbereitet.

@@ -80,11 +80,26 @@ exclude_docs: |
   !/index.md
   !/MASKEN.md
   /_internal/
+  !/_internal/workflow-chains.md
+  !/_internal/cards-inventory.md
+  !/_internal/legacy-docs-inventory.md
   /analysis/
   /api/
   /agent-ops/
+  !/agent-ops/active-workboard.md
+  !/agent-ops/session-start-checklist.md
+  !/agent-ops/task-slice-template.md
+  !/agent-ops/handoff-template.md
+  !/agent-ops/parallel-work-protocol.md
+  !/agent-ops/resume-packet-template.md
+  !/agent-ops/README.md
+  !/agent-ops/autogoal-skill.md
+  !/agent-ops/goal-skill.md
+  !/agent-ops/agent-orchestrator-pilot.md
   /archive/
   /cards/
+  !/cards/README.md
+  !/cards/card-template.md
   /config/
   /data/
   /db/
@@ -116,6 +131,9 @@ exclude_docs: |
   !/quality-assurance/traceability-matrix.md
   !/quality-assurance/playwright-smoke-auth.md
   !/quality-assurance/browser-use-checklists.md
+  !/quality-assurance/soll-ist-checks.md
+  !/quality-assurance/external-auditor-simulation-template.md
+  !/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
   /roadmap/
   /runbooks/
   !/runbooks/ALERTS.md
@@ -135,6 +153,12 @@ exclude_docs: |
   /user/
   /valeo-reference/
   /warehouse/
+  !/warehouse/folkerts-landhandel-hofplan.md
+  !/warehouse/handbuch-c-inventar.md
+  !/warehouse/agrar-silo-materialfluss-studio-baustein.md
+  !/warehouse/agri-silo-vendor-interface-research-2026-06-12.md
+  !/warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
+  !/warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
   /wiki/
   /workflows/
   /architecture/process-kernel/wave-*/
@@ -160,7 +184,28 @@ exclude_docs: |
   !/architecture/KI-USABILITY-MICROSERVICES.md
   !/architecture/context-architecture-revolution.md
   !/architecture/typescript-generic-architecture.md
+  !/architecture/arc42/*
+  !/architecture/views/*
+  !/architecture/views/components/*
+  !/architecture/views/sequences/*
+  !/architecture/domains/**
+  !/architecture/agents/**
+  !/architecture/quality-gates/**
+  !/architecture/c4/*
   !/project-context/open-gaps-and-known-issues.md
+  !/project-context/ai-assisted-development-implementation-plan-2026-06-23.md
+  !/project-context/ui-maskenbestand.md
+  !/project-context/documentation-consolidation-2026-06-26.md
+  !/project-context/hrm-payroll-deepening-2026-06-18.md
+  !/project-context/fibu-cutover-mapping-readiness-2026-04-24.md
+  !/project-context/hr-time-canonical-core-data-model-2026-05-08.md
+  !/project-context/hr-time-absence-driver-integration-2026-05-07.md
+  !/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md
+  !/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md
+  !/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md
+  !/project-context/integration-bootstrap-readiness-2026-04-12.md
+  !/project-context/rations-optimization-fan1-fani-spec-2026-04-21.md
+  !/project-context/ux-excellence-operating-standard-2026-05-13.md
 
 nav:
   - Start: index.md
@@ -230,11 +275,21 @@ nav:
       - Konventionen: entwickler/konventionen.md
       - Test-Strategie: entwickler/test-strategie.md
       - Service-Inventar: entwickler/service-inventory.md
+      - Container-Inventar: entwickler/container-inventory.md
       - Workflow-Index: entwickler/workflow-index.md
       - Action-Matrix-Report: quality-assurance/action-matrix-report.md
       - Traceability-Matrix: quality-assurance/traceability-matrix.md
       - Playwright Auth (Smoke): quality-assurance/playwright-smoke-auth.md
       - Browser-Use Checklists: quality-assurance/browser-use-checklists.md
+      - Soll-Ist Checks: quality-assurance/soll-ist-checks.md
+      - Auditor Simulation Template: quality-assurance/external-auditor-simulation-template.md
+      - E2E CRUD Acceptance Matrix: quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
+      - Workflow-Ketten (intern): _internal/workflow-chains.md
+      - Prozess-Cards:
+          - Cards — Konzept: cards/README.md
+          - Card Template: cards/card-template.md
+          - Cards-Inventar (intern): _internal/cards-inventory.md
+          - Legacy-Docs-Inventar: _internal/legacy-docs-inventory.md
       - UAT Checklisten:
           - Agrar: uat/checklisten/AGRAR.md
           - CRM: uat/checklisten/CRM.md
@@ -243,6 +298,46 @@ nav:
           - Sales: uat/checklisten/SALES.md
       - Architektur:
           - Index: architecture/index.md
+          - arc42 (Hub):
+              - Einführung: architecture/arc42/01-einfuehrung.md
+              - Randbedingungen: architecture/arc42/02-randbedingungen.md
+              - Kontext: architecture/arc42/03-kontext-scope.md
+              - Lösungsstrategie: architecture/arc42/04-loesungsstrategie.md
+              - Bausteinsicht: architecture/arc42/05-bausteinsicht.md
+              - Laufzeitsicht: architecture/arc42/06-laufzeitsicht.md
+              - Verteilungssicht: architecture/arc42/07-verteilungssicht.md
+              - Querschnitt: architecture/arc42/08-querschnitt.md
+              - Entscheidungen: architecture/arc42/09-entscheidungen.md
+              - Qualität: architecture/arc42/10-qualitaet.md
+              - Risiken: architecture/arc42/11-risiken.md
+              - Glossar: architecture/arc42/12-glossar.md
+          - Sichten (ISO 42010 / C4):
+              - Stakeholder & Concerns: architecture/views/stakeholder-concerns.md
+              - Viewpoint-Katalog: architecture/views/viewpoint-catalog.md
+              - C4 System Context: architecture/views/c4-01-system-context.md
+              - C4 Container: architecture/views/c4-02-containers.md
+              - Enterprise-Landkarte: architecture/views/enterprise-landscape.md
+              - ERD Canonical Domain: architecture/views/erd-canonical-domain.md
+              - C4 Component CRM: architecture/views/components/c4-crm.md
+              - C4 Component Agrar: architecture/views/components/c4-agrar.md
+              - C4 Component Finance: architecture/views/components/c4-finance.md
+              - C4 Component Einkauf/Lager: architecture/views/components/c4-procurement-inventory.md
+              - C4 Component DMS/Compliance: architecture/views/components/c4-dms-compliance.md
+              - UML Klassendiagramm Core: architecture/views/uml-canonical-domain-class.md
+              - Sequenz O2C/DATEV: architecture/views/sequences/seq-o2c-fibu.md
+              - Sequenz Agrar Settlement: architecture/views/sequences/seq-agrar-settlement.md
+              - Sequenz Auth/Tenant: architecture/views/sequences/seq-auth-tenant.md
+          - Architecture OS:
+              - Agent Rollout Prompt: architecture/agents/architecture-os-rollout-prompt.md
+              - Agent Protocol: architecture/agents/architecture-protocol.md
+              - Impact Note Template: architecture/agents/impact-note-template.md
+              - Drift Checks: architecture/quality-gates/architecture-drift-checks.md
+              - Structurizr DSL: architecture/c4/workspace.dsl
+              - Domain CRM: architecture/domains/crm/README.md
+              - Domain Finance: architecture/domains/finance/README.md
+              - Domain Agrar: architecture/domains/agrar/README.md
+              - Domain Inventory: architecture/domains/inventory/README.md
+              - Domain DMS/Compliance: architecture/domains/dms-compliance/README.md
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md
           - Process Kernel (Lieferstand): architecture/process-kernel/STATUS.md
           - Lieferkarte: architecture/process-kernel/DELIVERY-MAP.md
@@ -304,6 +399,8 @@ nav:
           - "ADR-033 — Rollback-Strategie: Zentral in get_db()": adr/adr-033-rollback-strategie-get-db.md
           - ADR-034 — Tenant-Isolation-Klassifizierungssystem: adr/adr-034-tenant-isolation-klassifizierungssystem.md
           - "ADR-035: Kein interaktiver Workflow-Designer (P2.1 gestrichen)": adr/adr-035-kein-workflow-designer.md
+          - ADR-036 — Architektur-Dokumentations-Stack: adr/adr-036-architecture-documentation-stack.md
+          - ADR-037 — Structurizr DSL als primäre C4-Quelle: adr/adr-037-structurizr-c4-source-of-truth.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
       # adr-nav:end
   - Schnittstellen:
@@ -319,6 +416,17 @@ nav:
       - Guardrails: agent-docs/guardrails.md
       - ai_harness-Verträge: agent-docs/contracts.md
       - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
+      - Agent-Ops:
+          - Überblick: agent-ops/README.md
+          - Active Workboard: agent-ops/active-workboard.md
+          - Session Start Checklist: agent-ops/session-start-checklist.md
+          - Task Slice Template: agent-ops/task-slice-template.md
+          - Handoff Template: agent-ops/handoff-template.md
+          - Parallel Work Protocol: agent-ops/parallel-work-protocol.md
+          - Resume Packet Template: agent-ops/resume-packet-template.md
+          - /goal Skill: agent-ops/goal-skill.md
+          - /autogoal Skill: agent-ops/autogoal-skill.md
+          - Agent Orchestrator Pilot: agent-ops/agent-orchestrator-pilot.md
   - Compliance:
       - Überblick: compliance/index.md
       - GoBD-Checkliste: compliance/gobd-checklist.md
@@ -339,6 +447,27 @@ nav:
       - Module Map: project-context/module-map.md
       - Domain Landhandel: project-context/domain-landhandel-und-agrarhandel.md
       - Open Gaps & Known Issues: project-context/open-gaps-and-known-issues.md
+      - UI-Maskenbestand: project-context/ui-maskenbestand.md
+      - AI-Dev Implementierungsplan: project-context/ai-assisted-development-implementation-plan-2026-06-23.md
+      - Doku-Konsolidierung 2026-06: project-context/documentation-consolidation-2026-06-26.md
+      - FiBu Cutover Readiness: project-context/fibu-cutover-mapping-readiness-2026-04-24.md
+      - Integration Bootstrap: project-context/integration-bootstrap-readiness-2026-04-12.md
+      - UX Excellence Standard: project-context/ux-excellence-operating-standard-2026-05-13.md
+      - Rationsoptimierung GfE-2023: project-context/rations-optimization-fan1-fani-spec-2026-04-21.md
+      - HRM & HR-Time:
+          - Payroll Deepening: project-context/hrm-payroll-deepening-2026-06-18.md
+          - HR-Time Kerndatenmodell: project-context/hr-time-canonical-core-data-model-2026-05-08.md
+          - HR-Time Abwesenheit/Driver: project-context/hr-time-absence-driver-integration-2026-05-07.md
+          - HR-Time Lastenheft/Roadmap: project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md
+          - HR-Time UX Workflow: project-context/hr-time-ux-workflow-roadmap-2026-05-12.md
+          - HRM Germany Gap-Plan: project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md
+      - Warehouse / WM-AGRI:
+          - Hofplan Folkerts Landhandel: warehouse/folkerts-landhandel-hofplan.md
+          - Handbuch-C-Inventar: warehouse/handbuch-c-inventar.md
+          - Silo-Baustein (Studio): warehouse/agrar-silo-materialfluss-studio-baustein.md
+          - Hersteller-Recherche Silo: warehouse/agri-silo-vendor-interface-research-2026-06-12.md
+          - Benchmark Agrar-Silo: warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
+          - Open-Source Silo/Materialfluss: warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
   - Grundlagen:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md

@@ -1,3 +1,14 @@
+---
+title: Referenz-Hofplan Folkerts Landhandel
+type: reference
+audience: [entwickler, agent]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Statischer Referenz-Hofplan (Silo-Lage, Lager-/Logistik-Zonen, Materialfluss) als Grundlage fuer WM-AGRI-SILO-001 und WM-AGRI-MAP-001.
+---
+
 # Referenz-Hofplan: Folkerts Landhandel
 
 **Zweck:** Orientierung fÃ¼r **statische Silo-Lage**, **Lager-/Logistik-Zonen** und **Verkehrs- bzw. Materialfluss** beim Modellieren in NeuroERP (WM-AGRI-SILO-001, spÃ¤ter WM-AGRI-MAP-001 Bird-View).

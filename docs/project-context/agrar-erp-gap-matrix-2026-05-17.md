@@ -1,3 +1,14 @@
+---
+title: Agrar-ERP Gap-Matrix — Erweiterter Plattformvergleich
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: archiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: Historischer Vergleich externer Agrar-ERP-Plattformen mit VALEO NeuroERP 3.0 — Gap-Matrix und Funktionsparität (Stand 2026-05-17, Konsolidierungsstatus 2026-06-26).
+---
+
 # Externe Agrar-ERP-Plattformen — Erweiterter Gap-Vergleich
 
 **Konsolidierungsstatus 2026-06-26:** Historische externe Vergleichsanalyse.

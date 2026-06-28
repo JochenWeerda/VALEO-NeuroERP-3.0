@@ -1,3 +1,14 @@
+---
+title: UX Excellence Operating Standard 2026-05-13
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: aktiv
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: UX-Betriebsstandard fuer klickarme Arbeitscockpits — naechste fachlich richtige Handlung sichtbar machen, nicht nur Daten anzeigen. Abgeleitet aus HRM-Betriebsfreigaben, gilt fuer alle VALEO NeuroERP-Arbeitsflaechen.
+---
+
 # UX Excellence Operating Standard
 
 Stand: 2026-05-13

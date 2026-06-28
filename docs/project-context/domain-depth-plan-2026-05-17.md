@@ -1,3 +1,14 @@
+---
+title: Domain-Tiefe Ist-Soll-Vergleich und Umsetzungsplan
+type: reference
+audience: [entwickler, product]
+owner: Claude Code
+status: umgesetzt
+last_reviewed: 2026-06-27
+version: 3.0.0
+description: "WEITGEHEND UMGESETZT 2026-05-17: Erste Closure-Welle hat alle grossen Luecken repo-seitig geschlossen (Verkauf, Einkauf, Finance, CRM, Logistik, HRM, Compliance, Futtermittel, POS, Kontrakte). Verbleibende Punkte in open-gaps-and-known-issues.md verfolgbar."
+---
+
 # Domain-Tiefe: Ist-Soll-Vergleich und Umsetzungsplan
 
 **Erstellt:** 2026-05-17

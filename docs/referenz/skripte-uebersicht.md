@@ -20,6 +20,7 @@ version: 3.1.0
 | `scripts/generate_mcp_tool_reference.py` | MCP-Tool-Referenz aus `config/mcp_erp_tools.yaml` |
 | `scripts/generate_adr_nav.py` | MkDocs ADR-Navigation patchen |
 | `scripts/generate_code_inventories.py` | Endpoint-/Service-/Migrations-Inventare |
+| `scripts/generate_container_inventory.py` | Docker-Compose-Container-Inventar → C4-Drift-Check |
 | `scripts/doc_drift_report.py` | Code↔Doku-Drift-Report → `artifacts/` |
 | `scripts/docs-legacy-migrate.py` | Alt-Doku inventarisieren/archivieren |
 | `scripts/docs-staleness-check.cjs` | `last_reviewed`-Gate (Node) |

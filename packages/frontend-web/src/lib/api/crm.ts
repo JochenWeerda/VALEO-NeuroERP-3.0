@@ -63,6 +63,31 @@ export type CustomerCreate = Omit<Customer, 'id' | 'created_at' | 'updated_at' |
 
 export type CustomerUpdate = Partial<CustomerCreate>
 
+export type CustomerScreenSummary = {
+  schema_version: 1
+  screen_id: 'crm/customer-360'
+  customer_id: string
+  tenant_id?: string | null
+  title: string
+  subtitle?: string | null
+  summary: {
+    sales_ytd: number
+    open_items_total: number
+    recent_activity_count: number
+    credit_status: 'ok' | 'warning' | string
+  }
+  badges: Array<{ key: string; label: string; tone?: string }>
+  available_tabs: string[]
+  tab_endpoints?: Record<string, string>
+  actions: Array<{ key: string; label: string; permission?: string }>
+  performance: {
+    initial_payload_budget_kb: number
+    tabs_lazy: boolean
+    lookup_min_chars: number
+    default_table_limit: number
+  }
+}
+
 export type Lead = {
   id: string
   company_name: string
@@ -121,6 +146,8 @@ export const crmKeys = {
   all: ['crm'] as const,
   customers: () => [...crmKeys.all, 'customers'] as const,
   customer: (id: string) => [...crmKeys.customers(), id] as const,
+  customerScreenSummary: (id: string) => [...crmKeys.customer(id), 'screen-summary'] as const,
+  customerTabData: (id: string, tabKey: string) => [...crmKeys.customer(id), 'tab-data', tabKey] as const,
   leads: () => [...crmKeys.all, 'leads'] as const,
   lead: (id: string) => [...crmKeys.leads(), id] as const,
 }
@@ -143,15 +170,27 @@ export function useCustomers(filters?: { search?: string; is_active?: boolean })
   })
 }
 
-export function useCustomer(id: string) {
+export function useCustomer(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: crmKeys.customer(id),
     queryFn: async () => {
       const response = await apiClient.get<Customer>(`/api/v1/crm/customers/${id}`)
       return response.data
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
     initialData: null,
+  })
+}
+
+export function useCustomerScreenSummary(id: string) {
+  return useQuery({
+    queryKey: crmKeys.customerScreenSummary(id),
+    queryFn: async () => {
+      const response = await apiClient.get<CustomerScreenSummary>(`/api/v1/crm/customers/${id}/screen-summary`)
+      return response.data
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
   })
 }
 

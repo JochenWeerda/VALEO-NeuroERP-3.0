@@ -39217,13 +39217,6 @@
         "title": "EinbuchenResult",
         "type": "object"
       },
-      "EinkaufBestellvorschlagOut": {
-        "additionalProperties": true,
-        "description": "Response schema for einkauf bestellvorschlag endpoints.",
-        "properties": {},
-        "title": "EinkaufBestellvorschlagOut",
-        "type": "object"
-      },
       "EinkaufDocOut": {
         "additionalProperties": true,
         "properties": {
@@ -44838,6 +44831,220 @@
           }
         },
         "title": "FrachtauftragUpdate",
+        "type": "object"
+      },
+      "FrachtbriefCreate": {
+        "properties": {
+          "absender": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absender"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "datum": {
+            "format": "date",
+            "title": "Datum",
+            "type": "string"
+          },
+          "empfaenger": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empfaenger"
+          },
+          "kennzeichen": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kennzeichen"
+          },
+          "lieferschein_ref": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferschein Ref"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "nummer": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Nummer",
+            "type": "string"
+          },
+          "tour_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tour Id"
+          }
+        },
+        "required": [
+          "nummer",
+          "datum"
+        ],
+        "title": "FrachtbriefCreate",
+        "type": "object"
+      },
+      "FrachtbriefOut": {
+        "properties": {
+          "absender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absender"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "datum": {
+            "format": "date",
+            "title": "Datum",
+            "type": "string"
+          },
+          "empfaenger": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empfaenger"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kennzeichen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kennzeichen"
+          },
+          "lieferschein_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferschein Ref"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "nummer": {
+            "title": "Nummer",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tour_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tour Id"
+          }
+        },
+        "required": [
+          "id",
+          "nummer",
+          "datum",
+          "status"
+        ],
+        "title": "FrachtbriefOut",
         "type": "object"
       },
       "FrachtkostenCalculateOut": {
@@ -171226,9 +171433,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response List Inbox Api V1 Crm Bestell Inbox Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -182372,9 +182582,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response Katalog Api V1 Crm Kaeufergruppe Katalog Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -193084,7 +193297,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EbilanzElsterOut"
+                  "items": {
+                    "$ref": "#/components/schemas/EbilanzElsterOut"
+                  },
+                  "title": "Response Taxonomie Felder Api V1 Ebilanz Taxonomie Felder Get",
+                  "type": "array"
                 }
               }
             },
@@ -194116,7 +194333,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Artikel Lager Parameter Api V1 Einkauf Artikel Lager Parameter Get",
+                  "type": "array"
                 }
               }
             },
@@ -197492,7 +197713,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Fremdwaren Api V1 Einkauf Fremdwaren Einlagerung Get",
+                  "type": "array"
                 }
               }
             },
@@ -198194,7 +198419,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Kontrakte Api V1 Einkauf Kontrakte Get",
+                  "type": "array"
                 }
               }
             },
@@ -198652,7 +198881,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Lager Konten Api V1 Einkauf Lager Konten Get",
+                  "type": "array"
                 }
               }
             },
@@ -198888,7 +199121,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufBestellvorschlagOut"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Lieferanten Api V1 Einkauf Lieferanten Get",
+                  "type": "array"
                 }
               }
             },
@@ -227940,6 +228177,787 @@
         ]
       }
     },
+    "/api/v1/futtermittel/qs/haccp-plaene": {
+      "get": {
+        "operationId": "list_haccp_plaene_api_v1_futtermittel_qs_haccp_plaene_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "aktiv",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Aktiv"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Haccp Plaene Api V1 Futtermittel Qs Haccp Plaene Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "HACCP-Plaene auflisten",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      },
+      "post": {
+        "operationId": "create_haccp_plan_api_v1_futtermittel_qs_haccp_plaene_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Haccp Plan Api V1 Futtermittel Qs Haccp Plaene Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "HACCP-Plan anlegen",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      }
+    },
+    "/api/v1/futtermittel/qs/haccp-plaene/{plan_id}": {
+      "get": {
+        "operationId": "get_haccp_plan_api_v1_futtermittel_qs_haccp_plaene__plan_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "title": "Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Haccp Plan Api V1 Futtermittel Qs Haccp Plaene  Plan Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "HACCP-Plan Detail",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      },
+      "patch": {
+        "operationId": "update_haccp_plan_api_v1_futtermittel_qs_haccp_plaene__plan_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "title": "Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Haccp Plan Api V1 Futtermittel Qs Haccp Plaene  Plan Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "HACCP-Plan aktualisieren",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      }
+    },
+    "/api/v1/futtermittel/qs/leitfaden-pruefpunkte": {
+      "get": {
+        "operationId": "list_pruefpunkte_api_v1_futtermittel_qs_leitfaden_pruefpunkte_get",
+        "parameters": [
+          {
+            "description": "YYYY-MM oder YYYY",
+            "in": "query",
+            "name": "periode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "YYYY-MM oder YYYY",
+              "title": "Periode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bestaetigt",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bestaetigt"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Pruefpunkte Api V1 Futtermittel Qs Leitfaden Pruefpunkte Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "QS-Leitfaden-Pruefpunkte auflisten",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      },
+      "post": {
+        "operationId": "create_pruefpunkt_api_v1_futtermittel_qs_leitfaden_pruefpunkte_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Pruefpunkt Api V1 Futtermittel Qs Leitfaden Pruefpunkte Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "QS-Pruefpunkt anlegen",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      }
+    },
+    "/api/v1/futtermittel/qs/leitfaden-pruefpunkte/{punkt_id}/bestaetigen": {
+      "post": {
+        "operationId": "bestaetigen_pruefpunkt_api_v1_futtermittel_qs_leitfaden_pruefpunkte__punkt_id__bestaetigen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "punkt_id",
+            "required": true,
+            "schema": {
+              "title": "Punkt Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Bestaetigen Pruefpunkt Api V1 Futtermittel Qs Leitfaden Pruefpunkte  Punkt Id  Bestaetigen Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "QS-Pruefpunkt bestaetigen",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      }
+    },
+    "/api/v1/futtermittel/qs/vlog-meldungen": {
+      "get": {
+        "operationId": "list_vlog_meldungen_api_v1_futtermittel_qs_vlog_meldungen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Vlog Meldungen Api V1 Futtermittel Qs Vlog Meldungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "VLOG-Meldungen auflisten",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      },
+      "post": {
+        "operationId": "create_vlog_meldung_api_v1_futtermittel_qs_vlog_meldungen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Vlog Meldung Api V1 Futtermittel Qs Vlog Meldungen Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "VLOG-Meldung erstellen",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      }
+    },
+    "/api/v1/futtermittel/qs/vlog-meldungen/{meldung_id}/status": {
+      "patch": {
+        "operationId": "set_vlog_status_api_v1_futtermittel_qs_vlog_meldungen__meldung_id__status_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Vlog Status Api V1 Futtermittel Qs Vlog Meldungen  Meldung Id  Status Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "VLOG-Meldung Status setzen",
+        "tags": [
+          "futtermittel",
+          "qs"
+        ]
+      }
+    },
     "/api/v1/futtermittel/rezepte": {
       "get": {
         "operationId": "list_rezepte_api_v1_futtermittel_rezepte_get",
@@ -251654,6 +252672,252 @@
         ]
       }
     },
+    "/api/v1/logistik/frachtbriefe": {
+      "get": {
+        "operationId": "list_frachtbriefe_api_v1_logistik_frachtbriefe_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tour_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tour Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FrachtbriefOut"
+                  },
+                  "title": "Response List Frachtbriefe Api V1 Logistik Frachtbriefe Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Frachtbriefe auflisten",
+        "tags": [
+          "logistik",
+          "frachtbriefe",
+          "logistik",
+          "frachtbriefe"
+        ]
+      },
+      "post": {
+        "operationId": "create_frachtbrief_api_v1_logistik_frachtbriefe_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FrachtbriefCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrachtbriefOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Frachtbrief anlegen",
+        "tags": [
+          "logistik",
+          "frachtbriefe",
+          "logistik",
+          "frachtbriefe"
+        ]
+      }
+    },
+    "/api/v1/logistik/frachtbriefe/{fb_id}/status": {
+      "patch": {
+        "operationId": "update_frachtbrief_status_api_v1_logistik_frachtbriefe__fb_id__status_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fb_id",
+            "required": true,
+            "schema": {
+              "title": "Fb Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "pattern": "^(erstellt|unterwegs|zugestellt|storniert)$",
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrachtbriefOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Frachtbrief-Status aktualisieren",
+        "tags": [
+          "logistik",
+          "frachtbriefe",
+          "logistik",
+          "frachtbriefe"
+        ]
+      }
+    },
     "/api/v1/logistik/frachttabellen": {
       "get": {
         "operationId": "list_frachttabellen_api_v1_logistik_frachttabellen_get",
@@ -256377,7 +257641,7 @@
     },
     "/api/v1/mcp/policy/list": {
       "get": {
-        "description": "Listet alle Policies auf\n\nReturns:\n    Dict mit ok=True und data=List[Rule]",
+        "description": "Listet alle Policies auf\n\nReturns:\n    Dict mit success=True und data=List[Rule]",
         "operationId": "list_policies_api_v1_mcp_policy_list_get",
         "responses": {
           "200": {
@@ -257166,7 +258430,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MessageOut"
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Messages Health Api V1 Messages Health Get",
+                  "type": "object"
                 }
               }
             },
@@ -325828,6 +327096,166 @@
           }
         ],
         "summary": "Blocker als resolved markieren",
+        "tags": [
+          "workflow",
+          "cockpit",
+          "workflow",
+          "cockpit"
+        ]
+      }
+    },
+    "/api/v1/workflow/cockpit-db/instances/{process_instance_id}/compensate": {
+      "post": {
+        "operationId": "compensate_instance_api_v1_workflow_cockpit_db_instances__process_instance_id__compensate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "process_instance_id",
+            "required": true,
+            "schema": {
+              "title": "Process Instance Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Compensate Instance Api V1 Workflow Cockpit Db Instances  Process Instance Id  Compensate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Instanz als kompensiert/storniert markieren (Kompensationspfad)",
+        "tags": [
+          "workflow",
+          "cockpit",
+          "workflow",
+          "cockpit"
+        ]
+      }
+    },
+    "/api/v1/workflow/cockpit-db/instances/{process_instance_id}/retry": {
+      "post": {
+        "operationId": "retry_instance_api_v1_workflow_cockpit_db_instances__process_instance_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "process_instance_id",
+            "required": true,
+            "schema": {
+              "title": "Process Instance Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retry Instance Api V1 Workflow Cockpit Db Instances  Process Instance Id  Retry Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "FAILED/blocked Instanz kontrolliert neu starten (WF-COCKPIT-RETRY-001)",
         "tags": [
           "workflow",
           "cockpit",

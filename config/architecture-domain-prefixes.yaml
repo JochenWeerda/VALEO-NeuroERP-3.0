@@ -1,0 +1,589 @@
+# Architecture OS — Domain-Prefix-Regeln (Single Source of Truth)
+# Wird von scripts/generate_architecture_index.py geladen.
+# Jeder Route-Segment, Service- und Endpoint-Stem muss hier abgedeckt sein.
+
+schema_version: "1.1.0"
+
+# Fallback wenn path leer oder nur Shell-Routen (login, auth, …)
+default_route_domain: platform
+
+domains:
+  crm:
+    route_segments:
+      - crm
+      - sales
+      - verkauf
+      - vertrieb
+      - portal
+      - marketing
+      - prospecting
+      - kunden
+      - termine
+      - mahnwesen
+      - benachrichtigungen
+      - service
+      - vertreterprovisionen
+      - inbox
+    service_prefixes:
+      - crm_
+      - business_partner_
+      - bedarfsdeckung_
+      - case_management
+      - consent_engine
+      - competitor_monitor
+      - customer_
+      - portal_
+      - sales_
+      - o2c_
+      - notification_
+      - kunden_
+      - lieferschein_
+      - milchvieh_crosssell_
+      - whatsapp_
+      - kaeufer_
+      - gap_analytics
+      - gap_pipeline
+      - gap_progress
+      - semantic_e2e_chain_
+      - kaeufergruppe
+    endpoint_prefixes:
+      - crm
+      - business_partner
+      - verkauf
+      - sales_
+      - customer
+      - customers
+      - contacts
+      - leads
+      - opportunities
+      - portal_
+      - marketing
+      - prospecting
+      - bedarfsdeckung
+      - case_management
+      - cases
+      - activities
+      - messages
+      - channels
+      - vertreter
+      - mahnwesen
+      - dunning
+      - credit_management
+      - creditors
+      - debtors
+      - o2c_
+      - whatsapp_
+
+  finance:
+    route_segments:
+      - finance
+      - fibu
+      - finanzplanung
+      - fibu-suite
+      - pos
+      - kasse
+      - banken
+      - controlling
+      - reports
+      - statistik
+      - export
+      - pricing
+      - preise
+    service_prefixes:
+      - finance_
+      - finanz
+      - accounting_
+      - closing_
+      - ap_invoice
+      - command_handlers_finance
+      - controlling_
+      - meldewesen_
+      - pos_
+      - eric_submission_
+      - einvoice_
+      - fints_
+      - tse_fiskaly_
+      - vies_
+      - ist_aggregation_
+    endpoint_prefixes:
+      - finance
+      - finanz
+      - fibu
+      - accounting_
+      - ap_
+      - ar_
+      - accruals_
+      - asset_
+      - bank_
+      - betriebsstaetten
+      - budget_
+      - chart_of_accounts
+      - closing_
+      - controlling
+      - credit_debit
+      - debtors
+      - creditors
+      - dauerauftraege
+      - direct_debits
+      - ebilanz_
+      - erloeskennziffern
+      - exchange_rates
+      - financial_reports
+      - forderungsgruppen
+      - gelangensbestaetigung
+      - gobd_
+      - hausbankenstamm
+      - intrastat
+      - journal_
+      - kasse_
+      - kostenrechnung
+      - liquidity
+      - meldewesen_
+      - open_items
+      - op_skonto
+      - payment_
+      - periodische_
+      - pos_
+      - preis_rabatt
+      - price_
+      - pricing
+      - report_print
+      - reporting_
+      - subsidiary_
+      - tax_
+      - vat_
+      - xrechnung
+      - zahlungsbedingungen
+      - zinsabrechnung
+      - zu_abschlag
+      - bulk_journal
+      - booking_templates
+      - auto_matching
+      - erechnung_
+      - individualpreise
+      - inventur_piv
+      - kundenbanken
+      - stmd_duplikat
+      - iban_lookup
+      - export_service
+      - accounts
+      - banken
+
+  agrar:
+    route_segments:
+      - agrar
+      - agribusiness
+      - annahme
+      - kontrakte
+      - contracts
+      - contracts-v2
+      - futtermittel
+      - futter
+      - waage
+      - weighing
+      - charge
+      - nawaro
+      - nachhaltigkeit
+      - zertifikate
+      - foerderung
+      - rezepte
+      - silo
+      - energie
+      - tankstelle
+      - vertrag
+      - subventionen
+      - produktion
+      - saatzucht
+    service_prefixes:
+      - agrar_
+      - agri_
+      - agribusiness_
+      - annahme_
+      - harvest_acceptance_
+      - kontrakt_
+      - kontrakte_
+      - contract_
+      - settlement_
+      - feed_
+      - silo_rule_
+      - supply_chain_
+      - rations_
+      - qs_charge_
+      - geo_pipeline
+      - webshop_integration_
+    endpoint_prefixes:
+      - agrar
+      - agri
+      - annahme
+      - harvest_
+      - kontrakt
+      - kontrakte
+      - contract_
+      - central_contracts
+      - commodity_
+      - charges
+      - ernte_
+      - ers_settlement
+      - farm_
+      - feed_
+      - foerderung
+      - futter_
+      - futtermittel_
+      - grundfutter_
+      - hofliste
+      - kontrakt_
+      - nawaro
+      - nutrient_
+      - partiestamm
+      - produktion_
+      - rations_
+      - reklamation_
+      - rohware
+      - saatzucht
+      - self_billing
+      - silo
+      - sustainability
+      - tankstelle
+      - vermehrungsvertrag
+      - waage
+      - waagen_
+      - weighing_
+      - zertifikate
+      - charge
+      - commodity
+      - ernte_
+      - partiestamm
+
+  inventory:
+    route_segments:
+      - lager
+      - inventory
+      - stock-management
+      - inventory-dashboard
+      - inventory-reports
+      - artikel
+      - stammdaten
+      - disposition
+      - etiketten
+    service_prefixes:
+      - inventory_
+      - warehouse_
+      - articles_
+      - article_
+      - number_range_
+      - numbering_
+      - position_
+      - report_print_
+      - pdf_
+    endpoint_prefixes:
+      - inventory
+      - lager
+      - warehouse
+      - articles
+      - artikel_
+      - disposition
+      - etiketten
+      - gs1_
+      - inventur_
+      - master_data
+      - number_ranges
+      - pick_lists
+      - preparation_lists
+      - ruestliste
+      - stuecklisten
+      - warengruppen
+      - massebilanz
+      - nve
+      - individuelle_artikel
+      - article_
+      - position_
+      - daily_prices
+      - price_lists
+      - price_calculation
+      - price_hedge
+      - terminologie
+      - branches
+
+  procurement:
+    route_segments:
+      - einkauf
+      - procurement
+    service_prefixes:
+      - procurement_
+      - command_handlers_procurement
+      - proc_
+      - purchase_order_
+      - rfq_
+      - einkauf_
+    endpoint_prefixes:
+      - procurement
+      - einkauf
+      - purchase_
+      - rfq
+      - supplier_portal
+
+  logistics:
+    route_segments:
+      - logistik
+      - transporte
+      - versand
+      - verladung
+      - strecke
+      - fuhrpark
+    service_prefixes:
+      - logistics_
+      - logistik_
+      - lkv_pipeline
+    endpoint_prefixes:
+      - logistics_
+      - logistik_
+      - transporte
+      - tours
+      - fuhrpark
+      - strecke
+      - verladung
+      - versandprofile
+      - nve
+
+  dms-compliance:
+    route_segments:
+      - compliance
+      - dms
+      - docflow
+      - dokumente
+      - document
+      - policies
+      - policy-manager
+      - qualitaet
+      - labor
+      - schaeden
+    service_prefixes:
+      - compliance_
+      - archive_
+      - dms_
+      - connector_
+      - docflow_
+      - doc_nachweisraum_
+      - audit_hardening
+      - atlas_customs_
+      - pii_detector
+    endpoint_prefixes:
+      - compliance
+      - dms
+      - archive
+      - docflow
+      - dokumente
+      - doc_nachweisraum
+      - policies
+      - quality_
+      - qualitaet
+      - labor
+      - schaeden
+      - audit
+      - audit_evidence
+      - gdpr
+      - sanctions_
+      - atlas_
+      - gobd_
+      - edi_api
+      - quadriga_
+
+  hr:
+    route_segments:
+      - personal
+      - schichtplan
+    service_prefixes:
+      - hrm_
+      - personal_
+      - lohn_
+    endpoint_prefixes:
+      - personal
+      - hrm_
+      - lohn_
+
+  platform:
+    route_segments:
+      - admin
+      - admin-suite
+      - auth
+      - login
+      - setup
+      - system
+      - monitoring
+      - dashboard
+      - dashboards
+      - start-dashboard
+      - workflow
+      - workflows
+      - analytics
+      - copilot
+      - mobile
+      - public
+      - hilfe
+      - errors
+      - verify
+      - alerts
+      - management
+      - einstellungen
+      - genossenschaft
+      - wissen
+      - projekte
+      - versicherungen
+      - wartung
+    service_prefixes:
+      - admin_
+      - ai_
+      - mcp_
+      - workflow_
+      - wf_
+      - neuro_
+      - operator_agent_
+      - integration_bootstrap
+      - event_schema_
+      - scheduler_
+      - secrets_
+      - policy_registry
+      - policy_service
+      - guardrails
+      - llm_gateway
+      - action_execution_
+      - compat_
+      - external_mock_
+      - fast_track
+      - interaction_state_
+      - knowledge_
+      - mail_ingest_
+      - mobile_sync_
+      - nats_event_
+      - process_map_
+      - prompt_pack_
+      - security_observability
+      - stt_client
+      - sync_scheduler
+      - voice_adapter
+      - gap_pipeline_service
+      - compensation_engine
+      - article_image_enrichment
+    endpoint_prefixes:
+      - admin_
+      - agents
+      - agent_
+      - ai_
+      - analytics
+      - auth
+      - background_
+      - batch
+      - benchmark_
+      - blockchain_
+      - channels
+      - command_catalog
+      - compat
+      - config_service
+      - copilot_
+      - data_quality
+      - e2e_chain
+      - external_
+      - flow_spines
+      - gap
+      - geo
+      - iot_
+      - job_runner
+      - ki_usability
+      - knowledge_
+      - mask_registry
+      - mcp_
+      - modules
+      - neuro_
+      - operational_
+      - operator_agent
+      - process_kernel
+      - process_map
+      - process_mining
+      - process_sla
+      - projection_
+      - rag
+      - read_model_
+      - runtime_
+      - security_
+      - system_metrics
+      - tenant_
+      - tenants
+      - users
+      - training
+      - webhook
+      - websocket
+      - wf_
+      - workflow_
+      - import_pipeline
+      - idempotency_
+      - tapi
+      - channel_work
+      - webshop_integration
+      - edi_api
+      - external_agent
+      - external_gates
+      - external_mock
+      - service_anfragen
+      - versicherungen
+      - projekte
+      - wartung
+      - genossenschaft
+      - wissen
+      - hilfe
+      - errors
+      - verify
+      - public
+      - mobile
+      - setup
+      - system
+      - monitoring
+      - dashboard
+      - alerts
+      - management
+      - einstellungen
+      - analytics
+      - copilot
+      - login
+      - auth
+      - modules
+      - terminology
+      - benchmark_
+      - o2c_uat
+      - sla_escalation
+      - collective_documents
+      - config_service
+      - data_quality
+      - nutrient_compositions
+      - supply_chain_blockchain
+
+# Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
+exact_service_stems:
+  articles_service: inventory
+  customer_service: crm
+  customer_sales_eligibility: crm
+  harvest_acceptance_service: agrar
+  pdf_service: platform
+  pdf_template_service: platform
+  scheduler_service: platform
+  notification_service: crm
+  process_map_service: platform
+  workflow_service: platform
+  workflow_guards: platform
+  workflow_cockpit_service: platform
+  einkauf_compat_service: procurement
+  kaeufergruppe: crm
+
+exact_endpoint_stems:
+  articles: inventory
+  customers: crm
+  contacts: crm
+  compat: platform
+  modules: platform
+  users: platform
+  tenants: platform
+  accounts: finance
+  banken: finance
+  kaeufergruppe: crm
+  milchvieh_crosssell: crm
+  supply_chain: agrar
+  vertraege: agrar
