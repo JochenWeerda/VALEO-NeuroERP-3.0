@@ -1,0 +1,16 @@
+slice_id: UIX-PERF-GATE-006
+title: Mask Performance Contract CI Gate
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-25
+completed_at: 2026-06-25
+goal: Operationalize generator performance contract in CI.
+file_ownership:
+  - scripts/check_mask_performance_contract.ts
+  - app/core/mask_classification.py
+  - .github/workflows/quality-gate.yml
+acceptance:
+  - Script validates requires_lazy_tabs, lookup_min_chars >= 2, initial_payload_budget_kb for generator_ready masks.
+  - Quality-gate workflow runs the script.
+tests:
+  - "npx ts-node scripts/check_mask_performance_contract.ts"

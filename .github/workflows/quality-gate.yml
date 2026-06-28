@@ -191,6 +191,9 @@ jobs:
       - name: Godfile regression check (>1000 LOC)
         run: python scripts/check_file_size.py --threshold 12
 
+      - name: Mask performance contract (UIX-PERF-GATE-006)
+        run: npx ts-node scripts/check_mask_performance_contract.ts
+
       - name: OpenAPI docs coverage (summary= on all routes)
         run: python scripts/check_openapi_docs.py --threshold 0
 

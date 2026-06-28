@@ -11,14 +11,46 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-CRM-PARITY-003 - CRM Customer 360 Lazy Tab Data Parity
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — Lazy Tab-Daten, tab_endpoints, Paritaetsmatrix, Tests; Renderer-Lib, native ScreenDefinition und Perf-Gate in Waves 28–30 nachgezogen.
+**Ziel:** CRM-Pilot von renderbarer Shell zu 360-naher Paritaet: aktiver Tab laedt echte Listendaten nach, ohne Legacy-Maske zu ersetzen.
+**Abnahme:** Mindestens 4 Tabs mit Lazy-Load; tab_endpoints dokumentiert; Paritaetsmatrix; Vitest/pytest/Playwright gruen; Legacy-Fallback unberuehrt.
+
+## UIX-RENDERER-LIB-004 - Mask Builder Renderer Library
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — Field/Table/Summary/Action/Tab/Workflow-Renderer extrahiert; UniversalMaskRenderer als Orchestrator.
+**Ziel:** Visualisierungslayer aus Monolith loesen (Refactor-only).
+**Abnahme:** Vitest UniversalMaskRenderer unveraendert gruen; Diff = Move only.
+
+## UIX-DATA-CONTRACT-005 - Native ScreenDefinition API
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — GET /api/v1/masks/{id}/screen-definition, useScreenDefinition, crm/customer-360 nativ.
+**Ziel:** Backend liefert native ScreenDefinition; Adapter wird schrittweise Fallback.
+**Abnahme:** pytest test_mask_screen_definition gruen; Pilot nutzt native Metadaten wenn Endpoint 200.
+
+## UIX-PERF-GATE-006 - Mask Performance Contract CI
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — check_mask_performance_contract.ts im Quality-Gate; lookup_min_chars in Registry.
+**Ziel:** Performance-Vertrag operationalisieren.
+**Abnahme:** Script gruen fuer generator_ready Masken; CI-Schritt aktiv.
+
 ## UIX-CRM-PILOT-002 - Universal Mask Generator CRM Customer Pilot
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-28 - Claim fuer produktive CRM-Kundenpilot-Anbindung des Universal Mask Generator hinter Feature Flag mit Legacy-Fallback, Summary-first-Datenfluss, Lazy Tabs, Mobile-Layout-Haertung und Playwright/Unit/Backend-Abnahme.
+**Stand:** abgeschlossen 2026-06-28 - CRM-Kundenpilot hinter `VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER` geliefert: UniversalMaskRenderer-Anbindung, Legacy-Fallback, Summary-first-Datenfluss, Permission-Action-Filter, Mobile-Layout-Haertung und Unit-/Backend-/Playwright-Abnahme.
 **Ziel:** CRM Kundenstamm/360 als erste echte Maske ueber `ScreenDefinition` und `UniversalMaskRenderer` anbinden, ohne alte Maske zu ersetzen; Generator-Paritaet, Mobile-Verhalten und Performance-Vertrag messbar machen.
 **Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/**`, `packages/frontend-web/src/pages/crm/kunden-stamm-modern.tsx`, `packages/frontend-web/src/features/crm-masks/**`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/lib/api/**`, CRM-Pilot-Tests, `docs/adr/adr-011-ui-maskenstrategie.md`, `docs/architecture/domains/crm/README.md`, `docs/project-context/open-gaps-and-known-issues.md`, Slice-YAML.
-**Abnahme:** Feature Flag schaltet Legacy vs. Universal Pilot; Customer MaskConfig wird temporaer adaptiert; Shell/Summary erscheinen vor Details; Tabs bleiben lazy; Permissions und Mobile-Modi sind getestet; Legacy-Fallback bleibt intakt; Doku und Open-Gaps aktualisiert.
+**Abnahme:** Feature Flag schaltet Legacy vs. Universal Pilot; Customer MaskConfig wird temporaer adaptiert; Shell/Summary erscheinen vor Details; Tabs bleiben lazy; Permissions und Mobile-Modi sind getestet; Legacy-Fallback bleibt intakt; Doku und Open-Gaps aktualisiert. Typecheck, Backend-Contracts und Playwright-Pilot-Smoke Desktop/Mobile gruen; globaler Visual-Tour-Teardown meldet bestehende Alt-Warnungen ausserhalb des Pilot-Scopes.
 
 ## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator with Translation Layer Skeleton
 

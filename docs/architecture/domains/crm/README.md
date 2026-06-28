@@ -46,3 +46,42 @@ Maschinenlesbar: [`config/architecture-index.yaml`](../../../../config/architect
 ## Agenten-Hinweis
 
 Strukturelle CRM-Änderungen: [architecture-protocol.md](../../agents/architecture-protocol.md) + [Impact Note](../../agents/impact-note-template.md).
+
+## UIX / Universal Mask Generator
+
+CRM ist Pilotdomaene fuer `UIX-MASK-FRAMEWORK-001`.
+Die Kunden-360-Maske wird als erster Generator-Kandidat gefuehrt:
+
+- Mask Registry: `crm/customer-360`
+- Startvertrag: `GET /api/v1/crm/customers/{customer_id}/screen-summary`
+- Migration: bestehende CRM-Masken bleiben aktiv; CRM-Mask-JSONs werden zuerst
+  ueber Adapter in `ScreenDefinition` uebersetzt.
+- Performance-Regel: Summary zuerst, Kontakte/Belege/Dokumente/Aktivitaeten erst
+  bei Tab-Aktivierung, Tabellen serverseitig limitiert und virtualisierbar.
+
+### UIX-CRM-PILOT-002
+
+Der erste produktive Pilot ist `packages/frontend-web/src/pages/crm/kunden-stamm-modern.tsx`.
+
+- Aktivierung: `VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true`
+- Fallback: bei deaktiviertem Flag bleibt Legacy bzw. die bestehende
+  Mask-Builder-Seite aktiv.
+- Datenfluss: `screen-summary` laedt zuerst; die Customer-Detailquery wird erst
+  danach aktiviert.
+- Abnahme: Unit-Tests fuer Adapter/Renderer/Route-Switch plus Playwright-Smoke
+  fuer Desktop und Mobile mit gemockter CRM-API.
+
+### UIX-CRM-PARITY-003
+
+Lazy Tab-Listendaten fuer den Generator-Pilot:
+
+- `tab_endpoints` im screen-summary-Vertrag
+- `GET /api/v1/crm/customers/{id}/tabs/{tab_key}` (read-only, max. 25 Zeilen)
+- Paritaetsmatrix: [mask-parity-customer-360.md](./mask-parity-customer-360.md)
+
+### UIX-DATA-CONTRACT-005
+
+Native ScreenDefinition:
+
+- `GET /api/v1/masks/{mask_id}/screen-definition`
+- Pilot bevorzugt native Metadaten, Felder weiterhin aus Adapter bis vollstaendige native Lieferung

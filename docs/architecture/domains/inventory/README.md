@@ -25,3 +25,11 @@ Lager, Bestand, Warenbewegungen, Silo/Materialfluss (Agrar-Überschneidung).
 
 - [C4 Einkauf/Lager](../../views/components/c4-procurement-inventory.md)
 - Container: `inventory-service`, `backend`
+
+## UIX / Universal Mask Generator
+
+Inventory/Lager ist fuer die zweite Generator-Welle relevant, weil Listen und
+Tabellen hier besonders gross werden. Neue generatorfaehige Listen muessen
+serverseitige Pagination, Sortierung, Filterung und `VirtualDataTable`-Eignung
+dokumentieren. Bestehende Lager- und Artikelmasken bleiben bis zur Paritaet auf
+ihrem aktuellen Renderer.

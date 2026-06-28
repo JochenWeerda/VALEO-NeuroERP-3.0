@@ -11,6 +11,57 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator (2026-06-28)
+
+Status: Skeleton geliefert als Architektur-Slice, kein offener UX-Baukasten-Rollout.
+
+- Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
+  bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
+  VirtualDataTable.
+- Pilotvertrag: CRM 360/Kundenmaske mit kompaktem
+  `screen-summary`-Startvertrag und Registry-UIX-Metadaten.
+- Begrenzung: keine Big-Bang-Migration; Waage, POS, Ernteannahme und dichte
+  Operator-UIs bleiben zulaessige Spezialmasken.
+- Restarbeit nach diesem Slice: Maske-fuer-Maske Paritaet beweisen, Adapter
+  abbauen und direkte ScreenDefinition-Lieferung pro Domaene einfuehren.
+
+## UIX-CRM-PILOT-002 - CRM Customer Generator Pilot (2026-06-28)
+
+Status: produktiver Pilot hinter Feature Flag geliefert; Paritaetsrollout bleibt
+offen.
+
+- Geliefert: CRM Kundenstamm/360 kann ueber
+  `VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true` mit `UniversalMaskRenderer`
+  gerendert werden.
+- Datenvertrag: `screen-summary` wird vor der Customer-Detailquery geladen;
+  Legacy bleibt Default-Fallback.
+- Abnahme: Unit-Tests fuer Renderer, Route-Switch und Pilotseite sowie
+  Playwright-Smoke Desktop/Mobile mit gemockter CRM-API.
+- Restarbeit: fachliche Paritaet mit der alten CRM-Maske pruefen,
+  produktive Testdaten fuer E2E bereitstellen und danach erst weitere CRM- oder
+  Sales-/Inventory-/Finance-Masken aufnehmen.
+
+## UIX-CRM-PARITY-003 - CRM Lazy Tab Parity (2026-06-25)
+
+Status: abgeschlossen — read-only Lazy-Tab-Listen, tab_endpoints, Paritaetsmatrix.
+
+- Geliefert: `useCustomerTabData`, Tab-API in `crm_360.py`, supplemental 360-Tabs
+  (Auftraege, Aktivitaeten, Dokumente), Vitest/pytest/Playwright-Erweiterung.
+- Paritaet: [mask-parity-customer-360.md](../architecture/domains/crm/mask-parity-customer-360.md)
+- Restarbeit: Angebote/Historie-Quellen, Mutationen in Generator-Tabs, vollstaendige native Felddefinition.
+
+## UIX-RENDERER-LIB-004 - Renderer Library (2026-06-25)
+
+Status: abgeschlossen — Visualisierungslayer unter `mask-builder/renderers/` extrahiert (Refactor-only).
+
+## UIX-DATA-CONTRACT-005 - Native ScreenDefinition (2026-06-25)
+
+Status: abgeschlossen — `GET /api/v1/masks/{mask_id}/screen-definition`, `useScreenDefinition`, erster Eintrag `crm/customer-360`.
+
+## UIX-PERF-GATE-006 - Mask Performance Gate (2026-06-25)
+
+Status: abgeschlossen — `scripts/check_mask_performance_contract.ts` im Quality-Gate; Registry-Feld `lookup_min_chars`.
+
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.

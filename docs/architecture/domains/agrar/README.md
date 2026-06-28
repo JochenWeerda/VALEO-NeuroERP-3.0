@@ -26,3 +26,10 @@ Ernteannahme, Kontrakte, Trocknung, Selbstabrechnung, Materialfluss, Futtermitte
 - [C4 Component Agrar](../../views/components/c4-agrar.md)
 - [agrar-event-hook-contracts.md](../../agrar-event-hook-contracts.md)
 - Index: `domains.agrar`
+
+## UIX / Universal Mask Generator
+
+Agrar bleibt fuer Spezialmasken bewusst differenziert. Waage-, Ernteannahme-,
+Silo- und Operator-UIs duerfen Spezialrenderer behalten, muessen aber kuenftig
+ScreenDefinition-kompatible Daten-, Action- und Workflow-Vertraege anbieten.
+Eine Migration erfolgt erst nach CRM-Pilot und nur ueber Adapter-Paritaet.
