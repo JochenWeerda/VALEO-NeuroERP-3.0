@@ -151,6 +151,7 @@ function convertField(l3Field: L3Field): Field {
   const baseField: Field = {
     name: l3Field.bind.split('.').pop() || l3Field.bind,
     label: l3Field.label,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: convertFieldType(l3Field.comp) as any,
     required: !l3Field.optional && l3Field.validators?.includes('required'),
     readonly: false,

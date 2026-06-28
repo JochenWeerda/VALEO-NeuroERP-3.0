@@ -242,6 +242,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 )
 
               case 'select': {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const selectField = field as any
                 return (
                   <NativeSelect

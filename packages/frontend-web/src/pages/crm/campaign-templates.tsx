@@ -180,7 +180,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'campaign-templates'] })
 
-  const handleAction = async (action: string, item: Record<string, unknown> = null) => {
+  const handleAction = async (action: string, item: Record<string, unknown> | null = null) => {
     if (action === 'create') {
       navigate('/crm/campaign-template/new')
     } else if (action === 'edit' && item) {
@@ -256,7 +256,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
     try {
       const csvHeader = `${t('crud.fields.name')};${t('crud.fields.type')};${t('crud.fields.subject')};${t('crud.fields.isActive')};${t('crud.fields.usageCount')};${t('crud.fields.createdAt')}\n`
       const csvContent = data.map(item =>
-        `"${item.name || ''}";"${item.type || ''}";"${item.subject || ''}";"${item.is_active ? t('status.active') : t('status.inactive')}";"${item.usage_count || 0}";"${item.created_at || ''}"`
+        `"${String(item.name ?? '')}";"${String(item.type ?? '')}";"${String(item.subject ?? '')}";"${item.is_active ? t('status.active') : t('status.inactive')}";"${Number(item.usage_count ?? 0)}";"${String(item.created_at ?? '')}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

@@ -247,7 +247,8 @@ function KostenstellenTab() {
       setVerantwortlicher('')
       setBudget('')
       inv()
-    } catch (err: unknown) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       const msg = err instanceof Error ? err.message : 'Fehler'
       toast({ title: 'Fehler', description: msg, variant: 'destructive' })
     } finally {
@@ -276,7 +277,8 @@ function KostenstellenTab() {
       await deleteKostenstelle(kst.id)
       toast({ title: 'Kostenstelle gelöscht', description: kst.nummer })
       inv()
-    } catch (err: unknown) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       const msg = err instanceof Error ? err.message : 'Löschen fehlgeschlagen (ggf. noch Buchungen vorhanden)'
       toast({ title: 'Fehler', description: msg, variant: 'destructive' })
     } finally {

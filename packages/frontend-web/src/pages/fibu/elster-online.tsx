@@ -112,7 +112,8 @@ export default function ElsterOnlinePage(): JSX.Element {
       await calculateMutation.mutateAsync({ period })
       toast({ title: 'UStVA berechnet', description: `Zeitraum ${period} wurde aus dem Sachkonto ermittelt.` })
       refetch()
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: 'Fehler',
@@ -125,7 +126,8 @@ export default function ElsterOnlinePage(): JSX.Element {
     try {
       await downloadELSTERXml(r.id, r.period)
       toast({ title: 'ELSTER-XML heruntergeladen', description: `UStVA_${r.period}_ELSTER.xml` })
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: 'Export fehlgeschlagen',

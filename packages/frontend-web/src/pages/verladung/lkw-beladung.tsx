@@ -98,7 +98,8 @@ export default function LKWBeladungPage(): JSX.Element {
       })
       toast({ title: 'Beladung gebucht', description: `${beladung.artikel}: ${beladung.menge} t` })
       navigate('/logistik/verladungen')
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Buchung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     } finally {
       setSaving(false)

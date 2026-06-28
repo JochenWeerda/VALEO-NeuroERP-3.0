@@ -97,7 +97,8 @@ export default function AuslagerungPage(): JSX.Element {
       }
       toast({ title: 'Auslagerung gebucht', description: `${auslagerung.artikel}: ${auslagerung.menge} t` })
       navigate('/lager/bestandsuebersicht')
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ title: 'Buchung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     } finally {
       setSaving(false)

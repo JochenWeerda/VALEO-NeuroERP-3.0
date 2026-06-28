@@ -419,7 +419,8 @@ export default function BestellungenListePage(): JSX.Element {
       setImportOpen(false)
       setImportFile(null)
       refetch()
-    } catch (err: any) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: 'Import fehlgeschlagen',

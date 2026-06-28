@@ -91,7 +91,7 @@ export function ContractSelectionDialog({
           valid_from: c.valid_from || c.validFrom || null,
           valid_until: c.valid_until || c.validUntil || null,
         }))
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('[ContractSelectionDialog] Error fetching contracts:', err)
         return []
       }

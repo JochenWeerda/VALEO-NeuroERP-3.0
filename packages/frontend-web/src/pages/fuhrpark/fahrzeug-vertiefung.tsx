@@ -227,7 +227,8 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
       setLrErgebnis(result.rueckgabe_protokoll)
       toast({ title: 'Leasing-Rückgabe eingeleitet', description: 'Fahrzeug auf "ausgeschieden" gesetzt.' })
       invalidate()
-    } catch (err: unknown) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
       toast({ title: 'Fehler', description: msg, variant: 'destructive' })
     } finally {

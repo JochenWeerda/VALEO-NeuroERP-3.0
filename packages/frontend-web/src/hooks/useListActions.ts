@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Generischer Hook für Listen-Aktionen (Export, Drucken, Löschen)
  */
 
@@ -14,7 +14,7 @@ export interface UseListActionsOptions<T> {
   onDelete?: (id: string) => Promise<void>
 }
 
-export function useListActions<T extends Record<string, any>>({
+export function useListActions<T extends Record<string, unknown>>({
   data,
   entityName,
   columns,

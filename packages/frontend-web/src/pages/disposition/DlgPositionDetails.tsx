@@ -67,7 +67,8 @@ export function DlgPositionDetails({
         reason: `Freigabe für Short-Position ${articleId} / ${periodKey}`,
       })
       onOpenChange(false)
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: 'Freigabe-Anforderung fehlgeschlagen', description: e?.message })
     }
   }

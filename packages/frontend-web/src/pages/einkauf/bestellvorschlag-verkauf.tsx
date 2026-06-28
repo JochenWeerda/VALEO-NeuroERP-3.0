@@ -533,7 +533,7 @@ export default function BestellvorschlagVerkaufPage(): JSX.Element {
               })
               push(`Bestellung erstellt: ${res.bestellnummer ?? 'OK'}`)
               setVorschlaege([])
-            } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+            } catch (_rawErr: unknown) { const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }; push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
           }}>
           Bestellung erstellen
         </Button>
@@ -546,7 +546,7 @@ export default function BestellvorschlagVerkaufPage(): JSX.Element {
                 anfragedatum: new Date().toISOString().slice(0, 10),
               })
               push('Anfrage erstellt und weitergeleitet.')
-            } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+            } catch (_rawErr: unknown) { const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }; push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
           }}>
           Anfrage erstellen
         </Button>

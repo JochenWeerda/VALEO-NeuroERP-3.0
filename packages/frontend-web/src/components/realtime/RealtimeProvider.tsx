@@ -124,7 +124,7 @@ export function RealtimeProvider({
 /**
  * Hook to subscribe to specific realtime events
  */
-export function useRealtimeEvent<T = any>(
+export function useRealtimeEvent<T = unknown>(
   eventType: string,
   handler: (_data: T) => void
 ) {

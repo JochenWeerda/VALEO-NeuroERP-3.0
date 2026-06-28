@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Contracts Page V2
  * CRUD interface for managing contracts with Amendment support
  */
@@ -87,7 +87,7 @@ interface Amendment {
   type: string;
   reason: string;
   status: string;
-  changes: Record<string, any>;
+  changes: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -117,7 +117,7 @@ export default function ContractsPageV2(): JSX.Element {
   const [amendmentForm, setAmendmentForm] = useState({
     type: '',
     reason: '',
-    changes: {} as Record<string, any>,
+    changes: {} as Record<string, unknown>,
   });
 
   const entityType = 'contract';

@@ -154,7 +154,8 @@ export default function BestellvorschlaegePage(): JSX.Element {
           description: unresolved.slice(0, 3).join(', '),
         })
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: 'Bestellungen konnten nicht erstellt werden',

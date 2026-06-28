@@ -198,7 +198,8 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
         if (response.data) {
           setHistory(response.data || [])
         }
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
       } finally {
         setLoading(false)
@@ -269,7 +270,7 @@ export default function ConsentDetailPage(): JSX.Element {
   const consentConfig = createConsentConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, unknown>>({
     apiUrl: consentConfig.api.baseUrl,
     id: id || undefined
   })
@@ -301,7 +302,8 @@ export default function ConsentDetailPage(): JSX.Element {
         title: getSuccessMessage(t, isNew ? 'create' : 'update', entityType),
       })
       navigate('/crm/consents')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

@@ -19,7 +19,8 @@ export default function LoginPage(): JSX.Element {
   const handleLogin = async (): Promise<void> => {
     try {
       await login()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: 'Anmeldung fehlgeschlagen', description: error?.message ?? 'OIDC-Redirect konnte nicht gestartet werden.' })
     }
   }

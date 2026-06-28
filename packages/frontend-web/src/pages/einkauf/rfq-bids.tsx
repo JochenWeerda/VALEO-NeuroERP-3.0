@@ -205,7 +205,8 @@ export default function RfqBidsPage(): JSX.Element {
         title: t('crud.messages.importSuccess'),
         description: `${imported.length} Angebot(e) wurden aus ${file.name} uebernommen.`,
       })
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.importError'),

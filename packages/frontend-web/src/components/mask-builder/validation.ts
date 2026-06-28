@@ -44,11 +44,11 @@ function getFieldError(field: Field, value: unknown): string | null {
     if (numericValue === null) {
       return `${field.label} muss eine Zahl sein`
     }
-    if (typeof (field as Record<string, unknown>).min === 'number' && numericValue < (field as Record<string, unknown>).min) {
-      return `${field.label} muss mindestens ${(field as Record<string, unknown>).min} sein`
+    if (typeof (field as Record<string, unknown>).min === 'number' && numericValue < (field as Record<string, unknown>).min as number) {
+      return `${field.label} muss mindestens ${String((field as Record<string, unknown>).min)} sein`
     }
-    if (typeof (field as Record<string, unknown>).max === 'number' && numericValue > (field as Record<string, unknown>).max) {
-      return `${field.label} darf hoechstens ${(field as Record<string, unknown>).max} sein`
+    if (typeof (field as Record<string, unknown>).max === 'number' && numericValue > (field as Record<string, unknown>).max as number) {
+      return `${field.label} darf hoechstens ${String((field as Record<string, unknown>).max)} sein`
     }
     return null
   }

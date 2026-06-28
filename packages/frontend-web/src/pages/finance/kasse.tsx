@@ -515,7 +515,8 @@ export default function KassePage(): JSX.Element {
         toast({ title: t('crud.messages.dailyClosingPerformed'), description: t('crud.messages.cashClosingClosed') })
         setIsDirty(false)
         navigate('/finance/kasse')
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }
@@ -564,7 +565,8 @@ export default function KassePage(): JSX.Element {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'cash', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.export'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
-      } catch (error: any) {
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       }

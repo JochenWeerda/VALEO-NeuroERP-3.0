@@ -244,7 +244,8 @@ function UploadZone({ onResult }: { onResult: (r: PdfUploadResult, file: File) =
         result = await uploadGrundfutterPdf(file, false)
       }
       onResult(result, file)
-    } catch (e: unknown) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       const msg = e instanceof Error ? e.message : 'Upload fehlgeschlagen'
       setError(msg)
     } finally {

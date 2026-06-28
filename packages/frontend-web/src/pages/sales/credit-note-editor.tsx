@@ -355,7 +355,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
     navigate('/sales/credit-notes')
   }
 
-  const creditNote = (data ?? {}) as Record<string, any>
+  const creditNote = (data ?? {}) as Record<string, unknown>
   const lines = Array.isArray(creditNote.lines) ? creditNote.lines : []
   const hasCustomer = Boolean(creditNote.customerId)
   const hasSourceInvoice = Boolean(creditNote.sourceInvoice)

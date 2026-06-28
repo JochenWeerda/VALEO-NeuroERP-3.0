@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Export Utilities für CSV, Excel und PDF Export
  */
 
@@ -20,7 +20,7 @@ export type ExportFormat = 'csv' | 'xlsx' | 'pdf'
 /**
  * Konvertiert Daten zu CSV
  */
-export function exportToCSV<T extends Record<string, any>>(
+export function exportToCSV<T extends Record<string, unknown>>(
   data: T[],
   filename: string,
   columns?: { key: keyof T; label: string }[]
@@ -57,7 +57,7 @@ export function exportToCSV<T extends Record<string, any>>(
 /**
  * Konvertiert Daten zu Excel (CSV mit Excel-kompatiblem Format)
  */
-export function exportToExcel<T extends Record<string, any>>(
+export function exportToExcel<T extends Record<string, unknown>>(
   data: T[],
   filename: string,
   columns?: { key: keyof T; label: string }[]
@@ -70,7 +70,7 @@ export function exportToExcel<T extends Record<string, any>>(
 /**
  * Erstellt einen HTML-Print-Dialog für Tabellen
  */
-export function printTable<T extends Record<string, any>>(
+export function printTable<T extends Record<string, unknown>>(
   data: T[],
   title: string,
   columns?: { key: keyof T; label: string }[]

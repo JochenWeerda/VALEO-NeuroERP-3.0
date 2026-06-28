@@ -57,6 +57,7 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
       }
 
       if (!detectorRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         detectorRef.current = new (window as any).BarcodeDetector({
           formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'code_39', 'data_matrix', 'upc_a', 'upc_e'],
         })
@@ -88,7 +89,8 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
       }
 
       void detect()
-    } catch (err: unknown) {
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       const msg = err instanceof Error ? err.message : 'Kamerazugriff verweigert'
       setErrorMsg(msg)
       onError?.(msg)

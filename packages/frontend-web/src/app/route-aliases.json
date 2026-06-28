@@ -9,6 +9,10 @@
       "path": "dev/mask-benchmark/:domain/:variant/:id"
     },
     {
+      "module": "@/pages/workflow/mask-rollout/MaskRolloutRoute",
+      "path": "mask-rollout/:screenId/:entityId"
+    },
+    {
       "module": "@/pages/stammdaten/artikel-stoffstrom",
       "path": "stammdaten/artikel-stoffstrom"
     },

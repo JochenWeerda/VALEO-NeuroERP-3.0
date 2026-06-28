@@ -239,7 +239,8 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       }
       push(`${created.length} Bestellung(en) erstellt: ${created.join(', ')}`)
       setVorschlaege([])
-    } catch (e: any) {
+    } catch (_rawErr: unknown) {
+      const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Erstellen: ${e.response?.data?.detail ?? e.message}`)
     }
   }
@@ -644,7 +645,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
                 anfragedatum: new Date().toISOString().slice(0, 10),
               })
               push('Anfrage erstellt und an Lieferanten weitergeleitet.')
-            } catch (e: any) {
+            } catch (e: unknown) {
               push(`Fehler: ${(e as Record<string, unknown>).response?.data?.detail ?? (e as Record<string, unknown>).message}`)
             }
           }}>

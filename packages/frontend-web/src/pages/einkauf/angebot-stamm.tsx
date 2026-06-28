@@ -168,7 +168,8 @@ export default function AngebotStammPage(): JSX.Element {
             }
             toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })
             navigate('/einkauf/angebote')
-          } catch (error: any) {
+          } catch (_rawErr: unknown) {
+            const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
           }
   })
@@ -178,7 +179,8 @@ export default function AngebotStammPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/angebote')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: error?.message })
     } finally {
       setLoading(false)

@@ -125,7 +125,8 @@ export default function AnlieferavisPage(): JSX.Element {
             await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
             toast({ title: 'Aktion ausgefuehrt', description: `Anlieferavis ${id} wurde aktualisiert.` })
             navigate('/einkauf/anlieferavis')
-          } catch (error: any) {
+          } catch (_rawErr: unknown) {
+            const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
             toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
           }
   })
@@ -135,7 +136,8 @@ export default function AnlieferavisPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/anlieferavis')
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: 'Fehler beim Speichern', description: error?.message })
     } finally {
       setLoading(false)

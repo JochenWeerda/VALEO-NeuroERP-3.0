@@ -241,7 +241,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         }
       })
       setOpenInvoices(invoices)
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({ variant: 'destructive', title: t('crud.messages.loadError'), description: error?.message })
     }
   }
@@ -357,7 +358,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       } else {
         loadDebitMemos()
       }
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError'),
@@ -409,7 +411,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         loadDebitMemos()
       }
       loadOpenInvoices()
-    } catch (error: any) {
+    } catch (_rawErr: unknown) {
+      const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
         variant: 'destructive',
         title: t('crud.messages.settlementError'),
