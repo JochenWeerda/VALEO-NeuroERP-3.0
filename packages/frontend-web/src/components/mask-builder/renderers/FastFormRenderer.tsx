@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { LookupField } from './LookupField'
 import type { RenderFieldPlan, RenderPerformancePlan } from '../render-plan/types'
 import { useLookupBindingContext } from '../runtime/LookupBindingContext'
+import { useFormStateContext } from '../runtime/FormStateContext'
 import { FieldRenderer } from './FieldRenderer'
 import { getValue } from './render-utils'
 import type { ScreenFieldDefinition } from '../schema'
@@ -32,19 +33,61 @@ const FastFieldItem = memo(function FastFieldItem({
   performance?: RenderPerformancePlan
 }): JSX.Element | null {
   const lookupBindings = useLookupBindingContext()
+  const formState = useFormStateContext()
   if (!field.visible) return null
+
+  const value = getValue(payload, field.dataPath)
+  const fieldErrors = formState?.fieldErrors[field.key] ?? []
+  const hasBlockingError = fieldErrors.some((e) => e.severity === 'blocking')
+  const isEditable = formState !== undefined && !field.readOnly
+
+  function handleChange(newValue: unknown) {
+    formState?.setValue(field.key, newValue)
+  }
+
   if (field.componentKind === 'lookup') {
     const lookupEndpoint = lookupBindings[field.key]?.lookupEndpoint
     return (
-      <LookupField
-        field={field}
-        value={getValue(payload, field.dataPath)}
-        lookupEndpoint={lookupEndpoint}
-        performance={performance}
-      />
+      <div>
+        <LookupField
+          field={field}
+          value={value}
+          lookupEndpoint={lookupEndpoint}
+          performance={performance}
+        />
+        {fieldErrors.map((err) => (
+          <p
+            key={err.message}
+            className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-yellow-600'}`}
+            role="alert"
+            data-field-error={field.key}
+          >
+            {err.message}
+          </p>
+        ))}
+      </div>
     )
   }
-  return <FieldRenderer field={toScreenField(field)} value={getValue(payload, field.dataPath)} />
+
+  return (
+    <div>
+      <FieldRenderer
+        field={toScreenField(field)}
+        value={value}
+        onChange={isEditable ? handleChange : undefined}
+      />
+      {fieldErrors.map((err) => (
+        <p
+          key={err.message}
+          className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-yellow-600'}`}
+          role="alert"
+          data-field-error={field.key}
+        >
+          {err.message}
+        </p>
+      ))}
+    </div>
+  )
 })
 
 export const FastFormRenderer = memo(function FastFormRenderer({

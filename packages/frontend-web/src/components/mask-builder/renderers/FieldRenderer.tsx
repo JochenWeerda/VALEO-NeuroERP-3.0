@@ -1,3 +1,4 @@
+import type React from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -5,13 +6,25 @@ import { NativeSelect } from '@/components/ui/native-select'
 import type { ScreenFieldDefinition } from '../schema'
 import { renderValue } from './render-utils'
 
-export function FieldRenderer({ field, value }: { field: ScreenFieldDefinition; value: unknown }): JSX.Element {
+export function FieldRenderer({
+  field,
+  value,
+  onChange,
+}: {
+  field: ScreenFieldDefinition
+  value: unknown
+  onChange?: (_value: unknown) => void
+}): JSX.Element {
+  const isReadOnly = field.readOnly || !onChange
   const commonProps = {
     id: field.key,
     value: renderValue(value),
     placeholder: field.placeholder,
-    readOnly: true,
+    readOnly: isReadOnly,
     'aria-label': field.label,
+    onChange: onChange
+      ? (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)
+      : undefined,
   }
 
   if (field.type === 'lookup') {
@@ -38,13 +51,16 @@ export function FieldRenderer({ field, value }: { field: ScreenFieldDefinition; 
         <NativeSelect
           id={field.key}
           value={renderValue(value)}
-          disabled={field.readOnly}
+          disabled={isReadOnly}
           placeholder={field.placeholder}
           options={(field.options ?? []).map((option) => ({ value: String(option.value), label: option.label }))}
-          onValueChange={() => undefined}
+          onValueChange={onChange ? (v) => onChange(v) : () => undefined}
         />
       ) : (
-        <Input {...commonProps} type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'} />
+        <Input
+          {...commonProps}
+          type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+        />
       )}
       {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
     </div>
