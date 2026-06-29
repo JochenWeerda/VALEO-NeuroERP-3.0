@@ -5,11 +5,20 @@ audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
 last_reviewed: 2026-06-29
-version: 3.0.0
+version: 3.2.0
 description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
 ---
 
 # Active Workboard
+
+## UIX-RUNTIME-ROLLOUT-021 — Rollout-Kandidaten auf useUniversalMaskRuntime migrieren
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Alle 10 Wave-42–51-Rollout-Kandidaten laufen jetzt ueber `useUniversalMaskRuntime`. Fachliche Spalten mit `renderKind`, `sortable` und `width` fuer alle 10 Screens in `_ROLLOUT_TAB_COLUMNS`. VirtualDataTable unterstuetzt Sort-Indikatoren und `onSortChange`. `FastTableRenderer` formatiert Zellen nach `renderKind` (currency, date, datetime, status, boolean). `UniversalMaskRolloutPilotPage` komplett neu auf generischen Hook umgestellt.
+**Ziel:** Alten `usePilotRenderPlan + useMaskPilotState + useRolloutTabData`-Pfad in der generischen Rollout-Pilot-Page durch `useUniversalMaskRuntime` ersetzen; Rollout-Catalog mit echten `RolloutWaveSpec`-Eintraegen und `api_prefix` fuellen; Rollout-ScreenDefinitions mit fachlichen Spalten generieren; Sort-Support in Renderer-Stack nachziehen.
+**Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/core/screen_definitions.py` (_ROLLOUT_TAB_COLUMNS + _build_rollout_screen_definition_from_spec), `packages/frontend-web/src/components/mask-builder/schema.ts`, `render-plan/types.ts`, `render-plan/schema-compiler.ts`, `renderers/FastTableRenderer.tsx`, `renderers/FastTabRenderer.tsx`, `components/ui/VirtualDataTable.tsx`, `pages/workflow/mask-rollout/UniversalMaskRolloutPilotPage.tsx`.
+**Abnahme:** 181 Vitest-Tests gruen, 14 pytest-Tests (native CRM) gruen. Rollout-Catalog 10/10 Specs. Screen-Definitions fuer alle 10 Kandidaten mit dataSources und typisierten Spalten. UniversalMaskRolloutPilotPage ohne Legacy-Abhaengigkeiten.
 
 ## UIX-RUNTIME-BINDING-020 … UIX-RUNTIME-ADAPTERS-024 — UniversalMaskRuntime (geplant)
 
