@@ -2,10 +2,10 @@
 title: CRM – Kontakte, Leads, Aktivitäten
 type: how-to
 audience: [endnutzer, power-user]
-owner: Cursor
+owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-06-29
+version: 3.1.0
 ---
 
 # CRM – Kontakte, Leads, Aktivitäten
@@ -18,6 +18,58 @@ dokumentieren Sie Aktivitäten als Grundlage für Vertrieb und Marketing.
 ## Voraussetzungen
 
 - Modul **CRM & Marketing** ist für den Mandanten freigeschaltet.
+
+## Kundenstamm 360°-Cockpit
+
+Das **Kundenstamm-Cockpit** (`/crm/kunden/:id`) ist die zentrale Anlaufstelle
+für alle Informationen zu einem Kunden. Es fasst Stammdaten, Aufträge,
+Kontakte, Aktivitäten und Dokumente in einer strukturierten Ansicht zusammen.
+
+### Aufbau der Maske
+
+| Bereich | Inhalt |
+|---------|--------|
+| **Kopfzeile** | Kundenname, Kundennummer, Kreditstatus-Badge |
+| **Kennzahlen-Leiste** | Umsatz 12 Monate, offene Posten, Aktivitäten 90 Tage, Kreditstatus |
+| **Aktionsleiste** | Bearbeiten, Angebot erstellen, Anruf starten (TAPI), weitere Aktionen |
+| **Workflow-Panel** | Aktueller Prozessstatus, nächste erlaubte Aktionen, Sperrgründe |
+| **Tabs** | Stammdaten · Kontakte · Aufträge · Aktivitäten · Dokumente |
+
+### Tabellen: Sortieren und Filtern
+
+In den Tab-Tabellen (Aufträge, Aktivitäten, Kontakte) können Sie:
+
+- **Sortieren:** Klick auf einen Spaltenheader sortiert aufsteigend, zweiter Klick absteigend.
+  Ein kleiner Pfeil zeigt die aktive Sortierrichtung.
+- **Filtern:** Oberhalb der Tabelle erscheinen **Filter-Chips** für vordefinierte Spalten
+  (z. B. Status, Typ). Aktive Filter werden als farbige Chips angezeigt — Klick auf × entfernt
+  einen Filter. Zusätzlich steht ein Freitextsuche-Feld zur Verfügung.
+- **Blättern:** Über die Seitennavigation unten können Sie durch die Treffer blättern.
+  Die Seite wird serverseitig geladen — große Datenmengen belasten die Anzeige nicht.
+
+!!! tip "Workflow-Panel"
+    Das farbige Workflow-Panel oben im Cockpit zeigt den aktuellen Bearbeitungsstatus
+    des Kunden (z. B. *aktiv*, *gesperrt*, *in Klärung*) sowie die nächsten möglichen
+    Aktionen. Rote Panels signalisieren Sperrgründe, die vor dem Weiterarbeiten
+    behoben werden müssen.
+
+### Stammdaten bearbeiten
+
+1. Tab **Stammdaten** → Felder direkt anklicken und bearbeiten.
+2. Pflichtfelder werden mit einem roten Hinweis markiert, wenn sie leer gelassen werden.
+3. Eine **klebrige Fußzeile** (Sticky Submit Bar) erscheint, sobald Sie Änderungen gemacht
+   haben. Sie zeigt den Speicher- und Zurücksetzen-Button.
+4. **Speichern** oder `Strg+S` — der Button ist deaktiviert, solange Pflichtfelder
+   fehlen oder gerade gespeichert wird (Doppelklick-Schutz).
+
+### Aufträge-Tab
+
+Zeigt die letzten Aufträge des Kunden. Standardmässig nach Datum absteigend sortiert.
+Spalten: Auftragsnummer · Datum · Status · Betrag. Filtern nach Status möglich.
+
+### Aktivitäten-Tab
+
+Alle dokumentierten Kontaktpunkte: Anrufe, E-Mails, Termine, Notizen. Filtern nach Typ.
 
 ## Kontakt anlegen
 
@@ -49,6 +101,10 @@ Vertriebssteuerung und Kampagnen.
 - **Dublette angelegt:** vor dem Anlegen über die Suche prüfen.
 - **Kontakt nicht auffindbar:** Filter/Typ (Kunde/Lieferant) prüfen.
 - **Aktivität ohne Bezug:** Aktivität immer am Kontakt oder Lead erfassen.
+- **Speichern-Button grau:** Pflichtfeld (Name, Kundennummer) ist leer oder es
+  läuft gerade ein Speichervorgang — kurz warten oder fehlendes Feld ausfüllen.
+- **Workflow-Panel rot:** Kunde hat einen aktiven Sperrgrund. Details im Panel
+  aufklappen und den genannten Klärungsschritt durchführen.
 
 ## Maskenregister
 

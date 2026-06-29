@@ -5,14 +5,55 @@ type: reference
 audience: [alle]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-26
-version: 3.0.0
+last_reviewed: 2026-06-29
+version: 3.1.0
 ---
 
 # Release Notes — VALEO NeuroERP 3.0
 
-> Generiert via `scripts/generate_release_notes.py` · Stand: 2026-06-26
-> Quelle: `CHANGELOG.md` + abgeschlossene Slice-YAMLs
+> Manuell gepflegt · Stand: 2026-06-29
+
+## Version 3.1.0 — 2026-06-29 — Universal Mask Runtime & AgentMaskContract
+
+### Added — Benutzeroberfläche
+
+- **CRM Kundenstamm 360°-Cockpit** (`/crm/kunden/:id`): neue Tabs (Stammdaten,
+  Kontakte, Aufträge, Aktivitäten, Dokumente), Kennzahlen-Leiste (Umsatz 12M,
+  offene Posten, Aktivitäten 90T, Kreditstatus), Workflow-Panel mit farbiger
+  Statusanzeige und Sperrgründen.
+- **Sortieren in Tabellen:** Klick auf Spaltenheader sortiert auf- oder absteigend.
+  Pfeile zeigen die aktive Sortierrichtung. Nur freigegebene Spalten sind sortierbar.
+- **Filtern in Tabellen:** Filter-Chips für vordefinierte Spalten (Status, Typ u. a.),
+  Freitextsuche und Entfernen einzelner Filter per ×.
+- **Sticky Submit Bar:** beim Bearbeiten von Stammdaten erscheint eine klebrige
+  Fußleiste mit Speichern/Zurücksetzen-Buttons; Speichern ist solange deaktiviert
+  wie Pflichtfelder fehlen oder ein Speichervorgang läuft.
+- **Workflow-Panel:** farbiges Statusfeld zeigt Prozesszustand, nächste erlaubte
+  Aktionen und Klärungsbedarf (grün/gelb/rot je nach Eskalationsstufe).
+- **Universal Mask Rollout Waves 42–51:** 10 weitere Domänen-Piloten (Lager-Eingang,
+  Finance-Beleg, Einkauf-Bestellung, CRM-Opportunity, Sales-Lieferschein u. a.)
+  sind über `/mask-rollout/{screenId}/{entityId}` erreichbar (Feature-Flag
+  `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS=true`).
+
+### Added — Technisch / Agenten
+
+- **AgentMaskContract** (`GET /api/v1/masks/{id}/agent-contract`): maschinenlesbarer
+  Kontrakt je Maske mit lesbaren/editierbaren/sensiblen Feldern, Action-Policies,
+  Validierungsregeln und Audit-Anforderungen. Wird deterministisch aus der
+  ScreenDefinition abgeleitet.
+- **Generator-Readiness-Gates** (`GET /api/v1/masks/{id}/readiness`): 6-Gate-Report
+  (Schema, Sort-Whitelist, Filterbare Spalten, AgentContract, DataSources,
+  Non-Temporary) zeigt ob eine Maske vollständig native-fähig ist.
+- **ActionRuntime:** Aktionen unterstützen jetzt `dryRun`, `validate` und `propose`
+  als Ausführungsmodi — AI-Agenten können Vorschläge generieren ohne Seiteneffekte.
+- **Strukturierte FilterPlan-API:** Agenten können Tabellendaten strukturiert filtern
+  (8 Operatoren: eq/neq/contains/lt/lte/gt/gte/in/between) via JSON-Parameter.
+
+### Changed
+
+- CRM Kundenstamm-Pilot wechselt automatisch auf nativen Runtime-Pfad wenn die
+  ScreenDefinition `adapter.temporary: false` trägt (bisherige Legacy-Pfade bleiben
+  vollständig erhalten).
 
 ## Version Unreleased
 
