@@ -5,12 +5,38 @@ from __future__ import annotations
 from typing import Any
 
 
+def get_sortable_columns(screen_id: str, tab_key: str) -> frozenset[str]:
+    """Returns the set of sortable column keys for a tab from the ScreenDefinition.
+
+    Used as a whitelist so sort params cannot reference arbitrary fields.
+    Falls back to empty set (no sorting) if screen or tab is unknown.
+    """
+    from app.core.screen_definitions import get_screen_definition  # lazy import
+
+    definition = get_screen_definition(screen_id)
+    if definition is None:
+        return frozenset()
+    for tab in definition.get("tabs", []):
+        if tab.get("key") != tab_key:
+            continue
+        sortable: set[str] = set()
+        for table in tab.get("tables", []):
+            for col in table.get("columns", []):
+                if col.get("sortable"):
+                    sortable.add(col["key"])
+        return frozenset(sortable)
+    return frozenset()
+
+
 def paginate_tab_items(
     items: list[dict[str, Any]],
     *,
     page: int = 1,
     limit: int = 25,
     q: str | None = None,
+    sort: str | None = None,
+    sort_dir: str | None = None,
+    allowed_sort_columns: frozenset[str] | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     filtered = items
     if q:
@@ -20,6 +46,14 @@ def paginate_tab_items(
             for row in items
             if any(needle in str(value).casefold() for value in row.values())
         ]
+    # Sort — only against whitelisted columns
+    if sort and (allowed_sort_columns is None or sort in allowed_sort_columns):
+        reverse = (sort_dir or "asc") == "desc"
+        filtered = sorted(
+            filtered,
+            key=lambda row: (row.get(sort) is None, row.get(sort)),
+            reverse=reverse,
+        )
     safe_limit = max(1, min(limit, 50))
     safe_page = max(1, page)
     start = (safe_page - 1) * safe_limit
@@ -88,8 +122,15 @@ def build_tab_page(
     page: int,
     limit: int,
     q: str | None = None,
+    sort: str | None = None,
+    sort_dir: str | None = None,
+    screen_id: str | None = None,
 ) -> dict[str, Any]:
-    paged_items, total = paginate_tab_items(items, page=page, limit=limit, q=q)
+    allowed = get_sortable_columns(screen_id, tab_key) if screen_id else None
+    paged_items, total = paginate_tab_items(
+        items, page=page, limit=limit, q=q,
+        sort=sort, sort_dir=sort_dir, allowed_sort_columns=allowed,
+    )
     return {
         "tab_key": tab_key,
         "table_key": table_key,

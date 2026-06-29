@@ -85,12 +85,64 @@ export interface ScreenTableDefinition {
   serverPagination?: boolean
 }
 
+export type ActionDangerLevel = 'safe' | 'moderate' | 'destructive'
+
 export interface ScreenActionDefinition {
   key: string
   label: string
   kind?: 'primary' | 'secondary' | 'danger'
   permission?: string
   disabled?: boolean
+  // Action Runtime (Phase 026)
+  commandEndpoint?: string
+  method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+  requiresConfirmation?: boolean
+  dangerLevel?: ActionDangerLevel
+  idempotencyKey?: string
+  auditReasonRequired?: boolean
+  humanApprovalRequired?: boolean
+}
+
+/** Agent-readable contract for a single screen.
+ *  Derived from ScreenDefinition but explicitly versioned for AI consumers. */
+export interface AgentMaskContract {
+  screenId: string
+  domain: ScreenDomain
+  schemaVersion: number
+  contractVersion: 1
+  businessPurpose: string
+  primaryEntity: string
+  readableFields: string[]
+  editableFields: string[]
+  sensitiveFields: string[]
+  availableActions: Array<{
+    key: string
+    label: string
+    dangerLevel: ActionDangerLevel
+    requiresHumanApproval: boolean
+    requiresConfirmation: boolean
+    permission?: string
+  }>
+  validationRules: Array<{
+    fieldKey: string
+    rule: string
+    severity: 'blocking' | 'warning' | 'info'
+  }>
+  workflowRules: Array<{
+    fromStatus: string
+    toStatus: string
+    requiredActions: string[]
+    blockedBy?: string[]
+  }>
+  auditRequirements: Array<{
+    actionKey: string
+    requiresReason: boolean
+    requiresEvidence: boolean
+  }>
+  recommendedAgentTasks: string[]
+  forbiddenAgentTasks: string[]
+  testSelectors: Record<string, string>
+  examplePrompts: string[]
 }
 
 export interface ScreenTabDefinition {
@@ -152,6 +204,7 @@ export interface ScreenDefinition {
     lookupMinChars?: number
     bundleGroup?: string
   }
+  agentContract?: AgentMaskContract
 }
 
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {

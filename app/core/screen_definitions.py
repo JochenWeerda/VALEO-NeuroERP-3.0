@@ -23,14 +23,62 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "temporary": False,
         },
         "summaryEndpoint": "/api/v1/crm/customers/{customer_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/crm/customers/{entity_id}"},
+            {"key": "contacts",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/contacts",    "pageSize": 25},
+            {"key": "auftraege",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/auftraege",   "pageSize": 25},
+            {"key": "aktivitaeten","endpoint": "/api/v1/crm/customers/{entity_id}/tabs/aktivitaeten","pageSize": 25},
+            {"key": "dokumente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/dokumente",   "pageSize": 25},
+        ],
         "tabs": [
             {"key": "masterdata", "label": "Stammdaten", "lazy": True, "keepAlive": True},
             {"key": "address", "label": "Adresse & Kommunikation", "lazy": True, "keepAlive": True},
-            {"key": "contacts", "label": "Ansprechpartner", "lazy": True, "keepAlive": True},
+            {
+                "key": "contacts", "label": "Ansprechpartner", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "contacts", "label": "Ansprechpartner", "dataSourceKey": "contacts",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "name", "label": "Name", "width": 180},
+                                {"key": "funktion", "label": "Funktion", "width": 140},
+                                {"key": "telefon", "label": "Telefon", "width": 130},
+                                {"key": "email", "label": "E-Mail", "width": 200},
+                            ]}],
+            },
             {"key": "finance", "label": "Finanzen", "lazy": True, "keepAlive": True},
-            {"key": "auftraege", "label": "Auftraege", "lazy": True, "keepAlive": True},
-            {"key": "aktivitaeten", "label": "Aktivitaeten", "lazy": True, "keepAlive": True},
-            {"key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": True},
+            {
+                "key": "auftraege", "label": "Auftraege", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "auftraege", "label": "Auftraege", "dataSourceKey": "auftraege",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "auftrag_nr", "label": "Auftrag-Nr.", "width": 130, "sortable": True},
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                            ]}],
+            },
+            {
+                "key": "aktivitaeten", "label": "Aktivitaeten", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "aktivitaeten", "label": "Aktivitaeten", "dataSourceKey": "aktivitaeten",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 100},
+                                {"key": "betreff", "label": "Betreff", "width": 220},
+                                {"key": "verantwortlich", "label": "Verantwortlich", "width": 140},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                            ]}],
+            },
+            {
+                "key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 120},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                                {"key": "benutzer", "label": "Benutzer", "width": 140},
+                            ]}],
+            },
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "crm.customer.update"},
@@ -65,11 +113,49 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             "temporary": False,
         },
         "summaryEndpoint": "/api/v1/sales/orders/{order_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity",    "endpoint": "/api/v1/sales/orders/{entity_id}"},
+            {"key": "positionen","endpoint": "/api/v1/sales/orders/{entity_id}/tabs/positionen", "pageSize": 50},
+            {"key": "lieferung", "endpoint": "/api/v1/sales/orders/{entity_id}/tabs/lieferung",  "pageSize": 25},
+            {"key": "dokumente", "endpoint": "/api/v1/sales/orders/{entity_id}/tabs/dokumente",  "pageSize": 25},
+        ],
         "tabs": [
             {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
-            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True},
-            {"key": "lieferung", "label": "Lieferung", "lazy": True, "keepAlive": True},
-            {"key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": True},
+            {
+                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "pos_nr", "label": "Pos.", "width": 50},
+                                {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 120},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                                {"key": "menge", "label": "Menge", "numeric": True},
+                                {"key": "einheit", "label": "Einheit", "width": 70},
+                                {"key": "einzelpreis", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                            ]}],
+            },
+            {
+                "key": "lieferung", "label": "Lieferung", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "lieferung", "label": "Lieferscheine", "dataSourceKey": "lieferung",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "ls_nr", "label": "LS-Nr.", "width": 130, "sortable": True},
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                                {"key": "menge", "label": "Menge", "numeric": True},
+                            ]}],
+            },
+            {
+                "key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 120},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                            ]}],
+            },
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "sales.order.update"},
@@ -103,10 +189,37 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
             "temporary": False,
         },
         "summaryEndpoint": "/api/v1/kontrakte/{contract_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity",    "endpoint": "/api/v1/kontrakte/{entity_id}"},
+            {"key": "positionen","endpoint": "/api/v1/kontrakte/{entity_id}/tabs/positionen", "pageSize": 50},
+            {"key": "umsaetze",  "endpoint": "/api/v1/kontrakte/{entity_id}/tabs/umsaetze",  "pageSize": 25},
+        ],
         "tabs": [
             {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
-            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True},
-            {"key": "umsaetze", "label": "Umsaetze", "lazy": True, "keepAlive": True},
+            {
+                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "pos_nr", "label": "Pos.", "width": 50},
+                                {"key": "sorte", "label": "Sorte", "width": 160},
+                                {"key": "menge", "label": "Menge (t)", "numeric": True, "sortable": True},
+                                {"key": "preis", "label": "Preis", "numeric": True, "renderKind": "currency"},
+                                {"key": "ernte_jahr", "label": "Erntejahr", "width": 90},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                            ]}],
+            },
+            {
+                "key": "umsaetze", "label": "Umsaetze", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "umsaetze", "label": "Umsaetze", "dataSourceKey": "umsaetze",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "lieferschein_nr", "label": "LS-Nr.", "width": 130},
+                                {"key": "menge", "label": "Menge", "numeric": True},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                            ]}],
+            },
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "kontrakt.update"},
@@ -366,13 +479,15 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
     """Builds a ScreenDefinition from a RolloutWaveSpec with dataSources and typed columns."""
     tab_columns = _ROLLOUT_TAB_COLUMNS.get(spec.screen_id, {})
 
+    # Only lazy tabs have real tab endpoints; kopf/header tabs load via entity endpoint
     data_sources = [
         {
             "key": tab_key,
-            "endpoint": f"{spec.api_prefix}/{{entity_id}}/tabs/{tab_key}",
+            # Use the generic rollout tab endpoint (not domain-specific api_prefix)
+            "endpoint": f"/api/v1/mask-rollouts/{spec.screen_id}/{{entity_id}}/tabs/{tab_key}",
             "pageSize": 25,
         }
-        for tab_key in spec.available_tabs
+        for tab_key in spec.lazy_tabs
     ]
 
     tabs = [
