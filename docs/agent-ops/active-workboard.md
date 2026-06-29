@@ -20,24 +20,28 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/core/screen_definitions.py` (_ROLLOUT_TAB_COLUMNS + _build_rollout_screen_definition_from_spec), `packages/frontend-web/src/components/mask-builder/schema.ts`, `render-plan/types.ts`, `render-plan/schema-compiler.ts`, `renderers/FastTableRenderer.tsx`, `renderers/FastTabRenderer.tsx`, `components/ui/VirtualDataTable.tsx`, `pages/workflow/mask-rollout/UniversalMaskRolloutPilotPage.tsx`.
 **Abnahme:** 181 Vitest-Tests gruen, 14 pytest-Tests (native CRM) gruen. Rollout-Catalog 10/10 Specs. Screen-Definitions fuer alle 10 Kandidaten mit dataSources und typisierten Spalten. UniversalMaskRolloutPilotPage ohne Legacy-Abhaengigkeiten.
 
-## UIX-RUNTIME-BINDING-020 … UIX-RUNTIME-ADAPTERS-024 — UniversalMaskRuntime (geplant)
+## UIX-RUNTIME-022…030 — UniversalMaskRuntime Ausbau (Sort/Filter/Form/Action/Workflow/Agent)
 
-**Von:** Cursor (Plan)
-**Owner:** offen
-**Stand:** geplant 2026-06-29 — Architekturplan bestätigt; Rollout-Batch 019 liefert screen-summary, aber Schema-Wahrheit und Datenbindung fehlen noch.
-**Ziel:** Von Adapter-Parität zur nativen Maskenlaufzeit: `ScreenDefinition → RenderPlan → DataBindingPlan → UniversalMaskRuntime → Renderer`.
-**Plan:** [`.cursor/plans/universalmaskruntime_schicht_25fdb164.plan.md`](../../.cursor/plans/universalmaskruntime_schicht_25fdb164.plan.md)
-**Slice-Kette:**
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Phasen 022–030 vollstaendig implementiert und gepusht.
+**Ziel:** Einheitliche ScreenDefinition als Single Source of Truth fuer Human UI und AI-Agenten. Kein Dual-Pfad mehr: Sort-Whitelist, FilterPlan, FormState, ActionRuntime, WorkflowRuntime, CRM 360 native Parity, AgentMaskContract, Generator-Readiness-Gates.
+**Commit:** `81d706da8` (028–029), weitere Commits fuer 022–027 in Vorgaenger-Session.
+**Slice-Kette (abgeschlossen):**
 
-| Slice | Inhalt | Status |
+| Phase | Inhalt | Status |
 |-------|--------|--------|
-| `UIX-RUNTIME-BINDING-020` | DataBindingPlan, GenericDataSourceResolver, compile-data-binding-plan | offen |
-| `UIX-RUNTIME-CORE-021` | `useUniversalMaskRuntime`, GenericTableDataAdapter, GenericLookupResolver | offen |
-| `UIX-RUNTIME-RENDER-022` | FastFormRenderer Lookup; FastTableRenderer Server-Query | offen |
-| `UIX-RUNTIME-NATIVE-023` | CRM native ScreenDefinition (fields/tables/dataSources); usePilotRenderPlan Merge-Fix | offen |
-| `UIX-RUNTIME-ADAPTERS-024` | Validation, Workflow-Binding, ADR-011-Nachzug (optional) | offen |
+| 022 | Sort-Whitelist: `get_sortable_columns`, `paginate_tab_items` mit sort/sort_dir | ✅ |
+| 023 | FilterPlan: 8 Operatoren, `get_filterable_columns`, JSON-Param, FilterChips-UI | ✅ |
+| 024 | (Lookup-Binding via LookupBindingContext) | ✅ |
+| 025 | UniversalFormState: Ref-Guard, dirty-Tracking, Sticky-Submit-Bar | ✅ |
+| 026 | ActionRuntime: ActionPolicy, checkActionPolicy, useActionRuntime, dryRun/validate/propose | ✅ |
+| 027 | WorkflowRuntime: WorkflowState, tone-colored WorkflowPanelRenderer, useWorkflowState | ✅ |
+| 028 | CRM 360 native Parity: useUniversalMaskRuntime als Pfad wenn adapter.temporary===false | ✅ |
+| 029 | AgentMaskContract: generateAgentMaskContract, GET /masks/{id}/agent-contract | ✅ |
+| 030 | Generator-Readiness-Gates: checkGeneratorReadiness, 6 Gates, GET /masks/{id}/readiness | ✅ |
 
-**Abnahme (Gesamt):** CRM-Pilot ohne domänenspezifische Tab-Hooks; Lookup + serverseitiges Tab-Paging; native CRM-Schema pytest-grün; Perf-Gates unveraendert grün.
+**Abnahme:** Frontend-Tests (Vitest) gruen; Backend-Tests (pytest) gruen; Lint 0 Errors.
 
 ## UIX-ROLLOUT-BATCH-019 — Universal Mask Rollout Batch (Waves 42–51)
 

@@ -118,3 +118,87 @@ async def get_agent_mask_contract(
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return _generate_agent_contract(definition)
+
+
+def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
+    """Checks all generator readiness gates for a ScreenDefinition dict."""
+
+    def collect_tables(d: dict[str, Any]) -> list[dict[str, Any]]:
+        tables: list[dict[str, Any]] = list(d.get("tables") or [])
+        for tab in d.get("tabs") or []:
+            tables.extend(tab.get("tables") or [])
+        return tables
+
+    all_tables = collect_tables(definition)
+    gates = []
+
+    # Gate 1: schema validation
+    schema_errors: list[str] = []
+    for req_field in ("id", "domain", "mode", "title"):
+        if not definition.get(req_field):
+            schema_errors.append(f"{req_field} is required")
+    if definition.get("schemaVersion") != 1:
+        schema_errors.append("schemaVersion must be 1")
+    gates.append({"gate": "schema_valid", "passed": len(schema_errors) == 0, "detail": "; ".join(schema_errors) or "OK"})
+
+    # Gate 2: sort whitelist
+    has_sortable = any(col.get("sortable") for t in all_tables for col in (t.get("columns") or []))
+    gates.append({
+        "gate": "sort_whitelist",
+        "passed": has_sortable or not all_tables,
+        "detail": "OK" if has_sortable or not all_tables else "no sortable columns defined in any table",
+    })
+
+    # Gate 3: filterable columns
+    has_filterable = any(col.get("filterable") for t in all_tables for col in (t.get("columns") or []))
+    gates.append({
+        "gate": "filter_columns",
+        "passed": has_filterable or not all_tables,
+        "detail": "OK" if has_filterable or not all_tables else "no filterable columns defined in any table",
+    })
+
+    # Gate 4: agentContract — always derivable
+    has_explicit = bool((definition.get("agentContract") or {}).get("businessPurpose"))
+    gates.append({"gate": "agent_contract", "passed": True, "detail": "explicit agentContract provided" if has_explicit else "auto-generated"})
+
+    # Gate 5: dataSources when tables exist
+    has_data_sources = bool(definition.get("dataSources"))
+    gates.append({
+        "gate": "data_sources",
+        "passed": not all_tables or has_data_sources,
+        "detail": "OK" if not all_tables or has_data_sources else "tables exist but no dataSources defined",
+    })
+
+    # Gate 6: non-temporary adapter
+    is_temporary = bool((definition.get("adapter") or {}).get("temporary"))
+    gates.append({
+        "gate": "non_temporary",
+        "passed": not is_temporary,
+        "detail": "adapter.temporary=true — screen is not native yet" if is_temporary else "OK",
+    })
+
+    failed = [g for g in gates if not g["passed"]]
+    return {
+        "screenId": definition.get("id"),
+        "generatorReady": len(failed) == 0,
+        "gates": gates,
+        "errors": [f"[{g['gate']}] {g['detail']}" for g in failed],
+    }
+
+
+@router.get("/{mask_id}/readiness", response_model=dict[str, Any], summary="Generator-Readiness pruefen")
+async def get_mask_readiness(
+    mask_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Prueft alle Generator-Readiness-Gates fuer eine Maske.
+
+    Gibt generatorReady=true nur wenn alle 6 Gates gruen sind:
+    schema_valid, sort_whitelist, filter_columns, agent_contract, data_sources, non_temporary.
+    """
+    _ = tenant_id
+    normalized = mask_id.strip("/")
+    definition = get_screen_definition(normalized)
+    if definition is None:
+        raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
+    return _check_readiness(definition)
