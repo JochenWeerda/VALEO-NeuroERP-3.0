@@ -3,6 +3,7 @@ import type { ScreenDefinition, ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
 import type { LookupBinding, TableQueryState } from './runtime/types'
 import type { UniversalFormState } from './runtime/FormState'
+import type { WorkflowState } from './runtime/WorkflowRuntime'
 import { LookupBindingContext } from './runtime/LookupBindingContext'
 import { FormStateContext } from './runtime/FormStateContext'
 import {
@@ -33,6 +34,8 @@ interface UniversalMaskRendererProps {
   lookupBindings?: Record<string, LookupBinding>
   /** Optional edit-mode form state (from useUniversalFormState) */
   formState?: UniversalFormState
+  /** Optional rich workflow state (from useWorkflowState) */
+  workflowState?: WorkflowState
 }
 
 function renderLegacyFields(
@@ -91,6 +94,7 @@ function RenderFromPlan({
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
   formState?: UniversalFormState
+  workflowState?: WorkflowState
 }): JSX.Element {
   const classes = layoutClasses(plan.shell.layoutMode)
   const effectivePayload = formState ? formState.values : payload
@@ -117,7 +121,7 @@ function RenderFromPlan({
         payload={effectivePayload}
       />
 
-      <WorkflowPanelRenderer workflow={plan.workflow} />
+      <WorkflowPanelRenderer workflow={plan.workflow} workflowState={workflowState} />
       <FastSummaryRenderer items={plan.summaryItems} />
 
       <FastFormRenderer
@@ -315,6 +319,7 @@ export function UniversalMaskRenderer({
   onTableQueryChange,
   lookupBindings,
   formState,
+  workflowState,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
@@ -331,6 +336,7 @@ export function UniversalMaskRenderer({
           onTabChange={onTabChange}
           onAction={onAction}
           formState={formState}
+          workflowState={workflowState}
         />
       </LookupBindingContext.Provider>
     )
