@@ -41,7 +41,7 @@ def test_mask_registry_exposes_generator_metadata_for_agrar_kontrakt_pilot() -> 
 
 def test_mask_registry_keeps_defaults_for_non_generator_masks() -> None:
     registry = build_mask_registry()
-    mask = registry.get("finance/ap-invoice-form")
+    mask = registry.get("finance/ap-invoices-list")
 
     assert mask is not None
     assert mask.generator_ready is False
