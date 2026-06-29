@@ -1523,25 +1523,26 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         if (response.customer_id) {
           try {
             const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
+            const cd = customerData as Record<string, string | undefined>
             customer = {
               id: customerData.id,
-              customerNumber: customerData.customer_number || customerData.customerNumber || '',
-              name: customerData.company_name || customerData.name || '',
-              debitorAccount: customerData.customer_number || customerData.customerNumber || '',
-              representative: customerData.contact_person || customerData.representative,
-              postalCode: customerData.postal_code || customerData.postalCode,
-              city: customerData.city,
-              creditLimit: customerData.credit_limit?.toString(),
-              address: customerData.address,
-              phone: customerData.phone,
-              email: customerData.email,
-              chefanweisung: customerData.chefanweisung || customerData.executive_note,
+              customerNumber: cd.customer_number || cd.customerNumber || '',
+              name: cd.company_name || cd.name || '',
+              debitorAccount: cd.customer_number || cd.customerNumber || '',
+              representative: cd.contact_person || cd.representative,
+              postalCode: cd.postal_code || cd.postalCode,
+              city: cd.city,
+              creditLimit: cd.credit_limit,
+              address: customerData.address as { street?: string; postalCode?: string; city?: string; phone?: string; fax?: string } | undefined,
+              phone: cd.phone,
+              email: cd.email,
+              chefanweisung: cd.chefanweisung || cd.executive_note,
             }
           } catch {
             // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
         }
-        
+
         // Mappe Positionen
         const positionen: Position[] = await Promise.all(
           response.positionen.map(async (pos) => {
@@ -1551,9 +1552,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             if (pos.artikel_id) {
               try {
                 const artikelResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${pos.artikel_id}`)
-                artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
-                artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
-                  artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
+                artikelGewicht = (artikelResponse.weight as number) || (artikelResponse.gewicht as number) || 0
+                artikelGefahrgutPunkte = (artikelResponse.gefahrgut_punkte as number) || (artikelResponse.gefahrgutpunkte as number) ||
+                  (artikelResponse.gefahrgutPunkte as number) || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse as string) || 0 : 0)
               } catch {
                 // Artikel-Stammdaten schlagen still fehl — Gefahrgut-Punkte bleiben 0
               }
@@ -1660,16 +1661,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             if (pos.artikel_id) {
               try {
                 const artikelResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${pos.artikel_id}`)
-                artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
-                artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
-                  artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
+                artikelGewicht = (artikelResponse.weight as number) || (artikelResponse.gewicht as number) || 0
+                artikelGefahrgutPunkte = (artikelResponse.gefahrgut_punkte as number) || (artikelResponse.gefahrgutpunkte as number) ||
+                  (artikelResponse.gefahrgutPunkte as number) || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse as string) || 0 : 0)
               } catch {
                 // Artikel-Stammdaten schlagen still fehl — Gefahrgut-Punkte bleiben 0
               }
             }
             const gesamtGewicht = artikelGewicht * pos.menge
             const gesamtGefahrgutPunkte = artikelGefahrgutPunkte * pos.menge
-            
+
             return {
               posNr: state.positionen.length > 0 
                 ? Math.max(...state.positionen.map(p => p.posNr)) + 10 

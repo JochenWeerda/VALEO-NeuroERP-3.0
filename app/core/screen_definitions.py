@@ -31,15 +31,37 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             {"key": "dokumente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/dokumente",   "pageSize": 25},
         ],
         "tabs": [
-            {"key": "masterdata", "label": "Stammdaten", "lazy": True, "keepAlive": True},
-            {"key": "address", "label": "Adresse & Kommunikation", "lazy": True, "keepAlive": True},
+            {
+                "key": "masterdata", "label": "Stammdaten", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "kunden_nr", "label": "Kundennummer", "type": "text", "readOnly": True},
+                    {"key": "firma", "label": "Firma / Name", "type": "text", "required": True},
+                    {"key": "branche", "label": "Branche", "type": "text"},
+                    {"key": "segment", "label": "Segment", "type": "text"},
+                    {"key": "kreditlimit", "label": "Kreditlimit", "type": "currency"},
+                    {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                    {"key": "notizen", "label": "Notizen / Chefanweisung", "type": "textarea"},
+                ],
+            },
+            {
+                "key": "address", "label": "Adresse & Kommunikation", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "strasse", "label": "Straße", "type": "text"},
+                    {"key": "plz", "label": "PLZ", "type": "text", "width": 80},
+                    {"key": "ort", "label": "Ort", "type": "text"},
+                    {"key": "land", "label": "Land", "type": "text"},
+                    {"key": "telefon", "label": "Telefon", "type": "text"},
+                    {"key": "fax", "label": "Fax", "type": "text"},
+                    {"key": "email", "label": "E-Mail", "type": "email"},
+                ],
+            },
             {
                 "key": "contacts", "label": "Ansprechpartner", "lazy": True, "keepAlive": True,
                 "tables": [{"key": "contacts", "label": "Ansprechpartner", "dataSourceKey": "contacts",
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
-                                {"key": "name", "label": "Name", "width": 180},
-                                {"key": "funktion", "label": "Funktion", "width": 140},
+                                {"key": "name", "label": "Name", "width": 180, "sortable": True},
+                                {"key": "funktion", "label": "Funktion", "width": 140, "filterable": True},
                                 {"key": "telefon", "label": "Telefon", "width": 130},
                                 {"key": "email", "label": "E-Mail", "width": 200},
                             ]}],
@@ -81,9 +103,24 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "crm.customer.update"},
-            {"key": "create_activity", "label": "Aktivitaet anlegen", "kind": "secondary", "permission": "crm.activity.create"},
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update"},
+            {"key": "create_activity", "label": "Aktivitaet anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.activity.create"},
         ],
+        "noWorkflowReason": "Kundenstamm ist ein reines Verwaltungsobjekt ohne prozessgesteuerten Lebenszyklus — Statuswechsel erfolgen implizit ueber Auftraege und Aktivitaeten.",
+        "agentContract": {
+            "businessPurpose": "360-Grad-Kundenstamm-Cockpit fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, offene Auftraege und Dokumente in einer Ansicht.",
+            "examplePrompts": [
+                "Analysiere Kunde {entity_id}: offene Posten, letzte Aktivitaeten, Umsatz 12M.",
+                "Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.",
+                "Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.",
+            ],
+            "sensitiveFields": ["kreditlimit", "zahlungsbedingungen", "notizen"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='crm-customer-360']",
+                "primaryAction": "[data-testid='action-edit']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
+        },
         "layout": {
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
@@ -158,7 +195,7 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "sales.order.update"},
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "sales.order.update"},
         ],
         "layout": {
             "preferredMode": "desktopDense",
@@ -222,7 +259,7 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "permission": "kontrakt.update"},
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "kontrakt.update"},
         ],
         "layout": {
             "preferredMode": "desktopDense",
@@ -531,7 +568,7 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
         "dataSources": data_sources,
         "tabs": tabs,
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary"},
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "stubReason": "permission not yet assigned"},
         ],
         "layout": {
             "preferredMode": "desktopDense",

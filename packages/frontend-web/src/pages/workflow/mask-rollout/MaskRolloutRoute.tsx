@@ -7,7 +7,7 @@ const UniversalMaskRolloutPilotPage = lazy(
 )
 
 export default function MaskRolloutRoute(): JSX.Element {
-  const { screenId, entityId } = useParams<{ screenId?: string; entityId?: string }>()
+  const { screenId, entityId } = useParams() as { screenId?: string; entityId?: string }
   const normalizedScreenId = screenId?.replace(/__/g, '/')
 
   if (!normalizedScreenId || !entityId) {

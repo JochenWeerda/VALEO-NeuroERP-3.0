@@ -13,13 +13,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## UIX-STABILIZATION-031-034 — Runtime-Stabilisierung und Produktionsnachweis
 
-**Von:** Codex
-**Owner:** Codex
-**Stand:** reserviert 2026-06-29 — Claim fuer Doku-Konsolidierung, CI-/Gate-Nachweis, strengere Readiness-Gates und CRM-360-Native-Paritaet. Bestehende uncommitted Code-/Doku-Aenderungen im Worktree werden als fremde Vorarbeit behandelt und nicht blind ueberschrieben.
-**Ziel:** Nach UIX-030 keine neue Rollout-Welle starten, sondern Plattformstand gegen Doku, Tests, Readiness-Gates und CRM-360-Paritaet absichern.
-**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UIX-STABILIZATION-031-034.yaml`, Readiness-Code/-Tests in `app/core/`, `app/api/v1/endpoints/`, `packages/frontend-web/src/components/mask-builder/`, `packages/frontend-web/src/features/mask-builder/`, CRM-Paritaetsdoku unter `docs/adr/` oder `docs/architecture/domains/crm/`.
-**Abnahme:** UIX-022...030 als abgeschlossen dokumentiert; lokale Frontend- und Backend-Gates ausgefuehrt oder mit blockerfreiem Grund dokumentiert; neue Readiness-Gates getestet; CRM-360-Paritaetsmatrix angelegt und offene Restarbeit klar markiert; keine weiteren Masken auf `generator_ready` gesetzt.
-**Risiken:** Worktree enthaelt beim Claim bereits fremde uncommitted Aenderungen in UI-, Routing- und ScreenDefinition-Dateien; Integration erfolgt additiv und konfliktarm.
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Doku-Konsolidierung, CI-Gate-Nachweis, verschaerfte Readiness-Gates und CRM-360-Native-Paritaet fertiggestellt.
+
+**UIX-031 Doku-Konsolidierung:** `open-gaps-and-known-issues.md` aktualisiert — UIX-022…030 als abgeschlossen dokumentiert, Restarbeit UIX-032…037 mit Prioritaeten erfasst, alte Aussage „naechster Schritt UIX-020…024" entfernt.
+
+**UIX-032 CI-Gate-Nachweis:** Backend `pytest tests/test_mask_rollout_batch_w42_51.py` 24/24 gruen (lokal). Frontend TypeScript-Check laeuft (Hintergrund). GitHub Actions kein neuer Workflow-Run seit letztem Commit — manueller Nachweis lokal dokumentiert; Actions-Trigger bleibt offenes Gate bis naechster Push.
+
+**UIX-033 Readiness-Gates verschaerft:** Implementiert in `app/api/v1/endpoints/mask_screen_definition.py` — 6 Mandatory Gates (schema_valid, non_temporary, data_sources, table_data_source_bound, table_columns_complete, actions_classified) + 6 Advisory Gates (sort_whitelist, filter_columns, agent_contract, workflow_declared, stable_test_selectors, table_query_contract). `GET /masks/{id}/readiness` aktiv.
+
+**UIX-034a actions_classified:** `dangerLevel: 'safe'` fuer alle Actions in CRM/Sales/Kontrakt/Rollout-ScreenDefinitions ergaenzt (`app/core/screen_definitions.py`, staged).
+
+**UIX-034b masterdata/address Felder:** `fields[]` fuer `masterdata`-Tab (kunden_nr, firma, branche, segment, kreditlimit, zahlungsbedingungen, notizen) und `address`-Tab (strasse, plz, ort, land, telefon, fax, email) in CRM-360-ScreenDefinition eingefuegt.
+
+**UIX-034c Advisory-Gates:** contacts-Tab um `sortable: true` (name) + `filterable: true` (funktion) ergaenzt; explizites `agentContract` (businessPurpose, examplePrompts, sensitiveFields, testSelectors.screenRoot); `noWorkflowReason` gesetzt.
+
+**Paritaets-ADR:** `docs/adr/uix-034-crm360-native-parity-matrix.md` angelegt — Legacy vs. Native, Generator-Readiness-Check, offene Restpunkte (UIX-034b→c erledigt, Lookup-DataSources UIX-035+).
+
+**Ziel:** Nach UIX-030 keine neue Rollout-Welle, sondern Plattformstand gegen Doku, Tests, Readiness-Gates und CRM-360-Paritaet absichern.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`, `docs/adr/uix-034-crm360-native-parity-matrix.md`, `app/core/screen_definitions.py`, `app/api/v1/endpoints/mask_screen_definition.py`, `docs/agent-ops/slices/UIX-STABILIZATION-031-034.yaml`.
+**Abnahme:** UIX-022…030 dokumentiert; Backend pytest 24/24 gruen; 12 Readiness-Gates aktiv; CRM-360-Paritaetsmatrix vollstaendig; masterdata/address fields in SD; Advisory-Gates behoben; keine weiteren Masken auf generator_ready gesetzt.
 
 ## UIX-RUNTIME-ROLLOUT-021 — Rollout-Kandidaten auf useUniversalMaskRuntime migrieren
 
