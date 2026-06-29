@@ -118,6 +118,9 @@ services/inventory/env/
 
 # ── Laufzeit-Daten (kein Quellcode) ──────────────────────────────────────────
 runtime/
+# Ausnahme: Mask-Builder Runtime-Layer ist Quellcode, kein Laufzeit-Artefakt
+!packages/frontend-web/src/components/mask-builder/runtime/
+!packages/frontend-web/src/__tests__/components/mask-builder/runtime/
 data/gap/
 data/lkv/
 Futtermittelbetriebe PLZ 26*.csv
