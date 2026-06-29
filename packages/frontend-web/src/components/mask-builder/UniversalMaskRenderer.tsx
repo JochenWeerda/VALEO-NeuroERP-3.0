@@ -2,6 +2,7 @@ import { LazyTabs } from '@/components/ui/LazyTabs'
 import type { ScreenDefinition, ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
 import type { LookupBinding, TableQueryState } from './runtime/types'
+import { LookupBindingContext } from './runtime/LookupBindingContext'
 import {
   ActionBarRenderer,
   FastFormRenderer,
@@ -262,21 +263,24 @@ export function UniversalMaskRenderer({
   tableQueryStates,
   tableTotals,
   onTableQueryChange,
+  lookupBindings,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
   if (plan) {
     return (
-      <RenderFromPlan
-        plan={plan}
-        payload={payload}
-        tables={tables}
-        tableQueryStates={tableQueryStates}
-        tableTotals={tableTotals}
-        onTableQueryChange={onTableQueryChange}
-        onTabChange={onTabChange}
-        onAction={onAction}
-      />
+      <LookupBindingContext.Provider value={lookupBindings ?? {}}>
+        <RenderFromPlan
+          plan={plan}
+          payload={payload}
+          tables={tables}
+          tableQueryStates={tableQueryStates}
+          tableTotals={tableTotals}
+          onTableQueryChange={onTableQueryChange}
+          onTabChange={onTabChange}
+          onAction={onAction}
+        />
+      </LookupBindingContext.Provider>
     )
   }
 

@@ -128,7 +128,7 @@ export function useUniversalMaskRuntime({
       queryKey: [screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
       queryFn: async () => {
         const params = toQueryParams(resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
-        const url = tb.endpoint + '?' + new URLSearchParams(params).toString()
+        const url = `${tb.endpoint  }?${  new URLSearchParams(params).toString()}`
         const res = await apiClient.get<{ items?: Record<string, unknown>[]; total?: number } | Record<string, unknown>[]>(url)
         return res.data
       },

@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { LookupField } from './LookupField'
 import type { RenderFieldPlan, RenderPerformancePlan } from '../render-plan/types'
+import { useLookupBindingContext } from '../runtime/LookupBindingContext'
 import { FieldRenderer } from './FieldRenderer'
 import { getValue } from './render-utils'
 import type { ScreenFieldDefinition } from '../schema'
@@ -30,12 +31,15 @@ const FastFieldItem = memo(function FastFieldItem({
   payload: Record<string, unknown>
   performance?: RenderPerformancePlan
 }): JSX.Element | null {
+  const lookupBindings = useLookupBindingContext()
   if (!field.visible) return null
   if (field.componentKind === 'lookup') {
+    const lookupEndpoint = lookupBindings[field.key]?.lookupEndpoint
     return (
       <LookupField
         field={field}
         value={getValue(payload, field.dataPath)}
+        lookupEndpoint={lookupEndpoint}
         performance={performance}
       />
     )
