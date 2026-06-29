@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
 import type { RenderColumnKind, RenderTablePlan } from '../render-plan/types'
-import type { TableQueryState } from '../runtime/types'
+import type { FilterPlan, TableQueryState } from '../runtime/types'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -12,6 +12,8 @@ interface FastTableRendererProps {
   page?: number
   sort?: string
   sortDir?: 'asc' | 'desc'
+  q?: string
+  filterPlan?: FilterPlan
   onQueryChange?: (patch: Partial<TableQueryState>) => void
 }
 
@@ -37,6 +39,53 @@ function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefine
   }
 }
 
+function FilterChips({
+  filterPlan,
+  columns,
+  onRemove,
+}: {
+  filterPlan: FilterPlan
+  columns: RenderTablePlan['columns']
+  onRemove: (colKey: string) => void
+}): JSX.Element | null {
+  const entries = Object.entries(filterPlan)
+  if (entries.length === 0) return null
+  return (
+    <div
+      className="flex flex-wrap gap-1 pb-2"
+      role="list"
+      aria-label="Aktive Filter"
+      data-testid="filter-chips"
+    >
+      {entries.map(([colKey, spec]) => {
+        const col = columns.find((c) => c.key === colKey)
+        const colLabel = col?.label ?? colKey
+        const label = spec.label ?? String(spec.value)
+        return (
+          <span
+            key={colKey}
+            role="listitem"
+            className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+            data-filter-key={colKey}
+            data-filter-op={spec.op}
+          >
+            <span className="font-medium">{colLabel}:</span>
+            <span>{label}</span>
+            <button
+              type="button"
+              aria-label={`Filter ${colLabel} entfernen`}
+              className="ml-0.5 rounded-full hover:text-foreground focus:outline-none focus:ring-1"
+              onClick={() => onRemove(colKey)}
+            >
+              ×
+            </button>
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 export const FastTableRenderer = memo(function FastTableRenderer({
   table,
   rows,
@@ -44,18 +93,48 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   page,
   sort,
   sortDir,
+  q,
+  filterPlan,
   onQueryChange,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
   const totalPages = total !== undefined ? Math.ceil(total / table.pageSize) : undefined
+  const activeFilterPlan = filterPlan && Object.keys(filterPlan).length > 0 ? filterPlan : undefined
+
+  function handleRemoveFilter(colKey: string) {
+    if (!onQueryChange || !filterPlan) return
+    const next = { ...filterPlan }
+    delete next[colKey]
+    onQueryChange({ filterPlan: Object.keys(next).length > 0 ? next : undefined, page: 1 })
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{table.label}</CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-base">{table.label}</CardTitle>
+          {onQueryChange && (
+            <input
+              type="search"
+              placeholder="Suchen…"
+              value={q ?? ''}
+              onChange={(e) => onQueryChange({ q: e.target.value || undefined, page: 1 })}
+              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label={`Suche in ${table.label}`}
+              data-testid={`search-${table.key}`}
+            />
+          )}
+        </div>
       </CardHeader>
       <CardContent>
+        {activeFilterPlan && (
+          <FilterChips
+            filterPlan={activeFilterPlan}
+            columns={table.columns}
+            onRemove={handleRemoveFilter}
+          />
+        )}
         <VirtualDataTable
           data={visibleRows}
           rowHeight={table.rowHeight}

@@ -56,12 +56,13 @@ class MaskRolloutSummaryService:
         q: str | None = None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         spec = get_rollout_spec(screen_id)
         if spec is None:
             raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")
         if tab_key not in spec.lazy_tabs:
-            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
         tab_loaders = {
             "lager/stock-movement": self._stock_movement_tabs,
@@ -77,8 +78,8 @@ class MaskRolloutSummaryService:
         }
         loader = tab_loaders.get(spec.screen_id)
         if loader is None:
-            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return loader(spec, entity_id, tab_key, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir)
+            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return loader(spec, entity_id, tab_key, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, filter_plan=filter_plan)
 
     def _stock_movement_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = (
@@ -122,6 +123,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         row = (
             self.db.query(StockMovementModel)
@@ -153,8 +155,8 @@ class MaskRolloutSummaryService:
                     "value": row.notes or "-",
                 },
             ]
-            return build_tab_page(tab_key=tab_key, table_key="movement_details", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="movement_details", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _article_stock_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -199,6 +201,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key == "bestand":
             rows = self.db.execute(
@@ -224,7 +227,7 @@ class MaskRolloutSummaryService:
                 }
                 for r in rows
             ]
-            return build_tab_page(tab_key=tab_key, table_key="bin_stock", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="bin_stock", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
         if tab_key == "bewegungen":
             rows = (
@@ -247,9 +250,9 @@ class MaskRolloutSummaryService:
                 }
                 for r in rows
             ]
-            return build_tab_page(tab_key=tab_key, table_key="recent_movements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="recent_movements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _ap_invoice_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         repo = get_repository(self.db)
@@ -288,6 +291,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         repo = get_repository(self.db)
         invoice = get_from_store("ap_invoice", entity_id, repo)
@@ -305,14 +309,14 @@ class MaskRolloutSummaryService:
                 }
                 for idx, line in enumerate(lines)
             ]
-            return build_tab_page(tab_key=tab_key, table_key="invoice_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="invoice_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "freigabe":
             items = [
                 {"key": "approval_status", "value": invoice.get("approval_status") or invoice.get("status") or "-"},
                 {"key": "semantic_status", "value": invoice.get("semantic_status") or "-"},
             ]
-            return build_tab_page(tab_key=tab_key, table_key="approval", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="approval", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _resolve_op_schema(self) -> str:
         row = self.db.execute(
@@ -372,9 +376,10 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key != "ausgleich":
-            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         schema = self._resolve_op_schema()
         rows = self.db.execute(
             text(
@@ -396,7 +401,7 @@ class MaskRolloutSummaryService:
             }
             for r in rows
         ]
-        return build_tab_page(tab_key=tab_key, table_key="settlements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+        return build_tab_page(tab_key=tab_key, table_key="settlements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _purchase_order_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -442,6 +447,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key == "positionen":
             rows = self.db.execute(
@@ -456,7 +462,7 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="po_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="po_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "kommunikation":
             rows = self.db.execute(
                 text(
@@ -470,8 +476,8 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="po_comms", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="po_comms", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _supplier_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -515,6 +521,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key == "bestellungen":
             rows = self.db.execute(
@@ -530,7 +537,7 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "lieferant_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="supplier_pos", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="supplier_pos", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "kontakte":
             rows = self.db.execute(
                 text(
@@ -544,8 +551,8 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "lieferant_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="supplier_contacts", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="supplier_contacts", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _opportunity_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -591,6 +598,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key == "aktivitaeten":
             rows = self.db.execute(
@@ -606,7 +614,7 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "opportunity_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="activities", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="activities", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "angebote":
             rows = self.db.execute(
                 text(
@@ -621,8 +629,8 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "opportunity_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="quotes", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="quotes", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _delivery_note_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -666,6 +674,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key == "positionen":
             rows = self.db.execute(
@@ -680,11 +689,11 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "ls_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="delivery_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="delivery_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "dokumente":
             items = [{"document_type": "Lieferschein", "reference": entity_id}]
-            return build_tab_page(tab_key=tab_key, table_key="documents", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="documents", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _harvest_settlement_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -729,6 +738,7 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key == "abzuege":
             rows = self.db.execute(
@@ -743,11 +753,11 @@ class MaskRolloutSummaryService:
                 {"tenant_id": self.tenant_id, "settlement_id": entity_id},
             ).mappings().all()
             items = [dict(r) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="deductions", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="deductions", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "positionen":
             items = [{"position": 1, "description": "Ernte-Abrechnung", "settlement_id": entity_id}]
-            return build_tab_page(tab_key=tab_key, table_key="settlement_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key="settlement_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
+        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _payment_run_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(
@@ -793,9 +803,10 @@ class MaskRolloutSummaryService:
         q: str | None,
         sort: str | None = None,
         sort_dir: str | None = None,
+        filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         if tab_key != "zahlungen":
-            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+            return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         rows = self.db.execute(
             text(
                 """
@@ -808,4 +819,4 @@ class MaskRolloutSummaryService:
             {"run_id": entity_id},
         ).mappings().all()
         items = [dict(r) for r in rows]
-        return build_tab_page(tab_key=tab_key, table_key="payments", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id)
+        return build_tab_page(tab_key=tab_key, table_key="payments", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)

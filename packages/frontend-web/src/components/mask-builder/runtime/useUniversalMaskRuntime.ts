@@ -36,7 +36,7 @@ export interface UseUniversalMaskRuntimeResult {
 }
 
 function hasContentChange(patch: Partial<TableQueryState>): boolean {
-  return patch.sort !== undefined || patch.q !== undefined || patch.filters !== undefined
+  return patch.sort !== undefined || patch.q !== undefined || patch.filterPlan !== undefined
 }
 
 export function useUniversalMaskRuntime({

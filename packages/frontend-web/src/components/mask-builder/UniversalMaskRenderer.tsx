@@ -131,6 +131,8 @@ function RenderFromPlan({
             page={tableQueryStates?.[tableKey]?.page}
             sort={tableQueryStates?.[tableKey]?.sort}
             sortDir={tableQueryStates?.[tableKey]?.sortDir}
+            q={tableQueryStates?.[tableKey]?.q}
+            filterPlan={tableQueryStates?.[tableKey]?.filterPlan}
             total={tableTotals?.[tableKey]}
             onQueryChange={onTableQueryChange ? (patch) => onTableQueryChange(tableKey, patch) : undefined}
           />
