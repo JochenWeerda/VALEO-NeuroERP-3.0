@@ -14,10 +14,8 @@ export function toQueryParams(state: TableQueryState): Record<string, string> {
     params['sort_dir'] = state.sortDir ?? 'asc'
   }
   if (state.q) params['q'] = state.q
-  if (state.filters) {
-    for (const [key, value] of Object.entries(state.filters)) {
-      if (value != null) params[key] = String(value)
-    }
+  if (state.filterPlan && Object.keys(state.filterPlan).length > 0) {
+    params['filterPlan'] = JSON.stringify(state.filterPlan)
   }
   return params
 }

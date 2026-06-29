@@ -67,3 +67,57 @@ def test_q_filter_then_sort():
     result, total = paginate_tab_items(ITEMS, q="ü", sort="amount", sort_dir="asc")
     assert total == 1
     assert result[0]["name"] == "Müller"
+
+
+# FilterPlan tests (Phase 023)
+
+def test_filter_plan_eq():
+    result, total = paginate_tab_items(ITEMS, filter_plan={"name": {"op": "eq", "value": "Arndt"}})
+    assert total == 1
+    assert result[0]["name"] == "Arndt"
+
+
+def test_filter_plan_neq():
+    result, total = paginate_tab_items(ITEMS, filter_plan={"name": {"op": "neq", "value": "Arndt"}})
+    assert total == 2
+
+
+def test_filter_plan_contains():
+    result, total = paginate_tab_items(ITEMS, filter_plan={"name": {"op": "contains", "value": "ül"}})
+    assert total == 1
+    assert result[0]["name"] == "Müller"
+
+
+def test_filter_plan_gt():
+    result, total = paginate_tab_items(ITEMS, filter_plan={"amount": {"op": "gt", "value": 150}})
+    assert total == 2
+    assert all(r["amount"] > 150 for r in result)
+
+
+def test_filter_plan_between():
+    result, total = paginate_tab_items(
+        ITEMS, filter_plan={"amount": {"op": "between", "value": [100, 200]}}
+    )
+    assert total == 2
+
+
+def test_filter_plan_in():
+    result, total = paginate_tab_items(
+        ITEMS, filter_plan={"name": {"op": "in", "value": ["Arndt", "Ziegler"]}}
+    )
+    assert total == 2
+
+
+def test_filter_plan_unknown_op_ignored():
+    result, total = paginate_tab_items(ITEMS, filter_plan={"name": {"op": "regex", "value": ".*"}})
+    assert total == 3
+
+
+def test_filter_plan_combined_with_sort():
+    result, total = paginate_tab_items(
+        ITEMS,
+        filter_plan={"amount": {"op": "gte", "value": 200}},
+        sort="amount", sort_dir="desc",
+    )
+    assert total == 2
+    assert result[0]["amount"] == 300

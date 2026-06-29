@@ -45,6 +45,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
             page={tableQueryStates?.[tableKey]?.page}
             sort={tableQueryStates?.[tableKey]?.sort}
             sortDir={tableQueryStates?.[tableKey]?.sortDir}
+            q={tableQueryStates?.[tableKey]?.q}
+            filterPlan={tableQueryStates?.[tableKey]?.filterPlan}
             total={tableTotals?.[tableKey]}
             onQueryChange={onQueryChange ? (patch) => onQueryChange(tableKey, patch) : undefined}
           />

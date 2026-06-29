@@ -5,27 +5,72 @@ from __future__ import annotations
 from typing import Any
 
 
-def get_sortable_columns(screen_id: str, tab_key: str) -> frozenset[str]:
-    """Returns the set of sortable column keys for a tab from the ScreenDefinition.
-
-    Used as a whitelist so sort params cannot reference arbitrary fields.
-    Falls back to empty set (no sorting) if screen or tab is unknown.
-    """
+def _get_tab_columns(screen_id: str, tab_key: str) -> list[dict[str, Any]]:
     from app.core.screen_definitions import get_screen_definition  # lazy import
 
     definition = get_screen_definition(screen_id)
     if definition is None:
-        return frozenset()
+        return []
     for tab in definition.get("tabs", []):
         if tab.get("key") != tab_key:
             continue
-        sortable: set[str] = set()
+        cols: list[dict[str, Any]] = []
         for table in tab.get("tables", []):
-            for col in table.get("columns", []):
-                if col.get("sortable"):
-                    sortable.add(col["key"])
-        return frozenset(sortable)
-    return frozenset()
+            cols.extend(table.get("columns", []))
+        return cols
+    return []
+
+
+def get_sortable_columns(screen_id: str, tab_key: str) -> frozenset[str]:
+    """Returns the set of sortable column keys for a tab from the ScreenDefinition."""
+    return frozenset(col["key"] for col in _get_tab_columns(screen_id, tab_key) if col.get("sortable"))
+
+
+def get_filterable_columns(screen_id: str, tab_key: str) -> frozenset[str]:
+    """Returns the set of filterable column keys for a tab from the ScreenDefinition.
+
+    FilterPlan keys are validated against this set — unknown columns are silently dropped.
+    """
+    return frozenset(col["key"] for col in _get_tab_columns(screen_id, tab_key) if col.get("filterable"))
+
+
+def _apply_filter_plan(
+    items: list[dict[str, Any]],
+    filter_plan: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Apply structured FilterPlan to items. Unknown operators are silently ignored."""
+    result = items
+    for col_key, spec in filter_plan.items():
+        op = spec.get("op", "eq")
+        val = spec.get("value")
+        if val is None:
+            continue
+        if op == "eq":
+            result = [r for r in result if r.get(col_key) == val]
+        elif op == "neq":
+            result = [r for r in result if r.get(col_key) != val]
+        elif op == "contains":
+            needle = str(val).casefold()
+            result = [r for r in result if needle in str(r.get(col_key, "")).casefold()]
+        elif op == "lt":
+            result = [r for r in result if r.get(col_key) is not None and r.get(col_key) < val]
+        elif op == "lte":
+            result = [r for r in result if r.get(col_key) is not None and r.get(col_key) <= val]
+        elif op == "gt":
+            result = [r for r in result if r.get(col_key) is not None and r.get(col_key) > val]
+        elif op == "gte":
+            result = [r for r in result if r.get(col_key) is not None and r.get(col_key) >= val]
+        elif op == "in":
+            if isinstance(val, list):
+                result = [r for r in result if r.get(col_key) in val]
+        elif op == "between":
+            if isinstance(val, list) and len(val) == 2:
+                lo, hi = val
+                result = [
+                    r for r in result
+                    if r.get(col_key) is not None and lo <= r.get(col_key) <= hi
+                ]
+    return result
 
 
 def paginate_tab_items(
@@ -37,6 +82,7 @@ def paginate_tab_items(
     sort: str | None = None,
     sort_dir: str | None = None,
     allowed_sort_columns: frozenset[str] | None = None,
+    filter_plan: dict[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     filtered = items
     if q:
@@ -46,6 +92,8 @@ def paginate_tab_items(
             for row in items
             if any(needle in str(value).casefold() for value in row.values())
         ]
+    if filter_plan:
+        filtered = _apply_filter_plan(filtered, filter_plan)
     # Sort — only against whitelisted columns
     if sort and (allowed_sort_columns is None or sort in allowed_sort_columns):
         reverse = (sort_dir or "asc") == "desc"
@@ -125,11 +173,23 @@ def build_tab_page(
     sort: str | None = None,
     sort_dir: str | None = None,
     screen_id: str | None = None,
+    filter_plan: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    allowed = get_sortable_columns(screen_id, tab_key) if screen_id else None
+    allowed_sort = get_sortable_columns(screen_id, tab_key) if screen_id else None
+    # Restrict filterPlan to only filterable columns
+    safe_filter_plan: dict[str, Any] | None = None
+    if filter_plan and screen_id:
+        allowed_filter = get_filterable_columns(screen_id, tab_key)
+        if allowed_filter:
+            safe_filter_plan = {k: v for k, v in filter_plan.items() if k in allowed_filter}
+        else:
+            safe_filter_plan = filter_plan  # no whitelist defined → pass through
+    elif filter_plan:
+        safe_filter_plan = filter_plan
     paged_items, total = paginate_tab_items(
         items, page=page, limit=limit, q=q,
-        sort=sort, sort_dir=sort_dir, allowed_sort_columns=allowed,
+        sort=sort, sort_dir=sort_dir, allowed_sort_columns=allowed_sort,
+        filter_plan=safe_filter_plan,
     )
     return {
         "tab_key": tab_key,

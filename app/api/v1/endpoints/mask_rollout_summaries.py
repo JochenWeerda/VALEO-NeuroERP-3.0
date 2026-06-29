@@ -50,12 +50,21 @@ async def get_mask_rollout_tab_data(
     q: str | None = Query(None),
     sort: str | None = Query(None, description="Sortierfeld (Spalten-Key)"),
     sort_dir: str | None = Query(None, pattern="^(asc|desc)$", description="Sortierrichtung"),
+    filter_plan: str | None = Query(None, description="JSON FilterPlan (machine-readable column filters)"),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
+    import json
+
     normalized = _normalize_screen_id(screen_id)
     if get_rollout_spec(normalized) is None:
         raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")
+    parsed_filter_plan: dict | None = None
+    if filter_plan:
+        try:
+            parsed_filter_plan = json.loads(filter_plan)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=422, detail="filterPlan must be valid JSON")
     return MaskRolloutSummaryService(db, tenant_id).build_tab_data(
         normalized,
         entity_id,
@@ -65,4 +74,5 @@ async def get_mask_rollout_tab_data(
         q=q,
         sort=sort,
         sort_dir=sort_dir,
+        filter_plan=parsed_filter_plan,
     )

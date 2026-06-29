@@ -304,11 +304,13 @@ def _paginate_items(
     sort_dir: str | None = None,
     screen_id: str | None = None,
     tab_key: str | None = None,
+    filter_plan: dict | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     allowed = get_sortable_columns(screen_id, tab_key) if screen_id and tab_key else None
     return _paginate_tab_items(
         items, page=page, limit=limit, q=q,
         sort=sort, sort_dir=sort_dir, allowed_sort_columns=allowed,
+        filter_plan=filter_plan,
     )
 
 
@@ -327,9 +329,11 @@ async def get_customer_tab_data(
     q: Optional[str] = Query(None),
     sort: Optional[str] = Query(None),
     sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
     db: Session = Depends(get_db),
 ):
     """Limitierte Tab-Listen fuer den Universal Mask Generator (read-only)."""
+    import json
 
     customer = _query_one(
         db,
@@ -344,6 +348,13 @@ async def get_customer_tab_data(
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
 
+    parsed_filter_plan: dict | None = None
+    if filter_plan:
+        try:
+            parsed_filter_plan = json.loads(filter_plan)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=422, detail="filterPlan must be valid JSON")
+
     table_key, items = _fetch_customer_tab_items(
         db,
         customer_id=customer_id,
@@ -355,6 +366,7 @@ async def get_customer_tab_data(
         items, page=page, limit=limit, q=q,
         sort=sort, sort_dir=sort_dir,
         screen_id="crm/customer-360", tab_key=tab_key,
+        filter_plan=parsed_filter_plan,
     )
     return {
         "tab_key": tab_key,
