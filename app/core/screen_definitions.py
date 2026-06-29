@@ -96,7 +96,7 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Typ", "width": 120},
+                                {"key": "typ", "label": "Typ", "width": 120, "filterable": True},
                                 {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
                                 {"key": "benutzer", "label": "Benutzer", "width": 140},
                             ]}],
@@ -177,7 +177,7 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
                             "columns": [
                                 {"key": "pos_nr", "label": "Pos.", "width": 50},
                                 {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 120},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220, "filterable": True},
                                 {"key": "menge", "label": "Menge", "numeric": True},
                                 {"key": "einheit", "label": "Einheit", "width": 70},
                                 {"key": "einzelpreis", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
@@ -191,7 +191,7 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
                             "columns": [
                                 {"key": "ls_nr", "label": "LS-Nr.", "width": 130, "sortable": True},
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                                 {"key": "menge", "label": "Menge", "numeric": True},
                             ]}],
             },
@@ -201,7 +201,7 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Typ", "width": 120},
+                                {"key": "typ", "label": "Typ", "width": 120, "filterable": True},
                                 {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
                             ]}],
             },
@@ -209,6 +209,17 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "sales.order.update"},
         ],
+        "noWorkflowReason": "Verkaufsauftrag-Status wird durch Liefer- und Rechnungsfortschritt automatisch gesetzt — kein deklarativer Prozess-Workflow.",
+        "agentContract": {
+            "businessPurpose": "Verkaufsauftrag-Cockpit: Kopfdaten, Positionen, Lieferscheine und Dokumente fuer Auftragsabwicklung und Kundenkommunikation.",
+            "examplePrompts": [
+                "Was ist der Status von Auftrag {entity_id} und welche Positionen sind noch offen?",
+                "Welche Lieferscheine wurden fuer Auftrag {entity_id} erstellt?",
+                "Zeige alle Dokumente von Auftrag {entity_id}.",
+            ],
+            "sensitiveFields": ["einzelpreis", "betrag"],
+            "testSelectors": {"screenRoot": "[data-testid='sales-sales-order']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
         "layout": {
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
@@ -251,7 +262,7 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
                             "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
                             "columns": [
                                 {"key": "pos_nr", "label": "Pos.", "width": 50},
-                                {"key": "sorte", "label": "Sorte", "width": 160},
+                                {"key": "sorte", "label": "Sorte", "width": 160, "filterable": True},
                                 {"key": "menge", "label": "Menge (t)", "numeric": True, "sortable": True},
                                 {"key": "preis", "label": "Preis", "numeric": True, "renderKind": "currency"},
                                 {"key": "ernte_jahr", "label": "Erntejahr", "width": 90},
@@ -264,7 +275,7 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "lieferschein_nr", "label": "LS-Nr.", "width": 130},
+                                {"key": "lieferschein_nr", "label": "LS-Nr.", "width": 130, "filterable": True},
                                 {"key": "menge", "label": "Menge", "numeric": True},
                                 {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                             ]}],
@@ -273,6 +284,17 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "kontrakt.update"},
         ],
+        "noWorkflowReason": "Kontrakt-Status wird durch Lieferfortschritt automatisch gesetzt — Freigabe erfolgt ausserhalb des Masken-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Agrar-Kontrakt-Cockpit: Positionen (Sorte, Menge, Preis) und Umsaetze fuer Erzeuger-Vertragsmanagement.",
+            "examplePrompts": [
+                "Was ist der Erfuellungsstand von Kontrakt {entity_id}?",
+                "Zeige alle Lieferschein-Umsaetze fuer Kontrakt {entity_id}.",
+                "Welche Sorten und Mengen sind in Kontrakt {entity_id} vereinbart?",
+            ],
+            "sensitiveFields": ["preis"],
+            "testSelectors": {"screenRoot": "[data-testid='agrar-kontrakte']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
         "layout": {
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
