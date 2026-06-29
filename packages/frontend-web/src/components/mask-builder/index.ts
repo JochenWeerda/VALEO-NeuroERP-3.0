@@ -16,3 +16,12 @@ export { adaptMaskConfigToScreenDefinition } from './adapters/mask-config-adapte
 // export * from './layouts' // Not implemented yet
 export * from './hooks'
 export * from './utils'
+// Runtime layer (Phase 020-025)
+export type { DataBindingPlan, TableQueryState, FilterPlan, FilterValue, FilterOperator, LookupBinding } from './runtime/types'
+export type { UniversalFormState, ValidationPlan, ValidationRule, FieldError, DirtyState, SubmitState } from './runtime/FormState'
+export { useUniversalMaskRuntime } from './runtime/useUniversalMaskRuntime'
+export { useUniversalFormState } from './runtime/useUniversalFormState'
+export { compileDataBindingPlan } from './runtime/compile-data-binding-plan'
+export type { ActionRequest, ActionResult, ActionExecutionMode, ActionPolicy } from './runtime/ActionRuntime'
+export { buildActionPolicy, checkActionPolicy } from './runtime/ActionRuntime'
+export { useActionRuntime, useHumanActionDispatch, useAgentActionDispatch } from './runtime/useActionRuntime'

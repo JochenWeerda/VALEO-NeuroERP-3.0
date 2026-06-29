@@ -2,7 +2,9 @@ import { LazyTabs } from '@/components/ui/LazyTabs'
 import type { ScreenDefinition, ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
 import type { LookupBinding, TableQueryState } from './runtime/types'
+import type { UniversalFormState } from './runtime/FormState'
 import { LookupBindingContext } from './runtime/LookupBindingContext'
+import { FormStateContext } from './runtime/FormStateContext'
 import {
   ActionBarRenderer,
   FastFormRenderer,
@@ -29,6 +31,8 @@ interface UniversalMaskRendererProps {
   tableTotals?: Record<string, number>
   onTableQueryChange?: (_tableKey: string, _patch: Partial<TableQueryState>) => void
   lookupBindings?: Record<string, LookupBinding>
+  /** Optional edit-mode form state (from useUniversalFormState) */
+  formState?: UniversalFormState
 }
 
 function renderLegacyFields(
@@ -76,6 +80,7 @@ function RenderFromPlan({
   onTableQueryChange,
   onTabChange,
   onAction,
+  formState,
 }: {
   plan: RenderPlan
   payload: Record<string, unknown>
@@ -85,10 +90,13 @@ function RenderFromPlan({
   onTableQueryChange?: (_tableKey: string, _patch: Partial<TableQueryState>) => void
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
+  formState?: UniversalFormState
 }): JSX.Element {
   const classes = layoutClasses(plan.shell.layoutMode)
+  const effectivePayload = formState ? formState.values : payload
 
   return (
+    <FormStateContext.Provider value={formState}>
     <div
       className={classes.root}
       data-screen-definition={plan.screenId}
@@ -106,7 +114,7 @@ function RenderFromPlan({
         headerClassName={classes.header}
         touchTargetClass={classes.touchTarget}
         onAction={onAction}
-        payload={payload}
+        payload={effectivePayload}
       />
 
       <WorkflowPanelRenderer workflow={plan.workflow} />
@@ -115,7 +123,7 @@ function RenderFromPlan({
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}
         fieldsByKey={plan.fieldsByKey}
-        payload={payload}
+        payload={effectivePayload}
         className={classes.fields}
         performance={plan.performance}
       />
@@ -151,7 +159,7 @@ function RenderFromPlan({
               <FastTabRenderer
                 plan={plan}
                 tabKey={tab.key}
-                payload={payload}
+                payload={effectivePayload}
                 tables={tables}
                 tableQueryStates={tableQueryStates}
                 tableTotals={tableTotals}
@@ -161,7 +169,47 @@ function RenderFromPlan({
           }))}
         />
       )}
+
+      {formState && (
+        <div
+          className="sticky bottom-0 flex items-center justify-between gap-3 border-t bg-background px-4 py-3"
+          data-testid="form-submit-bar"
+          aria-live="polite"
+        >
+          <span className="text-sm text-muted-foreground">
+            {formState.submitState === 'error' && formState.submitError
+              ? `Fehler: ${formState.submitError}`
+              : formState.dirtyState.isDirty
+              ? 'Ungespeicherte Änderungen'
+              : formState.submitState === 'success'
+              ? 'Gespeichert'
+              : ''}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="rounded border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+              disabled={!formState.dirtyState.isDirty || formState.submitState === 'submitting'}
+              onClick={() => formState.resetForm()}
+              data-testid="form-reset-btn"
+            >
+              Zurücksetzen
+            </button>
+            <button
+              type="button"
+              className="rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              disabled={!formState.canSubmit}
+              onClick={() => { void formState.submit() }}
+              data-testid="form-submit-btn"
+              aria-busy={formState.submitState === 'submitting'}
+            >
+              {formState.submitState === 'submitting' ? 'Speichern…' : 'Speichern'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+    </FormStateContext.Provider>
   )
 }
 
@@ -266,6 +314,7 @@ export function UniversalMaskRenderer({
   tableTotals,
   onTableQueryChange,
   lookupBindings,
+  formState,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
@@ -281,6 +330,7 @@ export function UniversalMaskRenderer({
           onTableQueryChange={onTableQueryChange}
           onTabChange={onTabChange}
           onAction={onAction}
+          formState={formState}
         />
       </LookupBindingContext.Provider>
     )
