@@ -48,6 +48,8 @@ async def get_mask_rollout_tab_data(
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=1, le=50),
     q: str | None = Query(None),
+    sort: str | None = Query(None, description="Sortierfeld (Spalten-Key)"),
+    sort_dir: str | None = Query(None, pattern="^(asc|desc)$", description="Sortierrichtung"),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
@@ -61,4 +63,6 @@ async def get_mask_rollout_tab_data(
         page=page,
         limit=limit,
         q=q,
+        sort=sort,
+        sort_dir=sort_dir,
     )
