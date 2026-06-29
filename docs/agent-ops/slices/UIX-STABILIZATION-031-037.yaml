@@ -1,0 +1,53 @@
+slice_id: UIX-STABILIZATION-031-037
+title: Runtime-Stabilisierung und Produktionsnachweis (031-037)
+owner: Codex
+status: in_arbeit
+created_at: 2026-06-29
+goal: >-
+  Nach UIX-030 keine Feature-Welle — Doku, CI, Readiness, CRM-Parität und Agent-Nachweis
+  vor weiteren Rollouts absichern.
+file_ownership:
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/adr/uix-034-crm360-native-parity-matrix.md
+  - docs/agent-ops/slices/UIX-STABILIZATION-031-037.yaml
+acceptance:
+  - UIX-031 Doku konsolidiert und maschinenlesbar
+  - UIX-032 CI-Gates dokumentiert (Frontend + Backend + GHA)
+  - UIX-033 Readiness-Gates pro Tabelle aktiv
+  - UIX-034 CRM-Parity-Matrix mit offenen Punkten markiert
+  - Keine weiteren generator_ready bis 032+034 grün
+tests:
+  - pnpm --dir packages/frontend-web type-check
+  - pnpm --dir packages/frontend-web build
+  - pnpm --dir packages/frontend-web test:run
+  - pytest tests/test_mask_rollout_batch_w42_51.py tests/test_agent_mask_contract.py
+risks:
+  - GitHub Actions ohne sichtbaren Run für UIX-028…030
+  - Worktree-Mischung aus parallelen Agenten-Edits
+external_gates:
+  - GitHub Actions quality-gate Run auf main nach Push
+ai_harness:
+  fachlicher_vertrag: >-
+    Stakeholder-Audit 2026-06-29 — Plattform architektonisch weit, Nachweisbarkeit fehlt.
+  architektur_vertrag: >-
+    ADR-011, render-plan-architecture, universal-mask-runtime-status; keine neue Rollout-Welle.
+  daten_vertrag: >-
+    ScreenDefinition Readiness + AgentMaskContract; keine Schema-Migration in diesem Slice.
+  test_vertrag: >-
+    Vitest generatorReadiness + pytest rollout/agent-contract; CI-Tabelle in Status-Doku.
+  security_vertrag: >-
+    ActionRuntime humanApproval; Agent sensitiveFields; Tenant via X-Tenant-ID unverändert.
+  betriebs_vertrag: >-
+    Feature-Flags für Piloten; generator_ready Governance bis Parität nachgewiesen.
+  dokumentations_vertrag: >-
+    Workboard, Open-Gaps, Slice-YAMLs, ADR-011, Rollout-Doku, AGENTS.md Verweis.
+sub_slices:
+  - UIX-031
+  - UIX-032
+  - UIX-033
+  - UIX-034
+  - UIX-035
+  - UIX-036
+  - UIX-037

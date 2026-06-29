@@ -104,7 +104,19 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update"},
-            {"key": "create_activity", "label": "Aktivitaet anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.activity.create"},
+            {
+                "key": "create_activity",
+                "label": "Aktivitaet anlegen",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "permission": "crm.activity.create",
+                "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+                "method": "POST",
+                "requiresConfirmation": False,
+                "humanApprovalRequired": False,
+                "auditReasonRequired": False,
+                "forbiddenForAgents": False,
+            },
         ],
         "noWorkflowReason": "Kundenstamm ist ein reines Verwaltungsobjekt ohne prozessgesteuerten Lebenszyklus — Statuswechsel erfolgen implizit ueber Auftraege und Aktivitaeten.",
         "agentContract": {

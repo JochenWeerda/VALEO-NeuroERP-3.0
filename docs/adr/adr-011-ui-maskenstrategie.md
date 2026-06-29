@@ -115,6 +115,20 @@ Stattdessen gilt:
 
 Referenz: `docs/architecture/uix/render-plan-architecture.md`.
 
+### Erweiterung 2026-06-29: Universal Mask Runtime Platform (UIX-021…033)
+
+Ab Wave 021 ist der Mask Generator eine **Human+Agent Runtime-Plattform**, nicht nur Renderer:
+
+1. **`useUniversalMaskRuntime`** — Entity-Query, Table-Queries (`page`, `limit`, `q`, `sort`, `filter_plan`), Lookup-Bindings.
+2. **`UniversalFormState`** — Dirty-State, Validierung, Doppel-Submit-Schutz (UIX-025).
+3. **`ActionRuntime`** — execute/dryRun/validate/propose, `idempotencyKey`, `auditReason`, Human Approval (UIX-026).
+4. **`WorkflowState`** — BlockingReasons, PolicyHints (UIX-027).
+5. **`AgentMaskContract`** — deterministisch aus ScreenDefinition; Backend `GET /masks/{id}/agent-contract` (UIX-029).
+6. **Readiness-Gates** — 6 mandatory + 6 advisory pro Tabelle; `GET /masks/{id}/readiness` (UIX-030/033).
+
+Stabilisierung (UIX-031…037): Doku-Konsolidierung, CI-Nachweis, CRM-360-Parität, produktive Action-Mutation, Agent-E2E, Rollout-Neu-Bewertung.
+Maschinenreferenz: `docs/architecture/uix/universal-mask-runtime-status.md`.
+
 ## Consequences
 Positiv:
 - Klarere Entscheidung zwischen Wiederverwendung und Spezial-UI

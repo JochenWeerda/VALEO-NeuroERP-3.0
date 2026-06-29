@@ -5,7 +5,7 @@ audience: [entwickler, agent]
 owner: Claude Code
 status: aktiv
 last_reviewed: 2026-06-29
-version: 3.1.0
+version: 3.2.0
 description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
 ---
 
@@ -89,7 +89,8 @@ Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`
 | 027 WorkflowRuntime | `WorkflowState`, tone-colored `WorkflowPanelRenderer`, `useWorkflowState` | `b3eea3a20` |
 | 028 CRM 360 native Parity | `useUniversalMaskRuntime` wenn `adapter.temporary===false`; `data-runtime` Marker | `81d706da8` |
 | 029 AgentMaskContract | `generateAgentMaskContract`, `GET /api/v1/masks/{id}/agent-contract` | `81d706da8` |
-| 030 Readiness Gates | `checkGeneratorReadiness` (6 Gates), `GET /api/v1/masks/{id}/readiness` | `e6cabb380` |
+| 030 Readiness Gates | `checkGeneratorReadiness` (6 mandatory Gates), `GET /api/v1/masks/{id}/readiness` | `e6cabb380` |
+| 033 Readiness verschärft | 6 mandatory + 6 advisory Gates pro Tabelle; `table_data_source_bound`, `actions_classified` u.a. | `fd2b8a7cf` |
 
 ### Architekturprinzip
 
@@ -98,21 +99,36 @@ Eine `ScreenDefinition` ist Single Source of Truth für **Human UI und AI Agent*
 - Agent: `AgentMaskContract` → lesbare/editierbare/sensible Felder, Action-Policies, Audit-Anforderungen
 - Backend: Sort-/Filter-Whitelist aus `ScreenDefinition`; strukturierter `FilterPlan`-JSON-Parameter
 
+### Plattformstatus (Stakeholder-Audit 2026-06-29)
+
+```text
+Architektur:                sehr guter Sprung (021…030 geliefert)
+Human+Agent-Gedanke:        umgesetzt (AgentMaskContract, ActionRuntime, FilterPlan)
+Runtime-Basis:              vorhanden (useUniversalMaskRuntime)
+Readiness-Governance:       vorhanden (030 Basis + 033 pro Tabelle)
+CRM 360 native Pfad:        vorhanden; fachliche Parität offen (034)
+CI-/Release-Nachweis:       teilweise — pytest 43/43 lokal; Frontend-Gates + GitHub Actions offen
+Doku-Konsistenz:            nach UIX-031 synchron
+Produktionsreife:           noch nicht bewiesen
+```
+
+Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md)
+
 ### Offene Restarbeit (UIX-031…037)
 
-Diese Plattform ist architektonisch bereit — aber noch nicht **bewiesen**. Folgende Punkte sind offen:
+Die Plattform ist architektonisch bereit — der Engpass ist **Nachweisbarkeit**, nicht Code-Menge.
 
-| Slice | Inhalt | Priorität |
-|-------|--------|-----------|
-| UIX-031 | Doku-Konsolidierung — diese Datei (erledigt) | ✅ |
-| UIX-032 | CI-Gate-Nachweis: type-check, build, vitest, pytest lokal + GitHub Actions | P0 |
-| UIX-033 | Strengere Readiness-Gates (7 neue Gates, insb. pro-Tabelle) | P1 |
-| UIX-034 | CRM 360 native Parity-Matrix: Legacy vs. Native vergleichen | P1 |
-| UIX-035 | ActionRuntime Backend-Command: erste produktive Mutation (CRM Aktivität anlegen) | P2 |
-| UIX-036 | Agent-Modus End-to-End-Test: lesen → dryRun → humanApproval → execute | P2 |
-| UIX-037 | Rollout-Kandidaten mit neuen Gates neu bewerten, Reihenfolge: einkauf/supplier → crm/opportunity → lager/article-stock → … | P2 |
+| Slice | Inhalt | Priorität | Stand |
+|-------|--------|-----------|-------|
+| UIX-031 | Doku-Konsolidierung (Open-Gaps, Workboard, ADR, Rollout-Doku, Slice-YAMLs) | P0 | ✅ abgeschlossen 2026-06-29 |
+| UIX-032 | CI-Gate-Nachweis: type-check, build, vitest, pytest lokal + GitHub Actions | P0 | 🟡 pytest 43/43 grün; Frontend type-check blockiert durch WIP `lieferschein-erfassung.tsx`; GHA ausstehend |
+| UIX-033 | Strengere Readiness-Gates (mandatory/advisory, pro Tabelle) | P1 | ✅ `fd2b8a7cf` |
+| UIX-034 | CRM 360 native Parity-Matrix Legacy vs. Native | P1 | 🟡 Matrix angelegt; Stammdaten-Felder + Advisory-Gates offen |
+| UIX-035 | ActionRuntime Backend-Command: CRM Aktivität anlegen | P2 | ⬜ geplant |
+| UIX-036 | Agent End-to-End: lesen → dryRun → humanApproval → execute | P2 | ⬜ geplant |
+| UIX-037 | Rollout-Kandidaten mit neuen Gates neu bewerten | P2 | ⬜ geplant |
 
-**Wichtig für Agenten:** Keine weiteren `generator_ready`-Masken setzen, bis UIX-032 (CI grün) und UIX-034 (CRM 360 Parität) nachgewiesen sind.
+**Governance für Agenten:** Keine weiteren `generator_ready`-Masken setzen, bis UIX-032 (CI grün) und UIX-034 (CRM 360 Parität) nachgewiesen sind. Keine neue Feature-/Rollout-Welle vor Stabilisierung.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 

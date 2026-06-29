@@ -1,0 +1,32 @@
+slice_id: UIX-034
+title: CRM 360 Native Parity (Legacy vs Native)
+owner: offen
+status: in_arbeit
+created_at: 2026-06-29
+goal: >-
+  CRM 360 nativ fachlich gleichwertig oder besser — Paritätsmatrix, Sort/Filter/Lookup/Actions/AgentContract/Performance.
+file_ownership:
+  - docs/adr/uix-034-crm360-native-parity-matrix.md
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/crm/
+acceptance:
+  - Paritätsmatrix Legacy | Native | Status | Bemerkung vollständig
+  - Stammdaten-Felder in ScreenDefinition (034b)
+  - Advisory Readiness-Gates für CRM 360 grün oder dokumentiert
+  - Legacy-Fallback erst nach grüner Parität abbauen
+tests:
+  - Vitest UniversalCustomerMaskPilotPage / native runtime
+  - pytest crm screen-definition + readiness
+  - Playwright CRM 360 smoke optional
+risks:
+  - Lookup-DataSources (Land, Branche) fehlen in beiden Pfaden
+external_gates:
+  - not_applicable
+ai_harness:
+  fachlicher_vertrag: CRM 360 als Referenz-Beweisfall für Runtime-Plattform.
+  architektur_vertrag: useNativeRuntime wenn adapter.temporary===false.
+  daten_vertrag: crm/customer-360 ScreenDefinition fields + dataSources.
+  test_vertrag: Parity-Matrix + Vitest/pytest; E2E mit Mock-API.
+  security_vertrag: sensitiveFields im AgentContract (IBAN etc.).
+  betriebs_vertrag: VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER Feature Flag.
+  dokumentations_vertrag: uix-034-crm360-native-parity-matrix.md; mask-parity-customer-360 Verweis.

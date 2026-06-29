@@ -4,8 +4,8 @@ type: explanation
 audience: [ki-agent, entwickler]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
-version: 3.1.0
+last_reviewed: 2026-06-29
+version: 3.2.0
 ---
 
 # Agent-Dokumentation
@@ -20,6 +20,7 @@ sind Leser **und** Autoren der Doku.
 - [**Tool-Katalog**](tool-catalog.md) — MCP-Tools (Schema, Scope, Idempotenz, Risiko).
 - [**Guardrails**](guardrails.md) — Human-Approval bei HIGH-Risk, fail-closed, RBAC.
 - [**Contracts**](contracts.md) — `ai_harness`-Verträge je Slice (7 Pflichtverträge).
+- [**Universal Mask Runtime Status**](../architecture/uix/universal-mask-runtime-status.md) — maschinenlesbarer Lieferstand UIX-021…037.
 
 ## Zwei Rollen
 

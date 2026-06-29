@@ -5,8 +5,8 @@ audience: [agent, entwickler]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-29
-version: 1.1.0
-description: Performance-orientierte Rendering-Engine — SchemaCompiler, RenderPlan-Cache, Fast Renderer, DataBindingPlan-Runtime.
+version: 1.2.0
+description: Performance-orientierte Rendering-Engine — SchemaCompiler, RenderPlan-Cache, Fast Renderer, UniversalMaskRuntime, Readiness-Gates.
 ---
 
 # RenderPlan Architecture
@@ -87,3 +87,19 @@ Invalidierung bei Logout oder `schemaVersion`-Wechsel.
 ## Performance-Vertrag
 
 Siehe ADR-011 Erweiterung RenderPlan Engine und `scripts/check_mask_performance_contract.ts` + `scripts/check_mask_bundle_budget.ts`.
+
+## Runtime-Schicht (UIX-021…033)
+
+| Modul | Aufgabe |
+|-------|---------|
+| `runtime/useUniversalFormState.ts` | Form-Werte, Dirty, Validierung, Submit-Guard |
+| `runtime/useActionRuntime.ts` | Actions: execute/dryRun/validate/propose, Audit, Idempotenz |
+| `runtime/useWorkflowState.ts` | Workflow-Panel, BlockingReasons |
+| `runtime/generateAgentMaskContract.ts` | Agent-Vertrag aus ScreenDefinition |
+| `runtime/generatorReadiness.ts` | 6 mandatory + 6 advisory Gates pro Tabelle |
+
+Backend-Spiegel: `GET /api/v1/masks/{id}/readiness`, `GET /api/v1/masks/{id}/agent-contract`.
+
+Tab-API-Query (Rollouts + CRM): `page`, `limit`, `q`, `sort`, `sort_dir`, `filter_plan` — Sort/Filter nur gegen Whitelist aus ScreenDefinition.
+
+Plattformstatus und Governance: [`universal-mask-runtime-status.md`](universal-mask-runtime-status.md).

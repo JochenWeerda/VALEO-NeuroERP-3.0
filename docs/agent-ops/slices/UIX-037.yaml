@@ -1,0 +1,28 @@
+slice_id: UIX-037
+title: Rollout-Kandidaten neu bewerten (neue Gates)
+owner: offen
+status: geplant
+created_at: 2026-06-29
+goal: Zehn Batch-Kandidaten gegen verschärfte Readiness-Gates; neue Priorisierung.
+file_ownership:
+  - app/core/mask_classification.py
+  - app/core/screen_definitions.py
+  - docs/architecture/uix/mask-rollout-batch-w42-51.md
+acceptance:
+  - Reihenfolge supplier → opportunity → article-stock → … → payment-run/harvest-settlement zuletzt
+  - Jeder Kandidat Readiness-Report dokumentiert
+  - Keine blinden generator_ready Setzungen
+tests:
+  - pytest test_mask_rollout_batch_w42_51.py
+  - GET /masks/{id}/readiness pro Kandidat
+external_gates:
+  - UIX-032 CI grün
+  - UIX-034 CRM Parität nachgewiesen
+ai_harness:
+  fachlicher_vertrag: Rollout-Governance nach Runtime-Plattform-Reife.
+  architektur_vertrag: universal-mask-runtime-status Governance-Regel.
+  daten_vertrag: ScreenDefinition pro Kandidat vollstaendig.
+  test_vertrag: Readiness + rollout pytest.
+  security_vertrag: payment-run/harvest-settlement zuletzt (hohes Agenten-Risiko).
+  betriebs_vertrag: VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS.
+  dokumentations_vertrag: mask-rollout-batch-w42-51 v2; open-gaps UIX-037.

@@ -15,25 +15,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-29 — Doku-Konsolidierung, CI-Gate-Nachweis, verschaerfte Readiness-Gates und CRM-360-Native-Paritaet fertiggestellt.
+**Stand:** in Arbeit 2026-06-29 — UIX-031 Doku-Konsolidierung abgeschlossen (`universal-mask-runtime-status.md`); UIX-033 Gates in `fd2b8a7cf`; pytest rollout+agent/readiness **43/43** lokal gruen; **UIX-032** Frontend type-check/build/vitest + GitHub Actions noch offen; **UIX-034** Parity-Matrix angelegt, fachliche Verifikation (Sort/Filter/E2E) ausstehend.
 
-**UIX-031 Doku-Konsolidierung:** `open-gaps-and-known-issues.md` aktualisiert — UIX-022…030 als abgeschlossen dokumentiert, Restarbeit UIX-032…037 mit Prioritaeten erfasst, alte Aussage „naechster Schritt UIX-020…024" entfernt.
+**UIX-031 Doku-Konsolidierung:** `open-gaps-and-known-issues.md` v3.2, [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md), ADR-011, Rollout-Doku, Slice-YAMLs 022–037; alte Aussage „naechster Schritt UIX-020…024" entfernt.
 
-**UIX-032 CI-Gate-Nachweis:** Backend `pytest tests/test_mask_rollout_batch_w42_51.py` 24/24 gruen (lokal). Frontend TypeScript-Check laeuft (Hintergrund). GitHub Actions kein neuer Workflow-Run seit letztem Commit — manueller Nachweis lokal dokumentiert; Actions-Trigger bleibt offenes Gate bis naechster Push.
+**UIX-032 CI-Gate-Nachweis:** Backend pytest 43/43 gruen (lokal 2026-06-29). Frontend: type-check nach Fix `ustva.tsx` erneut ausfuehren; build + vitest + GitHub Actions quality-gate ausstehend.
 
-**UIX-033 Readiness-Gates verschaerft:** Implementiert in `app/api/v1/endpoints/mask_screen_definition.py` — 6 Mandatory Gates (schema_valid, non_temporary, data_sources, table_data_source_bound, table_columns_complete, actions_classified) + 6 Advisory Gates (sort_whitelist, filter_columns, agent_contract, workflow_declared, stable_test_selectors, table_query_contract). `GET /masks/{id}/readiness` aktiv.
+**UIX-033 Readiness-Gates verschaerft:** `fd2b8a7cf` + `generatorReadiness.ts` — 6 Mandatory + 6 Advisory Gates pro Tabelle.
 
-**UIX-034a actions_classified:** `dangerLevel: 'safe'` fuer alle Actions in CRM/Sales/Kontrakt/Rollout-ScreenDefinitions ergaenzt (`app/core/screen_definitions.py`, staged).
-
-**UIX-034b masterdata/address Felder:** `fields[]` fuer `masterdata`-Tab (kunden_nr, firma, branche, segment, kreditlimit, zahlungsbedingungen, notizen) und `address`-Tab (strasse, plz, ort, land, telefon, fax, email) in CRM-360-ScreenDefinition eingefuegt.
-
-**UIX-034c Advisory-Gates:** contacts-Tab um `sortable: true` (name) + `filterable: true` (funktion) ergaenzt; explizites `agentContract` (businessPurpose, examplePrompts, sensitiveFields, testSelectors.screenRoot); `noWorkflowReason` gesetzt.
-
-**Paritaets-ADR:** `docs/adr/uix-034-crm360-native-parity-matrix.md` angelegt — Legacy vs. Native, Generator-Readiness-Check, offene Restpunkte (UIX-034b→c erledigt, Lookup-DataSources UIX-035+).
+**UIX-034 CRM 360 Native Parity:** [`uix-034-crm360-native-parity-matrix.md`](../adr/uix-034-crm360-native-parity-matrix.md); 034a actions_classified; 034b/034c (Felder, Advisory) teils in Worktree — E2E-Paritaet noch nicht nachgewiesen.
 
 **Ziel:** Nach UIX-030 keine neue Rollout-Welle, sondern Plattformstand gegen Doku, Tests, Readiness-Gates und CRM-360-Paritaet absichern.
-**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`, `docs/adr/uix-034-crm360-native-parity-matrix.md`, `app/core/screen_definitions.py`, `app/api/v1/endpoints/mask_screen_definition.py`, `docs/agent-ops/slices/UIX-STABILIZATION-031-034.yaml`.
-**Abnahme:** UIX-022…030 dokumentiert; Backend pytest 24/24 gruen; 12 Readiness-Gates aktiv; CRM-360-Paritaetsmatrix vollstaendig; masterdata/address fields in SD; Advisory-Gates behoben; keine weiteren Masken auf generator_ready gesetzt.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/adr/uix-034-crm360-native-parity-matrix.md`, `docs/agent-ops/slices/UIX-STABILIZATION-031-037.yaml`.
+**Abnahme:** UIX-022…030 + 033 dokumentiert; pytest gruen; CRM-Parity-Matrix + Restarbeit 032/034–037 klar; keine weiteren Masken auf `generator_ready` bis 032+034 gruen.
 
 ## UIX-RUNTIME-ROLLOUT-021 — Rollout-Kandidaten auf useUniversalMaskRuntime migrieren
 
@@ -63,9 +57,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 | 027 | WorkflowRuntime: WorkflowState, tone-colored WorkflowPanelRenderer, useWorkflowState | ✅ |
 | 028 | CRM 360 native Parity: useUniversalMaskRuntime als Pfad wenn adapter.temporary===false | ✅ |
 | 029 | AgentMaskContract: generateAgentMaskContract, GET /masks/{id}/agent-contract | ✅ |
-| 030 | Generator-Readiness-Gates: checkGeneratorReadiness, 6 Gates, GET /masks/{id}/readiness | ✅ |
+| 030 | Generator-Readiness-Gates: checkGeneratorReadiness, 6 mandatory Gates, GET /masks/{id}/readiness | ✅ |
+| 033 | Readiness verschärft: 6 mandatory + 6 advisory pro Tabelle | ✅ |
 
-**Abnahme:** Frontend-Tests (Vitest) gruen; Backend-Tests (pytest) gruen; Lint 0 Errors.
+**Commit:** `e6cabb380` (030), `fd2b8a7cf` (033 Doku+Gates), `81d706da8` (028–029).
 
 ## UIX-ROLLOUT-BATCH-019 — Universal Mask Rollout Batch (Waves 42–51)
 
@@ -76,7 +71,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/core/mask_screen_summary_common.py`, `app/services/mask_rollout_summary_service.py`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/core/mask_classification.py`, `app/core/screen_definitions.py`, `packages/frontend-web/src/features/mask-rollouts/`, `packages/frontend-web/src/pages/workflow/mask-rollout/`, `tests/test_mask_rollout_batch_w42_51.py`, `docs/architecture/uix/mask-rollout-batch-w42-51.md`, `docs/agent-ops/slices/UIX-ROLLOUT-BATCH-019.yaml`
 **Doku:** [`mask-rollout-batch-w42-51.md`](../architecture/uix/mask-rollout-batch-w42-51.md), [`mask-generator-rollout-template.md`](../architecture/uix/mask-generator-rollout-template.md) (Reihenfolge Waves 42–51)
 **Abnahme:** pytest `test_mask_rollout_batch_w42_51.py` 24/24 gruen; Vitest `mask-rollout-route.test.tsx`; Flag `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS=true` + Route `/mask-rollout/{screenId}/{entityId}`.
-**Offene Grenzen (bewusst):** Generic Tab-Spalten; Mutationen/Legacy-Detail-Routes; naechster Schritt = UniversalMaskRuntime (020–024).
+**Offene Grenzen (bewusst):** Mutationen/Legacy-Detail-Routes; fachliche Feintuning-Matrix pro Domäne; **Governance:** keine weiteren `generator_ready`-Setzungen bis UIX-032 (CI) + UIX-034 (CRM-Parität) grün — Runtime-Plattform siehe [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md) (UIX-021…030 abgeschlossen).
 
 ## UIX-MASK-AB-BENCH-018 — A/B Render Benchmark (Legacy vs. Pilot)
 

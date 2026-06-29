@@ -16,7 +16,4 @@ docs:
   - docs/architecture/uix/mask-rollout-batch-w42-51.md
   - docs/architecture/uix/mask-generator-rollout-template.md
 follow_up:
-  - UIX-RUNTIME-BINDING-020
-  - UIX-RUNTIME-CORE-021
-  - UIX-RUNTIME-RENDER-022
-  - UIX-RUNTIME-NATIVE-023
+  - UIX-STABILIZATION-031-037
