@@ -256888,6 +256888,74 @@
         ]
       }
     },
+    "/api/v1/masks/{mask_id}/agent-contract": {
+      "get": {
+        "description": "Liefert den maschinenlesbaren AgentMaskContract fuer AI-Agenten.\n\nWird deterministisch aus der ScreenDefinition abgeleitet — kein separates Speichern\nnoetig. Explizite agentContract-Felder im Screen ueberschreiben die generierten Werte.",
+        "operationId": "get_agent_mask_contract_api_v1_masks__mask_id__agent_contract_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mask_id",
+            "required": true,
+            "schema": {
+              "title": "Mask Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Agent Mask Contract Api V1 Masks  Mask Id  Agent Contract Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "AgentMaskContract abrufen",
+        "tags": [
+          "ui",
+          "masks",
+          "screen-definition"
+        ]
+      }
+    },
     "/api/v1/masks/{mask_id}/screen-definition": {
       "get": {
         "description": "Liefert die native ScreenDefinition fuer Generator-faehige Masken.",
