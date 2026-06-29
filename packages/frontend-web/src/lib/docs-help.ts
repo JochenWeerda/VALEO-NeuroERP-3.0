@@ -1,6 +1,6 @@
 // DOC-INAPP-HELP-002 — Route → Dokumentation Mapping
 // Generiert via scripts/generate_inapp_help_map.py
-// Stand: 2026-06-26
+// Stand: 2026-06-29
 // Nicht manuell bearbeiten — aus route-inventory.gen.json + HELP_MAP generiert.
 
 export interface HelpEntry {
@@ -9,8 +9,8 @@ export interface HelpEntry {
   url: string;
 }
 
-/** Vollständige Docs-Basis-URL (mit abschließendem Slash) */
-export const DOCS_BASE_URL = "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/";
+/** Vollständige Docs-Basis-URL */
+export const DOCS_BASE_URL = "https://jochenweerda.github.io/VALEO-NeuroERP-3.0";
 
 /**
  * Mapping von Route-Pfad-Präfix → Hilfe-Seite.
@@ -46,8 +46,6 @@ export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "agrar/milchvieh": { docPath: "benutzerhandbuch/agrar-warenwirtschaft", label: "Agrar-Warenwirtschaft", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/" },
   "agrar/saatzucht": { docPath: "benutzerhandbuch/agrar-warenwirtschaft", label: "Agrar-Warenwirtschaft", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/" },
   "admin/mandanten": { docPath: "admin/mandanten-administration", label: "Mandanten-Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/mandanten-administration/" },
-  "admin/deployment": { docPath: "admin/deployment", label: "Deployment", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/deployment/" },
-  "admin/control-center": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/" },
   "compliance/gobd": { docPath: "compliance/gobd-checklist", label: "GoBD-Prüfung", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/compliance/gobd-checklist/" },
   "policy-manager": { docPath: "benutzerhandbuch/dashboard-workflows", label: "Dashboard und Workflows", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/dashboard-workflows/" },
   "agrar/hofliste": { docPath: "benutzerhandbuch/annahme", label: "Ernteannahme und Waage", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
@@ -69,6 +67,7 @@ export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "agrar/betrieb": { docPath: "benutzerhandbuch/agrar-warenwirtschaft", label: "Agrar-Warenwirtschaft", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/" },
   "agrar/flaeche": { docPath: "benutzerhandbuch/agrar-warenwirtschaft", label: "Agrar-Warenwirtschaft", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-warenwirtschaft/" },
   "finanzplanung": { docPath: "benutzerhandbuch/finanzbuchhaltung", label: "Finanzbuchhaltung", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/finanzbuchhaltung/" },
+  "mask-rollout": { docPath: "benutzerhandbuch/masken-plattform", label: "Masken-Plattform (Universal Mask Runtime)", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/masken-plattform/" },
   "agrar/partie": { docPath: "benutzerhandbuch/annahme", label: "Ernteannahme und Waage", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
   "agrar/wetter": { docPath: "benutzerhandbuch/annahme", label: "Ernteannahme und Waage", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
   "contracts-v2": { docPath: "benutzerhandbuch/agrar-kontrakte", label: "Agrar-Kontrakte", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-kontrakte/" },
@@ -132,7 +131,6 @@ export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "projekte": { docPath: "benutzerhandbuch/service-support", label: "Service und Support", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/service-support/" },
   "schaeden": { docPath: "benutzerhandbuch/service-support", label: "Service und Support", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/service-support/" },
   "api-docs": { docPath: "schnittstellen/rest-api", label: "API-Dokumentation", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/schnittstellen/rest-api/" },
-  "schnittstellen": { docPath: "schnittstellen", label: "Schnittstellen", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/schnittstellen/" },
   "copilot": { docPath: "benutzerhandbuch/dashboard-workflows", label: "Dashboard und Workflows", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/dashboard-workflows/" },
   "annahme": { docPath: "benutzerhandbuch/annahme", label: "Ernteannahme und Waage", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
   "vertrag": { docPath: "benutzerhandbuch/agrar-kontrakte", label: "Agrar-Kontrakte", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/agrar-kontrakte/" },
@@ -192,7 +190,6 @@ export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "crm": { docPath: "benutzerhandbuch/crm", label: "CRM und Marketing", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/crm/" },
   "esg": { docPath: "benutzerhandbuch/compliance-meldewesen", label: "Compliance und Meldewesen", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/compliance-meldewesen/" },
   "bab": { docPath: "benutzerhandbuch/controlling-kostenrechnung", label: "Controlling und Kostenrechnung", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/controlling-kostenrechnung/" },
-  "pos/terminal": { docPath: "benutzerhandbuch/verkauf", label: "Verkauf (Auftrag bis Rechnung)", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/verkauf/" },
   "pos": { docPath: "benutzerhandbuch/pos-kasse", label: "POS und Kasse", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/pos-kasse/" },
   "tse": { docPath: "benutzerhandbuch/pos-kasse", label: "POS und Kasse", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/pos-kasse/" },
   "dms": { docPath: "benutzerhandbuch/dokumente-belegarchiv", label: "Dokumente und Belegarchiv", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/dokumente-belegarchiv/" },
@@ -210,7 +207,7 @@ export function findHelpEntry(currentPath: string): HelpEntry | null {
     ([a], [b]) => b.length - a.length
   );
   for (const [prefix, entry] of entries) {
-    if (normalised === prefix || normalised.startsWith(`${prefix  }/`)) {
+    if (normalised === prefix || normalised.startsWith(prefix + "/")) {
       return entry;
     }
   }
@@ -221,19 +218,17 @@ export function findHelpEntry(currentPath: string): HelpEntry | null {
 export const HELP_ROUTE = '/hilfe';
 
 /** URL des Benutzerhandbuchs */
-export const DOCS_USER_MANUAL_URL = `${DOCS_BASE_URL}benutzerhandbuch/`;
+export const DOCS_USER_MANUAL_URL = `${DOCS_BASE_URL}/benutzerhandbuch/`;
 
-/** Gibt den eingebetteten Hilfe-Link für einen App-Pfad zurück. Der ctx-Parameter trägt den originalen Pfad. */
+/** Gibt die Hilfe-URL für einen gegebenen App-Pfad zurück. */
 export function getEmbeddedHelpHref(currentPath: string): string {
-  if (!currentPath) return HELP_ROUTE;
-  return `${HELP_ROUTE}?ctx=${encodeURIComponent(currentPath)}`;
+  const entry = findHelpEntry(currentPath);
+  return entry ? `${HELP_ROUTE}?ctx=${encodeURIComponent(entry.docPath)}` : HELP_ROUTE;
 }
 
-/** Löst einen App-Pfad zur passenden Docs-URL auf. Unbekannte Pfade fallen auf das Benutzerhandbuch zurück. */
-export function resolveHelpUrl(appPath: string): string {
-  if (appPath.startsWith('http')) return appPath;
-  const entry = findHelpEntry(appPath);
-  return entry ? entry.url : DOCS_USER_MANUAL_URL;
+/** Löst einen doc-Pfad oder -Schlüssel zur vollständigen Hilfe-URL auf. */
+export function resolveHelpUrl(docPath: string): string {
+  return docPath.startsWith('http') ? docPath : `${DOCS_BASE_URL}/${docPath}`;
 }
 
 /** Öffnet eine Docs-URL im neuen Tab. */

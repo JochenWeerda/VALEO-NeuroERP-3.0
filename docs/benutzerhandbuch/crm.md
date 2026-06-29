@@ -71,6 +71,11 @@ Spalten: Auftragsnummer · Datum · Status · Betrag. Filtern nach Status mögli
 
 Alle dokumentierten Kontaktpunkte: Anrufe, E-Mails, Termine, Notizen. Filtern nach Typ.
 
+!!! info "Masken-Plattform"
+    Gemeinsame Bedienelemente (Sort/Filter, Workflow, Agenten-Modus) sind in
+    [Masken-Plattform](masken-plattform.md) beschrieben. **Opportunity** ist nativ
+    verfügbar (UIX-039) — Rollout-Pilot `/mask-rollout/crm__opportunity/{id}`.
+
 ## Kontakt anlegen
 
 1. Bereich *CRM & Marketing* → *Kontakte* → **Neuer Kontakt**.

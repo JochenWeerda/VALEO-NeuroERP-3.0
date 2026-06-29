@@ -11,6 +11,26 @@ version: 1.1.0
 
 # UIX-034 - CRM 360 Native Parity Matrix
 
+**Status:** Accepted
+**Date:** 2026-06-29
+
+## Kontext
+
+Nach UIX-028/029 nutzt CRM 360 bei `adapter.temporary === false` den nativen `useUniversalMaskRuntime`-Pfad. Vor Abbau des Legacy-Fallbacks muss fachliche und technische Parität gegen die bestehende CRM-Maske nachgewiesen werden. UIX-033 liefert verschärfte Readiness-Gates als objektive Checkliste.
+
+## Entscheidung
+
+1. Parity-Matrix Legacy vs. Native als Referenzdokument führen (Tabs, Felder, Actions, AgentContract, Readiness).
+2. Legacy-Fallback bleibt aktiv, bis E2E-Verifikation und Finance-Tab abgeschlossen sind (UIX-034d).
+3. Kein weiterer Rollout-Kandidat wird über UIX-034 auf `generator_ready` gesetzt.
+
+## Konsequenzen
+
+Positiv: Nachweisbare Promotions-Grundlage für CRM 360 und Vorlage für UIX-038 (einkauf/supplier).
+Negativ: Zwei Runtime-Pfade bleiben temporär parallel; Finance-Tab und Lookup-DataSources sind noch Lücken.
+
+---
+
 Stand: 2026-06-29. ScreenDefinition: `crm/customer-360`. Native Runtime ist aktiv, wenn `adapter.temporary === false`.
 
 ## Ergebnis

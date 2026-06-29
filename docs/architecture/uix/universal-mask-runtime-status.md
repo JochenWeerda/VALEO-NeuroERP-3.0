@@ -11,7 +11,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
-> **Kurzfassung (2026-06-29):** Die Runtime-Plattform ist architektonisch weit (UIX-021…030 abgeschlossen). Der Engpass ist **Nachweisbarkeit**, nicht Code-Menge. Keine weiteren `generator_ready`-Masken, bis **UIX-032** (CI grün) und **UIX-034** (CRM-360-Parität) nachgewiesen sind.
+> **Kurzfassung (2026-06-29):** Die Runtime-Plattform ist architektonisch weit (UIX-021…040 abgeschlossen). Der Engpass ist jetzt Frontend-Verdrahtung und produktive Command-Ausführung, nicht der native ScreenDefinition-Vertrag. `einkauf/supplier`, `crm/opportunity` und `lager/article-stock` sind native ScreenDefinitions mit `generatorReady=true` und `advisoryScore=1.0`.
 
 ## Lieferstand
 
@@ -27,11 +27,14 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-RUNTIME-030 | Generator-Readiness-Gates (Basis) | ✅ | `e6cabb380` |
 | UIX-031 | Doku-Konsolidierung | ✅ | diese Datei + Open-Gaps + Workboard |
 | UIX-033 | Verschärfte Readiness-Gates (pro Tabelle) | ✅ | `fd2b8a7cf` |
-| UIX-032 | CI-/Gate-Nachweis | 🟡 offen | siehe Abschnitt CI |
-| UIX-034 | CRM 360 Native Parity-Matrix | 🟡 in Arbeit | [`uix-034-crm360-native-parity-matrix.md`](../../adr/uix-034-crm360-native-parity-matrix.md) |
-| UIX-035 | ActionRuntime produktiv (CRM Aktivität) | ⬜ geplant | — |
-| UIX-036 | Agent End-to-End-Test | ⬜ geplant | — |
-| UIX-037 | Rollout-Kandidaten neu bewerten | ⬜ geplant | neue Gate-Reihenfolge unten |
+| UIX-032 | CI-/Gate-Nachweis | ✅ lokal | siehe Abschnitt CI |
+| UIX-034 | CRM 360 Native Parity-Matrix | ✅ | [`uix-034-crm360-native-parity-matrix.md`](../../adr/uix-034-crm360-native-parity-matrix.md) |
+| UIX-035 | ActionRuntime produktiv (CRM Aktivität) | ✅ | `tests/test_uix035_action_runtime_crm.py` |
+| UIX-036 | Agent End-to-End-Test | ✅ | propose → dryRun → validate |
+| UIX-037 | Rollout-Kandidaten neu bewerten | ✅ | `uix-037-rollout-readiness-report.md` |
+| UIX-038 | Einkauf Supplier native ScreenDefinition | ✅ | `generatorReady=true`, `advisoryScore=1.0` |
+| UIX-039 | CRM Opportunity native ScreenDefinition | ✅ | `generatorReady=true`, `advisoryScore=1.0` |
+| UIX-040 | Lager Article Stock native ScreenDefinition | ✅ | `generatorReady=true`, `advisoryScore=1.0` |
 
 ## Architektur (Single Source of Truth)
 
@@ -87,11 +90,11 @@ Backend: `_check_readiness()` in `app/api/v1/endpoints/mask_screen_definition.py
 
 ## UIX-037 — Rollout-Reihenfolge (neu bewertet)
 
-Nach grünem CI + CRM-Parität:
+Stand nach UIX-040:
 
-1. `einkauf/supplier`
-2. `crm/opportunity`
-3. `lager/article-stock`
+1. `einkauf/supplier` — nativ bereit, Frontend-Verdrahtung folgt in UIX-042
+2. `crm/opportunity` — nativ bereit, Parity-Matrix aktualisiert
+3. `lager/article-stock` — nativ bereit
 4. `sales/delivery-note`
 5. `einkauf/purchase-order`
 6. `finance/ap-invoice`
@@ -114,8 +117,8 @@ pytest tests/test_agent_mask_contract.py
 
 Ergebnis wird nach jedem Lauf hier aktualisiert:
 
-| pytest rollout batch | 2026-06-29 | ✅ 24/24 | lokal |
-| pytest agent/readiness | 2026-06-29 | ✅ 19/19 | `test_agent_mask_contract.py` |
+| pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov`; Coverage-Dateilock unter Windows bei parallelem Lauf umgangen |
+| pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py`, inkl. native Promotionen 038–040 |
 | Frontend type-check | 2026-06-29 | ❌ | Viele TS-Fehler in uncommitted `lieferschein-erfassung.tsx` (fremde WIP); `ustva.tsx` Extra-`}` behoben |
 | Frontend build | — | ausstehend | UIX-032 |
 | Frontend vitest (readiness) | 2026-06-29 | ✅ 15/15 | `generatorReadiness.test.ts` |
@@ -141,4 +144,9 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 - [ADR-011 UI-Maskenstrategie](../../adr/adr-011-ui-maskenstrategie.md)
 - [Rollout Batch Waves 42–51](mask-rollout-batch-w42-51.md)
 - [CRM 360 Native Parity-Matrix](../../adr/uix-034-crm360-native-parity-matrix.md)
+- [Einkauf Lieferant Parity (UIX-038)](../domains/einkauf/mask-parity-supplier-native.md)
+- [CRM Opportunity Parity (UIX-039)](../domains/crm/mask-parity-opportunity-native.md)
 - [Domain Rollout Template](mask-generator-rollout-template.md)
+- [Benutzerhandbuch Masken-Plattform](../../benutzerhandbuch/masken-plattform.md)
+- [Entwickler Mask Runtime API](../../entwickler/mask-runtime-api.md)
+- [Agent-Runbook Mask Runtime Agent-Modus](../../agent-docs/runbooks/mask-runtime-agent-modus.md)

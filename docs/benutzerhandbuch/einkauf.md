@@ -21,6 +21,23 @@ geführt und zeigen jederzeit die nächste nötige Aktion.
 - Modul **Einkauf** ist für den Mandanten freigeschaltet.
 - Lieferant und Artikel sind als Stammdaten vorhanden.
 
+## Lieferantenstamm 360° (native)
+
+Der **Lieferantenstamm** ist die zweite native Maske auf der Universal Mask Runtime
+(nach CRM Kundenstamm 360°). Aufbau analog zum CRM-Cockpit:
+
+| Bereich | Inhalt |
+|---------|--------|
+| **Kopf / Stammdaten** | Lieferantennummer, Firma, Adresse, Zahlungsbedingungen, Lieferzeit, Status |
+| **Tab Bestellungen** | Offene und abgeschlossene Bestellungen — Sort/Filter, serverseitige Paginierung |
+| **Tab Ansprechpartner** | Kontakte zum Lieferanten |
+
+**Zugang:** Legacy-Route *Lieferanten Stamm* oder Rollout-Pilot
+`/mask-rollout/einkauf__supplier/{id}` (Feature-Flag `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS`).
+
+Speichern und Folgebelege (z. B. *Neue Bestellung*) folgen in den nächsten Wellen (UIX-041/042).
+Details: [Masken-Plattform](masken-plattform.md).
+
 ## 1. Bestellvorschlag prüfen
 
 1. Bereich *Einkauf* → *Bestellvorschläge* (Lager, Verkauf oder Rohware).

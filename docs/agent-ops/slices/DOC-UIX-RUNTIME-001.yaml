@@ -1,0 +1,35 @@
+slice_id: DOC-UIX-RUNTIME-001
+title: Vollstaendiges Mask-Runtime-Dokumentationspaket
+owner: Codex
+status: abgeschlossen
+created_at: 2026-06-29
+goal: Benutzerhandbuch, Entwickler-API, Agent-Runbook, Parity-Matrizen und In-App-Hilfe fuer Universal Mask Runtime.
+file_ownership:
+  - docs/benutzerhandbuch/masken-plattform.md
+  - docs/benutzerhandbuch/einkauf.md
+  - docs/benutzerhandbuch/crm.md
+  - docs/architecture/domains/einkauf/mask-parity-supplier-native.md
+  - docs/architecture/domains/crm/mask-parity-opportunity-native.md
+  - docs/entwickler/mask-runtime-api.md
+  - docs/agent-docs/runbooks/mask-runtime-agent-modus.md
+  - scripts/generate_benutzerhandbuch_full.py
+  - packages/frontend-web/src/lib/docs-help.ts
+acceptance:
+  - masken-plattform.md in mkdocs und Benutzerhandbuch-Index
+  - einkauf/crm Abschnitte mit native Runtime verknuepft
+  - Parity supplier unter architecture/domains/einkauf (nicht adr/)
+  - generate_inapp_help_map.py ausgefuehrt (mask-rollout → masken-plattform)
+  - universal-mask-runtime-status Verweise aktualisiert
+tests:
+  - python scripts/generate_inapp_help_map.py
+  - mkdocs build (optional lokal)
+risks:
+  - In-App-Hilfe nur fuer mask-rollout-Praefix; Legacy-Routen unveraendert
+ai_harness:
+  fachlicher_vertrag: Endnutzer und Agenten finden Mask-Runtime-Doku zentral.
+  architektur_vertrag: Verweise in universal-mask-runtime-status als Kanon.
+  daten_vertrag: not_applicable
+  test_vertrag: generate_inapp_help_map ohne Fehler
+  security_vertrag: not_applicable
+  betriebs_vertrag: mkdocs-Navigation erweitert
+  dokumentations_vertrag: open-gaps + workboard nachziehen

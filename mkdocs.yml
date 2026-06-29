@@ -213,6 +213,7 @@ nav:
       - Überblick: benutzerhandbuch/index.md
       - Einstieg: benutzerhandbuch/einstieg.md
       - Dashboard und Workflows: benutzerhandbuch/dashboard-workflows.md
+      - Masken-Plattform: benutzerhandbuch/masken-plattform.md
       - Wissensbasis und Kundenportal: benutzerhandbuch/wissensbasis-kundenportal.md
       - Ernteannahme: benutzerhandbuch/annahme.md
       - Agrar-Kontrakte: benutzerhandbuch/agrar-kontrakte.md
@@ -274,6 +275,7 @@ nav:
       - Datenmodell & Tenancy: entwickler/datenmodell-tenancy.md
       - Konventionen: entwickler/konventionen.md
       - Test-Strategie: entwickler/test-strategie.md
+      - Mask Runtime API: entwickler/mask-runtime-api.md
       - Service-Inventar: entwickler/service-inventory.md
       - Container-Inventar: entwickler/container-inventory.md
       - Workflow-Index: entwickler/workflow-index.md
@@ -414,6 +416,7 @@ nav:
       - Capability-Katalog: agent-docs/capability-catalog.md
       - Tool-Katalog: agent-docs/tool-catalog.md
       - Guardrails: agent-docs/guardrails.md
+      - Mask Runtime Agent-Modus: agent-docs/runbooks/mask-runtime-agent-modus.md
       - ai_harness-Verträge: agent-docs/contracts.md
       - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
       - Agent-Ops:

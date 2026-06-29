@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-UIX-RUNTIME-001 — Mask-Runtime-Dokumentationspaket
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-29 — Benutzerhandbuch `masken-plattform.md`, Einkauf/CRM-Abschnitte, Parity-Matrizen supplier/opportunity, Entwickler-API, Agent-Runbook, mkdocs-Navigation, `generate_inapp_help_map.py` fuer mask-rollout.
+**Ziel:** Vollstaendiges Doku-Paket fuer Universal Mask Runtime (Endnutzer, Entwickler, Agenten).
+**Dateibesitz:** `docs/benutzerhandbuch/masken-plattform.md`, `docs/entwickler/mask-runtime-api.md`, `docs/agent-docs/runbooks/mask-runtime-agent-modus.md`, `docs/architecture/domains/einkauf/mask-parity-supplier-native.md`, `docs/architecture/domains/crm/mask-parity-opportunity-planned.md`, `scripts/generate_benutzerhandbuch_full.py`, `packages/frontend-web/src/lib/docs-help.ts`.
+**Abnahme:** mkdocs-Eintrag Masken-Plattform; In-App-Hilfe mask-rollout → masken-plattform; Verweise in universal-mask-runtime-status.
+
 ## UIX-035 — ActionRuntime Backend-Command: CRM Aktivitaet anlegen
 
 **Von:** Claude Code
@@ -49,6 +58,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 8. lager/stock-movement
 9. agrar/harvest-settlement
 10. finance/payment-run (zuletzt — hoechstes Risiko)
+
+## UIX-038…040 — Native ScreenDefinition Promotionen
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-29 — `einkauf/supplier`, `crm/opportunity` und `lager/article-stock` loesen jetzt auf native ScreenDefinitions mit `adapter.temporary=false` auf. Alle drei erreichen `generatorReady=true`, `advisoryScore=1.0`; Regressionstest verhindert, dass promotete Masken wieder durch den generischen Rollout-Builder ueberschrieben werden.
+**Ziel:** Die ersten drei UIX-037-Rollout-Kandidaten nativ promoten, ohne sofort Legacy-Routen oder Mutationspfade umzubauen.
+**Dateibesitz:** `app/core/screen_definitions.py`, `tests/test_agent_mask_contract.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/architecture/domains/einkauf/mask-parity-supplier-native.md`, `docs/architecture/domains/crm/mask-parity-opportunity-planned.md`.
+**Abnahme:** `python -m pytest tests/test_agent_mask_contract.py -q --no-cov` → 22/22 gruen; `python -m pytest tests/test_mask_rollout_batch_w42_51.py -q --no-cov` → 24/24 gruen; direkte `_check_readiness()`-Pruefung fuer 038–040: keine Errors/Warnings.
+**Folge:** UIX-042 Frontend-Verdrahtung fuer `einkauf/supplier`; UIX-041 `neue_bestellung` CommandEndpoint; weitere Promotionen ab `sales/delivery-note`.
 
 ## UIX-STABILIZATION-031-034 — Runtime-Stabilisierung und Produktionsnachweis
 

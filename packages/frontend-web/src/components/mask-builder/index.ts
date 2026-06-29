@@ -34,3 +34,5 @@ export { useAgentMaskContract, useLocalAgentMaskContract } from './runtime/useAg
 // Phase 030 — Generator Readiness Gates
 export { checkGeneratorReadiness } from './runtime/generatorReadiness'
 export type { GeneratorReadinessReport, GateResult, ReadinessGate, GateSeverity } from './runtime/generatorReadiness'
+// UIX-042 — Generic native detail page
+export { UniversalNativeDetailPage } from './UniversalNativeDetailPage'

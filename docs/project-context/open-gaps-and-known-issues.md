@@ -108,7 +108,7 @@ Runtime-Basis:              vorhanden (useUniversalMaskRuntime)
 Readiness-Governance:       vorhanden (030 Basis + 033 pro Tabelle)
 CRM 360 native Pfad:        vorhanden; fachliche Parität offen (034)
 CI-/Release-Nachweis:       teilweise — pytest 43/43 lokal; Frontend-Gates + GitHub Actions offen
-Doku-Konsistenz:            nach UIX-031 synchron
+Doku-Konsistenz:            nach UIX-031 + DOC-UIX-RUNTIME-001 synchron
 Produktionsreife:           noch nicht bewiesen
 ```
 
@@ -126,18 +126,19 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | UIX-036 | Agent propose→dryRun→validate getestet; humanApproval-Block aktiv | P2 | ✅ |
 | UIX-037 | Rollout-Kandidaten strukturell gefixt; adv=50% alle 10; Promotions-Reihenfolge | P2 | ✅ |
 | UIX-038 | einkauf/supplier native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
+| UIX-039 | crm/opportunity native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
+| UIX-040 | lager/article-stock native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
+| DOC-UIX-RUNTIME-001 | Doku-Paket Handbuch, Entwickler-API, Agent-Runbook, Parity, In-App-Hilfe | P1 | ✅ |
 
-### Offene Restarbeit (UIX-039+)
+### Offene Restarbeit (UIX-041+)
 
 | Slice | Inhalt | Priorität |
 |-------|--------|-----------|
-| UIX-039 | crm/opportunity native ScreenDefinition + Parity-Matrix | P1 |
-| UIX-040 | lager/article-stock native | P1 |
 | UIX-041 | `neue_bestellung` commandEndpoint fuer einkauf/supplier | P2 |
 | UIX-042 | Frontend: useUniversalMaskRuntime fuer einkauf/supplier (analog CRM-360) | P2 |
 | UIX-Roll | sales/delivery-note → finance/* → lager/* → agrar/* Promotionen | P2-P3 |
 
-**Governance fuer Agenten:** einkauf/supplier ist nativ bereit. Naechster Schritt: UIX-042 Frontend-Verdrahtung, dann UIX-039 crm/opportunity. Zahlungslauf und Ernte-Abrechnung bleiben zuletzt.
+**Governance fuer Agenten:** einkauf/supplier, crm/opportunity und lager/article-stock sind nativ bereit. Naechster Schritt: UIX-042 Frontend-Verdrahtung fuer Lieferanten, danach CommandEndpoint UIX-041 und weitere Promotionen. Zahlungslauf und Ernte-Abrechnung bleiben zuletzt.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 

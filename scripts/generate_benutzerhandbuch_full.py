@@ -33,6 +33,9 @@ CHAPTERS: list[tuple[str, str, list[str], str]] = [
         "workflow", "workflows", "dashboard", "dashboards", "management/executive-dashboard",
         "monitoring", "system/live-monitor", "copilot", "policy-manager", "policies",
     ], "Leitstand, Flow Spine, Freigaben, Prozessüberwachung, KI-Copilot."),
+    ("masken-plattform.md", "Masken-Plattform (Universal Mask Runtime)", [
+        "mask-rollout",
+    ], "Einheitliche Detailmasken, Sort/Filter, Rollout-Piloten, Agenten-Modus."),
     ("wissensbasis-kundenportal.md", "Wissensbasis und Kundenportal", [
         "wissen", "portal",
     ], "Interne Wissensdatenbank und externes Kundenportal."),

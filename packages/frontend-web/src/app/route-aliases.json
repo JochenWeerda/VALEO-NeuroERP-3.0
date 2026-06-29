@@ -2411,6 +2411,34 @@
     {
       "module": "@/pages/produktion/produktions-dokumente-drucken",
       "path": "produktion/produktions-dokumente-drucken"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-native",
+      "path": "sales/delivery-note/:id"
+    },
+    {
+      "module": "@/pages/einkauf/bestellung-native",
+      "path": "einkauf/bestellung-native/:id"
+    },
+    {
+      "module": "@/pages/finance/ap-invoice-native",
+      "path": "finance/ap-invoice/:id"
+    },
+    {
+      "module": "@/pages/finance/ar-open-item-native",
+      "path": "finance/ar-open-item/:id"
+    },
+    {
+      "module": "@/pages/finance/payment-run-native",
+      "path": "finance/payment-run/:id"
+    },
+    {
+      "module": "@/pages/lager/lagerbewegung-native",
+      "path": "lager/stock-movement/:id"
+    },
+    {
+      "module": "@/pages/agrar/ernte-abrechnung-native",
+      "path": "agrar/harvest-settlement/:id"
     }
   ]
 }
