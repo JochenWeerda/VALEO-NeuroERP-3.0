@@ -181469,6 +181469,39 @@
               ],
               "title": "Q"
             }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
           }
         ],
         "responses": {
@@ -256726,6 +256759,43 @@
                 }
               ],
               "title": "Q"
+            }
+          },
+          {
+            "description": "Sortierfeld (Spalten-Key)",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sortierfeld (Spalten-Key)",
+              "title": "Sort"
+            }
+          },
+          {
+            "description": "Sortierrichtung",
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sortierrichtung",
+              "title": "Sort Dir"
             }
           },
           {
