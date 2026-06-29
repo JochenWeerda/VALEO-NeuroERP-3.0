@@ -7,6 +7,7 @@ export interface VirtualDataTableColumn<T extends Record<string, unknown>> {
   label: string
   width?: number
   numeric?: boolean
+  sortable?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (_value: any, _row: T) => ReactNode
 }
@@ -19,6 +20,9 @@ interface VirtualDataTableProps<T extends Record<string, unknown>> {
   loading?: boolean
   emptyMessage?: string
   onRowClick?: (_row: T) => void
+  sortColumn?: string
+  sortDir?: 'asc' | 'desc'
+  onSortChange?: (_columnKey: string, _dir: 'asc' | 'desc') => void
 }
 
 export function VirtualDataTable<T extends Record<string, unknown>>({
@@ -29,6 +33,9 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   loading = false,
   emptyMessage = 'Keine Eintraege vorhanden.',
   onRowClick,
+  sortColumn,
+  sortDir,
+  onSortChange,
 }: VirtualDataTableProps<T>): JSX.Element {
   const parentRef = useRef<HTMLDivElement>(null)
   const virtualizer = useVirtualizer({
@@ -90,11 +97,33 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
             className="grid border-b bg-muted text-[11px] font-semibold uppercase tracking-normal text-muted-foreground"
             style={{ gridTemplateColumns }}
           >
-            {columns.map((column) => (
-              <div key={String(column.key)} className={cn('px-3 py-3', column.numeric && 'text-right')}>
-                {column.label}
-              </div>
-            ))}
+            {columns.map((column) => {
+              const colKey = String(column.key)
+              const isActive = sortColumn === colKey
+              const canSort = column.sortable && Boolean(onSortChange)
+              return (
+                <div
+                  key={colKey}
+                  className={cn(
+                    'px-3 py-3',
+                    column.numeric && 'text-right',
+                    canSort && 'cursor-pointer select-none hover:text-foreground',
+                  )}
+                  onClick={
+                    canSort
+                      ? () => onSortChange?.(colKey, isActive && sortDir === 'asc' ? 'desc' : 'asc')
+                      : undefined
+                  }
+                >
+                  {column.label}
+                  {canSort && isActive ? (
+                    <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
+                  ) : canSort ? (
+                    <span className="ml-1 opacity-30">⇅</span>
+                  ) : null}
+                </div>
+              )
+            })}
           </div>
           <div ref={parentRef} className="relative overflow-auto" style={{ height }}>
             <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
