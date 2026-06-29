@@ -4,27 +4,48 @@ type: reference
 audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-27
+last_reviewed: 2026-06-29
 version: 3.0.0
 description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
 ---
 
 # Active Workboard
 
+## UIX-RUNTIME-BINDING-020 … UIX-RUNTIME-ADAPTERS-024 — UniversalMaskRuntime (geplant)
+
+**Von:** Cursor (Plan)
+**Owner:** offen
+**Stand:** geplant 2026-06-29 — Architekturplan bestätigt; Rollout-Batch 019 liefert screen-summary, aber Schema-Wahrheit und Datenbindung fehlen noch.
+**Ziel:** Von Adapter-Parität zur nativen Maskenlaufzeit: `ScreenDefinition → RenderPlan → DataBindingPlan → UniversalMaskRuntime → Renderer`.
+**Plan:** [`.cursor/plans/universalmaskruntime_schicht_25fdb164.plan.md`](../../.cursor/plans/universalmaskruntime_schicht_25fdb164.plan.md)
+**Slice-Kette:**
+
+| Slice | Inhalt | Status |
+|-------|--------|--------|
+| `UIX-RUNTIME-BINDING-020` | DataBindingPlan, GenericDataSourceResolver, compile-data-binding-plan | offen |
+| `UIX-RUNTIME-CORE-021` | `useUniversalMaskRuntime`, GenericTableDataAdapter, GenericLookupResolver | offen |
+| `UIX-RUNTIME-RENDER-022` | FastFormRenderer Lookup; FastTableRenderer Server-Query | offen |
+| `UIX-RUNTIME-NATIVE-023` | CRM native ScreenDefinition (fields/tables/dataSources); usePilotRenderPlan Merge-Fix | offen |
+| `UIX-RUNTIME-ADAPTERS-024` | Validation, Workflow-Binding, ADR-011-Nachzug (optional) | offen |
+
+**Abnahme (Gesamt):** CRM-Pilot ohne domänenspezifische Tab-Hooks; Lookup + serverseitiges Tab-Paging; native CRM-Schema pytest-grün; Perf-Gates unveraendert grün.
+
 ## UIX-ROLLOUT-BATCH-019 — Universal Mask Rollout Batch (Waves 42–51)
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** abgeschlossen 2026-06-28 — zehn Rollout-Kandidaten mit screen-summary, Registry, Generic Pilot Route.
+**Stand:** abgeschlossen 2026-06-29 — gepusht auf `main` (`ad4727482`, Backend); Frontend-Pilot bereits in `8aca70b42`.
 **Ziel:** Nach CRM/Sales/Agrar-Kontrakt die naechsten zehn Domänen-Piloten (Lager, Finance, Einkauf, CRM Opportunity, Sales LS, Agrar Settlement) hinter Feature-Flag ausrollen.
-**Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/services/mask_rollout_summary_service.py`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `packages/frontend-web/src/features/mask-rollouts/`, `pages/workflow/mask-rollout/`, `docs/architecture/uix/mask-rollout-batch-w42-51.md`
-**Abnahme:** pytest `test_mask_rollout_batch_w42_51.py` gruen; Vitest Route-Switch; `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS=true` + `/mask-rollout/{screenId}/{entityId}`.
+**Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/core/mask_screen_summary_common.py`, `app/services/mask_rollout_summary_service.py`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/core/mask_classification.py`, `app/core/screen_definitions.py`, `packages/frontend-web/src/features/mask-rollouts/`, `packages/frontend-web/src/pages/workflow/mask-rollout/`, `tests/test_mask_rollout_batch_w42_51.py`, `docs/architecture/uix/mask-rollout-batch-w42-51.md`, `docs/agent-ops/slices/UIX-ROLLOUT-BATCH-019.yaml`
+**Doku:** [`mask-rollout-batch-w42-51.md`](../architecture/uix/mask-rollout-batch-w42-51.md), [`mask-generator-rollout-template.md`](../architecture/uix/mask-generator-rollout-template.md) (Reihenfolge Waves 42–51)
+**Abnahme:** pytest `test_mask_rollout_batch_w42_51.py` 24/24 gruen; Vitest `mask-rollout-route.test.tsx`; Flag `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS=true` + Route `/mask-rollout/{screenId}/{entityId}`.
+**Offene Grenzen (bewusst):** Generic Tab-Spalten; Mutationen/Legacy-Detail-Routes; naechster Schritt = UniversalMaskRuntime (020–024).
 
 ## UIX-MASK-AB-BENCH-018 — A/B Render Benchmark (Legacy vs. Pilot)
 
 **Von:** Cursor
 **Owner:** offen
-**Stand:** geparkt 2026-06-28 — wartet auf stabile Frontend-Baseline (428-Fehler-Fix durch Claude Code).
+**Stand:** geparkt 2026-06-28 — Frontend-Baseline nach ESLint-Wave 3 (`d22193fa8`) stabiler; Reaktivierung moeglich sobald Sales/Kontrakt-Pilot-Selektoren final sind.
 **Ziel:** Messbarer Proof-of-Concept: Shell-Ready-Zeit, initiale API-Bytes, DOM-Zeilen Legacy vs. RenderPlan-Pilot (Sales + Kontrakt).
 **Dateibesitz:** `packages/frontend-web/tests/e2e/mask-render-ab-benchmark.spec.ts`, `tests/e2e/helpers/mask-*`, `scripts/benchmark_mask_render_ab.ts`, `pages/workflow/mask-benchmark/MaskBenchmarkRoute.tsx`, `docs/architecture/uix/render-performance-baseline.md`
 **Abnahme:** `MASK_AB_BENCHMARK=1 pnpm benchmark:mask-render-ab` gruen; Report in `evidence/perf/`; Baseline-Doku mit gemessenen Zahlen.

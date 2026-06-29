@@ -3,10 +3,20 @@ title: Universal Mask Rollout Batch Waves 42-51
 owner: Cursor
 status: abgeschlossen
 created_at: 2026-06-28
+completed_at: 2026-06-29
+commit: ad4727482
 goal: Ten rollout candidates with screen-summary, registry, generic pilot route.
 acceptance:
   - mask_rollout_catalog with 10 specs
   - mask_rollout_summary_service + central API router
   - screen_definitions and mask_classification generator_ready
   - UniversalMaskRolloutPilotPage + /mask-rollout route
-  - pytest and vitest green
+  - pytest 24/24 and vitest green
+docs:
+  - docs/architecture/uix/mask-rollout-batch-w42-51.md
+  - docs/architecture/uix/mask-generator-rollout-template.md
+follow_up:
+  - UIX-RUNTIME-BINDING-020
+  - UIX-RUNTIME-CORE-021
+  - UIX-RUNTIME-RENDER-022
+  - UIX-RUNTIME-NATIVE-023
