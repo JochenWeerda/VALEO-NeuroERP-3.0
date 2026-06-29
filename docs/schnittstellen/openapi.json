@@ -1452,6 +1452,107 @@
         "title": "ActionResponse",
         "type": "object"
       },
+      "ActionResult": {
+        "description": "Einheitliches ActionResult-Format — spiegelt den Frontend-Typ.",
+        "properties": {
+          "actionKey": {
+            "title": "Actionkey",
+            "type": "string"
+          },
+          "affectedIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affectedids"
+          },
+          "auditEntryId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditentryid"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "proposedChanges": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposedchanges"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "validationErrors": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validationerrors"
+          }
+        },
+        "required": [
+          "actionKey",
+          "mode",
+          "success"
+        ],
+        "title": "ActionResult",
+        "type": "object"
+      },
       "ActionSurface": {
         "enum": [
           "toolbar-primary",
@@ -181253,6 +181354,87 @@
           "360",
           "crm",
           "customers"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/actions/create_activity": {
+      "post": {
+        "description": "ActionRuntime-Endpoint für 'create_activity'.\n\nUnterstützt _mode: execute | dryRun | validate | propose.\n- validate / dryRun: validiert Payload, schreibt nichts.\n- propose: gibt vorausgefüllten Payload-Vorschlag zurück.\n- execute: legt Aktivität an, schreibt Audit-Log-Eintrag.",
+        "operationId": "create_activity_action_api_v1_crm_customers__customer_id__actions_create_activity_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "CRM-Aktivität anlegen (ActionRuntime)",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "actions"
         ]
       }
     },
