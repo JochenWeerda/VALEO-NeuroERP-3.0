@@ -124,3 +124,66 @@ def test_explicit_agent_contract_overrides_generated():
 def test_primary_entity_derived_from_screen_id():
     contract = _generate_agent_contract(MINIMAL_SCREEN)
     assert contract["primaryEntity"] == "customer-360"
+
+
+# ─── Readiness gate tests ────────────────────────────────────────────────────
+
+from app.api.v1.endpoints.mask_screen_definition import _check_readiness  # noqa: E402
+
+READY_SCREEN = {
+    "schemaVersion": 1,
+    "id": "crm/customer-360",
+    "domain": "crm",
+    "mode": "detail",
+    "title": "Kundenstamm",
+    "dataSources": [{"key": "entity", "endpoint": "/api/v1/crm/customers/{entity_id}"}],
+    "tabs": [
+        {
+            "key": "auftraege",
+            "label": "Auftraege",
+            "tables": [
+                {
+                    "key": "recent_orders",
+                    "label": "Auftraege",
+                    "columns": [
+                        {"key": "order_nr", "label": "Auftrag", "sortable": True},
+                        {"key": "status", "label": "Status", "filterable": True},
+                    ],
+                }
+            ],
+        }
+    ],
+}
+
+
+@pytest.mark.unit
+def test_readiness_all_gates_green():
+    report = _check_readiness(READY_SCREEN)
+    assert report["generatorReady"] is True
+    assert report["errors"] == []
+
+
+@pytest.mark.unit
+def test_readiness_fails_non_temporary():
+    screen = {**READY_SCREEN, "adapter": {"type": "maskConfig", "temporary": True}}
+    report = _check_readiness(screen)
+    assert report["generatorReady"] is False
+    assert any("non_temporary" in e for e in report["errors"])
+
+
+@pytest.mark.unit
+def test_readiness_fails_missing_datasources():
+    screen = {k: v for k, v in READY_SCREEN.items() if k != "dataSources"}
+    report = _check_readiness(screen)
+    assert report["generatorReady"] is False
+    assert any("data_sources" in e for e in report["errors"])
+
+
+@pytest.mark.unit
+def test_readiness_skips_table_gates_when_no_tables():
+    screen = {k: v for k, v in READY_SCREEN.items() if k not in ("dataSources", "tabs")}
+    report = _check_readiness(screen)
+    sort_gate = next(g for g in report["gates"] if g["gate"] == "sort_whitelist")
+    filter_gate = next(g for g in report["gates"] if g["gate"] == "filter_columns")
+    assert sort_gate["passed"] is True
+    assert filter_gate["passed"] is True

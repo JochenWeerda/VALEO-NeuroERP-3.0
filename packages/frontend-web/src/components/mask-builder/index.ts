@@ -31,3 +31,6 @@ export { useWorkflowState } from './runtime/useWorkflowState'
 // Phase 029 — AgentMaskContract
 export { generateAgentMaskContract } from './runtime/generateAgentMaskContract'
 export { useAgentMaskContract, useLocalAgentMaskContract } from './runtime/useAgentMaskContract'
+// Phase 030 — Generator Readiness Gates
+export { checkGeneratorReadiness } from './runtime/generatorReadiness'
+export type { GeneratorReadinessReport, GateResult, ReadinessGate } from './runtime/generatorReadiness'
