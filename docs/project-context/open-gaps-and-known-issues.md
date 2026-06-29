@@ -66,6 +66,14 @@ Status: abgeschlossen — `scripts/check_mask_performance_contract.ts` im Qualit
 
 Status: abgeschlossen — SchemaCompiler, LRU-Cache, useRenderPlan, ADR-011 + render-plan-architecture.md.
 
+## UIX-ROLLOUT-BATCH-019 — Rollout Batch Waves 42–51 (2026-06-29)
+
+Status: abgeschlossen — zehn Rollout-Kandidaten mit zentralem `/api/v1/mask-rollouts/...` screen-summary; Registry + Generic Pilot Route (`ad4727482`).
+
+- Geliefert: `mask_rollout_catalog`, `mask_rollout_summary_service`, pytest 24/24, Doku `mask-rollout-batch-w42-51.md`.
+- Grenzen: Adapter-Parität (Felder aus MaskConfig); generische Tab-Spalten; keine Detail-Route-Switches pro Legacy-Seite.
+- **Naechster Architekturschritt:** UniversalMaskRuntime (`UIX-RUNTIME-020`…`024`) — DataBindingPlan, Lookup-/Table-Adapter, native CRM-Schema.
+
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 
 Status: abgeschlossen — Lazy Tabs `lieferung` (Lieferscheinliste) und `dokumente` (Rechnungsbelege) via tab API.
