@@ -407,11 +407,697 @@ def build_supplier_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_crm_opportunity_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer crm/opportunity (UIX-039)."""
+    return {
+        "schemaVersion": 1,
+        "id": "crm/opportunity",
+        "domain": "crm",
+        "mode": "detail",
+        "title": "Opportunity",
+        "subtitle": "CRM Verkaufschance",
+        "adapter": {
+            "type": "native",
+            "sourceId": "crm/opportunity",
+            "temporary": False,
+        },
+        "summaryEndpoint": "/api/v1/crm/opportunities/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/crm/opportunities/{entity_id}"},
+            {"key": "aktivitaeten", "endpoint": "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
+            {"key": "angebote", "endpoint": "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/angebote", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf",
+                "label": "Stammdaten",
+                "lazy": False,
+                "keepAlive": True,
+                "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "opportunity_nr", "label": "Opportunity-Nr.", "type": "text", "readOnly": True},
+                    {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                    {"key": "kunde", "label": "Kunde", "type": "text"},
+                    {"key": "verantwortlich", "label": "Verantwortlich", "type": "text"},
+                    {"key": "phase", "label": "Phase", "type": "text"},
+                    {"key": "wert", "label": "Wert", "type": "currency"},
+                    {"key": "wahrscheinlichkeit", "label": "Wahrscheinlichkeit %", "type": "number"},
+                    {"key": "abschluss_datum", "label": "Abschlussdatum", "type": "date"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "aktivitaeten",
+                "label": "Aktivitaeten",
+                "lazy": True,
+                "keepAlive": False,
+                "tables": [{
+                    "key": "aktivitaeten",
+                    "label": "Aktivitaeten",
+                    "dataSourceKey": "aktivitaeten",
+                    "serverPagination": True,
+                    "pageSize": 25,
+                    "virtualized": True,
+                    "rowHeight": 52,
+                    "columns": [
+                        {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                        {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
+                        {"key": "betreff", "label": "Betreff", "width": 220},
+                        {"key": "verantwortlich", "label": "Verantwortlich", "width": 140},
+                        {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                    ],
+                }],
+            },
+            {
+                "key": "angebote",
+                "label": "Angebote",
+                "lazy": True,
+                "keepAlive": False,
+                "tables": [{
+                    "key": "angebote",
+                    "label": "Angebote",
+                    "dataSourceKey": "angebote",
+                    "serverPagination": True,
+                    "pageSize": 25,
+                    "virtualized": True,
+                    "rowHeight": 52,
+                    "columns": [
+                        {"key": "angebot_nr", "label": "Angebot-Nr.", "width": 130, "sortable": True},
+                        {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                        {"key": "wert", "label": "Wert", "numeric": True, "sortable": True, "renderKind": "currency"},
+                        {"key": "waehrung", "label": "Waehrung", "width": 70},
+                        {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                    ],
+                }],
+            },
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.opportunity.update"},
+            {"key": "create_activity", "label": "Aktivitaet anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.activity.create", "stubReason": "commandEndpoint ueber crm_360 bei Bedarf"},
+        ],
+        "noWorkflowReason": "Opportunity-Phasen werden manuell gesteuert — kein automatischer Prozess-Lebenszyklus erforderlich.",
+        "agentContract": {
+            "businessPurpose": "CRM-Verkaufschance: Phase, Wert, Wahrscheinlichkeit, Aktivitaeten und Angebote in einer Ansicht fuer Vertriebssteuerung.",
+            "examplePrompts": [
+                "Was ist der aktuelle Status und die Wahrscheinlichkeit von Opportunity {entity_id}?",
+                "Zeige alle Aktivitaeten der letzten 30 Tage fuer Opportunity {entity_id}.",
+                "Welche Angebote sind mit Opportunity {entity_id} verknuepft?",
+            ],
+            "sensitiveFields": ["wert", "wahrscheinlichkeit"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='crm-opportunity-360']",
+                "primaryAction": "[data-testid='action-edit']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
+        },
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 48,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "crm",
+        },
+    }
+
+
+def build_lager_article_stock_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer lager/article-stock (UIX-040)."""
+    return {
+        "schemaVersion": 1,
+        "id": "lager/article-stock",
+        "domain": "lager",
+        "mode": "detail",
+        "title": "Artikelbestand",
+        "subtitle": "Lager / Bestandsfuehrung",
+        "adapter": {"type": "native", "sourceId": "lager/article-stock", "temporary": False},
+        "summaryEndpoint": "/api/v1/articles/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/articles/{entity_id}"},
+            {"key": "bestand", "endpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bestand", "pageSize": 25},
+            {"key": "bewegungen", "endpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bewegungen", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Artikelstamm", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "artikel_nr", "label": "Artikel-Nr.", "type": "text", "readOnly": True},
+                    {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                    {"key": "artikel_gruppe", "label": "Artikelgruppe", "type": "text"},
+                    {"key": "einheit", "label": "Basiseinheit", "type": "text"},
+                    {"key": "mindestbestand", "label": "Mindestbestand", "type": "number"},
+                    {"key": "meldebestand", "label": "Meldebestand", "type": "number"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "bestand", "label": "Bestand je Lagerort", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "bestand", "label": "Bestand", "dataSourceKey": "bestand",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "lagerort_nr", "label": "Lagerort-Nr.", "width": 120, "sortable": True},
+                                {"key": "lagerort_bezeichnung", "label": "Bezeichnung", "width": 180},
+                                {"key": "bestand_menge", "label": "Bestand", "numeric": True, "sortable": True, "renderKind": "number"},
+                                {"key": "einheit", "label": "Einheit", "width": 70},
+                                {"key": "reserviert", "label": "Reserviert", "numeric": True, "sortable": True, "renderKind": "number"},
+                                {"key": "mindestbestand", "label": "Mindestbest.", "numeric": True, "renderKind": "number", "filterable": True},
+                            ]}],
+            },
+            {
+                "key": "bewegungen", "label": "Lagerbewegungen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "bewegungen", "label": "Bewegungen", "dataSourceKey": "bewegungen",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
+                                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                                {"key": "einheit", "label": "Einheit", "width": 70},
+                                {"key": "beleg_nr", "label": "Beleg-Nr.", "width": 120},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "lager.artikel.update"},
+        ],
+        "noWorkflowReason": "Artikelstamm ist ein reines Verwaltungsobjekt — kein prozessgesteuerter Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Artikelbestand-Cockpit: Stammdaten, Bestand je Lagerort und Bewegungshistorie fuer Disposition und Einkauf.",
+            "examplePrompts": [
+                "Wie hoch ist der aktuelle Bestand von Artikel {entity_id} je Lagerort?",
+                "Zeige alle Lagerbewegungen von Artikel {entity_id} der letzten 30 Tage.",
+                "Welche Lagerorte haben Bestand unter Mindestbestand fuer Artikel {entity_id}?",
+            ],
+            "sensitiveFields": ["mindestbestand", "meldebestand"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='lager-article-stock']",
+                "primaryAction": "[data-testid='action-edit']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "lager"},
+    }
+
+
+def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer sales/delivery-note (UIX-041)."""
+    return {
+        "schemaVersion": 1,
+        "id": "sales/delivery-note",
+        "domain": "sales",
+        "mode": "detail",
+        "title": "Lieferschein",
+        "subtitle": "Verkauf / Warenausgang",
+        "adapter": {"type": "native", "sourceId": "sales/delivery-note", "temporary": False},
+        "summaryEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/sales/delivery-notes/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/positionen", "pageSize": 50},
+            {"key": "dokumente", "endpoint": "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/dokumente", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Lieferschein-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "ls_nr", "label": "LS-Nr.", "type": "text", "readOnly": True},
+                    {"key": "auftrag_nr", "label": "Auftrag-Nr.", "type": "text", "readOnly": True},
+                    {"key": "kunde", "label": "Kunde", "type": "text"},
+                    {"key": "datum", "label": "Datum", "type": "date"},
+                    {"key": "versandart", "label": "Versandart", "type": "text"},
+                    {"key": "lagerort", "label": "Lagerort", "type": "text"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "pos_nr", "label": "Pos.", "width": 50, "sortable": True},
+                                {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 120},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 200, "filterable": True},
+                                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                                {"key": "einheit", "label": "Einheit", "width": 70},
+                                {"key": "charge", "label": "Charge", "width": 120},
+                            ]}],
+            },
+            {
+                "key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 120, "filterable": True},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                                {"key": "benutzer", "label": "Benutzer", "width": 140},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "drucken", "label": "Lieferschein drucken", "kind": "primary", "dangerLevel": "safe", "permission": "sales.lieferschein.drucken", "stubReason": "PDF-Druck commandEndpoint folgt"},
+        ],
+        "noWorkflowReason": "Lieferschein-Status wird ueber den Verkaufsauftrag gesteuert — kein eigener Workflow-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Lieferschein-Cockpit: Kopfdaten, Positionen und Dokumente fuer Warenausgang und Lieferverfolgung.",
+            "examplePrompts": [
+                "Zeige alle Positionen und Chargen von Lieferschein {entity_id}.",
+                "Welche Dokumente sind mit Lieferschein {entity_id} verknuepft?",
+                "Was ist der aktuelle Status von Lieferschein {entity_id}?",
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='sales-delivery-note']", "primaryAction": "[data-testid='action-drucken']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
+    }
+
+
+def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer einkauf/purchase-order (UIX-041)."""
+    return {
+        "schemaVersion": 1,
+        "id": "einkauf/purchase-order",
+        "domain": "einkauf",
+        "mode": "detail",
+        "title": "Bestellung",
+        "subtitle": "Einkauf / Bestellvorgang",
+        "adapter": {"type": "native", "sourceId": "einkauf/purchase-order", "temporary": False},
+        "summaryEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/einkauf/bestellungen/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/positionen", "pageSize": 50},
+            {"key": "kommunikation", "endpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/kommunikation", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Bestell-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "bestell_nr", "label": "Bestell-Nr.", "type": "text", "readOnly": True},
+                    {"key": "lieferant", "label": "Lieferant", "type": "text"},
+                    {"key": "datum", "label": "Datum", "type": "date"},
+                    {"key": "lieferdatum", "label": "Lieferdatum", "type": "date"},
+                    {"key": "betrag", "label": "Betrag", "type": "currency"},
+                    {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "pos_nr", "label": "Pos.", "width": 50, "sortable": True},
+                                {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 120},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 200, "filterable": True},
+                                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                                {"key": "einheit", "label": "Einheit", "width": 70},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                            ]}],
+            },
+            {
+                "key": "kommunikation", "label": "Kommunikation", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "kommunikation", "label": "Nachrichten", "dataSourceKey": "kommunikation",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
+                                {"key": "betreff", "label": "Betreff", "width": 220},
+                                {"key": "benutzer", "label": "Benutzer", "width": 140},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.bestellung.update"},
+        ],
+        "noWorkflowReason": "Bestellstatus wird im Bestellvorgang manuell gesetzt — kein automatischer Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Einkaufs-Bestellung: Kopfdaten, Positionen und Kommunikation fuer Beschaffungssteuerung.",
+            "examplePrompts": [
+                "Was ist der Status von Bestellung {entity_id} und wann ist der Liefertermin?",
+                "Zeige alle Positionen und bestellten Mengen von Bestellung {entity_id}.",
+            ],
+            "sensitiveFields": ["zahlungsbedingungen", "betrag"],
+            "testSelectors": {"screenRoot": "[data-testid='einkauf-purchase-order']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "einkauf"},
+    }
+
+
+def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer finance/ap-invoice (UIX-041)."""
+    return {
+        "schemaVersion": 1,
+        "id": "finance/ap-invoice",
+        "domain": "finance",
+        "mode": "detail",
+        "title": "Eingangsrechnung",
+        "subtitle": "Finance / Accounts Payable",
+        "adapter": {"type": "native", "sourceId": "finance/ap-invoice", "temporary": False},
+        "summaryEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/finance/ap/invoices/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/positionen", "pageSize": 50},
+            {"key": "freigabe", "endpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/freigabe", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Rechnungs-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "beleg_nr", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
+                    {"key": "kreditor", "label": "Kreditor", "type": "text"},
+                    {"key": "datum", "label": "Rechnungsdatum", "type": "date"},
+                    {"key": "faellig_am", "label": "Faellig am", "type": "date"},
+                    {"key": "brutto", "label": "Brutto", "type": "currency"},
+                    {"key": "mwst", "label": "MwSt.", "type": "currency"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "pos_nr", "label": "Pos.", "width": 50, "sortable": True},
+                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 200, "filterable": True},
+                                {"key": "menge", "label": "Menge", "numeric": True, "renderKind": "number"},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "konto", "label": "Konto", "width": 100},
+                            ]}],
+            },
+            {
+                "key": "freigabe", "label": "Freigabe", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "freigabe", "label": "Freigabe-Historie", "dataSourceKey": "freigabe",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "benutzer", "label": "Benutzer", "width": 160, "sortable": True},
+                                {"key": "aktion", "label": "Aktion", "width": 120, "filterable": True},
+                                {"key": "kommentar", "label": "Kommentar", "width": 240},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "freigeben", "label": "Freigeben", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ap.freigabe", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt in UIX-042"},
+        ],
+        "noWorkflowReason": "Freigabe-Workflow ist tabellenbasiert — explizite Workflow-Deklaration nach vollstaendiger AP-Parity.",
+        "agentContract": {
+            "businessPurpose": "Eingangsrechnung: Kopfdaten, Positionen und Freigabe-Historie fuer AP-Buchhalter und Audit.",
+            "examplePrompts": [
+                "Was ist der Freigabe-Status von Eingangsrechnung {entity_id}?",
+                "Wann ist Eingangsrechnung {entity_id} faellig und wie hoch ist der Bruttobetrag?",
+            ],
+            "sensitiveFields": ["brutto", "mwst", "faellig_am"],
+            "testSelectors": {"screenRoot": "[data-testid='finance-ap-invoice']", "primaryAction": "[data-testid='action-freigeben']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
+    }
+
+
+def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer finance/ar-open-item (UIX-041)."""
+    return {
+        "schemaVersion": 1,
+        "id": "finance/ar-open-item",
+        "domain": "finance",
+        "mode": "detail",
+        "title": "Offener Posten",
+        "subtitle": "Finance / Accounts Receivable",
+        "adapter": {"type": "native", "sourceId": "finance/ar-open-item", "temporary": False},
+        "summaryEndpoint": "/api/v1/finance/open-items/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/finance/open-items/{entity_id}"},
+            {"key": "ausgleich", "endpoint": "/api/v1/mask-rollouts/finance/ar-open-item/{entity_id}/tabs/ausgleich", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "OP-Daten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "beleg_nr", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
+                    {"key": "debitor", "label": "Debitor", "type": "text"},
+                    {"key": "datum", "label": "Belegdatum", "type": "date"},
+                    {"key": "faellig_am", "label": "Faellig am", "type": "date"},
+                    {"key": "brutto", "label": "Brutto", "type": "currency"},
+                    {"key": "offen", "label": "Offen", "type": "currency"},
+                    {"key": "skonto", "label": "Skonto", "type": "currency"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "ausgleich", "label": "Ausgleich / Zahlungen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "ausgleich", "label": "Ausgleich", "dataSourceKey": "ausgleich",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "zahlungsart", "label": "Zahlungsart", "width": 120, "filterable": True},
+                                {"key": "bank_ref", "label": "Bank-Referenz", "width": 160},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "mahnen", "label": "Mahnung erstellen", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ar.mahnung", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt"},
+        ],
+        "noWorkflowReason": "OP-Status wird durch Zahlungseingaenge automatisch gesetzt — kein separater Workflow noetig.",
+        "agentContract": {
+            "businessPurpose": "Offener Posten: Forderungs-Cockpit fuer Debitorenbuchhaltung mit Faelligkeiten, Skonto und Ausgleichshistorie.",
+            "examplePrompts": [
+                "Wann ist OP {entity_id} faellig und wie hoch ist der offene Betrag?",
+                "Zeige alle bisherigen Zahlungseingaenge fuer OP {entity_id}.",
+            ],
+            "sensitiveFields": ["brutto", "offen", "skonto", "faellig_am"],
+            "testSelectors": {"screenRoot": "[data-testid='finance-ar-open-item']", "primaryAction": "[data-testid='action-mahnen']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
+    }
+
+
+def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer lager/stock-movement (UIX-041)."""
+    return {
+        "schemaVersion": 1,
+        "id": "lager/stock-movement",
+        "domain": "lager",
+        "mode": "detail",
+        "title": "Lagerbewegung",
+        "subtitle": "Lager / Warenbewegung",
+        "adapter": {"type": "native", "sourceId": "lager/stock-movement", "temporary": False},
+        "summaryEndpoint": "/api/v1/inventory/stock-movements/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/inventory/stock-movements/{entity_id}"},
+            {"key": "details", "endpoint": "/api/v1/mask-rollouts/lager/stock-movement/{entity_id}/tabs/details", "pageSize": 50},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Bewegungs-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "bewegungs_nr", "label": "Bewegungs-Nr.", "type": "text", "readOnly": True},
+                    {"key": "typ", "label": "Typ", "type": "text"},
+                    {"key": "datum", "label": "Datum", "type": "date"},
+                    {"key": "beleg_nr", "label": "Beleg-Nr.", "type": "text"},
+                    {"key": "lagerort", "label": "Lagerort", "type": "text"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "details", "label": "Positionen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "details", "label": "Positionen", "dataSourceKey": "details",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
+                                {"key": "beleg_nr", "label": "Beleg-Nr.", "width": 120},
+                                {"key": "lagerort", "label": "Lagerort", "width": 140, "sortable": True},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "stubReason": "commandEndpoint folgt"},
+        ],
+        "noWorkflowReason": "Lagerbewegungen sind Buchungsbelege ohne eigenstaendigen Workflow — Storno ist die einzige Mutation.",
+        "agentContract": {
+            "businessPurpose": "Lagerbewegung: Einzelne Warenbewegung mit Belegpositionen fuer Lager-Audit und Traceability.",
+            "examplePrompts": [
+                "Was ist der Status und Typ von Lagerbewegung {entity_id}?",
+                "Zeige alle Positionen und betroffenen Lagerorte von Bewegung {entity_id}.",
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='lager-stock-movement']", "primaryAction": "[data-testid='action-stornieren']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "lager"},
+    }
+
+
+def build_agrar_harvest_settlement_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer agrar/harvest-settlement (UIX-041).
+
+    Hinweis: Ernte-Abrechnung ist fachlich komplex — Readiness intentional
+    ohne commandEndpoints fuer Zahlungs-Aktionen (Risiko-Gate).
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/harvest-settlement",
+        "domain": "agrar",
+        "mode": "detail",
+        "title": "Ernte-Abrechnung",
+        "subtitle": "Agrar / Ernteannahme-Abrechnung",
+        "adapter": {"type": "native", "sourceId": "agrar/harvest-settlement", "temporary": False},
+        "summaryEndpoint": "/api/v1/agrar/settlements/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/agrar/settlements/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/positionen", "pageSize": 50},
+            {"key": "abzuege", "endpoint": "/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/abzuege", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Abrechnungs-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "abrechnungs_nr", "label": "Abrechnungs-Nr.", "type": "text", "readOnly": True},
+                    {"key": "erzeuger", "label": "Erzeuger", "type": "text"},
+                    {"key": "ernte_jahr", "label": "Erntejahr", "type": "text"},
+                    {"key": "sorte", "label": "Hauptsorte", "type": "text"},
+                    {"key": "gesamtmenge", "label": "Gesamtmenge (t)", "type": "number"},
+                    {"key": "gesamtbetrag", "label": "Gesamtbetrag", "type": "currency"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "positionen", "label": "Lieferschein-Positionen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "positionen", "label": "Lieferscheine", "dataSourceKey": "positionen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "lieferschein_nr", "label": "LS-Nr.", "width": 130, "sortable": True},
+                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "sorte", "label": "Sorte", "width": 140, "filterable": True},
+                                {"key": "feuchtigkeit", "label": "Feuchte %", "numeric": True, "renderKind": "number"},
+                                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                            ]}],
+            },
+            {
+                "key": "abzuege", "label": "Qualitaets-Abzuege", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "abzuege", "label": "Abzuege", "dataSourceKey": "abzuege",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "abzug_art", "label": "Abzug-Art", "width": 140, "filterable": True},
+                                {"key": "beschreibung", "label": "Beschreibung", "width": 200},
+                                {"key": "menge", "label": "Menge", "numeric": True, "renderKind": "number"},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {"key": "drucken", "label": "Abrechnung drucken", "kind": "primary", "dangerLevel": "safe", "permission": "agrar.abrechnung.drucken", "stubReason": "PDF-Druck commandEndpoint folgt"},
+        ],
+        "noWorkflowReason": "Ernte-Abrechnung wird manuell freigegeben — Auszahlung erfolgt ueber separaten Finance-Zahlungslauf (finance/payment-run).",
+        "agentContract": {
+            "businessPurpose": "Ernte-Abrechnung: Erzeuger-Abrechnung mit Lieferschein-Positionen, Qualitaets-Abzuegen und Gesamtbetrag fuer Agrar-Buchhalter.",
+            "examplePrompts": [
+                "Was ist der Gesamtbetrag und Status der Ernte-Abrechnung {entity_id}?",
+                "Zeige alle Lieferschein-Positionen und Qualitaets-Abzuege von Abrechnung {entity_id}.",
+            ],
+            "sensitiveFields": ["gesamtbetrag"],
+            "testSelectors": {"screenRoot": "[data-testid='agrar-harvest-settlement']", "primaryAction": "[data-testid='action-drucken']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 52, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar"},
+    }
+
+
+def build_finance_payment_run_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer finance/payment-run (UIX-041).
+
+    Hoechstes Risiko: commandEndpoints fuer Zahlungs-Aktionen intentional
+    gestubt — humanApprovalRequired=True erzwungen.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "finance/payment-run",
+        "domain": "finance",
+        "mode": "detail",
+        "title": "Zahlungslauf",
+        "subtitle": "Finance / Massenzahlung",
+        "adapter": {"type": "native", "sourceId": "finance/payment-run", "temporary": False},
+        "summaryEndpoint": "/api/v1/finance/payment-runs/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/finance/payment-runs/{entity_id}"},
+            {"key": "zahlungen", "endpoint": "/api/v1/mask-rollouts/finance/payment-run/{entity_id}/tabs/zahlungen", "pageSize": 50},
+        ],
+        "tabs": [
+            {
+                "key": "kopf", "label": "Zahlungslauf-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "lauf_nr", "label": "Lauf-Nr.", "type": "text", "readOnly": True},
+                    {"key": "datum", "label": "Ausfuehrungsdatum", "type": "date"},
+                    {"key": "bank", "label": "Bank", "type": "text"},
+                    {"key": "gesamtbetrag", "label": "Gesamtbetrag", "type": "currency"},
+                    {"key": "anzahl_zahlungen", "label": "Anzahl Zahlungen", "type": "number"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "zahlungen", "label": "Einzelzahlungen", "lazy": True, "keepAlive": False,
+                "tables": [{"key": "zahlungen", "label": "Zahlungen", "dataSourceKey": "zahlungen",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "kreditoren_nr", "label": "Kreditor-Nr.", "width": 120, "sortable": True},
+                                {"key": "name", "label": "Name", "width": 200},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "bank", "label": "Bank", "width": 140},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {
+                "key": "freigeben",
+                "label": "Zahlungslauf freigeben",
+                "kind": "primary",
+                "dangerLevel": "critical",
+                "permission": "finance.payment_run.freigabe",
+                "requiresConfirmation": True,
+                "humanApprovalRequired": True,
+                "auditReasonRequired": True,
+                "forbiddenForAgents": True,
+                "stubReason": "commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe",
+            },
+        ],
+        "noWorkflowReason": "Zahlungslauf ist Batch-Vorgang — Freigabe-Gate separat; kein laufender Prozess nach Ausfuehrung.",
+        "agentContract": {
+            "businessPurpose": "Zahlungslauf-Cockpit (read-only fuer Agenten): Laufdetails und Einzelzahlungen fuer Audit und Reconciliation. Freigabe ist Agent-gesperrt.",
+            "examplePrompts": [
+                "Was ist der Status von Zahlungslauf {entity_id} und wie hoch ist der Gesamtbetrag?",
+                "Zeige alle Einzelzahlungen von Zahlungslauf {entity_id} mit Status 'fehler'.",
+            ],
+            "sensitiveFields": ["gesamtbetrag", "bank"],
+            "testSelectors": {"screenRoot": "[data-testid='finance-payment-run']", "primaryAction": "[data-testid='action-freigeben']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
     "einkauf/supplier": build_supplier_screen_definition,
+    "crm/opportunity": build_crm_opportunity_screen_definition,
+    "lager/article-stock": build_lager_article_stock_screen_definition,
+    "sales/delivery-note": build_sales_delivery_note_screen_definition,
+    "einkauf/purchase-order": build_einkauf_purchase_order_screen_definition,
+    "finance/ap-invoice": build_finance_ap_invoice_screen_definition,
+    "finance/ar-open-item": build_finance_ar_open_item_screen_definition,
+    "lager/stock-movement": build_lager_stock_movement_screen_definition,
+    "agrar/harvest-settlement": build_agrar_harvest_settlement_screen_definition,
+    "finance/payment-run": build_finance_payment_run_screen_definition,
 }
 
 
@@ -788,6 +1474,9 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
 
 
 for _spec in ROLLOUT_WAVES_42_51:
+    if _spec.screen_id in _SCREEN_DEFINITIONS:
+        continue
+
     def _make_builder(_s: Any = _spec) -> Any:
         def _builder() -> dict[str, Any]:
             return _build_rollout_screen_definition_from_spec(_s)
