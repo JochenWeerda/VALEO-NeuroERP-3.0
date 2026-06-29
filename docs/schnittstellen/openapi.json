@@ -256958,7 +256958,7 @@
     },
     "/api/v1/masks/{mask_id}/readiness": {
       "get": {
-        "description": "Prueft alle Generator-Readiness-Gates fuer eine Maske.\n\nGibt generatorReady=true nur wenn alle 6 Gates gruen sind:\nschema_valid, sort_whitelist, filter_columns, agent_contract, data_sources, non_temporary.",
+        "description": "Prueft alle Generator-Readiness-Gates fuer eine Maske.\n\nMandatory gates (blockieren generatorReady):\nschema_valid, non_temporary, data_sources, table_data_source_bound,\ntable_columns_complete, actions_classified.\n\nAdvisory gates (nur Warnungen, kein Block):\nsort_whitelist, filter_columns, agent_contract, workflow_declared,\nstable_test_selectors, table_query_contract.",
         "operationId": "get_mask_readiness_api_v1_masks__mask_id__readiness_get",
         "parameters": [
           {
