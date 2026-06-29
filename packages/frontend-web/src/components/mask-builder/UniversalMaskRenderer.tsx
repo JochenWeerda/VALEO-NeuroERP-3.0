@@ -1,6 +1,7 @@
 import { LazyTabs } from '@/components/ui/LazyTabs'
 import type { ScreenDefinition, ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
+import type { LookupBinding, TableQueryState } from './runtime/types'
 import {
   ActionBarRenderer,
   FastFormRenderer,
@@ -22,6 +23,11 @@ interface UniversalMaskRendererProps {
   allowedPermissions?: string[]
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
+  // Runtime query state (from useUniversalMaskRuntime)
+  tableQueryStates?: Record<string, TableQueryState>
+  tableTotals?: Record<string, number>
+  onTableQueryChange?: (_tableKey: string, _patch: Partial<TableQueryState>) => void
+  lookupBindings?: Record<string, LookupBinding>
 }
 
 function renderLegacyFields(
@@ -64,12 +70,18 @@ function RenderFromPlan({
   plan,
   payload,
   tables,
+  tableQueryStates,
+  tableTotals,
+  onTableQueryChange,
   onTabChange,
   onAction,
 }: {
   plan: RenderPlan
   payload: Record<string, unknown>
   tables: Record<string, Record<string, unknown>[]>
+  tableQueryStates?: Record<string, TableQueryState>
+  tableTotals?: Record<string, number>
+  onTableQueryChange?: (_tableKey: string, _patch: Partial<TableQueryState>) => void
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
 }): JSX.Element {
@@ -111,7 +123,16 @@ function RenderFromPlan({
         const tablePlan = plan.tablesByKey[tableKey]
         if (!tablePlan) return null
         return (
-          <FastTableRenderer key={tableKey} table={tablePlan} rows={tables[tableKey] ?? []} />
+          <FastTableRenderer
+            key={tableKey}
+            table={tablePlan}
+            rows={tables[tableKey] ?? []}
+            page={tableQueryStates?.[tableKey]?.page}
+            sort={tableQueryStates?.[tableKey]?.sort}
+            sortDir={tableQueryStates?.[tableKey]?.sortDir}
+            total={tableTotals?.[tableKey]}
+            onQueryChange={onTableQueryChange ? (patch) => onTableQueryChange(tableKey, patch) : undefined}
+          />
         )
       })}
 
@@ -124,7 +145,15 @@ function RenderFromPlan({
             lazy: tab.lazy,
             keepAlive: tab.keepAlive,
             content: () => (
-              <FastTabRenderer plan={plan} tabKey={tab.key} payload={payload} tables={tables} />
+              <FastTabRenderer
+                plan={plan}
+                tabKey={tab.key}
+                payload={payload}
+                tables={tables}
+                tableQueryStates={tableQueryStates}
+                tableTotals={tableTotals}
+                onQueryChange={onTableQueryChange}
+              />
             ),
           }))}
         />
@@ -230,6 +259,9 @@ export function UniversalMaskRenderer({
   allowedPermissions = [],
   onTabChange,
   onAction,
+  tableQueryStates,
+  tableTotals,
+  onTableQueryChange,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
@@ -239,6 +271,9 @@ export function UniversalMaskRenderer({
         plan={plan}
         payload={payload}
         tables={tables}
+        tableQueryStates={tableQueryStates}
+        tableTotals={tableTotals}
+        onTableQueryChange={onTableQueryChange}
         onTabChange={onTabChange}
         onAction={onAction}
       />
