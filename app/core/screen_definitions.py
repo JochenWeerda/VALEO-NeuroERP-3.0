@@ -52,7 +52,7 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                             "columns": [
                                 {"key": "auftrag_nr", "label": "Auftrag-Nr.", "width": 130, "sortable": True},
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                                 {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                             ]}],
             },
@@ -62,10 +62,10 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Typ", "width": 100},
+                                {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
                                 {"key": "betreff", "label": "Betreff", "width": 220},
                                 {"key": "verantwortlich", "label": "Verantwortlich", "width": 140},
-                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                             ]}],
             },
             {
