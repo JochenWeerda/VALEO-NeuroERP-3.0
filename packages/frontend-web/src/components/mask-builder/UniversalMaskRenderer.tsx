@@ -84,6 +84,7 @@ function RenderFromPlan({
   onTabChange,
   onAction,
   formState,
+  workflowState,
 }: {
   plan: RenderPlan
   payload: Record<string, unknown>

@@ -25,6 +25,26 @@ vi.mock('@/features/crm-masks/use-customer-tab-data', () => ({
   mapTabDataToTables: vi.fn((response) => (response ? { [response.table_key]: response.items } : {})),
 }))
 
+// Mock the runtime hook to avoid QueryClientProvider requirement in unit tests
+vi.mock('@/components/mask-builder', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/components/mask-builder')>()
+  return {
+    ...actual,
+    useUniversalMaskRuntime: vi.fn(() => ({
+      plan: undefined,
+      binding: undefined,
+      entityData: {},
+      tableRows: {},
+      tableTotals: {},
+      tableQueryStates: {},
+      setTableQuery: vi.fn(),
+      lookupBindings: {},
+      isEntityLoading: false,
+      entityError: null,
+    })),
+  }
+})
+
 const mockedUseCustomer = vi.mocked(useCustomer)
 const mockedUseCustomerScreenSummary = vi.mocked(useCustomerScreenSummary)
 const mockedUseCustomerTabData = vi.mocked(useCustomerTabData)

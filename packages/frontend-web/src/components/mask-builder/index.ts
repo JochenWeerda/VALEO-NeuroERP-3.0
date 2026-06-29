@@ -28,3 +28,6 @@ export { useActionRuntime, useHumanActionDispatch, useAgentActionDispatch } from
 export type { WorkflowState, WorkflowStatusInfo, NextAllowedAction, BlockingReason, AuditTrailEntry, PolicyHint } from './runtime/WorkflowRuntime'
 export { buildWorkflowState } from './runtime/WorkflowRuntime'
 export { useWorkflowState } from './runtime/useWorkflowState'
+// Phase 029 — AgentMaskContract
+export { generateAgentMaskContract } from './runtime/generateAgentMaskContract'
+export { useAgentMaskContract, useLocalAgentMaskContract } from './runtime/useAgentMaskContract'
