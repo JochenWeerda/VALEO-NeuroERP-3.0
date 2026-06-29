@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-STABILIZATION-031-034 — Runtime-Stabilisierung und Produktionsnachweis
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-29 — Claim fuer Doku-Konsolidierung, CI-/Gate-Nachweis, strengere Readiness-Gates und CRM-360-Native-Paritaet. Bestehende uncommitted Code-/Doku-Aenderungen im Worktree werden als fremde Vorarbeit behandelt und nicht blind ueberschrieben.
+**Ziel:** Nach UIX-030 keine neue Rollout-Welle starten, sondern Plattformstand gegen Doku, Tests, Readiness-Gates und CRM-360-Paritaet absichern.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UIX-STABILIZATION-031-034.yaml`, Readiness-Code/-Tests in `app/core/`, `app/api/v1/endpoints/`, `packages/frontend-web/src/components/mask-builder/`, `packages/frontend-web/src/features/mask-builder/`, CRM-Paritaetsdoku unter `docs/adr/` oder `docs/architecture/domains/crm/`.
+**Abnahme:** UIX-022...030 als abgeschlossen dokumentiert; lokale Frontend- und Backend-Gates ausgefuehrt oder mit blockerfreiem Grund dokumentiert; neue Readiness-Gates getestet; CRM-360-Paritaetsmatrix angelegt und offene Restarbeit klar markiert; keine weiteren Masken auf `generator_ready` gesetzt.
+**Risiken:** Worktree enthaelt beim Claim bereits fremde uncommitted Aenderungen in UI-, Routing- und ScreenDefinition-Dateien; Integration erfolgt additiv und konfliktarm.
+
 ## UIX-RUNTIME-ROLLOUT-021 — Rollout-Kandidaten auf useUniversalMaskRuntime migrieren
 
 **Von:** Claude Code
