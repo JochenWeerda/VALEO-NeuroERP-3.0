@@ -2,10 +2,10 @@
 title: Einstieg – Anmeldung, Mandant, Navigation
 type: tutorial
 audience: [endnutzer]
-owner: Cursor
+owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-06-29
+version: 3.1.0
 ---
 
 # Einstieg – Anmeldung, Mandant, Navigation
@@ -48,6 +48,56 @@ Wenn Sie Zugriff auf mehrere Mandanten haben:
 Häufige Aktionen sind über Funktionstasten erreichbar (z. B. Speichern, Neu,
 Folgebeleg). Die belegspezifischen Shortcuts stehen jeweils in der Fußzeile der
 Maske.
+
+## Gemeinsame Masken-Funktionen (ab Version 3.1)
+
+Diese Funktionen stehen in allen modernen Detailmasken (Universal Mask) zur Verfügung:
+
+### Sortieren und Filtern in Tabellen
+
+In Tab-Tabellen (z. B. Aufträge, Aktivitäten, Positionen):
+
+- **Sortieren:** Klick auf einen Spalten-Header sortiert aufsteigend, zweiter Klick
+  absteigend. Ein kleiner Pfeil zeigt die aktive Richtung an.
+- **Filter-Chips:** Oberhalb der Tabelle erscheinen vordefinierte Filter (z. B. nach
+  Status oder Typ). Aktive Filter sind farbig hervorgehoben; × entfernt den Filter.
+- **Freitextsuche:** Das Suchfeld oben in der Tabelle filtert alle sichtbaren Spalten.
+- **Blättern:** Die Seitennavigation am Tabellenrand lädt die Daten serverseitig —
+  auch bei sehr vielen Datensätzen bleibt die Anzeige flüssig.
+
+### Bearbeiten mit Sticky Submit Bar
+
+Beim Bearbeiten von Stammdaten-Feldern erscheint am unteren Bildschirmrand eine
+**klebrige Aktionsleiste**:
+
+| Element | Bedeutung |
+|---------|-----------|
+| „Ungespeicherte Änderungen" | Es gibt nicht gespeicherte Felder |
+| **Zurücksetzen** | Alle Änderungen verwerfen (wird aktiv sobald etwas geändert wurde) |
+| **Speichern** | Änderungen sichern (deaktiviert bei leeren Pflichtfeldern oder laufendem Speichern) |
+| „Speichern…" | Speichervorgang läuft — Button deaktiviert, Doppelklick-Schutz aktiv |
+
+Pflichtfelder werden beim Verlassen mit einem roten Hinweistext markiert.
+
+### Workflow-Panel
+
+In Masken mit Prozessstatus (z. B. Aufträge, Kunden-Cockpit) erscheint ein
+**Workflow-Panel** unterhalb der Aktionsleiste:
+
+- **Grün:** Objekt ist im Normalzustand, alle Aktionen erlaubt.
+- **Gelb:** Hinweis oder weiche Sperre; Aktionen möglich, aber Klärung empfohlen.
+- **Rot:** Harte Sperre; Aktionen sind blockiert bis der genannte Klärungsschritt
+  durchgeführt wurde. Details aufklappen für Sperrgrund und Nächste Schritte.
+
+### Allgemeine Fehler-Tabelle
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Speichern-Button grau | Pflichtfeld leer oder Speichervorgang läuft | Fehlende Felder ausfüllen oder kurz warten |
+| Tabelle lädt nicht | Fehler beim API-Aufruf oder kein Netz | Seite neu laden; Administrator informieren |
+| Filter zeigt keine Ergebnisse | Kombination zu restriktiv | Einen oder mehrere Filter entfernen |
+| Workflow-Panel rot | Aktive Sperre am Objekt | Sperrgrund lesen, Klärungsschritte ausführen |
+| Aktion ausgegraut | Berechtigung fehlt oder falscher Status | Vorbeleg freigeben oder Berechtigung klären |
 
 ## Maskenregister
 
