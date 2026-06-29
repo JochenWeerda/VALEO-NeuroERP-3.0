@@ -69,11 +69,24 @@ export interface RenderFieldPlan {
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
+export type RenderColumnKind =
+  | 'text'
+  | 'number'
+  | 'currency'
+  | 'date'
+  | 'datetime'
+  | 'status'
+  | 'boolean'
+
 export interface RenderTableColumnPlan {
   key: string
   label: string
   width?: number
   numeric?: boolean
+  sortable?: boolean
+  filterable?: boolean
+  renderKind?: RenderColumnKind
+  defaultSort?: 'asc' | 'desc'
 }
 
 export interface RenderTablePlan {

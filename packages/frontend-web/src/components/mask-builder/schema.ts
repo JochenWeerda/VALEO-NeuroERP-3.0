@@ -53,11 +53,24 @@ export interface ScreenFieldDefinition {
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
+export type ScreenColumnRenderKind =
+  | 'text'
+  | 'number'
+  | 'currency'
+  | 'date'
+  | 'datetime'
+  | 'status'
+  | 'boolean'
+
 export interface ScreenTableColumn {
   key: string
   label: string
   width?: number
   numeric?: boolean
+  sortable?: boolean
+  filterable?: boolean
+  renderKind?: ScreenColumnRenderKind
+  defaultSort?: 'asc' | 'desc'
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
 }
 
