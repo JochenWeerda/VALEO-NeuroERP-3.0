@@ -120,8 +120,15 @@ async def get_agent_mask_contract(
     return _generate_agent_contract(definition)
 
 
+_TRIVIAL_KEYS = frozenset({"id", "pk", "uuid", "key", "name", "bezeichnung"})
+_GENERIC_KEY_PATTERN = re.compile(r"^(col|column|field|item)\d+$", re.IGNORECASE)
+
+
 def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
-    """Checks all generator readiness gates for a ScreenDefinition dict."""
+    """Checks all generator readiness gates (mandatory + advisory) for a ScreenDefinition dict.
+
+    Phases 030+033 — 6 mandatory gates (block generatorReady) + 6 advisory gates (warnings only).
+    """
 
     def collect_tables(d: dict[str, Any]) -> list[dict[str, Any]]:
         tables: list[dict[str, Any]] = list(d.get("tables") or [])
@@ -130,59 +137,107 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
         return tables
 
     all_tables = collect_tables(definition)
-    gates = []
+    server_tables = [t for t in all_tables if t.get("serverPagination")]
+    data_source_keys = {ds["key"] for ds in (definition.get("dataSources") or []) if ds.get("key")}
+    mandatory: list[dict[str, Any]] = []
+    advisory: list[dict[str, Any]] = []
 
-    # Gate 1: schema validation
+    def m(gate: str, passed: bool, detail: str) -> None:
+        mandatory.append({"gate": gate, "severity": "mandatory", "passed": passed, "detail": detail})
+
+    def a(gate: str, passed: bool, detail: str) -> None:
+        advisory.append({"gate": gate, "severity": "advisory", "passed": passed, "detail": detail})
+
+    # ── Mandatory ────────────────────────────────────────────────────────────
+
+    # 1. schema_valid
     schema_errors: list[str] = []
-    for req_field in ("id", "domain", "mode", "title"):
-        if not definition.get(req_field):
-            schema_errors.append(f"{req_field} is required")
+    for req in ("id", "domain", "mode", "title"):
+        if not definition.get(req):
+            schema_errors.append(f"{req} is required")
     if definition.get("schemaVersion") != 1:
         schema_errors.append("schemaVersion must be 1")
-    gates.append({"gate": "schema_valid", "passed": len(schema_errors) == 0, "detail": "; ".join(schema_errors) or "OK"})
+    m("schema_valid", len(schema_errors) == 0, "; ".join(schema_errors) or "OK")
 
-    # Gate 2: sort whitelist
-    has_sortable = any(col.get("sortable") for t in all_tables for col in (t.get("columns") or []))
-    gates.append({
-        "gate": "sort_whitelist",
-        "passed": has_sortable or not all_tables,
-        "detail": "OK" if has_sortable or not all_tables else "no sortable columns defined in any table",
-    })
-
-    # Gate 3: filterable columns
-    has_filterable = any(col.get("filterable") for t in all_tables for col in (t.get("columns") or []))
-    gates.append({
-        "gate": "filter_columns",
-        "passed": has_filterable or not all_tables,
-        "detail": "OK" if has_filterable or not all_tables else "no filterable columns defined in any table",
-    })
-
-    # Gate 4: agentContract — always derivable
-    has_explicit = bool((definition.get("agentContract") or {}).get("businessPurpose"))
-    gates.append({"gate": "agent_contract", "passed": True, "detail": "explicit agentContract provided" if has_explicit else "auto-generated"})
-
-    # Gate 5: dataSources when tables exist
-    has_data_sources = bool(definition.get("dataSources"))
-    gates.append({
-        "gate": "data_sources",
-        "passed": not all_tables or has_data_sources,
-        "detail": "OK" if not all_tables or has_data_sources else "tables exist but no dataSources defined",
-    })
-
-    # Gate 6: non-temporary adapter
+    # 2. non_temporary
     is_temporary = bool((definition.get("adapter") or {}).get("temporary"))
-    gates.append({
-        "gate": "non_temporary",
-        "passed": not is_temporary,
-        "detail": "adapter.temporary=true — screen is not native yet" if is_temporary else "OK",
-    })
+    m("non_temporary", not is_temporary, "adapter.temporary=true — screen is not native yet" if is_temporary else "OK")
 
-    failed = [g for g in gates if not g["passed"]]
+    # 3. data_sources — when any table exists
+    has_ds = bool(definition.get("dataSources"))
+    m("data_sources", not all_tables or has_ds, "OK" if not all_tables or has_ds else "tables exist but no dataSources defined")
+
+    # 4. table_data_source_bound — every serverPagination table has matching dataSource
+    unbound = [t["key"] for t in server_tables if not t.get("dataSourceKey") or t["dataSourceKey"] not in data_source_keys]
+    m("table_data_source_bound",
+      not server_tables or not unbound,
+      f"tables missing bound dataSource: {', '.join(unbound)}" if unbound else
+      ("no serverPagination tables — gate skipped" if not server_tables else "OK"))
+
+    # 5. table_columns_complete — every table has ≥2 non-trivial columns
+    def non_trivial(col: dict[str, Any]) -> bool:
+        return col.get("key", "").lower() not in _TRIVIAL_KEYS
+
+    thin = [t["key"] for t in all_tables if len([c for c in (t.get("columns") or []) if non_trivial(c)]) < 2]
+    m("table_columns_complete",
+      not all_tables or not thin,
+      f"tables with <2 non-trivial columns: {', '.join(thin)}" if thin else
+      ("no tables — gate skipped" if not all_tables else "OK"))
+
+    # 6. actions_classified — every action has dangerLevel + permission (or stubReason)
+    actions = definition.get("actions") or []
+    unclassified = [a_["key"] for a_ in actions if not a_.get("dangerLevel") or (not a_.get("permission") and not a_.get("stubReason"))]
+    m("actions_classified",
+      not actions or not unclassified,
+      f"actions missing dangerLevel or permission: {', '.join(unclassified)}" if unclassified else
+      ("no actions — gate skipped" if not actions else "OK"))
+
+    # ── Advisory ─────────────────────────────────────────────────────────────
+
+    # 7. sort_whitelist — every table with columns has ≥1 sortable
+    no_sort = [t["key"] for t in all_tables if (t.get("columns") or []) and not any(c.get("sortable") for c in (t.get("columns") or []))]
+    a("sort_whitelist", not all_tables or not no_sort, f"tables with no sortable column: {', '.join(no_sort)}" if no_sort else ("OK" if all_tables else "no tables"))
+
+    # 8. filter_columns — every table with columns has ≥1 filterable
+    no_filt = [t["key"] for t in all_tables if (t.get("columns") or []) and not any(c.get("filterable") for c in (t.get("columns") or []))]
+    a("filter_columns", not all_tables or not no_filt, f"tables with no filterable column: {', '.join(no_filt)}" if no_filt else ("OK" if all_tables else "no tables"))
+
+    # 9. agent_contract — explicit businessPurpose preferred
+    has_explicit = bool((definition.get("agentContract") or {}).get("businessPurpose"))
+    a("agent_contract", has_explicit, "explicit agentContract provided" if has_explicit else "no explicit agentContract — auto-generated only")
+
+    # 10. workflow_declared
+    needs_wf = definition.get("mode") in ("detail", "cockpit")
+    has_wf = bool((definition.get("workflow") or {}).get("processKey")) or bool(definition.get("noWorkflowReason"))
+    a("workflow_declared", not needs_wf or has_wf,
+      "OK" if has_wf else (f"mode={definition.get('mode')} — gate skipped" if not needs_wf else "detail/cockpit screen missing workflow or noWorkflowReason"))
+
+    # 11. stable_test_selectors
+    has_sel = bool((definition.get("agentContract") or {}).get("testSelectors", {}).get("screenRoot"))
+    a("stable_test_selectors", has_sel, "OK" if has_sel else "no explicit testSelectors.screenRoot (auto-generated only)")
+
+    # 12. table_query_contract — sortable/filterable keys must not be generic
+    generic_cols = [
+        f"{t['key']}.{c['key']}"
+        for t in all_tables
+        for c in (t.get("columns") or [])
+        if (c.get("sortable") or c.get("filterable")) and _GENERIC_KEY_PATTERN.match(c.get("key", ""))
+    ]
+    a("table_query_contract", not generic_cols, f"generic unstable column keys: {', '.join(generic_cols)}" if generic_cols else "OK")
+
+    # ── Summary ───────────────────────────────────────────────────────────────
+    all_gates = mandatory + advisory
+    failed_m = [g for g in mandatory if not g["passed"]]
+    failed_a = [g for g in advisory if not g["passed"]]
+    advisory_score = round((len(advisory) - len(failed_a)) / len(advisory), 2) if advisory else 1.0
+
     return {
         "screenId": definition.get("id"),
-        "generatorReady": len(failed) == 0,
-        "gates": gates,
-        "errors": [f"[{g['gate']}] {g['detail']}" for g in failed],
+        "generatorReady": len(failed_m) == 0,
+        "advisoryScore": advisory_score,
+        "gates": all_gates,
+        "errors": [f"[{g['gate']}] {g['detail']}" for g in failed_m],
+        "warnings": [f"[{g['gate']}] {g['detail']}" for g in failed_a],
     }
 
 
@@ -193,8 +248,13 @@ async def get_mask_readiness(
 ):
     """Prueft alle Generator-Readiness-Gates fuer eine Maske.
 
-    Gibt generatorReady=true nur wenn alle 6 Gates gruen sind:
-    schema_valid, sort_whitelist, filter_columns, agent_contract, data_sources, non_temporary.
+    Mandatory gates (blockieren generatorReady):
+    schema_valid, non_temporary, data_sources, table_data_source_bound,
+    table_columns_complete, actions_classified.
+
+    Advisory gates (nur Warnungen, kein Block):
+    sort_whitelist, filter_columns, agent_contract, workflow_declared,
+    stable_test_selectors, table_query_contract.
     """
     _ = tenant_id
     normalized = mask_id.strip("/")
