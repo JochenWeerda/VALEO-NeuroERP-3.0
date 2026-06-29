@@ -288,10 +288,130 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_supplier_screen_definition() -> dict[str, Any]:
+    """Native ScreenDefinition fuer einkauf/supplier (UIX-038)."""
+    return {
+        "schemaVersion": 1,
+        "id": "einkauf/supplier",
+        "domain": "einkauf",
+        "mode": "detail",
+        "title": "Lieferant",
+        "subtitle": "Lieferantenstamm",
+        "adapter": {
+            "type": "native",
+            "sourceId": "einkauf/supplier",
+            "temporary": False,
+        },
+        "summaryEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/einkauf/lieferanten/{entity_id}"},
+            {"key": "bestellungen", "endpoint": "/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/bestellungen", "pageSize": 25},
+            {"key": "kontakte", "endpoint": "/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/kontakte", "pageSize": 25},
+        ],
+        "tabs": [
+            {
+                "key": "kopf",
+                "label": "Stammdaten",
+                "lazy": False,
+                "keepAlive": True,
+                "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "lieferanten_nr", "label": "Lieferanten-Nr.", "type": "text", "readOnly": True},
+                    {"key": "firma", "label": "Firma", "type": "text", "required": True},
+                    {"key": "strasse", "label": "Strasse", "type": "text"},
+                    {"key": "plz", "label": "PLZ", "type": "text", "width": 80},
+                    {"key": "ort", "label": "Ort", "type": "text"},
+                    {"key": "land", "label": "Land", "type": "text"},
+                    {"key": "telefon", "label": "Telefon", "type": "text"},
+                    {"key": "email", "label": "E-Mail", "type": "email"},
+                    {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                    {"key": "lieferzeit_tage", "label": "Lieferzeit (Tage)", "type": "number"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                "key": "bestellungen",
+                "label": "Bestellungen",
+                "lazy": True,
+                "keepAlive": False,
+                "tables": [{
+                    "key": "bestellungen",
+                    "label": "Bestellungen",
+                    "dataSourceKey": "bestellungen",
+                    "serverPagination": True,
+                    "pageSize": 25,
+                    "virtualized": True,
+                    "rowHeight": 52,
+                    "columns": [
+                        {"key": "bestell_nr", "label": "Bestell-Nr.", "width": 130, "sortable": True},
+                        {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                        {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                        {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                        {"key": "waehrung", "label": "Waehrung", "width": 70},
+                    ],
+                }],
+            },
+            {
+                "key": "kontakte",
+                "label": "Ansprechpartner",
+                "lazy": True,
+                "keepAlive": False,
+                "tables": [{
+                    "key": "kontakte",
+                    "label": "Ansprechpartner",
+                    "dataSourceKey": "kontakte",
+                    "serverPagination": True,
+                    "pageSize": 25,
+                    "virtualized": True,
+                    "rowHeight": 52,
+                    "columns": [
+                        {"key": "name", "label": "Name", "width": 180, "sortable": True},
+                        {"key": "funktion", "label": "Funktion", "width": 140, "filterable": True},
+                        {"key": "telefon", "label": "Telefon", "width": 130},
+                        {"key": "email", "label": "E-Mail", "width": 200},
+                    ],
+                }],
+            },
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.lieferant.update"},
+            {"key": "neue_bestellung", "label": "Bestellung anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.bestellung.create", "stubReason": "commandEndpoint folgt in UIX-039"},
+        ],
+        "noWorkflowReason": "Lieferantenstamm ist ein Verwaltungsobjekt — Prozessstatus liegt in den Bestellungen, nicht im Stammsatz.",
+        "agentContract": {
+            "businessPurpose": "Lieferantenstamm-Cockpit fuer Einkauf — Stammdaten, offene Bestellungen und Ansprechpartner in einer Ansicht.",
+            "examplePrompts": [
+                "Zeige alle offenen Bestellungen von Lieferant {entity_id} mit Status 'offen'.",
+                "Welche Ansprechpartner gibt es bei Lieferant {entity_id}?",
+                "Wie sind die Zahlungsbedingungen und Lieferzeiten von Lieferant {entity_id}?",
+            ],
+            "sensitiveFields": ["zahlungsbedingungen", "lieferzeit_tage"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='einkauf-supplier-360']",
+                "primaryAction": "[data-testid='action-edit']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
+        },
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 48,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "einkauf",
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
+    "einkauf/supplier": build_supplier_screen_definition,
 }
 
 

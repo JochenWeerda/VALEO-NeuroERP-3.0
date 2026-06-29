@@ -114,21 +114,30 @@ Produktionsreife:           noch nicht bewiesen
 
 Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md)
 
-### Offene Restarbeit (UIX-031…037)
-
-Die Plattform ist architektonisch bereit — der Engpass ist **Nachweisbarkeit**, nicht Code-Menge.
+### Status UIX-031…038 (Stand 2026-06-29)
 
 | Slice | Inhalt | Priorität | Stand |
 |-------|--------|-----------|-------|
-| UIX-031 | Doku-Konsolidierung (Open-Gaps, Workboard, ADR, Rollout-Doku, Slice-YAMLs) | P0 | ✅ abgeschlossen 2026-06-29 |
-| UIX-032 | CI-Gate-Nachweis: type-check, build, vitest, pytest lokal + GitHub Actions | P0 | 🟡 pytest 43/43 grün; Frontend type-check blockiert durch WIP `lieferschein-erfassung.tsx`; GHA ausstehend |
-| UIX-033 | Strengere Readiness-Gates (mandatory/advisory, pro Tabelle) | P1 | ✅ `fd2b8a7cf` |
-| UIX-034 | CRM 360 native Parity-Matrix Legacy vs. Native | P1 | 🟡 Matrix angelegt; Stammdaten-Felder + Advisory-Gates offen |
-| UIX-035 | ActionRuntime Backend-Command: CRM Aktivität anlegen | P2 | ⬜ geplant |
-| UIX-036 | Agent End-to-End: lesen → dryRun → humanApproval → execute | P2 | ⬜ geplant |
-| UIX-037 | Rollout-Kandidaten mit neuen Gates neu bewerten | P2 | ⬜ geplant |
+| UIX-031 | Doku-Konsolidierung | P0 | ✅ |
+| UIX-032 | CI-Gate: pytest 57/57 lokal; tsc 0 Fehler; GHA nach Push | P0 | ✅ lokal |
+| UIX-033 | 12 Readiness-Gates (6 mandatory + 6 advisory) | P1 | ✅ |
+| UIX-034 | CRM-360 Parity-Matrix; fields[]; agentContract; advisoryScore=83% | P1 | ✅ |
+| UIX-035 | ActionRuntime create_activity: validate/dryRun/propose/execute + Audit | P2 | ✅ |
+| UIX-036 | Agent propose→dryRun→validate getestet; humanApproval-Block aktiv | P2 | ✅ |
+| UIX-037 | Rollout-Kandidaten strukturell gefixt; adv=50% alle 10; Promotions-Reihenfolge | P2 | ✅ |
+| UIX-038 | einkauf/supplier native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 
-**Governance für Agenten:** Keine weiteren `generator_ready`-Masken setzen, bis UIX-032 (CI grün) und UIX-034 (CRM 360 Parität) nachgewiesen sind. Keine neue Feature-/Rollout-Welle vor Stabilisierung.
+### Offene Restarbeit (UIX-039+)
+
+| Slice | Inhalt | Priorität |
+|-------|--------|-----------|
+| UIX-039 | crm/opportunity native ScreenDefinition + Parity-Matrix | P1 |
+| UIX-040 | lager/article-stock native | P1 |
+| UIX-041 | `neue_bestellung` commandEndpoint fuer einkauf/supplier | P2 |
+| UIX-042 | Frontend: useUniversalMaskRuntime fuer einkauf/supplier (analog CRM-360) | P2 |
+| UIX-Roll | sales/delivery-note → finance/* → lager/* → agrar/* Promotionen | P2-P3 |
+
+**Governance fuer Agenten:** einkauf/supplier ist nativ bereit. Naechster Schritt: UIX-042 Frontend-Verdrahtung, dann UIX-039 crm/opportunity. Zahlungslauf und Ernte-Abrechnung bleiben zuletzt.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 
