@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
+
 
 def build_crm_customer_360_screen_definition() -> dict[str, Any]:
     """Canonical ScreenDefinition for crm/customer-360 (Wave 29)."""
@@ -129,6 +131,101 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
 }
+
+
+def _build_rollout_screen_definition(
+    *,
+    screen_id: str,
+    domain: str,
+    title: str,
+    subtitle: str,
+    tabs: list[dict[str, Any]],
+    summary_endpoint: str,
+    budget_kb: int,
+    bundle_group: str,
+) -> dict[str, Any]:
+    return {
+        "schemaVersion": 1,
+        "id": screen_id,
+        "domain": domain,
+        "mode": "detail",
+        "title": title,
+        "subtitle": subtitle,
+        "adapter": {
+            "type": "native",
+            "sourceId": screen_id,
+            "temporary": False,
+        },
+        "summaryEndpoint": summary_endpoint,
+        "tabs": tabs,
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary"},
+        ],
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+        },
+        "performance": {
+            "initialPayloadBudgetKb": budget_kb,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": bundle_group,
+        },
+    }
+
+
+def _rollout_tab_defs(keys: list[str]) -> list[dict[str, Any]]:
+    labels = {
+        "kopf": "Kopfdaten",
+        "details": "Details",
+        "bestand": "Bestand",
+        "bewegungen": "Bewegungen",
+        "positionen": "Positionen",
+        "freigabe": "Freigabe",
+        "ausgleich": "Ausgleich",
+        "kommunikation": "Kommunikation",
+        "kontakte": "Kontakte",
+        "bestellungen": "Bestellungen",
+        "aktivitaeten": "Aktivitaeten",
+        "angebote": "Angebote",
+        "dokumente": "Dokumente",
+        "abzuege": "Abzuege",
+        "zahlungen": "Zahlungen",
+    }
+    return [
+        {"key": key, "label": labels.get(key, key.title()), "lazy": key != "kopf", "keepAlive": True}
+        for key in keys
+    ]
+
+
+def build_rollout_screen_definitions() -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for spec in ROLLOUT_WAVES_42_51:
+        result[spec.screen_id] = _build_rollout_screen_definition(
+            screen_id=spec.screen_id,
+            domain=spec.domain,
+            title=spec.label,
+            subtitle=f"Rollout Pilot {spec.screen_id}",
+            tabs=_rollout_tab_defs(list(spec.available_tabs)),
+            summary_endpoint=f"/api/v1/mask-rollouts/{spec.screen_id}/{{entity_id}}/screen-summary",
+            budget_kb=spec.budget_kb,
+            bundle_group=spec.domain,
+        )
+    return result
+
+
+for _spec in ROLLOUT_WAVES_42_51:
+    _sid = _spec.screen_id
+
+    def _make_builder(screen_id: str = _sid):
+        def _builder() -> dict[str, Any]:
+            return build_rollout_screen_definitions()[screen_id]
+
+        return _builder
+
+    _SCREEN_DEFINITIONS[_sid] = _make_builder()
 
 
 def get_screen_definition(mask_id: str) -> dict[str, Any] | None:

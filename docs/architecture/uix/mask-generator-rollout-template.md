@@ -28,8 +28,9 @@ Referenz-Slices: CRM (`UIX-CRM-PILOT-002`), Sales (`UIX-SALES-PILOT-007`), Rende
 1. CRM 360 (abgeschlossen)
 2. Sales Order (abgeschlossen)
 3. Agrar — Ernte/Contract (abgeschlossen: Kontrakt-Pilot Wave 41)
-4. Inventory — Bestand/Lagerbewegung
-5. Finance — AP/AR Object Pages
+4. **Batch Waves 42–51** — zehn Kandidaten (Inventory, Finance, Einkauf, CRM, Sales, Agrar Settlement) — siehe [`mask-rollout-batch-w42-51.md`](mask-rollout-batch-w42-51.md)
+5. Inventory — Bestand/Lagerbewegung (in Batch enthalten)
+6. Finance — AP/AR Object Pages (in Batch enthalten)
 
 ## Datei-Vorlage
 

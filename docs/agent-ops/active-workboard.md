@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-ROLLOUT-BATCH-019 — Universal Mask Rollout Batch (Waves 42–51)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-28 — zehn Rollout-Kandidaten mit screen-summary, Registry, Generic Pilot Route.
+**Ziel:** Nach CRM/Sales/Agrar-Kontrakt die naechsten zehn Domänen-Piloten (Lager, Finance, Einkauf, CRM Opportunity, Sales LS, Agrar Settlement) hinter Feature-Flag ausrollen.
+**Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/services/mask_rollout_summary_service.py`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `packages/frontend-web/src/features/mask-rollouts/`, `pages/workflow/mask-rollout/`, `docs/architecture/uix/mask-rollout-batch-w42-51.md`
+**Abnahme:** pytest `test_mask_rollout_batch_w42_51.py` gruen; Vitest Route-Switch; `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS=true` + `/mask-rollout/{screenId}/{entityId}`.
+
 ## UIX-MASK-AB-BENCH-018 — A/B Render Benchmark (Legacy vs. Pilot)
 
 **Von:** Cursor
