@@ -1,7 +1,12 @@
 import { useMemo } from 'react'
 import { useParams } from '@/app/routing/typed-router'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { UniversalMaskRenderer, type ScreenSummaryItem, type ScreenTabDefinition } from '@/components/mask-builder'
+import {
+  UniversalMaskRenderer,
+  useUniversalMaskRuntime,
+  type ScreenSummaryItem,
+  type ScreenTabDefinition,
+} from '@/components/mask-builder'
 import {
   CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
 } from '@/features/crm-masks/customer-mask-support'
@@ -52,7 +57,31 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
   const { activeTabKey, tablePage, onTabChange } = useMaskPilotState()
   const summaryQuery = useCustomerScreenSummary(id ?? '')
   const nativeScreenQuery = useScreenDefinition('crm/customer-360', { enabled: Boolean(id) })
-  const customerQuery = useCustomer(id ?? '', { enabled: Boolean(summaryQuery.data) })
+
+  const summaryItems = useMemo(
+    () => buildSummaryItems(summaryQuery.data),
+    [summaryQuery.data],
+  )
+
+  // Phase 028: use native runtime when non-temporary ScreenDefinition available
+  const useNativeRuntime = Boolean(
+    nativeScreenQuery.data && nativeScreenQuery.data.adapter?.temporary === false,
+  )
+
+  const nativeRuntime = useUniversalMaskRuntime({
+    screenId: 'crm/customer-360',
+    entityId: id,
+    schema: nativeScreenQuery.data,
+    tabEndpoints: summaryQuery.data?.tab_endpoints,
+    availableTabs: summaryQuery.data?.available_tabs,
+    summaryTitle: summaryQuery.data?.title,
+    summarySubtitle: summaryQuery.data?.subtitle,
+    summaryItems,
+    enabled: useNativeRuntime && Boolean(id),
+  })
+
+  // Legacy path (kept for fallback when native screen not available)
+  const customerQuery = useCustomer(id ?? '', { enabled: !useNativeRuntime && Boolean(summaryQuery.data) })
   const tabDataQuery = useCustomerTabData(
     id ?? '',
     activeTabKey,
@@ -60,12 +89,7 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     tablePage,
   )
 
-  const summaryItems = useMemo(
-    () => buildSummaryItems(summaryQuery.data),
-    [summaryQuery.data],
-  )
-
-  const { plan } = usePilotRenderPlan({
+  const { plan: legacyPlan } = usePilotRenderPlan({
     screenId: 'crm/customer-360',
     domain: 'crm',
     maskConfig: {
@@ -80,11 +104,11 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     supplementalTabs: CRM360_SUPPLEMENTAL_TABS,
     enrichTabs: enrichTabsWithTables,
     summaryItems,
-    enabled: Boolean(id),
+    enabled: !useNativeRuntime && Boolean(id),
   })
 
-  const data = useMemo(() => mapCustomerToMask(customerQuery.data), [customerQuery.data])
-  const tables = useMemo(() => mapTabDataToTables(tabDataQuery.data), [tabDataQuery.data])
+  const legacyData = useMemo(() => mapCustomerToMask(customerQuery.data), [customerQuery.data])
+  const legacyTables = useMemo(() => mapTabDataToTables(tabDataQuery.data), [tabDataQuery.data])
 
   if (!id) {
     return (
@@ -97,7 +121,7 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     )
   }
 
-  if (summaryQuery.error || customerQuery.error) {
+  if (summaryQuery.error || (!useNativeRuntime && customerQuery.error)) {
     return (
       <div className="p-6">
         <Alert variant="destructive">
@@ -108,8 +132,33 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     )
   }
 
+  // Native runtime path (Phase 028)
+  if (useNativeRuntime && nativeRuntime.plan) {
+    return (
+      <div data-testid="universal-customer-mask-pilot" data-runtime="native">
+        {nativeRuntime.isEntityLoading && (
+          <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
+            Daten werden geladen…
+          </div>
+        )}
+        <UniversalMaskRenderer
+          plan={nativeRuntime.plan}
+          data={nativeRuntime.entityData}
+          tables={nativeRuntime.tableRows}
+          tableQueryStates={nativeRuntime.tableQueryStates}
+          tableTotals={nativeRuntime.tableTotals}
+          lookupBindings={nativeRuntime.lookupBindings}
+          onTabChange={onTabChange}
+          onTableQueryChange={nativeRuntime.setTableQuery}
+          onAction={() => undefined}
+        />
+      </div>
+    )
+  }
+
+  // Legacy runtime path (fallback)
   return (
-    <div data-testid="universal-customer-mask-pilot">
+    <div data-testid="universal-customer-mask-pilot" data-runtime="legacy">
       {summaryQuery.isLoading ? (
         <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
           Summary wird geladen...
@@ -128,11 +177,11 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
           Tab-Daten werden geladen...
         </div>
       ) : null}
-      {plan ? (
+      {legacyPlan ? (
         <UniversalMaskRenderer
-          plan={plan}
-          data={data}
-          tables={tables}
+          plan={legacyPlan}
+          data={legacyData}
+          tables={legacyTables}
           onTabChange={onTabChange}
           onAction={() => undefined}
         />
