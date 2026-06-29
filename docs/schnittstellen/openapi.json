@@ -181502,6 +181502,24 @@
               ],
               "title": "Sort Dir"
             }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
           }
         ],
         "responses": {
@@ -256796,6 +256814,24 @@
               ],
               "description": "Sortierrichtung",
               "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan (machine-readable column filters)",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan (machine-readable column filters)",
+              "title": "Filter Plan"
             }
           },
           {
