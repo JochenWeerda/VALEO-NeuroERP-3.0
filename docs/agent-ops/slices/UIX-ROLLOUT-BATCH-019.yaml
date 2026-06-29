@@ -1,0 +1,12 @@
+slice_id: UIX-ROLLOUT-BATCH-019
+title: Universal Mask Rollout Batch Waves 42-51
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-06-28
+goal: Ten rollout candidates with screen-summary, registry, generic pilot route.
+acceptance:
+  - mask_rollout_catalog with 10 specs
+  - mask_rollout_summary_service + central API router
+  - screen_definitions and mask_classification generator_ready
+  - UniversalMaskRolloutPilotPage + /mask-rollout route
+  - pytest and vitest green
