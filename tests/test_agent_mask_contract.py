@@ -129,6 +129,7 @@ def test_primary_entity_derived_from_screen_id():
 # ─── Readiness gate tests ────────────────────────────────────────────────────
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness  # noqa: E402
+from app.core.screen_definitions import get_screen_definition  # noqa: E402
 
 READY_SCREEN = {
     "schemaVersion": 1,
@@ -288,3 +289,19 @@ def test_readiness_skips_table_gates_when_no_tables():
     filter_gate = next(g for g in report["gates"] if g["gate"] == "filter_columns")
     assert sort_gate["passed"] is True
     assert filter_gate["passed"] is True
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "screen_id",
+    ["einkauf/supplier", "crm/opportunity", "lager/article-stock"],
+)
+def test_promoted_rollout_masks_resolve_to_native_screen_definitions(screen_id):
+    screen = get_screen_definition(screen_id)
+    assert screen is not None
+    report = _check_readiness(screen)
+    assert screen["adapter"]["temporary"] is False
+    assert report["generatorReady"] is True
+    assert report["advisoryScore"] == 1.0
+    assert report["errors"] == []
+    assert report["warnings"] == []

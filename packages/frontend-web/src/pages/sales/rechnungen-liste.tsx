@@ -103,7 +103,8 @@ export default function RechnungenListePage(): JSX.Element {
     
     // Erweiterte Filter
     if (filterValues.status && rechnung.status !== filterValues.status) return false
-    if (filterValues.kunde && !rechnung.kunde.toLowerCase().includes(filterValues.kunde.toLowerCase())) return false
+    const filterKunde = typeof filterValues.kunde === 'string' ? filterValues.kunde : ''
+    if (filterKunde && !rechnung.kunde.toLowerCase().includes(filterKunde.toLowerCase())) return false
     if (filterValues.datum) {
       const rechnungDate = new Date(rechnung.datum).toISOString().split('T')[0]
       if (rechnungDate !== filterValues.datum) return false
@@ -202,7 +203,11 @@ export default function RechnungenListePage(): JSX.Element {
           lines: [],
           subtotalNet: 0,
           totalTax: 0,
-          totalGross: parseFloat(row.Betrag?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
+          totalGross: (() => {
+            const raw = row.Betrag
+            const betragStr = typeof raw === 'string' ? raw : typeof raw === 'number' ? String(raw) : ''
+            return parseFloat(betragStr.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0
+          })(),
         }
         await saveDocument('sales_invoice', doc)
       }

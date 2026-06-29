@@ -119,7 +119,7 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 
 | pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov`; Coverage-Dateilock unter Windows bei parallelem Lauf umgangen |
 | pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py`, inkl. native Promotionen 038–040 |
-| Frontend type-check | 2026-06-29 | ❌ | Viele TS-Fehler in uncommitted `lieferschein-erfassung.tsx` (fremde WIP); `ustva.tsx` Extra-`}` behoben |
+| Frontend type-check | 2026-06-29 | ❌ | Global weiterhin rot durch breit gestreute Bestands-/Parallel-WIP-Typfehler; Verkauf-`lieferschein-erfassung.tsx` lokal bereinigt, verbleibende Lieferschein-Treffer liegen in `pages/einkauf/lieferschein-erfassung.tsx` |
 | Frontend build | — | ausstehend | UIX-032 |
 | Frontend vitest (readiness) | 2026-06-29 | ✅ 15/15 | `generatorReadiness.test.ts` |
 | Frontend vitest (gesamt) | — | ausstehend | UIX-032 |

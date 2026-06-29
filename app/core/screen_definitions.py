@@ -1106,6 +1106,672 @@ def build_finance_payment_run_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_duenger_screen_definition() -> dict[str, Any]:
+    """Native SD fuer agrar/duenger (Duenger-Stammdaten)."""
+    return {
+        "schemaVersion": 1, "id": "agrar/duenger", "domain": "agrar", "mode": "detail",
+        "title": "Duenger", "subtitle": "Agrar / Duenger-Stammdaten",
+        "adapter": {"type": "native", "sourceId": "agrar/duenger", "temporary": False},
+        "summaryEndpoint": "/api/v1/agrar/duenger/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/agrar/duenger/{entity_id}"},
+            {"key": "verwendung", "endpoint": "/api/v1/agrar/duenger/{entity_id}/tabs/verwendung", "pageSize": 25},
+            {"key": "preise", "endpoint": "/api/v1/agrar/duenger/{entity_id}/tabs/preise", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "duenger_nr", "label": "Duenger-Nr.", "type": "text", "readOnly": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                 {"key": "typ", "label": "Typ", "type": "text"},
+                 {"key": "naehrstoff_n", "label": "N %", "type": "number"},
+                 {"key": "naehrstoff_p", "label": "P2O5 %", "type": "number"},
+                 {"key": "naehrstoff_k", "label": "K2O %", "type": "number"},
+                 {"key": "einheit", "label": "Einheit", "type": "text"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "verwendung", "label": "Verwendung", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "verwendung", "label": "Verwendungs-Historie", "dataSourceKey": "verwendung",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                             {"key": "flaeche", "label": "Flaeche", "width": 160, "filterable": True},
+                             {"key": "menge", "label": "Menge", "numeric": True, "renderKind": "number"},
+                             {"key": "einheit", "label": "Einheit", "width": 80},
+                         ]}]},
+            {"key": "preise", "label": "Preise", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "preise", "label": "Preise", "dataSourceKey": "preise",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "gueltig_ab", "label": "Gueltig ab", "sortable": True, "renderKind": "date", "width": 110},
+                             {"key": "preis", "label": "Preis", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "lieferant", "label": "Lieferant", "width": 180, "filterable": True},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "agrar.duenger.update"}],
+        "noWorkflowReason": "Duenger-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Duenger-Stammdaten: Naehrstoffgehalte, Verwendungshistorie und Preise fuer Duengungsplanung.",
+            "examplePrompts": ["Welche Naehrstoffgehalte hat Duenger {entity_id}?", "Zeige die Preisentwicklung von Duenger {entity_id}."],
+            "sensitiveFields": ["preis"],
+            "testSelectors": {"screenRoot": "[data-testid='agrar-duenger']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "agrar"},
+    }
+
+
+def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
+    """Native SD fuer agrar/saatgut (Saatgut-Stammdaten)."""
+    return {
+        "schemaVersion": 1, "id": "agrar/saatgut", "domain": "agrar", "mode": "detail",
+        "title": "Saatgut", "subtitle": "Agrar / Saatgut-Stammdaten",
+        "adapter": {"type": "native", "sourceId": "agrar/saatgut", "temporary": False},
+        "summaryEndpoint": "/api/v1/agrar/saatgut/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/agrar/saatgut/{entity_id}"},
+            {"key": "lagerbestaende", "endpoint": "/api/v1/agrar/saatgut/{entity_id}/tabs/lagerbestaende", "pageSize": 25},
+            {"key": "vertraege", "endpoint": "/api/v1/agrar/saatgut/{entity_id}/tabs/vertraege", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "saatgut_nr", "label": "Saatgut-Nr.", "type": "text", "readOnly": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                 {"key": "sorte", "label": "Sorte", "type": "text"},
+                 {"key": "kultur", "label": "Kulturart", "type": "text"},
+                 {"key": "zulassungs_nr", "label": "Zulassungs-Nr.", "type": "text"},
+                 {"key": "tausendkorngewicht", "label": "TKG (g)", "type": "number"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "lagerbestaende", "label": "Lagerbestaende", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "lagerbestaende", "label": "Bestaende", "dataSourceKey": "lagerbestaende",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "lagerort", "label": "Lagerort", "sortable": True, "filterable": True},
+                             {"key": "menge", "label": "Menge (kg)", "numeric": True, "sortable": True, "renderKind": "number"},
+                             {"key": "charge", "label": "Charge", "width": 120},
+                             {"key": "lager_datum", "label": "Eingelagert", "renderKind": "date", "width": 110},
+                         ]}]},
+            {"key": "vertraege", "label": "Vertraege", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "vertraege", "label": "Anbauvertraege", "dataSourceKey": "vertraege",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "vertrag_nr", "label": "Vertrag-Nr.", "sortable": True},
+                             {"key": "erzeuger", "label": "Erzeuger", "filterable": True},
+                             {"key": "menge", "label": "Menge (kg)", "numeric": True, "sortable": True, "renderKind": "number"},
+                             {"key": "ernte_jahr", "label": "Erntejahr", "width": 90},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "agrar.saatgut.update"}],
+        "noWorkflowReason": "Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Saatgut-Stammdaten: Sorteninfo, Lagerbestaende und Anbauvertraege fuer Saatgutplanung.",
+            "examplePrompts": ["Welche Lagerbestaende hat Saatgut {entity_id}?", "Zeige alle Anbauvertraege fuer Saatgut {entity_id}."],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='agrar-saatgut']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "agrar"},
+    }
+
+
+def build_finance_debitor_screen_definition() -> dict[str, Any]:
+    """Native SD fuer finance/debitor (Debitoren-Stammdaten)."""
+    return {
+        "schemaVersion": 1, "id": "finance/debitor", "domain": "finance", "mode": "detail",
+        "title": "Debitor", "subtitle": "Finance / Debitorenstamm",
+        "adapter": {"type": "native", "sourceId": "finance/debitor", "temporary": False},
+        "summaryEndpoint": "/api/v1/finance/debitoren/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/finance/debitoren/{entity_id}"},
+            {"key": "offene_posten", "endpoint": "/api/v1/finance/debitoren/{entity_id}/tabs/offene-posten", "pageSize": 25},
+            {"key": "umsaetze", "endpoint": "/api/v1/finance/debitoren/{entity_id}/tabs/umsaetze", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "debitoren_nr", "label": "Debitoren-Nr.", "type": "text", "readOnly": True},
+                 {"key": "name", "label": "Name", "type": "text", "required": True},
+                 {"key": "kreditlimit", "label": "Kreditlimit", "type": "currency"},
+                 {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                 {"key": "steuernummer", "label": "Steuernummer", "type": "text"},
+                 {"key": "ust_id", "label": "USt-IdNr.", "type": "text"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "offene_posten", "label": "Offene Posten", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "offene_posten", "label": "Offene Posten", "dataSourceKey": "offene_posten",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "beleg_nr", "label": "Beleg-Nr.", "sortable": True},
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "faellig", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "status", "label": "Status", "filterable": True, "width": 100},
+                         ]}]},
+            {"key": "umsaetze", "label": "Umsaetze", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "umsaetze", "label": "Umsaetze", "dataSourceKey": "umsaetze",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "periode", "label": "Periode", "sortable": True, "filterable": True, "width": 100},
+                             {"key": "umsatz", "label": "Umsatz", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "anzahl_belege", "label": "Belege", "numeric": True},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "finance.debitor.update"}],
+        "noWorkflowReason": "Debitorenstamm ist Referenzdaten — kein Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Debitoren-Stammdaten: Kreditlimit, offene Posten und Umsatzhistorie fuer Debitorenbuchhaltung.",
+            "examplePrompts": ["Was ist das Kreditlimit von Debitor {entity_id}?", "Zeige alle offenen Posten von Debitor {entity_id}."],
+            "sensitiveFields": ["kreditlimit", "steuernummer", "ust_id"],
+            "testSelectors": {"screenRoot": "[data-testid='finance-debitor']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
+    }
+
+
+def build_finance_kreditor_screen_definition() -> dict[str, Any]:
+    """Native SD fuer finance/kreditor (Kreditoren-Stammdaten)."""
+    return {
+        "schemaVersion": 1, "id": "finance/kreditor", "domain": "finance", "mode": "detail",
+        "title": "Kreditor", "subtitle": "Finance / Kreditorenstamm",
+        "adapter": {"type": "native", "sourceId": "finance/kreditor", "temporary": False},
+        "summaryEndpoint": "/api/v1/finance/kreditoren/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/finance/kreditoren/{entity_id}"},
+            {"key": "offene_posten", "endpoint": "/api/v1/finance/kreditoren/{entity_id}/tabs/offene-posten", "pageSize": 25},
+            {"key": "bestellungen", "endpoint": "/api/v1/finance/kreditoren/{entity_id}/tabs/bestellungen", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "kreditoren_nr", "label": "Kreditoren-Nr.", "type": "text", "readOnly": True},
+                 {"key": "name", "label": "Name", "type": "text", "required": True},
+                 {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                 {"key": "iban", "label": "IBAN", "type": "text"},
+                 {"key": "steuernummer", "label": "Steuernummer", "type": "text"},
+                 {"key": "ust_id", "label": "USt-IdNr.", "type": "text"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "offene_posten", "label": "Offene Posten", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "offene_posten", "label": "Offene Posten", "dataSourceKey": "offene_posten",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "beleg_nr", "label": "Beleg-Nr.", "sortable": True},
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "faellig", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "status", "label": "Status", "filterable": True, "width": 100},
+                         ]}]},
+            {"key": "bestellungen", "label": "Bestellungen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "bestellungen", "label": "Bestellungen", "dataSourceKey": "bestellungen",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "bestell_nr", "label": "Bestell-Nr.", "sortable": True},
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "status", "label": "Status", "filterable": True, "width": 100},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "finance.kreditor.update"}],
+        "noWorkflowReason": "Kreditorenstamm ist Referenzdaten — kein Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Kreditoren-Stammdaten: Zahlungsbedingungen, offene Posten und Bestellhistorie fuer Kreditorenbuchhaltung.",
+            "examplePrompts": ["Welche offenen Posten hat Kreditor {entity_id}?", "Zeige alle Bestellungen bei Kreditor {entity_id}."],
+            "sensitiveFields": ["iban", "steuernummer", "ust_id"],
+            "testSelectors": {"screenRoot": "[data-testid='finance-kreditor']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
+    }
+
+
+def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
+    """Native SD fuer finance/bankkonto (Bankkonten-Stammdaten)."""
+    return {
+        "schemaVersion": 1, "id": "finance/bankkonto", "domain": "finance", "mode": "detail",
+        "title": "Bankkonto", "subtitle": "Finance / Bankkonten-Stamm",
+        "adapter": {"type": "native", "sourceId": "finance/bankkonto", "temporary": False},
+        "summaryEndpoint": "/api/v1/finance/bankkonten/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/finance/bankkonten/{entity_id}"},
+            {"key": "buchungen", "endpoint": "/api/v1/finance/bankkonten/{entity_id}/tabs/buchungen", "pageSize": 50},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Konto-Stamm", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "konto_nr", "label": "Kontonummer", "type": "text", "readOnly": True},
+                 {"key": "bank_name", "label": "Bank", "type": "text"},
+                 {"key": "iban", "label": "IBAN", "type": "text"},
+                 {"key": "bic", "label": "BIC", "type": "text"},
+                 {"key": "waehrung", "label": "Waehrung", "type": "text"},
+                 {"key": "saldo", "label": "Saldo", "type": "currency"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "buchungen", "label": "Buchungen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "buchungen", "label": "Buchungen", "dataSourceKey": "buchungen",
+                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "verwendungszweck", "label": "Verwendungszweck", "width": 240, "filterable": True},
+                             {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "gegenpartei", "label": "Gegenpartei", "width": 180},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "finance.bankkonto.update"}],
+        "noWorkflowReason": "Bankkonten-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.",
+            "examplePrompts": ["Was ist der aktuelle Saldo von Bankkonto {entity_id}?", "Zeige die letzten Buchungen auf Bankkonto {entity_id}."],
+            "sensitiveFields": ["iban", "bic", "saldo"],
+            "testSelectors": {"screenRoot": "[data-testid='finance-bankkonto']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
+    }
+
+
+def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
+    """Native SD fuer einkauf/anfrage (Einkaufsanfrage)."""
+    return {
+        "schemaVersion": 1, "id": "einkauf/anfrage", "domain": "einkauf", "mode": "detail",
+        "title": "Einkaufsanfrage", "subtitle": "Einkauf / Anfrage",
+        "adapter": {"type": "native", "sourceId": "einkauf/anfrage", "temporary": False},
+        "summaryEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/einkauf/anfragen/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/einkauf/anfragen/{entity_id}/tabs/positionen", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Anfrage-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "anfrage_nr", "label": "Anfrage-Nr.", "type": "text", "readOnly": True},
+                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
+                 {"key": "datum", "label": "Datum", "type": "date"},
+                 {"key": "rueckmeldung_bis", "label": "Rueckmeldung bis", "type": "date"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "artikel_nr", "label": "Artikel-Nr.", "sortable": True},
+                             {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
+                             {"key": "menge", "label": "Menge", "numeric": True, "renderKind": "number"},
+                             {"key": "einheit", "label": "Einheit", "width": 70},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.anfrage.update"}],
+        "noWorkflowReason": "Anfrage-Status wird durch Lieferantenantwort gesetzt — kein deklarativer Workflow.",
+        "agentContract": {
+            "businessPurpose": "Einkaufsanfrage: Kopfdaten und Positionen fuer Beschaffungsanfragen an Lieferanten.",
+            "examplePrompts": ["Was ist der Status von Anfrage {entity_id}?", "Zeige alle Positionen von Anfrage {entity_id}."],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='einkauf-anfrage']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
+    }
+
+
+def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
+    """Native SD fuer einkauf/angebot (Lieferantenangebot)."""
+    return {
+        "schemaVersion": 1, "id": "einkauf/angebot", "domain": "einkauf", "mode": "detail",
+        "title": "Lieferantenangebot", "subtitle": "Einkauf / Angebot",
+        "adapter": {"type": "native", "sourceId": "einkauf/angebot", "temporary": False},
+        "summaryEndpoint": "/api/v1/einkauf/angebote/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/einkauf/angebote/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/einkauf/angebote/{entity_id}/tabs/positionen", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Angebot-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "angebot_nr", "label": "Angebot-Nr.", "type": "text", "readOnly": True},
+                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
+                 {"key": "datum", "label": "Datum", "type": "date"},
+                 {"key": "gueltig_bis", "label": "Gueltig bis", "type": "date"},
+                 {"key": "gesamtbetrag", "label": "Gesamtbetrag", "type": "currency"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "artikel_nr", "label": "Artikel-Nr.", "sortable": True},
+                             {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
+                             {"key": "menge", "label": "Menge", "numeric": True, "renderKind": "number"},
+                             {"key": "einzelpreis", "label": "Einzelpreis", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                         ]}]},
+        ],
+        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "stubReason": "commandEndpoint folgt"}],
+        "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
+        "agentContract": {
+            "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",
+            "examplePrompts": ["Wie lange ist Angebot {entity_id} gueltig?", "Zeige alle Positionen und Preise von Angebot {entity_id}."],
+            "sensitiveFields": ["gesamtbetrag", "einzelpreis"],
+            "testSelectors": {"screenRoot": "[data-testid='einkauf-angebot']", "primaryAction": "[data-testid='action-bestellen']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
+    }
+
+
+def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
+    """Native SD fuer einkauf/anlieferavis."""
+    return {
+        "schemaVersion": 1, "id": "einkauf/anlieferavis", "domain": "einkauf", "mode": "detail",
+        "title": "Anlieferavis", "subtitle": "Einkauf / Wareneingangsankuendigung",
+        "adapter": {"type": "native", "sourceId": "einkauf/anlieferavis", "temporary": False},
+        "summaryEndpoint": "/api/v1/einkauf/anlieferavise/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/einkauf/anlieferavise/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/einkauf/anlieferavise/{entity_id}/tabs/positionen", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Avis-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "avis_nr", "label": "Avis-Nr.", "type": "text", "readOnly": True},
+                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
+                 {"key": "lieferdatum", "label": "Lieferdatum", "type": "date"},
+                 {"key": "lieferschein_nr", "label": "Lieferanten-LS-Nr.", "type": "text"},
+                 {"key": "lagerort", "label": "Lagerort", "type": "text"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "artikel_nr", "label": "Artikel-Nr.", "sortable": True},
+                             {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
+                             {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                             {"key": "einheit", "label": "Einheit", "width": 70},
+                             {"key": "charge", "label": "Charge", "width": 120},
+                         ]}]},
+        ],
+        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt"}],
+        "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
+        "agentContract": {
+            "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",
+            "examplePrompts": ["Wann ist Avis {entity_id} angekuendigt?", "Zeige alle Positionen von Avis {entity_id}."],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='einkauf-anlieferavis']", "primaryAction": "[data-testid='action-wareneingang']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
+    }
+
+
+def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
+    """Native SD fuer einkauf/auftragsbestaetigung."""
+    return {
+        "schemaVersion": 1, "id": "einkauf/auftragsbestaetigung", "domain": "einkauf", "mode": "detail",
+        "title": "Auftragsbestaetigung", "subtitle": "Einkauf / Lieferanten-AB",
+        "adapter": {"type": "native", "sourceId": "einkauf/auftragsbestaetigung", "temporary": False},
+        "summaryEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}"},
+            {"key": "positionen", "endpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/tabs/positionen", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "AB-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "ab_nr", "label": "AB-Nr.", "type": "text", "readOnly": True},
+                 {"key": "bestell_nr", "label": "Bestell-Nr.", "type": "text", "readOnly": True},
+                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
+                 {"key": "datum", "label": "Datum", "type": "date"},
+                 {"key": "lieferdatum", "label": "Zugesagter Liefertermin", "type": "date"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "artikel_nr", "label": "Artikel-Nr.", "sortable": True},
+                             {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
+                             {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                             {"key": "einheit", "label": "Einheit", "width": 70},
+                             {"key": "einzelpreis", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.ab.update"}],
+        "noWorkflowReason": "AB-Status wird durch Lieferfortschritt gesetzt — kein separater Workflow.",
+        "agentContract": {
+            "businessPurpose": "Auftragsbestaetigung: Lieferanten-Rueckmeldung auf Bestellung mit zugesagtem Liefertermin.",
+            "examplePrompts": ["Wann hat Lieferant den Liefertermin fuer AB {entity_id} zugesagt?", "Zeige alle Positionen von AB {entity_id}."],
+            "sensitiveFields": ["einzelpreis"],
+            "testSelectors": {"screenRoot": "[data-testid='einkauf-auftragsbestaetigung']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
+    }
+
+
+def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
+    """Native SD fuer qualitaet/reklamation."""
+    return {
+        "schemaVersion": 1, "id": "qualitaet/reklamation", "domain": "qualitaet", "mode": "detail",
+        "title": "Reklamation", "subtitle": "Qualitaet / Reklamationsbearbeitung",
+        "adapter": {"type": "native", "sourceId": "qualitaet/reklamation", "temporary": False},
+        "summaryEndpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}"},
+            {"key": "massnahmen", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/tabs/massnahmen", "pageSize": 25},
+            {"key": "dokumente", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/tabs/dokumente", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Reklamation", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "rekl_nr", "label": "Reklamations-Nr.", "type": "text", "readOnly": True},
+                 {"key": "titel", "label": "Titel", "type": "text", "required": True},
+                 {"key": "kunde", "label": "Kunde / Lieferant", "type": "text"},
+                 {"key": "datum", "label": "Datum", "type": "date"},
+                 {"key": "artikel", "label": "Artikel", "type": "text"},
+                 {"key": "prioritaet", "label": "Prioritaet", "type": "text"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "massnahmen", "label": "Massnahmen", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "massnahmen", "label": "Massnahmen", "dataSourceKey": "massnahmen",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "typ", "label": "Typ", "filterable": True, "width": 120},
+                             {"key": "beschreibung", "label": "Beschreibung", "width": 240},
+                             {"key": "verantwortlich", "label": "Verantwortlich", "width": 140},
+                             {"key": "status", "label": "Status", "filterable": True, "width": 100},
+                         ]}]},
+            {"key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "typ", "label": "Typ", "filterable": True, "width": 120},
+                             {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                         ]}]},
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "qualitaet.reklamation.update"},
+            {"key": "abschliessen", "label": "Abschliessen", "kind": "secondary", "dangerLevel": "moderate", "permission": "qualitaet.reklamation.close", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt"},
+        ],
+        "noWorkflowReason": "Reklamations-Status wird manuell gesetzt — Massnahmentracking ist tabellenbasiert.",
+        "agentContract": {
+            "businessPurpose": "Reklamation: Qualitaetsmaengel mit Massnahmen und Dokumenten fuer Reklamationsbearbeitung.",
+            "examplePrompts": ["Was ist der Status von Reklamation {entity_id}?", "Zeige alle offenen Massnahmen von Reklamation {entity_id}."],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='qualitaet-reklamation']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "qualitaet"},
+    }
+
+
+def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
+    """Native SD fuer futtermittel/einzelfuttermittel."""
+    return {
+        "schemaVersion": 1, "id": "futtermittel/einzelfuttermittel", "domain": "futtermittel", "mode": "detail",
+        "title": "Einzelfuttermittel", "subtitle": "Futtermittel / Rohstoff-Stamm",
+        "adapter": {"type": "native", "sourceId": "futtermittel/einzelfuttermittel", "temporary": False},
+        "summaryEndpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}"},
+            {"key": "naehrstoffe", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/tabs/naehrstoffe", "pageSize": 50},
+            {"key": "preise", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/tabs/preise", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "futtermittel_nr", "label": "FM-Nr.", "type": "text", "readOnly": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                 {"key": "quelle", "label": "Quelle / Kategorie", "type": "text"},
+                 {"key": "trockensubstanz", "label": "Trockensubstanz %", "type": "number"},
+                 {"key": "energie_nel", "label": "NEL (MJ)", "type": "number"},
+                 {"key": "rohprotein", "label": "Rohprotein %", "type": "number"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "naehrstoffe", "label": "Naehrstoffe", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "naehrstoffe", "label": "Naehrstoffgehalte", "dataSourceKey": "naehrstoffe",
+                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "naehrstoff", "label": "Naehrstoff", "sortable": True, "filterable": True},
+                             {"key": "gehalt", "label": "Gehalt", "numeric": True, "renderKind": "number"},
+                             {"key": "einheit", "label": "Einheit", "width": 80},
+                             {"key": "quelle", "label": "Quelle", "filterable": True, "width": 120},
+                         ]}]},
+            {"key": "preise", "label": "Preise", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "preise", "label": "Preise", "dataSourceKey": "preise",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "gueltig_ab", "label": "Gueltig ab", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "preis", "label": "Preis/t", "numeric": True, "sortable": True, "renderKind": "currency"},
+                             {"key": "lieferant", "label": "Lieferant", "filterable": True, "width": 180},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.einzelfm.update"}],
+        "noWorkflowReason": "Futtermittel-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Einzelfuttermittel-Stamm: Naehrstoffgehalte und Preise fuer Rationsoptimierung.",
+            "examplePrompts": ["Welche NEL und Rohprotein-Gehalte hat Futtermittel {entity_id}?", "Zeige die aktuellen Preise fuer Futtermittel {entity_id}."],
+            "sensitiveFields": ["preis"],
+            "testSelectors": {"screenRoot": "[data-testid='futtermittel-einzelfuttermittel']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
+    }
+
+
+def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
+    """Native SD fuer futtermittel/mischfuttermittel."""
+    return {
+        "schemaVersion": 1, "id": "futtermittel/mischfuttermittel", "domain": "futtermittel", "mode": "detail",
+        "title": "Mischfuttermittel", "subtitle": "Futtermittel / Misch-Rezeptur",
+        "adapter": {"type": "native", "sourceId": "futtermittel/mischfuttermittel", "temporary": False},
+        "summaryEndpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}"},
+            {"key": "rezeptur", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/tabs/rezeptur", "pageSize": 50},
+            {"key": "naehrstoffe", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/tabs/naehrstoffe", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "misch_nr", "label": "Misch-Nr.", "type": "text", "readOnly": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                 {"key": "tierart", "label": "Tierart", "type": "text"},
+                 {"key": "leistungsgruppe", "label": "Leistungsgruppe", "type": "text"},
+                 {"key": "preis_je_t", "label": "Preis/t", "type": "currency"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "rezeptur", "label": "Rezeptur", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "rezeptur", "label": "Komponenten", "dataSourceKey": "rezeptur",
+                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "futtermittel", "label": "Einzelfuttermittel", "sortable": True, "filterable": True, "width": 220},
+                             {"key": "anteil_pct", "label": "Anteil %", "numeric": True, "sortable": True, "renderKind": "number"},
+                             {"key": "menge_je_t", "label": "Menge/t", "numeric": True, "renderKind": "number"},
+                         ]}]},
+            {"key": "naehrstoffe", "label": "Naehrstoffe (berechnet)", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "naehrstoffe", "label": "Naehrstoffgehalte", "dataSourceKey": "naehrstoffe",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "naehrstoff", "label": "Naehrstoff", "sortable": True, "filterable": True},
+                             {"key": "gehalt", "label": "Gehalt", "numeric": True, "renderKind": "number"},
+                             {"key": "einheit", "label": "Einheit", "width": 80},
+                         ]}]},
+        ],
+        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.mischfm.update"}],
+        "noWorkflowReason": "Mischfuttermittel-Stamm ist Referenzdaten ohne Prozess-Lebenszyklus.",
+        "agentContract": {
+            "businessPurpose": "Mischfuttermittel: Rezeptur-Komponenten und berechnete Naehrstoffgehalte fuer Rationsoptimierung.",
+            "examplePrompts": ["Welche Komponenten hat Mischfutter {entity_id}?", "Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}."],
+            "sensitiveFields": ["preis_je_t"],
+            "testSelectors": {"screenRoot": "[data-testid='futtermittel-mischfuttermittel']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
+    }
+
+
+def build_crm_lead_screen_definition() -> dict[str, Any]:
+    """Native SD fuer crm/lead."""
+    return {
+        "schemaVersion": 1, "id": "crm/lead", "domain": "crm", "mode": "detail",
+        "title": "Lead", "subtitle": "CRM / Lead-Verwaltung",
+        "adapter": {"type": "native", "sourceId": "crm/lead", "temporary": False},
+        "summaryEndpoint": "/api/v1/crm/leads/{entity_id}/screen-summary",
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/crm/leads/{entity_id}"},
+            {"key": "aktivitaeten", "endpoint": "/api/v1/crm/leads/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
+            {"key": "aufgaben", "endpoint": "/api/v1/crm/leads/{entity_id}/tabs/aufgaben", "pageSize": 25},
+        ],
+        "tabs": [
+            {"key": "kopf", "label": "Lead-Daten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": [
+                 {"key": "lead_nr", "label": "Lead-Nr.", "type": "text", "readOnly": True},
+                 {"key": "titel", "label": "Titel", "type": "text", "required": True},
+                 {"key": "unternehmen", "label": "Unternehmen", "type": "text"},
+                 {"key": "kontakt", "label": "Ansprechpartner", "type": "text"},
+                 {"key": "quelle", "label": "Quelle", "type": "text"},
+                 {"key": "wert", "label": "Geschaetzter Wert", "type": "currency"},
+                 {"key": "status", "label": "Status", "type": "text"},
+             ]},
+            {"key": "aktivitaeten", "label": "Aktivitaeten", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "aktivitaeten", "label": "Aktivitaeten", "dataSourceKey": "aktivitaeten",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "typ", "label": "Typ", "filterable": True, "width": 100},
+                             {"key": "betreff", "label": "Betreff", "width": 220},
+                             {"key": "benutzer", "label": "Benutzer", "width": 140},
+                         ]}]},
+            {"key": "aufgaben", "label": "Aufgaben", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "aufgaben", "label": "Aufgaben", "dataSourceKey": "aufgaben",
+                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "faellig", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 110},
+                             {"key": "titel", "label": "Titel", "filterable": True, "width": 220},
+                             {"key": "prioritaet", "label": "Prioritaet", "filterable": True, "width": 100},
+                             {"key": "status", "label": "Status", "filterable": True, "width": 100},
+                         ]}]},
+        ],
+        "actions": [
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.lead.update"},
+            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "stubReason": "commandEndpoint + Opportunity-Erzeugungs-Flow folgt"},
+        ],
+        "noWorkflowReason": "Lead-Status wird manuell gesetzt — Qualifizierung erzeugt Opportunity (separate Maske).",
+        "agentContract": {
+            "businessPurpose": "Lead-Cockpit: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.",
+            "examplePrompts": ["Was ist der Status von Lead {entity_id}?", "Zeige alle offenen Aufgaben fuer Lead {entity_id}.", "Welche Aktivitaeten wurden fuer Lead {entity_id} erfasst?"],
+            "sensitiveFields": ["wert"],
+            "testSelectors": {"screenRoot": "[data-testid='crm-lead']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "crm"},
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
@@ -1120,6 +1786,20 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "lager/stock-movement": build_lager_stock_movement_screen_definition,
     "agrar/harvest-settlement": build_agrar_harvest_settlement_screen_definition,
     "finance/payment-run": build_finance_payment_run_screen_definition,
+    # Wave 2: alle verbleibenden ObjectPage-Masken (UIX-043)
+    "agrar/duenger": build_agrar_duenger_screen_definition,
+    "agrar/saatgut": build_agrar_saatgut_screen_definition,
+    "finance/debitor": build_finance_debitor_screen_definition,
+    "finance/kreditor": build_finance_kreditor_screen_definition,
+    "finance/bankkonto": build_finance_bankkonto_screen_definition,
+    "einkauf/anfrage": build_einkauf_anfrage_screen_definition,
+    "einkauf/angebot": build_einkauf_angebot_screen_definition,
+    "einkauf/anlieferavis": build_einkauf_anlieferavis_screen_definition,
+    "einkauf/auftragsbestaetigung": build_einkauf_auftragsbestaetigung_screen_definition,
+    "qualitaet/reklamation": build_qualitaet_reklamation_screen_definition,
+    "futtermittel/einzelfuttermittel": build_futtermittel_einzelfuttermittel_screen_definition,
+    "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
+    "crm/lead": build_crm_lead_screen_definition,
 }
 
 

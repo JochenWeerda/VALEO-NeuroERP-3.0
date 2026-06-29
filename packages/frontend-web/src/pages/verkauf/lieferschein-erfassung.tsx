@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import type { Customer } from '@/components/sales/CustomerSelectionDialog'
 import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useAuth } from '@/hooks/useAuth'
 import { useSchlaege } from '@/lib/api/agrar'
 import { useKontraktLookup } from '@/hooks/useKontraktLookup'
@@ -32,6 +32,65 @@ import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility
 import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
 import { NativeSelect } from '@/components/ui/native-select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search } from 'lucide-react'
+
+type UnknownRecord = Record<string, unknown>
+
+function apiRecord(value: unknown): UnknownRecord | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as UnknownRecord) : null
+}
+
+function apiString(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return fallback
+}
+
+function apiOptionalString(value: unknown): string | undefined {
+  const s = apiString(value)
+  return s || undefined
+}
+
+function apiNumber(value: unknown, fallback = 0): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    const n = Number(value)
+    if (Number.isFinite(n)) return n
+  }
+  return fallback
+}
+
+function apiListItems(payload: unknown): UnknownRecord[] {
+  if (Array.isArray(payload)) {
+    return payload.map((item) => apiRecord(item)).filter((item): item is UnknownRecord => item !== null)
+  }
+  const record = apiRecord(payload)
+  if (!record) return []
+  const nested = record.items ?? record.data
+  if (Array.isArray(nested)) {
+    return nested.map((item) => apiRecord(item)).filter((item): item is UnknownRecord => item !== null)
+  }
+  return []
+}
+
+function mapCustomerFromApi(raw: unknown, fallback?: Partial<Customer>): Customer {
+  const cd = apiRecord(raw) ?? {}
+  const paymentRaw = cd.payment_terms ?? cd.paymentTerms
+  return {
+    id: apiString(cd.id, fallback?.id ?? ''),
+    customerNumber: apiString(cd.customer_number ?? cd.customerNumber, fallback?.customerNumber ?? ''),
+    name: apiString(cd.company_name ?? cd.name, fallback?.name ?? ''),
+    debitorAccount: apiString(cd.customer_number ?? cd.customerNumber, fallback?.debitorAccount ?? ''),
+    representative: apiOptionalString(cd.contact_person ?? cd.representative) ?? fallback?.representative,
+    postalCode: apiOptionalString(cd.postal_code ?? cd.postalCode) ?? fallback?.postalCode,
+    city: apiOptionalString(cd.city) ?? fallback?.city,
+    creditLimit: cd.credit_limit != null ? apiString(cd.credit_limit) : fallback?.creditLimit,
+    paymentTerms: typeof paymentRaw === 'number' ? paymentRaw : fallback?.paymentTerms,
+    address: apiRecord(cd.address) as Customer['address'] | undefined,
+    phone: apiOptionalString(cd.phone) ?? fallback?.phone,
+    email: apiOptionalString(cd.email) ?? fallback?.email,
+    chefanweisung: apiOptionalString(cd.chefanweisung ?? cd.executive_note) ?? fallback?.chefanweisung,
+  }
+}
 
 const CustomerSelectionDialog = lazy(() =>
   import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
@@ -348,16 +407,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         if (response.customer_id) {
           try {
             const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
-            customer = {
-              id: customerData.id,
-              customerNumber: customerData.customer_number || customerData.customerNumber || '',
-              name: customerData.company_name || customerData.name || '',
-              debitorAccount: customerData.customer_number || customerData.customerNumber || '',
-              representative: customerData.contact_person || customerData.representative,
-              postalCode: customerData.postal_code || customerData.postalCode,
-              city: customerData.city,
-              chefanweisung: customerData.chefanweisung || customerData.executive_note,
-            }
+            customer = mapCustomerFromApi(customerData)
           } catch {
             // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
@@ -372,9 +422,12 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             if (pos.artikel_id) {
               try {
                 const artikelResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/articles/${pos.artikel_id}`)
-                artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
-                artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
-                  artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
+                artikelGewicht = apiNumber(artikelResponse.weight ?? artikelResponse.gewicht)
+                artikelGefahrgutPunkte = apiNumber(
+                  artikelResponse.gefahrgut_punkte ?? artikelResponse.gefahrgutpunkte ?? artikelResponse.gefahrgutPunkte,
+                ) || (typeof artikelResponse.gefahrgutklasse === 'string'
+                  ? parseFloat(artikelResponse.gefahrgutklasse) || 0
+                  : 0)
               } catch {
                 // Artikel-Stammdaten schlagen still fehl — Gefahrgut-Punkte bleiben 0
               }
@@ -433,7 +486,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         if (branchId) {
           try {
             const branch = await apiClient.get<Record<string, unknown>>(`/api/v1/admin/branches/${branchId}`)
-            niederlassung = branch.branch_number || 0
+            niederlassung = apiNumber(branch.branch_number)
             // Cache speichern
             setBranchCache((prev) => new Map(prev).set(niederlassung, branchId))
           } catch {
@@ -555,22 +608,15 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             if (!cd) throw new Error('Empty customer detail response')
             setState((prev) => ({
               ...prev,
-              customer: {
-                id: cd.id ?? handoverCustomer?.id ?? order.customer_id,
-                customerNumber: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.customerNumber ?? '',
-                name: cd.company_name ?? cd.name ?? handoverCustomer?.name ?? '',
-                debitorAccount: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.debitorAccount ?? '',
-                representative: cd.contact_person ?? cd.representative,
-                postalCode: cd.postal_code ?? cd.postalCode,
-                city: cd.city,
-                creditLimit: cd.credit_limit?.toString(),
-                address: cd.address,
-                phone: cd.phone,
-                email: cd.email,
-                chefanweisung: cd.chefanweisung ?? cd.executive_note,
-                paymentTerms: cd.payment_terms,
-              },
-              vertreter: cd.contact_person ?? cd.representative ?? prev.vertreter,
+              customer: mapCustomerFromApi(cd, {
+                id: handoverCustomer?.id ?? order.customer_id ?? '',
+                customerNumber: handoverCustomer?.customerNumber ?? '',
+                name: handoverCustomer?.name ?? '',
+                debitorAccount: handoverCustomer?.debitorAccount ?? '',
+                creditLimit: handoverCustomer?.creditLimit,
+                paymentTerms: handoverCustomer?.paymentTerms,
+              }),
+              vertreter: apiString(apiRecord(cd)?.contact_person ?? apiRecord(cd)?.representative, prev.vertreter || ''),
             }))
           } catch { /* Kundendaten nicht verfügbar, weiter ohne Prefill */ }
         }
@@ -696,21 +742,21 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         apiClient.get<Record<string, unknown>>('/api/v1/portal/bestellungen', { params: { customer_id: customer.id, status: 'bestellt', limit: 20 } }),
       ])
 
-      const orders = ordersResp.status === 'fulfilled' ? (ordersResp.value.items || ordersResp.value || []) : []
-      const mapped = orders.map(o => ({
-        id: o.id,
-        bestellNr: o.order_number || o.orderNumber || '',
+      const orders = ordersResp.status === 'fulfilled' ? apiListItems(ordersResp.value) : []
+      const mapped = orders.map((o) => ({
+        id: apiString(o.id),
+        bestellNr: apiString(o.order_number ?? o.orderNumber),
         datum: o.created_at
-          ? new Date(o.created_at).toLocaleDateString('de-DE')
+          ? new Date(apiString(o.created_at)).toLocaleDateString('de-DE')
           : new Date().toLocaleDateString('de-DE'),
       }))
       setBestellungen(mapped)
 
       const quotesCount = quotesResp.status === 'fulfilled'
-        ? (quotesResp.value.items || quotesResp.value || []).length
+        ? apiListItems(quotesResp.value).length
         : 0
       const portalCount = portalResp.status === 'fulfilled'
-        ? (Array.isArray(portalResp.value) ? portalResp.value : (portalResp.value.items || portalResp.value.data || [])).length
+        ? apiListItems(portalResp.value).length
         : 0
       setVorgaengerCount(mapped.length + quotesCount + portalCount)
     } catch (error) {
@@ -759,30 +805,25 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
   // Artikel auswählen
   const handleArticleSelect = (article: Record<string, unknown>): void => {
-    // API gibt zurück: article_number, name, description, sales_price, mehrwertsteuer_prozent, unit
-    const mwstProzent = article.mehrwertsteuer_prozent || article.mwstProzent || 19
-    const articleId = article.id
-    
-    // Standardwerte (Fallback falls Pricing-API nicht verfügbar)
-    const fallbackListenpreis = article.sales_price || article.salesPrice || 0
-    
-    // Setze zunächst Standardwerte
-    const artikelGewicht = article.weight || article.gewicht || 0
-    // Gefahrgut-Punkte aus Artikel laden (kann direkt als Zahl oder aus gefahrgutklasse berechnet werden)
-    const artikelGefahrgutPunkte = article.gefahrgut_punkte || article.gefahrgutpunkte || article.gefahrgutPunkte || 
-      (article.gefahrgutklasse ? parseFloat(article.gefahrgutklasse) || 0 : 0)
+    const mwstProzent = apiNumber(article.mehrwertsteuer_prozent ?? article.mwstProzent, 19)
+    const articleId = apiString(article.id)
+    const fallbackListenpreis = apiNumber(article.sales_price ?? article.salesPrice)
+    const artikelGewicht = apiNumber(article.weight ?? article.gewicht)
+    const artikelGefahrgutPunkte = apiNumber(
+      article.gefahrgut_punkte ?? article.gefahrgutpunkte ?? article.gefahrgutPunkte,
+    ) || (typeof article.gefahrgutklasse === 'string' ? parseFloat(article.gefahrgutklasse) || 0 : 0)
     setCurrentPosition((prev) => ({
       ...prev,
-      artikelNr: article.article_number || article.articleNumber || '',
-      artikelId: article.id || articleId || null, // Artikel-ID für Backend-Mapping
-      artikelBezeichnung: article.name || article.description || '',
-      artikelBezeichnung2: article.description || article.description2 || '',
-      einheit: article.unit || 'Stk',
+      artikelNr: apiString(article.article_number ?? article.articleNumber),
+      artikelId: articleId || null,
+      artikelBezeichnung: apiString(article.name ?? article.description),
+      artikelBezeichnung2: apiString(article.description ?? article.description2),
+      einheit: apiString(article.unit, 'Stk'),
       listenpreis: fallbackListenpreis,
-      einhPreis: fallbackListenpreis, // Wird bei Preisberechnung aktualisiert
-      mwstProzent: Number(mwstProzent) || 19,
-      artikelGewicht, // Gewicht pro Einheit aus Artikel
-      artikelGefahrgutPunkte, // Gefahrgut-Punkte pro Einheit aus Artikel
+      einhPreis: fallbackListenpreis,
+      mwstProzent: mwstProzent || 19,
+      artikelGewicht,
+      artikelGefahrgutPunkte,
     }))
     
     // Hole Listenpreis aus Preisliste (mit Mengenstaffel-Berücksichtigung) asynchron
@@ -1118,7 +1159,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       '/api/v1/sales/delivery-notes',
       { params: { limit: 100 } }
     )
-    return Array.isArray(list) ? list : (list as Record<string, unknown>)?.data ?? []
+    return apiListItems(list) as Array<{ id: string; delivery_note_number: string; customer_id?: string; delivery_date?: string }>
   }
   const handleLieferscheinSuchenOpen = async (): Promise<void> => {
     try {
@@ -1163,8 +1204,10 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     let cancelled = false
     apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
       .then((res) => {
-        const list = (res as Record<string, unknown>)?.data ?? res
-        if (!cancelled && Array.isArray(list)) setBranchesList(list)
+        const list = apiListItems(res)
+        if (!cancelled && list.length > 0) {
+          setBranchesList(list as Array<{ id: string; branch_number: number; name: string }>)
+        }
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -1173,8 +1216,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const handleNiederlassungOpen = async (): Promise<void> => {
     try {
       const res = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
-      const list = (res as Record<string, unknown>)?.data ?? res
-      setBranchesList(Array.isArray(list) ? list : [])
+      const list = apiListItems(res) as Array<{ id: string; branch_number: number; name: string }>
+      setBranchesList(list)
       setShowNiederlassungDialog(true)
     } catch (_rawErr: unknown) {
         const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -1472,7 +1515,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         if (cancelled) return
         setPositionContext(null)
         setPositionContextError(
-          error?.response?.data?.detail || error?.message || 'Positionskontext konnte nicht geladen werden.',
+          getAxiosErrorMessage(error) || 'Positionskontext konnte nicht geladen werden.',
         )
       } finally {
         if (!cancelled) {
@@ -1523,21 +1566,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         if (response.customer_id) {
           try {
             const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
-            const cd = customerData as Record<string, string | undefined>
-            customer = {
-              id: customerData.id,
-              customerNumber: cd.customer_number || cd.customerNumber || '',
-              name: cd.company_name || cd.name || '',
-              debitorAccount: cd.customer_number || cd.customerNumber || '',
-              representative: cd.contact_person || cd.representative,
-              postalCode: cd.postal_code || cd.postalCode,
-              city: cd.city,
-              creditLimit: cd.credit_limit,
-              address: customerData.address as { street?: string; postalCode?: string; city?: string; phone?: string; fax?: string } | undefined,
-              phone: cd.phone,
-              email: cd.email,
-              chefanweisung: cd.chefanweisung || cd.executive_note,
-            }
+            customer = mapCustomerFromApi(customerData)
           } catch {
             // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
