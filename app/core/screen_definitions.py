@@ -434,13 +434,13 @@ _ROLLOUT_TAB_COLUMNS: dict[str, dict[str, list[dict[str, Any]]]] = {
     },
     "einkauf/supplier": {
         "kontakte": [
-            _txt("name", "Name", width=180),
-            _txt("funktion", "Funktion", width=140),
+            _txt("name", "Name", width=180, sortable=True),
+            _txt("funktion", "Funktion", width=140, filterable=True),
             _txt("telefon", "Telefon", width=130),
             _txt("email", "E-Mail", width=200),
         ],
         "bestellungen": [
-            _txt("bestell_nr", "Bestell-Nr.", width=130),
+            _txt("bestell_nr", "Bestell-Nr.", width=130, sortable=True),
             _date("datum", "Datum"),
             _status("status", "Status"),
             _num("betrag", "Betrag", render_kind="currency"),
@@ -524,45 +524,114 @@ _ROLLOUT_TAB_COLUMNS: dict[str, dict[str, list[dict[str, Any]]]] = {
 }
 
 
+_ROLLOUT_KOPF_FIELDS: dict[str, list[dict[str, Any]]] = {
+    "_default": [
+        {"key": "nummer", "label": "Nummer", "type": "text", "readOnly": True},
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text"},
+        {"key": "datum", "label": "Datum", "type": "date"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+    "lager": [
+        {"key": "bewegungs_nr", "label": "Bewegungs-Nr.", "type": "text", "readOnly": True},
+        {"key": "artikel_nr", "label": "Artikel-Nr.", "type": "text"},
+        {"key": "artikel_bezeichnung", "label": "Bezeichnung", "type": "text"},
+        {"key": "datum", "label": "Datum", "type": "date"},
+        {"key": "typ", "label": "Typ", "type": "text"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+    "finance": [
+        {"key": "beleg_nr", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
+        {"key": "kreditor_debitor", "label": "Kreditor/Debitor", "type": "text"},
+        {"key": "datum", "label": "Datum", "type": "date"},
+        {"key": "faellig_am", "label": "Faellig am", "type": "date"},
+        {"key": "brutto", "label": "Brutto", "type": "currency"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+    "einkauf": [
+        {"key": "bestell_nr", "label": "Bestell-Nr.", "type": "text", "readOnly": True},
+        {"key": "lieferant", "label": "Lieferant", "type": "text"},
+        {"key": "datum", "label": "Datum", "type": "date"},
+        {"key": "betrag", "label": "Betrag", "type": "currency"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+    "crm": [
+        {"key": "opportunity_nr", "label": "Opportunity-Nr.", "type": "text", "readOnly": True},
+        {"key": "kunde", "label": "Kunde", "type": "text"},
+        {"key": "phase", "label": "Phase", "type": "text"},
+        {"key": "wert", "label": "Wert", "type": "currency"},
+        {"key": "abschluss_datum", "label": "Abschlussdatum", "type": "date"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+    "sales": [
+        {"key": "ls_nr", "label": "Lieferschein-Nr.", "type": "text", "readOnly": True},
+        {"key": "kunde", "label": "Kunde", "type": "text"},
+        {"key": "datum", "label": "Datum", "type": "date"},
+        {"key": "versandart", "label": "Versandart", "type": "text"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+    "agrar": [
+        {"key": "abrechnungs_nr", "label": "Abrechnungs-Nr.", "type": "text", "readOnly": True},
+        {"key": "erzeuger", "label": "Erzeuger", "type": "text"},
+        {"key": "ernte_jahr", "label": "Erntejahr", "type": "text"},
+        {"key": "gesamtbetrag", "label": "Gesamtbetrag", "type": "currency"},
+        {"key": "status", "label": "Status", "type": "text"},
+    ],
+}
+
+
 def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
     """Builds a ScreenDefinition from a RolloutWaveSpec with dataSources and typed columns."""
     tab_columns = _ROLLOUT_TAB_COLUMNS.get(spec.screen_id, {})
 
-    # Only lazy tabs have real tab endpoints; kopf/header tabs load via entity endpoint
-    data_sources = [
+    # Always include entity dataSource (bound to kopf tab)
+    data_sources: list[dict[str, Any]] = [
+        {"key": "entity", "endpoint": f"{spec.api_prefix}/{{entity_id}}"},
+    ]
+    data_sources += [
         {
             "key": tab_key,
-            # Use the generic rollout tab endpoint (not domain-specific api_prefix)
             "endpoint": f"/api/v1/mask-rollouts/{spec.screen_id}/{{entity_id}}/tabs/{tab_key}",
             "pageSize": 25,
         }
         for tab_key in spec.lazy_tabs
     ]
 
-    tabs = [
-        {
-            "key": tab_key,
-            "label": _TAB_LABELS.get(tab_key, tab_key.title()),
-            "lazy": True,
-            "keepAlive": False,
-            "tables": [
-                {
-                    "key": tab_key,
-                    "label": _TAB_LABELS.get(tab_key, tab_key.title()),
-                    "dataSourceKey": tab_key,
-                    "serverPagination": True,
-                    "pageSize": 25,
-                    "virtualized": True,
-                    "rowHeight": 52,
-                    "columns": tab_columns.get(tab_key, [
-                        {"key": "id", "label": "ID", "width": 100},
-                        {"key": "bezeichnung", "label": "Bezeichnung"},
-                    ]),
-                }
-            ],
-        }
-        for tab_key in spec.available_tabs
-    ]
+    tabs: list[dict[str, Any]] = []
+    for tab_key in spec.available_tabs:
+        label = _TAB_LABELS.get(tab_key, tab_key.title())
+        if tab_key == "kopf":
+            # Header/detail tab: fields[] bound to entity dataSource, not a table
+            tabs.append({
+                "key": "kopf",
+                "label": "Details",
+                "lazy": False,
+                "keepAlive": True,
+                "dataSourceKey": "entity",
+                "fields": _ROLLOUT_KOPF_FIELDS.get(spec.domain, _ROLLOUT_KOPF_FIELDS["_default"]),
+            })
+        else:
+            tabs.append({
+                "key": tab_key,
+                "label": label,
+                "lazy": True,
+                "keepAlive": False,
+                "tables": [
+                    {
+                        "key": tab_key,
+                        "label": label,
+                        "dataSourceKey": tab_key,
+                        "serverPagination": True,
+                        "pageSize": 25,
+                        "virtualized": True,
+                        "rowHeight": 52,
+                        "columns": tab_columns.get(tab_key, [
+                            _txt("nr", "Nr.", width=120, sortable=True),
+                            _txt("bezeichnung", "Bezeichnung"),
+                            _date("datum", "Datum"),
+                        ]),
+                    }
+                ],
+            })
 
     return {
         "schemaVersion": 1,
@@ -582,6 +651,7 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "stubReason": "permission not yet assigned"},
         ],
+        "noWorkflowReason": f"Rollout-Pilot fuer {spec.screen_id} — Workflow-Deklaration erfolgt nach nativer Paritaet.",
         "layout": {
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",

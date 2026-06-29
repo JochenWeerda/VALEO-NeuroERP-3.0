@@ -11,23 +11,58 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-035 — ActionRuntime Backend-Command: CRM Aktivitaet anlegen
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — `POST /api/v1/crm/customers/{customer_id}/actions/create_activity` mit vollstaendigem Mode-Support (validate/dryRun/propose/execute); Audit-Log-Eintrag bei execute; graceful degradation bei fehlender Tabelle im Dev/Test. `commandEndpoint` in ScreenDefinition verdrahtet.
+**Ziel:** Erste produktive Mutation ueber ActionRuntime — fachlich relevant, kein Zahlungsrisiko.
+**Dateibesitz:** `app/api/v1/endpoints/crm_360.py`, `app/core/screen_definitions.py` (commandEndpoint), `tests/test_uix035_action_runtime_crm.py`.
+**Abnahme:** 14/14 pytest gruen — validate/dryRun/propose/execute, AgentContract-Gate, Readiness-Gates, commandEndpoint-Verdrahtung.
+
+## UIX-036 — Agent-Modus End-to-End-Test
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Agent-Pfad (propose → dryRun → validate, kein execute) in `tests/test_uix035_action_runtime_crm.py` getestet. `checkActionPolicy` blockiert `forbiddenForAgents`/`humanApprovalRequired` korrekt. `create_activity` im AgentContract sichtbar mit `requiresHumanApproval=False`.
+**Ziel:** VALEO agentenfaehig — Agent kann sicher lesen, vorschlagen, trocken laufen ohne zu schreiben.
+**Dateibesitz:** `tests/test_uix035_action_runtime_crm.py` (test_agent_*), `packages/frontend-web/src/components/mask-builder/runtime/ActionRuntime.ts` (`checkActionPolicy`), `useActionRuntime.ts` (`useAgentActionDispatch`).
+**Abnahme:** test_agent_dry_run_propose_chain, test_agent_contract_gate_on_action_definition gruen.
+
+## UIX-037 — Rollout-Kandidaten Readiness-Bewertung
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Alle 10 Kandidaten (Wave 42-51) gegen 12 Gates geprueft; strukturelle Fehler behoben; advisoryScore einheitlich 50%; einziger Mandatory-Blocker = `non_temporary` (intentional — Rollout-Status).
+**Ziel:** Beweisen dass die 10 Kandidaten strukturell korrekt sind; Promotions-Reihenfolge festlegen.
+**Dateibesitz:** `app/core/screen_definitions.py` (_ROLLOUT_KOPF_FIELDS, entity-DataSource, fields[]-Tab, noWorkflowReason, sortable/filterable kontakte), `docs/architecture/uix/uix-037-rollout-readiness-report.md`.
+**Abnahme:** Alle 10 Kandidaten: mandatory errors = 1 (non_temporary only), advisory = 50%, keine strukturellen Fehler.
+
+**Promotions-Reihenfolge:**
+1. einkauf/supplier → UIX-038 (naechster Schritt)
+2. crm/opportunity
+3. lager/article-stock
+4. sales/delivery-note
+5. einkauf/purchase-order
+6. finance/ap-invoice
+7. finance/ar-open-item
+8. lager/stock-movement
+9. agrar/harvest-settlement
+10. finance/payment-run (zuletzt — hoechstes Risiko)
+
 ## UIX-STABILIZATION-031-034 — Runtime-Stabilisierung und Produktionsnachweis
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-29 — UIX-031 Doku-Konsolidierung abgeschlossen (`universal-mask-runtime-status.md`); UIX-033 Gates in `fd2b8a7cf`; pytest rollout+agent/readiness **43/43** lokal gruen; **UIX-032** Frontend type-check/build/vitest + GitHub Actions noch offen; **UIX-034** Parity-Matrix angelegt, fachliche Verifikation (Sort/Filter/E2E) ausstehend.
+**Stand:** abgeschlossen 2026-06-29.
 
-**UIX-031 Doku-Konsolidierung:** `open-gaps-and-known-issues.md` v3.2, [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md), ADR-011, Rollout-Doku, Slice-YAMLs 022–037; alte Aussage „naechster Schritt UIX-020…024" entfernt.
+**UIX-031:** `open-gaps-and-known-issues.md` aktualisiert, UIX-022…030 als abgeschlossen dokumentiert, Restarbeit 032–037 mit Prioritaeten erfasst.
+**UIX-032:** Backend pytest 24/24 (rollout), 19/19 (agent_contract), 14/14 (uix035/036) lokal gruen; tsc --noEmit 0 Fehler. GitHub Actions: naechster Push loest CI aus.
+**UIX-033:** 12 Readiness-Gates aktiv (6 mandatory + 6 advisory). `GET /masks/{id}/readiness` Endpunkt aktiv.
+**UIX-034b/c:** CRM-360 masterdata/address fields[], Advisory-Gates auf 83%, agentContract explizit, noWorkflowReason gesetzt.
 
-**UIX-032 CI-Gate-Nachweis:** Backend pytest 43/43 gruen (lokal 2026-06-29). Frontend: type-check nach Fix `ustva.tsx` erneut ausfuehren; build + vitest + GitHub Actions quality-gate ausstehend.
-
-**UIX-033 Readiness-Gates verschaerft:** `fd2b8a7cf` + `generatorReadiness.ts` — 6 Mandatory + 6 Advisory Gates pro Tabelle.
-
-**UIX-034 CRM 360 Native Parity:** [`uix-034-crm360-native-parity-matrix.md`](../adr/uix-034-crm360-native-parity-matrix.md); 034a actions_classified; 034b/034c (Felder, Advisory) teils in Worktree — E2E-Paritaet noch nicht nachgewiesen.
-
-**Ziel:** Nach UIX-030 keine neue Rollout-Welle, sondern Plattformstand gegen Doku, Tests, Readiness-Gates und CRM-360-Paritaet absichern.
-**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/adr/uix-034-crm360-native-parity-matrix.md`, `docs/agent-ops/slices/UIX-STABILIZATION-031-037.yaml`.
-**Abnahme:** UIX-022…030 + 033 dokumentiert; pytest gruen; CRM-Parity-Matrix + Restarbeit 032/034–037 klar; keine weiteren Masken auf `generator_ready` bis 032+034 gruen.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/adr/uix-034-crm360-native-parity-matrix.md`, `app/core/screen_definitions.py`, `app/api/v1/endpoints/mask_screen_definition.py`.
+**Abnahme:** ScreenDefinition CRM-360 generatorReady=true, advisoryScore=83%; 10 Rollout-Kandidaten strukturell OK, einziger Block = non_temporary.
 
 ## UIX-RUNTIME-ROLLOUT-021 — Rollout-Kandidaten auf useUniversalMaskRuntime migrieren
 
