@@ -98,7 +98,6 @@ byPath.set('', { module: '@/pages/start-dashboard', path: '', source: 'system' }
 byPath.set('login', { module: '@/pages/auth/Login', path: 'login', source: 'system' })
 byPath.set('auth/login', { module: '@/pages/auth/Login', path: 'auth/login', source: 'system' })
 byPath.set('auth/callback', { module: '@/pages/auth/Callback', path: 'auth/callback', source: 'system' })
-byPath.set('fibu-suite', { module: '@runtime/fibu-suite', path: 'fibu-suite', source: 'system' })
 byPath.set('fibu-suite/$', { module: '@runtime/fibu-suite', path: 'fibu-suite/$', source: 'system' })
 
 const entries = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path))

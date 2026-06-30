@@ -2042,11 +2042,6 @@
     },
     {
       "module": "@runtime/fibu-suite",
-      "path": "fibu-suite",
-      "source": "system"
-    },
-    {
-      "module": "@runtime/fibu-suite",
       "path": "fibu-suite/$",
       "source": "system"
     },
