@@ -11,6 +11,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { 
   ArrowLeft, 
   Filter, 
@@ -49,12 +50,20 @@ interface StageColumn {
   count: number
 }
 
+interface OpportunityStage {
+  stage_key: string
+  key: string
+  name: string
+  label: string
+  order: number
+}
+
 export default function OpportunitiesKanbanPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [stages, setStages] = useState<Record<string, unknown>[]>([])
+  const [stages, setStages] = useState<OpportunityStage[]>([])
   const [loading, setLoading] = useState(true)
   const [filterOwner, setFilterOwner] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
@@ -84,10 +93,14 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
       }
 
       // Load stages
-      const stagesResponse = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/opportunities/stages')
-      if (stagesResponse.data) {
-        setStages(stagesResponse.data || [])
-      }
+      const stagesResponse = await apiClient.get('/api/v1/crm/opportunities/stages')
+      setStages(recordArrayFromResponse(stagesResponse.data).map((stage) => ({
+        stage_key: stringValue(stage.stage_key, stringValue(stage.key)),
+        key: stringValue(stage.key, stringValue(stage.stage_key)),
+        name: stringValue(stage.name),
+        label: stringValue(stage.label),
+        order: numberValue(stage.order),
+      })))
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -103,15 +116,15 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
     const columns: StageColumn[] = []
     
     // Get default stages if API stages not loaded yet
-    const defaultStages = [
-      { stage_key: 'initial_contact', name: t('crud.stages.initialContact'), order: 1 },
-      { stage_key: 'needs_analysis', name: t('crud.stages.needsAnalysis'), order: 2 },
-      { stage_key: 'value_proposition', name: t('crud.stages.valueProposition'), order: 3 },
-      { stage_key: 'identify_decision_makers', name: t('crud.stages.identifyDecisionMakers'), order: 4 },
-      { stage_key: 'proposal_price_quote', name: t('crud.stages.proposalPriceQuote'), order: 5 },
-      { stage_key: 'negotiation_review', name: t('crud.stages.negotiationReview'), order: 6 },
-      { stage_key: 'closed_won', name: t('crud.stages.closedWon'), order: 7 },
-      { stage_key: 'closed_lost', name: t('crud.stages.closedLost'), order: 8 }
+    const defaultStages: OpportunityStage[] = [
+      { stage_key: 'initial_contact', key: 'initial_contact', name: t('crud.stages.initialContact'), label: t('crud.stages.initialContact'), order: 1 },
+      { stage_key: 'needs_analysis', key: 'needs_analysis', name: t('crud.stages.needsAnalysis'), label: t('crud.stages.needsAnalysis'), order: 2 },
+      { stage_key: 'value_proposition', key: 'value_proposition', name: t('crud.stages.valueProposition'), label: t('crud.stages.valueProposition'), order: 3 },
+      { stage_key: 'identify_decision_makers', key: 'identify_decision_makers', name: t('crud.stages.identifyDecisionMakers'), label: t('crud.stages.identifyDecisionMakers'), order: 4 },
+      { stage_key: 'proposal_price_quote', key: 'proposal_price_quote', name: t('crud.stages.proposalPriceQuote'), label: t('crud.stages.proposalPriceQuote'), order: 5 },
+      { stage_key: 'negotiation_review', key: 'negotiation_review', name: t('crud.stages.negotiationReview'), label: t('crud.stages.negotiationReview'), order: 6 },
+      { stage_key: 'closed_won', key: 'closed_won', name: t('crud.stages.closedWon'), label: t('crud.stages.closedWon'), order: 7 },
+      { stage_key: 'closed_lost', key: 'closed_lost', name: t('crud.stages.closedLost'), label: t('crud.stages.closedLost'), order: 8 }
     ]
     
     const stagesToUse = stages.length > 0 ? stages : defaultStages
@@ -119,7 +132,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
     stagesToUse
       .sort((a, b) => (a.order || 0) - (b.order || 0))
       .forEach((stage) => {
-        const stageKey = stage.stage_key || stage.key || stage
+        const stageKey = stage.stage_key || stage.key
         const stageOpps = opportunities.filter(opp => opp.stage === stageKey)
         
         const totalAmount = stageOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0)

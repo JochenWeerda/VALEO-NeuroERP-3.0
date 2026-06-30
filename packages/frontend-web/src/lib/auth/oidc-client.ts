@@ -4,6 +4,7 @@
  */
 
 import { UserManager, User, WebStorageStateStore } from 'oidc-client-ts'
+import { isRecord, stringValue } from '@/lib/record-utils'
 
 const OIDC_CONFIG = {
   authority: import.meta.env.VITE_OIDC_DISCOVERY_URL?.replace('/.well-known/openid-configuration', '') || 'http://localhost:8080/realms/valeo-neuro-erp',
@@ -98,13 +99,16 @@ export class OIDCClient {
 
     // Try different claim locations
     const profile = user.profile as Record<string, unknown>
-    const roles = 
-      profile.roles || 
-      profile.realm_access?.roles ||
+    const realmAccess = isRecord(profile.realm_access) ? profile.realm_access : null
+    const roles =
+      profile.roles ||
+      realmAccess?.roles ||
       profile['https://valeo-erp.com/roles'] ||
       []
 
-    return Array.isArray(roles) ? roles : [roles]
+    return (Array.isArray(roles) ? roles : [roles])
+      .map((role) => stringValue(role))
+      .filter((role) => role.length > 0)
   }
 
   /**
@@ -123,7 +127,7 @@ export class OIDCClient {
     if (!user) return null
 
     const profile = user.profile as Record<string, unknown>
-    return profile.tenant_id || profile.tid || '00000000-0000-0000-0000-000000000001'
+    return stringValue(profile.tenant_id, stringValue(profile.tid, '00000000-0000-0000-0000-000000000001'))
   }
 
   /**

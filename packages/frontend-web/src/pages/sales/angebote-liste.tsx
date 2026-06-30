@@ -15,6 +15,7 @@ import { CSVImport } from '@/components/list/CSVImport'
 import { useToast } from '@/hooks/use-toast'
 import { saveDocument } from '@/lib/document-api'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+import { stringValue } from '@/lib/record-utils'
 import { useAngebote, type Angebot, type AngebotStatus } from '@/lib/api/sales'
 import {
   CrudCapabilityChecklist,
@@ -109,13 +110,13 @@ export default function AngeboteListePage(): JSX.Element {
 
   const filteredAngebote = angebote.filter((angebot) => {
     const matchesSearch =
-      angebot.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      angebot.kunde.toLowerCase().includes(searchTerm.toLowerCase())
+      stringValue(angebot.nummer).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stringValue(angebot.kunde).toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || angebot.status === statusFilter
     
     // Erweiterte Filter
     if (filterValues.status && angebot.status !== filterValues.status) return false
-    if (filterValues.kunde && !angebot.kunde.toLowerCase().includes(filterValues.kunde.toLowerCase())) return false
+    if (filterValues.kunde && !stringValue(angebot.kunde).toLowerCase().includes(stringValue(filterValues.kunde).toLowerCase())) return false
     if (filterValues.datum) {
       const angebotDate = new Date(angebot.datum).toISOString().split('T')[0]
       if (angebotDate !== filterValues.datum) return false
@@ -137,7 +138,7 @@ export default function AngeboteListePage(): JSX.Element {
           lines: [],
           subtotalNet: 0,
           totalTax: 0,
-          totalGross: parseFloat(row.Betrag?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
+          totalGross: parseFloat(stringValue(row.Betrag).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
         }
         await saveDocument('sales_offer', doc)
       }

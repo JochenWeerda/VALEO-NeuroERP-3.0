@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { Download, TrendingUp, AlertTriangle, Package, DollarSign } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { numberValue } from '@/lib/record-utils';
 
 type StockLevelsResponse = {
   total_articles: number;
@@ -219,9 +220,9 @@ export default function InventoryReportsPage() {
                   {stockLevels?.categories && Object.entries(stockLevels.categories).map(([category, data]: [string, Record<string, unknown>]) => (
                     <TableRow key={category}>
                       <TableCell className="font-medium">{category}</TableCell>
-                      <TableCell className="text-right">{data.count}</TableCell>
-                      <TableCell className="text-right">{data.total_stock.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">€{data.total_value.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{numberValue(data.count).toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{numberValue(data.total_stock).toLocaleString()}</TableCell>
+                      <TableCell className="text-right">€{numberValue(data.total_value).toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

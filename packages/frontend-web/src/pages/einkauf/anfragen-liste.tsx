@@ -15,6 +15,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { renderValue, stringValue } from '@/lib/record-utils'
 
 const createAnfragenConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -28,7 +29,7 @@ const createAnfragenConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.requestNumber'),
       labelKey: 'crud.fields.requestNumber',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'typ',
@@ -63,7 +64,7 @@ const createAnfragenConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.quantity'),
       labelKey: 'crud.fields.quantity',
       sortable: true,
-      render: (value, item) => `${formatNumber(value, 2)} ${item.einheit || t('crud.fields.unit')}`
+      render: (value, item) => `${formatNumber(value, 2)} ${renderValue(item.einheit, t('crud.fields.unit'))}`
     },
     {
       key: 'prioritaet',
@@ -106,14 +107,14 @@ const createAnfragenConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.dueDate'),
       labelKey: 'crud.fields.dueDate',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     },
     {
       key: 'createdAt',
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -187,7 +188,7 @@ async function bulkRequestMutation(
       const response = await apiClient.post<{
         purchaseOrderId?: string
         purchaseOrderNumber?: string
-      }>(`/api/v1/einkauf/anfragen/${encodeURIComponent(item.id)}/${endpointSuffix}`)
+      }>(`/api/v1/einkauf/anfragen/${encodeURIComponent(stringValue(item.id))}/${endpointSuffix}`)
       createdOrderId = createdOrderId || response.data?.purchaseOrderId
       createdOrderNumber = createdOrderNumber || response.data?.purchaseOrderNumber
       ok += 1
@@ -271,17 +272,17 @@ export default function AnfragenListePage(): JSX.Element {
     navigate('/einkauf/anfrage/neu')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) {
-      navigate(`/einkauf/anfragen/${item.id}`)
+      navigate(`/einkauf/anfragen/${stringValue(item.id)}`)
     }
   }
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
-      await apiClient.delete(`/api/v1/einkauf/anfragen/${item.id}`)
+      await apiClient.delete(`/api/v1/einkauf/anfragen/${stringValue(item.id)}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.anfragen() })
     } catch (_rawErr: unknown) {

@@ -34,6 +34,7 @@ import FrmKontraktProtokoll from '@/pages/kontrakte/FrmKontraktProtokoll'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { apiClient } from '@/lib/api-client'
+import { errorMessage } from '@/lib/record-utils'
 import { useTenant } from '@/hooks/useTenant'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -313,7 +314,7 @@ export default function FrmKontraktDetail(): JSX.Element {
       navigate(`/kontrakte/${saved.contract_id}${query ? `?${query}` : ''}`)
     },
     onError: (err: unknown) => {
-      toast({ title: 'Fehler', description: err?.message || 'Speichern fehlgeschlagen', variant: 'destructive' })
+      toast({ title: 'Fehler', description: errorMessage(err, 'Speichern fehlgeschlagen'), variant: 'destructive' })
     },
   })
 
@@ -347,7 +348,7 @@ export default function FrmKontraktDetail(): JSX.Element {
       setState((prev) => updateSteeringValue(prev, 'hedge_status', 'offen'))
     },
     onError: (err: unknown) => {
-      toast({ title: 'Hedge fehlgeschlagen', description: err?.message || 'Hedge konnte nicht angelegt werden', variant: 'destructive' })
+      toast({ title: 'Hedge fehlgeschlagen', description: errorMessage(err, 'Hedge konnte nicht angelegt werden'), variant: 'destructive' })
     },
   })
 
@@ -358,7 +359,7 @@ export default function FrmKontraktDetail(): JSX.Element {
       navigate('/kontrakte')
     },
     onError: (err: unknown) => {
-      toast({ title: 'Loeschen fehlgeschlagen', description: err?.message || '', variant: 'destructive' })
+      toast({ title: 'Loeschen fehlgeschlagen', description: errorMessage(err), variant: 'destructive' })
     },
   })
 

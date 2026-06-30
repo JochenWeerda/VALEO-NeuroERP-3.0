@@ -5,6 +5,7 @@ import type { TFunction } from 'i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { apiClient } from '@/lib/api-client'
+import { apiErrorDetail, errorMessage, isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -204,8 +205,7 @@ async function triggerExportDownload(entity: string, format: string, toastFn: (o
     URL.revokeObjectURL(url)
     toastFn({ title: 'Export erstellt', description: 'Download gestartet.' })
   } catch (_rawErr: unknown) {
-        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-    toastFn({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    toastFn({ title: 'Export fehlgeschlagen', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
   }
 }
 
@@ -241,11 +241,12 @@ export default function DebitorenListePage(): JSX.Element {
     try {
       const response = await apiClient.get('/api/v1/finance/debitoren')
       if (response.data) {
-        setData((response.data as Record<string, unknown>).data || [])
-        setTotal((response.data as Record<string, unknown>).total || 0)
+        const rows = recordArrayFromResponse(response.data)
+        setData(rows)
+        setTotal(numberValue(isRecord(response.data) ? response.data.total : undefined, rows.length))
       }
     } catch (error: unknown) {
-      toast({ variant: 'destructive', title: t('crud.messages.loadDataError'), description: error?.message })
+      toast({ variant: 'destructive', title: t('crud.messages.loadDataError'), description: errorMessage(error) })
     } finally {
       setLoading(false)
     }
@@ -266,8 +267,7 @@ export default function DebitorenListePage(): JSX.Element {
         toast({ title: 'Mahnlauf gestartet', description: 'Mahnungen werden erstellt.' })
         loadData()
       } catch (_rawErr: unknown) {
-        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-        toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+        toast({ title: 'Fehler', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
       }
     }
     const onBlock = async (items: Record<string, unknown>[]) => {
@@ -279,8 +279,7 @@ export default function DebitorenListePage(): JSX.Element {
         toast({ title: 'Gesperrt', description: `${items.length} Debitor(en) gesperrt.`, variant: 'destructive' })
         loadData()
       } catch (_rawErr: unknown) {
-        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-        toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+        toast({ title: 'Fehler', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
       }
     }
     const bulkActions = baseConfig.bulkActions ?? []
@@ -303,15 +302,16 @@ export default function DebitorenListePage(): JSX.Element {
     navigate('/finance/debitoren/new')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     handleAction('edit', item)
   }
 
-  const handleDelete = item => {
-    if (!confirm(t('crud.messages.confirmDeleteDebtor', { name: item.kunde }))) return
-    void withPending(String(item.id), async () => {
+  const handleDelete = (item: Record<string, unknown>) => {
+    const id = stringValue(item.id)
+    if (!confirm(t('crud.messages.confirmDeleteDebtor', { name: stringValue(item.kunde) }))) return
+    void withPending(id, async () => {
       try {
-        await apiClient.delete(`/api/v1/finance/debitoren/${item.id}`)
+        await apiClient.delete(`/api/v1/finance/debitoren/${id}`)
         loadData()
       } catch {
         toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
@@ -334,8 +334,7 @@ export default function DebitorenListePage(): JSX.Element {
       toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
       loadData()
     } catch (_rawErr: unknown) {
-        const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      toast({ title: 'Import fehlgeschlagen', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
     }
     e.target.value = ''
   }

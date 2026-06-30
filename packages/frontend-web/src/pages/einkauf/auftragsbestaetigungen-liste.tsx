@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast'
 import { useAuftragsbestaetigungen, type Auftragsbestaetigung, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
 
 const createAuftragsbestaetigungenConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -28,14 +29,14 @@ const createAuftragsbestaetigungenConfig = (t: TFunction, entityTypeLabel: strin
       label: t('crud.fields.confirmationNumber'),
       labelKey: 'crud.fields.confirmationNumber',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'bestellung',
       label: t('crud.entities.purchaseOrder'),
       labelKey: 'crud.entities.purchaseOrder',
       sortable: true,
-      render: (value) => value?.nummer || '-'
+      render: (value) => isRecord(value) ? renderValue(value.nummer, '-') : '-'
     },
     {
       key: 'lieferant',
@@ -66,7 +67,7 @@ const createAuftragsbestaetigungenConfig = (t: TFunction, entityTypeLabel: strin
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -111,7 +112,7 @@ async function bulkConfirmationMutation(selectedItems: Record<string, unknown>[]
   const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
   for (const item of eligible) {
     try {
-      await apiClient.post(`/api/v1/einkauf/auftragsbestaetigungen/${encodeURIComponent(item.id)}/${action}`)
+      await apiClient.post(`/api/v1/einkauf/auftragsbestaetigungen/${encodeURIComponent(stringValue(item.id))}/${action}`)
       ok += 1
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -213,17 +214,17 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
     navigate('/einkauf/auftragsbestaetigung/neu')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) {
-      navigate(`/einkauf/auftragsbestaetigungen/${item.id}`)
+      navigate(`/einkauf/auftragsbestaetigungen/${stringValue(item.id)}`)
     }
   }
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
-      await apiClient.delete(`/api/v1/einkauf/auftragsbestaetigungen/${item.id}`)
+      await apiClient.delete(`/api/v1/einkauf/auftragsbestaetigungen/${stringValue(item.id)}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
     } catch (_rawErr: unknown) {

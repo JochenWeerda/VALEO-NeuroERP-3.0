@@ -23,6 +23,7 @@ import {
   type UxTaskItem,
 } from '@/components/workflow'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
 
 type ProcurementRoleFocus = 'all' | 'procurement' | 'goods-receipt' | 'finance' | 'management' | 'audit'
 
@@ -71,7 +72,7 @@ const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): 
       label: t('crud.fields.invoiceNumber'),
       labelKey: 'crud.fields.invoiceNumber',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'lieferant',
@@ -85,14 +86,14 @@ const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): 
       label: t('crud.entities.purchaseOrder'),
       labelKey: 'crud.entities.purchaseOrder',
       sortable: true,
-      render: (value) => value?.nummer || '-'
+      render: (value) => isRecord(value) ? renderValue(value.nummer, '-') : '-'
     },
     {
       key: 'wareneingang',
       label: t('crud.fields.goodsReceipt'),
       labelKey: 'crud.fields.goodsReceipt',
       sortable: true,
-      render: (value) => value?.nummer || '-'
+      render: (value) => isRecord(value) ? renderValue(value.nummer, '-') : '-'
     },
     {
       key: 'status',
@@ -101,7 +102,8 @@ const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): 
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const status = stringValue(value)
+        const statusLabel = getStatusLabel(t, status, status)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           ERFASST: 'secondary',
           GEPRUEFT: 'default',
@@ -109,7 +111,7 @@ const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): 
           VERBUCHT: 'outline',
           BEZAHLT: 'outline'
         }
-        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
+        return <Badge variant={variants[status] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -124,14 +126,14 @@ const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): 
       label: t('crud.fields.invoiceDate'),
       labelKey: 'crud.fields.invoiceDate',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     },
     {
       key: 'createdAt',
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -175,7 +177,7 @@ const createRechnungseingaengeConfig = (t: TFunction, entityTypeLabel: string): 
 const ENTWURF_STATUSES = ['ENTWURF', 'ERFASST', 'OFFEN']
 
 async function bulkWorkflow(
-  selectedItems: Array<{ id: string; status?: string }>,
+  selectedItems: Record<string, unknown>[],
   endpointSuffix: 'pruefen' | 'freigeben' | 'verbuchen',
   allowedStatuses: string[],
 ): Promise<{ ok: number; err: number; messages: string[] }> {
@@ -184,19 +186,19 @@ async function bulkWorkflow(
   let err = 0
   const messages: string[] = []
   const toProcess = selectedItems.filter((item) =>
-    allowedStatuses.includes((item.status || '').toUpperCase()),
+    allowedStatuses.includes(stringValue(item.status).toUpperCase()),
   )
   for (const item of toProcess) {
     try {
-      await apiClient.post(`${base}/${encodeURIComponent(item.id)}/${endpointSuffix}`)
+      await apiClient.post(`${base}/${encodeURIComponent(stringValue(item.id))}/${endpointSuffix}`)
       ok += 1
     } catch (_rawErr: unknown) {
       const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       err += 1
       messages.push(
-        ( item as Record<string, unknown>).rechnungsNummer || item.id
-          ? `${String(( item as Record<string, unknown>).rechnungsNummer ?? item.id ?? '')}: ${e?.response?.data?.detail ?? e?.message}`
-          : e?.response?.data?.detail || e?.message,
+        item.rechnungsNummer || item.id
+          ? `${String(item.rechnungsNummer ?? item.id ?? '')}: ${e?.response?.data?.detail ?? e?.message}`
+          : e?.response?.data?.detail || e?.message || 'Unbekannter Fehler',
       )
     }
   }
@@ -420,17 +422,17 @@ export default function RechnungseingaengeListePage(): JSX.Element {
     navigate('/einkauf/rechnungseingang/neu')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) {
-      navigate(`/einkauf/rechnungseingaenge/${item.id}`)
+      navigate(`/einkauf/rechnungseingaenge/${stringValue(item.id)}`)
     }
   }
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
-      await apiClient.delete(`/api/v1/einkauf/rechnungen/${item.id}`)
+      await apiClient.delete(`/api/v1/einkauf/rechnungen/${stringValue(item.id)}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
     } catch (_rawErr: unknown) {

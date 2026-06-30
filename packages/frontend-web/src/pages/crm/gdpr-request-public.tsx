@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Loader2, FileText, ShieldCheck } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { renderValue } from '@/lib/record-utils'
 import { useTenant } from '@/hooks/useTenant'
 
 
@@ -222,8 +223,8 @@ export default function GDPRRequestPublicPage(): JSX.Element {
                     <XCircle className="h-5 w-5" />
                   )}
                   <AlertDescription>
-                    <div className="font-medium mb-2">{t('crud.fields.status')}: {t(`status.${String(statusData.status)}`)}</div>
-                    {statusData.status === 'completed' && statusData.response_file_path && (
+                    <div className="font-medium mb-2">{t('crud.fields.status')}: {t(`status.${String(statusData.status)}`, { defaultValue: renderValue(statusData.status) })}</div>
+                    {statusData.status === 'completed' && Boolean(statusData.response_file_path) && (
                       <Button onClick={handleDownload} className="mt-2">
                         <FileText className="h-4 w-4 mr-2" />
                         {t('crud.actions.downloadExport')}

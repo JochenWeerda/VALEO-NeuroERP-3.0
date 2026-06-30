@@ -16,6 +16,7 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { stringValue } from '@/lib/record-utils'
 
 // Zod-Schema für Debitoren-Stammdaten (wird in Komponente mit i18n erstellt)
 const createDebitorenSchema = (t: TFunction) => z.object({
@@ -309,7 +310,7 @@ export default function DebitorenStammPage(): JSX.Element {
 
   // Auto-lookup IBAN when it changes and seems complete
   useEffect(() => {
-    const iban = formData?.iban
+    const iban = stringValue(formData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
@@ -343,7 +344,7 @@ export default function DebitorenStammPage(): JSX.Element {
     setIsDirty(true)
     
     // Auto-lookup IBAN when it changes
-    const iban = newData?.iban
+    const iban = stringValue(newData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
@@ -367,7 +368,7 @@ export default function DebitorenStammPage(): JSX.Element {
       try {
         // Format IBAN before saving
         if (formData.iban) {
-          formData.iban = formatIBAN(formData.iban)
+          formData.iban = formatIBAN(stringValue(formData.iban))
         }
 
         await saveData({
@@ -390,12 +391,12 @@ export default function DebitorenStammPage(): JSX.Element {
     } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'debtors', format: 'pdf', id: formData?.id })
-        if (res?.url) window.open(res.url, '_blank')
+        if (res.data?.url) window.open(res.data.url, '_blank')
         toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
-        toast.error(msg)
+        toast.error(stringValue(msg, t('crud.messages.exportError')))
       }
     }
   })

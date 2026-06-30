@@ -39,6 +39,7 @@ interface ReplenishmentSuggestion {
   current_stock: number;
   suggested_quantity: number;
   estimated_cost?: number;
+  priority: number;
 }
 
 type InventoryRoleFocus = 'all' | 'warehouse' | 'logistics' | 'scale' | 'procurement' | 'management';

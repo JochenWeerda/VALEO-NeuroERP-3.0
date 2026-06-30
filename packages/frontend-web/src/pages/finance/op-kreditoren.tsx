@@ -15,6 +15,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { apiErrorDetail } from '@/lib/record-utils'
 
 type OpStatus = 'offen' | 'teilweise' | 'geschlossen' | 'storniert'
 
@@ -127,7 +128,7 @@ export default function OpKreditorenPage(): JSX.Element {
       setFormData(defaultForm)
     },
     onError: (error: unknown) => {
-      toast.error(error?.response?.data?.detail ?? 'Anlage fehlgeschlagen')
+      toast.error(apiErrorDetail(error) ?? 'Anlage fehlgeschlagen')
     },
   })
 
@@ -142,7 +143,7 @@ export default function OpKreditorenPage(): JSX.Element {
       setFormData(defaultForm)
     },
     onError: (error: unknown) => {
-      toast.error(error?.response?.data?.detail ?? 'Aktualisierung fehlgeschlagen')
+      toast.error(apiErrorDetail(error) ?? 'Aktualisierung fehlgeschlagen')
     },
   })
 
@@ -153,7 +154,7 @@ export default function OpKreditorenPage(): JSX.Element {
       toast.success('Offener Posten wurde gelöscht.')
     },
     onError: (error: unknown) => {
-      toast.error(error?.response?.data?.detail ?? 'Löschen fehlgeschlagen')
+      toast.error(apiErrorDetail(error) ?? 'Löschen fehlgeschlagen')
     },
   })
 
@@ -169,7 +170,7 @@ export default function OpKreditorenPage(): JSX.Element {
       setSettleAmount(0)
     },
     onError: (error: unknown) => {
-      toast.error(error?.response?.data?.detail ?? 'Ausgleich fehlgeschlagen')
+      toast.error(apiErrorDetail(error) ?? 'Ausgleich fehlgeschlagen')
     },
   })
 
@@ -190,7 +191,7 @@ export default function OpKreditorenPage(): JSX.Element {
       }
     },
     onError: (error: unknown) => {
-      toast.error(error?.response?.data?.detail ?? 'Sammelausgleich fehlgeschlagen')
+      toast.error(apiErrorDetail(error) ?? 'Sammelausgleich fehlgeschlagen')
     },
   })
 

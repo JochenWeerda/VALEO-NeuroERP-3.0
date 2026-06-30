@@ -18,6 +18,7 @@ import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { apiClient } from '@/lib/api-client'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
@@ -169,17 +170,17 @@ function LieferantSuchDialog({
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers/', {
+      const response = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers/', {
         params: { search: search.trim(), limit: 30 },
       })
-      const mapped: Lieferant[] = (data || []).map(c => ({
-        id: c.id,
-        lieferantNr: c.customer_number || c.customerNumber || '',
-        name: c.company_name || c.name || '',
-        kreditorAccount: c.customer_number || c.customerNumber || '',
-        address: c.address || undefined,
-        zahlungsbedingung: c.payment_terms || undefined,
-        kontaktperson: c.contact_person || undefined,
+      const mapped: Lieferant[] = recordArrayFromResponse(response.data).map(c => ({
+        id: stringValue(c.id),
+        lieferantNr: stringValue(c.customer_number || c.customerNumber),
+        name: stringValue(c.company_name || c.name),
+        kreditorAccount: stringValue(c.customer_number || c.customerNumber),
+        address: isRecord(c.address) ? c.address : undefined,
+        zahlungsbedingung: stringValue(c.payment_terms) || undefined,
+        kontaktperson: stringValue(c.contact_person) || undefined,
       }))
       setResults(mapped)
     } catch {
@@ -483,16 +484,16 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
 
   // Artikel ausgewählt
   const handleArticleSelect = (article: Record<string, unknown>): void => {
-    const ep = article.purchase_price || article.purchasePrice || article.sales_price || 0
+    const ep = numberValue(article.purchase_price || article.purchasePrice || article.sales_price)
     setCurrentPos((prev) => ({
       ...prev,
-      artikelNr: article.article_number || article.articleNumber || '',
-      artikelId: article.id || null,
-      artikelBezeichnung: article.name || article.description || '',
-      artikelBezeichnung2: article.description || '',
-      einheit: article.unit || 'Stk',
+      artikelNr: stringValue(article.article_number || article.articleNumber),
+      artikelId: stringValue(article.id) || null,
+      artikelBezeichnung: stringValue(article.name || article.description),
+      artikelBezeichnung2: stringValue(article.description),
+      einheit: stringValue(article.unit, 'Stk'),
       einzelpreis: ep,
-      mwstProzent: article.mehrwertsteuer_prozent || article.mwstProzent || 19,
+      mwstProzent: numberValue(article.mehrwertsteuer_prozent || article.mwstProzent, 19),
     }))
   }
 

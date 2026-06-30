@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
+import { recordArrayFromResponse } from '@/lib/record-utils'
 
 // Konfiguration für Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
@@ -278,7 +279,8 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       const res = await api.post('/api/v1/futter/import/chargen', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
+      const { created = 0, updated = 0, errors: rawErrors = [] } = (res.data as Record<string, unknown>) ?? {}
+      const errors = recordArrayFromResponse(rawErrors)
       toast({
         title: 'Import abgeschlossen',
         description: `${String(created ?? '')} neu, ${String(updated ?? '')} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,

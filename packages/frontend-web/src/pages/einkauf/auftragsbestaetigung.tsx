@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { stringValue } from '@/lib/record-utils'
 
 const createAuftragsbestaetigungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -135,7 +136,7 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
     autoApprovalEligible: data?.status === 'GEPRUEFT' || data?.status === 'BESTAETIGT',
     hasGoodsReceipt: Boolean(data?.bestellungId),
   })
-  const operationalStatus = normalizeOperationalStatus(data?.status)
+  const operationalStatus = normalizeOperationalStatus(stringValue(data?.status))
   const operationalBlocker = data?.status === 'OFFEN'
     ? 'Die Auftragsbestaetigung ist noch nicht geprueft und kann Termin- oder Preisabweichungen enthalten.'
     : null

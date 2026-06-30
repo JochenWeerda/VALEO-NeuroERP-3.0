@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/api-client'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { MoreHorizontal, RefreshCw, Truck, Eye, Calculator } from 'lucide-react'
 
 type Frachtauftrag = {
@@ -63,19 +64,19 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
       if (filterSpedNr) params['spediteur_nr'] = filterSpedNr
       if (filterKundenNr) params['kunden_nr'] = filterKundenNr
 
-      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/frachtauftraege', { params })
-      setItems((data || []).map(r => ({
-        id: r.id,
-        belegart: r.belegart || 'Lieferschein',
-        belegNr: r.belegnummer || r.frachtauftrag_nr || '',
-        datum: r.frachtauftrag_erzeugt?.substring(0, 10) || '',
-        lieferTermin: r.liefertermin || '',
-        ladeDatum: r.lade_datum || '',
-        spedNr: r.spediteur_nr || '',
-        spedName: r.spediteur_name || '',
-        eLiefSchNr: r.e_lief_sch_nr || '',
-        frachtArtikel: r.fracht_artikel || '',
-        pauschalFracht: parseFloat(r.pauschal_fracht || '0'),
+      const response = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/frachtauftraege', { params })
+      setItems(recordArrayFromResponse(response.data).map(r => ({
+        id: stringValue(r.id),
+        belegart: stringValue(r.belegart, 'Lieferschein'),
+        belegNr: stringValue(r.belegnummer || r.frachtauftrag_nr),
+        datum: stringValue(r.frachtauftrag_erzeugt).substring(0, 10),
+        lieferTermin: stringValue(r.liefertermin),
+        ladeDatum: stringValue(r.lade_datum),
+        spedNr: stringValue(r.spediteur_nr),
+        spedName: stringValue(r.spediteur_name),
+        eLiefSchNr: stringValue(r.e_lief_sch_nr),
+        frachtArtikel: stringValue(r.fracht_artikel),
+        pauschalFracht: numberValue(r.pauschal_fracht),
       })))
     } catch {
       setItems([])

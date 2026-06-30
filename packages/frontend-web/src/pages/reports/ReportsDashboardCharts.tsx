@@ -1,13 +1,14 @@
 import { Suspense, lazy } from 'react'
+import type { ReportDashboardData } from '@/pages/reports/report-chart-types'
 
 type ReportType = 'sales-performance' | 'customer-analytics' | 'product-analytics' | 'financial-analytics' | 'trend-analytics'
 
 type ReportChartsProps = {
   selectedReport: ReportType
-  data: unknown
+  data: ReportDashboardData
 }
 
-const chartModules: Record<ReportType, React.LazyExoticComponent<(props: { data: unknown }) => JSX.Element>> = {
+const chartModules: Record<ReportType, React.LazyExoticComponent<(props: { data: ReportDashboardData }) => JSX.Element>> = {
   'sales-performance': lazy(() => import('@/pages/reports/charts/SalesPerformanceCharts')),
   'customer-analytics': lazy(() => import('@/pages/reports/charts/CustomerAnalyticsCharts')),
   'product-analytics': lazy(() => import('@/pages/reports/charts/ProductAnalyticsCharts')),

@@ -7,7 +7,7 @@ import { SALES_ORDER_MASK_OBJECT_PAGE_CONFIG } from '@/features/sales-masks/sale
 import { SALES_ORDER_PILOT_TAB_TABLES } from '@/features/sales-masks/sales-order-tab-tables'
 import { mapTabDataToTables, useSalesOrderTabData } from '@/features/sales-masks/use-sales-order-tab-data'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
-import { usePilotRenderPlan } from '@/features/mask-pilot/use-pilot-render-plan'
+import { usePilotRenderPlan, type PilotScreenSummaryLike } from '@/features/mask-pilot/use-pilot-render-plan'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useSalesOrder, useSalesOrderScreenSummary } from '@/lib/api/sales'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -53,6 +53,20 @@ export default function UniversalSalesOrderPilotPage(): JSX.Element {
     () => buildSummaryItems(summaryQuery.data),
     [summaryQuery.data],
   )
+  const summaryForRenderPlan = useMemo<PilotScreenSummaryLike | undefined>(() => {
+    const summary = summaryQuery.data
+    if (!summary) return undefined
+    return {
+      title: summary.title,
+      subtitle: summary.subtitle ?? undefined,
+      available_tabs: summary.available_tabs,
+      actions: summary.actions,
+      performance: {
+        initial_payload_budget_kb: summary.performance.initial_payload_budget_kb,
+        lookup_min_chars: summary.performance.lookup_min_chars,
+      },
+    }
+  }, [summaryQuery.data])
 
   const { plan } = usePilotRenderPlan({
     screenId: 'sales/sales-order',
@@ -64,7 +78,7 @@ export default function UniversalSalesOrderPilotPage(): JSX.Element {
     },
     entityId: id,
     summaryEndpointPrefix: '/api/v1/sales/orders',
-    summary: summaryQuery.data,
+    summary: summaryForRenderPlan,
     nativeScreen: nativeScreenQuery.data,
     enrichTabs: enrichTabsWithTables,
     summaryItems,

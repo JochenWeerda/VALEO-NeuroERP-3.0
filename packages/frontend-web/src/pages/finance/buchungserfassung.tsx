@@ -19,6 +19,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { inputValue, numberValue, recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 
 
 // Konfiguration für Buchungserfassung ObjectPage (wird in Komponente mit i18n erstellt)
@@ -87,7 +88,7 @@ const createBuchungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig 
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <BuchungszeilenTable
-          data={_data.buchungszeilen || []}
+          data={recordArrayFromResponse(_data.buchungszeilen)}
           onChange={(zeilen) => {
             const gesamtSoll = zeilen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).soll || 0), 0)
             const gesamtHaben = zeilen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).haben || 0), 0)
@@ -221,7 +222,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, u
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={row.konto}
+                    value={inputValue(row.konto)}
                     onChange={(e) => updateRow(index, 'konto', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.accountNumber')}
@@ -231,7 +232,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, u
                   <input
                     type="number"
                     step="0.01"
-                    value={row.soll}
+                    value={inputValue(row.soll)}
                     onChange={(e) => updateRow(index, 'soll', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -240,7 +241,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, u
                   <input
                     type="number"
                     step="0.01"
-                    value={row.haben}
+                    value={inputValue(row.haben)}
                     onChange={(e) => updateRow(index, 'haben', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -248,7 +249,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, u
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={row.steuerschluessel}
+                    value={inputValue(row.steuerschluessel)}
                     onChange={(e) => updateRow(index, 'steuerschluessel', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.taxKey')}
@@ -257,7 +258,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, u
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={row.kostenstelle}
+                    value={inputValue(row.kostenstelle)}
                     onChange={(e) => updateRow(index, 'kostenstelle', e.target.value)}
                     className="w-full p-1 border rounded"
                   />
@@ -265,7 +266,7 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: Record<string, u
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={row.kostentraeger}
+                    value={inputValue(row.kostentraeger)}
                     onChange={(e) => updateRow(index, 'kostentraeger', e.target.value)}
                     className="w-full p-1 border rounded"
                   />
@@ -326,13 +327,13 @@ export default function BuchungserfassungPage(): JSX.Element {
 
   const validate = (formData: Record<string, unknown>) => {
     const errors = validateFields(getFieldsFromMaskConfig(buchungConfig), formData ?? {})
-    const buchungszeilen = Array.isArray(formData?.buchungszeilen) ? formData.buchungszeilen : []
+    const buchungszeilen = recordArrayFromResponse(formData?.buchungszeilen)
 
     if (buchungszeilen.length === 0) {
       errors.buchungszeilen = t('crud.messages.validationError')
     }
 
-    if (Math.abs((formData?.gesamtSoll ?? 0) - (formData?.gesamtHaben ?? 0)) >= 0.01) {
+    if (Math.abs(numberValue(formData?.gesamtSoll) - numberValue(formData?.gesamtHaben)) >= 0.01) {
       errors.differenz = t('crud.messages.debitCreditMustBalance')
     }
 
@@ -370,7 +371,7 @@ export default function BuchungserfassungPage(): JSX.Element {
       }
 
       try {
-        const period = String(formData?.periode ?? '').trim()
+        const period = stringValue(formData?.periode).trim()
         if (period) {
           const periodCheck = (await apiClient.get<{ is_open: boolean; message: string }>(`/api/v1/finance/periods/check/${period}`)).data
           if (!periodCheck?.is_open) {
@@ -461,7 +462,7 @@ export default function BuchungserfassungPage(): JSX.Element {
         throw new Error('Buchung-ID nicht gefunden')
       }
 
-      await financeService.reverseJournalEntry(entryId, reason)
+      await financeService.reverseJournalEntry(stringValue(entryId), reason)
       
       toast({
         title: t('crud.messages.stornoSuccess'),
@@ -480,40 +481,41 @@ export default function BuchungserfassungPage(): JSX.Element {
       setIsStornoLoading(false)
     }
   }
-  const lineCount = Array.isArray(formData?.buchungszeilen) ? formData.buchungszeilen.length : 0
+  const lineCount = recordArrayFromResponse(formData?.buchungszeilen).length
+  const difference = numberValue(formData?.differenz)
   const operationalStatus = normalizeOperationalStatus(
     data?.id
       ? 'abgeschlossen'
       : lineCount === 0
         ? 'offen'
-        : Math.abs((formData?.differenz ?? 0)) >= 0.01
+        : Math.abs(difference) >= 0.01
           ? 'blockiert'
           : 'in_pruefung',
   )
-  const operationalBlocker = Math.abs((formData?.differenz ?? 0)) >= 0.01
+  const operationalBlocker = Math.abs(difference) >= 0.01
     ? 'Soll und Haben sind noch nicht ausgeglichen.'
     : null
   const contextSections = [
     {
       title: 'Vorgang',
       items: [
-        { label: 'Belegart', value: formData?.belegart || 'BANK' },
-        { label: 'Belegnummer', value: formData?.belegnummer || 'Noch offen' },
-        { label: 'Periode', value: formData?.periode || 'Nicht gesetzt' },
+        { label: 'Belegart', value: renderValue(formData?.belegart, 'BANK') },
+        { label: 'Belegnummer', value: renderValue(formData?.belegnummer, 'Noch offen') },
+        { label: 'Periode', value: renderValue(formData?.periode, 'Nicht gesetzt') },
       ],
     },
     {
       title: 'Buchungslage',
       items: [
         { label: 'Zeilen', value: `${lineCount}` },
-        { label: 'Soll', value: `${formData?.gesamtSoll ?? 0}` },
-        { label: 'Haben', value: `${formData?.gesamtHaben ?? 0}` },
+        { label: 'Soll', value: `${numberValue(formData?.gesamtSoll)}` },
+        { label: 'Haben', value: `${numberValue(formData?.gesamtHaben)}` },
       ],
     },
     {
       title: 'Governance',
       items: [
-        { label: 'Differenz', value: `${formData?.differenz ?? 0}` },
+        { label: 'Differenz', value: `${difference}` },
         { label: 'Workflow', value: workflowContext?.label || workflowCase || workflowProcess || 'Kein Handover' },
         { label: 'Instanz', value: workflowInstanceId ? `${workflowInstanceId.slice(0, 8)}...` : 'lokal' },
         { label: 'Owner', value: 'FIBU' },
@@ -524,8 +526,8 @@ export default function BuchungserfassungPage(): JSX.Element {
     ...(workflowContext?.instanceId
       ? [{ label: 'Flow-Spine uebernommen', detail: workflowContext.label || workflowContext.process || undefined }]
       : [{ label: 'Buchungsfall aktiv', detail: 'Manuelle Buchung wird jetzt validiert und verbucht.' }]),
-    { label: 'Aktuelle Zeilenlage', detail: `${lineCount} Buchungszeilen / Differenz ${formData?.differenz ?? 0}` },
-    ...(formData?.buchungsdatum ? [{ label: 'Buchungsdatum', detail: formData.buchungsdatum }] : []),
+    { label: 'Aktuelle Zeilenlage', detail: `${lineCount} Buchungszeilen / Differenz ${difference}` },
+    ...(formData?.buchungsdatum ? [{ label: 'Buchungsdatum', detail: renderValue(formData.buchungsdatum) }] : []),
   ]
 
   return (
@@ -549,8 +551,8 @@ export default function BuchungserfassungPage(): JSX.Element {
           status={operationalStatus}
           owner="FIBU"
           blocker={operationalBlocker}
-          nextAction={data?.id ? 'Storno oder Export bei Bedarf ausloesen' : Math.abs((formData?.differenz ?? 0)) >= 0.01 ? 'Buchungszeilen ausgleichen' : 'Validieren und buchen'}
-          caseLabel={formData?.belegnummer || 'Buchungsfall'}
+          nextAction={data?.id ? 'Storno oder Export bei Bedarf ausloesen' : Math.abs(difference) >= 0.01 ? 'Buchungszeilen ausgleichen' : 'Validieren und buchen'}
+          caseLabel={renderValue(formData?.belegnummer, 'Buchungsfall')}
           tags={['FIBU', 'Journal']}
         />
         <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
@@ -578,8 +580,8 @@ export default function BuchungserfassungPage(): JSX.Element {
         open={isStornoDialogOpen}
         onOpenChange={setIsStornoDialogOpen}
         onConfirm={handleStornoConfirm}
-        entryNumber={data?.belegnummer}
-        entryDate={data?.buchungsdatum}
+        entryNumber={stringValue(data?.belegnummer)}
+        entryDate={stringValue(data?.buchungsdatum)}
         isLoading={isStornoLoading}
       />
     </>

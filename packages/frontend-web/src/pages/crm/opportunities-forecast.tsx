@@ -29,6 +29,8 @@ interface ForecastData {
 
 
 type ForecastGrouped = {
+  name?: string
+  value?: number
   period?: string
   stage?: string
   owner?: string
@@ -127,7 +129,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       if (!acc[key]) acc[key] = { name: key, value: 0 }
       acc[key].value += item.total_expected_revenue
       return acc
-    }, {} as Record<string, ForecastGrouped>)
+    }, {} as Record<string, StageDistItem>)
 
     return Object.values(grouped).map(item => ({
       ...item,

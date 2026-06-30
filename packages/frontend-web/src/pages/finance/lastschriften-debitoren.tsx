@@ -419,7 +419,9 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
   const approvalDecisionView = buildDecisionView(safeFormData.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-direct-debit', approvalDecisionView)
-  const approvalOverrideResolution = isRecord(safeFormData.approval_override_resolution) ? safeFormData.approval_override_resolution : null
+  const approvalOverrideRuleId = isRecord(safeFormData.approval_override_resolution)
+    ? stringValue(safeFormData.approval_override_resolution['rule_id'], '-')
+    : '-'
   const directDebits = recordArrayFromResponse(safeFormData.lastschriften)
   const debitCount = Number(safeFormData.anzahlLastschriften || directDebits.length || 0)
   const totalAmount = Number(safeFormData.gesamtBetrag || 0)
@@ -703,7 +705,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
             </div>
             <div className="rounded-md border bg-white/50 p-3">
               <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
-              <div className="mt-1 font-medium">{stringValue(approvalOverrideResolution?.rule_id, '-')}</div>
+              <div className="mt-1 font-medium">{approvalOverrideRuleId}</div>
             </div>
           </div>
         </ProcessStatusPanel>

@@ -16,7 +16,8 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, Users, BarChart3 } from 'lucide-react'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
-import { DataTable } from '@/components/ui/data-table'
+import { DataTable, type LegacyColumnDef } from '@/components/ui/data-table'
+import { recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 
 // API Client
 
@@ -182,10 +183,8 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/segments/${segmentId}/members`)
-        if (response.data) {
-          setMembers(response.data || [])
-        }
+        const response = await apiClient.get(`/api/v1/crm/segments/${segmentId}/members`)
+        setMembers(recordArrayFromResponse(response.data))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Mitglieder', description: error?.message })
@@ -206,21 +205,21 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
     return <div className="p-4 text-muted-foreground">{t('crud.messages.noMembers')}</div>
   }
 
-  const columns = [
+  const columns: LegacyColumnDef<Record<string, unknown>>[] = [
     {
       key: 'contact_id' as const,
       label: t('crud.entities.contact'),
-      render: member => member.contact_id || '-'
+      render: (member) => renderValue(member.contact_id, '-')
     },
     {
       key: 'added_at' as const,
       label: t('crud.fields.addedAt'),
-      render: member => formatDate(member.added_at)
+      render: (member) => formatDate(stringValue(member.added_at))
     },
     {
       key: 'added_by' as const,
       label: t('crud.fields.addedBy'),
-      render: member => member.added_by || '-'
+      render: (member) => renderValue(member.added_by, '-')
     }
   ]
 
@@ -241,10 +240,8 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/segments/${segmentId}/performance`)
-        if (response.data) {
-          setPerformance(response.data || [])
-        }
+        const response = await apiClient.get(`/api/v1/crm/segments/${segmentId}/performance`)
+        setPerformance(recordArrayFromResponse(response.data))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance-Daten', description: error?.message })
@@ -268,20 +265,20 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
   return (
     <div className="space-y-4">
       {performance.map((perf) => (
-        <Card key={perf.id}>
+        <Card key={stringValue(perf.id)}>
           <CardContent className="pt-4">
             <div className="grid grid-cols-4 gap-4">
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.date')}</div>
-                <div className="font-medium">{formatDate(perf.date)}</div>
+                <div className="font-medium">{formatDate(stringValue(perf.date))}</div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.memberCount')}</div>
-                <div className="font-medium">{perf.member_count}</div>
+                <div className="font-medium">{renderValue(perf.member_count)}</div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.activeMembers')}</div>
-                <div className="font-medium">{perf.active_members}</div>
+                <div className="font-medium">{renderValue(perf.active_members)}</div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.conversionRate')}</div>

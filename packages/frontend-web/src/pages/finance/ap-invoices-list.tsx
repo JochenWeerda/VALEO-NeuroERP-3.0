@@ -54,7 +54,7 @@ export default function APInvoicesListPage(): JSX.Element {
   const pageTitle = getListTitle(t, entityTypeLabel)
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [filters, setFilters] = useState<Record<string, string | Date | undefined>>({})
+  const [filters, setFilters] = useState<Record<string, unknown>>({})
   const [pendingActions, setPendingActions] = useState<Set<string>>(new Set())
 
   const withPending = async (key: string, fn: () => Promise<void>) => {

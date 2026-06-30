@@ -28,7 +28,7 @@ import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { apiClient } from '@/lib/api-client'
-import { inputValue, isRecord } from '@/lib/record-utils'
+import { inputValue, isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type FinanceRoleFocus = 'all' | 'accounting' | 'treasury' | 'controller' | 'tax-advisor' | 'management'
 
@@ -130,7 +130,7 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <ZahlungenTable
-          data={_data.zahlungen || []}
+          data={recordArrayFromResponse(_data.zahlungen)}
           onChange={(zahlungen) => {
             // Berechne Gesamtbetrag mit Skonto
             const gesamtBetrag = zahlungen.reduce((sum: number, z) => {
@@ -570,7 +570,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           auftraggeberName: responseData.initiator_name,
           auftraggeberIban: responseData.initiator_iban,
           auftraggeberBic: responseData.initiator_bic,
-          zahlungen: Array.isArray(responseData.payments) ? responseData.payments : [],
+          zahlungen: recordArrayFromResponse(responseData.payments),
           freigegebenAm: responseData.approved_at,
           freigegebenDurch: responseData.approved_by,
           ausgefuehrtAm: responseData.executed_at,
@@ -728,10 +728,10 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const effectiveData = data || formData
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-payment-run', approvalDecisionView)
-  const payments = Array.isArray(effectiveData?.zahlungen) ? effectiveData.zahlungen : []
-  const totalAmount = Number(effectiveData?.gesamtBetrag || 0)
-  const paymentCount = Number(effectiveData?.anzahlZahlungen || payments.length || 0)
-  const skontoCount = payments.filter(payment => payment.skontoGenutzt && Number(payment.skontoBetrag || 0) > 0).length
+  const payments = recordArrayFromResponse(effectiveData?.zahlungen)
+  const totalAmount = numberValue(effectiveData?.gesamtBetrag)
+  const paymentCount = numberValue(effectiveData?.anzahlZahlungen, payments.length)
+  const skontoCount = payments.filter(payment => Boolean(payment.skontoGenutzt) && numberValue(payment.skontoBetrag) > 0).length
   const operationalStatus = normalizeOperationalStatus(
     effectiveData?.status === 'executed'
       ? 'abgeschlossen'
@@ -745,15 +745,15 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     {
       title: 'Zahlungslage',
       items: [
-        { label: 'Laufnummer', value: effectiveData?.laufNummer || effectiveData?.run_number || 'Noch kein Lauf' },
+        { label: 'Laufnummer', value: stringValue(effectiveData?.laufNummer || effectiveData?.run_number, 'Noch kein Lauf') },
         { label: 'Zahlungen', value: `${paymentCount}` },
-        { label: 'Ausfuehrung', value: effectiveData?.ausfuehrungsDatum || '-' },
+        { label: 'Ausfuehrung', value: stringValue(effectiveData?.ausfuehrungsDatum, '-') },
       ],
     },
     {
       title: 'Governance',
       items: [
-        { label: 'Approval-Status', value: effectiveData?.approval_status || effectiveData?.status || 'draft' },
+        { label: 'Approval-Status', value: stringValue(effectiveData?.approval_status || effectiveData?.status, 'draft') },
         { label: 'Skonto genutzt', value: `${skontoCount}` },
         { label: 'Naechste Aktion', value: effectiveData?.approval_can_execute ? 'SEPA exportieren oder Lauf ausfuehren' : paymentCount > 0 ? 'Freigabe und Pruefung abschliessen' : 'Zahlungen erfassen' },
       ],
@@ -862,7 +862,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_status || effectiveData.status || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(effectiveData.approval_status || effectiveData.status, '-')}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Ausfuehrbar</div>
@@ -870,7 +870,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_override_resolution?.rule_id || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(isRecord(effectiveData.approval_override_resolution) ? effectiveData.approval_override_resolution.rule_id : undefined, '-')}</div>
             </div>
           </div>
         </ProcessStatusPanel>

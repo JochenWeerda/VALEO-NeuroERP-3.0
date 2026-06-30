@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ComponentType } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,7 +74,7 @@ export default function CampaignBuilderPage(): JSX.Element {
   const [templates, setTemplates] = useState<CampaignTemplateSummary[]>([])
   const [segments, setSegments] = useState<CampaignSegmentSummary[]>([])
 
-  const steps: Array<{ key: CampaignBuilderStep; label: string; icon: React.ComponentType }> = [
+  const steps: Array<{ key: CampaignBuilderStep; label: string; icon: ComponentType<{ className?: string }> }> = [
     { key: 'type', label: t('crud.campaigns.builder.steps.type'), icon: Settings },
     { key: 'template', label: t('crud.campaigns.builder.steps.template'), icon: Mail },
     { key: 'segment', label: t('crud.campaigns.builder.steps.segment'), icon: Users },

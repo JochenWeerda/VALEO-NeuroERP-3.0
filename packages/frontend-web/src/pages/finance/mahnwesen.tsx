@@ -431,11 +431,12 @@ export default function MahnwesenPage(): JSX.Element {
   }
 
   const blocker = useUnsavedChanges(isDirty)
+  const objectData = data ?? {}
 
   return (
     <>
       <ModuleToolbar backTarget="/finance/mahnwesen" closeTarget="/finance/mahnwesen" title={entityTypeLabel} />
-      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(objectData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
       <div className="space-y-4 px-6 pt-4">
         <OperationalCaseHeader
           title="Mahnfall steuern"

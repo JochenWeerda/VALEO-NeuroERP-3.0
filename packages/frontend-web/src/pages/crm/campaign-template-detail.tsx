@@ -11,6 +11,7 @@ import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage 
 import { apiClient } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
+import { stringValue } from '@/lib/record-utils'
 import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, Copy } from 'lucide-react'
 
@@ -261,7 +262,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
           <h1 className="text-3xl font-bold">
             {isNew 
               ? t('crud.actions.create', { entityType: entityTypeLabel })
-              : getDetailTitle(t, entityTypeLabel, data?.name || id || '')
+              : getDetailTitle(t, entityTypeLabel, stringValue(data?.name, id || ''))
             }
           </h1>
         </div>

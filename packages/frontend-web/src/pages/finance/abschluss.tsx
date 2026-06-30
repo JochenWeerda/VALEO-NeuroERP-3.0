@@ -799,11 +799,11 @@ export default function AbschlussPage(): JSX.Element {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Checklistenstatus</div>
-              <div className="mt-1 font-medium">{effectiveData.status || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(effectiveData.status, '-')}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Freigabestatus</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_status || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(effectiveData.approval_status, '-')}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Abschliessbar</div>

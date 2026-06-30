@@ -11,6 +11,7 @@ import { apiClient } from '@/lib/api-client'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { renderValue, stringValue } from '@/lib/record-utils'
 
 const createAngebotConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -204,9 +205,9 @@ export default function AngebotStammPage(): JSX.Element {
   return (
     <div className="space-y-6">
       <OperationalCaseHeader
-        title={data?.angebotNummer || 'Angebot'}
+        title={renderValue(data?.angebotNummer, 'Angebot')}
         description="Angebot als eigenstaendiger Einkaufsvorgang mit Preis-, Governance- und Folgebelegkontext."
-        status={normalizeOperationalStatus(data?.status)}
+        status={normalizeOperationalStatus(stringValue(data?.status))}
         owner={data?.lieferantId ? 'Lieferantenbezug gepflegt' : 'Lieferant offen'}
         blocker={data?.status === 'ABGELEHNT' ? 'Dieses Angebot ist abgelehnt und blockiert den Folgeprozess.' : null}
         nextAction={
@@ -219,7 +220,7 @@ export default function AngebotStammPage(): JSX.Element {
                 : 'Vorgang abschliessen'
         }
         caseLabel="Angebotsvorgang"
-        tags={[data?.status || 'Status offen', data?.waehrung || 'EUR']}
+        tags={[renderValue(data?.status, 'Status offen'), renderValue(data?.waehrung, 'EUR')]}
       />
       <OperationalContextPanel
         title="Angebotskontext"
@@ -227,21 +228,21 @@ export default function AngebotStammPage(): JSX.Element {
           {
             title: 'Ressourcenlage',
             items: [
-              { label: 'Artikel', value: data?.artikel || '-' },
-              { label: 'Menge', value: data?.menge != null ? `${data.menge} ${data?.einheit || ''}`.trim() : '-' },
+              { label: 'Artikel', value: renderValue(data?.artikel, '-') },
+              { label: 'Menge', value: data?.menge != null ? `${renderValue(data.menge)} ${renderValue(data?.einheit)}`.trim() : '-' },
             ],
           },
           {
             title: 'Wirtschaftslage',
             items: [
-              { label: 'Preis', value: data?.preis != null ? `${data.preis} ${data?.waehrung || 'EUR'}` : '-' },
-              { label: 'Gueltig bis', value: data?.gueltigBis || '-' },
+              { label: 'Preis', value: data?.preis != null ? `${renderValue(data.preis)} ${renderValue(data?.waehrung, 'EUR')}` : '-' },
+              { label: 'Gueltig bis', value: renderValue(data?.gueltigBis, '-') },
             ],
           },
           {
             title: 'Governance',
             items: [
-              { label: 'Anfragebezug', value: data?.anfrageId || '-' },
+              { label: 'Anfragebezug', value: renderValue(data?.anfrageId, '-') },
               { label: 'Naechster Schritt', value: data?.status === 'GENEHMIGT' ? 'Bestellung erzeugen' : 'Review abschliessen' },
             ],
           },

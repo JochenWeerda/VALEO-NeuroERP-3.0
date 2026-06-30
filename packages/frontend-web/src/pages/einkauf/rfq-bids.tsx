@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Upload, Plus, FileText } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { ErrorState } from '@/components/ErrorState'
@@ -68,7 +69,7 @@ export default function RfqBidsPage(): JSX.Element {
     totalValue: 0, currency: 'EUR', paymentTerms: '', deliveryTerms: '', notes: '',
   })
   const [availableSuppliers, setAvailableSuppliers] = useState<Record<string, unknown>[]>([])
-  const supplierOptions = availableSuppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))
+  const supplierOptions = availableSuppliers.map((supplier) => ({ value: stringValue(supplier.id), label: stringValue(supplier.name) }))
   const { data: bidsData, isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
     queryKey: ['einkauf', 'rfq-bids', rfqId],
     queryFn: async () => apiClient.get<Bid[]>(`/api/v1/einkauf/anfragen/${rfqId}/bids`),
@@ -84,9 +85,9 @@ export default function RfqBidsPage(): JSX.Element {
 
   useEffect(() => {
     if (rfqId) {
-      apiClient.get(`/api/v1/einkauf/anfragen/${rfqId}`).then(r => setRfq(r as Record<string, unknown>)).catch(() => {})
+      apiClient.get(`/api/v1/einkauf/anfragen/${rfqId}`).then(r => setRfq(isRecord(r.data) ? r.data : null)).catch(() => {})
       apiClient.get('/api/v1/crm/business-partners').then(r => {
-        setAvailableSuppliers(Array.isArray(r) ? r : [])
+        setAvailableSuppliers(recordArrayFromResponse(r.data))
       }).catch(() => {})
     }
   }, [rfqId])
@@ -95,9 +96,9 @@ export default function RfqBidsPage(): JSX.Element {
     setNewBid({
       supplierId: '',
       supplierName: '',
-      items: rfq?.items?.map(item => ({
-        rfqItemId: item.id || item.anfrageNummer,
-        quantity: item.menge || 0,
+      items: recordArrayFromResponse(rfq?.items).map(item => ({
+        rfqItemId: stringValue(item.id || item.anfrageNummer),
+        quantity: numberValue(item.menge),
         unitPrice: 0,
         deliveryDate: '',
         leadTime: 0,
@@ -301,7 +302,7 @@ export default function RfqBidsPage(): JSX.Element {
       {bidsLoading && <div className="space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-[300px] w-full" /></div>}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('crud.fields.bids')} - {rfq?.anfrageNummer || rfqId}</h1>
+          <h1 className="text-3xl font-bold">{t('crud.fields.bids')} - {stringValue(rfq?.anfrageNummer, rfqId || '')}</h1>
           <p className="text-muted-foreground mt-1">{t('crud.subtitles.manageBids')}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -492,11 +493,11 @@ export default function RfqBidsPage(): JSX.Element {
                 id="supplier"
                 value={newBid.supplierId}
                 onValueChange={(value) => {
-                  const supplier = availableSuppliers.find(s => s.id === value)
+                  const supplier = availableSuppliers.find(s => stringValue(s.id) === value)
                   setNewBid(prev => ({
                     ...prev,
                     supplierId: value,
-                    supplierName: supplier?.name || '',
+                    supplierName: stringValue(supplier?.name),
                   }))
                 }}
                 disabled={!!selectedBid}
@@ -521,7 +522,7 @@ export default function RfqBidsPage(): JSX.Element {
                 <TableBody>
                   {newBid.items.map((item, index) => (
                     <TableRow key={index}>
-                      <TableCell>{rfq?.artikel || '-'}</TableCell>
+                      <TableCell>{stringValue(rfq?.artikel, '-')}</TableCell>
                       <TableCell className="text-right">
                         <Input
                           type="number"

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { api } from '@/lib/axios'
 import { apiClient } from '@/lib/api-client'
+import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 // Konfiguration für Mischfuttermittel ListReport
 const mischfuttermittelListConfig: ListConfig = {
@@ -271,7 +272,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
         type: 'danger' as const,
         onClick: async (items: Record<string, unknown>[]) => {
           if (!confirm(`${items.length} Mischfuttermittel wirklich löschen?`)) return
-          const result = await bulkDeleteFutterItems('mischfuttermittel', items.map((item) => item.id))
+          const result = await bulkDeleteFutterItems('mischfuttermittel', items.map((item) => stringValue(item.id)).filter(Boolean))
           queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
           toast({
             title: 'Bulk-Löschen',
@@ -319,7 +320,8 @@ export default function MischfuttermittelListePage(): JSX.Element {
       const res = await api.post('/api/v1/futter/import/mischfuttermittel', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
+      const { created = 0, updated = 0, errors: rawErrors = [] } = (res.data as Record<string, unknown>) ?? {}
+      const errors = recordArrayFromResponse(rawErrors)
       toast({
         title: 'Import abgeschlossen',
         description: `${String(created ?? '')} neu, ${String(updated ?? '')} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,

@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast'
 import { useAnlieferavis, type Anlieferavis, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
 
 const createAnlieferavisConfig = (t: TFunction): ListConfig => ({
   title: 'Anlieferavis',
@@ -25,13 +26,13 @@ const createAnlieferavisConfig = (t: TFunction): ListConfig => ({
       key: 'avisNummer',
       label: 'Avis-Nr.',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'bestellung',
       label: 'Bestellung',
       sortable: true,
-      render: (value) => value?.nummer || '-'
+      render: (value) => isRecord(value) ? renderValue(value.nummer, '-') : '-'
     },
     {
       key: 'lieferant',
@@ -60,18 +61,18 @@ const createAnlieferavisConfig = (t: TFunction): ListConfig => ({
       key: 'geplantesAnlieferDatum',
       label: 'Geplantes Datum',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     },
     {
       key: 'fahrzeug',
       label: 'Fahrzeug',
-      render: (value) => value?.kennzeichen || '-'
+      render: (value) => isRecord(value) ? renderValue(value.kennzeichen, '-') : '-'
     },
     {
       key: 'createdAt',
       label: 'Erstellt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -115,7 +116,7 @@ async function bulkAvisMutation(selectedItems: Record<string, unknown>[], action
   const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
   for (const item of eligible) {
     try {
-      await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(item.id)}/${action}`)
+      await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(stringValue(item.id))}/${action}`)
       ok += 1
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -232,17 +233,17 @@ export default function AnlieferavisListePage(): JSX.Element {
     navigate('/einkauf/anlieferavis/neu')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) {
-      navigate(`/einkauf/anlieferavis/${item.id}`)
+      navigate(`/einkauf/anlieferavis/${stringValue(item.id)}`)
     }
   }
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Anlieferavis' }))) return
     try {
-      await apiClient.delete(`/api/v1/einkauf/anlieferavis/${item.id}`)
+      await apiClient.delete(`/api/v1/einkauf/anlieferavis/${stringValue(item.id)}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
     } catch (_rawErr: unknown) {

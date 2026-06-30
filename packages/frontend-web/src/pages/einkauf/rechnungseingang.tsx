@@ -21,6 +21,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
 
 const createRechnungseingangConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -335,8 +336,9 @@ export default function RechnungseingangPage(): JSX.Element {
   const freigebenMutation = useRechnungseingangFreigeben()
   const verbuchenMutation = useRechnungseingangVerbuchen()
 
-  const status = (data?.status as string) || ''
+  const status = stringValue(data?.status)
   const statusUpper = status.toUpperCase()
+  const skonto = isRecord(data?.skonto) ? data.skonto : null
   const procurementOps = summarizeProcurementMatch({
     exceptionsCount: Array.isArray(data?.abweichungen) ? data.abweichungen.length : 0,
     variancePercentage: data?.matchStatus === 'MATCHED' ? 0 : data?.matchStatus === 'PARTIAL' ? 5 : data?.matchStatus === 'EXCEPTION' ? 12 : 8,
@@ -351,32 +353,32 @@ export default function RechnungseingangPage(): JSX.Element {
     {
       title: 'Vorgang',
       items: [
-        { label: 'Rechnung', value: data.rechnungsNummer || data.id || 'Noch offen' },
-        { label: 'Lieferant', value: data.lieferantId || 'Nicht zugeordnet' },
-        { label: 'Bestellung', value: data.bestellungId || 'Keine Referenz' },
+        { label: 'Rechnung', value: renderValue(data.rechnungsNummer, renderValue(data.id, 'Noch offen')) },
+        { label: 'Lieferant', value: renderValue(data.lieferantId, 'Nicht zugeordnet') },
+        { label: 'Bestellung', value: renderValue(data.bestellungId, 'Keine Referenz') },
       ],
     },
     {
       title: 'Wirtschaft',
       items: [
-        { label: 'Brutto', value: data.bruttoBetrag != null ? `${data.bruttoBetrag} EUR` : 'Noch offen' },
-        { label: 'Netto', value: data.nettoBetrag != null ? `${data.nettoBetrag} EUR` : 'Noch offen' },
-        { label: 'Skonto', value: data?.skonto?.prozent != null ? `${data.skonto.prozent}%` : 'Kein Skonto' },
+        { label: 'Brutto', value: data.bruttoBetrag != null ? `${renderValue(data.bruttoBetrag)} EUR` : 'Noch offen' },
+        { label: 'Netto', value: data.nettoBetrag != null ? `${renderValue(data.nettoBetrag)} EUR` : 'Noch offen' },
+        { label: 'Skonto', value: skonto?.prozent != null ? `${renderValue(skonto.prozent)}%` : 'Kein Skonto' },
       ],
     },
     {
       title: 'Governance',
       items: [
         { label: 'Status', value: statusUpper || 'ERFASST' },
-        { label: 'Match', value: data.matchStatus || 'offen' },
+        { label: 'Match', value: renderValue(data.matchStatus, 'offen') },
         { label: 'Abweichungen', value: Array.isArray(data.abweichungen) ? `${data.abweichungen.length}` : '0' },
       ],
     },
   ] : []
   const timelineItems = data ? [
-    { label: 'Rechnung erfasst', detail: data.rechnungsDatum || 'Datum offen' },
+    { label: 'Rechnung erfasst', detail: renderValue(data.rechnungsDatum, 'Datum offen') },
     { label: 'Workflowstatus', detail: statusUpper || 'ERFASST' },
-    ...(data.zahlungsziel ? [{ label: 'Zahlungsziel', detail: data.zahlungsziel }] : []),
+    ...(data.zahlungsziel ? [{ label: 'Zahlungsziel', detail: renderValue(data.zahlungsziel) }] : []),
   ] : []
 
   const rechnungseingangConfig: MaskConfig = useMemo(() => ({
@@ -390,7 +392,7 @@ export default function RechnungseingangPage(): JSX.Element {
         onClick: async () => {
           if (!data?.id) return
           try {
-            await pruefenMutation.mutateAsync(data.id)
+            await pruefenMutation.mutateAsync(stringValue(data.id))
             toast({ title: t('crud.messages.success'), description: t('status.reviewed') })
             await loadData()
           } catch (_rawErr: unknown) {
@@ -411,7 +413,7 @@ export default function RechnungseingangPage(): JSX.Element {
         onClick: async () => {
           if (!data?.id) return
           try {
-            await freigebenMutation.mutateAsync(data.id)
+            await freigebenMutation.mutateAsync(stringValue(data.id))
             toast({ title: t('crud.messages.success'), description: t('status.approved') })
             await loadData()
           } catch (_rawErr: unknown) {
@@ -432,7 +434,7 @@ export default function RechnungseingangPage(): JSX.Element {
         onClick: async () => {
           if (!data?.id) return
           try {
-            await verbuchenMutation.mutateAsync(data.id)
+            await verbuchenMutation.mutateAsync(stringValue(data.id))
             toast({ title: t('crud.messages.success'), description: t('status.posted') })
             await loadData()
           } catch (_rawErr: unknown) {
@@ -450,7 +452,7 @@ export default function RechnungseingangPage(): JSX.Element {
         label: t('crud.actions.match'),
         type: 'secondary',
         onClick: () => {
-          if (data?.id) navigate(`/einkauf/rechnung-abgleich?invoiceId=${data.id}`)
+          if (data?.id) navigate(`/einkauf/rechnung-abgleich?invoiceId=${stringValue(data.id)}`)
         },
       },
     ],
@@ -497,7 +499,7 @@ export default function RechnungseingangPage(): JSX.Element {
             owner="Einkauf / FIBU"
             blocker={operationalBlocker}
             nextAction={procurementOps.nextAction}
-            caseLabel={data.rechnungsNummer || 'Rechnungseingang'}
+            caseLabel={renderValue(data.rechnungsNummer, 'Rechnungseingang')}
             tags={['Einkauf', 'FIBU']}
           />
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">

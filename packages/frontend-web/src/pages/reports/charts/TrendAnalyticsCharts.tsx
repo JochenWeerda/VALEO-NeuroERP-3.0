@@ -1,10 +1,11 @@
 import { Card } from '@/components/ui/card'
 import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
+import type { ReportDashboardData } from '@/pages/reports/report-chart-types'
 
 const CHART_HEIGHT = 300
 const formatCurrencyLabel = (value: number | string): [string, string] => [`${Number(value).toLocaleString('de-DE')} EUR`, 'Wert']
 
-export default function TrendAnalyticsCharts({ data }: { data: unknown }): JSX.Element {
+export default function TrendAnalyticsCharts({ data }: { data: ReportDashboardData }): JSX.Element {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Card className="p-4">
