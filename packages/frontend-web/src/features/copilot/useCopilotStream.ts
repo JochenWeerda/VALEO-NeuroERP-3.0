@@ -136,7 +136,17 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     return () => {
       clearTimeout(reconnectTimer.current)
       manuallyClosedRef.current = true
-      wsRef.current?.close()
+      const ws = wsRef.current
+      if (ws) {
+        if (ws.readyState === WebSocket.CONNECTING) {
+          // Avoid "closed before connection established" browser error in StrictMode:
+          // override onopen so the socket closes itself once the handshake finishes.
+          ws.onopen = () => { ws.close() }
+        } else {
+          ws.close()
+        }
+        wsRef.current = null
+      }
     }
   }, [])
 
