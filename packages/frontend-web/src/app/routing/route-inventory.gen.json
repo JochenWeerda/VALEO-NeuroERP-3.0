@@ -3182,6 +3182,11 @@
     },
     {
       "module": "@/pages/personal/hrm-operations-gates",
+      "path": "personal/hrm-freigaben",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/personal/hrm-operations-gates",
       "path": "personal/hrm-operations-gates",
       "source": "auto"
     },
@@ -4063,11 +4068,6 @@
     {
       "module": "@/pages/verkauf/kunde-neu",
       "path": "verkauf/kunde-neu",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage",
-      "path": "verkauf/kunde-neu/kundeneumaskbuilderpage",
       "source": "auto"
     },
     {
