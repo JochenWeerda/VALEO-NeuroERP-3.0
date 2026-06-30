@@ -4,7 +4,7 @@ import { useFeature } from '@/hooks/useFeature'
 import { auth } from '@/lib/auth'
 
 const resolveSseToken = (): string | undefined => {
-  return auth.getAccessToken() ?? undefined
+  return auth.getAccessToken() ?? (import.meta.env.VITE_API_DEV_TOKEN as string | undefined) ?? undefined
 }
 
 export default function SSEBootstrap({ children }: { children: ReactNode }): JSX.Element {
