@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-044 — FilterPlan Query Contract + ActionRuntime Anschluss
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-30 — FilterPlan-Query-Vertrag wird auf `filter_plan` als kanonischen Frontend-Parameter umgestellt; Backend akzeptiert fuer Rueckwaertskompatibilitaet `filter_plan` und `filterPlan`. Danach wird der ActionRuntime-Anschluss in `UniversalNativeDetailPage` geprueft und umgesetzt, soweit ohne unsauberes Kaschieren moeglich.
+**Ziel:** Native Masken laufen durchgaengig ueber den neuen Maskengenerator-Vertrag: strukturierte Filter erreichen effektiv das Backend; Actions nutzen echte `commandEndpoint`-Definitionen statt No-op.
+**Dateibesitz:** `packages/frontend-web/src/components/mask-builder/runtime/*`, `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `packages/frontend-web/src/components/mask-builder/renderers/*`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/api/v1/endpoints/crm_360.py`, relevante Tests und E2E-Nachweise.
+**Abnahme:** Frontend-Unit-Test fuer `filter_plan`; Backend-Tests fuer snake_case und camelCase Query-Parameter; Playwright-Nachweis fuer Filter-Chip/Backend-Filter; Typecheck/Build bleiben gruen.
+
 ## UIX-QA-044 — Frontend-Typecheck + Universal-Masken Browser-Gate
 
 **Von:** Codex
