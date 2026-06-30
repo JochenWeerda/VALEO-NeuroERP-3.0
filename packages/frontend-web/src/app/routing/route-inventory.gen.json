@@ -571,11 +571,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/agrar/saatgut-native",
-      "path": "agrar/saatgut-native/:id",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/agrar/saatgut-stamm",
       "path": "agrar/saatgut-stamm",
       "source": "auto"
@@ -583,6 +578,11 @@
     {
       "module": "@/pages/agrar/saatgut-stamm",
       "path": "agrar/saatgut-stamm/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/agrar/saatgut-native",
+      "path": "agrar/saatgut/:id",
       "source": "alias"
     },
     {
@@ -1401,7 +1401,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/crm/lead-detail",
+      "module": "@/pages/crm/lead-native",
       "path": "crm/lead/:id",
       "source": "alias"
     },
@@ -1646,14 +1646,14 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/einkauf/anfrage-native",
-      "path": "einkauf/anfrage-native/:id",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/einkauf/anfrage-stamm",
       "path": "einkauf/anfrage-stamm",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/anfrage-native",
+      "path": "einkauf/anfrage/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/anfrage-stamm",
@@ -1681,14 +1681,14 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/einkauf/angebot-native",
-      "path": "einkauf/angebot-native/:id",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/einkauf/angebot-stamm",
       "path": "einkauf/angebot-stamm",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/angebot-native",
+      "path": "einkauf/angebot/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/angebot-stamm",
@@ -1722,13 +1722,8 @@
     },
     {
       "module": "@/pages/einkauf/anlieferavis-native",
-      "path": "einkauf/anlieferavis-native/:id",
-      "source": "alias"
-    },
-    {
-      "module": "@/pages/einkauf/anlieferavis",
       "path": "einkauf/anlieferavis/:id",
-      "source": "navigation"
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/anlieferavis",
@@ -1747,7 +1742,7 @@
     },
     {
       "module": "@/pages/einkauf/auftragsbestaetigung-native",
-      "path": "einkauf/auftragsbestaetigung-native/:id",
+      "path": "einkauf/auftragsbestaetigung/:id",
       "source": "alias"
     },
     {
@@ -1776,14 +1771,14 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/einkauf/bestellung-native",
-      "path": "einkauf/bestellung-native/:id",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/einkauf/bestellung-stamm",
       "path": "einkauf/bestellung-stamm",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/bestellung-native",
+      "path": "einkauf/bestellung/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/bestellungen-liste",
@@ -2816,7 +2811,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/futtermittel/einzelfuttermittel-stamm",
+      "module": "@/pages/futtermittel/einzelfuttermittel-native",
       "path": "futtermittel/einzelfuttermittel/:id",
       "source": "alias"
     },
@@ -2871,7 +2866,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/futtermittel/mischfuttermittel-stamm",
+      "module": "@/pages/futtermittel/mischfuttermittel-native",
       "path": "futtermittel/mischfuttermittel/:id",
       "source": "alias"
     },
@@ -3706,9 +3701,9 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/qualitaet/reklamation-detail",
+      "module": "@/pages/qualitaet/reklamation-native",
       "path": "qualitaet/reklamation/:id",
-      "source": "auto"
+      "source": "alias"
     },
     {
       "module": "@/pages/qualitaet/reklamationen",
