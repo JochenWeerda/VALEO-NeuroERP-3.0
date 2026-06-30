@@ -21,7 +21,8 @@ Diese Checkliste minimiert Kontextverlust bei Neustarts oder Agentenwechseln.
 2. [Active Workboard](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/active-workboard.md) lesen
 3. passenden Handoff oder Resume-Block lesen
 4. betroffene Source-of-Truth-Dateien oeffnen
-5. offenen Dateibesitz und Risiken pruefen
+5. bei Mask-Generator-/Runtime-Arbeit zusaetzlich [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md)
+6. offenen Dateibesitz und Risiken pruefen
 6. erst dann in Code oder Tests einsteigen
 
 ## Pflichtfragen

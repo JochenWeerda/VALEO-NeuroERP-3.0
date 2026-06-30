@@ -5,8 +5,8 @@ audience: [agent, entwickler]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-29
-version: 1.1.0
-description: Schritt-fuer-Schritt Template fuer Agrar, Inventory, Finance Mask-Piloten (useUniversalMaskRuntime-Muster ab Wave 42).
+version: 1.2.0
+description: Schritt-fuer-Schritt Template fuer Agrar, Inventory, Finance Mask-Piloten (useUniversalMaskRuntime-Muster ab Wave 42; Governance ab UIX-031).
 ---
 
 # Domain Rollout Template (Wave 40 / aktualisiert Wave 42)
@@ -25,12 +25,17 @@ Referenz-Slices: CRM (`UIX-CRM-PILOT-002`), Sales (`UIX-SALES-PILOT-007`), Rende
 
 ## Rollout-Reihenfolge
 
-1. CRM 360 (abgeschlossen — native Runtime ab UIX-NATIVE-RUNTIME-020)
+1. CRM 360 (native Runtime ab UIX-028; Parität in UIX-034)
 2. Sales Order (abgeschlossen)
 3. Agrar — Ernte/Contract (abgeschlossen: Kontrakt-Pilot Wave 41)
-4. **Batch Waves 42–51** — zehn Kandidaten (Inventory, Finance, Einkauf, CRM, Sales, Agrar Settlement) — siehe [`mask-rollout-batch-w42-51.md`](mask-rollout-batch-w42-51.md)
-5. Inventory — Bestand/Lagerbewegung (in Batch enthalten)
-6. Finance — AP/AR Object Pages (in Batch enthalten)
+4. **Batch Waves 42–51** — zehn Kandidaten — siehe [`mask-rollout-batch-w42-51.md`](mask-rollout-batch-w42-51.md)
+5. **UIX-037 Neu-Bewertung** (nach CI + CRM-Parität): supplier → opportunity → article-stock → delivery-note → purchase-order → ap-invoice → ar-open-item → stock-movement → harvest-settlement → payment-run
+
+## Governance (Pflicht ab UIX-031)
+
+- **Keine weiteren `generator_ready`-Masken**, bis UIX-032 (CI grün) und UIX-034 (CRM-360-Parität) nachgewiesen sind.
+- Readiness prüfen: `GET /api/v1/masks/{id}/readiness` + [`universal-mask-runtime-status.md`](universal-mask-runtime-status.md)
+- Agent-Vertrag: `GET /api/v1/masks/{id}/agent-contract`
 
 ## Datei-Vorlage (ab Wave 42)
 

@@ -1,0 +1,29 @@
+slice_id: UIX-032
+title: CI- und Gate-Nachweis (Mask Runtime)
+owner: offen
+status: in_arbeit
+created_at: 2026-06-29
+goal: Eindeutiger grüner Commit-Status vor weiterer Architekturwelle.
+file_ownership:
+  - docs/architecture/uix/universal-mask-runtime-status.md
+acceptance:
+  - Frontend type-check, build, vitest grün
+  - pytest rollout + agent/readiness grün
+  - GitHub Actions quality-gate Run dokumentiert oder Blocker benannt
+tests:
+  - pnpm --dir packages/frontend-web type-check
+  - pnpm --dir packages/frontend-web build
+  - pnpm --dir packages/frontend-web test:run
+  - pytest tests/test_mask_rollout_batch_w42_51.py tests/test_agent_mask_contract.py
+risks:
+  - Kein GHA-Run für UIX-028…030 sichtbar
+external_gates:
+  - GitHub Actions quality-gate.yml auf main
+ai_harness:
+  fachlicher_vertrag: Produktionsnachweis für Runtime-Plattform.
+  architektur_vertrag: Kein Code-Change — Nachweis und Doku.
+  daten_vertrag: not_applicable
+  test_vertrag: Lokale + CI Befehlskette in universal-mask-runtime-status.md
+  security_vertrag: not_applicable
+  betriebs_vertrag: CI-Tabelle in Status-Doku pflegen
+  dokumentations_vertrag: universal-mask-runtime-status CI-Abschnitt; open-gaps UIX-032

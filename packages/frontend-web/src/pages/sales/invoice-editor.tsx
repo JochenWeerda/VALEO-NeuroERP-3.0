@@ -136,17 +136,33 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     }
     void (async () => {
       try {
-        const { data: doc } = await apiClient.get(`/api/v1/docflow/${editId}`)
-        setDocId(String(doc.id))
+        type DocflowInvoiceDoc = {
+          id?: string | number
+          doc_number?: string
+          document_date?: string
+          customer_id?: string
+          status?: string
+          items?: Array<{
+            article_number?: string
+            quantity?: number
+            unit_price?: number
+            tax_rate?: number
+          }>
+          total_net?: number
+          total_tax?: number
+          total_gross?: number
+        }
+        const doc = await apiClient.get<DocflowInvoiceDoc>(`/api/v1/docflow/${editId}`)
+        setDocId(String(doc.id ?? editId))
         setInvoice((prev) => ({
           ...prev,
           number: doc.doc_number ?? prev.number,
           date: String(doc.document_date ?? prev.date).slice(0, ISO_DATE_LENGTH),
-          customerId: doc.customer_id ?? "",
+          customerId: doc.customer_id ?? '',
           status: doc.status ?? prev.status,
           lines: Array.isArray(doc.items)
-            ? doc.items.map(it => ({
-                article: it.article_number ?? "",
+            ? doc.items.map((it) => ({
+                article: it.article_number ?? '',
                 qty: Number(it.quantity ?? 0),
                 price: Number(it.unit_price ?? 0),
                 vatRate: Number(it.tax_rate ?? 0),

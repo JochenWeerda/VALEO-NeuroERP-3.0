@@ -23,6 +23,7 @@ Die vollständige Startseite mit Diátaxis-Navigation liegt unter **[index.md](i
 | Architektur | [Architektur-Index](architecture/index.md) → [arc42](architecture/arc42/01-einfuehrung.md) |
 | Entscheidungen | [ADR-Index](adr/README.md) |
 | Offene Lücken | [Open Gaps](project-context/open-gaps-and-known-issues.md) |
+| Mask Runtime Status | [Universal Mask Runtime](architecture/uix/universal-mask-runtime-status.md) |
 
 ## Architektur-Sichten (neu)
 

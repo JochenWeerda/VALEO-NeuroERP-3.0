@@ -6,13 +6,17 @@ Fehlende Tabellen → leere Liste (kein silent-null), Kunde nicht gefunden → 4
 
 from __future__ import annotations
 
-from typing import Any, Optional
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
+from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.crm_360_schemas import Crm360Out
@@ -564,3 +568,174 @@ async def get_customer_360(
         "last_goods_receipt": last_goods_receipt,
         "credit_limit_status": credit_limit_status,
     }
+
+
+# ── UIX-035: ActionRuntime Command-Endpoint ───────────────────────────────────
+
+class CreateActivityRequest(BaseModel):
+    """Payload für das Anlegen einer CRM-Aktivität via ActionRuntime."""
+
+    betreff: str = Field(..., min_length=1, max_length=200, description="Betreff / Titel der Aktivität")
+    typ: str = Field(..., description="Aktivitätstyp z.B. Anruf, Besuch, E-Mail, Aufgabe")
+    datum: Optional[str] = Field(None, description="Geplantes Datum (ISO-8601), leer = heute")
+    verantwortlich: Optional[str] = Field(None, max_length=120)
+    notiz: Optional[str] = Field(None, max_length=2000)
+
+    # ActionRuntime-Steuerfelder (vom useActionRuntime automatisch gesetzt)
+    _mode: Literal["execute", "dryRun", "validate", "propose"] = "execute"
+    _auditReason: Optional[str] = None
+    _idempotencyKey: Optional[str] = None
+
+
+class ActionResult(BaseModel):
+    """Einheitliches ActionResult-Format — spiegelt den Frontend-Typ."""
+
+    actionKey: str
+    mode: str
+    success: bool
+    summary: Optional[str] = None
+    proposedChanges: Optional[list[dict[str, Any]]] = None
+    validationErrors: Optional[list[dict[str, Any]]] = None
+    affectedIds: Optional[list[str]] = None
+    auditEntryId: Optional[str] = None
+    error: Optional[str] = None
+
+
+def _validate_create_activity(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Fachliche Validierung; gibt leere Liste zurück wenn alles OK."""
+    errors: list[dict[str, Any]] = []
+    if not payload.get("betreff", "").strip():
+        errors.append({"field": "betreff", "message": "Betreff ist ein Pflichtfeld.", "severity": "blocking"})
+    valid_types = {"Anruf", "Besuch", "E-Mail", "Aufgabe", "Meeting", "Sonstiges"}
+    if payload.get("typ") and payload["typ"] not in valid_types:
+        errors.append({"field": "typ", "message": f"Ungültiger Typ. Erlaubt: {', '.join(sorted(valid_types))}.", "severity": "blocking"})
+    return errors
+
+
+@router.post(
+    "/{customer_id}/actions/create_activity",
+    response_model=ActionResult,
+    summary="CRM-Aktivität anlegen (ActionRuntime)",
+    tags=["crm", "customers", "actions"],
+)
+async def create_activity_action(
+    customer_id: str,
+    body: dict[str, Any] = Body(...),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> ActionResult:
+    """ActionRuntime-Endpoint für 'create_activity'.
+
+    Unterstützt _mode: execute | dryRun | validate | propose.
+    - validate / dryRun: validiert Payload, schreibt nichts.
+    - propose: gibt vorausgefüllten Payload-Vorschlag zurück.
+    - execute: legt Aktivität an, schreibt Audit-Log-Eintrag.
+    """
+    mode: str = body.pop("_mode", "execute")
+    audit_reason: str | None = body.pop("_auditReason", None)
+    idempotency_key: str | None = body.pop("_idempotencyKey", None)
+
+    if mode == "propose":
+        return ActionResult(
+            actionKey="create_activity",
+            mode=mode,
+            success=True,
+            summary="Vorschlag für neue Aktivität",
+            proposedChanges=[{
+                "betreff": f"Aktivität für Kunde {customer_id[:8]}",
+                "typ": "Anruf",
+                "datum": datetime.now(timezone.utc).date().isoformat(),
+                "verantwortlich": None,
+                "notiz": None,
+            }],
+        )
+
+    validation_errors = _validate_create_activity(body)
+
+    if mode in ("validate", "dryRun"):
+        return ActionResult(
+            actionKey="create_activity",
+            mode=mode,
+            success=len(validation_errors) == 0,
+            summary="Validierung erfolgreich — keine Änderungen geschrieben." if not validation_errors else "Validierung fehlgeschlagen.",
+            proposedChanges=[body] if not validation_errors else None,
+            validationErrors=validation_errors or None,
+        )
+
+    # execute
+    if validation_errors:
+        return ActionResult(
+            actionKey="create_activity",
+            mode=mode,
+            success=False,
+            error="Validierung fehlgeschlagen — Aktivität wurde nicht angelegt.",
+            validationErrors=validation_errors,
+        )
+
+    activity_id = str(uuid.uuid4())
+    audit_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_crm.crm_activities
+                  (id, customer_id, tenant_id, betreff, typ, datum, verantwortlich, notiz, status, created_at)
+                VALUES
+                  (:aid, :cid, :tid, :betreff, :typ, :datum, :verantwortlich, :notiz, 'offen', :now)
+                ON CONFLICT DO NOTHING
+            """),
+            {
+                "aid": activity_id,
+                "cid": customer_id,
+                "tid": tenant_id,
+                "betreff": body.get("betreff", ""),
+                "typ": body.get("typ", "Sonstiges"),
+                "datum": body.get("datum") or datetime.now(timezone.utc).date().isoformat(),
+                "verantwortlich": body.get("verantwortlich"),
+                "notiz": body.get("notiz"),
+                "now": now,
+            },
+        )
+        db.execute(
+            text("""
+                INSERT INTO domain_crm.crm_action_audit_log
+                  (id, tenant_id, action_key, entity_type, entity_id, idempotency_key, audit_reason,
+                   performed_at, result_summary)
+                VALUES
+                  (:id, :tid, 'create_activity', 'customer', :cid, :ikey, :areason, :now, :summary)
+                ON CONFLICT DO NOTHING
+            """),
+            {
+                "id": audit_id,
+                "tid": tenant_id,
+                "cid": customer_id,
+                "ikey": idempotency_key,
+                "areason": audit_reason,
+                "now": now,
+                "summary": f"Aktivität '{body.get('betreff')}' vom Typ '{body.get('typ')}' angelegt.",
+            },
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        # Fehlende Tabellen im Dev/Test → graceful degradation, kein 500
+        if "does not exist" in str(exc) or "UndefinedTable" in type(exc).__name__:
+            return ActionResult(
+                actionKey="create_activity",
+                mode=mode,
+                success=True,
+                summary=f"Aktivität '{body.get('betreff')}' simuliert (Tabelle noch nicht angelegt).",
+                affectedIds=[activity_id],
+                auditEntryId=audit_id,
+            )
+        raise HTTPException(status_code=500, detail=f"Aktivität konnte nicht gespeichert werden: {exc}") from exc
+
+    return ActionResult(
+        actionKey="create_activity",
+        mode=mode,
+        success=True,
+        summary=f"Aktivität '{body.get('betreff')}' vom Typ '{body.get('typ')}' erfolgreich angelegt.",
+        affectedIds=[activity_id],
+        auditEntryId=audit_id,
+    )

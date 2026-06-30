@@ -5,7 +5,7 @@ type: reference
 audience: [entwickler, endnutzer]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-06-29
 version: 3.2.0
 ---
 
@@ -19,7 +19,7 @@ version: 3.2.0
 Der Hook `useInAppHelp()` liest die aktuelle Route, sucht den längsten Präfix-Treffer
 in `ROUTE_HELP_MAP` und öffnet die passende MkDocs-Seite im Benutzerhandbuch.
 
-**Abdeckung:** 895 App-Routen → 176 Präfix-Einträge.
+**Abdeckung:** 896 App-Routen → 177 Präfix-Einträge.
 
 ## Beispiel-Routen (Auszug)
 
@@ -82,4 +82,4 @@ in `ROUTE_HELP_MAP` und öffnet die passende MkDocs-Seite im Benutzerhandbuch.
 2. `python scripts/generate_inapp_help_map.py`
 3. `src/lib/docs-help.ts` committen
 
-*Stand: 2026-06-26 · 895 Routen gemappt · Slice: DOC-USER-MANUAL-004*
+*Stand: 2026-06-29 · 896 Routen gemappt · Slice: DOC-USER-MANUAL-004*

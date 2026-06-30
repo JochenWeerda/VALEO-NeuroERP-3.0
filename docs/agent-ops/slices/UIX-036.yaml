@@ -1,0 +1,26 @@
+slice_id: UIX-036
+title: Agent End-to-End-Test (CRM 360)
+owner: offen
+status: geplant
+created_at: 2026-06-29
+goal: Agent liest AgentMaskContract, nutzt dryRun/propose, blockiert bei humanApprovalRequired.
+file_ownership:
+  - tests/ oder docs/quality-assurance/
+  - packages/frontend-web/src/components/mask-builder/runtime/generateAgentMaskContract.ts
+acceptance:
+  - Szenario Analyse ohne Freigabe-Ausfuehrung dokumentiert und automatisiert
+  - sensitiveFields respektiert
+  - AuditReason bei vorbereiteten Aktionen
+tests:
+  - pytest agent-contract Integration
+  - optional Playwright oder Agent-Harness-Skript
+external_gates:
+  - not_applicable
+ai_harness:
+  fachlicher_vertrag: VALEO agentenfaehig — nicht nur JSON, sondern durchgespielter Ablauf.
+  architektur_vertrag: AgentMaskContract + ActionRuntime Modi.
+  daten_vertrag: Keine PII in Test-Fixtures ohne Maskierung.
+  test_vertrag: Reproduzierbarer Agent-Szenario-Test.
+  security_vertrag: Kein execute ohne humanApproval bei HIGH-Risk.
+  betriebs_vertrag: Dev-Token / Mock-API.
+  dokumentations_vertrag: Runbook oder QA-Spec fuer Agent-Modus.

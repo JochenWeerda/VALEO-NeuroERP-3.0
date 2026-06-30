@@ -4,8 +4,8 @@ type: reference
 audience: [entwickler, agent]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-27
-version: 3.0.0
+last_reviewed: 2026-06-29
+version: 3.2.0
 description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
 ---
 
@@ -72,7 +72,81 @@ Status: abgeschlossen — zehn Rollout-Kandidaten mit zentralem `/api/v1/mask-ro
 
 - Geliefert: `mask_rollout_catalog`, `mask_rollout_summary_service`, pytest 24/24, Doku `mask-rollout-batch-w42-51.md`.
 - Grenzen: Adapter-Parität (Felder aus MaskConfig); generische Tab-Spalten; keine Detail-Route-Switches pro Legacy-Seite.
-- **Naechster Architekturschritt:** UniversalMaskRuntime (`UIX-RUNTIME-020`…`024`) — DataBindingPlan, Lookup-/Table-Adapter, native CRM-Schema.
+- ~~**Naechster Architekturschritt:** UniversalMaskRuntime (`UIX-RUNTIME-020`…`024`)~~ → **abgeschlossen in UIX-022…030** (siehe unten).
+
+## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
+
+Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`81d706da8` bis `e6cabb380`).
+
+### Was geliefert wurde
+
+| Phase | Inhalt | Commit |
+|-------|--------|--------|
+| 022 Sort-Whitelist | `get_sortable_columns`, `paginate_tab_items` mit sort/sort_dir, Backend + Frontend | `0f6e06f43` |
+| 023 FilterPlan | 8 Operatoren (eq/neq/contains/lt/lte/gt/gte/in/between), `get_filterable_columns`, FilterChips-UI | `bf83d8563` |
+| 025 UniversalFormState | `useUniversalFormState` — Ref-Guard, dirty-Tracking, Sticky Submit Bar, Pflichtfeld-Blocking | `7f95ef674` |
+| 026 ActionRuntime | `ActionPolicy`, `checkActionPolicy`, `useActionRuntime`, dryRun/validate/propose Modi | `7f95ef674` |
+| 027 WorkflowRuntime | `WorkflowState`, tone-colored `WorkflowPanelRenderer`, `useWorkflowState` | `b3eea3a20` |
+| 028 CRM 360 native Parity | `useUniversalMaskRuntime` wenn `adapter.temporary===false`; `data-runtime` Marker | `81d706da8` |
+| 029 AgentMaskContract | `generateAgentMaskContract`, `GET /api/v1/masks/{id}/agent-contract` | `81d706da8` |
+| 030 Readiness Gates | `checkGeneratorReadiness` (6 mandatory Gates), `GET /api/v1/masks/{id}/readiness` | `e6cabb380` |
+| 033 Readiness verschärft | 6 mandatory + 6 advisory Gates pro Tabelle; `table_data_source_bound`, `actions_classified` u.a. | `fd2b8a7cf` |
+
+### Architekturprinzip
+
+Eine `ScreenDefinition` ist Single Source of Truth für **Human UI und AI Agent**:
+- Human: `RenderPlan` → `UniversalMaskRenderer` → Sort/Filter/Form/Workflow/Actions
+- Agent: `AgentMaskContract` → lesbare/editierbare/sensible Felder, Action-Policies, Audit-Anforderungen
+- Backend: Sort-/Filter-Whitelist aus `ScreenDefinition`; strukturierter `FilterPlan`-JSON-Parameter
+
+### Plattformstatus (Stakeholder-Audit 2026-06-29)
+
+```text
+Architektur:                sehr guter Sprung (021…030 geliefert)
+Human+Agent-Gedanke:        umgesetzt (AgentMaskContract, ActionRuntime, FilterPlan)
+Runtime-Basis:              vorhanden (useUniversalMaskRuntime)
+Readiness-Governance:       vorhanden (030 Basis + 033 pro Tabelle)
+CRM 360 native Pfad:        vorhanden; fachliche Parität offen (034)
+CI-/Release-Nachweis:       teilweise — pytest 43/43 lokal; Frontend-Gates + GitHub Actions offen
+Doku-Konsistenz:            nach UIX-031 + DOC-UIX-RUNTIME-001 synchron
+Produktionsreife:           noch nicht bewiesen
+```
+
+Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md)
+
+### Status UIX-031…038 (Stand 2026-06-29)
+
+| Slice | Inhalt | Priorität | Stand |
+|-------|--------|-----------|-------|
+| UIX-031 | Doku-Konsolidierung | P0 | ✅ |
+| UIX-032 | CI-Gate: pytest 57/57 lokal; tsc 0 Fehler; GHA nach Push | P0 | ✅ lokal |
+| UIX-033 | 12 Readiness-Gates (6 mandatory + 6 advisory) | P1 | ✅ |
+| UIX-034 | CRM-360 Parity-Matrix; fields[]; agentContract; advisoryScore=83% | P1 | ✅ |
+| UIX-035 | ActionRuntime create_activity: validate/dryRun/propose/execute + Audit | P2 | ✅ |
+| UIX-036 | Agent propose→dryRun→validate getestet; humanApproval-Block aktiv | P2 | ✅ |
+| UIX-037 | Rollout-Kandidaten strukturell gefixt; adv=50% alle 10; Promotions-Reihenfolge | P2 | ✅ |
+| UIX-038 | einkauf/supplier native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
+| UIX-039 | crm/opportunity native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
+| UIX-040 | lager/article-stock native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
+| DOC-UIX-RUNTIME-001 | Doku-Paket Handbuch, Entwickler-API, Agent-Runbook, Parity, In-App-Hilfe | P1 | ✅ |
+| UIX-041 | 7 native SDs Wave 1 (delivery-note, purchase-order, ap-invoice, ar-open-item, stock-movement, harvest-settlement, payment-run) | P1 | ✅ |
+| UIX-042a/b | advisory-Score 1.00 alle SDs + UniversalNativeDetailPage + 7 Frontend-Wrapper | P1 | ✅ |
+| UIX-043 | 13 verbliebene ObjectPage-Masken migriert; 26 native SDs gesamt; Vollständige Inventur | P1 | ✅ |
+
+### Migrationsstand Universal Mask Generator (2026-06-30) — ABGESCHLOSSEN
+
+- **26 native SDs** — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`
+- **20 Frontend thin wrapper pages** + 20 route-aliases in `route-aliases.json`
+- **60 Tests grün** | Inventur: `docs/architecture/uix/uix-043-mask-migration-inventory.md`
+- **18 Seiten bewusst exempt** (Prozessmasken, Formulare, Batch)
+
+### Offene Folgearbeit (P2/P3)
+
+| Thema | Beschreibung | Priorität |
+|-------|-------------|-----------|
+| commandEndpoints | Gestubte Actions (neue_bestellung, freigeben, mahnen, drucken) | P2 |
+| Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
+| Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 

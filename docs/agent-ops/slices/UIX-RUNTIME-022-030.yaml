@@ -1,0 +1,40 @@
+slice_id: UIX-RUNTIME-022-030
+title: Universal Mask Runtime Platform (Sort/Filter/Form/Action/Workflow/Agent)
+owner: Claude Code
+status: abgeschlossen
+created_at: 2026-06-29
+completed_at: 2026-06-29
+commit: e6cabb380
+goal: >-
+  ScreenDefinition als Single Source of Truth für Human UI und AI Agent;
+  useUniversalMaskRuntime, FilterPlan, FormState, ActionRuntime, Workflow, Readiness.
+file_ownership:
+  - packages/frontend-web/src/components/mask-builder/runtime/
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - app/core/mask_screen_summary_common.py
+acceptance:
+  - Sort-Whitelist Backend + Frontend (022)
+  - FilterPlan Human + Agent (023)
+  - UniversalFormState + ActionRuntime (025-026)
+  - WorkflowState (027)
+  - CRM 360 native Pfad (028)
+  - AgentMaskContract (029)
+  - Generator Readiness Gates Basis (030)
+tests:
+  - Vitest runtime + generatorReadiness
+  - pytest test_agent_mask_contract.py
+  - pytest test_mask_rollout_batch_w42_51.py
+risks:
+  - Produktionsreife erst nach UIX-032/034
+external_gates:
+  - not_applicable
+ai_harness:
+  fachlicher_vertrag: Human+Agent Mask Runtime für ERP-360°-Cockpits und Rollouts.
+  architektur_vertrag: ADR-011 Erweiterung; render-plan-architecture v1.2.
+  daten_vertrag: filter_plan JSON; ScreenDefinition Whitelists; AgentContract derived.
+  test_vertrag: Vitest + pytest agent/readiness; E2E CRM in UIX-034.
+  security_vertrag: ActionPolicy dangerLevel; humanApprovalRequired; sensitiveFields.
+  betriebs_vertrag: GET /masks/{id}/readiness für Rollout-Governance.
+  dokumentations_vertrag: open-gaps § UIX-RUNTIME-022-030; universal-mask-runtime-status.
+follow_up:
+  - UIX-STABILIZATION-031-037

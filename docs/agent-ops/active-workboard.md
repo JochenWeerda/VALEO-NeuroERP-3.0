@@ -4,12 +4,101 @@ type: reference
 audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-29
-version: 3.2.0
+last_reviewed: 2026-06-30
+version: 3.3.0
 description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
 ---
 
 # Active Workboard
+
+## UIX-043 — Vollständige Masken-Migration (alle verbliebenen ObjectPage-Masken)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-30 — 13 weitere native SDs (Wave 2) fertiggestellt; 26 gesamt im Registry, alle `generatorReady=True`, `advisoryScore=1.00`. 18 Seiten bewusst exempt (Prozessmasken, Formulare, Batch-Screens). Vollständige Inventur in `docs/architecture/uix/uix-043-mask-migration-inventory.md`.
+**Ziel:** Alle entity-detail ObjectPage-Masken auf native ScreenDefinition migrieren — keine Ausnahme ohne dokumentierten Grund.
+**Dateibesitz:** `app/core/screen_definitions.py`, `packages/frontend-web/src/pages/{agrar,finance,einkauf,qualitaet,futtermittel,crm}/*-native.tsx`, `packages/frontend-web/src/app/route-aliases.json`, `docs/architecture/uix/uix-043-mask-migration-inventory.md`.
+**Abnahme:** 60/60 pytest gruen; alle 26 SDs `generatorReady=True advisoryScore=1.00`; 20 route-aliases registriert.
+
+## UIX-041/042 — Restliche native SDs + Frontend-Verdrahtung
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-30 — 7 native SDs (Wave 1: sales/delivery-note, einkauf/purchase-order, finance/ap-invoice, finance/ar-open-item, lager/stock-movement, agrar/harvest-settlement, finance/payment-run) promoted. `UniversalNativeDetailPage` als generischer Wrapper eingeführt. 7 thin wrapper pages + route-aliases.
+**Dateibesitz:** `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `packages/frontend-web/src/components/mask-builder/index.ts`.
+**Abnahme:** 60 pytest gruen; alle 13 SDs advisory=1.00.
+
+## DOC-UIX-RUNTIME-001 — Mask-Runtime-Dokumentationspaket
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-29 — Benutzerhandbuch `masken-plattform.md`, Einkauf/CRM-Abschnitte, Parity-Matrizen supplier/opportunity, Entwickler-API, Agent-Runbook, mkdocs-Navigation, `generate_inapp_help_map.py` fuer mask-rollout.
+**Ziel:** Vollstaendiges Doku-Paket fuer Universal Mask Runtime (Endnutzer, Entwickler, Agenten).
+**Dateibesitz:** `docs/benutzerhandbuch/masken-plattform.md`, `docs/entwickler/mask-runtime-api.md`, `docs/agent-docs/runbooks/mask-runtime-agent-modus.md`, `docs/architecture/domains/einkauf/mask-parity-supplier-native.md`, `docs/architecture/domains/crm/mask-parity-opportunity-planned.md`, `scripts/generate_benutzerhandbuch_full.py`, `packages/frontend-web/src/lib/docs-help.ts`.
+**Abnahme:** mkdocs-Eintrag Masken-Plattform; In-App-Hilfe mask-rollout → masken-plattform; Verweise in universal-mask-runtime-status.
+
+## UIX-035 — ActionRuntime Backend-Command: CRM Aktivitaet anlegen
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — `POST /api/v1/crm/customers/{customer_id}/actions/create_activity` mit vollstaendigem Mode-Support (validate/dryRun/propose/execute); Audit-Log-Eintrag bei execute; graceful degradation bei fehlender Tabelle im Dev/Test. `commandEndpoint` in ScreenDefinition verdrahtet.
+**Ziel:** Erste produktive Mutation ueber ActionRuntime — fachlich relevant, kein Zahlungsrisiko.
+**Dateibesitz:** `app/api/v1/endpoints/crm_360.py`, `app/core/screen_definitions.py` (commandEndpoint), `tests/test_uix035_action_runtime_crm.py`.
+**Abnahme:** 14/14 pytest gruen — validate/dryRun/propose/execute, AgentContract-Gate, Readiness-Gates, commandEndpoint-Verdrahtung.
+
+## UIX-036 — Agent-Modus End-to-End-Test
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Agent-Pfad (propose → dryRun → validate, kein execute) in `tests/test_uix035_action_runtime_crm.py` getestet. `checkActionPolicy` blockiert `forbiddenForAgents`/`humanApprovalRequired` korrekt. `create_activity` im AgentContract sichtbar mit `requiresHumanApproval=False`.
+**Ziel:** VALEO agentenfaehig — Agent kann sicher lesen, vorschlagen, trocken laufen ohne zu schreiben.
+**Dateibesitz:** `tests/test_uix035_action_runtime_crm.py` (test_agent_*), `packages/frontend-web/src/components/mask-builder/runtime/ActionRuntime.ts` (`checkActionPolicy`), `useActionRuntime.ts` (`useAgentActionDispatch`).
+**Abnahme:** test_agent_dry_run_propose_chain, test_agent_contract_gate_on_action_definition gruen.
+
+## UIX-037 — Rollout-Kandidaten Readiness-Bewertung
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29 — Alle 10 Kandidaten (Wave 42-51) gegen 12 Gates geprueft; strukturelle Fehler behoben; advisoryScore einheitlich 50%; einziger Mandatory-Blocker = `non_temporary` (intentional — Rollout-Status).
+**Ziel:** Beweisen dass die 10 Kandidaten strukturell korrekt sind; Promotions-Reihenfolge festlegen.
+**Dateibesitz:** `app/core/screen_definitions.py` (_ROLLOUT_KOPF_FIELDS, entity-DataSource, fields[]-Tab, noWorkflowReason, sortable/filterable kontakte), `docs/architecture/uix/uix-037-rollout-readiness-report.md`.
+**Abnahme:** Alle 10 Kandidaten: mandatory errors = 1 (non_temporary only), advisory = 50%, keine strukturellen Fehler.
+
+**Promotions-Reihenfolge:**
+1. einkauf/supplier → UIX-038 (naechster Schritt)
+2. crm/opportunity
+3. lager/article-stock
+4. sales/delivery-note
+5. einkauf/purchase-order
+6. finance/ap-invoice
+7. finance/ar-open-item
+8. lager/stock-movement
+9. agrar/harvest-settlement
+10. finance/payment-run (zuletzt — hoechstes Risiko)
+
+## UIX-038…040 — Native ScreenDefinition Promotionen
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-29 — `einkauf/supplier`, `crm/opportunity` und `lager/article-stock` loesen jetzt auf native ScreenDefinitions mit `adapter.temporary=false` auf. Alle drei erreichen `generatorReady=true`, `advisoryScore=1.0`; Regressionstest verhindert, dass promotete Masken wieder durch den generischen Rollout-Builder ueberschrieben werden.
+**Ziel:** Die ersten drei UIX-037-Rollout-Kandidaten nativ promoten, ohne sofort Legacy-Routen oder Mutationspfade umzubauen.
+**Dateibesitz:** `app/core/screen_definitions.py`, `tests/test_agent_mask_contract.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/architecture/domains/einkauf/mask-parity-supplier-native.md`, `docs/architecture/domains/crm/mask-parity-opportunity-planned.md`.
+**Abnahme:** `python -m pytest tests/test_agent_mask_contract.py -q --no-cov` → 22/22 gruen; `python -m pytest tests/test_mask_rollout_batch_w42_51.py -q --no-cov` → 24/24 gruen; direkte `_check_readiness()`-Pruefung fuer 038–040: keine Errors/Warnings.
+**Folge:** UIX-042 Frontend-Verdrahtung fuer `einkauf/supplier`; UIX-041 `neue_bestellung` CommandEndpoint; weitere Promotionen ab `sales/delivery-note`.
+
+## UIX-STABILIZATION-031-034 — Runtime-Stabilisierung und Produktionsnachweis
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-29.
+
+**UIX-031:** `open-gaps-and-known-issues.md` aktualisiert, UIX-022…030 als abgeschlossen dokumentiert, Restarbeit 032–037 mit Prioritaeten erfasst.
+**UIX-032:** Backend pytest 24/24 (rollout), 19/19 (agent_contract), 14/14 (uix035/036) lokal gruen; tsc --noEmit 0 Fehler. GitHub Actions: naechster Push loest CI aus.
+**UIX-033:** 12 Readiness-Gates aktiv (6 mandatory + 6 advisory). `GET /masks/{id}/readiness` Endpunkt aktiv.
+**UIX-034b/c:** CRM-360 masterdata/address fields[], Advisory-Gates auf 83%, agentContract explizit, noWorkflowReason gesetzt.
+
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/adr/uix-034-crm360-native-parity-matrix.md`, `app/core/screen_definitions.py`, `app/api/v1/endpoints/mask_screen_definition.py`.
+**Abnahme:** ScreenDefinition CRM-360 generatorReady=true, advisoryScore=83%; 10 Rollout-Kandidaten strukturell OK, einziger Block = non_temporary.
 
 ## UIX-RUNTIME-ROLLOUT-021 — Rollout-Kandidaten auf useUniversalMaskRuntime migrieren
 
@@ -39,9 +128,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 | 027 | WorkflowRuntime: WorkflowState, tone-colored WorkflowPanelRenderer, useWorkflowState | ✅ |
 | 028 | CRM 360 native Parity: useUniversalMaskRuntime als Pfad wenn adapter.temporary===false | ✅ |
 | 029 | AgentMaskContract: generateAgentMaskContract, GET /masks/{id}/agent-contract | ✅ |
-| 030 | Generator-Readiness-Gates: checkGeneratorReadiness, 6 Gates, GET /masks/{id}/readiness | ✅ |
+| 030 | Generator-Readiness-Gates: checkGeneratorReadiness, 6 mandatory Gates, GET /masks/{id}/readiness | ✅ |
+| 033 | Readiness verschärft: 6 mandatory + 6 advisory pro Tabelle | ✅ |
 
-**Abnahme:** Frontend-Tests (Vitest) gruen; Backend-Tests (pytest) gruen; Lint 0 Errors.
+**Commit:** `e6cabb380` (030), `fd2b8a7cf` (033 Doku+Gates), `81d706da8` (028–029).
 
 ## UIX-ROLLOUT-BATCH-019 — Universal Mask Rollout Batch (Waves 42–51)
 
@@ -52,7 +142,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `app/core/mask_rollout_catalog.py`, `app/core/mask_screen_summary_common.py`, `app/services/mask_rollout_summary_service.py`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/core/mask_classification.py`, `app/core/screen_definitions.py`, `packages/frontend-web/src/features/mask-rollouts/`, `packages/frontend-web/src/pages/workflow/mask-rollout/`, `tests/test_mask_rollout_batch_w42_51.py`, `docs/architecture/uix/mask-rollout-batch-w42-51.md`, `docs/agent-ops/slices/UIX-ROLLOUT-BATCH-019.yaml`
 **Doku:** [`mask-rollout-batch-w42-51.md`](../architecture/uix/mask-rollout-batch-w42-51.md), [`mask-generator-rollout-template.md`](../architecture/uix/mask-generator-rollout-template.md) (Reihenfolge Waves 42–51)
 **Abnahme:** pytest `test_mask_rollout_batch_w42_51.py` 24/24 gruen; Vitest `mask-rollout-route.test.tsx`; Flag `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS=true` + Route `/mask-rollout/{screenId}/{entityId}`.
-**Offene Grenzen (bewusst):** Generic Tab-Spalten; Mutationen/Legacy-Detail-Routes; naechster Schritt = UniversalMaskRuntime (020–024).
+**Offene Grenzen (bewusst):** Mutationen/Legacy-Detail-Routes; fachliche Feintuning-Matrix pro Domäne; **Governance:** keine weiteren `generator_ready`-Setzungen bis UIX-032 (CI) + UIX-034 (CRM-Parität) grün — Runtime-Plattform siehe [`universal-mask-runtime-status.md`](../architecture/uix/universal-mask-runtime-status.md) (UIX-021…030 abgeschlossen).
 
 ## UIX-MASK-AB-BENCH-018 — A/B Render Benchmark (Legacy vs. Pilot)
 

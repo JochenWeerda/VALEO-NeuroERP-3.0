@@ -1,0 +1,26 @@
+slice_id: UIX-035
+title: ActionRuntime produktiv — CRM Aktivitaet anlegen
+owner: offen
+status: geplant
+created_at: 2026-06-29
+goal: Erste sichere Mutation end-to-end — commandEndpoint → useActionRuntime → audit → UI refresh.
+file_ownership:
+  - app/api/v1/endpoints/crm_360.py
+  - packages/frontend-web/src/components/mask-builder/runtime/useActionRuntime.ts
+acceptance:
+  - validate/dryRun/propose → human execute fuer create_activity
+  - Audit-Eintrag nach execute
+  - UI-Refresh nach Erfolg
+tests:
+  - pytest Action-Command-Endpoint
+  - Vitest useActionRuntime Integration
+external_gates:
+  - not_applicable
+ai_harness:
+  fachlicher_vertrag: CRM Aktivitaet anlegen — relevant, nicht hochriskant.
+  architektur_vertrag: ADR-004 Command-Layer; ActionRuntime UIX-026.
+  daten_vertrag: Idempotency-Key; Tenant-Scope; AuditReason Pflicht.
+  test_vertrag: Contract-Test Command + Vitest Hook.
+  security_vertrag: humanApprovalRequired; crm.activity.create Permission.
+  betriebs_vertrag: Feature Flag CRM Pilot.
+  dokumentations_vertrag: open-gaps UIX-035; uix-034 Restarbeit.

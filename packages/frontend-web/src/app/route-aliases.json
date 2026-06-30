@@ -2411,6 +2411,86 @@
     {
       "module": "@/pages/produktion/produktions-dokumente-drucken",
       "path": "produktion/produktions-dokumente-drucken"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-native",
+      "path": "sales/delivery-note/:id"
+    },
+    {
+      "module": "@/pages/einkauf/bestellung-native",
+      "path": "einkauf/bestellung-native/:id"
+    },
+    {
+      "module": "@/pages/finance/ap-invoice-native",
+      "path": "finance/ap-invoice/:id"
+    },
+    {
+      "module": "@/pages/finance/ar-open-item-native",
+      "path": "finance/ar-open-item/:id"
+    },
+    {
+      "module": "@/pages/finance/payment-run-native",
+      "path": "finance/payment-run/:id"
+    },
+    {
+      "module": "@/pages/lager/lagerbewegung-native",
+      "path": "lager/stock-movement/:id"
+    },
+    {
+      "module": "@/pages/agrar/ernte-abrechnung-native",
+      "path": "agrar/harvest-settlement/:id"
+    },
+    {
+      "module": "@/pages/agrar/duenger-native",
+      "path": "agrar/duenger/:id"
+    },
+    {
+      "module": "@/pages/agrar/saatgut-native",
+      "path": "agrar/saatgut-native/:id"
+    },
+    {
+      "module": "@/pages/finance/debitor-native",
+      "path": "finance/debitor/:id"
+    },
+    {
+      "module": "@/pages/finance/kreditor-native",
+      "path": "finance/kreditor/:id"
+    },
+    {
+      "module": "@/pages/finance/bankkonto-native",
+      "path": "finance/bankkonto/:id"
+    },
+    {
+      "module": "@/pages/einkauf/anfrage-native",
+      "path": "einkauf/anfrage-native/:id"
+    },
+    {
+      "module": "@/pages/einkauf/angebot-native",
+      "path": "einkauf/angebot-native/:id"
+    },
+    {
+      "module": "@/pages/einkauf/anlieferavis-native",
+      "path": "einkauf/anlieferavis-native/:id"
+    },
+    {
+      "module": "@/pages/einkauf/auftragsbestaetigung-native",
+      "path": "einkauf/auftragsbestaetigung-native/:id"
+    },
+    {
+      "module": "@/pages/qualitaet/reklamation-native",
+      "path": "qualitaet/reklamation/:id"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-native",
+      "path": "futtermittel/einzelfuttermittel/:id"
+    },
+    {
+      "module": "@/pages/futtermittel/mischfuttermittel-native",
+      "path": "futtermittel/mischfuttermittel/:id"
+    },
+    {
+      "module": "@/pages/crm/lead-native",
+      "path": "crm/lead/:id"
     }
   ]
 }

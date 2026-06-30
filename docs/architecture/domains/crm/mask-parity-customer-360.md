@@ -4,14 +4,17 @@ type: reference
 audience: [agent, entwickler, fachlich]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 1.0.0
-description: Paritaetsmatrix Legacy-Kundenmaske vs. Universal Mask Generator (CRM 360 Pilot).
+last_reviewed: 2026-06-29
+version: 1.1.0
+description: Paritaetsmatrix Legacy-Kundenmaske vs. Universal Mask Generator (CRM 360 Pilot); Native-Runtime siehe UIX-034.
 ---
 
 # CRM Customer 360 — Paritaetsmatrix
 
 Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab, Felder/Liste, API, Status.
+
+> **Native Runtime (UIX-028/034):** Detaillierte Legacy-vs.-Native-Matrix mit Readiness-Gates:
+> [`uix-034-crm360-native-parity-matrix.md`](../../../adr/uix-034-crm360-native-parity-matrix.md)
 
 **Legende:** `ok` = funktional abgedeckt | `partial` = read-only Teilmenge | `gap` = noch nicht im Generator
 
