@@ -1286,16 +1286,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/crm/kunden-stamm-modern/customermaskeditpage",
-      "path": "crm/kunden-stamm-modern/customermaskeditpage",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/kunden-stamm-modern/legacykundenstammmodern",
-      "path": "crm/kunden-stamm-modern/legacykundenstammmodern",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/crm/kunden-zuordnung",
       "path": "crm/kunden-zuordnung",
       "source": "alias"
@@ -1308,16 +1298,6 @@
     {
       "module": "@/pages/crm/lead-detail",
       "path": "crm/lead-detail",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/lead-detail/leadmaskdetailpage",
-      "path": "crm/lead-detail/leadmaskdetailpage",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/lead-detail/legacyleaddetailpage",
-      "path": "crm/lead-detail/legacyleaddetailpage",
       "source": "auto"
     },
     {
@@ -2496,26 +2476,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/finance/reports/analyticschartcontent",
-      "path": "finance/reports/analyticschartcontent",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/finance/reports/charts/analyticsbalancesharechart",
-      "path": "finance/reports/charts/analyticsbalancesharechart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/finance/reports/charts/analyticscashflowchart",
-      "path": "finance/reports/charts/analyticscashflowchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/finance/reports/financialcardsparkline",
-      "path": "finance/reports/financialcardsparkline",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/finance/skonto-optimizer",
       "path": "finance/skonto-optimizer",
       "source": "auto"
@@ -2889,21 +2849,6 @@
       "module": "@/pages/kontrakte/KontraktAlarmDashboard",
       "path": "kontrakte/alarme",
       "source": "alias"
-    },
-    {
-      "module": "@/pages/kontrakte/dlgauswahlverkaufkontrakte",
-      "path": "kontrakte/dlgauswahlverkaufkontrakte",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/kontrakte/dlgkontraktumsaetze",
-      "path": "kontrakte/dlgkontraktumsaetze",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/kontrakte/dlgmatifpreisfixierung",
-      "path": "kontrakte/dlgmatifpreisfixierung",
-      "source": "auto"
     },
     {
       "module": "@/pages/kontrakte/FrmKontraktDetail",
@@ -3633,31 +3578,6 @@
     {
       "module": "@/pages/reports",
       "path": "reports",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/customeranalyticscharts",
-      "path": "reports/charts/customeranalyticscharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/financialanalyticscharts",
-      "path": "reports/charts/financialanalyticscharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/productanalyticscharts",
-      "path": "reports/charts/productanalyticscharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/salesperformancecharts",
-      "path": "reports/charts/salesperformancecharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/trendanalyticscharts",
-      "path": "reports/charts/trendanalyticscharts",
       "source": "auto"
     },
     {

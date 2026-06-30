@@ -21,9 +21,6 @@ export const entries: AutoGroupRouteEntry[] = [
     "module": "@/pages/kontrakte/KontraktPositionsmonitor",
     "path": "KontraktPositionsmonitor"
   },
-  { "module": "@/pages/kontrakte/dlgauswahlverkaufkontrakte", "path": "dlgauswahlverkaufkontrakte" },
-  { "module": "@/pages/kontrakte/dlgkontraktumsaetze", "path": "dlgkontraktumsaetze" },
-  { "module": "@/pages/kontrakte/dlgmatifpreisfixierung", "path": "dlgmatifpreisfixierung" },
   { "module": "@/pages/kontrakte/kontraktklassen", "path": "kontraktklassen" },
   { "module": "@/pages/kontrakte/mengenzeitraeume", "path": "mengenzeitraeume" },
 ]
