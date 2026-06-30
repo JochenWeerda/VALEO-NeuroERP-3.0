@@ -20,6 +20,7 @@ Kanonischer Architekturstand: [Universal Mask Runtime Status](../architecture/ui
 | GET | `/api/v1/masks/{mask_id}/screen-definition` | Native `ScreenDefinition` JSON |
 | GET | `/api/v1/masks/{mask_id}/agent-contract` | `AgentMaskContract` (Human + Agent) |
 | GET | `/api/v1/masks/{mask_id}/readiness` | Generator-Readiness-Report |
+| GET | `/api/v1/masks/{mask_id}/entity/{entity_id}` | Generischer Kopf-Stub für Wave-2-SDs ohne Domain-Entity-API |
 | GET | `/api/v1/mask-rollouts/{screen_id}/{entity_id}/screen-summary` | Rollout Summary + `tab_endpoints` |
 | GET | `/api/v1/mask-rollouts/.../tabs/{tab_key}` | Lazy Tab mit Query-Parametern |
 
