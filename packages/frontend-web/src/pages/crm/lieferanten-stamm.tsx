@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
+import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 
@@ -202,7 +202,7 @@ const lieferantenConfig: MaskConfig = {
           label: 'Produktpalette',
           type: 'multiselect',
           helpText: 'Produktbereiche des Lieferanten'
-        } as Field
+        }
       ]
     },
     {

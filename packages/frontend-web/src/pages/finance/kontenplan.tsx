@@ -92,7 +92,7 @@ const kontenplanConfig: MaskConfig = {
           required: true,
           placeholder: '2025-01',
           pattern: '^\\d{4}-\\d{2}$'
-         } as Field
+         }
       ],
       layout: 'grid',
       columns: 2
@@ -192,7 +192,7 @@ const kontenplanConfig: MaskConfig = {
       update: '/api/v1/finance/chart-of-accounts/{id}',
       delete: '/api/v1/finance/chart-of-accounts/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 }
 

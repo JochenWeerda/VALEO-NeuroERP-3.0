@@ -16,6 +16,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -116,6 +117,39 @@ type LieferantData = {
     status: 'aktiv' | 'abgelaufen' | 'wird_abgelaufen'
   }>
   bemerkungen?: string
+}
+
+type Ansprechpartner = NonNullable<LieferantData['ansprechpartner']>[number]
+type Bankkonto = NonNullable<LieferantData['bankkonten']>[number]
+type Klassifikation = NonNullable<LieferantData['klassifikationen']>[number]
+
+function mapAnsprechpartner(value: unknown): Ansprechpartner[] {
+  return recordArrayFromResponse(value).map((item) => ({
+    id: stringValue(item.id, crypto.randomUUID()),
+    name: stringValue(item.name),
+    email: stringValue(item.email),
+    telefon: stringValue(item.telefon ?? item.phone),
+    funktion: stringValue(item.funktion ?? item.role),
+  }))
+}
+
+function mapBankkonten(value: unknown): Bankkonto[] {
+  return recordArrayFromResponse(value).map((item) => ({
+    id: stringValue(item.id, crypto.randomUUID()),
+    iban: stringValue(item.iban),
+    bic: stringValue(item.bic),
+    bankName: stringValue(item.bankName ?? item.bank_name),
+    kontoinhaber: stringValue(item.kontoinhaber ?? item.accountHolder),
+    isDefault: item.isDefault === true || item.is_default === true,
+  }))
+}
+
+function mapKlassifikationen(value: unknown): Klassifikation[] {
+  return recordArrayFromResponse(value).map((item) => ({
+    id: stringValue(item.id, crypto.randomUUID()),
+    typ: stringValue(item.typ ?? item.type),
+    wert: stringValue(item.wert ?? item.value),
+  }))
 }
 
 /** Dokumenttypen im Lieferantenstamm (häufig bis seltener) */
@@ -223,10 +257,10 @@ export default function LieferantenStammPage(): JSX.Element {
       // Versuche verschiedene API-Endpunkte
       let response: Record<string, unknown>
       try {
-        response = (await apiClient.get<Record<string, unknown>>(`/api/v1/crm/business-partners/${id}?type=supplier`))
+        response = (await apiClient.get<Record<string, unknown>>(`/api/v1/crm/business-partners/${id}?type=supplier`)).data
       } catch (e1) {
         try {
-          response = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/lieferanten/${id}`))
+          response = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/lieferanten/${id}`)).data
         } catch (e2) {
           toast({
             variant: 'destructive',
@@ -242,34 +276,34 @@ export default function LieferantenStammPage(): JSX.Element {
       if (response) {
         const data = response
         setLieferant({
-          id: data.id || id || '',
-          name: data.name || '',
-          legalName: data.legalName,
-          typ: data.type || data.typ || '',
-          kategorie: data.category || data.kategorie,
-          gruppe: data.group || data.gruppe,
-          strasse: data.address || data.strasse || '',
-          plz: data.postalCode || data.plz || '',
-          ort: data.city || data.ort || '',
-          land: data.country || data.land || 'DE',
-          email: data.email || '',
-          telefon: data.phone || data.telefon || '',
-          website: data.website,
-          vatId: data.vatId,
-          steuernummer: data.taxId || data.steuernummer,
-          iban: data.iban,
-          bic: data.bic,
-          bankName: data.bankName,
-          kontoinhaber: data.accountHolder || data.kontoinhaber,
-          zahlungsbedingungen: data.paymentTerms || data.zahlungsbedingungen,
-          kreditlimit: data.creditLimit || data.kreditlimit,
-          qsNummer: data.qsNummer,
-          bewertung: data.rating || data.bewertung || 0,
+          id: stringValue(data.id, id || ''),
+          name: stringValue(data.name),
+          legalName: stringValue(data.legalName) || undefined,
+          typ: stringValue(data.type ?? data.typ),
+          kategorie: stringValue(data.category ?? data.kategorie) || undefined,
+          gruppe: stringValue(data.group ?? data.gruppe) || undefined,
+          strasse: stringValue(data.address ?? data.strasse),
+          plz: stringValue(data.postalCode ?? data.plz),
+          ort: stringValue(data.city ?? data.ort),
+          land: stringValue(data.country ?? data.land, 'DE'),
+          email: stringValue(data.email),
+          telefon: stringValue(data.phone ?? data.telefon),
+          website: stringValue(data.website) || undefined,
+          vatId: stringValue(data.vatId) || undefined,
+          steuernummer: stringValue(data.taxId ?? data.steuernummer) || undefined,
+          iban: stringValue(data.iban) || undefined,
+          bic: stringValue(data.bic) || undefined,
+          bankName: stringValue(data.bankName) || undefined,
+          kontoinhaber: stringValue(data.accountHolder ?? data.kontoinhaber) || undefined,
+          zahlungsbedingungen: stringValue(data.paymentTerms ?? data.zahlungsbedingungen) || undefined,
+          kreditlimit: data.creditLimit != null || data.kreditlimit != null ? numberValue(data.creditLimit ?? data.kreditlimit) : undefined,
+          qsNummer: stringValue(data.qsNummer) || undefined,
+          bewertung: numberValue(data.rating ?? data.bewertung),
           status: data.status === 'suspended' || data.status === 'gesperrt' ? 'gesperrt' : data.status === 'inactive' || data.status === 'archiviert' ? 'archiviert' : 'aktiv',
-          ansprechpartner: data.contacts || data.ansprechpartner || [],
-          bankkonten: data.bankAccounts || data.bankkonten || [],
-          klassifikationen: data.classifications || data.klassifikationen || [],
-          bemerkungen: data.notes || data.bemerkungen,
+          ansprechpartner: mapAnsprechpartner(data.contacts ?? data.ansprechpartner),
+          bankkonten: mapBankkonten(data.bankAccounts ?? data.bankkonten),
+          klassifikationen: mapKlassifikationen(data.classifications ?? data.klassifikationen),
+          bemerkungen: stringValue(data.notes ?? data.bemerkungen) || undefined,
         })
       }
     } catch (_rawErr: unknown) {
@@ -355,11 +389,12 @@ export default function LieferantenStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const results = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/crm/business-partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)) as unknown as Record<string, unknown>[]
+      const response = await apiClient.get<unknown>(`/api/v1/crm/business-partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)
+      const results = recordArrayFromResponse(response.data)
       const duplicates = results.filter(s => 
         s.id !== lieferant.id && 
-        (s.name?.toLowerCase().includes(lieferant.name.toLowerCase()) || 
-         s.name?.toLowerCase() === lieferant.name.toLowerCase())
+        (stringValue(s.name).toLowerCase().includes(lieferant.name.toLowerCase()) || 
+         stringValue(s.name).toLowerCase() === lieferant.name.toLowerCase())
       )
       setDuplicateResults(duplicates)
       setDuplicateCheckDialogOpen(true)
@@ -1256,10 +1291,10 @@ export default function LieferantenStammPage(): JSX.Element {
                 </TableHeader>
                 <TableBody>
                   {duplicateResults.map((dup) => (
-                    <TableRow key={dup.id}>
-                      <TableCell>{dup.name}</TableCell>
-                      <TableCell>{dup.id || dup.number || '-'}</TableCell>
-                      <TableCell>{dup.city || dup.ort || '-'}</TableCell>
+                    <TableRow key={stringValue(dup.id)}>
+                      <TableCell>{stringValue(dup.name, '-')}</TableCell>
+                      <TableCell>{stringValue(dup.id ?? dup.number, '-')}</TableCell>
+                      <TableCell>{stringValue(dup.city ?? dup.ort, '-')}</TableCell>
                       <TableCell>
                         <Button
                           size="sm"
@@ -1535,7 +1570,7 @@ export default function LieferantenStammPage(): JSX.Element {
 }
 
 // New Contact Form Component
-function NewContactForm({ onSave, onCancel }: { onSave: (contact: Record<string, unknown>) => void; onCancel: () => void }) {
+function NewContactForm({ onSave, onCancel }: { onSave: (contact: Omit<Ansprechpartner, 'id'>) => void; onCancel: () => void }) {
   const { t } = useTranslation()
   const [contact, setContact] = useState({ name: '', email: '', telefon: '', funktion: '' })
 
@@ -1590,7 +1625,7 @@ function NewContactForm({ onSave, onCancel }: { onSave: (contact: Record<string,
 }
 
 // New Bank Account Form Component
-function NewBankAccountForm({ onSave, onCancel }: { onSave: (bank: Record<string, unknown>) => void; onCancel: () => void }) {
+function NewBankAccountForm({ onSave, onCancel }: { onSave: (bank: Omit<Bankkonto, 'id'>) => void; onCancel: () => void }) {
   const { t } = useTranslation()
   const [bank, setBank] = useState({ iban: '', bic: '', bankName: '', kontoinhaber: '', isDefault: false })
 
@@ -1656,7 +1691,7 @@ function NewBankAccountForm({ onSave, onCancel }: { onSave: (bank: Record<string
 }
 
 // New Classification Form Component
-function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: Record<string, unknown>) => void; onCancel: () => void }) {
+function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: Omit<Klassifikation, 'id'>) => void; onCancel: () => void }) {
   const { t } = useTranslation()
   const [klass, setKlass] = useState({ typ: '', wert: '' })
 

@@ -1,6 +1,7 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -155,7 +156,7 @@ const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customer
       key: 'zahlungen',
       label: t('crud.fields.payments'),
       fields: []
-    } as Field,
+    },
     {
       key: 'zahlungen_custom',
       label: '',
@@ -205,7 +206,7 @@ const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customer
       label: t('crud.fields.settlementHistory') ?? 'Ausgleichshistorie',
       fields: [],
       customRender: (tabData: Record<string, unknown>) => tabData?.id ? <SettlementsList opId={tabData.id} t={t} /> : <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'OP speichern, um die Ausgleichshistorie zu sehen.'}</p>
-    } as Field,
+    },
     {
       key: 'notizen',
       label: t('crud.fields.notes'),
@@ -235,7 +236,7 @@ const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customer
       update: '/api/v1/finance/open-items/{id}',
       delete: '/api/v1/finance/open-items/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 

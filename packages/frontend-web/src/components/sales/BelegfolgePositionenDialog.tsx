@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { apiClient } from '@/lib/api-client'
 import { FileText, Globe, ShoppingCart, Truck, ChevronDown, ChevronRight } from 'lucide-react'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,27 @@ function sourcesFor(target: TargetDocType): BelegTyp[] {
   return ['auftrag', 'lieferschein']
 }
 
+function responseItems(value: unknown): Record<string, unknown>[] {
+  return recordArrayFromResponse(value)
+}
+
+function mapPosition(item: Record<string, unknown>, typ: BelegTyp): BelegfolgePosition {
+  const quantity = numberValue(item.quantity ?? item.menge, typ === 'portalbestellung' ? 1 : 0)
+  const grossAmount = numberValue(item.betrag)
+  return {
+    artikelNr: stringValue(item.article_number ?? item.artikelnummer ?? item.artikel_nr ?? item.artikel),
+    artikelId: stringValue(item.artikel_id) || null,
+    bezeichnung: stringValue(item.description ?? item.name ?? item.bezeichnung ?? item.artikel),
+    bezeichnung2: stringValue(item.description2 ?? item.bezeichnung2),
+    menge: quantity,
+    einheit: stringValue(item.unit ?? item.einheit, 'Stk'),
+    listenpreis: numberValue(item.unit_price ?? item.einzelpreis ?? item.preis ?? item.listenpreis, quantity > 0 ? grossAmount / quantity : 0),
+    rabatt: numberValue(item.discount_percent ?? item.rabatt),
+    mwstProzent: numberValue(item.mwst_prozent, 19),
+    ekPreis: numberValue(item.purchase_price),
+  }
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerId, targetDocType }: Props) {
@@ -112,32 +134,32 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
             const r = await apiClient.get<Record<string, unknown>>('/api/v1/sales/quotes', {
               params: { customer_id: customerId, limit: 20 },
             })
-            response = r.items || r || []
+            response = responseItems(r.data)
           } else if (typ === 'auftrag') {
             const r = await apiClient.get<Record<string, unknown>>('/api/v1/sales/orders', {
               params: { customer_id: customerId, limit: 20 },
             })
-            response = r.items || r || []
+            response = responseItems(r.data)
           } else if (typ === 'portalbestellung') {
             const r = await apiClient.get<Record<string, unknown>>('/api/v1/portal/bestellungen', {
               params: { customer_id: customerId, status: 'bestellt', limit: 20 },
             })
-            response = Array.isArray(r) ? r : (r.items || r.data || [])
+            response = responseItems(r.data)
           } else {
             const r = await apiClient.get<Record<string, unknown>>('/api/v1/sales/delivery-notes', {
               params: { customer_id: customerId, limit: 20 },
             })
-            response = r.items || r || []
+            response = responseItems(r.data)
           }
 
           const docs: BelegDokument[] = response.map(d => ({
-            id: d.id,
+            id: stringValue(d.id),
             typ,
-            nummer: d.order_number || d.quote_number || d.delivery_note_number || d.id,
+            nummer: stringValue(d.order_number ?? d.quote_number ?? d.delivery_note_number ?? d.id),
             datum: d.created_at
-              ? new Date(d.created_at).toLocaleDateString('de-DE')
+              ? new Date(stringValue(d.created_at)).toLocaleDateString('de-DE')
               : '—',
-            status: d.status || '—',
+            status: stringValue(d.status, '---'),
             positionen: [],
             positionenGeladen: false,
           }))
@@ -165,65 +187,20 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
 
       if (beleg.typ === 'auftrag') {
         const r = await apiClient.get<Record<string, unknown>>(`/api/v1/sales/orders/${beleg.id}`)
-        const items = r.items || []
-        positionen = items.map(item => ({
-          artikelNr: item.article_number || '',
-          artikelId: item.artikel_id || null,
-          bezeichnung: item.description || '',
-          bezeichnung2: item.description2 || '',
-          menge: item.quantity || 0,
-          einheit: item.unit || 'Stk',
-          listenpreis: item.unit_price || 0,
-          rabatt: item.discount_percent || 0,
-          mwstProzent: item.mwst_prozent || 19,
-          ekPreis: item.purchase_price || 0,
-        }))
+        positionen = responseItems(r.data).map((item) => mapPosition(item, beleg.typ))
       } else if (beleg.typ === 'portalbestellung') {
         const r = await apiClient.get<Record<string, unknown>>(`/api/v1/portal/bestellungen/${beleg.id}`)
-        // Portal-Bestellungen können Positionen-Array oder Einzelartikel-Struktur haben
-        const items = r.positionen || r.items || (r.artikel ? [r] : [])
-        positionen = items.map(item => ({
-          artikelNr: item.artikelnummer || item.artikel_nr || item.artikel || '',
-          artikelId: item.artikel_id || null,
-          bezeichnung: item.name || item.bezeichnung || item.artikel || '',
-          bezeichnung2: item.bezeichnung2 || '',
-          menge: item.menge || 1,
-          einheit: item.einheit || 'Stk',
-          listenpreis: item.einzelpreis || item.preis || (item.betrag != null && item.menge > 0 ? item.betrag / item.menge : 0),
-          rabatt: item.rabatt || 0,
-          mwstProzent: item.mwst_prozent || 19,
-          ekPreis: 0,
-        }))
+        const data = isRecord(r.data) ? r.data : {}
+        const items = responseItems(data.positionen ?? data.items ?? (data.artikel ? [data] : []))
+        positionen = items.map((item) => mapPosition(item, beleg.typ))
       } else if (beleg.typ === 'angebot') {
         const r = await apiClient.get<Record<string, unknown>>(`/api/v1/sales/quotes/${beleg.id}`)
-        const items = r.items || r.positionen || []
-        positionen = items.map(item => ({
-          artikelNr: item.article_number || item.artikel_nr || '',
-          artikelId: item.artikel_id || null,
-          bezeichnung: item.description || item.bezeichnung || '',
-          bezeichnung2: item.description2 || item.bezeichnung2 || '',
-          menge: item.quantity || item.menge || 0,
-          einheit: item.unit || item.einheit || 'Stk',
-          listenpreis: item.unit_price || item.listenpreis || 0,
-          rabatt: item.discount_percent || item.rabatt || 0,
-          mwstProzent: item.mwst_prozent || 19,
-          ekPreis: item.purchase_price || 0,
-        }))
+        const data = isRecord(r.data) ? r.data : {}
+        positionen = responseItems(data.items ?? data.positionen).map((item) => mapPosition(item, beleg.typ))
       } else {
         const r = await apiClient.get<Record<string, unknown>>(`/api/v1/sales/delivery-notes/${beleg.id}`)
-        const items = r.positionen || []
-        positionen = items.map(item => ({
-          artikelNr: item.artikel_nr || '',
-          artikelId: item.artikel_id || null,
-          bezeichnung: item.bezeichnung || '',
-          bezeichnung2: item.bezeichnung2 || '',
-          menge: item.menge || 0,
-          einheit: item.einheit || 'Stk',
-          listenpreis: item.listenpreis || 0,
-          rabatt: item.rabatt || 0,
-          mwstProzent: item.mwst_prozent || 19,
-          ekPreis: 0,
-        }))
+        const data = isRecord(r.data) ? r.data : {}
+        positionen = responseItems(data.positionen).map((item) => mapPosition(item, beleg.typ))
       }
 
       setBelege((prev) =>

@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 import { apiClient } from '@/lib/api-client';
+import { apiErrorDetail, errorMessage } from '@/lib/record-utils';
 
 // API response type (server returns strings for dates, all fields optional)
 interface SaatgutApiData {
@@ -124,9 +125,10 @@ const SaatgutStammPage: React.FC = () => {
       navigate('/agrar/saatgut-liste');
     },
     onError: (error: unknown) => {
-      toast.error(`Fehler beim Erstellen: ${error.message}`);
-      if (error.response?.data?.detail) {
-        setErrors({ general: error.response.data.detail });
+      toast.error(`Fehler beim Erstellen: ${errorMessage(error)}`);
+      const detail = apiErrorDetail(error);
+      if (detail) {
+        setErrors({ general: detail });
       }
     },
   });
@@ -138,7 +140,7 @@ const SaatgutStammPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['saatgut', id] });
     },
     onError: (error: unknown) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      toast.error(`Fehler beim Aktualisieren: ${errorMessage(error)}`);
     },
   });
 

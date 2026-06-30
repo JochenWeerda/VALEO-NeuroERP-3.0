@@ -5,6 +5,13 @@
  * Verbindet NeuroERP Frontend mit Paperless-ngx Backend.
  */
 
+import {
+  isRecord,
+  nullableNumberValue,
+  numberValue,
+  stringValue,
+} from '@/lib/record-utils'
+
 const DMS_API_BASE = import.meta.env.VITE_DMS_URL || 'http://localhost:8002'
 
 // ==================== Types ====================
@@ -59,18 +66,18 @@ export interface SearchOptions {
 
 // ==================== Helper Functions ====================
 
-function snakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {
-  if (obj === null || typeof obj !== 'object') {
-    return obj
+function snakeToCamel(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(snakeToCamel)
+  }
+
+  if (!isRecord(value)) {
+    return value
   }
   
-  if (Array.isArray(obj)) {
-    return obj.map(snakeToCamel)
-  }
-  
-  return Object.keys(obj).reduce((acc, key) => {
+  return Object.keys(value).reduce((acc, key) => {
     const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
-    acc[camelKey] = snakeToCamel(obj[key])
+    acc[camelKey] = snakeToCamel(value[key])
     return acc
   }, {} as Record<string, unknown>)
 }
@@ -79,6 +86,55 @@ function getHeaders(tenantId: string): HeadersInit {
   return {
     'X-Tenant-ID': tenantId,
     'Accept': 'application/json',
+  }
+}
+
+function healthFromResponse(value: unknown): { status: string; paperlessConnected: boolean } {
+  const record = snakeToCamel(value)
+  if (!isRecord(record)) {
+    return { status: 'unavailable', paperlessConnected: false }
+  }
+
+  return {
+    status: stringValue(record.status, 'unavailable'),
+    paperlessConnected: typeof record.paperlessConnected === 'boolean'
+      ? record.paperlessConnected
+      : false,
+  }
+}
+
+function documentFromResponse(value: unknown): Document {
+  const record = snakeToCamel(value)
+  const data = isRecord(record) ? record : {}
+  return {
+    id: numberValue(data.id),
+    paperlessId: nullableNumberValue(data.paperlessId) ?? undefined,
+    title: stringValue(data.title),
+    filename: stringValue(data.filename) || undefined,
+    fileType: stringValue(data.fileType) || undefined,
+    sizeKb: nullableNumberValue(data.sizeKb) ?? undefined,
+    tenantId: stringValue(data.tenantId) || undefined,
+    businessObjectType: stringValue(data.businessObjectType) || undefined,
+    businessObjectId: stringValue(data.businessObjectId) || undefined,
+    documentType: stringValue(data.documentType) || undefined,
+    createdAt: stringValue(data.createdAt) || undefined,
+    downloadUrl: stringValue(data.downloadUrl) || undefined,
+    thumbnailUrl: stringValue(data.thumbnailUrl) || undefined,
+  }
+}
+
+function documentListFromResponse(value: unknown): DocumentListResponse {
+  const record = snakeToCamel(value)
+  const data = isRecord(record) ? record : {}
+  const documents = Array.isArray(data.data)
+    ? data.data.map(documentFromResponse)
+    : []
+
+  return {
+    data: documents,
+    total: numberValue(data.total, documents.length),
+    page: numberValue(data.page, 1),
+    pageSize: numberValue(data.pageSize, documents.length),
   }
 }
 
@@ -95,7 +151,7 @@ export const dmsService = {
         return { status: 'unavailable', paperlessConnected: false }
       }
       const data = await response.json()
-      return snakeToCamel(data)
+      return healthFromResponse(data)
     } catch {
       return { status: 'unavailable', paperlessConnected: false }
     }
@@ -136,7 +192,7 @@ export const dmsService = {
     }
 
     const data = await response.json()
-    return snakeToCamel(data)
+    return documentFromResponse(data)
   },
 
   /**
@@ -181,7 +237,7 @@ export const dmsService = {
     }
 
     const data = await response.json()
-    return snakeToCamel(data)
+    return documentListFromResponse(data)
   },
 
   /**
@@ -197,7 +253,7 @@ export const dmsService = {
     }
 
     const data = await response.json()
-    return snakeToCamel(data)
+    return documentFromResponse(data)
   },
 
   /**
@@ -252,7 +308,7 @@ export const dmsService = {
     }
 
     const data = await response.json()
-    return snakeToCamel(data)
+    return documentFromResponse(data)
   },
 
   /**
@@ -291,7 +347,7 @@ export const dmsService = {
     }
 
     const data = await response.json()
-    return snakeToCamel(data)
+    return documentListFromResponse(data)
   },
 
   /**
@@ -313,7 +369,7 @@ export const dmsService = {
     }
 
     const data = await response.json()
-    return snakeToCamel(data)
+    return documentListFromResponse(data)
   },
 
   /**

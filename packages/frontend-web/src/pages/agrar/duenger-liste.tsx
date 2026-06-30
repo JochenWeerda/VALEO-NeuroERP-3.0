@@ -41,6 +41,12 @@ interface DuengerListItem {
   kultur_typ?: string
   vk_preis?: number | null
   lagerbestand?: number
+  dmv_nummer?: string
+  eu_zulassung?: string
+  ablauf_zulassung?: string | number | Date | null
+  n_gehalt?: number | null
+  p_gehalt?: number | null
+  k_gehalt?: number | null
   [key: string]: unknown
 }
 
@@ -110,7 +116,7 @@ export default function DuengerListePage(): JSX.Element {
     let filtered = duengerList.items
 
     if (safetyFilter !== 'all-safety') {
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item: DuengerListItem) => {
         if (safetyFilter === 'wassergefaehrdend') return item.wassergefaehrdend
         if (safetyFilter === 'gefahrstoff') return item.gefahrstoff_klasse
         if (safetyFilter === 'safe') return !item.wassergefaehrdend && !item.gefahrstoff_klasse
@@ -121,7 +127,7 @@ export default function DuengerListePage(): JSX.Element {
     return filtered
   }, [duengerList, safetyFilter])
 
-  const getSafetyBadges = item => {
+  const getSafetyBadges = (item: DuengerListItem): JSX.Element[] => {
     const badges = []
 
     if (item.gefahrstoff_klasse) {
@@ -162,7 +168,7 @@ export default function DuengerListePage(): JSX.Element {
     return badges
   }
 
-  const getApprovalStatus = item => {
+  const getApprovalStatus = (item: DuengerListItem): JSX.Element => {
     const hasDmv = item.dmv_nummer
     const hasEu = item.eu_zulassung
     const expiryDate = item.ablauf_zulassung ? new Date(item.ablauf_zulassung) : null
@@ -189,7 +195,7 @@ export default function DuengerListePage(): JSX.Element {
     return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Keine Zulassung</Badge>
   }
 
-  const getNpkDisplay = item => {
+  const getNpkDisplay = (item: DuengerListItem): string => {
     const n = item.n_gehalt || 0
     const p = item.p_gehalt || 0
     const k = item.k_gehalt || 0

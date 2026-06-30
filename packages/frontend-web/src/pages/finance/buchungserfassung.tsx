@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -63,7 +64,7 @@ const createBuchungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig 
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-        } as Field,
+        },
         {
           name: 'buchungstext',
           label: t('crud.fields.bookingText'),
@@ -79,7 +80,7 @@ const createBuchungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig 
       key: 'buchungszeilen',
       label: t('crud.fields.bookingLines'),
       fields: []
-    } as Field,
+    },
     {
       key: 'buchungszeilen_custom',
       label: '',
@@ -141,7 +142,7 @@ const createBuchungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig 
           type: 'file',
           accept: '.pdf,.jpg,.jpeg,.png',
           helpText: t('crud.tooltips.fields.gobdDocumentArchiving')
-        } as Field
+        }
       ]
     }
   ],
@@ -160,7 +161,7 @@ const createBuchungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig 
       update: '/api/v1/journal-entries/{id}',
       delete: '/api/v1/journal-entries/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 

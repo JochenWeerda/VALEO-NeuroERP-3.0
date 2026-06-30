@@ -7,6 +7,23 @@ import type {
   ScreenTabDefinition,
 } from '../schema'
 
+function screenOptions(value: unknown): Array<{ value: string | number; label: string }> | undefined {
+  if (!Array.isArray(value)) return undefined
+  const options = value
+    .map((option) => {
+      if (option === null || typeof option !== 'object') return null
+      const record = option as Record<string, unknown>
+      const rawValue = record.value
+      if (typeof rawValue !== 'string' && typeof rawValue !== 'number') return null
+      return {
+        value: rawValue,
+        label: typeof record.label === 'string' ? record.label : String(rawValue),
+      }
+    })
+    .filter((option): option is { value: string | number; label: string } => option !== null)
+  return options.length > 0 ? options : undefined
+}
+
 function toScreenMode(type: MaskConfig['type']): ScreenMode {
   if (type === 'list-report') return 'list'
   if (type === 'overview-page') return 'cockpit'
@@ -28,7 +45,7 @@ function toScreenField(field: Field): ScreenFieldDefinition {
     readOnly: field.readonly ?? field.readOnly,
     placeholder: field.placeholder,
     helpText: field.helpText,
-    options: 'options' in field ? field.options : undefined,
+    options: 'options' in field ? screenOptions(field.options) : undefined,
     dataSourceKey: field.type === 'lookup' ? fieldKey(field) : undefined,
     minSearchChars: field.type === 'lookup' ? 2 : undefined,
   }

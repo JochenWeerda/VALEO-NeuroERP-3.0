@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -214,22 +215,22 @@ const createDebitorenConfig = (t: TFunction, entityTypeLabel: string): MaskConfi
           name: 'payment_terms_days',
           label: t('crud.fields.paymentDueDays'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'discount_days',
           label: t('crud.fields.discountDays'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'discount_percent',
           label: t('crud.fields.discountPercent'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'credit_limit',
           label: t('crud.fields.creditLimit'),
           type: 'number'
-        } as Field
+        }
       ],
       layout: 'grid',
       columns: 2
@@ -261,7 +262,7 @@ const createDebitorenConfig = (t: TFunction, entityTypeLabel: string): MaskConfi
       update: '/api/v1/finance/debtors/{id}',
       delete: '/api/v1/finance/debtors/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 

@@ -159,7 +159,7 @@ export function getCachedData<T>(key: string): T | null {
     return null
   }
 
-  return cached.data
+  return cached.data as T
 }
 
 export function setCachedData(key: string, data: unknown, ttl = 5 * 60 * 1000): void {

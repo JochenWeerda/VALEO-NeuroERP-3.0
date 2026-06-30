@@ -582,7 +582,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                   if (ls.positionen?.length) {
                     setState((prev) => ({
                       ...prev,
-                      positionen: ls.positionen.map(p, i => ({
+                      positionen: ls.positionen.map((p, i) => ({
                       id: crypto.randomUUID(), posNr: i + 1, liefArt: 'frei',
                       artikelNr: p.artikel_nr ?? '', lieferantArtikelNr: '',
                       artikelBezeichnung: p.bezeichnung ?? '', artikelBezeichnung2: '',

@@ -81,12 +81,15 @@ const candidates = [
   })),
 ]
 
-// The current runtime resolves exact auto routes before aliases. Preserve that
-// behavior while emitting one deterministic route per URL.
+// Native mask aliases are the rollout switch for UniversalMaskRuntime pages and
+// must win over legacy auto detail routes on the same URL.
 const byPath = new Map()
-const sourcePriority = { auto: 0, alias: 1, navigation: 2 }
+function candidatePriority(entry) {
+  if (entry.source === 'alias' && entry.module?.endsWith('-native')) return -1
+  return { auto: 0, alias: 1, navigation: 2 }[entry.source] ?? 3
+}
 for (const entry of candidates.sort(
-  (a, b) => sourcePriority[a.source] - sourcePriority[b.source],
+  (a, b) => candidatePriority(a) - candidatePriority(b),
 )) {
   if (entry.path && !byPath.has(entry.path)) byPath.set(entry.path, entry)
 }

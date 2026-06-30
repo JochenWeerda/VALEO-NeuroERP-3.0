@@ -203,7 +203,7 @@ export function CSVImport({ onImport, expectedColumns, entityName }: CSVImportPr
                 <tbody>
                   {preview.map((row, index) => (
                     <tr key={index}>
-                      {Object.values(row).map(value, colIndex => (
+                      {Object.values(row).map((value, colIndex) => (
                         <td key={colIndex} className="px-2 py-1 border-b">
                           {String(value)}
                         </td>

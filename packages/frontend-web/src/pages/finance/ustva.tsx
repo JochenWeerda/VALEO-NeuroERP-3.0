@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -52,7 +53,7 @@ const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as Field,
+         },
         {
           name: 'voranmeldungszeitraum',
           label: t('crud.fields.declarationPeriod'),
@@ -232,7 +233,7 @@ const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       key: 'abweichungen',
       label: t('crud.fields.deviations'),
       fields: []
-    } as Field,
+    },
     {
       key: 'abweichungen_custom',
       label: '',
@@ -306,7 +307,7 @@ const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       update: '/api/v1/finance/vat-return/{id}',
       delete: '/api/v1/finance/vat-return/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 

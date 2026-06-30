@@ -4,6 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { isRecord, stringValue } from '@/lib/record-utils'
 
 // ========== TYPES ==========
 
@@ -249,16 +250,19 @@ export function useBuchungen(filters?: { datum_von?: string; datum_bis?: string;
       const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
         '/api/v1/journal-entries', { params }
       )
-      return (response.data.items ?? []).map((e): Buchung => ({
-        id: e.id,
-        belegnr: e.entry_number,
-        datum: e.posting_date || e.entry_date,
-        soll_konto: e.lines?.[0]?.account_id ?? '',
-        haben_konto: e.lines?.[1]?.account_id ?? '',
+      return (response.data.items ?? []).map((e): Buchung => {
+        const lines = Array.isArray(e.lines) ? e.lines.filter(isRecord) : []
+        return {
+        id: stringValue(e.id),
+        belegnr: stringValue(e.entry_number),
+        datum: stringValue(e.posting_date || e.entry_date),
+        soll_konto: stringValue(lines[0]?.account_id),
+        haben_konto: stringValue(lines[1]?.account_id),
         betrag: Number(e.total_debit || 0),
-        text: e.description,
-        belegart: e.source || 'MAN',
-      }))
+        text: stringValue(e.description),
+        belegart: stringValue(e.source, 'MAN'),
+        }
+      })
     },
     initialData: [],
   })
@@ -289,11 +293,11 @@ export function useKonten(filters?: { typ?: string }) {
         '/api/v1/chart-of-accounts', { params }
       )
       return (response.data.items ?? []).map((a): Konto => ({
-        id: a.id,
-        kontonummer: a.account_number,
-        bezeichnung: a.account_name,
-        kontoart: a.category ?? '',
-        typ: a.account_type,
+        id: stringValue(a.id),
+        kontonummer: stringValue(a.account_number),
+        bezeichnung: stringValue(a.account_name),
+        kontoart: stringValue(a.category),
+        typ: stringValue(a.account_type),
         saldo: Number(a.balance ?? 0),
       }))
     },
@@ -593,15 +597,15 @@ export function useDebitorenOP() {
         '/api/v1/finance/open-items?typ=debitor'
       )
       return (response.data.items ?? []).map((item): DebitOP => ({
-        id: item.id,
-        rechnungsnr: item.beleg_nummer ?? item.rechnungsnr ?? '',
-        kunde: item.partner_name ?? item.kunde_name ?? '',
-        kundennr: item.debitor_id ?? '',
-        datum: item.faellig_am ?? '',
-        faelligkeit: item.faellig_am ?? '',
+        id: stringValue(item.id),
+        rechnungsnr: stringValue(item.beleg_nummer ?? item.rechnungsnr),
+        kunde: stringValue(item.partner_name ?? item.kunde_name),
+        kundennr: stringValue(item.debitor_id),
+        datum: stringValue(item.faellig_am),
+        faelligkeit: stringValue(item.faellig_am),
         betrag: Number(item.betrag ?? 0),
         offen: Number(item.offen ?? 0),
-        ueberfaellig: new Date(item.faellig_am) < new Date(),
+        ueberfaellig: stringValue(item.faellig_am) ? new Date(stringValue(item.faellig_am)) < new Date() : false,
         mahnStufe: Number(item.mahnstufe ?? 0),
       }))
     },
@@ -618,12 +622,12 @@ export function useKreditorenOP() {
         '/api/v1/finance/open-items?typ=kreditor'
       )
       return (response.data.items ?? []).map((item): KreditOP => ({
-        id: item.id,
-        rechnungsnr: item.beleg_nummer ?? item.rechnungsnr ?? '',
-        lieferant: item.partner_name ?? item.lieferant_name ?? '',
-        lieferantennr: item.kreditor_id ?? '',
-        datum: item.faellig_am ?? '',
-        faelligkeit: item.faellig_am ?? '',
+        id: stringValue(item.id),
+        rechnungsnr: stringValue(item.beleg_nummer ?? item.rechnungsnr),
+        lieferant: stringValue(item.partner_name ?? item.lieferant_name),
+        lieferantennr: stringValue(item.kreditor_id),
+        datum: stringValue(item.faellig_am),
+        faelligkeit: stringValue(item.faellig_am),
         betrag: Number(item.betrag ?? 0),
         offen: Number(item.offen ?? 0),
         skonto: 0,
@@ -643,15 +647,18 @@ export function useHauptbuchBuchungen() {
     queryKey: [...fibuKeys.buchungen(), 'hauptbuch'],
     queryFn: async () => {
       const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/journal-entries')
-      return (response.data.items ?? []).map((e): HauptbuchBuchung => ({
-        id: e.id,
-        datum: e.posting_date || e.entry_date,
-        belegnummer: e.entry_number,
-        konto: e.lines?.[0]?.account_id ?? '',
-        text: e.description,
+      return (response.data.items ?? []).map((e): HauptbuchBuchung => {
+        const lines = Array.isArray(e.lines) ? e.lines.filter(isRecord) : []
+        return {
+        id: stringValue(e.id),
+        datum: stringValue(e.posting_date || e.entry_date),
+        belegnummer: stringValue(e.entry_number),
+        konto: stringValue(lines[0]?.account_id),
+        text: stringValue(e.description),
         soll: Number(e.total_debit ?? 0),
         haben: Number(e.total_credit ?? 0),
-      }))
+        }
+      })
     },
     initialData: [],
     staleTime: 2 * 60 * 1000,
@@ -690,11 +697,11 @@ export function useVerbindlichkeiten() {
         '/api/v1/finance/open-items?typ=kreditor'
       )
       return (response.data.items ?? []).map((item): Verbindlichkeit => ({
-        id: item.id,
-        rechnungsNr: item.beleg_nummer ?? '',
-        lieferant: item.partner_name ?? '',
-        rechnungsDatum: item.faellig_am ?? '',
-        faelligAm: item.faellig_am ?? '',
+        id: stringValue(item.id),
+        rechnungsNr: stringValue(item.beleg_nummer),
+        lieferant: stringValue(item.partner_name),
+        rechnungsDatum: stringValue(item.faellig_am),
+        faelligAm: stringValue(item.faellig_am),
         betrag: Number(item.betrag ?? 0),
         offen: Number(item.offen ?? 0),
         status: Number(item.offen ?? 0) === 0 ? 'bezahlt' : 'offen',

@@ -680,10 +680,16 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT position_no, article_id, description, quantity, unit
-                    FROM domain_sales.delivery_note_positions
-                    WHERE tenant_id = :tenant_id AND delivery_note_id = :ls_id
-                    ORDER BY position_no
+                    SELECT
+                        pos_nr AS position_no,
+                        artikel_id AS article_id,
+                        bezeichnung AS description,
+                        menge AS quantity,
+                        einheit AS unit
+                    FROM domain_sales.delivery_note_positions p
+                    JOIN domain_sales.delivery_notes n ON n.id = p.delivery_note_id
+                    WHERE n.tenant_id = :tenant_id AND p.delivery_note_id = :ls_id
+                    ORDER BY p.pos_nr
                     """
                 ),
                 {"tenant_id": self.tenant_id, "ls_id": entity_id},

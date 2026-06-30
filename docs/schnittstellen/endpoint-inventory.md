@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-27
+last_reviewed: 2026-06-30
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -238,6 +238,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `marketing` | Marketing API - DB-backed endpoints. |
 | `mask_registry` | Mask Registry API — Wave 3 AP1 |
+| `mask_rollout_summaries` | Central screen-summary routes for batch mask rollouts (Waves 42–51). |
+| `mask_screen_definition` | Mask ScreenDefinition API — native generator payloads. |
 | `massebilanz` | Massebilanz — Periodische Mengenbilanzierung für Rohwarenbewegungen. |
 | `master_data` | Master-data / Stammdaten endpoints (l3c-stammdaten) |
 | `mcp_tool_registry` | MCP-ERP-TOOLS-001 — API fuer den ERP-Tool-Katalog. |

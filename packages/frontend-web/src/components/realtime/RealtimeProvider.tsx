@@ -6,6 +6,7 @@
 import React, { createContext, useContext, useCallback, useEffect } from 'react'
 import { useSSE, type SSEMessage } from '@/lib/hooks/useSSE'
 import { useQueryClient } from '@tanstack/react-query'
+import { isRecord, stringValue } from '@/lib/record-utils'
 
 type RealtimeContextValue = {
   isConnected: boolean
@@ -40,7 +41,8 @@ export function RealtimeProvider({
 
   const handleMessage = useCallback(
     (message: SSEMessage) => {
-      const eventType = message.event ?? message.data.event ?? 'message'
+      const messageData = isRecord(message.data) ? message.data : {}
+      const eventType = message.event ?? stringValue(messageData.event, 'message')
       const handlers = eventHandlers.current.get(eventType)
 
       if (handlers) {
@@ -131,7 +133,7 @@ export function useRealtimeEvent<T = unknown>(
   const { subscribe } = useRealtime()
 
   useEffect(() => {
-    const unsubscribe = subscribe(eventType, handler)
+    const unsubscribe = subscribe(eventType, (data: unknown) => handler(data as T))
     return unsubscribe
   }, [eventType, handler, subscribe])
 }

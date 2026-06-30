@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -157,22 +158,22 @@ const createKreditorenConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           name: 'zahlungsziel',
           label: t('crud.fields.paymentDueDays'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'skontoTage',
           label: t('crud.fields.discountDays'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'skontoProzent',
           label: t('crud.fields.discountPercent'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'kreditlimit',
           label: t('crud.fields.creditLimit'),
           type: 'number'
-        } as Field
+        }
       ],
       layout: 'grid',
       columns: 2

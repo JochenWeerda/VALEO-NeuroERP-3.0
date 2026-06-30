@@ -13,9 +13,27 @@ type BedarfsrechnerState = {
   ertragsziel?: number
 }
 
+function isBedarfsrechnerState(value: unknown): value is { fromBedarfsrechner: BedarfsrechnerState } {
+  if (!value || typeof value !== 'object') return false
+  const state = value as { fromBedarfsrechner?: unknown }
+  const bedarf = state.fromBedarfsrechner
+  if (!bedarf || typeof bedarf !== 'object') return false
+  const candidate = bedarf as Partial<BedarfsrechnerState>
+  return (
+    typeof candidate.flaeche === 'number' &&
+    typeof candidate.kultur === 'string' &&
+    !!candidate.empfehlung &&
+    typeof candidate.empfehlung.n === 'number' &&
+    typeof candidate.empfehlung.p === 'number' &&
+    typeof candidate.empfehlung.k === 'number'
+  )
+}
+
 export default function DuengungsplanungPage(): JSX.Element {
   const location = useLocation()
-  const fromBedarfsrechner = location.state?.fromBedarfsrechner as BedarfsrechnerState | undefined
+  const fromBedarfsrechner = isBedarfsrechnerState(location.state)
+    ? location.state.fromBedarfsrechner
+    : undefined
   const { data: komponenten, isLoading: loadingKomponenten } = useDuengerKomponenten()
   const { data: schlaegeListe = [], isLoading: loadingSchlaege } = useSchlaege()
 

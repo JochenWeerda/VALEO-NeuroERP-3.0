@@ -31,6 +31,13 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
+import {
+  errorMessage,
+  recordArrayFromResponse,
+  stringValue,
+  nullableNumberValue,
+  type UnknownRecord,
+} from '@/lib/record-utils'
 
 const CustomerSelectionDialog = lazy(() =>
   import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
@@ -234,12 +241,34 @@ function normalizeArticleLookup(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-function extractArticleLookupCandidates(payload: Record<string, unknown>): ArticleLookupCandidate[] {
-  if (Array.isArray(payload)) return payload
-  if (Array.isArray(payload?.items)) return payload.items
-  if (Array.isArray(payload?.data?.items)) return payload.data.items
-  if (Array.isArray(payload?.data)) return payload.data
-  return []
+function mapArticleLookupCandidate(value: UnknownRecord): ArticleLookupCandidate {
+  return {
+    id: stringValue(value.id),
+    name: stringValue(value.name) || null,
+    description: stringValue(value.description) || null,
+    article_number: stringValue(value.article_number) || null,
+    vat_rate: nullableNumberValue(value.vat_rate),
+    mwst_prozent: nullableNumberValue(value.mwst_prozent),
+    mehrwertsteuer_prozent: nullableNumberValue(value.mehrwertsteuer_prozent),
+  }
+}
+
+function extractArticleLookupCandidates(payload: unknown): ArticleLookupCandidate[] {
+  return recordArrayFromResponse(payload).map(mapArticleLookupCandidate)
+}
+
+function mapCustomerForAcceptance(value: UnknownRecord): Customer {
+  const customerNumber = stringValue(value.customer_number ?? value.customerNumber)
+  return {
+    id: stringValue(value.id),
+    customerNumber,
+    name: stringValue(value.company_name ?? value.name),
+    debitorAccount: customerNumber,
+    representative: stringValue(value.contact_person ?? value.representative),
+    postalCode: stringValue(value.postal_code ?? value.postalCode),
+    city: stringValue(value.city),
+    chefanweisung: stringValue(value.chefanweisung ?? value.executive_note),
+  }
 }
 
 export default function ErnteAnnahmeErfassungPage(): JSX.Element {
@@ -470,7 +499,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       if (!acceptanceId) return
 
       try {
-        const ha = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
+        const { data: ha } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
         const positions = ha.positions ?? []
         const pos15 = positions.find((p: { position_number: number }) => p.position_number === 15)
         const pos20 = positions.find((p: { position_number: number }) => p.position_number === 20)
@@ -480,17 +509,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         let customer: Customer | null = null
         if (ha.customer_id) {
           try {
-            const { data: customerData } = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${ha.customer_id}`)
-            customer = {
-              id: customerData.id,
-              customerNumber: customerData.customer_number || customerData.customerNumber || '',
-              name: customerData.company_name || customerData.name || '',
-              debitorAccount: customerData.customer_number || customerData.customerNumber || '',
-              representative: customerData.contact_person || customerData.representative,
-              postalCode: customerData.postal_code || customerData.postalCode,
-              city: customerData.city,
-              chefanweisung: customerData.chefanweisung || customerData.executive_note,
-            }
+            const { data: customerData } = await apiClient.get<UnknownRecord>(`/api/v1/crm/customers/${ha.customer_id}`)
+            customer = mapCustomerForAcceptance(customerData)
           } catch {
             // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
@@ -573,8 +593,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
         push('Ernte-Annahme geladen')
       } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-        push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
+        push(`Fehler beim Laden: ${errorMessage(_rawErr)}`)
       }
     }
 
@@ -681,10 +700,10 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       let response: HarvestAcceptanceResponse
       if (state.id) {
         // Update
-        response = await apiClient.put<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`, payload)
+        response = (await apiClient.put<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`, payload)).data
       } else {
         // Create
-        response = await apiClient.post<HarvestAcceptanceResponse>('/api/v1/agrar/harvest-acceptance', payload)
+        response = (await apiClient.post<HarvestAcceptanceResponse>('/api/v1/agrar/harvest-acceptance', payload)).data
       }
 
       setState((prev) => ({
@@ -700,8 +719,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push('Ernte-Annahme erfolgreich gespeichert')
       return response.id
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler beim Speichern: ${errorMessage(_rawErr)}`)
       return null
     } finally {
       setIsSaving(false)
@@ -720,11 +738,10 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push('Berechnung erfolgreich durchgeführt')
       
       // Lade aktualisierte Daten
-      const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
+      const { data: response } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler bei der Berechnung: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler bei der Berechnung: ${errorMessage(_rawErr)}`)
     }
   }
 
@@ -753,28 +770,26 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const handleAbschlagrechnung = async (): Promise<void> => {
     if (!state.id) { push('Bitte zuerst Ernte-Annahme speichern'); return }
     try {
-      const calcResult = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
+      const { data: calcResult } = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
       const brutto = calcResult?.total_gross_amount_eur != null ? `${Number(calcResult.total_gross_amount_eur).toFixed(2)} EUR` : '-'
       push(`Abschlagrechnung berechnet. Bruttobetrag: ${brutto}`)
-      const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
+      const { data: response } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler: ${errorMessage(_rawErr)}`)
     }
   }
 
   const handleEndabrechnung = async (): Promise<void> => {
     if (!state.id) { push('Bitte zuerst Ernte-Annahme speichern'); return }
     try {
-      const calcResult = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
+      const { data: calcResult } = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
       const brutto = calcResult?.total_gross_amount_eur != null ? `${Number(calcResult.total_gross_amount_eur).toFixed(2)} EUR` : '-'
       push(`Endabrechnung berechnet. Bruttobetrag: ${brutto}`)
-      const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
+      const { data: response } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler: ${errorMessage(_rawErr)}`)
     }
   }
 
@@ -849,14 +864,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push(`Ernte-Annahme erfolgreich freigegeben (${status})`)
       
       // Lade aktualisierte Daten
-      const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
+      const { data: response } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       setState((prev) => ({
         ...prev,
         releaseStatus: response.release_status as HarvestAcceptanceState['releaseStatus'],
       }))
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler bei der Freigabe: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler bei der Freigabe: ${errorMessage(_rawErr)}`)
     } finally {
       setIsSaving(false)
     }
@@ -874,11 +888,12 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
   // Artikel auswählen
   const handleArticleSelect = (article: Record<string, unknown>): void => {
+    const vatRate = nullableNumberValue(article.vat_rate ?? article.mwst_prozent ?? article.mehrwertsteuer_prozent)
     setState((prev) => ({
       ...prev,
-      articleId: article.id,
-      articleName: article.name || article.bezeichnung || article.description || '',
-      vatRatePercent: article.vat_rate || article.mwst_prozent || article.mehrwertsteuer_prozent || 7.0,
+      articleId: stringValue(article.id),
+      articleName: stringValue(article.name ?? article.bezeichnung ?? article.description),
+      vatRatePercent: vatRate ?? 7.0,
     }))
     setShowArticleDialog(false)
   }
@@ -951,7 +966,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   // Wie vorheriger Annahmeschein (F11 / Strg+F8)
   const handleCopyPreviousFull = async (): Promise<void> => {
     try {
-      const response = await apiClient.get<HarvestAcceptanceResponse | null>('/api/v1/agrar/harvest-acceptance/last', {
+      const { data: response } = await apiClient.get<HarvestAcceptanceResponse | null>('/api/v1/agrar/harvest-acceptance/last', {
         params: {
           operator_id: user?.sub || undefined,
           customer_id: state.customer?.id || undefined,
@@ -967,17 +982,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       let customer: Customer | null = null
       if (response.customer_id) {
         try {
-          const customerData = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
-          customer = {
-            id: customerData.id,
-            customerNumber: customerData.customer_number || customerData.customerNumber || '',
-            name: customerData.company_name || customerData.name || '',
-            debitorAccount: customerData.customer_number || customerData.customerNumber || '',
-            representative: customerData.contact_person || customerData.representative,
-            postalCode: customerData.postal_code || customerData.postalCode,
-            city: customerData.city,
-            chefanweisung: customerData.chefanweisung || customerData.executive_note,
-          }
+          const { data: customerData } = await apiClient.get<UnknownRecord>(`/api/v1/crm/customers/${response.customer_id}`)
+          customer = mapCustomerForAcceptance(customerData)
         } catch {
           // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
         }
@@ -1067,8 +1073,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
       push('Daten vom vorherigen Annahmeschein übernommen')
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler: ${errorMessage(_rawErr)}`)
     }
   }
 
@@ -1091,8 +1096,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       setShowDeleteDialog(false)
       navigate('/agrar/ernte')
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Fehler beim Löschen: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler beim Löschen: ${errorMessage(_rawErr)}`)
     } finally {
       setIsSaving(false)
     }

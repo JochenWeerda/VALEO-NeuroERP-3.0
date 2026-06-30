@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -105,7 +106,7 @@ const createLastschriftenConfig = (t: TFunction, entityTypeLabel: string): MaskC
       key: 'lastschriften',
       label: t('crud.fields.directDebits'),
       fields: [],
-    } as Field,
+    },
     {
       key: 'lastschriften_custom',
       label: '',
@@ -181,7 +182,7 @@ const createLastschriftenConfig = (t: TFunction, entityTypeLabel: string): MaskC
       update: '/api/v1/finance/direct-debits/{id}',
       delete: '/api/v1/finance/direct-debits/{id}',
     },
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin'],
 })
 
@@ -507,9 +508,9 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
 
     if (action === 'validate-mandates') {
-      const lastschriften: Record<string, unknown>[] = currentFormData?.lastschriften ?? []
+      const lastschriften = Array.isArray(currentFormData?.lastschriften) ? currentFormData.lastschriften : []
       const errors: string[] = []
-      lastschriften.forEach(ls, idx => {
+      lastschriften.forEach((ls, idx) => {
         if (!ls.iban) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
         if (!ls.bic) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
         if (!ls.mandatReferenz) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)

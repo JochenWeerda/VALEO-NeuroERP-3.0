@@ -11,6 +11,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Filter, X } from 'lucide-react'
+import { inputValue, renderValue } from '@/lib/record-utils'
 
 export interface FilterConfig {
   key: string
@@ -71,6 +72,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
           <CardContent className="space-y-4">
             {filters.map((filter, filterIndex) => {
               const value = values[filter.key]
+              const fieldValue = inputValue(value)
               
               return (
                 <div key={`${filter.key}-${filterIndex}`} className="space-y-2">
@@ -78,7 +80,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                   
                   {filter.type === 'text' && (
                     <Input
-                      value={value || ''}
+                      value={fieldValue}
                       onChange={(e) => handleChange(filter.key, e.target.value)}
                       placeholder={t('crud.list.searchPlaceholder')}
                     />
@@ -86,7 +88,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                   
                   {filter.type === 'select' && filter.options && (
                     <NativeSelect
-                      value={value || ''}
+                      value={fieldValue}
                       onValueChange={(val) => handleChange(filter.key, val)}
                       options={filter.options}
                       placeholder={t('common.optional')}
@@ -96,7 +98,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                   {filter.type === 'date' && (
                     <Input
                       type="date"
-                      value={value || ''}
+                      value={fieldValue}
                       onChange={(e) => handleChange(filter.key, e.target.value || null)}
                     />
                   )}
@@ -104,13 +106,13 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                   {filter.type === 'number' && (
                     <Input
                       type="number"
-                      value={value || ''}
+                      value={fieldValue}
                       onChange={(e) => handleChange(filter.key, e.target.value ? Number(e.target.value) : null)}
                       placeholder={t('common.optional')}
                     />
                   )}
                   
-                  {value && (
+                  {Boolean(value) && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -118,6 +120,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                       className="h-6 px-2"
                     >
                       <X className="h-3 w-3" />
+                      <span className="sr-only">{renderValue(value)}</span>
                     </Button>
                   )}
                 </div>

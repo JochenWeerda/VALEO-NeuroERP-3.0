@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { StrictMode, Suspense, lazy } from 'react'
-import ReactDOM from 'react-dom/client'
+import ReactDOM, { type Root } from 'react-dom/client'
 import { PageLoader } from '@/app/PageLoader'
 import './index.css'
 
@@ -11,9 +11,10 @@ const AppRuntime = lazy(() =>
 const rootElement = document.getElementById('root')
 
 if (rootElement instanceof HTMLElement) {
-  const existingRoot = (rootElement as Record<string, unknown>).__reactRoot ?? null
+  const rootContainer = rootElement as HTMLElement & { __reactRoot?: Root }
+  const existingRoot = rootContainer.__reactRoot ?? null
   const root = existingRoot ?? ReactDOM.createRoot(rootElement)
-  ;(rootElement as Record<string, unknown>).__reactRoot = root
+  rootContainer.__reactRoot = root
 
   root.render(
     <StrictMode>

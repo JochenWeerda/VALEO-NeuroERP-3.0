@@ -11,7 +11,7 @@ export function useScreenDefinition(maskId: string, options?: { enabled?: boolea
   return useQuery({
     queryKey: maskKeys.screenDefinition(maskId),
     queryFn: async () => {
-      const encoded = encodeURIComponent(maskId)
+      const encoded = maskId.replace(/\//g, '__')
       const response = await apiClient.get<ScreenDefinition>(`/api/v1/masks/${encoded}/screen-definition`)
       return response.data
     },
