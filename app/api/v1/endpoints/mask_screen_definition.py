@@ -87,7 +87,7 @@ def _generate_agent_contract(definition: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/{mask_id}/screen-definition", response_model=dict[str, Any], summary="Native ScreenDefinition abrufen")
+@router.get("/{mask_id:path}/screen-definition", response_model=dict[str, Any], summary="Native ScreenDefinition abrufen")
 async def get_mask_screen_definition(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -102,7 +102,7 @@ async def get_mask_screen_definition(
     return definition
 
 
-@router.get("/{mask_id}/agent-contract", response_model=dict[str, Any], summary="AgentMaskContract abrufen")
+@router.get("/{mask_id:path}/agent-contract", response_model=dict[str, Any], summary="AgentMaskContract abrufen")
 async def get_agent_mask_contract(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -241,7 +241,7 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/{mask_id}/readiness", response_model=dict[str, Any], summary="Generator-Readiness pruefen")
+@router.get("/{mask_id:path}/readiness", response_model=dict[str, Any], summary="Generator-Readiness pruefen")
 async def get_mask_readiness(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -262,3 +262,35 @@ async def get_mask_readiness(
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return _check_readiness(definition)
+
+
+@router.get(
+    "/{mask_id:path}/entity/{entity_id}",
+    response_model=dict[str, Any],
+    summary="Generischer Entity-Stub fuer native SDs ohne dedizierten Backend-Endpunkt",
+)
+async def get_mask_entity_stub(
+    mask_id: str,
+    entity_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Stub-Endpoint fuer native SDs, deren fachlicher Entity-Endpunkt noch nicht implementiert ist.
+
+    Liefert Platzhalter-Daten damit das Frontend kein 404 erhaelt.
+    Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
+    """
+    _ = tenant_id
+    normalized = mask_id.strip("/")
+    definition = get_screen_definition(normalized)
+    if definition is None:
+        raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
+    # Collect all field keys from kopf tab to build a minimal stub payload
+    fields: list[dict[str, Any]] = []
+    for tab in definition.get("tabs", []):
+        if tab.get("key") == "kopf":
+            fields = tab.get("fields", [])
+            break
+    stub: dict[str, Any] = {"id": entity_id, "_stub": True, "_mask_id": normalized}
+    for f in fields:
+        stub.setdefault(f["key"], None)
+    return stub
