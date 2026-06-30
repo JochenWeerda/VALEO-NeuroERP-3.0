@@ -19,6 +19,7 @@ import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { CheckCircle, XCircle, AlertTriangle, FileCheck, Receipt } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type MatchItem = {
   purchaseOrderItemId: string
@@ -98,13 +99,13 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
   const loadInvoices = async () => {
     try {
-      const response = (await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/rechnungseingaenge')) as unknown as Record<string, unknown>[]
-      const rows = Array.isArray(response) ? response : []
+      const response = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>('/api/v1/einkauf/rechnungseingaenge')
+      const rows = recordArrayFromResponse(response.data)
       const normalized = rows.map(inv => ({
-        id: inv.id,
-        rechnungsNummer: inv.rechnungsNummer || inv.rechnungs_nummer || inv.rechnungsnr || '',
-        lieferantName: inv.lieferantName || inv.lieferant_name || inv.lieferant || '',
-        status: String(inv.status || '').toUpperCase(),
+        id: stringValue(inv.id),
+        rechnungsNummer: stringValue(inv.rechnungsNummer, stringValue(inv.rechnungs_nummer, stringValue(inv.rechnungsnr))),
+        lieferantName: stringValue(inv.lieferantName, stringValue(inv.lieferant_name, stringValue(inv.lieferant))),
+        status: stringValue(inv.status).toUpperCase(),
       }))
       setInvoices(normalized.filter(x => ['ERFASST', 'GEPRUEFT'].includes(x.status)))
     } catch (error) {
@@ -121,9 +122,10 @@ export default function RechnungAbgleichPage(): JSX.Element {
     setMatching(true)
     try {
       // Lade Rechnung
-      const invoice = await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`)
-      const invoiceBestellungId = invoice.bestellungId || invoice.bestellung_id || invoice.bestellung
-      const invoiceWareneingangId = invoice.wareneingangId || invoice.wareneingang_id || invoice.wareneingang
+      const invoiceResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`)
+      const invoice = invoiceResponse.data
+      const invoiceBestellungId = stringValue(invoice.bestellungId, stringValue(invoice.bestellung_id, stringValue(invoice.bestellung)))
+      const invoiceWareneingangId = stringValue(invoice.wareneingangId, stringValue(invoice.wareneingang_id, stringValue(invoice.wareneingang)))
 
       if (!invoiceBestellungId) {
         toast({
@@ -135,13 +137,15 @@ export default function RechnungAbgleichPage(): JSX.Element {
         return
       }
 
-      const purchaseOrder = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${String(invoiceBestellungId ?? '')}`)
+      const purchaseOrderResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${invoiceBestellungId}`)
+      const purchaseOrder = purchaseOrderResponse.data
 
       // Lade Wareneingang (falls vorhanden)
       let goodsReceipt = null
       if (invoiceWareneingangId) {
         try {
-          goodsReceipt = await apiClient.get<Record<string, unknown>>(`/api/purchase-workflow/orders/${String(invoiceBestellungId ?? '')}/goods-receipt/${String(invoiceWareneingangId ?? '')}`)
+          const goodsReceiptResponse = await apiClient.get<Record<string, unknown>>(`/api/purchase-workflow/orders/${invoiceBestellungId}/goods-receipt/${invoiceWareneingangId}`)
+          goodsReceipt = goodsReceiptResponse.data
         } catch {
           // Wareneingang optional — Abgleich läuft auch ohne WE-Daten
         }
@@ -153,7 +157,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
       // Prüfe Blockierung
       const hasBlockingExceptions = match.itemMatches.some(
-        item => item.exceptions.length > 0 && Math.abs(item.varianceAmount) > (purchaseOrder.totalAmount * toleranceConfig.price / 100)
+        item => item.exceptions.length > 0 && Math.abs(item.varianceAmount) > (numberValue(purchaseOrder.totalAmount) * toleranceConfig.price / 100)
       )
       setBlocked(hasBlockingExceptions && match.overallStatus !== 'matched')
     } catch (_rawErr: unknown) {
@@ -178,12 +182,12 @@ export default function RechnungAbgleichPage(): JSX.Element {
     let totalVariance = 0
     let exceptionsCount = 0
 
-    const poItems = po.lines || po.items || []
-    const grItems = gr?.items || []
-    const ivItems = invoice.positionen || invoice.items || []
+    const poItems = recordArrayFromResponse(po.lines).length > 0 ? recordArrayFromResponse(po.lines) : recordArrayFromResponse(po.items)
+    const grItems = recordArrayFromResponse(gr?.items)
+    const ivItems = recordArrayFromResponse(invoice.positionen).length > 0 ? recordArrayFromResponse(invoice.positionen) : recordArrayFromResponse(invoice.items)
 
     for (const poItem of poItems) {
-      const grItem = grItems.find(gi => gi.purchaseOrderItemId === poItem.id)
+      const grItem = grItems.find(gi => stringValue(gi.purchaseOrderItemId) === stringValue(poItem.id))
       const ivItem = ivItems.find(ii => {
         const iiArticleId = ii.artikelId || ii.artikel_id || ii.articleId || ii.productId
         const poArticleId = poItem.productId || poItem.articleId || poItem.artikelId
@@ -192,15 +196,15 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
       if (!ivItem) {
         itemMatches.push({
-          purchaseOrderItemId: poItem.id,
+          purchaseOrderItemId: stringValue(poItem.id),
           invoiceItemId: '',
-          productName: poItem.productName || poItem.product?.name || '',
-          poQuantity: poItem.qty || poItem.quantity || 0,
-          poPrice: poItem.price || 0,
-          poTotal: (poItem.qty || poItem.quantity || 0) * (poItem.price || 0),
-          grQuantity: grItem?.receivedQuantity || 0,
-          grAccepted: grItem?.acceptedQuantity || 0,
-          grRejected: grItem?.rejectedQuantity || 0,
+          productName: stringValue(poItem.productName),
+          poQuantity: numberValue(poItem.qty, numberValue(poItem.quantity)),
+          poPrice: numberValue(poItem.price),
+          poTotal: numberValue(poItem.qty, numberValue(poItem.quantity)) * numberValue(poItem.price),
+          grQuantity: numberValue(grItem?.receivedQuantity),
+          grAccepted: numberValue(grItem?.acceptedQuantity),
+          grRejected: numberValue(grItem?.rejectedQuantity),
           ivQuantity: 0,
           ivPrice: 0,
           ivTotal: 0,
@@ -208,22 +212,22 @@ export default function RechnungAbgleichPage(): JSX.Element {
           priceMatch: false,
           qualityMatch: !!grItem,
           exceptions: ['Rechnungsposition nicht gefunden'],
-          varianceAmount: (poItem.qty || poItem.quantity || 0) * (poItem.price || 0),
+          varianceAmount: numberValue(poItem.qty, numberValue(poItem.quantity)) * numberValue(poItem.price),
         })
         exceptionsCount++
-        totalVariance += Math.abs((poItem.qty || poItem.quantity || 0) * (poItem.price || 0))
+        totalVariance += Math.abs(numberValue(poItem.qty, numberValue(poItem.quantity)) * numberValue(poItem.price))
         continue
       }
 
-      const poQty = poItem.qty || poItem.quantity || 0
-      const poPrice = poItem.price || 0
+      const poQty = numberValue(poItem.qty, numberValue(poItem.quantity))
+      const poPrice = numberValue(poItem.price)
       const poTotal = poQty * poPrice
       const ivQty = Number(ivItem.menge || ivItem.quantity || 0)
       const ivPrice = Number(ivItem.preis || ivItem.unitPrice || ivItem.einzelpreis || 0)
       const ivTotal = ivQty * ivPrice
-      const grQty = grItem?.receivedQuantity || 0
-      const grAccepted = grItem?.acceptedQuantity || 0
-      const grRejected = grItem?.rejectedQuantity || 0
+      const grQty = numberValue(grItem?.receivedQuantity)
+      const grAccepted = numberValue(grItem?.acceptedQuantity)
+      const grRejected = numberValue(grItem?.rejectedQuantity)
 
       // Mengen-Abgleich
       const qtyDiff = Math.abs(ivQty - (grAccepted || poQty))
@@ -236,7 +240,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
       const priceMatch = priceDiff <= priceTolerance
 
       // Qualität (nur wenn GR vorhanden)
-      const qualityMatch = !grItem || (grItem.rejectedQuantity || 0) === 0
+      const qualityMatch = !grItem || numberValue(grItem.rejectedQuantity) === 0
 
       const exceptions: string[] = []
       if (!quantityMatch) {
@@ -254,10 +258,10 @@ export default function RechnungAbgleichPage(): JSX.Element {
       if (exceptions.length > 0) exceptionsCount++
 
       itemMatches.push({
-        purchaseOrderItemId: poItem.id,
-        receiptItemId: grItem?.id,
-        invoiceItemId: ivItem.id || '',
-        productName: poItem.productName || poItem.product?.name || '',
+        purchaseOrderItemId: stringValue(poItem.id),
+        receiptItemId: stringValue(grItem?.id) || undefined,
+        invoiceItemId: stringValue(ivItem.id),
+        productName: stringValue(poItem.productName),
         poQuantity: poQty,
         poPrice: poPrice,
         poTotal: poTotal,
@@ -276,8 +280,8 @@ export default function RechnungAbgleichPage(): JSX.Element {
     }
 
     const poTotal = poItems.reduce((sum, item) => {
-      const qty = item.qty || item.quantity || 0
-      const price = item.price || 0
+      const qty = numberValue(item.qty, numberValue(item.quantity))
+      const price = numberValue(item.price)
       return sum + (qty * price)
     }, 0)
 
@@ -306,9 +310,9 @@ export default function RechnungAbgleichPage(): JSX.Element {
       (overallStatus === 'partial_match' && variancePercentage <= 5)
 
     return {
-      purchaseOrderId: po.id || po.number,
-      receiptId: gr?.id,
-      invoiceId: invoice.id || invoice.rechnungsNummer,
+      purchaseOrderId: stringValue(po.id, stringValue(po.number)),
+      receiptId: stringValue(gr?.id) || undefined,
+      invoiceId: stringValue(invoice.id, stringValue(invoice.rechnungsNummer)),
       matchType: gr ? 'three_way' : 'two_way',
       overallStatus,
       quantityMatch,
@@ -488,7 +492,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
                 value={selectedInvoiceId}
                 onValueChange={setSelectedInvoiceId}
                 options={invoices.map((inv) => ({
-                  value: inv.id,
+                  value: stringValue(inv.id),
                   label: `${String(inv.rechnungsNummer ?? '')} - ${String(inv.lieferantName ?? '')}`,
                 }))}
                 placeholder={t('crud.fields.selectInvoice')}

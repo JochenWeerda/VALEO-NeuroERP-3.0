@@ -14,6 +14,7 @@ import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, History } from 'lucide-react'
+import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 // API Client
 
@@ -196,9 +197,7 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
     const loadHistory = async () => {
       try {
         const response = await apiClient.get<unknown[]>(`/api/v1/crm/consents/${consentId}/history`)
-        if (response.data) {
-          setHistory(response.data || [])
-        }
+        setHistory(recordArrayFromResponse(response.data))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
@@ -221,39 +220,47 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
 
   return (
     <div className="space-y-4">
-      {history.map((entry) => (
-        <Card key={entry.id}>
+      {history.map((entry) => {
+        const entryId = stringValue(entry.id)
+        const action = stringValue(entry.action)
+        const oldStatus = stringValue(entry.old_status)
+        const newStatus = stringValue(entry.new_status)
+        const reason = stringValue(entry.reason)
+        const changedBy = stringValue(entry.changed_by)
+        const changedAt = stringValue(entry.changed_at)
+        return (
+        <Card key={entryId}>
           <CardContent className="pt-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="font-medium">{t(`crud.actions.${String(entry.action)}`, { defaultValue: entry.action as string })}</div>
+                <div className="font-medium">{t(`crud.actions.${action}`, { defaultValue: action })}</div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  {entry.old_status && (
+                  {oldStatus && (
                     <span className="line-through text-red-600">
-                      {getStatusLabel(t, entry.old_status, entry.old_status)}
+                      {getStatusLabel(t, oldStatus, oldStatus)}
                     </span>
                   )}
-                  {entry.old_status && entry.new_status && ' → '}
-                  {entry.new_status && (
+                  {oldStatus && newStatus && ' → '}
+                  {newStatus && (
                     <span className="text-green-600">
-                      {getStatusLabel(t, entry.new_status, entry.new_status)}
+                      {getStatusLabel(t, newStatus, newStatus)}
                     </span>
                   )}
                 </div>
-                {entry.reason && (
+                {reason && (
                   <div className="text-xs text-muted-foreground mt-1">
-                    {t('crud.fields.reason')}: {entry.reason}
+                    {t('crud.fields.reason')}: {reason}
                   </div>
                 )}
               </div>
               <div className="text-right text-sm text-muted-foreground">
-                <div>{entry.changed_by}</div>
-                <div>{formatDate(entry.changed_at)}</div>
+                <div>{changedBy}</div>
+                <div>{changedAt ? formatDate(changedAt) : '-'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
-      ))}
+      )})}
     </div>
   )
 }

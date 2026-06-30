@@ -39,9 +39,9 @@ interface ListReportProps<TItem extends object = Record<string, unknown>> {
   onExport?: () => void
   onImport?: () => void
   /** Generic row action: (actionKey, item). When set, row buttons use config.actions and call this. */
-  onAction?: (_actionKey: string, _item: TItem) => void
+  onAction?: (_actionKey: string, _item?: TItem) => unknown | Promise<unknown>
   /** Generic bulk action: (actionKey, selectedItems). Called when bulk action has no onClick. */
-  onBulkAction?: (_actionKey: string, _items: TItem[]) => void
+  onBulkAction?: (_actionKey: string, _items: TItem[]) => unknown | Promise<unknown>
   /** Called when config.serverPagination is true and page/sort/filter changes. */
   onPageChange?: (_params: ServerPaginationParams) => void
   isLoading?: boolean
@@ -483,13 +483,16 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedData.map((item, index) => (
-                    <TableRow key={typeof recordFromItem(item).id === 'string' || typeof recordFromItem(item).id === 'number' ? recordFromItem(item).id : index}>
+                  paginatedData.map((item, index) => {
+                    const itemRecord = recordFromItem(item)
+                    const rowKey = typeof itemRecord.id === 'string' || typeof itemRecord.id === 'number' ? itemRecord.id : index
+                    return (
+                    <TableRow key={rowKey}>
                       <TableCell>
                         <input
                           type="checkbox"
                           aria-label={t('crud.list.selectItem', {
-                            item: String(recordFromItem(item).purchaseOrderNumber ?? recordFromItem(item).name ?? recordFromItem(item).id ?? index + 1),
+                            item: String(itemRecord.purchaseOrderNumber ?? itemRecord.name ?? itemRecord.id ?? index + 1),
                           })}
                           checked={selectedItems.includes(item)}
                           onChange={(e) => {
@@ -513,11 +516,11 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                                 .filter(a => a.key !== 'create')
                                 .map(action => (
                                   <Button
-                                    key={action.key}
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => onAction(action.key, item)}
-                                    disabled={pendingRows?.has(String(recordFromItem(item).id))}
+                            key={action.key}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onAction(action.key, item)}
+                                    disabled={pendingRows?.has(String(itemRecord.id))}
                                     className={action.type === 'danger' ? 'text-destructive hover:text-destructive' : undefined}
                                   >
                                     {action.labelKey ? t(action.labelKey) : action.label}
@@ -535,7 +538,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onDelete(item)}
-                                    disabled={pendingRows?.has(String(recordFromItem(item).id))}
+                                    disabled={pendingRows?.has(String(itemRecord.id))}
                                     className="text-destructive hover:text-destructive"
                                   >
                                     {t('crud.actions.delete')}
@@ -546,7 +549,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                  )})
                 )}
               </TableBody>
             </Table>

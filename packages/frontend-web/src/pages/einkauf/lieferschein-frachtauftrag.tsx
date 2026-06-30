@@ -11,6 +11,7 @@ import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { apiClient } from '@/lib/api-client'
 import { Truck, Search, FileText, RefreshCw } from 'lucide-react'
+import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type Branch = {
   id: string
@@ -32,6 +33,24 @@ type Frachtauftrag = {
   info: string
   frachtArtikel: string
   status: string
+}
+
+function mapFrachtauftrag(row: Record<string, unknown>): Frachtauftrag {
+  return {
+    id: stringValue(row.id),
+    datum: stringValue(row.datum),
+    auftragNr: stringValue(row.auftragNr, stringValue(row.auftrag_nr)),
+    kdAuftragNr: stringValue(row.kdAuftragNr, stringValue(row.kd_auftrag_nr)),
+    kundenName: stringValue(row.kundenName, stringValue(row.kunden_name)),
+    lieferTermin: stringValue(row.lieferTermin, stringValue(row.liefer_termin)),
+    ladeDatum: stringValue(row.ladeDatum, stringValue(row.lade_datum)),
+    spediteurNr: stringValue(row.spediteurNr, stringValue(row.spediteur_nr)),
+    spediteurName: stringValue(row.spediteurName, stringValue(row.spediteur_name)),
+    eingangsLieferschein: stringValue(row.eingangsLieferschein, stringValue(row.eingangs_lieferschein)),
+    info: stringValue(row.info),
+    frachtArtikel: stringValue(row.frachtArtikel, stringValue(row.fracht_artikel)),
+    status: stringValue(row.status),
+  }
 }
 
 export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
@@ -59,13 +78,12 @@ export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
 
   const { data: frachtauftraege = [], refetch: refetchFracht } = useQuery<Frachtauftrag[]>({
     queryKey: ['einkauf', 'frachtauftraege'],
-    queryFn: async () => {
+    queryFn: async (): Promise<Frachtauftrag[]> => {
       try {
         const res = await apiClient.get<{ data: Frachtauftrag[] } | Frachtauftrag[]>(
           '/api/v1/einkauf/frachtauftraege',
         )
-        const raw = res.data
-        return Array.isArray(raw) ? raw : (raw as Record<string, unknown>)?.data || []
+        return recordArrayFromResponse(res.data).map(mapFrachtauftrag)
       } catch {
         return []
       }

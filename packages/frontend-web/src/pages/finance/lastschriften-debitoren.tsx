@@ -21,6 +21,7 @@ import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { inputValue, isRecord, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 const createLastschriftenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -113,7 +114,7 @@ const createLastschriftenConfig = (t: TFunction, entityTypeLabel: string): MaskC
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <LastschriftenTable
-          data={_data.lastschriften || []}
+          data={recordArrayFromResponse(_data.lastschriften)}
           onChange={(lastschriften) => {
             const gesamtBetrag = lastschriften.reduce((sum, l) => sum + Number((l as Record<string, unknown>).betrag || 0), 0)
             onChange({
@@ -211,7 +212,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
     const newData = [..._data]
 
     if (field === 'iban' && value) {
-      const normalized = value.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+      const normalized = stringValue(value).replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       const formatted = formatIBAN(normalized)
       newData[index] = { ...newData[index], [field]: formatted }
 
@@ -280,14 +281,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                   <div>
                     <input
                       type="text"
-                      value={lastschrift.debitorId}
+                      value={inputValue(lastschrift.debitorId)}
                       onChange={(e) => updateLastschrift(index, 'debitorId', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
                       placeholder={t('crud.tooltips.placeholders.debtorNumber')}
                     />
                     <input
                       type="text"
-                      value={lastschrift.debitorName}
+                      value={inputValue(lastschrift.debitorName)}
                       onChange={(e) => updateLastschrift(index, 'debitorName', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
                       placeholder={t('crud.fields.name')}
@@ -298,14 +299,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                   <div>
                     <input
                       type="text"
-                      value={lastschrift.iban}
+                      value={inputValue(lastschrift.iban)}
                       onChange={(e) => updateLastschrift(index, 'iban', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
                       placeholder={t('crud.fields.iban')}
                     />
                     <input
                       type="text"
-                      value={lastschrift.bic || ''}
+                      value={inputValue(lastschrift.bic)}
                       onChange={(e) => updateLastschrift(index, 'bic', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
                       placeholder={t('crud.tooltips.placeholders.bicOptional')}
@@ -316,7 +317,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                   <input
                     type="number"
                     step="0.01"
-                    value={lastschrift.betrag}
+                    value={inputValue(lastschrift.betrag)}
                     onChange={(e) => updateLastschrift(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -325,14 +326,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                   <div>
                     <input
                       type="text"
-                      value={lastschrift.mandatReferenz}
+                      value={inputValue(lastschrift.mandatReferenz)}
                       onChange={(e) => updateLastschrift(index, 'mandatReferenz', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
                       placeholder={t('crud.tooltips.placeholders.mandateReference')}
                     />
                     <input
                       type="date"
-                      value={lastschrift.mandatDatum}
+                      value={inputValue(lastschrift.mandatDatum)}
                       onChange={(e) => updateLastschrift(index, 'mandatDatum', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
                     />
@@ -340,7 +341,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                 </td>
                 <td className="px-4 py-2 border">
                   <select
-                    value={lastschrift.sequenzTyp}
+                    value={inputValue(lastschrift.sequenzTyp)}
                     onChange={(e) => updateLastschrift(index, 'sequenzTyp', e.target.value)}
                     className="w-full p-1 border rounded"
                   >
@@ -353,7 +354,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={lastschrift.verwendungszweck}
+                    value={inputValue(lastschrift.verwendungszweck)}
                     onChange={(e) => updateLastschrift(index, 'verwendungszweck', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.invoiceNumber')}
@@ -362,7 +363,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={lastschrift.opReferenz || ''}
+                    value={inputValue(lastschrift.opReferenz)}
                     onChange={(e) => updateLastschrift(index, 'opReferenz', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
                     placeholder={t('crud.tooltips.placeholders.opReference')}
@@ -418,10 +419,11 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
   const approvalDecisionView = buildDecisionView(safeFormData.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-direct-debit', approvalDecisionView)
-  const directDebits = Array.isArray(safeFormData.lastschriften) ? safeFormData.lastschriften : []
+  const approvalOverrideResolution = isRecord(safeFormData.approval_override_resolution) ? safeFormData.approval_override_resolution : null
+  const directDebits = recordArrayFromResponse(safeFormData.lastschriften)
   const debitCount = Number(safeFormData.anzahlLastschriften || directDebits.length || 0)
   const totalAmount = Number(safeFormData.gesamtBetrag || 0)
-  const missingMandates = directDebits.filter(entry => !entry.mandatReferenz || !entry.mandatDatum).length
+  const missingMandates = directDebits.filter(entry => !stringValue(entry.mandatReferenz) || !stringValue(entry.mandatDatum)).length
   const operationalStatus = normalizeOperationalStatus(
     safeFormData.status === 'ausgefuehrt'
       ? 'abgeschlossen'
@@ -475,7 +477,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     setFormData(newData)
     setIsDirty(true)
 
-    const auftraggeberIban = newData?.auftraggeberIban
+    const auftraggeberIban = stringValue(newData?.auftraggeberIban)
     if (auftraggeberIban && auftraggeberIban.replace(/\s/g, '').length >= 15) {
       const normalized = auftraggeberIban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
@@ -508,14 +510,14 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
 
     if (action === 'validate-mandates') {
-      const lastschriften = Array.isArray(currentFormData?.lastschriften) ? currentFormData.lastschriften : []
+      const lastschriften = recordArrayFromResponse(currentFormData?.lastschriften)
       const errors: string[] = []
       lastschriften.forEach((ls, idx) => {
-        if (!ls.iban) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
-        if (!ls.bic) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
-        if (!ls.mandatReferenz) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)
-        if (!ls.mandatDatum) errors.push(`Zeile ${idx + 1}: Mandat-Datum fehlt`)
-        if (!ls.debitorId) errors.push(`Zeile ${idx + 1}: Debitor fehlt`)
+        if (!stringValue(ls.iban)) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
+        if (!stringValue(ls.bic)) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
+        if (!stringValue(ls.mandatReferenz)) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)
+        if (!stringValue(ls.mandatDatum)) errors.push(`Zeile ${idx + 1}: Mandat-Datum fehlt`)
+        if (!stringValue(ls.debitorId)) errors.push(`Zeile ${idx + 1}: Debitor fehlt`)
       })
       if (lastschriften.length === 0) {
         toast({ title: 'Mandatspruefung', description: 'Keine Lastschriften vorhanden.', variant: 'destructive' })
@@ -567,7 +569,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
           const response = await apiClient.post(`/api/v1/finance/direct-debits/${String(runId ?? '')}/approve`, {
             approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
           })
-          setData(response.data)
+          if (isRecord(response.data)) setData(response.data)
         } else {
           const created = await saveData({ ...currentFormData, status: 'zur_freigabe' })
           const createdId = created?.id
@@ -577,7 +579,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
           const response = await apiClient.post(`/api/v1/finance/direct-debits/${createdId}/approve`, {
             approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
           })
-          setData(response.data)
+          if (isRecord(response.data)) setData(response.data)
         }
         setIsDirty(false)
         toast({ title: 'Freigegeben', description: 'Lastschriftlauf wurde freigegeben.' })
@@ -600,7 +602,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         const runId = currentFormData?.id
         if (runId) {
           const response = await apiClient.post(`/api/v1/finance/direct-debits/${String(runId ?? '')}/execute`, {})
-          setData(response.data)
+          if (isRecord(response.data)) setData(response.data)
         } else {
           const created = await saveData({ ...currentFormData, status: 'zur_freigabe' })
           const createdId = created?.id
@@ -611,7 +613,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
             approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
           })
           const response = await apiClient.post(`/api/v1/finance/direct-debits/${createdId}/execute`, {})
-          setData(response.data)
+          if (isRecord(response.data)) setData(response.data)
         }
         toast({ title: t('crud.messages.executed', { defaultValue: 'Zahlungslauf ausgefuehrt' }) })
         setIsDirty(false)
@@ -701,7 +703,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
             </div>
             <div className="rounded-md border bg-white/50 p-3">
               <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
-              <div className="mt-1 font-medium">{safeFormData.approval_override_resolution?.rule_id || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(approvalOverrideResolution?.rule_id, '-')}</div>
             </div>
           </div>
         </ProcessStatusPanel>

@@ -3,7 +3,9 @@
  * Replaces legacy handcrafted detail pages when a non-temporary SD is available.
  */
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { getAxiosErrorMessage } from '@/lib/api-client'
@@ -22,6 +24,7 @@ export function UniversalNativeDetailPage({
   testId,
 }: UniversalNativeDetailPageProps): JSX.Element {
   const { onTabChange } = useMaskPilotState()
+  const navigate = useNavigate()
   const schemaQuery = useScreenDefinition(screenId, { enabled: Boolean(entityId) })
 
   const runtime = useUniversalMaskRuntime({
@@ -33,24 +36,42 @@ export function UniversalNativeDetailPage({
 
   if (!entityId) {
     return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertTitle>Keine ID</AlertTitle>
-          <AlertDescription>Bitte rufen Sie die Seite mit einer gueltigen ID auf.</AlertDescription>
-        </Alert>
+      <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
+        <AlertCircle className="h-10 w-10 text-muted-foreground" />
+        <div>
+          <p className="text-lg font-medium">Kein Datensatz ausgewählt</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Bitte wählen Sie einen Eintrag aus der Liste aus, um die Details anzuzeigen.
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Zurück zur Liste
+        </Button>
       </div>
     )
   }
 
   if (schemaQuery.error || runtime.entityError) {
+    const errMsg = getAxiosErrorMessage(schemaQuery.error ?? runtime.entityError)
+    const isNotFound = errMsg?.includes('404') || errMsg?.toLowerCase().includes('not found')
     return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertTitle>Fehler beim Laden</AlertTitle>
-          <AlertDescription>
-            {getAxiosErrorMessage(schemaQuery.error ?? runtime.entityError)}
-          </AlertDescription>
-        </Alert>
+      <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
+        <AlertCircle className="h-10 w-10 text-destructive" />
+        <div>
+          <p className="text-lg font-medium">
+            {isNotFound ? 'Datensatz nicht gefunden' : 'Fehler beim Laden'}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isNotFound
+              ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.'
+              : errMsg}
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Zurück
+        </Button>
       </div>
     )
   }

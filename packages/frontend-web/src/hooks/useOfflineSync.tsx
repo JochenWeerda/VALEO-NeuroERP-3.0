@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { isRecord, stringValue } from '@/lib/record-utils'
 
 interface OfflineQueueItem {
   id: string
@@ -207,10 +208,13 @@ export function useOfflineMutation() {
     if (isOnline) {
       return await mutation()
     } else {
+      if (!isRecord(offlineData)) {
+        throw new Error('Offline mutation data must be an object')
+      }
       // Store for later sync
       addToQueue({
         type: 'create',
-        entity: offlineData.entity,
+        entity: stringValue(offlineData.entity, 'unknown'),
         data: offlineData,
       })
       return { id: crypto.randomUUID(), ...offlineData }

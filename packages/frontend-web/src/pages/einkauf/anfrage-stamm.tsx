@@ -20,6 +20,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { renderValue, stringValue } from '@/lib/record-utils'
 
 const createAnfrageConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -211,7 +212,9 @@ export default function AnfrageStammPage(): JSX.Element {
     setLoading(true)
     try {
       // Status-Transition validieren
-      if (data && formData.status !== data.status) {
+      const currentStatus = stringValue(data?.status)
+      const nextStatus = stringValue(formData.status)
+      if (data && nextStatus !== currentStatus) {
         const allowedTransitions: Record<string, string[]> = {
           'ENTWURF': ['FREIGEGEBEN'],
           'FREIGEGEBEN': ['ANGEBOTSPHASE', 'BESTELLT', 'ABGELEHNT'],
@@ -220,12 +223,12 @@ export default function AnfrageStammPage(): JSX.Element {
           'ABGELEHNT': [],
         }
 
-        const allowed = allowedTransitions[data.status] || []
-        if (!allowed.includes(formData.status)) {
+        const allowed = allowedTransitions[currentStatus] || []
+        if (!allowed.includes(nextStatus)) {
           toast({
             variant: 'destructive',
             title: t('crud.messages.validationError'),
-            description: `Ungültiger Status-Übergang: ${String(data.status ?? '')} → ${String(formData.status ?? '')}`,
+            description: `Ungueltiger Status-Uebergang: ${currentStatus} -> ${nextStatus}`,
           })
           setLoading(false)
           return
@@ -408,46 +411,47 @@ export default function AnfrageStammPage(): JSX.Element {
     }
   }
 
-  const canApprove = data?.status === 'ENTWURF'
-  const canReject = data?.status === 'ENTWURF' || data?.status === 'FREIGEGEBEN'
-  const canConvert = data?.status === 'FREIGEGEBEN' || data?.status === 'ANGEBOTSPHASE'
-  const canSendRfq = data?.status === 'FREIGEGEBEN'
-  const operationalStatus = normalizeOperationalStatus(data?.status)
-  const operationalBlocker = data?.status === 'ABGELEHNT'
+  const status = stringValue(data?.status)
+  const canApprove = status === 'ENTWURF'
+  const canReject = status === 'ENTWURF' || status === 'FREIGEGEBEN'
+  const canConvert = status === 'FREIGEGEBEN' || status === 'ANGEBOTSPHASE'
+  const canSendRfq = status === 'FREIGEGEBEN'
+  const operationalStatus = normalizeOperationalStatus(status)
+  const operationalBlocker = status === 'ABGELEHNT'
     ? 'Die Anfrage ist abgelehnt und braucht eine neue fachliche Entscheidung.'
-    : data?.status === 'FREIGEGEBEN' && selectedSuppliers.length === 0
+    : status === 'FREIGEGEBEN' && selectedSuppliers.length === 0
       ? 'Fuer die Angebotsphase sind noch keine Lieferanten ausgewaehlt.'
       : null
   const contextSections = data ? [
     {
       title: 'Bedarf',
       items: [
-        { label: 'Artikel', value: data.artikel || 'Noch offen' },
-        { label: 'Menge', value: data.menge ? `${data.menge} ${data.einheit || ''}`.trim() : 'Noch offen' },
-        { label: 'Faelligkeit', value: data.faelligkeit || 'Nicht gesetzt' },
+        { label: 'Artikel', value: renderValue(data.artikel, 'Noch offen') },
+        { label: 'Menge', value: data.menge ? `${renderValue(data.menge)} ${renderValue(data.einheit)}`.trim() : 'Noch offen' },
+        { label: 'Faelligkeit', value: renderValue(data.faelligkeit, 'Nicht gesetzt') },
       ],
     },
     {
       title: 'Wirtschaft',
       items: [
-        { label: 'Prioritaet', value: data.prioritaet || 'normal' },
-        { label: 'Kostenstelle', value: data.kostenstelle || 'Nicht zugeordnet' },
-        { label: 'Projekt', value: data.projekt || 'Kein Projekt' },
+        { label: 'Prioritaet', value: renderValue(data.prioritaet, 'normal') },
+        { label: 'Kostenstelle', value: renderValue(data.kostenstelle, 'Nicht zugeordnet') },
+        { label: 'Projekt', value: renderValue(data.projekt, 'Kein Projekt') },
       ],
     },
     {
       title: 'Governance',
       items: [
-        { label: 'Anforderer', value: data.anforderer || 'Unbekannt' },
-        { label: 'Status', value: data.status || 'offen' },
+        { label: 'Anforderer', value: renderValue(data.anforderer, 'Unbekannt') },
+        { label: 'Status', value: status || 'offen' },
         { label: 'Lieferanten bereit', value: availableSuppliers.length > 0 ? `${availableSuppliers.length}` : 'keine geladen' },
       ],
     },
   ] : []
   const timelineItems = data ? [
-    { label: 'Anfrage angelegt', detail: data.anfrageNummer || data.id || 'Unnummeriert' },
-    { label: 'Aktueller Status', detail: data.status || 'ENTWURF' },
-    ...(data.faelligkeit ? [{ label: 'Bedarf faellig', detail: data.faelligkeit }] : []),
+    { label: 'Anfrage angelegt', detail: renderValue(data.anfrageNummer, renderValue(data.id, 'Unnummeriert')) },
+    { label: 'Aktueller Status', detail: status || 'ENTWURF' },
+    ...(data.faelligkeit ? [{ label: 'Bedarf faellig', detail: renderValue(data.faelligkeit) }] : []),
   ] : []
 
   return (
@@ -459,18 +463,18 @@ export default function AnfrageStammPage(): JSX.Element {
             title="Beschaffungsanfrage steuern"
             description="Die Anfrage zeigt nur den freizugebenden Bedarf, den wirtschaftlichen Kontext und die naechste zulassige Folgeaktion."
             status={operationalStatus}
-            owner={data.anforderer || 'Einkauf'}
+            owner={renderValue(data.anforderer, 'Einkauf')}
             blocker={operationalBlocker}
             nextAction={
-              data.status === 'ENTWURF'
+              status === 'ENTWURF'
                 ? 'Freigeben oder fachlich ablehnen'
-                : data.status === 'FREIGEGEBEN'
+                : status === 'FREIGEGEBEN'
                   ? 'Lieferanten fuer RFQ auswaehlen'
-                  : data.status === 'ANGEBOTSPHASE'
+                  : status === 'ANGEBOTSPHASE'
                     ? 'In Bestellung ueberfuehren oder ablehnen'
                     : 'Vorgang nachhalten'
             }
-            caseLabel={data.anfrageNummer || 'Anfrage'}
+            caseLabel={renderValue(data.anfrageNummer, 'Anfrage')}
             tags={['Einkauf', 'Bedarf']}
           />
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
@@ -644,32 +648,36 @@ export default function AnfrageStammPage(): JSX.Element {
                 {availableSuppliers.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{t('crud.messages.noSuppliersAvailable')}</p>
                 ) : (
-                  availableSuppliers.map((supplier) => (
-                    <div key={supplier.id} className="flex items-center space-x-2">
+                  availableSuppliers.map((supplier) => {
+                    const supplierId = stringValue(supplier.id)
+                    const supplierName = stringValue(supplier.name, stringValue(supplier.legalName, supplierId))
+                    const supplierEmail = stringValue(supplier.email)
+                    return (
+                    <div key={supplierId} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`supplier-${String(supplier.id ?? '')}`}
-                        checked={selectedSuppliers.includes(supplier.id)}
+                        id={`supplier-${supplierId}`}
+                        checked={selectedSuppliers.includes(supplierId)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedSuppliers([...selectedSuppliers, supplier.id])
+                            setSelectedSuppliers([...selectedSuppliers, supplierId])
                           } else {
-                            setSelectedSuppliers(selectedSuppliers.filter((id) => id !== supplier.id))
+                            setSelectedSuppliers(selectedSuppliers.filter((id) => id !== supplierId))
                           }
                         }}
                       />
                       <Label
-                        htmlFor={`supplier-${String(supplier.id ?? '')}`}
+                        htmlFor={`supplier-${supplierId}`}
                         className="flex-1 cursor-pointer"
                       >
-                        {supplier.name || supplier.legalName || supplier.id}
-                        {supplier.email && (
+                        {supplierName}
+                        {supplierEmail && (
                           <span className="text-sm text-muted-foreground ml-2">
-                            ({supplier.email})
+                            ({supplierEmail})
                           </span>
                         )}
                       </Label>
                     </div>
-                  ))
+                  )})
                 )}
               </div>
             </div>

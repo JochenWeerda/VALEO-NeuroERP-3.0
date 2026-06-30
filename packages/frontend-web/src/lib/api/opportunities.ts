@@ -71,7 +71,7 @@ async function fetchOpportunity(id: string): Promise<Opportunity> {
 // Fetch customers for select dropdown
 async function fetchCustomers(): Promise<Customer[]> {
   try {
-    const response = await authenticatedFetch('/api/v1/crm/customers?limit=500')
+    const response = await authenticatedFetch('/api/v1/crm/customers/?limit=500')
 
     if (!response.ok) {
       return []

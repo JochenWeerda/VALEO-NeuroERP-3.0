@@ -32,6 +32,15 @@ interface AlertItem {
   deficit: number;
 }
 
+interface ReplenishmentSuggestion {
+  article_id: string;
+  article_number: string;
+  name: string;
+  current_stock: number;
+  suggested_quantity: number;
+  estimated_cost?: number;
+}
+
 type InventoryRoleFocus = 'all' | 'warehouse' | 'logistics' | 'scale' | 'procurement' | 'management';
 
 const inventoryRoleProfiles: Array<{ id: InventoryRoleFocus; label: string; description: string }> = [
@@ -64,7 +73,7 @@ export function InventoryDashboard() {
   });
 
   // Fetch replenishment suggestions
-  const { data: replenishment } = useQuery({
+  const { data: replenishment } = useQuery<{ suggestions: ReplenishmentSuggestion[] }>({
     queryKey: ['inventory', 'replenishment'],
     queryFn: async () => {
       const response = await fetch('/api/v1/inventory/reports/replenishment-suggestions');
@@ -72,7 +81,7 @@ export function InventoryDashboard() {
     }
   });
   const alertItems = alerts?.alerts ?? [];
-  const replenishmentSuggestions = Array.isArray(replenishment?.suggestions) ? replenishment.suggestions : [];
+  const replenishmentSuggestions = replenishment?.suggestions ?? [];
   const totalArticles = stats?.total_articles ?? 0;
   const totalStock = stats?.total_current_stock ?? 0;
   const availableStock = stats?.total_available_stock ?? 0;
@@ -225,7 +234,7 @@ export function InventoryDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {replenishment.suggestions.slice(0, 5).map(suggestion => (
+              {replenishmentSuggestions.slice(0, 5).map((suggestion) => (
                 <div key={suggestion.article_id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{suggestion.name}</div>

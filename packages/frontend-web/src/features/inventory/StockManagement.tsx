@@ -16,6 +16,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow';
+import { stringValue } from '@/lib/record-utils';
 
 interface Article {
   id: string;
@@ -304,7 +305,7 @@ interface StockMovementFormProps {
 function StockMovementFormDialog({ article, warehouses, onSubmit, isSubmitting, onCancel }: StockMovementFormProps) {
   const [formData, setFormData] = useState<StockMovementForm>({
     article_id: article?.id || '',
-    warehouse_id: warehouses[0]?.id || '',
+    warehouse_id: stringValue(warehouses[0]?.id),
     movement_type: 'adjustment',
     quantity: 0,
     unit_cost: undefined,
@@ -318,8 +319,8 @@ function StockMovementFormDialog({ article, warehouses, onSubmit, isSubmitting, 
     { value: 'adjustment', label: 'Adjustment' },
   ];
   const warehouseOptions = warehouses.map((warehouse) => ({
-    value: warehouse.id,
-    label: warehouse.name,
+    value: stringValue(warehouse.id),
+    label: stringValue(warehouse.name),
   }));
 
   const handleSubmit = (e: React.FormEvent) => {

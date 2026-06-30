@@ -3,6 +3,7 @@ import type {
   ScreenActionDefinition,
   ScreenDefinition,
   ScreenFieldDefinition,
+  ScreenFieldType,
   ScreenMode,
   ScreenTabDefinition,
 } from '../schema'
@@ -36,11 +37,17 @@ function fieldKey(field: Field): string {
   return String(field.name ?? field.key ?? field.label)
 }
 
+function toScreenFieldType(field: Field): ScreenFieldType {
+  if (field.type === 'checkbox') return 'boolean'
+  if (field.type === 'custom') return 'text'
+  return field.type
+}
+
 function toScreenField(field: Field): ScreenFieldDefinition {
   return {
     key: fieldKey(field),
     label: field.label,
-    type: field.type === 'checkbox' ? 'boolean' : field.type,
+    type: toScreenFieldType(field),
     required: field.required,
     readOnly: field.readonly ?? field.readOnly,
     placeholder: field.placeholder,

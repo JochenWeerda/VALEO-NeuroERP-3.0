@@ -89,7 +89,7 @@ export interface Tab {
   customRender?: (_data: Record<string, unknown>, _onChange: (_data: Record<string, unknown>) => void) => React.ReactNode
 }
 
-type ActionPayload = Record<string, unknown> | Record<string, unknown>[]
+type ActionPayload = object | object[]
 type ActionClickHandler = {
   bivarianceHack(_payload?: ActionPayload): unknown | Promise<unknown>
 }['bivarianceHack']

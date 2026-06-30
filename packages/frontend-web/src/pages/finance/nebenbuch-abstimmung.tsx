@@ -13,6 +13,72 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, CheckCircle2, XCircle, ChevronRight, Download } from 'lucide-react'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
+
+interface ReconciliationSummary {
+  total_accounts?: number
+  balanced_accounts?: number
+  unbalanced_accounts?: number
+}
+
+interface ReconciliationEntry {
+  account_number: string
+  account_name: string
+  subsidiary_balance: string
+  general_ledger_balance: string
+  difference: string
+  is_balanced: boolean
+}
+
+interface ReconciliationData extends ReconciliationSummary {
+  entries: ReconciliationEntry[]
+}
+
+interface ReconciliationDetail {
+  entry_id: string
+  entry_number: string
+  entry_date: string
+  description: string
+  amount: string
+  source: string
+  matched: boolean
+}
+
+function mapSummary(value: unknown): ReconciliationSummary | null {
+  if (!isRecord(value)) return null
+  return {
+    total_accounts: numberValue(value.total_accounts),
+    balanced_accounts: numberValue(value.balanced_accounts),
+    unbalanced_accounts: numberValue(value.unbalanced_accounts),
+  }
+}
+
+function mapReconciliation(value: unknown): ReconciliationData | null {
+  if (!isRecord(value)) return null
+  return {
+    ...(mapSummary(value) ?? {}),
+    entries: recordArrayFromResponse(value.entries).map((entry) => ({
+      account_number: stringValue(entry.account_number),
+      account_name: stringValue(entry.account_name),
+      subsidiary_balance: String(numberValue(entry.subsidiary_balance)),
+      general_ledger_balance: String(numberValue(entry.general_ledger_balance)),
+      difference: String(numberValue(entry.difference)),
+      is_balanced: Boolean(entry.is_balanced),
+    })),
+  }
+}
+
+function mapDetails(value: unknown): ReconciliationDetail[] {
+  return recordArrayFromResponse(value).map((detail) => ({
+    entry_id: stringValue(detail.entry_id),
+    entry_number: stringValue(detail.entry_number),
+    entry_date: stringValue(detail.entry_date),
+    description: stringValue(detail.description),
+    amount: String(numberValue(detail.amount)),
+    source: stringValue(detail.source),
+    matched: Boolean(detail.matched),
+  }))
+}
 
 export default function NebenbuchAbstimmungPage(): JSX.Element {
   const { t } = useTranslation()
@@ -24,10 +90,10 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const [loading, setLoading] = useState(false)
   const [ledgerType, setLedgerType] = useState<string>('AR')
   const [period, setPeriod] = useState<string>(new Date().toISOString().slice(0, 7))
-  const [reconciliationData, setReconciliationData] = useState<Record<string, unknown> | null>(null)
-  const [summary, setSummary] = useState<Record<string, unknown> | null>(null)
+  const [reconciliationData, setReconciliationData] = useState<ReconciliationData | null>(null)
+  const [summary, setSummary] = useState<ReconciliationSummary | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null)
-  const [details, setDetails] = useState<Record<string, unknown>[]>([])
+  const [details, setDetails] = useState<ReconciliationDetail[]>([])
   const [exporting, setExporting] = useState(false)
   const [matchingInProgress, setMatchingInProgress] = useState(false)
 
@@ -47,7 +113,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         `/api/v1/finance/subsidiary-ledger-reconciliation/summary`,
         { params: { period } },
       )
-      setSummary(data)
+      setSummary(mapSummary(data))
     } catch {
       // Zusammenfassung ist sekundär; Hauptabstimmung hat eigene Fehlerbehandlung
     }
@@ -60,7 +126,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}`,
         { params: { period } },
       )
-      setReconciliationData(data)
+      setReconciliationData(mapReconciliation(data))
     } catch (error: unknown) {
       toast({
         variant: 'destructive',
@@ -75,11 +141,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadDetails = async (accountNumber: string) => {
     setSelectedAccount(accountNumber)
     try {
-      const { data } = await apiClient.get<Record<string, unknown>[]>(
+      const { data } = await apiClient.get(
         `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details`,
         { params: { account_number: accountNumber, period } },
       )
-      setDetails(Array.isArray(data) ? data : [])
+      setDetails(mapDetails(data))
     } catch {
       // Details-Anfrage schlägt still fehl; Tab bleibt leer
     }
@@ -159,7 +225,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
     { value: 'AP', label: `${t('crud.entities.creditor')} (AP)` },
     { value: 'BANK', label: t('crud.fields.bankAccount') },
   ]
-  const unbalancedAccounts = Number(summary?.unbalanced_accounts ?? reconciliationData?.entries?.filter(entry => !entry.is_balanced).length ?? 0)
+  const unbalancedAccounts = Number(summary?.unbalanced_accounts ?? reconciliationData?.entries.filter(entry => !entry.is_balanced).length ?? 0)
   const operationalStatus = normalizeOperationalStatus(
     unbalancedAccounts > 0 ? 'eskaliert' : reconciliationData ? 'in_pruefung' : 'offen'
   )
@@ -236,7 +302,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.totalAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{summary.total_accounts}</div>
+              <div className="text-2xl font-bold">{summary.total_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -244,7 +310,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.balancedAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{summary.balanced_accounts}</div>
+              <div className="text-2xl font-bold text-green-600">{summary.balanced_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -252,7 +318,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.unbalancedAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{summary.unbalanced_accounts}</div>
+              <div className="text-2xl font-bold text-red-600">{summary.unbalanced_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -312,7 +378,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               {getLedgerTypeLabel(ledgerType)} - {t('crud.fields.reconciliation')}
             </CardTitle>
             <CardDescription>
-              {t('crud.fields.balancedAccounts')}: {reconciliationData.balanced_accounts} / {reconciliationData.total_accounts}
+              {t('crud.fields.balancedAccounts')}: {reconciliationData.balanced_accounts ?? 0} / {reconciliationData.total_accounts ?? 0}
             </CardDescription>
           </CardHeader>
           <CardContent>

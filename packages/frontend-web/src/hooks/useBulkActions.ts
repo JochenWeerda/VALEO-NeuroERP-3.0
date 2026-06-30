@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { bulkDeleteDocuments, type DocumentType } from '@/lib/document-api'
+import { stringValue } from '@/lib/record-utils'
 
 export interface UseBulkActionsOptions {
   docType: DocumentType
@@ -84,7 +85,7 @@ export function useBulkActions({ docType, onSuccess }: UseBulkActionsOptions) {
       return
     }
 
-    const filteredData = data.filter(item => selectedItems.includes(item.id || item.number))
+    const filteredData = data.filter(item => selectedItems.includes(stringValue(item.id, stringValue(item.number))))
     
     // Export-Logik (kann erweitert werden)
     const csv = filteredData.map(item => 

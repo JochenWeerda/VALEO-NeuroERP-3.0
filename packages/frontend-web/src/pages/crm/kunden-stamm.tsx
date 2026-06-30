@@ -20,6 +20,7 @@ import { apiClient } from '@/lib/api-client'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { useTenant } from '@/hooks/useTenant'
 import { KundenBankverbindungenPanel } from '@/features/crm/components/KundenBankverbindungenPanel'
+import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 function resolveCustomerRouteId(params: { id?: string }, pathname: string): string | undefined {
   if (params.id?.trim() && params.id !== 'neu') {
@@ -357,11 +358,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
           }
         })
 
-        if (Array.isArray(response.data)) {
-          setRequests(response.data)
-        } else {
-          setRequests([])
-        }
+        setRequests(recordArrayFromResponse(response.data))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der DSGVO-Anfragen', description: error?.message })
@@ -416,23 +413,29 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
       </div>
 
       <div className="space-y-2">
-        {requests.map((req) => (
-          <Card key={req.id} className="hover:shadow-md transition-shadow">
+        {requests.map((req) => {
+          const requestId = stringValue(req.id)
+          const status = stringValue(req.status)
+          const requestType = stringValue(req.request_type)
+          const requestedAt = stringValue(req.requested_at)
+          const completedAt = stringValue(req.completed_at)
+          return (
+          <Card key={requestId} className="hover:shadow-md transition-shadow">
             <CardContent className="pt-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={statusVariants[req.status] || 'secondary'}>
-                      {getStatusLabel(t, req.status, req.status)}
+                    <Badge variant={statusVariants[status] || 'secondary'}>
+                      {getStatusLabel(t, status, status)}
                     </Badge>
-                    <Badge variant="outline">{typeLabels[req.request_type] || req.request_type}</Badge>
+                    <Badge variant="outline">{typeLabels[requestType] || requestType}</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {t('crud.fields.requestedAt')}: {formatDate(req.requested_at)}
+                    {t('crud.fields.requestedAt')}: {formatDate(requestedAt)}
                   </div>
-                  {req.completed_at && (
+                  {completedAt && (
                     <div className="text-sm text-muted-foreground">
-                      {t('crud.fields.completedAt')}: {formatDate(req.completed_at)}
+                      {t('crud.fields.completedAt')}: {formatDate(completedAt)}
                     </div>
                   )}
                 </div>
@@ -440,7 +443,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/crm/gdpr-request/${req.id as string}`)}
+                    onClick={() => navigate(`/crm/gdpr-request/${requestId}`)}
                   >
                     {t('crud.actions.details')}
                   </Button>
@@ -448,7 +451,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )})}
       </div>
     </div>
   )
@@ -477,9 +480,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
           }
         })
         
-        if (response.data) {
-          setConsents(Array.isArray(response.data) ? response.data : [])
-        }
+        setConsents(recordArrayFromResponse(response.data))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Einwilligungen', description: error?.message })
@@ -533,28 +534,35 @@ function ConsentsList({ contactId }: { contactId?: string }) {
       </div>
 
       <div className="space-y-2">
-        {consents.map((consent) => (
-          <Card key={consent.id} className="hover:shadow-md transition-shadow">
+        {consents.map((consent) => {
+          const consentId = stringValue(consent.id)
+          const status = stringValue(consent.status)
+          const channel = stringValue(consent.channel)
+          const consentType = stringValue(consent.consent_type)
+          const grantedAt = stringValue(consent.granted_at)
+          const expiresAt = stringValue(consent.expires_at)
+          return (
+          <Card key={consentId} className="hover:shadow-md transition-shadow">
             <CardContent className="pt-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={statusVariants[consent.status] || 'secondary'}>
-                      {getStatusLabel(t, consent.status, consent.status)}
+                    <Badge variant={statusVariants[status] || 'secondary'}>
+                      {getStatusLabel(t, status, status)}
                     </Badge>
-                    <Badge variant="outline">{channelLabels[consent.channel] || consent.channel}</Badge>
+                    <Badge variant="outline">{channelLabels[channel] || channel}</Badge>
                     <span className="text-sm text-muted-foreground">
-                      {t(`crud.consentTypes.${String(consent.consent_type)}`)}
+                      {t(`crud.consentTypes.${consentType}`)}
                     </span>
                   </div>
-                  {consent.granted_at && (
+                  {grantedAt && (
                     <div className="text-sm text-muted-foreground">
-                      {t('crud.fields.grantedAt')}: {formatDate(consent.granted_at)}
+                      {t('crud.fields.grantedAt')}: {formatDate(grantedAt)}
                     </div>
                   )}
-                  {consent.expires_at && (
+                  {expiresAt && (
                     <div className="text-sm text-muted-foreground">
-                      {t('crud.fields.expiresAt')}: {formatDate(consent.expires_at)}
+                      {t('crud.fields.expiresAt')}: {formatDate(expiresAt)}
                     </div>
                   )}
                 </div>
@@ -562,7 +570,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/crm/consent/${consent.id as string}`)}
+                    onClick={() => navigate(`/crm/consent/${consentId}`)}
                   >
                     {t('crud.actions.details')}
                   </Button>
@@ -570,7 +578,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )})}
       </div>
     </div>
   )
@@ -592,7 +600,7 @@ function ContactsList({ customerId }: { customerId?: string }) {
   // Filtere Kontakte nach customer_id (falls API das nicht direkt unterstützt)
   const contacts = (contactsData?.data || []).filter((contact: Contact) => 
     (contact.company?.toLowerCase().includes(customerId?.toLowerCase() || '') || 
-     (contact as Record<string, unknown>).customer_id === customerId)
+     (contact as unknown as Record<string, unknown>).customer_id === customerId)
   )
 
   const columns = [
