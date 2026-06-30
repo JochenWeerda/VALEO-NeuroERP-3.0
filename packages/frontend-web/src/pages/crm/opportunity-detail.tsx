@@ -434,7 +434,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: customersData } = useQuery({
     queryKey: ['crm', 'customers-lookup'],
     queryFn: async () => {
-      const r = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers')
+      const r = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers/')
       return r.data?.items || []
     },
     staleTime: 10 * 60 * 1000,

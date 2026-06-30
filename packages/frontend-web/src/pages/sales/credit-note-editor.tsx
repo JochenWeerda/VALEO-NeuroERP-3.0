@@ -75,7 +75,7 @@ const createCreditNoteConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           label: t('crud.entities.customer'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/v1/crm/customers',
+          endpoint: '/api/v1/crm/customers/',
           displayField: 'name',
           valueField: 'id'
         },

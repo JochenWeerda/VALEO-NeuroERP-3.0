@@ -322,11 +322,11 @@ const createKundenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =
     }
   ],
   api: {
-    baseUrl: '/api/v1/crm/customers',
+    baseUrl: '/api/v1/crm/customers/',
     endpoints: {
-      list: '/api/v1/crm/customers',
+      list: '/api/v1/crm/customers/',
       get: '/api/v1/crm/customers/{id}',
-      create: '/api/v1/crm/customers',
+      create: '/api/v1/crm/customers/',
       update: '/api/v1/crm/customers/{id}',
       delete: '/api/v1/crm/customers/{id}'
     }
