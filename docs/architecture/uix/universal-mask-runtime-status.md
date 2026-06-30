@@ -47,9 +47,10 @@ ScreenDefinition
   ├── Human: compileRenderPlan → useUniversalMaskRuntime → UniversalMaskRenderer
   │         Sort/Filter (FilterPlan), Form (UniversalFormState), Actions (ActionRuntime), Workflow
   └── Agent: generateAgentMaskContract → readable/editable/sensitive fields, policies, audit
-Backend: GET /api/v1/masks/{id}/screen-definition
+Backend: GET /api/v1/masks/{id}/screen-definition   ({mask_id:path} — Slash in IDs)
          GET /api/v1/masks/{id}/agent-contract
          GET /api/v1/masks/{id}/readiness
+         GET /api/v1/masks/{id}/entity/{entity_id}   (generischer Kopf-Stub Wave 2)
          GET /api/v1/mask-rollouts/.../tabs/{tab}?page&limit&q&sort&sort_dir&filter_plan
 ```
 

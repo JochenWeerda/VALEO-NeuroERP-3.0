@@ -2,54 +2,61 @@ import { describe, expect, it } from 'vitest'
 import {
   DOCS_BASE_URL,
   DOCS_USER_MANUAL_URL,
+  findHelpEntry,
   getEmbeddedHelpHref,
   HELP_ROUTE,
   resolveHelpUrl,
 } from '@/lib/docs-help'
 
 describe('docs-help', () => {
-  it('liefert eine Basis-URL mit abschließendem Slash', () => {
-    expect(DOCS_BASE_URL.endsWith('/')).toBe(true)
+  it('liefert eine Basis-URL ohne abschließenden Slash', () => {
+    expect(DOCS_BASE_URL.endsWith('/')).toBe(false)
+    expect(DOCS_BASE_URL).toContain('jochenweerda.github.io')
   })
 
   it('verweist auf das Benutzerhandbuch als Standard-Einstieg', () => {
-    expect(DOCS_USER_MANUAL_URL).toBe(`${DOCS_BASE_URL}benutzerhandbuch/`)
+    expect(DOCS_USER_MANUAL_URL).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/`)
   })
 
   it('mappt fachliche Routen kontextsensitiv auf Handbuch-Seiten', () => {
-    expect(resolveHelpUrl('/verkauf/auftraege')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/verkauf/`)
-    expect(resolveHelpUrl('/einkauf')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/einkauf/`)
-    expect(resolveHelpUrl('/lager/wms/bestand')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/lager/`)
-    expect(resolveHelpUrl('/crm/kunden-stamm')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/crm/`)
-    expect(resolveHelpUrl('/fibu/buchungen')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/finanzbuchhaltung/`)
+    expect(findHelpEntry('/verkauf/auftraege')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/verkauf/`)
+    expect(findHelpEntry('/einkauf')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/einkauf/`)
+    expect(findHelpEntry('/lager/wms/bestand')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/lager/`)
+    expect(findHelpEntry('/crm/kunden-stamm')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/crm/`)
+    expect(findHelpEntry('/fibu/buchungen')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/finanzbuchhaltung/`)
   })
 
   it('bevorzugt das spezifischere Fragment (längster Prefix)', () => {
-    expect(resolveHelpUrl('/agrar/annahme/erfassung')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/annahme/`)
+    expect(findHelpEntry('/agrar/annahme/erfassung')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/annahme/`)
   })
 
   it('mappt erweiterte Fachrouten (POS, WMS, Mahnwesen) korrekt', () => {
-    expect(resolveHelpUrl('/pos/terminal')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/verkauf/`)
-    expect(resolveHelpUrl('/lager/wms')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/lager/`)
-    expect(resolveHelpUrl('/mahnwesen/laeufe')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/finanzbuchhaltung/`)
+    expect(findHelpEntry('/pos/terminal')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/pos-kasse/`)
+    expect(findHelpEntry('/lager/wms')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/lager/`)
+    expect(findHelpEntry('/mahnwesen/laeufe')?.url).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/finanzbuchhaltung/`)
   })
 
   it('löst spezifische Admin-Deep-Links vor der Admin-Sektion auf', () => {
-    expect(resolveHelpUrl('/admin/mandanten')).toBe(`${DOCS_BASE_URL}admin/mandanten-administration/`)
-    expect(resolveHelpUrl('/admin/deployment')).toBe(`${DOCS_BASE_URL}admin/deployment/`)
-    expect(resolveHelpUrl('/admin/control-center')).toBe(`${DOCS_BASE_URL}admin/`)
-    expect(resolveHelpUrl('/schnittstellen/rest')).toBe(`${DOCS_BASE_URL}schnittstellen/`)
+    expect(findHelpEntry('/admin/mandanten')?.url).toBe(`${DOCS_BASE_URL}/admin/mandanten-administration/`)
+    expect(findHelpEntry('/admin/benutzer')?.url).toBe(`${DOCS_BASE_URL}/admin/rbac-und-rollen/`)
   })
 
-  it('fällt ohne Zuordnung auf das Benutzerhandbuch zurück', () => {
-    expect(resolveHelpUrl('/unbekannte-maske')).toBe(DOCS_USER_MANUAL_URL)
-    expect(resolveHelpUrl('/')).toBe(DOCS_USER_MANUAL_URL)
-    expect(resolveHelpUrl('')).toBe(DOCS_USER_MANUAL_URL)
+  it('fällt ohne Zuordnung auf null zurück', () => {
+    expect(findHelpEntry('/unbekannte-maske')).toBeNull()
+    expect(findHelpEntry('/')).toBeNull()
+    expect(findHelpEntry('')).toBeNull()
   })
 
-  it('baut den eingebetteten Hilfe-Link mit ctx-Parameter', () => {
+  it('resolveHelpUrl baut vollständige URL aus docPath', () => {
+    expect(resolveHelpUrl('benutzerhandbuch/verkauf')).toBe(`${DOCS_BASE_URL}/benutzerhandbuch/verkauf`)
+    expect(resolveHelpUrl('https://extern.example.com/page')).toBe('https://extern.example.com/page')
+  })
+
+  it('baut den eingebetteten Hilfe-Link mit ctx-Parameter aus docPath', () => {
+    const entry = findHelpEntry('/verkauf/auftraege')
+    expect(entry).not.toBeNull()
     expect(getEmbeddedHelpHref('/verkauf/auftraege')).toBe(
-      `${HELP_ROUTE}?ctx=${encodeURIComponent('/verkauf/auftraege')}`,
+      `${HELP_ROUTE}?ctx=${encodeURIComponent(entry!.docPath)}`,
     )
     expect(getEmbeddedHelpHref('')).toBe(HELP_ROUTE)
   })

@@ -257138,6 +257138,83 @@
         ]
       }
     },
+    "/api/v1/masks/{mask_id}/entity/{entity_id}": {
+      "get": {
+        "description": "Stub-Endpoint fuer native SDs, deren fachlicher Entity-Endpunkt noch nicht implementiert ist.\n\nLiefert Platzhalter-Daten damit das Frontend kein 404 erhaelt.\nWird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.",
+        "operationId": "get_mask_entity_stub_api_v1_masks__mask_id__entity__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mask_id",
+            "required": true,
+            "schema": {
+              "title": "Mask Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Mask Entity Stub Api V1 Masks  Mask Id  Entity  Entity Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Generischer Entity-Stub fuer native SDs ohne dedizierten Backend-Endpunkt",
+        "tags": [
+          "ui",
+          "masks",
+          "screen-definition"
+        ]
+      }
+    },
     "/api/v1/masks/{mask_id}/readiness": {
       "get": {
         "description": "Prueft alle Generator-Readiness-Gates fuer eine Maske.\n\nMandatory gates (blockieren generatorReady):\nschema_valid, non_temporary, data_sources, table_data_source_bound,\ntable_columns_complete, actions_classified.\n\nAdvisory gates (nur Warnungen, kein Block):\nsort_whitelist, filter_columns, agent_contract, workflow_declared,\nstable_test_selectors, table_query_contract.",

@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-043b — Mask-API Blocker-Fixes (Path + Entity-Stub)
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-30 — FastAPI `{mask_id:path}` auf allen Mask-Routen (Slash in IDs wie `crm/customer-360`); generischer Entity-Stub `GET /api/v1/masks/{mask_id}/entity/{entity_id}` für Wave-2-SDs; Wave-2 `dataSources.entity` auf Mask-Entity-URL umgestellt; In-App-Hilfe Prefix-Matching bereinigt.
+**Ziel:** Native Masken-API für alle 26 SDs erreichbar — keine 404 bei Slash-IDs, Kopf-Tab lädt auch ohne dedizierten Domain-Endpunkt.
+**Dateibesitz:** `app/api/v1/endpoints/mask_screen_definition.py`, `app/core/screen_definitions.py`, `packages/frontend-web/src/lib/docs-help.ts`, `mkdocs.yml` (ADR UIX-034).
+**Abnahme:** Docs/code-sync grün; pytest Mask-Contract unverändert grün.
+
 ## UIX-043 — Vollständige Masken-Migration (alle verbliebenen ObjectPage-Masken)
 
 **Von:** Claude Code

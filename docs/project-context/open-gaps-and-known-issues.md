@@ -139,6 +139,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 - **20 Frontend thin wrapper pages** + 20 route-aliases in `route-aliases.json`
 - **60 Tests grün** | Inventur: `docs/architecture/uix/uix-043-mask-migration-inventory.md`
 - **18 Seiten bewusst exempt** (Prozessmasken, Formulare, Batch)
+- **UIX-043b (2026-06-30):** Mask-API `{mask_id:path}` + Entity-Stub `/api/v1/masks/{id}/entity/{entity_id}` für Wave-2 Kopf-Tabs
 
 ### Offene Folgearbeit (P2/P3)
 
