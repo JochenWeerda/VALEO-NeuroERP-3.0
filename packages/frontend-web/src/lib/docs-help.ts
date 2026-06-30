@@ -207,7 +207,7 @@ export function findHelpEntry(currentPath: string): HelpEntry | null {
     ([a], [b]) => b.length - a.length
   );
   for (const [prefix, entry] of entries) {
-    if (normalised === prefix || normalised.startsWith(`${prefix  }/`)) {
+    if (normalised === prefix || normalised.startsWith(`${prefix}/`)) {
       return entry;
     }
   }

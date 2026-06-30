@@ -1114,7 +1114,7 @@ def build_agrar_duenger_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "agrar/duenger", "temporary": False},
         "summaryEndpoint": "/api/v1/agrar/duenger/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/agrar/duenger/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/agrar/duenger/entity/{entity_id}"},
             {"key": "verwendung", "endpoint": "/api/v1/agrar/duenger/{entity_id}/tabs/verwendung", "pageSize": 25},
             {"key": "preise", "endpoint": "/api/v1/agrar/duenger/{entity_id}/tabs/preise", "pageSize": 25},
         ],
@@ -1169,7 +1169,7 @@ def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "agrar/saatgut", "temporary": False},
         "summaryEndpoint": "/api/v1/agrar/saatgut/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/agrar/saatgut/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/agrar/saatgut/entity/{entity_id}"},
             {"key": "lagerbestaende", "endpoint": "/api/v1/agrar/saatgut/{entity_id}/tabs/lagerbestaende", "pageSize": 25},
             {"key": "vertraege", "endpoint": "/api/v1/agrar/saatgut/{entity_id}/tabs/vertraege", "pageSize": 25},
         ],
@@ -1224,7 +1224,7 @@ def build_finance_debitor_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "finance/debitor", "temporary": False},
         "summaryEndpoint": "/api/v1/finance/debitoren/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/debitoren/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/finance/debitor/entity/{entity_id}"},
             {"key": "offene_posten", "endpoint": "/api/v1/finance/debitoren/{entity_id}/tabs/offene-posten", "pageSize": 25},
             {"key": "umsaetze", "endpoint": "/api/v1/finance/debitoren/{entity_id}/tabs/umsaetze", "pageSize": 25},
         ],
@@ -1279,7 +1279,7 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "finance/kreditor", "temporary": False},
         "summaryEndpoint": "/api/v1/finance/kreditoren/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/kreditoren/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/finance/kreditor/entity/{entity_id}"},
             {"key": "offene_posten", "endpoint": "/api/v1/finance/kreditoren/{entity_id}/tabs/offene-posten", "pageSize": 25},
             {"key": "bestellungen", "endpoint": "/api/v1/finance/kreditoren/{entity_id}/tabs/bestellungen", "pageSize": 25},
         ],
@@ -1335,7 +1335,7 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "finance/bankkonto", "temporary": False},
         "summaryEndpoint": "/api/v1/finance/bankkonten/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/bankkonten/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/finance/bankkonto/entity/{entity_id}"},
             {"key": "buchungen", "endpoint": "/api/v1/finance/bankkonten/{entity_id}/tabs/buchungen", "pageSize": 50},
         ],
         "tabs": [
@@ -1380,7 +1380,7 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "einkauf/anfrage", "temporary": False},
         "summaryEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/anfragen/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/einkauf/anfrage/entity/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/einkauf/anfragen/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
@@ -1423,7 +1423,7 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "einkauf/angebot", "temporary": False},
         "summaryEndpoint": "/api/v1/einkauf/angebote/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/angebote/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/einkauf/angebot/entity/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/einkauf/angebote/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
@@ -1468,7 +1468,7 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "einkauf/anlieferavis", "temporary": False},
         "summaryEndpoint": "/api/v1/einkauf/anlieferavise/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/anlieferavise/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/einkauf/anlieferavis/entity/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/einkauf/anlieferavise/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
@@ -1513,7 +1513,7 @@ def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "einkauf/auftragsbestaetigung", "temporary": False},
         "summaryEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/einkauf/auftragsbestaetigung/entity/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
@@ -1558,7 +1558,7 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "qualitaet/reklamation", "temporary": False},
         "summaryEndpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/qualitaet/reklamation/entity/{entity_id}"},
             {"key": "massnahmen", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/tabs/massnahmen", "pageSize": 25},
             {"key": "dokumente", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/tabs/dokumente", "pageSize": 25},
         ],
@@ -1616,7 +1616,7 @@ def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "futtermittel/einzelfuttermittel", "temporary": False},
         "summaryEndpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}"},
             {"key": "naehrstoffe", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/tabs/naehrstoffe", "pageSize": 50},
             {"key": "preise", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/tabs/preise", "pageSize": 25},
         ],
@@ -1670,7 +1670,7 @@ def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "futtermittel/mischfuttermittel", "temporary": False},
         "summaryEndpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}"},
             {"key": "rezeptur", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/tabs/rezeptur", "pageSize": 50},
             {"key": "naehrstoffe", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/tabs/naehrstoffe", "pageSize": 25},
         ],
@@ -1722,7 +1722,7 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         "adapter": {"type": "native", "sourceId": "crm/lead", "temporary": False},
         "summaryEndpoint": "/api/v1/crm/leads/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/crm/leads/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/crm/lead/entity/{entity_id}"},
             {"key": "aktivitaeten", "endpoint": "/api/v1/crm/leads/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
             {"key": "aufgaben", "endpoint": "/api/v1/crm/leads/{entity_id}/tabs/aufgaben", "pageSize": 25},
         ],

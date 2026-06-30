@@ -311,6 +311,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/agrar/duenger-native",
+      "path": "agrar/duenger/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/agrar/duenger/bedarfsrechner",
       "path": "agrar/duenger/bedarfsrechner",
       "source": "auto"
@@ -564,6 +569,11 @@
       "module": "@/pages/agrar/saatgut-liste",
       "path": "agrar/saatgut-liste",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/agrar/saatgut-native",
+      "path": "agrar/saatgut-native/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/agrar/saatgut-stamm",
@@ -1636,6 +1646,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/einkauf/anfrage-native",
+      "path": "einkauf/anfrage-native/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/einkauf/anfrage-stamm",
       "path": "einkauf/anfrage-stamm",
       "source": "auto"
@@ -1663,6 +1678,11 @@
     {
       "module": "@/pages/einkauf/angebot-stamm",
       "path": "einkauf/angebot",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/einkauf/angebot-native",
+      "path": "einkauf/angebot-native/:id",
       "source": "alias"
     },
     {
@@ -1701,6 +1721,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/einkauf/anlieferavis-native",
+      "path": "einkauf/anlieferavis-native/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/einkauf/anlieferavis",
       "path": "einkauf/anlieferavis/:id",
       "source": "navigation"
@@ -1719,6 +1744,11 @@
       "module": "@/pages/einkauf/auftragsbestaetigung",
       "path": "einkauf/auftragsbestaetigung",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/auftragsbestaetigung-native",
+      "path": "einkauf/auftragsbestaetigung-native/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/auftragsbestaetigung",
@@ -2351,6 +2381,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/finance/bankkonto-native",
+      "path": "finance/bankkonto/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/fibu/buchungsjournal",
       "path": "finance/bookings/new",
       "source": "alias"
@@ -2383,6 +2418,11 @@
     {
       "module": "@/pages/finance/datev-export",
       "path": "finance/datev-export",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/finance/debitor-native",
+      "path": "finance/debitor/:id",
       "source": "alias"
     },
     {
@@ -2454,6 +2494,11 @@
       "module": "@/pages/finance/kontenplan",
       "path": "finance/kontenplan",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/finance/kreditor-native",
+      "path": "finance/kreditor/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/finance/kreditoren-stamm",
