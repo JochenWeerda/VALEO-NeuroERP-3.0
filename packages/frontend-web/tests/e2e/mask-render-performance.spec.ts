@@ -43,15 +43,15 @@ test.describe('Mask render performance smoke', () => {
       })
     })
 
-    await page.route(/\/api\/v1\/masks\/crm%2Fcustomer-360\/screen-definition$/, async (route) => {
+    await page.route(/\/api\/v1\/masks\/(?:crm%2Fcustomer-360|crm__customer-360)\/screen-definition$/, async (route) => {
       await route.fulfill({ status: 404, body: JSON.stringify({ detail: 'mock' }) })
     })
 
-    await page.goto('/crm/kunden-stamm-modern/perf-customer', { waitUntil: 'domcontentloaded' })
+    await page.goto('/crm/kunden-stamm-modern?id=perf-customer', { waitUntil: 'domcontentloaded' })
     await expect(page.getByTestId('universal-customer-mask-pilot')).toBeVisible()
     expect(tabRequests).toHaveLength(0)
 
-    await page.getByRole('tab', { name: /kontakte/i }).click()
+    await page.getByRole('tab', { name: /ansprechpartner/i }).click()
     await expect.poll(() => tabRequests.length).toBeGreaterThan(0)
   })
 })

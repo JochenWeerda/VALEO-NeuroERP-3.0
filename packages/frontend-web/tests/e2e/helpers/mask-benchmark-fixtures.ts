@@ -102,7 +102,7 @@ export async function setupSalesOrderBenchmarkMocks(page: Page): Promise<void> {
     })
   })
 
-  await page.route(/\/api\/v1\/masks\/sales%2Fsales-order\/screen-definition$/, async (route) => {
+  await page.route(/\/api\/v1\/masks\/(?:sales%2Fsales-order|sales__sales-order)\/screen-definition$/, async (route) => {
     await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'mock' }) })
   })
 

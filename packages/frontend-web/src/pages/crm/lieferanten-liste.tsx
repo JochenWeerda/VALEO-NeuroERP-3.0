@@ -385,7 +385,7 @@ export default function LieferantenListePage(): JSX.Element {
   }
 
   const handleDelete = async (item: Record<string, unknown>) => {
-    if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${item.firma}" wirklich löschen?` }))) {
+    if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${String(item.firma)}" wirklich löschen?` }))) {
       try {
         await apiClient.delete(`/api/v1/crm/business-partners/${stringValue(item.id)}`)
         invalidate()

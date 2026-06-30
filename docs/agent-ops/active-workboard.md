@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-QA-044 — Frontend-Typecheck + Universal-Masken Browser-Gate
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-30 — Frontend-Typecheck wieder grün; Frontend- und BFF-Build neu ausgeführt; Universal-Masken mit Playwright im echten Chromium gegen Vite-Dev-Server und aktivierten Universal-Flags getestet. CRM-360 Pilot ergänzt `contacts` als Supplemental-Tab, damit `screen-summary.available_tabs=contacts` wieder einen lazy Ansprechpartner-Tab erzeugt. E2E-Mocks auf aktuelle ScreenDefinition-URL-Normalisierung (`crm__customer-360`, `sales__sales-order`) und Query-Parameter bei Lazy-Tab-Requests nachgezogen.
+**Ziel:** Rote Frontend-TS-Gates sauber beseitigen, neuen Maskengenerator real im Browser validieren und Build-Stand für Frontend/Backend nachweisen.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage.tsx`, `packages/frontend-web/tests/e2e/*universal*`, `packages/frontend-web/tests/e2e/mask-render-performance.spec.ts`, `docs/architecture/uix/universal-mask-runtime-status.md`.
+**Abnahme:** `pnpm --dir packages/frontend-web run type-check` grün; `pnpm --dir packages/frontend-web run build` grün; `pnpm --dir packages/bff run build` grün; Playwright Universal-Masken-Satz 8/8 grün.
+
 ## UIX-043b — Mask-API Blocker-Fixes (Path + Entity-Stub)
 
 **Von:** Codex

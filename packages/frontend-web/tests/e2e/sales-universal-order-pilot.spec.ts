@@ -41,7 +41,7 @@ test.describe('Sales Universal Order Pilot', () => {
       })
     })
 
-    await page.route(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/lieferung$/, async (route) => {
+    await page.route(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/lieferung(?:\?.*)?$/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -62,7 +62,7 @@ test.describe('Sales Universal Order Pilot', () => {
       })
     })
 
-    await page.route(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/positionen$/, async (route) => {
+    await page.route(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/positionen(?:\?.*)?$/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -83,7 +83,7 @@ test.describe('Sales Universal Order Pilot', () => {
       })
     })
 
-    await page.route(/\/api\/v1\/masks\/sales%2Fsales-order\/screen-definition$/, async (route) => {
+    await page.route(/\/api\/v1\/masks\/(?:sales%2Fsales-order|sales__sales-order)\/screen-definition$/, async (route) => {
       await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'mock fallback' }) })
     })
 
@@ -115,7 +115,7 @@ test.describe('Sales Universal Order Pilot', () => {
   })
 
   test('loads positions after tab switch', async ({ page }) => {
-    const tabResponse = page.waitForResponse(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/positionen$/)
+    const tabResponse = page.waitForResponse(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/positionen(?:\?.*)?$/)
     await page.goto('/sales/order-editor/e2e-order', { waitUntil: 'domcontentloaded' })
 
     await page.getByRole('tab', { name: /positionen/i }).click()
@@ -124,7 +124,7 @@ test.describe('Sales Universal Order Pilot', () => {
   })
 
   test('loads delivery notes after lieferung tab switch', async ({ page }) => {
-    const tabResponse = page.waitForResponse(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/lieferung$/)
+    const tabResponse = page.waitForResponse(/\/api\/v1\/sales\/orders\/e2e-order\/tabs\/lieferung(?:\?.*)?$/)
     await page.goto('/sales/order-editor/e2e-order', { waitUntil: 'domcontentloaded' })
 
     await page.getByRole('tab', { name: /lieferung/i }).click()

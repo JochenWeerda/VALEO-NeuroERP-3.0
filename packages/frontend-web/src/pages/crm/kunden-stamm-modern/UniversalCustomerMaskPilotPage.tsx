@@ -20,6 +20,7 @@ import { useCustomer, useCustomerScreenSummary } from '@/lib/api/crm'
 import { useScreenDefinition } from '@/lib/api/masks'
 
 const CRM360_SUPPLEMENTAL_TABS: ScreenTabDefinition[] = [
+  { key: 'contacts', label: 'Ansprechpartner', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.contacts },
   { key: 'auftraege', label: 'Auftraege', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.auftraege },
   { key: 'aktivitaeten', label: 'Aktivitaeten', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.aktivitaeten },
   { key: 'dokumente', label: 'Dokumente', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.dokumente },
