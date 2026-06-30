@@ -5,8 +5,9 @@
 
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -26,6 +27,8 @@ export function UniversalNativeDetailPage({
   const { onTabChange } = useMaskPilotState()
   const navigate = useNavigate()
   const schemaQuery = useScreenDefinition(screenId, { enabled: Boolean(entityId) })
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [actionSummary, setActionSummary] = useState<string | null>(null)
 
   const runtime = useUniversalMaskRuntime({
     screenId,
@@ -33,6 +36,29 @@ export function UniversalNativeDetailPage({
     schema: schemaQuery.data,
     enabled: Boolean(entityId) && schemaQuery.data?.adapter?.temporary === false,
   })
+  const actionRuntime = useHumanActionDispatch(schemaQuery.data?.actions ?? [], {
+    screenId,
+    entityId,
+    permissions: schemaQuery.data?.permissions ?? [],
+  })
+
+  async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
+    setActionError(null)
+    setActionSummary(null)
+    const result = await actionRuntime.executeAction({
+      actionKey,
+      entityId,
+      payload,
+      mode: 'execute',
+    })
+    if (!result.success) {
+      const validationMessage = result.validationErrors?.map((error) => error.message).join('; ')
+      setActionError(result.error ?? validationMessage ?? `Aktion "${actionKey}" konnte nicht ausgefuehrt werden.`)
+      return
+    }
+    setActionSummary(result.summary ?? `Aktion "${actionKey}" wurde ausgefuehrt.`)
+    await runtime.refetch()
+  }
 
   if (!entityId) {
     return (
@@ -91,6 +117,21 @@ export function UniversalNativeDetailPage({
           Daten werden geladen…
         </div>
       )}
+      {actionRuntime.loadingActionKey && (
+        <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
+          Aktion wird ausgefuehrt...
+        </div>
+      )}
+      {actionError && (
+        <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
+          {actionError}
+        </div>
+      )}
+      {actionSummary && (
+        <div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 md:px-8" role="status">
+          {actionSummary}
+        </div>
+      )}
       <UniversalMaskRenderer
         plan={runtime.plan}
         data={runtime.entityData}
@@ -100,7 +141,7 @@ export function UniversalNativeDetailPage({
         lookupBindings={runtime.lookupBindings}
         onTabChange={onTabChange}
         onTableQueryChange={runtime.setTableQuery}
-        onAction={() => undefined}
+        onAction={handleAction}
       />
     </div>
   )

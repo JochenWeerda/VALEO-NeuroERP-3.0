@@ -15,10 +15,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-30 — FilterPlan-Query-Vertrag wird auf `filter_plan` als kanonischen Frontend-Parameter umgestellt; Backend akzeptiert fuer Rueckwaertskompatibilitaet `filter_plan` und `filterPlan`. Danach wird der ActionRuntime-Anschluss in `UniversalNativeDetailPage` geprueft und umgesetzt, soweit ohne unsauberes Kaschieren moeglich.
+**Stand:** abgeschlossen 2026-06-30 — Frontend serialisiert FilterPlan kanonisch als `filter_plan`; Backend akzeptiert `filter_plan` und den alten Alias `filterPlan`; generische Filter-Controls erzeugen Chips und loesen echte serverseitige Tabellen-Requests aus. `UniversalNativeDetailPage` ist nicht mehr No-op: Actions laufen ueber `useHumanActionDispatch`, verwenden die `commandEndpoint`-Definitionen aus der originalen `ScreenDefinition`, zeigen Fehler/Summary sichtbar an und refetchen Entity + Tabellen nach erfolgreicher Ausfuehrung.
 **Ziel:** Native Masken laufen durchgaengig ueber den neuen Maskengenerator-Vertrag: strukturierte Filter erreichen effektiv das Backend; Actions nutzen echte `commandEndpoint`-Definitionen statt No-op.
-**Dateibesitz:** `packages/frontend-web/src/components/mask-builder/runtime/*`, `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `packages/frontend-web/src/components/mask-builder/renderers/*`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/api/v1/endpoints/crm_360.py`, relevante Tests und E2E-Nachweise.
-**Abnahme:** Frontend-Unit-Test fuer `filter_plan`; Backend-Tests fuer snake_case und camelCase Query-Parameter; Playwright-Nachweis fuer Filter-Chip/Backend-Filter; Typecheck/Build bleiben gruen.
+**Dateibesitz:** `packages/frontend-web/src/components/mask-builder/runtime/*`, `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `packages/frontend-web/src/components/mask-builder/renderers/FastTableRenderer.tsx`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/api/v1/endpoints/crm_360.py`, `tests/test_uix044_filter_plan_contract.py`, `packages/frontend-web/tests/e2e/universal-mask-filter-plan.spec.ts`.
+**Abnahme:** Vitest `table-query-state.test.ts` 7/7 gruen; Backend-Contract-Test `tests/test_uix044_filter_plan_contract.py` 3/3 gruen mit isoliertem Pytest-Lauf (normaler Pytest-Plugin-Start in dieser Umgebung zeitweise haengend); Playwright Chromium FilterPlan 1/1 gruen; `pnpm --dir packages/frontend-web run type-check` gruen; `pnpm --dir packages/frontend-web run build` gruen; `pnpm --dir packages/bff run build` gruen.
 
 ## UIX-QA-044 — Frontend-Typecheck + Universal-Masken Browser-Gate
 

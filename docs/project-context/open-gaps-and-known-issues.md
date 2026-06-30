@@ -149,6 +149,13 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 
+Nachzug 2026-06-30 (UIX-044/045): Der FilterPlan-HTTP-Vertrag ist auf `filter_plan`
+kanonisiert; Backend akzeptiert `filterPlan` nur noch als Kompatibilitaetsalias.
+Native Detailseiten fuehren Actions nicht mehr als No-op aus, sondern ueber
+`ActionRuntime` gegen `commandEndpoint` aus der `ScreenDefinition`. Offen bleiben
+fachliche CommandEndpoint-Implementierungen fuer die oben genannten gestubten
+Actions.
+
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 
 Status: abgeschlossen — Lazy Tabs `lieferung` (Lieferscheinliste) und `dokumente` (Rechnungsbelege) via tab API.
