@@ -2418,7 +2418,7 @@
     },
     {
       "module": "@/pages/einkauf/bestellung-native",
-      "path": "einkauf/bestellung-native/:id"
+      "path": "einkauf/bestellung/:id"
     },
     {
       "module": "@/pages/finance/ap-invoice-native",
@@ -2446,7 +2446,7 @@
     },
     {
       "module": "@/pages/agrar/saatgut-native",
-      "path": "agrar/saatgut-native/:id"
+      "path": "agrar/saatgut/:id"
     },
     {
       "module": "@/pages/finance/debitor-native",
@@ -2462,19 +2462,19 @@
     },
     {
       "module": "@/pages/einkauf/anfrage-native",
-      "path": "einkauf/anfrage-native/:id"
+      "path": "einkauf/anfrage/:id"
     },
     {
       "module": "@/pages/einkauf/angebot-native",
-      "path": "einkauf/angebot-native/:id"
+      "path": "einkauf/angebot/:id"
     },
     {
       "module": "@/pages/einkauf/anlieferavis-native",
-      "path": "einkauf/anlieferavis-native/:id"
+      "path": "einkauf/anlieferavis/:id"
     },
     {
       "module": "@/pages/einkauf/auftragsbestaetigung-native",
-      "path": "einkauf/auftragsbestaetigung-native/:id"
+      "path": "einkauf/auftragsbestaetigung/:id"
     },
     {
       "module": "@/pages/qualitaet/reklamation-native",
