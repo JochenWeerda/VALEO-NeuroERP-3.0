@@ -121557,6 +121557,89 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/events": {
+      "get": {
+        "description": "Compatibility endpoint used by the frontend SSE client.",
+        "operationId": "stream_events_api_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "stream",
+            "required": false,
+            "schema": {
+              "default": "mcp",
+              "title": "Stream",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Events",
+        "tags": [
+          "sse"
+        ]
+      }
+    },
+    "/api/stream/{channel}": {
+      "get": {
+        "description": "Stream server-sent events for a specific channel.",
+        "operationId": "stream_channel_api_stream__channel__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel",
+            "required": true,
+            "schema": {
+              "title": "Channel",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Channel",
+        "tags": [
+          "sse"
+        ]
+      }
+    },
     "/api/v1/$batch": {
       "post": {
         "description": "OData-style batch endpoint. Accepts up to 10 GET sub-requests, runs them\nconcurrently, and returns all responses in one payload. Auth context and\ntenant headers are inherited from the outer request.",
