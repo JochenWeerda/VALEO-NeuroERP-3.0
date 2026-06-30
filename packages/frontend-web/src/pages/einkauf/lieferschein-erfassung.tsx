@@ -169,7 +169,7 @@ function LieferantSuchDialog({
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers', {
+      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers/', {
         params: { search: search.trim(), limit: 30 },
       })
       const mapped: Lieferant[] = (data || []).map(c => ({

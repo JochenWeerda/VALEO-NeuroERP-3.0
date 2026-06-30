@@ -205,3 +205,18 @@ def get_kpis(
         "top_5_suppliers_by_spend": top_5_suppliers,
         "abc_analysis": abc_analysis,
     }
+
+
+@router.get("/audit-trail/{doc_type}/{doc_id}", summary="Einkauf Audit-Trail abrufen")
+async def get_einkauf_audit_trail(
+    doc_type: str,
+    doc_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Stub: Audit-Trail für Einkaufsdokument."""
+    return {
+        "doc_type": doc_type,
+        "doc_id": doc_id,
+        "events": [],
+        "tenant_id": tenant_id,
+    }

@@ -85,7 +85,7 @@ export function useDuplicateDetection(options: UseDuplicateDetectionOptions = {}
     queryKey: ['customers-for-duplicate-check'],
     queryFn: async () => {
       try {
-        const response = await authenticatedFetch('/api/v1/crm/customers?limit=1000')
+        const response = await authenticatedFetch('/api/v1/crm/customers/?limit=1000')
         const result = await response.json()
         return result.data || result.items || []
       } catch {

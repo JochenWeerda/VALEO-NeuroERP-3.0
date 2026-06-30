@@ -371,3 +371,31 @@ async def get_wetter_boden(
         ))
 
     return result
+
+
+@router.get("/kulturen", summary="Agrar-Kulturen-Stammdaten auflisten")
+async def list_kulturen(
+    search: Optional[str] = Query(None),
+):
+    """Referenzliste der bewirtschafteten Kulturen / Fruchtarten."""
+    kulturen = [
+        {"id": "weizen", "name": "Weizen", "gruppe": "Getreide"},
+        {"id": "gerste", "name": "Gerste", "gruppe": "Getreide"},
+        {"id": "roggen", "name": "Roggen", "gruppe": "Getreide"},
+        {"id": "hafer", "name": "Hafer", "gruppe": "Getreide"},
+        {"id": "triticale", "name": "Triticale", "gruppe": "Getreide"},
+        {"id": "mais", "name": "Mais", "gruppe": "Getreide"},
+        {"id": "raps", "name": "Raps", "gruppe": "Ölfrüchte"},
+        {"id": "sonnenblumen", "name": "Sonnenblumen", "gruppe": "Ölfrüchte"},
+        {"id": "zuckerrueben", "name": "Zuckerrüben", "gruppe": "Hackfrüchte"},
+        {"id": "kartoffeln", "name": "Kartoffeln", "gruppe": "Hackfrüchte"},
+        {"id": "erbsen", "name": "Erbsen", "gruppe": "Hülsenfrüchte"},
+        {"id": "bohnen", "name": "Bohnen", "gruppe": "Hülsenfrüchte"},
+        {"id": "nawaro", "name": "NaWaRo (Energiepflanzen)", "gruppe": "Sonstige"},
+        {"id": "gruenland", "name": "Grünland", "gruppe": "Sonstige"},
+    ]
+    if search:
+        kulturen = [k for k in kulturen if search.lower() in k["name"].lower()]
+    return kulturen
+
+    return result

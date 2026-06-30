@@ -1501,10 +1501,9 @@ api_router.include_router(
     marketing.router
 )
 
-# CRM Campaigns API
+# CRM Campaigns API — router prefix is already /crm/campaigns, no extra prefix needed
 api_router.include_router(
     crm_campaigns.router,
-    prefix="/crm",
 )
 
 # Labor API (kanonisch /labor; Alias /qualitaet fuer Frontend-Hooks)
@@ -2200,3 +2199,15 @@ api_router.include_router(whatsapp_notify.router, prefix="/whatsapp", tags=["Wha
 # INTEGRATION-EVIDENCE-BOARD-001: Quality Evidence API
 from app.api.v1.endpoints import quality_evidence  # noqa: E402
 api_router.include_router(quality_evidence.router, tags=["quality-evidence"])
+
+# Annahme-Warteschlange (Ernte-Annahme / Wareneingang)
+from app.api.v1.endpoints import annahme  # noqa: E402
+api_router.include_router(annahme.router, tags=["annahme", "warteschlange"])
+
+# Reports Export (generischer Download-Endpunkt)
+from app.api.v1.endpoints import reports_export  # noqa: E402
+api_router.include_router(reports_export.router, tags=["reports", "export"])
+
+# CRM Kundensegmente
+from app.api.v1.endpoints import crm_segments  # noqa: E402
+api_router.include_router(crm_segments.router, tags=["crm", "segments"])
