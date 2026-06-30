@@ -31,6 +31,8 @@ async def require_bearer_token(
     """
     Validate bearer token and attach claims to the request state.
     Supports a development token (API_DEV_TOKEN) and OIDC JWT validation.
+    Falls back to ?token= query param for SSE/WebSocket paths where browsers
+    cannot set Authorization headers (EventSource limitation).
     """
     if _is_path_exempt(request.url.path):
         return ""
@@ -39,6 +41,17 @@ async def require_bearer_token(
         credentials = await http_bearer(request)
 
     if credentials is None or credentials.scheme.lower() != "bearer":
+        # Fallback: accept token from query param for SSE and WebSocket endpoints
+        query_token = request.query_params.get("token", "").strip()
+        if query_token:
+            token = query_token
+            expected = settings.API_DEV_TOKEN
+            if expected and token == expected:
+                request.state.token_claims = {"token_type": "dev"}
+                return token
+            claims = _validate_jwt(token)
+            request.state.token_claims = claims
+            return token
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing bearer token",
