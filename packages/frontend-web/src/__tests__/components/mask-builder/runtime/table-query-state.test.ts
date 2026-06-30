@@ -23,15 +23,16 @@ describe('toQueryParams', () => {
     expect(params['q']).toBe('Müller')
   })
 
-  it('serializes filterPlan as JSON string', () => {
+  it('serializes filterPlan as canonical filter_plan JSON string', () => {
     const filterPlan = { amount: { op: 'gt', value: 100 } }
     const params = toQueryParams({ page: 1, pageSize: 25, filterPlan })
-    expect(params['filterPlan']).toBe(JSON.stringify(filterPlan))
+    expect(params['filter_plan']).toBe(JSON.stringify(filterPlan))
+    expect(params['filterPlan']).toBeUndefined()
   })
 
-  it('omits filterPlan when empty', () => {
+  it('omits filter_plan when empty', () => {
     const params = toQueryParams({ page: 1, pageSize: 25, filterPlan: {} })
-    expect(params['filterPlan']).toBeUndefined()
+    expect(params['filter_plan']).toBeUndefined()
   })
 
   it('omits sort when not set', () => {
