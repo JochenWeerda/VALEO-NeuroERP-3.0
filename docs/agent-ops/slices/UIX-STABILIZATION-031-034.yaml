@@ -1,0 +1,63 @@
+slice_id: UIX-STABILIZATION-031-034
+title: Runtime-Stabilisierung und Produktionsnachweis nach UIX-030
+owner: Codex
+status: in_arbeit
+created_at: 2026-06-29
+coordination: >-
+  Workboard-Claim in 9073f1ce8. Beim Claim existierten bereits fremde
+  uncommitted Aenderungen in ScreenDefinition, CRM-Paritaetsdoku und
+  mehreren Frontend-Dateien; diese werden nur dort integriert, wo sie direkt
+  zum Stabilisierungsscope gehoeren.
+goal: >-
+  Nach UIX-030 keine weitere Rollout-Welle starten, sondern Dokumentation,
+  lokale Gates, Readiness-Vertraege und CRM-360-Native-Paritaet nachweisbar
+  machen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UIX-STABILIZATION-031-034.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/adr/uix-034-crm360-native-parity-matrix.md
+  - tests/test_agent_mask_contract.py
+acceptance:
+  - UIX-022 bis UIX-030 sind in Open-Gaps und Workboard als abgeschlossen dokumentiert.
+  - UIX-033 Readiness-Gates sind in Backend- und Frontend-Tests abgedeckt.
+  - CRM 360 besitzt eine aktuelle Native-Paritaetsmatrix mit klaren Restluecken.
+  - Lokale Frontend- und Backend-Gates sind ausgefuehrt oder mit blockerfreiem Grund dokumentiert.
+  - Keine neuen Rollout-Masken werden auf generator_ready gesetzt.
+tests:
+  - pnpm --dir packages/frontend-web type-check
+  - pnpm --dir packages/frontend-web build
+  - pnpm --dir packages/frontend-web test:run
+  - python -m pytest tests/test_mask_rollout_batch_w42_51.py tests/test_agent_mask_contract.py -q
+risks:
+  - GitHub-Actions-Nachweis kann lokal nicht erzwungen werden, wenn keine Remote-Ausfuehrung gestartet werden darf.
+  - Native CRM-360-Paritaet bleibt fachlich erst vollstaendig, wenn Finance-Tab, Action-Backend und Browser-Paritaet nachgezogen sind.
+ai_harness:
+  fachlicher_vertrag: >-
+    CRM 360 bleibt Beweisfall fuer die Human+Agent Runtime. Nutzer muessen
+    Stammdaten, Kommunikationsdaten, Tabellen und Aktionen im nativen Pfad
+    mindestens paritaetsnah sehen koennen; offene Restarbeit wird nicht als
+    erledigt markiert.
+  architektur_vertrag: >-
+    ScreenDefinition bleibt Single Source of Truth fuer UI, Backend-Whitelist,
+    AgentMaskContract und Readiness. Keine neuen Services, Container oder
+    Domaenengrenzen in diesem Slice.
+  daten_vertrag: >-
+    Keine neuen Datenbanktabellen oder Mutationen. Readiness prueft nur
+    bestehende ScreenDefinition-Struktur und dataSource-Vertraege.
+  test_vertrag: >-
+    Backend-Unit-Tests fuer mandatory/advisory Gates; Frontend-Vitest fuer
+    dieselbe Gate-Semantik; lokale Typecheck-/Build-/Test-Gates als UIX-032
+    Evidenz.
+  security_vertrag: >-
+    Keine Secrets, keine Tenant-Daten, keine neuen externen KI-Fluesse.
+    Sensitive CRM-Felder bleiben im AgentContract explizit markiert.
+  betriebs_vertrag: >-
+    Readiness-Endpoint liefert maschinenlesbare Errors und Warnings; Advisory
+    Gates blockieren Runtime nicht, bleiben aber fuer Rollout-Governance sichtbar.
+  dokumentations_vertrag: >-
+    Workboard, Open-Gaps, Slice-YAML und CRM-Paritaetsmatrix werden zusammen
+    aktualisiert.
+external_gates:
+  - github_actions_quality_gate
+  - browser_parity_with_test_data

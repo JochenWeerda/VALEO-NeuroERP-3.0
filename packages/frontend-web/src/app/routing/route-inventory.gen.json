@@ -411,6 +411,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/agrar/ernte-abrechnung-native",
+      "path": "agrar/harvest-settlement/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/agrar/kontrakt-engagement",
       "path": "agrar/kontrakt-engagement",
       "source": "alias"
@@ -1741,6 +1746,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/einkauf/bestellung-native",
+      "path": "einkauf/bestellung-native/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/einkauf/bestellung-stamm",
       "path": "einkauf/bestellung-stamm",
       "source": "auto"
@@ -2276,6 +2286,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/finance/ap-invoice-native",
+      "path": "finance/ap-invoice/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/finance/ap-invoices-list",
       "path": "finance/ap-invoices-list",
       "source": "auto"
@@ -2293,6 +2308,11 @@
     {
       "module": "@/pages/finance/ap-invoice-form",
       "path": "finance/ap/invoices/new",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/finance/ar-open-item-native",
+      "path": "finance/ar-open-item/:id",
       "source": "alias"
     },
     {
@@ -2489,6 +2509,11 @@
       "module": "@/pages/finance/payment-matching",
       "path": "finance/payment-matching",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/finance/payment-run-native",
+      "path": "finance/payment-run/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/finance/payment-matching",
@@ -3101,6 +3126,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/lager/lagerbewegung-native",
+      "path": "lager/stock-movement/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/lager/terminal",
       "path": "lager/terminal",
       "source": "auto"
@@ -3179,6 +3209,11 @@
       "module": "@/pages/marketing/kampagnen",
       "path": "marketing/kampagnen",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/workflow/mask-rollout/MaskRolloutRoute",
+      "path": "mask-rollout/:screenId/:entityId",
+      "source": "alias"
     },
     {
       "module": "@/pages/mobile/scanner",
@@ -3779,6 +3814,11 @@
       "module": "@/pages/sales/delivery-editor-new",
       "path": "sales/delivery-editor-new",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-native",
+      "path": "sales/delivery-note/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/sales/invoice-editor",
@@ -4548,6 +4588,7 @@
   ],
   "paramKeys": [
     "domain",
+    "entityId",
     "grId",
     "hash",
     "id",
@@ -4556,6 +4597,7 @@
     "number",
     "poId",
     "rfqId",
+    "screenId",
     "taskId",
     "type",
     "variant",

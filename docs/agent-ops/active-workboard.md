@@ -4,12 +4,29 @@ type: reference
 audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-29
-version: 3.2.0
+last_reviewed: 2026-06-30
+version: 3.3.0
 description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
 ---
 
 # Active Workboard
+
+## UIX-043 — Vollständige Masken-Migration (alle verbliebenen ObjectPage-Masken)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-30 — 13 weitere native SDs (Wave 2) fertiggestellt; 26 gesamt im Registry, alle `generatorReady=True`, `advisoryScore=1.00`. 18 Seiten bewusst exempt (Prozessmasken, Formulare, Batch-Screens). Vollständige Inventur in `docs/architecture/uix/uix-043-mask-migration-inventory.md`.
+**Ziel:** Alle entity-detail ObjectPage-Masken auf native ScreenDefinition migrieren — keine Ausnahme ohne dokumentierten Grund.
+**Dateibesitz:** `app/core/screen_definitions.py`, `packages/frontend-web/src/pages/{agrar,finance,einkauf,qualitaet,futtermittel,crm}/*-native.tsx`, `packages/frontend-web/src/app/route-aliases.json`, `docs/architecture/uix/uix-043-mask-migration-inventory.md`.
+**Abnahme:** 60/60 pytest gruen; alle 26 SDs `generatorReady=True advisoryScore=1.00`; 20 route-aliases registriert.
+
+## UIX-041/042 — Restliche native SDs + Frontend-Verdrahtung
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-30 — 7 native SDs (Wave 1: sales/delivery-note, einkauf/purchase-order, finance/ap-invoice, finance/ar-open-item, lager/stock-movement, agrar/harvest-settlement, finance/payment-run) promoted. `UniversalNativeDetailPage` als generischer Wrapper eingeführt. 7 thin wrapper pages + route-aliases.
+**Dateibesitz:** `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `packages/frontend-web/src/components/mask-builder/index.ts`.
+**Abnahme:** 60 pytest gruen; alle 13 SDs advisory=1.00.
 
 ## DOC-UIX-RUNTIME-001 — Mask-Runtime-Dokumentationspaket
 

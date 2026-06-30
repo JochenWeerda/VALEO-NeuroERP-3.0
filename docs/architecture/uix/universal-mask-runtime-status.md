@@ -4,14 +4,14 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-06-29
-version: 1.0.0
-description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…037) — Lieferstand, Gates, Governance, nächste Schritte.
+last_reviewed: 2026-06-30
+version: 2.0.0
+description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…043) — Lieferstand, Gates, Governance. Migration aller entity-detail Masken abgeschlossen.
 ---
 
 # Universal Mask Runtime — Plattformstatus
 
-> **Kurzfassung (2026-06-29):** Die Runtime-Plattform ist architektonisch weit (UIX-021…040 abgeschlossen). Der Engpass ist jetzt Frontend-Verdrahtung und produktive Command-Ausführung, nicht der native ScreenDefinition-Vertrag. `einkauf/supplier`, `crm/opportunity` und `lager/article-stock` sind native ScreenDefinitions mit `generatorReady=true` und `advisoryScore=1.0`.
+> **Kurzfassung (2026-06-30):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. 20 Frontend thin wrapper pages + route-aliases. 60 Tests grün. Keine weiteren Migrations-Kandidaten unter den entity-detail ObjectPage-Masken.
 
 ## Lieferstand
 
@@ -35,6 +35,10 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-038 | Einkauf Supplier native ScreenDefinition | ✅ | `generatorReady=true`, `advisoryScore=1.0` |
 | UIX-039 | CRM Opportunity native ScreenDefinition | ✅ | `generatorReady=true`, `advisoryScore=1.0` |
 | UIX-040 | Lager Article Stock native ScreenDefinition | ✅ | `generatorReady=true`, `advisoryScore=1.0` |
+| UIX-041 | 7 native SDs Wave 1 (delivery-note, purchase-order, ap/ar-invoice, stock-movement, harvest-settlement, payment-run) | ✅ | alle 1.00 |
+| UIX-042a | Advisory-Score 1.00 für alle SDs inkl. sales-order, kontrakte, crm-360 | ✅ | 13 SDs gesamt |
+| UIX-042b | UniversalNativeDetailPage + 7 thin wrapper pages + 7 route-aliases | ✅ | generischer Wrapper |
+| UIX-043 | 13 weitere ObjectPage-Masken migriert; vollständige Inventur; 18 bewusst exempt | ✅ | **26 SDs gesamt** |
 
 ## Architektur (Single Source of Truth)
 
@@ -80,17 +84,32 @@ Backend: `_check_readiness()` in `app/api/v1/endpoints/mask_screen_definition.py
 
 ## Governance für Agenten
 
-1. **Keine neue Rollout-Welle** — Stabilisierung hat Vorrang.
-2. **Kein weiteres `generator_ready: true`** in `mask_classification.py`, bis UIX-032 + UIX-034 grün.
-3. **CRM 360** ist Referenz-Beweisfall: Legacy-Fallback erst nach grüner Paritätsmatrix abbauen.
-4. **Maschinenlesbare Quellen** bei Masken-Arbeit immer zuerst lesen:
+1. **Migration abgeschlossen** — alle entity-detail Masken sind native SDs.
+2. **Nächster Fokus:** commandEndpoints für gestubte Actions (neue_bestellung, freigeben, mahnen, drucken).
+3. **CRM 360** ist produktiver Referenzfall mit vollständiger Action-Runtime.
+4. **finance/payment-run** bleibt `forbiddenForAgents=True` — human approval required.
+5. **Maschinenlesbare Quellen** bei Masken-Arbeit immer zuerst lesen:
    - diese Datei
-   - [`open-gaps-and-known-issues.md`](../../project-context/open-gaps-and-known-issues.md) § UIX-RUNTIME-022…037
-   - [`active-workboard.md`](../../agent-ops/active-workboard.md) § UIX-STABILIZATION-031-037
+   - [`open-gaps-and-known-issues.md`](../../project-context/open-gaps-and-known-issues.md)
+   - [`active-workboard.md`](../../agent-ops/active-workboard.md)
+   - [`uix-043-mask-migration-inventory.md`](uix-043-mask-migration-inventory.md) — vollständige Inventur aller 26 SDs + Exemptions
 
-## UIX-037 — Rollout-Reihenfolge (neu bewertet)
+## Registry-Übersicht (Stand 2026-06-30)
 
-Stand nach UIX-040:
+| Domain | SDs | Schlüssel-IDs |
+|--------|-----|---------------|
+| CRM | 3 | customer-360, opportunity, lead |
+| Einkauf | 6 | supplier, purchase-order, anfrage, angebot, anlieferavis, auftragsbestaetigung |
+| Finance | 5 | ap-invoice, ar-open-item, payment-run, debitor, kreditor, bankkonto |
+| Lager | 2 | article-stock, stock-movement |
+| Sales | 2 | sales-order, delivery-note |
+| Agrar | 4 | kontrakte, harvest-settlement, duenger, saatgut |
+| Qualität | 1 | reklamation |
+| Futtermittel | 2 | einzelfuttermittel, mischfuttermittel |
+
+## UIX-037 — Rollout-Reihenfolge (abgeschlossen)
+
+Alle 10 ursprünglichen Kandidaten sind nativ promoted — Stand nach UIX-043:
 
 1. `einkauf/supplier` — nativ bereit, Frontend-Verdrahtung folgt in UIX-042
 2. `crm/opportunity` — nativ bereit, Parity-Matrix aktualisiert

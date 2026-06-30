@@ -129,16 +129,24 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | UIX-039 | crm/opportunity native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 | UIX-040 | lager/article-stock native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 | DOC-UIX-RUNTIME-001 | Doku-Paket Handbuch, Entwickler-API, Agent-Runbook, Parity, In-App-Hilfe | P1 | ✅ |
+| UIX-041 | 7 native SDs Wave 1 (delivery-note, purchase-order, ap-invoice, ar-open-item, stock-movement, harvest-settlement, payment-run) | P1 | ✅ |
+| UIX-042a/b | advisory-Score 1.00 alle SDs + UniversalNativeDetailPage + 7 Frontend-Wrapper | P1 | ✅ |
+| UIX-043 | 13 verbliebene ObjectPage-Masken migriert; 26 native SDs gesamt; Vollständige Inventur | P1 | ✅ |
 
-### Offene Restarbeit (UIX-041+)
+### Migrationsstand Universal Mask Generator (2026-06-30) — ABGESCHLOSSEN
 
-| Slice | Inhalt | Priorität |
-|-------|--------|-----------|
-| UIX-041 | `neue_bestellung` commandEndpoint fuer einkauf/supplier | P2 |
-| UIX-042 | Frontend: useUniversalMaskRuntime fuer einkauf/supplier (analog CRM-360) | P2 |
-| UIX-Roll | sales/delivery-note → finance/* → lager/* → agrar/* Promotionen | P2-P3 |
+- **26 native SDs** — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`
+- **20 Frontend thin wrapper pages** + 20 route-aliases in `route-aliases.json`
+- **60 Tests grün** | Inventur: `docs/architecture/uix/uix-043-mask-migration-inventory.md`
+- **18 Seiten bewusst exempt** (Prozessmasken, Formulare, Batch)
 
-**Governance fuer Agenten:** einkauf/supplier, crm/opportunity und lager/article-stock sind nativ bereit. Naechster Schritt: UIX-042 Frontend-Verdrahtung fuer Lieferanten, danach CommandEndpoint UIX-041 und weitere Promotionen. Zahlungslauf und Ernte-Abrechnung bleiben zuletzt.
+### Offene Folgearbeit (P2/P3)
+
+| Thema | Beschreibung | Priorität |
+|-------|-------------|-----------|
+| commandEndpoints | Gestubte Actions (neue_bestellung, freigeben, mahnen, drucken) | P2 |
+| Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
+| Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 
