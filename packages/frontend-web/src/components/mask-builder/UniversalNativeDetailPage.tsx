@@ -68,16 +68,18 @@ function renderProposedChange(change: unknown, index: number): string {
   if (typeof change === 'string') return change
   if (typeof change !== 'object' || change === null) return String(change)
   const c = change as ProposedChange
-  if (c.description) return c.description
+  if (typeof c.description === 'string') return c.description
   if (c.field !== undefined && c.from !== undefined && c.to !== undefined) {
     const label = String(c.field).replace(/_/g, ' ')
-    return `${label.charAt(0).toUpperCase() + label.slice(1)} wird von „${c.from}" auf „${c.to}" geändert.`
+    const capitalized = label.charAt(0).toUpperCase() + label.slice(1)
+    return `${capitalized} wird von „${String(c.from)}" auf „${String(c.to)}" geändert.`
   }
   if (c.field !== undefined && c.to !== undefined) {
     const label = String(c.field).replace(/_/g, ' ')
-    return `${label.charAt(0).toUpperCase() + label.slice(1)} wird auf „${c.to}" gesetzt.`
+    const capitalized = label.charAt(0).toUpperCase() + label.slice(1)
+    return `${capitalized} wird auf „${String(c.to)}" gesetzt.`
   }
-  const entries = Object.entries(c).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
+  const entries = Object.entries(c).slice(0, 3).map(([k, v]) => `${k}: ${String(v)}`)
   return entries.join(', ') || `Änderung ${index + 1}`
 }
 
