@@ -95,12 +95,14 @@ export interface ScreenActionDefinition {
   disabled?: boolean
   // Action Runtime (Phase 026)
   commandEndpoint?: string
+  stubReason?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel
   idempotencyKey?: string
   auditReasonRequired?: boolean
   humanApprovalRequired?: boolean
+  forbiddenForAgents?: boolean
 }
 
 /** Agent-readable contract for a single screen.
