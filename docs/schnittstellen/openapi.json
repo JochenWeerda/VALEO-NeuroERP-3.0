@@ -207952,6 +207952,73 @@
         ]
       }
     },
+    "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben": {
+      "post": {
+        "description": "Stub: Freigabe für Eingangsrechnung — requiresConfirmation, execute folgt.",
+        "operationId": "action_freigeben_api_v1_finance_ap_invoices__entity_id__actions_freigeben_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnung freigeben (UIX-047)",
+        "tags": [
+          "finance",
+          "ap",
+          "invoices",
+          "finance",
+          "ap",
+          "invoices"
+        ]
+      }
+    },
     "/api/v1/finance/ap/invoices/{invoice_id}": {
       "delete": {
         "description": "Löscht eine Eingangsrechnung.",
