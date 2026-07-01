@@ -86,7 +86,10 @@
       "Bash(tasklist:*)",
       "Bash(cd C:/Users/Jochen/VALEO-NeuroERP-3.0/packages/frontend-web && npm run build 2>&1)",
       "WebFetch(domain:mcpmarket.com)",
-      "Bash(cd \"C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web\" && npm run build 2>&1)"
+      "Bash(cd \"C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web\" && npm run build 2>&1)",
+      "PowerShell(Get-ChildItem C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\ -File | Where-Object { $_.Name -match \"board|BOARD|Board\" })",
+      "PowerShell(Get-ChildItem C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\docs\\\\ -File | Where-Object { $_.Name -match \"board|BOARD|Board|status|STATUS\" })",
+      "Bash(git *)"
     ]
   }
 }

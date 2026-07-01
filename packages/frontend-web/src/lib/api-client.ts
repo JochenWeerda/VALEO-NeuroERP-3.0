@@ -142,6 +142,11 @@ class APIClient {
     const response = await this.client.delete<T, AxiosResponse<T>, D>(url, config as AxiosRequestConfig)
     return wrapResponseData(response)
   }
+
+  async request<T, D = unknown>(config: AxiosRequestConfig<D>): Promise<ApiResult<T>> {
+    const response = await this.client.request<T, AxiosResponse<T>, D>(config)
+    return wrapResponseData(response)
+  }
 }
 
 export const apiClient = new APIClient()

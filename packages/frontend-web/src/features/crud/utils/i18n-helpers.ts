@@ -176,7 +176,7 @@ export function getEntityTypeKey(entity: Record<string, unknown> | string): stri
   }
   
   // Try to infer from entity properties
-  if (entity?.entityType) {
+  if (typeof entity.entityType === 'string') {
     return entity.entityType.toLowerCase();
   }
   

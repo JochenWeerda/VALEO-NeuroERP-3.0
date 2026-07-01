@@ -324,9 +324,9 @@ def build_supplier_screen_definition() -> dict[str, Any]:
             "sourceId": "einkauf/supplier",
             "temporary": False,
         },
-        "summaryEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/einkauf/lieferanten/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/lieferanten/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/einkauf/lieferanten/{entity_id}"},
             {"key": "bestellungen", "endpoint": "/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/bestellungen", "pageSize": 25},
             {"key": "kontakte", "endpoint": "/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/kontakte", "pageSize": 25},
         ],
@@ -397,7 +397,7 @@ def build_supplier_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.lieferant.update"},
-            {"key": "neue_bestellung", "label": "Bestellung anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.bestellung.create", "stubReason": "commandEndpoint folgt in UIX-039"},
+            {"key": "neue_bestellung", "label": "Bestellung anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.bestellung.create", "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung", "method": "POST"},
         ],
         "noWorkflowReason": "Lieferantenstamm ist ein Verwaltungsobjekt — Prozessstatus liegt in den Bestellungen, nicht im Stammsatz.",
         "agentContract": {
@@ -708,9 +708,9 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
         "title": "Bestellung",
         "subtitle": "Einkauf / Bestellvorgang",
         "adapter": {"type": "native", "sourceId": "einkauf/purchase-order", "temporary": False},
-        "summaryEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/einkauf/bestellungen/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/bestellungen/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/einkauf/bestellungen/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/positionen", "pageSize": 50},
             {"key": "kommunikation", "endpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/kommunikation", "pageSize": 25},
         ],
@@ -780,9 +780,9 @@ def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
         "title": "Eingangsrechnung",
         "subtitle": "Finance / Accounts Payable",
         "adapter": {"type": "native", "sourceId": "finance/ap-invoice", "temporary": False},
-        "summaryEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/finance/ap/invoices/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/ap/invoices/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/finance/ap/invoices/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/positionen", "pageSize": 50},
             {"key": "freigabe", "endpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/freigabe", "pageSize": 25},
         ],
@@ -851,9 +851,9 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
         "title": "Offener Posten",
         "subtitle": "Finance / Accounts Receivable",
         "adapter": {"type": "native", "sourceId": "finance/ar-open-item", "temporary": False},
-        "summaryEndpoint": "/api/v1/finance/open-items/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/finance/open-items/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/open-items/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/finance/open-items/{entity_id}"},
             {"key": "ausgleich", "endpoint": "/api/v1/mask-rollouts/finance/ar-open-item/{entity_id}/tabs/ausgleich", "pageSize": 25},
         ],
         "tabs": [
@@ -883,7 +883,7 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "mahnen", "label": "Mahnung erstellen", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ar.mahnung", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt"},
+            {"key": "mahnen", "label": "Mahnung erstellen", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ar.mahnung", "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen", "method": "POST"},
         ],
         "noWorkflowReason": "OP-Status wird durch Zahlungseingaenge automatisch gesetzt — kein separater Workflow noetig.",
         "agentContract": {
@@ -972,9 +972,9 @@ def build_agrar_harvest_settlement_screen_definition() -> dict[str, Any]:
         "title": "Ernte-Abrechnung",
         "subtitle": "Agrar / Ernteannahme-Abrechnung",
         "adapter": {"type": "native", "sourceId": "agrar/harvest-settlement", "temporary": False},
-        "summaryEndpoint": "/api/v1/agrar/settlements/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/agrar/settlements/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/agrar/settlements/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/agrar/settlements/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/positionen", "pageSize": 50},
             {"key": "abzuege", "endpoint": "/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/abzuege", "pageSize": 25},
         ],
@@ -1047,9 +1047,9 @@ def build_finance_payment_run_screen_definition() -> dict[str, Any]:
         "title": "Zahlungslauf",
         "subtitle": "Finance / Massenzahlung",
         "adapter": {"type": "native", "sourceId": "finance/payment-run", "temporary": False},
-        "summaryEndpoint": "/api/v1/finance/payment-runs/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/finance/payment-runs/{entity_id}/screen-summary",
         "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/payment-runs/{entity_id}"},
+            {"key": "entity", "endpoint": "/api/v1/masks/finance/payment-runs/{entity_id}"},
             {"key": "zahlungen", "endpoint": "/api/v1/mask-rollouts/finance/payment-run/{entity_id}/tabs/zahlungen", "pageSize": 50},
         ],
         "tabs": [
@@ -1112,11 +1112,11 @@ def build_agrar_duenger_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "agrar/duenger", "domain": "agrar", "mode": "detail",
         "title": "Duenger", "subtitle": "Agrar / Duenger-Stammdaten",
         "adapter": {"type": "native", "sourceId": "agrar/duenger", "temporary": False},
-        "summaryEndpoint": "/api/v1/agrar/duenger/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/agrar/duenger/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/agrar/duenger/entity/{entity_id}"},
-            {"key": "verwendung", "endpoint": "/api/v1/agrar/duenger/{entity_id}/tabs/verwendung", "pageSize": 25},
-            {"key": "preise", "endpoint": "/api/v1/agrar/duenger/{entity_id}/tabs/preise", "pageSize": 25},
+            {"key": "verwendung", "endpoint": "/api/v1/masks/agrar/duenger/entity/{entity_id}/tabs/verwendung", "pageSize": 25},
+            {"key": "preise", "endpoint": "/api/v1/masks/agrar/duenger/entity/{entity_id}/tabs/preise", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1167,11 +1167,11 @@ def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "agrar/saatgut", "domain": "agrar", "mode": "detail",
         "title": "Saatgut", "subtitle": "Agrar / Saatgut-Stammdaten",
         "adapter": {"type": "native", "sourceId": "agrar/saatgut", "temporary": False},
-        "summaryEndpoint": "/api/v1/agrar/saatgut/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/agrar/saatgut/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/agrar/saatgut/entity/{entity_id}"},
-            {"key": "lagerbestaende", "endpoint": "/api/v1/agrar/saatgut/{entity_id}/tabs/lagerbestaende", "pageSize": 25},
-            {"key": "vertraege", "endpoint": "/api/v1/agrar/saatgut/{entity_id}/tabs/vertraege", "pageSize": 25},
+            {"key": "lagerbestaende", "endpoint": "/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/lagerbestaende", "pageSize": 25},
+            {"key": "vertraege", "endpoint": "/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/vertraege", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1222,11 +1222,11 @@ def build_finance_debitor_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "finance/debitor", "domain": "finance", "mode": "detail",
         "title": "Debitor", "subtitle": "Finance / Debitorenstamm",
         "adapter": {"type": "native", "sourceId": "finance/debitor", "temporary": False},
-        "summaryEndpoint": "/api/v1/finance/debitoren/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/finance/debitoren/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/finance/debitor/entity/{entity_id}"},
-            {"key": "offene_posten", "endpoint": "/api/v1/finance/debitoren/{entity_id}/tabs/offene-posten", "pageSize": 25},
-            {"key": "umsaetze", "endpoint": "/api/v1/finance/debitoren/{entity_id}/tabs/umsaetze", "pageSize": 25},
+            {"key": "offene_posten", "endpoint": "/api/v1/masks/finance/debitoren/entity/{entity_id}/tabs/offene-posten", "pageSize": 25},
+            {"key": "umsaetze", "endpoint": "/api/v1/masks/finance/debitoren/entity/{entity_id}/tabs/umsaetze", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1277,11 +1277,11 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "finance/kreditor", "domain": "finance", "mode": "detail",
         "title": "Kreditor", "subtitle": "Finance / Kreditorenstamm",
         "adapter": {"type": "native", "sourceId": "finance/kreditor", "temporary": False},
-        "summaryEndpoint": "/api/v1/finance/kreditoren/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/finance/kreditoren/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/finance/kreditor/entity/{entity_id}"},
-            {"key": "offene_posten", "endpoint": "/api/v1/finance/kreditoren/{entity_id}/tabs/offene-posten", "pageSize": 25},
-            {"key": "bestellungen", "endpoint": "/api/v1/finance/kreditoren/{entity_id}/tabs/bestellungen", "pageSize": 25},
+            {"key": "offene_posten", "endpoint": "/api/v1/masks/finance/kreditoren/entity/{entity_id}/tabs/offene-posten", "pageSize": 25},
+            {"key": "bestellungen", "endpoint": "/api/v1/masks/finance/kreditoren/entity/{entity_id}/tabs/bestellungen", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1333,10 +1333,10 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "finance/bankkonto", "domain": "finance", "mode": "detail",
         "title": "Bankkonto", "subtitle": "Finance / Bankkonten-Stamm",
         "adapter": {"type": "native", "sourceId": "finance/bankkonto", "temporary": False},
-        "summaryEndpoint": "/api/v1/finance/bankkonten/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/finance/bankkonten/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/finance/bankkonto/entity/{entity_id}"},
-            {"key": "buchungen", "endpoint": "/api/v1/finance/bankkonten/{entity_id}/tabs/buchungen", "pageSize": 50},
+            {"key": "buchungen", "endpoint": "/api/v1/masks/finance/bankkonten/entity/{entity_id}/tabs/buchungen", "pageSize": 50},
         ],
         "tabs": [
             {"key": "kopf", "label": "Konto-Stamm", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1378,10 +1378,10 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "einkauf/anfrage", "domain": "einkauf", "mode": "detail",
         "title": "Einkaufsanfrage", "subtitle": "Einkauf / Anfrage",
         "adapter": {"type": "native", "sourceId": "einkauf/anfrage", "temporary": False},
-        "summaryEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/einkauf/anfragen/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/einkauf/anfrage/entity/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/einkauf/anfragen/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/anfragen/entity/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Anfrage-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1421,10 +1421,10 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "einkauf/angebot", "domain": "einkauf", "mode": "detail",
         "title": "Lieferantenangebot", "subtitle": "Einkauf / Angebot",
         "adapter": {"type": "native", "sourceId": "einkauf/angebot", "temporary": False},
-        "summaryEndpoint": "/api/v1/einkauf/angebote/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/einkauf/angebote/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/einkauf/angebot/entity/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/einkauf/angebote/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/angebote/entity/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Angebot-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1466,10 +1466,10 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "einkauf/anlieferavis", "domain": "einkauf", "mode": "detail",
         "title": "Anlieferavis", "subtitle": "Einkauf / Wareneingangsankuendigung",
         "adapter": {"type": "native", "sourceId": "einkauf/anlieferavis", "temporary": False},
-        "summaryEndpoint": "/api/v1/einkauf/anlieferavise/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/einkauf/anlieferavise/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/einkauf/anlieferavis/entity/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/einkauf/anlieferavise/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Avis-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1511,10 +1511,10 @@ def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "einkauf/auftragsbestaetigung", "domain": "einkauf", "mode": "detail",
         "title": "Auftragsbestaetigung", "subtitle": "Einkauf / Lieferanten-AB",
         "adapter": {"type": "native", "sourceId": "einkauf/auftragsbestaetigung", "temporary": False},
-        "summaryEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/einkauf/auftragsbestaetigungen/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/einkauf/auftragsbestaetigung/entity/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/auftragsbestaetigungen/entity/{entity_id}/tabs/positionen", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "AB-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1556,11 +1556,11 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "qualitaet/reklamation", "domain": "qualitaet", "mode": "detail",
         "title": "Reklamation", "subtitle": "Qualitaet / Reklamationsbearbeitung",
         "adapter": {"type": "native", "sourceId": "qualitaet/reklamation", "temporary": False},
-        "summaryEndpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/qualitaet/reklamationen/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/qualitaet/reklamation/entity/{entity_id}"},
-            {"key": "massnahmen", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/tabs/massnahmen", "pageSize": 25},
-            {"key": "dokumente", "endpoint": "/api/v1/qualitaet/reklamationen/{entity_id}/tabs/dokumente", "pageSize": 25},
+            {"key": "massnahmen", "endpoint": "/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/massnahmen", "pageSize": 25},
+            {"key": "dokumente", "endpoint": "/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/dokumente", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Reklamation", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1614,11 +1614,11 @@ def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "futtermittel/einzelfuttermittel", "domain": "futtermittel", "mode": "detail",
         "title": "Einzelfuttermittel", "subtitle": "Futtermittel / Rohstoff-Stamm",
         "adapter": {"type": "native", "sourceId": "futtermittel/einzelfuttermittel", "temporary": False},
-        "summaryEndpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/futtermittel/einzelfuttermittel/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}"},
-            {"key": "naehrstoffe", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/tabs/naehrstoffe", "pageSize": 50},
-            {"key": "preise", "endpoint": "/api/v1/futtermittel/einzelfuttermittel/{entity_id}/tabs/preise", "pageSize": 25},
+            {"key": "naehrstoffe", "endpoint": "/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}/tabs/naehrstoffe", "pageSize": 50},
+            {"key": "preise", "endpoint": "/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}/tabs/preise", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1668,11 +1668,11 @@ def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "futtermittel/mischfuttermittel", "domain": "futtermittel", "mode": "detail",
         "title": "Mischfuttermittel", "subtitle": "Futtermittel / Misch-Rezeptur",
         "adapter": {"type": "native", "sourceId": "futtermittel/mischfuttermittel", "temporary": False},
-        "summaryEndpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/futtermittel/mischfuttermittel/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}"},
-            {"key": "rezeptur", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/tabs/rezeptur", "pageSize": 50},
-            {"key": "naehrstoffe", "endpoint": "/api/v1/futtermittel/mischfuttermittel/{entity_id}/tabs/naehrstoffe", "pageSize": 25},
+            {"key": "rezeptur", "endpoint": "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur", "pageSize": 50},
+            {"key": "naehrstoffe", "endpoint": "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
@@ -1720,11 +1720,11 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "crm/lead", "domain": "crm", "mode": "detail",
         "title": "Lead", "subtitle": "CRM / Lead-Verwaltung",
         "adapter": {"type": "native", "sourceId": "crm/lead", "temporary": False},
-        "summaryEndpoint": "/api/v1/crm/leads/{entity_id}/screen-summary",
+        "summaryEndpoint": "/api/v1/masks/crm/leads/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/masks/crm/lead/entity/{entity_id}"},
-            {"key": "aktivitaeten", "endpoint": "/api/v1/crm/leads/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
-            {"key": "aufgaben", "endpoint": "/api/v1/crm/leads/{entity_id}/tabs/aufgaben", "pageSize": 25},
+            {"key": "aktivitaeten", "endpoint": "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
+            {"key": "aufgaben", "endpoint": "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aufgaben", "pageSize": 25},
         ],
         "tabs": [
             {"key": "kopf", "label": "Lead-Daten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",

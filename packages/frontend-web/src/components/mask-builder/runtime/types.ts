@@ -27,7 +27,7 @@ export interface TableQueryState {
   sort?: string
   sortDir?: 'asc' | 'desc'
   q?: string
-  /** Structured per-column filters. Serialized as filterPlan=<JSON> in query params. */
+  /** Structured per-column filters. Serialized as filter_plan=<JSON> at the HTTP boundary. */
   filterPlan?: FilterPlan
 }
 

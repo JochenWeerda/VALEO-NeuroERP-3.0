@@ -24,6 +24,7 @@ import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer,
   Save, Trash2, FileText, Folder, Search, BookOpen,
 } from 'lucide-react'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 // ==================== Types ====================
 
@@ -114,10 +115,10 @@ function LieferantSuchDialog({ open, onClose, onSelect }: {
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers', { params: { search: search.trim(), limit: 30 } })
-      setResults((data || []).map(c => ({
-        id: c.id, name: c.company_name || c.name || '',
-        kreditorAccount: c.customer_number || '', address: c.address,
+      const response = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers/', { params: { search: search.trim(), limit: 30 } })
+      setResults(recordArrayFromResponse(response.data).map(c => ({
+        id: stringValue(c.id), name: stringValue(c.company_name, stringValue(c.name)),
+        kreditorAccount: stringValue(c.customer_number), address: isRecord(c.address) ? c.address : undefined,
       })))
     } catch { setResults([]) }
     finally { setLoading(false) }
@@ -231,11 +232,11 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
   }, [state.positionen])
 
   const handleArticleSelect = (article: Record<string, unknown>): void => {
-    const ep = article.purchase_price || article.sales_price || 0
+    const ep = numberValue(article.purchase_price, numberValue(article.sales_price))
     setCurrentPos((p) => ({
-      ...p, artikelNr: article.article_number || '', artikelId: article.id || null,
-      artikelBezeichnung: article.name || '', einheit: article.unit || 'Stk',
-      listenpreis: ep, mwstProzent: article.mehrwertsteuer_prozent || 19,
+      ...p, artikelNr: stringValue(article.article_number), artikelId: stringValue(article.id) || null,
+      artikelBezeichnung: stringValue(article.name), einheit: stringValue(article.unit, 'Stk'),
+      listenpreis: ep, mwstProzent: numberValue(article.mehrwertsteuer_prozent, 19),
     }))
   }
 
@@ -315,13 +316,13 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       }
       let resp: Record<string, unknown>
       if (state.id) {
-        resp = await apiClient.patch(`/api/v1/einkauf/rechnungen/${state.id}`, payload)
+        resp = (await apiClient.patch<Record<string, unknown>>(`/api/v1/einkauf/rechnungen/${state.id}`, payload)).data
       } else {
-        resp = await apiClient.post('/api/v1/einkauf/rechnungen', payload)
+        resp = (await apiClient.post<Record<string, unknown>>('/api/v1/einkauf/rechnungen', payload)).data
       }
-      setState((p) => ({ ...p, id: resp.id, belegNr: resp.beleg_nr || p.belegNr }))
+      setState((p) => ({ ...p, id: stringValue(resp.id) || null, belegNr: stringValue(resp.beleg_nr, p.belegNr) }))
       push('Rechnung gespeichert')
-      return resp.id
+      return stringValue(resp.id) || null
     } catch (_rawErr: unknown) {
         const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${err.response?.data?.detail || err.message}`)
@@ -425,9 +426,10 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                         onClick={async (e) => {
                           e.preventDefault()
                           try {
-                            const items: Record<string, unknown>[] = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/rechnungen')
+                            const response = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/rechnungen')
+                            const items = recordArrayFromResponse(response.data)
                             const idx = rechnungId ? items.findIndex(r => r.id === rechnungId) : -1
-                            if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${items[idx + 1].id as string}`)
+                            if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${stringValue(items[idx + 1].id)}`)
                             else push('Kein vorheriger Beleg vorhanden.')
                           } catch { push('Rechnungen konnten nicht geladen werden.') }
                         }}>
@@ -572,24 +574,32 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                 e.preventDefault()
                 if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
                 try {
-                  const res: Record<string, unknown>[] = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/lieferscheine', {
+                  const response = await apiClient.get<Record<string, unknown>[]>('/api/v1/einkauf/lieferscheine', {
                     params: { lieferant_id: state.lieferant.id, status: 'offen' }
                   })
-                  const lsList = Array.isArray(res) ? res : []
+                  const lsList = recordArrayFromResponse(response.data)
                   if (lsList.length === 0) { push('Keine offenen Lieferscheine für diesen Lieferanten.'); return }
                   // Übernimmt Positionen des ersten gefundenen Lieferscheins
                   const ls = lsList[0]
-                  if (ls.positionen?.length) {
+                  const positions = recordArrayFromResponse(ls.positionen)
+                  if (positions.length) {
                     setState((prev) => ({
                       ...prev,
-                      positionen: ls.positionen.map(p, i => ({
-                      id: crypto.randomUUID(), posNr: i + 1, liefArt: 'frei',
-                      artikelNr: p.artikel_nr ?? '', lieferantArtikelNr: '',
-                      artikelBezeichnung: p.bezeichnung ?? '', artikelBezeichnung2: '',
-                      einheit: p.einheit ?? 'kg', menge: p.menge ?? 0,
-                      einhPreis: p.einzelpreis ?? 0, betrag: (p.menge ?? 0) * (p.einzelpreis ?? 0),
-                      mwstKz: '1', mwstSatz: 19, rabatt: 0, lager: '', lagerhalle: '', lagerfach: '', info: ''
-                      }))
+                      positionen: positions.map((p, i) => {
+                        const menge = numberValue(p.menge)
+                        const einhPreis = numberValue(p.einzelpreis)
+                        const nettoBetrag = menge * einhPreis
+                        return {
+                      posNr: (i + 1) * 10, lieferscheinNr: stringValue(ls.ls_nummer, stringValue(ls.id)),
+                      artikelNr: stringValue(p.artikel_nr), artikelId: stringValue(p.artikel_id) || null,
+                      lieferantArtikelNr: '', bezeichnung: stringValue(p.bezeichnung), bezeichnung2: '',
+                      gebindeNr: '', gebinde: 0, menge, einheit: stringValue(p.einheit, 'kg'),
+                      einhPreis, bruttoEinzel: einhPreis * 1.19, nettoBetrag,
+                      mwstProzent: 19, bruttoBetrag: nettoBetrag * 1.19,
+                      niederlassung: '', lagerhalle: '', lagerfach: '', chargenNr: '', anerkennung: '',
+                      serienNr: '', kontraktNr: '', streckeNr: '', naBio: '', kostenstelle: ''
+                        }
+                      }),
                     }))
                     push(`${lsList.length} Lieferschein(e) gefunden — LS ${String(ls.ls_nummer ?? ls.id ?? '')} übernommen.`)
                   }

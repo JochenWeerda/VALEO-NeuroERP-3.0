@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { toast } from '@/hooks/use-toast'
-import { LeadCandidate, LeadSegment } from '@/types/prospecting'
+import { LeadCandidate, LeadSegment, LeadSourceSystem } from '@/types/prospecting'
 import { fetchLeadCandidates } from '@/api/prospecting'
 import {
   runGapYearPipeline,
@@ -45,7 +45,7 @@ export default function LeadExplorer(): JSX.Element {
   const [minPotential, setMinPotential] = useState<number>(50000)
   const [zipCodeStart, setZipCodeStart] = useState<string>('')
   const [zipCodeEnd, setZipCodeEnd] = useState<string>('')
-  const [source, setSource] = useState<string>('gap_de')
+  const [source, setSource] = useState<LeadSourceSystem>('gap_de')
   const [onlyNewProspects, setOnlyNewProspects] = useState<boolean>(true)
   const [onlyHighPriority, setOnlyHighPriority] = useState<boolean>(false)
   const [limit, setLimit] = useState<number>(100)
@@ -100,7 +100,7 @@ export default function LeadExplorer(): JSX.Element {
         minPotential,
         zipCodeStart: zipCodeStart || undefined,
         zipCodeEnd: zipCodeEnd || undefined,
-        source: source as string,
+        source,
         segment: segment === 'all' ? undefined : segment,
         onlyNewProspects,
         onlyHighPriority,
@@ -628,7 +628,7 @@ export default function LeadExplorer(): JSX.Element {
                 <NativeSelect
                   className="flex-1"
                   value={source}
-                  onValueChange={setSource}
+                  onValueChange={(value) => setSource(value as LeadSourceSystem)}
                   placeholder="Quelle auswaehlen"
                   options={[
                     { value: 'gap_de', label: 'GAP (DE)' },

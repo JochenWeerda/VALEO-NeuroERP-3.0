@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/toast-provider'
 import { Toolbar } from '@/components/ui/toolbar'
 import { Download, BarChart3, TrendingUp, Users, Package, Euro } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import type { ReportDashboardData } from '@/pages/reports/report-chart-types'
 
 const ReportsDashboardCharts = lazy(() =>
   import('@/pages/reports/ReportsDashboardCharts').then((module) => ({ default: module.default })),
@@ -14,7 +15,12 @@ const ReportsDashboardCharts = lazy(() =>
 type ReportType = 'sales-performance' | 'customer-analytics' | 'product-analytics' | 'financial-analytics' | 'trend-analytics'
 
 interface ReportData {
-  data: unknown
+  data: ReportDashboardData & {
+    totalOrders?: number
+    averageOrderValue?: number
+    totalUniqueCustomers?: number
+    totalUniqueProducts?: number
+  }
   metadata?: {
     reportType: string
     generatedAt: string
@@ -25,15 +31,6 @@ interface ReportData {
   averageOrderValue?: number
   totalUniqueCustomers?: number
   totalUniqueProducts?: number
-  conversionRates?: unknown
-  topCustomers?: unknown[]
-  topProductsByRevenue?: unknown[]
-  topProductsByQuantity?: unknown[]
-  customerAcquisitionTrends?: unknown[]
-  revenue?: unknown
-  outstandingPayments?: unknown
-  revenueTrends?: unknown[]
-  orderVolumeTrends?: unknown[]
 }
 
 const REPORT_TYPES = [
@@ -51,6 +48,7 @@ export default function ReportsDashboard(): JSX.Element {
   const { push } = useToast()
 
   const { data: reportData, isLoading } = useMcpQuery<ReportData>('reports', selectedReport, [startDate, endDate])
+  const reportPayload = reportData?.data?.data
 
   const handleExport = async (format: 'json' | 'csv' = 'json') => {
     try {
@@ -138,41 +136,41 @@ export default function ReportsDashboard(): JSX.Element {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {reportData?.data && (
+            {reportPayload && (
               <>
                 {selectedReport === 'sales-performance' && (
                   <>
-                    <Card className="p-4"><div className="text-sm opacity-70">Gesamtumsatz</div><div className="text-2xl font-bold">{reportData.data.totalRevenue?.toLocaleString('de-DE')} EUR</div></Card>
-                    <Card className="p-4"><div className="text-sm opacity-70">Auftraege</div><div className="text-2xl font-bold">{reportData.data.totalOrders}</div></Card>
-                    <Card className="p-4"><div className="text-sm opacity-70">Durchschnitt Auftragswert</div><div className="text-2xl font-bold">{reportData.data.averageOrderValue?.toLocaleString('de-DE')} EUR</div></Card>
-                    <Card className="p-4"><div className="text-sm opacity-70">Konversionsrate</div><div className="text-2xl font-bold">{reportData.data.conversionRates?.offerToOrder?.toFixed(1)} %</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Gesamtumsatz</div><div className="text-2xl font-bold">{reportPayload.totalRevenue?.toLocaleString('de-DE')} EUR</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Auftraege</div><div className="text-2xl font-bold">{reportPayload.totalOrders}</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Durchschnitt Auftragswert</div><div className="text-2xl font-bold">{reportPayload.averageOrderValue?.toLocaleString('de-DE')} EUR</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Konversionsrate</div><div className="text-2xl font-bold">{reportPayload.conversionRates?.offerToOrder?.toFixed(1)} %</div></Card>
                   </>
                 )}
                 {selectedReport === 'customer-analytics' && (
                   <>
-                    <Card className="p-4"><div className="text-sm opacity-70">Kunden</div><div className="text-2xl font-bold">{reportData.data.totalUniqueCustomers}</div></Card>
-                    <Card className="p-4"><div className="text-sm opacity-70">Top Kunde Umsatz</div><div className="text-2xl font-bold">{reportData.data.topCustomers?.[0]?.totalRevenue?.toLocaleString('de-DE')} EUR</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Kunden</div><div className="text-2xl font-bold">{reportPayload.totalUniqueCustomers}</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Top Kunde Umsatz</div><div className="text-2xl font-bold">{reportPayload.topCustomers?.[0]?.totalRevenue?.toLocaleString('de-DE')} EUR</div></Card>
                   </>
                 )}
                 {selectedReport === 'product-analytics' && (
                   <>
-                    <Card className="p-4"><div className="text-sm opacity-70">Produkte</div><div className="text-2xl font-bold">{reportData.data.totalUniqueProducts}</div></Card>
-                    <Card className="p-4"><div className="text-sm opacity-70">Top Produkt Umsatz</div><div className="text-2xl font-bold">{reportData.data.topProductsByRevenue?.[0]?.revenue?.toLocaleString('de-DE')} EUR</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Produkte</div><div className="text-2xl font-bold">{reportPayload.totalUniqueProducts}</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Top Produkt Umsatz</div><div className="text-2xl font-bold">{reportPayload.topProductsByRevenue?.[0]?.revenue?.toLocaleString('de-DE')} EUR</div></Card>
                   </>
                 )}
                 {selectedReport === 'financial-analytics' && (
                   <>
-                    <Card className="p-4"><div className="text-sm opacity-70">Gesamtumsatz</div><div className="text-2xl font-bold">{reportData.data.revenue?.total?.toLocaleString('de-DE')} EUR</div></Card>
-                    <Card className="p-4"><div className="text-sm opacity-70">Ausstehend</div><div className="text-2xl font-bold">{reportData.data.revenue?.outstanding?.toLocaleString('de-DE')} EUR</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Gesamtumsatz</div><div className="text-2xl font-bold">{reportPayload.revenue?.total?.toLocaleString('de-DE')} EUR</div></Card>
+                    <Card className="p-4"><div className="text-sm opacity-70">Ausstehend</div><div className="text-2xl font-bold">{reportPayload.revenue?.outstanding?.toLocaleString('de-DE')} EUR</div></Card>
                   </>
                 )}
               </>
             )}
           </div>
 
-          {reportData?.data ? (
+          {reportPayload ? (
             <Suspense fallback={<div className="grid grid-cols-1 gap-4 md:grid-cols-2"><Card className="h-[332px] animate-pulse" /><Card className="h-[332px] animate-pulse" /></div>}>
-              <ReportsDashboardCharts selectedReport={selectedReport} data={reportData.data} />
+              <ReportsDashboardCharts selectedReport={selectedReport} data={reportPayload} />
             </Suspense>
           ) : null}
         </>

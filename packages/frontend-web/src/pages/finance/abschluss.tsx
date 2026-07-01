@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
+import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
@@ -24,6 +24,7 @@ import {
   type UxTaskItem,
 } from '@/components/workflow'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { inputValue, isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type CloseRoleFocus = 'all' | 'accounting' | 'controlling' | 'tax-advisor' | 'management' | 'audit'
 
@@ -76,7 +77,7 @@ const abschlussConfig: MaskConfig = {
           required: true,
           placeholder: '2025-01',
           pattern: '^\\d{4}-\\d{2}$'
-         } as Field,
+         },
         {
           name: 'abschlussTyp',
           label: 'Abschluss-Typ',
@@ -219,14 +220,14 @@ const abschlussConfig: MaskConfig = {
       key: 'abgrenzungen',
       label: 'Abgrenzungen',
       fields: []
-    } as Field,
+    },
     {
       key: 'abgrenzungen_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <AbgrenzungenTable
-          data={_data.rechnungsabgrenzungsposten || []}
+          data={recordArrayFromResponse(_data.rechnungsabgrenzungsposten)}
           onChange={(rechnungsabgrenzungsposten) => onChange({ ..._data, rechnungsabgrenzungsposten })}
         />
       )
@@ -235,14 +236,14 @@ const abschlussConfig: MaskConfig = {
       key: 'rueckstellungen',
       label: 'Rückstellungen',
       fields: []
-    } as Field,
+    },
     {
       key: 'rueckstellungen_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <RueckstellungenTable
-          data={_data.rueckstellungen || []}
+          data={recordArrayFromResponse(_data.rueckstellungen)}
           onChange={(rueckstellungen) => onChange({ ..._data, rueckstellungen })}
         />
       )
@@ -305,7 +306,7 @@ const abschlussConfig: MaskConfig = {
       update: '/api/v1/finance/closing-checklists/{id}',
       delete: '/api/v1/finance/closing-checklists/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 }
 
@@ -357,7 +358,7 @@ function AbgrenzungenTable({ data: _data, onChange }: { data: Record<string, unk
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={posten.beschreibung}
+                    value={inputValue(posten.beschreibung)}
                     onChange={(e) => updatePosten(index, 'beschreibung', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder="z.B. Mietvorauszahlung"
@@ -367,14 +368,14 @@ function AbgrenzungenTable({ data: _data, onChange }: { data: Record<string, unk
                   <input
                     type="number"
                     step="0.01"
-                    value={posten.betrag}
+                    value={inputValue(posten.betrag)}
                     onChange={(e) => updatePosten(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
                 </td>
                 <td className="px-4 py-2 border">
                   <select
-                    value={posten.typ}
+                    value={inputValue(posten.typ)}
                     onChange={(e) => updatePosten(index, 'typ', e.target.value)}
                     className="w-full p-1 border rounded"
                   >
@@ -447,7 +448,7 @@ function RueckstellungenTable({ data: _data, onChange }: { data: Record<string, 
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={rueckstellung.beschreibung}
+                    value={inputValue(rueckstellung.beschreibung)}
                     onChange={(e) => updateRueckstellung(index, 'beschreibung', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder="z.B. Prozesskosten"
@@ -457,7 +458,7 @@ function RueckstellungenTable({ data: _data, onChange }: { data: Record<string, 
                   <input
                     type="number"
                     step="0.01"
-                    value={rueckstellung.betrag}
+                    value={inputValue(rueckstellung.betrag)}
                     onChange={(e) => updateRueckstellung(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -465,7 +466,7 @@ function RueckstellungenTable({ data: _data, onChange }: { data: Record<string, 
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={rueckstellung.zweck}
+                    value={inputValue(rueckstellung.zweck)}
                     onChange={(e) => updateRueckstellung(index, 'zweck', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder="z.B. Für erwartete Gerichtskosten"
@@ -504,30 +505,33 @@ export default function AbschlussPage(): JSX.Element {
     apiUrl: abschlussConfig.api.baseUrl,
     id: 'new',
     transformResponse: (response: unknown) => {
-      if (response?.data) {
+      const responseRecord = isRecord(response) ? response : {}
+      const responseData = isRecord(responseRecord.data) ? responseRecord.data : responseRecord
+      if (Object.keys(responseData).length > 0) {
         return {
-          ...response.data,
-          id: response.data.id,
-          periode: response.data.period,
+          ...responseData,
+          id: responseData.id,
+          periode: responseData.period,
           abschlussTyp:
-            response.data.closing_type === 'yearly'
+            responseData.closing_type === 'yearly'
               ? 'jahresabschluss'
-              : response.data.closing_type === 'quarterly'
+              : responseData.closing_type === 'quarterly'
                 ? 'quartalsabschluss'
                 : 'monatsabschluss',
-          status: response.data.status,
-          abgeschlossenAm: response.data.completed_at,
-          abgeschlossenDurch: response.data.completed_by,
-          approval_status: response.data.approval_status,
-          approval_can_close: response.data.approval_can_close,
-          approval_override_resolution: response.data.approval_override_resolution,
-          approval_explainability: response.data.approval_explainability,
+          status: responseData.status,
+          abgeschlossenAm: responseData.completed_at,
+          abgeschlossenDurch: responseData.completed_by,
+          approval_status: responseData.approval_status,
+          approval_can_close: responseData.approval_can_close,
+          approval_override_resolution: responseData.approval_override_resolution,
+          approval_explainability: responseData.approval_explainability,
         }
       }
-      return response
+      return {}
     }
   })
-  const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
+  const effectiveData: Record<string, unknown> =
+    Object.keys(workspaceData).length > 0 ? workspaceData : data ?? {}
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(abschlussConfig), formData ?? {})
@@ -546,9 +550,10 @@ export default function AbschlussPage(): JSX.Element {
     actor: currentActor,
   })
 
-  const applyWorkspaceResponse = response => {
-    const payload = response?.data ?? response
-    if (!payload) {
+  const applyWorkspaceResponse = (response: unknown) => {
+    const responseRecord = isRecord(response) ? response : {}
+    const payload = isRecord(responseRecord.data) ? responseRecord.data : responseRecord
+    if (Object.keys(payload).length === 0) {
       return
     }
     setWorkspaceData({
@@ -669,7 +674,7 @@ export default function AbschlussPage(): JSX.Element {
   const operationalStatus = normalizeOperationalStatus(
     !effectiveData?.approval_can_close && effectiveData?.id
       ? 'wartet_auf_mensch'
-      : effectiveData?.status,
+      : stringValue(effectiveData?.status),
   )
   const operationalBlocker = !effectiveData?.approval_can_close && effectiveData?.id
     ? 'Die Periode ist noch nicht abschliessbar. Freigabe- oder Abstimmungsbedarf ist offen.'
@@ -687,7 +692,7 @@ export default function AbschlussPage(): JSX.Element {
     {
       label: 'Periode festlegen',
       done: hasSelectedPeriod,
-      hint: hasSelectedPeriod ? `Abschluss wird fuer ${effectiveData.periode} gefuehrt.` : 'Periode eintragen oder Abschlussfall laden.',
+      hint: hasSelectedPeriod ? `Abschluss wird fuer ${stringValue(effectiveData?.periode)} gefuehrt.` : 'Periode eintragen oder Abschlussfall laden.',
     },
     {
       label: 'Konten und Nebenbuecher abstimmen',
@@ -753,9 +758,9 @@ export default function AbschlussPage(): JSX.Element {
     {
       title: 'Periode',
       items: [
-        { label: 'Periode', value: effectiveData?.periode || 'Noch offen' },
-        { label: 'Typ', value: effectiveData?.abschlussTyp || 'Monatsabschluss' },
-        { label: 'Status', value: effectiveData?.status || 'offen' },
+        { label: 'Periode', value: stringValue(effectiveData?.periode, 'Noch offen') },
+        { label: 'Typ', value: stringValue(effectiveData?.abschlussTyp, 'Monatsabschluss') },
+        { label: 'Status', value: stringValue(effectiveData?.status, 'offen') },
       ],
     },
     {
@@ -769,18 +774,18 @@ export default function AbschlussPage(): JSX.Element {
     {
       title: 'Governance',
       items: [
-        { label: 'Freigabe', value: effectiveData?.approval_status || 'offen' },
+        { label: 'Freigabe', value: stringValue(effectiveData?.approval_status, 'offen') },
         { label: 'Abschliessbar', value: effectiveData?.approval_can_close ? 'Ja' : 'Nein' },
-        { label: 'Owner', value: effectiveData?.freigegebenDurch || effectiveData?.abgeschlossenDurch || 'Finance' },
+        { label: 'Owner', value: stringValue(effectiveData?.freigegebenDurch ?? effectiveData?.abgeschlossenDurch, 'Finance') },
       ],
     },
   ]
   const timelineItems = [
     ...(effectiveData?.freigegebenAm
-      ? [{ label: 'Freigegeben', timestamp: effectiveData.freigegebenAm, detail: effectiveData.freigegebenDurch || undefined }]
+      ? [{ label: 'Freigegeben', timestamp: stringValue(effectiveData.freigegebenAm), detail: stringValue(effectiveData.freigegebenDurch) || undefined }]
       : [{ label: 'Abschlussfall aktiv', detail: 'Periode wird abgestimmt, geprueft und vorbereitet.' }]),
     ...(effectiveData?.abgeschlossenAm
-      ? [{ label: 'Abgeschlossen', timestamp: effectiveData.abgeschlossenAm, detail: effectiveData.abgeschlossenDurch || undefined }]
+      ? [{ label: 'Abgeschlossen', timestamp: stringValue(effectiveData.abgeschlossenAm), detail: stringValue(effectiveData.abgeschlossenDurch) || undefined }]
       : [{ label: 'Jahreswechsel-Lage', detail: fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klaerungen' }]),
     ...(fibuCockpit.revision.last_entry_date
       ? [{ label: 'Letzter Revisionseintrag', detail: fibuCockpit.revision.last_entry_date }]
@@ -794,11 +799,11 @@ export default function AbschlussPage(): JSX.Element {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Checklistenstatus</div>
-              <div className="mt-1 font-medium">{effectiveData.status || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(effectiveData.status, '-')}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Freigabestatus</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_status || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(effectiveData.approval_status, '-')}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Abschliessbar</div>
@@ -819,10 +824,10 @@ export default function AbschlussPage(): JSX.Element {
           title="Abschlussfall steuern"
           description="Die Seite verdichtet Periodenlage, Governance und Revisionssicherheit in einer schlanken Leitansicht ueber dem eigentlichen Abschlussarbeitsplatz."
           status={operationalStatus}
-          owner={effectiveData?.freigegebenDurch || effectiveData?.abgeschlossenDurch || 'Finance'}
+          owner={stringValue(effectiveData?.freigegebenDurch ?? effectiveData?.abgeschlossenDurch, 'Finance')}
           blocker={operationalBlocker}
           nextAction={nextCloseAction}
-          caseLabel={effectiveData?.periode ? `Periode ${effectiveData.periode}` : 'Abschlussfall'}
+          caseLabel={effectiveData?.periode ? `Periode ${stringValue(effectiveData.periode)}` : 'Abschlussfall'}
           tags={['FIBU', 'Abschluss']}
         />
         <RoleFocusBar

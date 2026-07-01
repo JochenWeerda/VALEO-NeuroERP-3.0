@@ -81,12 +81,15 @@ const candidates = [
   })),
 ]
 
-// The current runtime resolves exact auto routes before aliases. Preserve that
-// behavior while emitting one deterministic route per URL.
+// Native mask aliases are the rollout switch for UniversalMaskRuntime pages and
+// must win over legacy auto detail routes on the same URL.
 const byPath = new Map()
-const sourcePriority = { auto: 0, alias: 1, navigation: 2 }
+function candidatePriority(entry) {
+  if (entry.source === 'alias' && entry.module?.endsWith('-native')) return -1
+  return { auto: 0, alias: 1, navigation: 2 }[entry.source] ?? 3
+}
 for (const entry of candidates.sort(
-  (a, b) => sourcePriority[a.source] - sourcePriority[b.source],
+  (a, b) => candidatePriority(a) - candidatePriority(b),
 )) {
   if (entry.path && !byPath.has(entry.path)) byPath.set(entry.path, entry)
 }
@@ -95,7 +98,6 @@ byPath.set('', { module: '@/pages/start-dashboard', path: '', source: 'system' }
 byPath.set('login', { module: '@/pages/auth/Login', path: 'login', source: 'system' })
 byPath.set('auth/login', { module: '@/pages/auth/Login', path: 'auth/login', source: 'system' })
 byPath.set('auth/callback', { module: '@/pages/auth/Callback', path: 'auth/callback', source: 'system' })
-byPath.set('fibu-suite', { module: '@runtime/fibu-suite', path: 'fibu-suite', source: 'system' })
 byPath.set('fibu-suite/$', { module: '@runtime/fibu-suite', path: 'fibu-suite/$', source: 'system' })
 
 const entries = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path))

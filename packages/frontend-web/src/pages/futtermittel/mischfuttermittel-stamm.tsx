@@ -233,6 +233,7 @@ export default function MischfuttermittelStammPage(): JSX.Element {
     navigate('/futtermittel/mischfuttermittel/liste')
   }
 
+  const objectData = data ?? {}
   const objectConfig = useMemo(
     () => ({
       ...mischfuttermittelConfig,
@@ -241,29 +242,29 @@ export default function MischfuttermittelStammPage(): JSX.Element {
           key: 'calculate',
           label: 'Naehrwerte berechnen',
           type: 'secondary' as const,
-          onClick: () => { void handleAction('calculate', data) },
+          onClick: () => { void handleAction('calculate', objectData) },
         },
         {
           key: 'validate',
           label: 'Validieren',
           type: 'secondary' as const,
-          onClick: () => { void handleAction('validate', data) },
+          onClick: () => { void handleAction('validate', objectData) },
         },
         {
           key: 'save',
           label: 'Speichern',
           type: 'primary' as const,
-          onClick: () => { void handleAction('save', data) },
+          onClick: () => { void handleAction('save', objectData) },
         },
       ],
     }),
-    [data, handleAction],
+    [objectData, handleAction],
   )
 
   return (
     <ObjectPage
       config={objectConfig}
-      data={data}
+      data={objectData}
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}

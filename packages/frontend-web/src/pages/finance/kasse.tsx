@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -11,6 +12,7 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { inputValue, isRecord, numberValue, recordArrayFromResponse } from '@/lib/record-utils'
 
 const createKasseConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -105,21 +107,21 @@ const createKasseConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       key: 'bewegungen',
       label: t('crud.fields.cashMovements'),
       fields: []
-    } as Field,
+    },
     {
       key: 'bewegungen_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <KassenbewegungenTable
-          data={_data.bewegungen || []}
+          data={recordArrayFromResponse(_data.bewegungen)}
           onChange={(bewegungen) => {
             const sollEinlagen = bewegungen.filter(b => b.typ === 'einlage').reduce((sum, b) => sum + Number((b as Record<string, unknown>).betrag || 0), 0)
             const sollAuszahlungen = bewegungen.filter(b => b.typ === 'auszahlung').reduce((sum, b) => sum + Number((b as Record<string, unknown>).betrag || 0), 0)
             const istEinlagen = sollEinlagen // Vereinfacht - in Realität würden Ist-Werte manuell erfasst
             const istAuszahlungen = sollAuszahlungen
             const endbestand = (Number(_data.anfangsbestand) || 0) + istEinlagen - istAuszahlungen
-            const differenz = Math.abs(endbestand - (_data.endbestand || 0))
+            const differenz = Math.abs(endbestand - numberValue(_data.endbestand))
 
             onChange({
               ..._data,
@@ -139,20 +141,20 @@ const createKasseConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       key: 'kassensturz',
       label: t('crud.fields.cashCount'),
       fields: []
-    } as Field,
+    },
     {
       key: 'kassensturz_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <KassensturzForm
-          data={_data.kassensturz || {
+          data={isRecord(_data.kassensturz) ? _data.kassensturz : {
             scheine: {},
             muenzen: {},
             gesamtGezaehlt: 0,
             differenzKassensturz: 0
           }}
-          erwarteterBestand={_data.endbestand || 0}
+          erwarteterBestand={numberValue(_data.endbestand)}
           onChange={(kassensturz) => onChange({ ..._data, kassensturz })}
         />
       )
@@ -222,7 +224,7 @@ const createKasseConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       update: '/api/v1/finance/cash/{id}',
       delete: '/api/v1/finance/cash/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -278,7 +280,7 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: Record<string,
               <tr key={index} className="border">
                 <td className="px-4 py-2 border">
                   <select
-                    value={bewegung.typ}
+                    value={inputValue(bewegung.typ)}
                     onChange={(e) => updateBewegung(index, 'typ', e.target.value)}
                     className="w-full p-1 border rounded"
                   >
@@ -290,7 +292,7 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: Record<string,
                   <input
                     type="number"
                     step="0.01"
-                    value={bewegung.betrag}
+                    value={inputValue(bewegung.betrag)}
                     onChange={(e) => updateBewegung(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -298,7 +300,7 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: Record<string,
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={bewegung.verwendungszweck}
+                    value={inputValue(bewegung.verwendungszweck)}
                     onChange={(e) => updateBewegung(index, 'verwendungszweck', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.purpose')}
@@ -307,7 +309,7 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: Record<string,
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={bewegung.belegNummer || ''}
+                    value={inputValue(bewegung.belegNummer)}
                     onChange={(e) => updateBewegung(index, 'belegNummer', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.documentNumber')}
@@ -316,7 +318,7 @@ function KassenbewegungenTable({ data: _data, onChange }: { data: Record<string,
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={bewegung.konto || ''}
+                    value={inputValue(bewegung.konto)}
                     onChange={(e) => updateBewegung(index, 'konto', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.account')}
@@ -350,19 +352,21 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
   const muenzen = [2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01].map(m => m.toString())
 
   const updateAnzahl = (typ: 'scheine' | 'muenzen', wert: string, anzahl: number) => {
-    const newData = { ..._data }
-    if (!newData[typ]) newData[typ] = {}
-    newData[typ][wert] = anzahl
+    const currentCounts = isRecord(_data[typ]) ? _data[typ] as Record<string, unknown> : {}
+    const newData: Record<string, unknown> = {
+      ..._data,
+      [typ]: { ...currentCounts, [wert]: anzahl },
+    }
 
     // Berechne Gesamtsumme
     let gesamtGezaehlt = 0
-    if (newData.scheine) {
+    if (isRecord(newData.scheine)) {
       gesamtGezaehlt += Object.entries(newData.scheine).reduce((sum, [wert, anzahl]) =>
-        sum + (parseFloat(wert) * (anzahl as number)), 0)
+        sum + (parseFloat(wert) * numberValue(anzahl)), 0)
     }
-    if (newData.muenzen) {
+    if (isRecord(newData.muenzen)) {
       gesamtGezaehlt += Object.entries(newData.muenzen).reduce((sum, [wert, anzahl]) =>
-        sum + (parseFloat(wert) * (anzahl as number)), 0)
+        sum + (parseFloat(wert) * numberValue(anzahl)), 0)
     }
 
     newData.gesamtGezaehlt = gesamtGezaehlt
@@ -380,21 +384,25 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
         <div>
           <h4 className="font-semibold mb-3">{t('crud.fields.bills')}</h4>
           <div className="space-y-2">
-            {scheine.map(schein => (
+            {scheine.map((schein) => {
+              const scheineCounts = isRecord(_data.scheine) ? _data.scheine : {}
+              const anzahl = numberValue(scheineCounts[schein])
+              return (
               <div key={schein} className="flex items-center justify-between">
-                <span>{schein} €</span>
+                <span>{schein} EUR</span>
                 <input
                   type="number"
                   min="0"
-                  value={_data.scheine?.[schein] || 0}
+                  value={anzahl}
                   onChange={(e) => updateAnzahl('scheine', schein, parseInt(e.target.value) || 0)}
                   className="w-20 p-1 border rounded text-right"
                 />
                 <span className="w-16 text-right">
-                  {(parseFloat(schein) * (_data.scheine?.[schein] || 0)).toFixed(2)} €
+                  {(parseFloat(schein) * anzahl).toFixed(2)} EUR
                 </span>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -402,21 +410,25 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
         <div>
           <h4 className="font-semibold mb-3">{t('crud.fields.coins')}</h4>
           <div className="space-y-2">
-            {muenzen.map(münze => (
-              <div key={münze} className="flex items-center justify-between">
-                <span>{münze} €</span>
+            {muenzen.map((muenze) => {
+              const muenzenCounts = isRecord(_data.muenzen) ? _data.muenzen : {}
+              const anzahl = numberValue(muenzenCounts[muenze])
+              return (
+              <div key={muenze} className="flex items-center justify-between">
+                <span>{muenze} EUR</span>
                 <input
                   type="number"
                   min="0"
-                  value={_data.muenzen?.[münze] || 0}
-                  onChange={(e) => updateAnzahl('muenzen', münze, parseInt(e.target.value) || 0)}
+                  value={anzahl}
+                  onChange={(e) => updateAnzahl('muenzen', muenze, parseInt(e.target.value) || 0)}
                   className="w-20 p-1 border rounded text-right"
                 />
                 <span className="w-16 text-right">
-                  {(parseFloat(münze) * (_data.muenzen?.[münze] || 0)).toFixed(2)} €
+                  {(parseFloat(muenze) * anzahl).toFixed(2)} EUR
                 </span>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
@@ -430,12 +442,12 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
           </div>
           <div>
             <label className="block text-sm font-medium">{t('crud.fields.countedBalance')}</label>
-            <div className="text-lg font-semibold">{(_data.gesamtGezaehlt || 0).toFixed(2)} €</div>
+            <div className="text-lg font-semibold">{numberValue(_data.gesamtGezaehlt).toFixed(2)} EUR</div>
           </div>
           <div>
             <label className="block text-sm font-medium">{t('crud.fields.difference')}</label>
-            <div className={`text-lg font-semibold ${Math.abs(_data.differenzKassensturz || 0) > 0.01 ? 'text-red-600' : 'text-green-600'}`}>
-              {(_data.differenzKassensturz || 0).toFixed(2)} €
+            <div className={`text-lg font-semibold ${Math.abs(numberValue(_data.differenzKassensturz)) > 0.01 ? 'text-red-600' : 'text-green-600'}`}>
+              {numberValue(_data.differenzKassensturz).toFixed(2)} EUR
             </div>
           </div>
         </div>
@@ -483,8 +495,9 @@ export default function KassePage(): JSX.Element {
     } else if (action === 'validate') {
       const errors = validate(formData)
       if (Object.keys(errors).length === 0) {
-        const differenz = Math.abs(formData.differenz || 0)
-        const kassensturzDifferenz = Math.abs(formData.kassensturz?.differenzKassensturz || 0)
+        const differenz = Math.abs(numberValue(formData.differenz))
+        const kassensturz = isRecord(formData.kassensturz) ? formData.kassensturz : {}
+        const kassensturzDifferenz = Math.abs(numberValue(kassensturz.differenzKassensturz))
 
         if (differenz < 0.01 && kassensturzDifferenz < 0.01) {
           toast({
@@ -527,8 +540,9 @@ export default function KassePage(): JSX.Element {
         return
       }
 
-      const differenz = Math.abs(formData.differenz || 0)
-      const kassensturzDifferenz = Math.abs(formData.kassensturz?.differenzKassensturz || 0)
+      const differenz = Math.abs(numberValue(formData.differenz))
+      const kassensturz = isRecord(formData.kassensturz) ? formData.kassensturz : {}
+      const kassensturzDifferenz = Math.abs(numberValue(kassensturz.differenzKassensturz))
 
       if (differenz >= 0.01 || kassensturzDifferenz >= 0.01) {
         toast({
@@ -563,7 +577,7 @@ export default function KassePage(): JSX.Element {
 
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'cash', format: 'pdf', id: formData.id })
-        if (res?.url) window.open(res.url, '_blank')
+        if (res.data.url) window.open(res.data.url, '_blank')
         toast({ title: t('crud.actions.export'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -586,7 +600,7 @@ export default function KassePage(): JSX.Element {
   return (
     <>
       <ModuleToolbar backTarget="/finance/kasse" closeTarget="/finance/kasse" title={entityTypeLabel} />
-      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data ?? {})} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
       <ObjectPage
         config={kasseConfig}
         data={data}

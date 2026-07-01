@@ -14,6 +14,7 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { isRecord, nullableStringValue, numberValue, stringValue } from '@/lib/record-utils'
 
 type BestellungData = {
   lieferant: string
@@ -70,12 +71,27 @@ function buildRequestPositions(request: EinkaufAnfragePrefill, fallback: Bestell
 }
 
 function buildContractPositions(contract: Record<string, unknown>, fallback: BestellungData['positionen']): BestellungData['positionen'] {
-  const artikel = String(contract.commodity || '').trim()
-  const contractedQuantity = Number(contract.qty?.contracted ?? 0)
+  const qty = isRecord(contract.qty) ? contract.qty : null
+  const artikel = stringValue(contract.commodity).trim()
+  const contractedQuantity = numberValue(qty?.contracted)
   if (!artikel) {
     return fallback
   }
-  return [{ artikel, menge: contractedQuantity > 0 ? contractedQuantity : 1, einheit: String(contract.qty?.unit || 'kg') || 'kg', preis: 0 }]
+  return [{ artikel, menge: contractedQuantity > 0 ? contractedQuantity : 1, einheit: stringValue(qty?.unit, 'kg'), preis: 0 }]
+}
+
+function mapRequestPrefill(data: Record<string, unknown>, fallbackId: string): EinkaufAnfragePrefill {
+  return {
+    id: stringValue(data.id, fallbackId),
+    anfrageNummer: stringValue(data.anfrageNummer) || undefined,
+    typ: stringValue(data.typ) || undefined,
+    anforderer: stringValue(data.anforderer) || undefined,
+    artikel: stringValue(data.artikel) || undefined,
+    menge: numberValue(data.menge, 0) || undefined,
+    prioritaet: stringValue(data.prioritaet) || undefined,
+    status: stringValue(data.status) || undefined,
+    faelligkeit: nullableStringValue(data.faelligkeit),
+  }
 }
 
 function getErrorMessage(error: unknown): string {
@@ -169,11 +185,12 @@ export default function BestellungAnlegenPage(): JSX.Element {
     try {
       const req = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${id}`)).data
       if (req) {
+        const prefill = mapRequestPrefill(req, id)
         setBestellung(prev => ({
           ...prev,
-          requisitionId: req.anfrageNummer || req.id || prev.requisitionId,
-          liefertermin: req.faelligkeit || prev.liefertermin,
-          positionen: buildRequestPositions(req, prev.positionen),
+          requisitionId: prefill.anfrageNummer || prefill.id || prev.requisitionId,
+          liefertermin: prefill.faelligkeit || prev.liefertermin,
+          positionen: buildRequestPositions(prefill, prev.positionen),
           notizen: mergeNotes(prev.notizen, [
             req.anfrageNummer ? `Bedarfsmeldung ${String(req.anfrageNummer)}` : '',
             req.anforderer ? `Anforderer: ${String(req.anforderer)}` : '',
@@ -196,11 +213,11 @@ export default function BestellungAnlegenPage(): JSX.Element {
       if (contract) {
         setBestellung(prev => ({
           ...prev,
-          contractId: contract.contractNo || contract.id || prev.contractId,
-          lieferant: contract.supplierId || contract.counterpartyId || prev.lieferant,
-          liefertermin: contract.deliveryWindow?.to || prev.liefertermin,
-          incoterms: contract.incoterms || prev.incoterms,
-          zahlungsbedingung: contract.paymentTerms || prev.zahlungsbedingung,
+          contractId: stringValue(contract.contractNo, stringValue(contract.id, prev.contractId)),
+          lieferant: stringValue(contract.supplierId, stringValue(contract.counterpartyId, prev.lieferant)),
+          liefertermin: stringValue(isRecord(contract.deliveryWindow) ? contract.deliveryWindow.to : undefined, prev.liefertermin),
+          incoterms: stringValue(contract.incoterms, prev.incoterms),
+          zahlungsbedingung: stringValue(contract.paymentTerms, prev.zahlungsbedingung),
           positionen: buildContractPositions(contract, prev.positionen),
           notizen: mergeNotes(prev.notizen, [
             contract.contractNo ? `Vertragsbezug ${String(contract.contractNo)}` : '',
@@ -221,11 +238,12 @@ export default function BestellungAnlegenPage(): JSX.Element {
     try {
       const rfq = (await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${id}`)).data
       if (rfq) {
+        const prefill = mapRequestPrefill(rfq, id)
         setBestellung(prev => ({
           ...prev,
-          rfqId: rfq.anfrageNummer || rfq.id || prev.rfqId,
-          liefertermin: rfq.faelligkeit || prev.liefertermin,
-          positionen: buildRequestPositions(rfq, prev.positionen),
+          rfqId: prefill.anfrageNummer || prefill.id || prev.rfqId,
+          liefertermin: prefill.faelligkeit || prev.liefertermin,
+          positionen: buildRequestPositions(prefill, prev.positionen),
           notizen: mergeNotes(prev.notizen, [
             rfq.anfrageNummer ? `RFQ-Bezug ${String(rfq.anfrageNummer)}` : '',
             rfq.status ? `RFQ-Status: ${String(rfq.status)}` : '',

@@ -107,9 +107,10 @@ export default function DuengerMischungenPage(): JSX.Element {
     }))
   }
 
-  const updateKomponente = (index: number, field: keyof MischungsKomponente, value: unknown) => {
+  const updateKomponente = (index: number, field: keyof MischungsKomponente, value: string | number) => {
     const updatedKomponenten = [...mischung.komponenten]
-    updatedKomponenten[index] = { ...updatedKomponenten[index], [field]: value }
+    const normalizedValue = field === 'komponente_id' ? String(value) : Number(value)
+    updatedKomponenten[index] = { ...updatedKomponenten[index], [field]: normalizedValue }
 
     if (field === 'komponente_id') {
       updatedKomponenten[index].menge_tonne = 0
@@ -117,7 +118,7 @@ export default function DuengerMischungenPage(): JSX.Element {
 
     if (field === 'anteil' && mischung.berechnete_werte.gesamt_menge > 0) {
       const ziel_menge = mischung.berechnete_werte.gesamt_menge
-      updatedKomponenten[index].menge_tonne = (value / 100) * ziel_menge
+      updatedKomponenten[index].menge_tonne = (Number(normalizedValue) / 100) * ziel_menge
     }
 
     setMischung(prev => ({

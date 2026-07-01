@@ -62,7 +62,7 @@ export function CopilotDockPanel({
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ width: `${DOCK_WIDTH}px` }}
-        {...(!open ? { inert: true as const } : { role: 'dialog' as const, 'aria-modal': true as const, 'aria-label': 'Copilot Advisor' })}
+        {...(!open ? { inert: '' } : { role: 'dialog' as const, 'aria-modal': true as const, 'aria-label': 'Copilot Advisor' })}
       >
         <div className="border-b bg-muted/50 p-3">
           <div className="flex items-center justify-between">

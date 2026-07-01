@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/api-client'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { MoreHorizontal, RefreshCw, Plus, Trash2, Calculator } from 'lucide-react'
 
 type ArtikelZeile = {
@@ -113,21 +114,21 @@ export default function BestellvorschlagVerkaufPage(): JSX.Element {
       if (filterVon) p.set('vonDatum', filterVon)
       if (filterBis) p.set('bisDatum', filterBis)
       const qs = p.toString() ? `?${p.toString()}` : ''
-      const data = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)
-      setArtikel((data || []).map(r => ({
-        id: r.article_id,
-        artikelNr: r.artikel_nr || '',
-        bezeichnung: r.artikel_bezeichnung || '',
-        auftragsMenge: r.offene_auftraege ?? 0,
-        vorratsBestand: r.ist_bestand ?? 0,
-        bestellVorschlag: r.vorschlag_menge ?? 0,
-        einheit: r.einheit || '',
+      const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)
+      setArtikel(recordArrayFromResponse(response.data).map(r => ({
+        id: stringValue(r.article_id),
+        artikelNr: stringValue(r.artikel_nr),
+        bezeichnung: stringValue(r.artikel_bezeichnung),
+        auftragsMenge: numberValue(r.offene_auftraege),
+        vorratsBestand: numberValue(r.ist_bestand),
+        bestellVorschlag: numberValue(r.vorschlag_menge),
+        einheit: stringValue(r.einheit),
         auftragNr: '',
         niederlassung: '',
-        lieferant_name: r.lieferant_name,
-        lieferant_id: r.lieferant_id,
-        letzter_preis: r.letzter_preis,
-        letzter_kauf_datum: r.letzter_kauf_datum,
+        lieferant_name: stringValue(r.lieferant_name),
+        lieferant_id: stringValue(r.lieferant_id),
+        letzter_preis: numberValue(r.letzter_preis),
+        letzter_kauf_datum: stringValue(r.letzter_kauf_datum),
       })))
     } catch {
       setArtikel([])

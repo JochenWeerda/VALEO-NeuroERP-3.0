@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/api-client'
+import { apiErrorDetail, errorMessage, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { MoreHorizontal, RefreshCw, Plus, Trash2, Calculator } from 'lucide-react'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AgentProcessPanel, AgentSuggestionBadge } from '@/components/agent'
@@ -119,24 +120,24 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       if (filterArtikelNr) p.set('artikelNr', filterArtikelNr)
       p.set('nur_unter_meldebestand', 'false')
       const qs = p.toString() ? `?${p.toString()}` : ''
-      const data = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)
-      const rows = (data || []).map(r => ({
-        id: r.article_id,
-        artikelNr: r.artikel_nr || '',
-        bezeichnung: r.artikel_bezeichnung || '',
-        verfBestand: r.ist_bestand ?? 0,
-        bestandMin: r.mindestbestand ?? 0,
-        bestandMax: r.maximalbestand ?? 0,
-        vorschlagMenge: r.vorschlag_menge ?? 0,
-        einheit: r.einheit || '',
+      const response = await apiClient.get<Record<string, unknown>[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)
+      const rows: ArtikelZeile[] = recordArrayFromResponse(response.data).map(r => ({
+        id: stringValue(r.article_id),
+        artikelNr: stringValue(r.artikel_nr),
+        bezeichnung: stringValue(r.artikel_bezeichnung),
+        verfBestand: numberValue(r.ist_bestand),
+        bestandMin: numberValue(r.mindestbestand),
+        bestandMax: numberValue(r.maximalbestand),
+        vorschlagMenge: numberValue(r.vorschlag_menge),
+        einheit: stringValue(r.einheit),
         lagerhalle: '',
         niederlassung: '',
         // Für Detailpanel
-        lieferant_name: r.lieferant_name,
-        lieferant_id: r.lieferant_id,
-        letzter_preis: r.letzter_preis,
-        letzter_kauf_datum: r.letzter_kauf_datum,
-        bedarf: r.bedarf ?? 0,
+        lieferant_name: stringValue(r.lieferant_name),
+        lieferant_id: stringValue(r.lieferant_id),
+        letzter_preis: numberValue(r.letzter_preis),
+        letzter_kauf_datum: stringValue(r.letzter_kauf_datum),
+        bedarf: numberValue(r.bedarf),
       }))
       setArtikel(rows)
     } catch {
@@ -166,13 +167,13 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       }] : [])
       // Kontrakte nachladen
       try {
-        const data = await apiClient.get<Record<string, unknown>[]>(
+        const response = await apiClient.get<Record<string, unknown>[]>(
           `/api/v1/einkauf/kontrakte?lieferant_id=${encodeURIComponent(selected.lieferant_id || '')}&status=aktiv`
         )
-        setKontrakte((data || []).map(k => ({
-          kontraktNr: k.kontraktnummer || '',
-          lieferant: k.lieferant_id || '',
-          restMenge: k.offene_menge ?? 0,
+        setKontrakte(recordArrayFromResponse(response.data).map(k => ({
+          kontraktNr: stringValue(k.kontraktnummer),
+          lieferant: stringValue(k.lieferant_id),
+          restMenge: numberValue(k.offene_menge),
           einhPreis: 0,
           einheit: 't',
         })))
@@ -646,7 +647,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
               })
               push('Anfrage erstellt und an Lieferanten weitergeleitet.')
             } catch (e: unknown) {
-              push(`Fehler: ${(e as Record<string, unknown>).response?.data?.detail ?? (e as Record<string, unknown>).message}`)
+              push(`Fehler: ${apiErrorDetail(e) ?? errorMessage(e)}`)
             }
           }}>
           Anfrage erstellen

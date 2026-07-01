@@ -1,6 +1,7 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -16,6 +17,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { inputValue, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 /** Mappt GET /finance/open-items/{id} (API) auf Masken-Felder (OTC-011). */
 function mapOpenItemApiToForm(row: Record<string, unknown>): Record<string, unknown> {
@@ -155,21 +157,21 @@ const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customer
       key: 'zahlungen',
       label: t('crud.fields.payments'),
       fields: []
-    } as Field,
+    },
     {
       key: 'zahlungen_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <ZahlungenTable
-          data={_data.zahlungen || []}
-          gesamtBetrag={_data.betrag || 0}
+          data={recordArrayFromResponse(_data.zahlungen)}
+          gesamtBetrag={numberValue(_data.betrag)}
           onChange={(zahlungen) => {
             const totalPaid = zahlungen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).betrag || 0), 0)
             onChange({
               ..._data,
               zahlungen,
-              offen: (_data.betrag || 0) - totalPaid,
+              offen: numberValue(_data.betrag) - totalPaid,
               letzteZahlung: zahlungen.length > 0 ? zahlungen[zahlungen.length - 1].datum : _data.letzteZahlung
             })
           }}
@@ -204,8 +206,8 @@ const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customer
       key: 'ausgleichshistorie',
       label: t('crud.fields.settlementHistory') ?? 'Ausgleichshistorie',
       fields: [],
-      customRender: (tabData: Record<string, unknown>) => tabData?.id ? <SettlementsList opId={tabData.id} t={t} /> : <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'OP speichern, um die Ausgleichshistorie zu sehen.'}</p>
-    } as Field,
+      customRender: (tabData: Record<string, unknown>) => stringValue(tabData?.id) ? <SettlementsList opId={stringValue(tabData.id)} t={t} /> : <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'OP speichern, um die Ausgleichshistorie zu sehen.'}</p>
+    },
     {
       key: 'notizen',
       label: t('crud.fields.notes'),
@@ -235,7 +237,7 @@ const createOpDebitorenConfig = (t: TFunction, entityTypeLabel: string, customer
       update: '/api/v1/finance/open-items/{id}',
       delete: '/api/v1/finance/open-items/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -300,7 +302,7 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
                 <td className="px-4 py-2 border">
                   <input
                     type="date"
-                    value={zahlung.datum}
+                    value={inputValue(zahlung.datum)}
                     onChange={(e) => updateZahlung(index, 'datum', e.target.value)}
                     className="w-full p-1 border rounded"
                   />
@@ -309,14 +311,14 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
                   <input
                     type="number"
                     step="0.01"
-                    value={zahlung.betrag}
+                    value={inputValue(zahlung.betrag)}
                     onChange={(e) => updateZahlung(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
                 </td>
                 <td className="px-4 py-2 border">
                   <select
-                    value={zahlung.typ}
+                    value={inputValue(zahlung.typ)}
                     onChange={(e) => updateZahlung(index, 'typ', e.target.value)}
                     className="w-full p-1 border rounded"
                   >
@@ -329,7 +331,7 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={zahlung.referenz || ''}
+                    value={inputValue(zahlung.referenz)}
                     onChange={(e) => updateZahlung(index, 'referenz', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.paymentReference')}
@@ -411,7 +413,7 @@ export default function OPDebitorenPage(): JSX.Element {
   const { data: customers } = useQuery({
     queryKey: ['crm', 'customers', 'debitor-select'],
     queryFn: async () => {
-      const res = await apiClient.get<Array<{ id: string; customer_number?: string; company_name?: string; name?: string }>>('/api/v1/crm/customers?limit=500')
+      const res = await apiClient.get<Array<{ id: string; customer_number?: string; company_name?: string; name?: string }>>('/api/v1/crm/customers/?limit=500')
       return (Array.isArray(res) ? res : []).map((c) => ({
         value: c.customer_number ?? c.id,
         label: `${c.customer_number ?? c.id} - ${c.company_name ?? c.name ?? ''}`.trim(),
@@ -481,38 +483,39 @@ export default function OPDebitorenPage(): JSX.Element {
       // Zahlung buchen - fügt automatisch eine neue Zahlung hinzu
       const newZahlung = {
         datum: new Date().toISOString().split('T')[0],
-        betrag: formData.offen || 0,
+        betrag: numberValue(formData.offen),
         typ: 'zahlung' as const,
         referenz: `Z-${Date.now()}`
       }
 
-      const updatedZahlungen = [...(formData.zahlungen || []), newZahlung]
+      const updatedZahlungen = [...recordArrayFromResponse(formData.zahlungen), newZahlung]
       const totalPaid = updatedZahlungen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).betrag || 0), 0)
 
       formData.zahlungen = updatedZahlungen
-      formData.offen = (formData.betrag || 0) - totalPaid
+      formData.offen = numberValue(formData.betrag) - totalPaid
       formData.letzteZahlung = newZahlung.datum
 
       toast.success(t('crud.messages.paymentRecorded', { amount: newZahlung.betrag.toFixed(2) }))
     } else if (action === 'skonto') {
       // Skonto nutzen
-      if (!formData.skontoBetrag || formData.skontoBetrag <= 0) {
+      const discountAmount = numberValue(formData.skontoBetrag)
+      if (discountAmount <= 0) {
         toast.error(t('crud.messages.noDiscountAvailable'))
         return
       }
 
       const skontoZahlung = {
         datum: new Date().toISOString().split('T')[0],
-        betrag: formData.skontoBetrag,
+        betrag: discountAmount,
         typ: 'skonto' as const,
         referenz: `SK-${Date.now()}`
       }
 
-      const updatedZahlungen = [...(formData.zahlungen || []), skontoZahlung]
+      const updatedZahlungen = [...recordArrayFromResponse(formData.zahlungen), skontoZahlung]
       const totalPaid = updatedZahlungen.reduce((sum, z) => sum + Number((z as Record<string, unknown>).betrag || 0), 0)
 
       formData.zahlungen = updatedZahlungen
-      formData.offen = (formData.betrag || 0) - totalPaid
+      formData.offen = numberValue(formData.betrag) - totalPaid
       formData.letzteZahlung = skontoZahlung.datum
 
       toast.success(t('crud.messages.discountUsed', { amount: skontoZahlung.betrag.toFixed(2) }))
@@ -529,21 +532,23 @@ export default function OPDebitorenPage(): JSX.Element {
       }
 
       // Process all payments as settlements
-      if (formData.zahlungen && formData.zahlungen.length > 0) {
+      const payments = recordArrayFromResponse(formData.zahlungen)
+      if (payments.length > 0) {
         try {
-          for (const zahlung of formData.zahlungen) {
-            if (zahlung.typ === 'storno') {
+          for (const zahlung of payments) {
+            const paymentType = stringValue(zahlung.typ)
+            if (paymentType === 'storno') {
               // Skip reversed payments
               continue
             }
 
             const settlement = {
               op_id: formData.id,
-              payment_amount: zahlung.betrag,
-              payment_date: zahlung.datum,
-              payment_reference: zahlung.referenz || `Z-${Date.now()}`,
-              payment_type: zahlung.typ === 'skonto' ? 'discount' : 'payment',
-              notes: zahlung.typ === 'gutschrift' ? t('crud.entities.creditNote') : null
+              payment_amount: numberValue(zahlung.betrag),
+              payment_date: stringValue(zahlung.datum),
+              payment_reference: stringValue(zahlung.referenz, `Z-${Date.now()}`),
+              payment_type: paymentType === 'skonto' ? 'discount' : 'payment',
+              notes: paymentType === 'gutschrift' ? t('crud.entities.creditNote') : null
             }
 
             await apiClient.post(`/api/v1/finance/open-items/${String(formData.id ?? '')}/settle`, settlement)
@@ -581,11 +586,11 @@ export default function OPDebitorenPage(): JSX.Element {
         const nextLevel = (Number(formData.mahnstufe ?? 0)) + 1
         await apiClient.post('/api/v1/finance/dunning', {
           op_id: formData.id,
-          debtor_id: formData.debitorId || 'unknown',
+          debtor_id: stringValue(formData.debitorId, 'unknown'),
           dunning_level: nextLevel,
           dunning_date: today,
-          due_date: formData.faelligkeit || today,
-          open_amount: formData.offen ?? formData.betrag ?? 0,
+          due_date: stringValue(formData.faelligkeit, today),
+          open_amount: numberValue(formData.offen, numberValue(formData.betrag)),
         })
         formData.mahnstufe = nextLevel
         toast.success(t('crud.messages.dunningCreated', { level: formData.mahnstufe }))
@@ -605,7 +610,7 @@ export default function OPDebitorenPage(): JSX.Element {
         toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-        const msg = error.response?.data?.detail ?? error.message
+        const msg = error.response?.data?.detail ?? error.message ?? t('common.error')
         toast.error(msg)
       }
     }
@@ -621,8 +626,10 @@ export default function OPDebitorenPage(): JSX.Element {
     }
     navigate('/finance/offene-posten')
   }
+  const openAmount = numberValue(data?.offen)
+  const dunningLevel = numberValue(data?.mahnstufe)
   const operationalStatus = normalizeOperationalStatus(
-    fibuCockpit.dunning.overdue_items > 0 ? 'wartet_auf_mensch' : data?.offen > 0 ? 'in_pruefung' : 'abgeschlossen',
+    fibuCockpit.dunning.overdue_items > 0 ? 'wartet_auf_mensch' : openAmount > 0 ? 'in_pruefung' : 'abgeschlossen',
   )
   const operationalBlocker = noOpMatch
     ? `Kein Debitoren-OP fuer Rechnungsnr. "${rechnungsnrParam}" gefunden.`
@@ -635,22 +642,22 @@ export default function OPDebitorenPage(): JSX.Element {
       items: [
         { label: 'OP-Nummer', value: String(data?.opNummer ?? rechnungsnrParam ?? 'Noch offen') },
         { label: 'Debitor', value: String(data?.debitorId ?? 'Nicht zugeordnet') },
-        { label: 'Offener Betrag', value: `${Number(data?.offen ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` },
+        { label: 'Offener Betrag', value: `${openAmount.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` },
       ],
     },
     {
       title: 'Governance',
       items: [
-        { label: 'Mahnstufe', value: `${Number(data?.mahnstufe ?? 0)}` },
+        { label: 'Mahnstufe', value: `${dunningLevel}` },
         { label: 'Rueckstand', value: `${fibuCockpit.dunning.overdue_amount.toFixed(2)} EUR` },
-        { label: 'Naechste Aktion', value: Number(data?.offen ?? 0) > 0 ? 'Ausgleich oder Mahnung' : 'Vorgang abgeschlossen' },
+        { label: 'Naechste Aktion', value: openAmount > 0 ? 'Ausgleich oder Mahnung' : 'Vorgang abgeschlossen' },
       ],
     },
   ]
   const timelineItems = [
     { label: 'Debitoren-OP aktiv', detail: String(data?.opNummer ?? rechnungsnrParam ?? 'Neuer OP') },
     ...(showOtcHandoverHint ? [{ label: 'OTC-Handover', detail: rechnungsnrParam ? `Rechnung ${rechnungsnrParam}` : `OP ${opIdParam}` }] : []),
-    ...(Number(data?.offen ?? 0) > 0 ? [{ label: 'Offener Betrag', detail: `${Number(data?.offen ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` }] : []),
+    ...(openAmount > 0 ? [{ label: 'Offener Betrag', detail: `${openAmount.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` }] : []),
   ]
 
   return (
@@ -661,7 +668,7 @@ export default function OPDebitorenPage(): JSX.Element {
         status={operationalStatus}
         owner="FIBU / Debitoren"
         blocker={operationalBlocker}
-        nextAction={Number(data?.offen ?? 0) > 0 ? 'Zahlung erfassen, ausgleichen oder Mahnung erzeugen' : 'Vorgang nur noch revisionssicher nachhalten'}
+        nextAction={openAmount > 0 ? 'Zahlung erfassen, ausgleichen oder Mahnung erzeugen' : 'Vorgang nur noch revisionssicher nachhalten'}
         caseLabel={String(data?.opNummer ?? 'Debitoren-OP')}
         tags={['FIBU', 'Debitoren']}
       />

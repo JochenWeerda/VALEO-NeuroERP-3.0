@@ -19,6 +19,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/api-client'
+import {
+  recordArrayFromResponse,
+  stringValue,
+  type UnknownRecord,
+} from '@/lib/record-utils'
 
 export type Article = {
   id: string
@@ -39,6 +44,14 @@ export type Article = {
   ean?: string
   supplier_number?: string
   is_active?: boolean
+  article_group?: string
+  selection?: boolean
+  is_selected?: boolean
+  isVariant?: boolean
+  is_variant?: boolean
+  parent_article_id?: string
+  isAlternative?: boolean
+  is_alternative?: boolean
 }
 
 type ArtikelSuchDialogProps = {
@@ -49,6 +62,41 @@ type ArtikelSuchDialogProps = {
 }
 
 const SEARCH_DEBOUNCE_MS = 300
+
+function booleanValue(value: unknown, fallback = false): boolean {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+function mapArticle(record: UnknownRecord): Article {
+  const barcode = stringValue(record.barcode)
+  return {
+    id: stringValue(record.id),
+    articleNumber: stringValue(record.article_number ?? record.articleNumber),
+    description: stringValue(record.name ?? record.description).trim(),
+    description2: stringValue(record.description2 ?? record.description_2),
+    shortDescription: stringValue(record.short_description ?? record.shortDescription ?? record.suchbegriff),
+    articleType: stringValue(record.article_type ?? record.articleType ?? record.category),
+    unit: stringValue(record.unit ?? record.me),
+    matchcode2: stringValue(record.matchcode2 ?? record.matchcode_2 ?? record.suchbegriff),
+    articleGroup: stringValue(record.article_group ?? record.articleGroup ?? record.warengruppe ?? record.category),
+    customerArticleNumber: stringValue(record.customer_article_number ?? record.customerArticleNumber),
+    name: stringValue(record.name),
+    article_number: stringValue(record.article_number),
+    suchbegriff: stringValue(record.suchbegriff),
+    barcode,
+    ean: stringValue(record.ean ?? barcode),
+    supplier_number: stringValue(record.supplier_number),
+    is_active: booleanValue(record.is_active, true),
+    article_group: stringValue(record.article_group),
+    selection: booleanValue(record.selection),
+    is_selected: booleanValue(record.is_selected),
+    isVariant: booleanValue(record.isVariant),
+    is_variant: booleanValue(record.is_variant),
+    parent_article_id: stringValue(record.parent_article_id),
+    isAlternative: booleanValue(record.isAlternative),
+    is_alternative: booleanValue(record.is_alternative),
+  }
+}
 
 export function ArtikelSuchDialog({
   open,
@@ -87,53 +135,16 @@ export function ArtikelSuchDialog({
       params.append('search', debouncedSearchTerm)
       params.append('limit', '50')
 
-      const response = await apiClient.get<Record<string, unknown>>('/api/v1/articles', { params })
-
-      let items: Record<string, unknown>[] = []
-      if (Array.isArray(response)) {
-        items = response
-      } else if (response?.items && Array.isArray(response.items)) {
-        items = response.items
-      } else if (response?.data?.items && Array.isArray(response.data.items)) {
-        items = response.data.items
-      } else if (response?.data && Array.isArray(response.data)) {
-        items = response.data
-      }
-
-      if (items.length === 0 && response) {
-        for (const key of Object.keys(response)) {
-          if (Array.isArray((response as Record<string, unknown>)[key])) {
-            items = (response as Record<string, unknown>)[key]
-            break
-          }
-        }
-      }
-
-      // Map backend article format to frontend format
-      return items.map(a => ({
-        id: a.id,
-        articleNumber: a.article_number || a.articleNumber || '',
-        description: (a.name || a.description || '').trim(),
-        description2: a.description2 || a.description_2 || '',
-        shortDescription: a.short_description || a.shortDescription || a.suchbegriff || '',
-        articleType: a.article_type || a.articleType || a.category || '',
-        unit: a.unit || a.me || '',
-        matchcode2: a.matchcode2 || a.matchcode_2 || a.suchbegriff || '',
-        articleGroup: a.article_group || a.articleGroup || a.warengruppe || a.category || '',
-        customerArticleNumber: a.customer_article_number || a.customerArticleNumber || '',
-        name: a.name,
-        article_number: a.article_number,
-        suchbegriff: a.suchbegriff,
-        barcode: a.barcode,
-        ean: a.barcode,
-        supplier_number: a.supplier_number,
-        is_active: a.is_active ?? true,
-      }))
+      const response = await apiClient.get<unknown>('/api/v1/articles', { params })
+      return recordArrayFromResponse(response).map(mapArticle)
     },
     enabled: open && debouncedSearchTerm.length >= 2,
     staleTime: 30_000,
     retry: (failureCount, error) => {
-      if (error?.response?.status === 401) {
+      const status = error instanceof Error && 'response' in error
+        ? (error.response as { status?: number } | undefined)?.status
+        : undefined
+      if (status === 401) {
         return false
       }
       return failureCount < 3

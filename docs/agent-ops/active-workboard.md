@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-044 — FilterPlan Query Contract + ActionRuntime Anschluss
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-30 — Frontend serialisiert FilterPlan kanonisch als `filter_plan`; Backend akzeptiert `filter_plan` und den alten Alias `filterPlan`; generische Filter-Controls erzeugen Chips und loesen echte serverseitige Tabellen-Requests aus. `UniversalNativeDetailPage` ist nicht mehr No-op: Actions laufen ueber `useHumanActionDispatch`, verwenden die `commandEndpoint`-Definitionen aus der originalen `ScreenDefinition`, zeigen Fehler/Summary sichtbar an und refetchen Entity + Tabellen nach erfolgreicher Ausfuehrung.
+**Ziel:** Native Masken laufen durchgaengig ueber den neuen Maskengenerator-Vertrag: strukturierte Filter erreichen effektiv das Backend; Actions nutzen echte `commandEndpoint`-Definitionen statt No-op.
+**Dateibesitz:** `packages/frontend-web/src/components/mask-builder/runtime/*`, `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `packages/frontend-web/src/components/mask-builder/renderers/FastTableRenderer.tsx`, `app/api/v1/endpoints/mask_rollout_summaries.py`, `app/api/v1/endpoints/crm_360.py`, `tests/test_uix044_filter_plan_contract.py`, `packages/frontend-web/tests/e2e/universal-mask-filter-plan.spec.ts`.
+**Abnahme:** Vitest `table-query-state.test.ts` 7/7 gruen; Backend-Contract-Test `tests/test_uix044_filter_plan_contract.py` 3/3 gruen mit isoliertem Pytest-Lauf (normaler Pytest-Plugin-Start in dieser Umgebung zeitweise haengend); Playwright Chromium FilterPlan 1/1 gruen; `pnpm --dir packages/frontend-web run type-check` gruen; `pnpm --dir packages/frontend-web run build` gruen; `pnpm --dir packages/bff run build` gruen.
+
+## UIX-QA-044 — Frontend-Typecheck + Universal-Masken Browser-Gate
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-30 — Frontend-Typecheck wieder grün; Frontend- und BFF-Build neu ausgeführt; Universal-Masken mit Playwright im echten Chromium gegen Vite-Dev-Server und aktivierten Universal-Flags getestet. CRM-360 Pilot ergänzt `contacts` als Supplemental-Tab, damit `screen-summary.available_tabs=contacts` wieder einen lazy Ansprechpartner-Tab erzeugt. E2E-Mocks auf aktuelle ScreenDefinition-URL-Normalisierung (`crm__customer-360`, `sales__sales-order`) und Query-Parameter bei Lazy-Tab-Requests nachgezogen.
+**Ziel:** Rote Frontend-TS-Gates sauber beseitigen, neuen Maskengenerator real im Browser validieren und Build-Stand für Frontend/Backend nachweisen.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage.tsx`, `packages/frontend-web/tests/e2e/*universal*`, `packages/frontend-web/tests/e2e/mask-render-performance.spec.ts`, `docs/architecture/uix/universal-mask-runtime-status.md`.
+**Abnahme:** `pnpm --dir packages/frontend-web run type-check` grün; `pnpm --dir packages/frontend-web run build` grün; `pnpm --dir packages/bff run build` grün; Playwright Universal-Masken-Satz 8/8 grün.
+
 ## UIX-043b — Mask-API Blocker-Fixes (Path + Entity-Stub)
 
 **Von:** Codex

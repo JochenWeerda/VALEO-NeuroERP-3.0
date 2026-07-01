@@ -29,6 +29,7 @@ import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBanner'
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import {
   CrudCapabilityChecklist,
   ManagementDecisionPanel,
@@ -450,7 +451,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         const handoverCustomer: Customer | null =
           salesHandover.customerNumber || salesHandover.customerName
             ? {
-                id: response.customer_id ?? salesHandover.customerNumber ?? '',
+                id: stringValue(response.customer_id ?? salesHandover.customerNumber),
                 customerNumber: salesHandover.customerNumber ?? '',
                 name: salesHandover.customerName ?? salesHandover.customerNumber ?? '',
                 debitorAccount: salesHandover.customerNumber ?? '',
@@ -460,22 +461,30 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         if (response.customer_id) {
           try {
             const customerResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${response.customer_id}`)
-            const cd = customerResponse?.data ?? customerResponse
+            const cd = customerResponse.data
             if (!cd) throw new Error('Customer detail response is empty')
             customer = {
-              id: cd.id ?? response.customer_id,
-              customerNumber: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.customerNumber ?? '',
-              name: cd.company_name ?? cd.name ?? handoverCustomer?.name ?? '',
-              debitorAccount: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.debitorAccount ?? '',
-              representative: cd.contact_person ?? cd.representative,
-              postalCode: cd.postal_code ?? cd.postalCode,
-              city: cd.city,
-              creditLimit: cd.credit_limit?.toString(),
-              address: cd.address,
-              phone: cd.phone,
-              email: cd.email,
-              chefanweisung: cd.chefanweisung ?? cd.executive_note,
-              paymentTerms: cd.payment_terms,
+              id: stringValue(cd.id, stringValue(response.customer_id)),
+              customerNumber: stringValue(cd.customer_number ?? cd.customerNumber, handoverCustomer?.customerNumber ?? ''),
+              name: stringValue(cd.company_name ?? cd.name, handoverCustomer?.name ?? ''),
+              debitorAccount: stringValue(cd.customer_number ?? cd.customerNumber, handoverCustomer?.debitorAccount ?? ''),
+              representative: stringValue(cd.contact_person ?? cd.representative) || undefined,
+              postalCode: stringValue(cd.postal_code ?? cd.postalCode) || undefined,
+              city: stringValue(cd.city) || undefined,
+              creditLimit: stringValue(cd.credit_limit) || undefined,
+              address: isRecord(cd.address)
+                ? {
+                    street: stringValue(cd.address.street),
+                    postalCode: stringValue(cd.address.postalCode ?? cd.address.postal_code),
+                    city: stringValue(cd.address.city),
+                    phone: stringValue(cd.address.phone),
+                    fax: stringValue(cd.address.fax),
+                  }
+                : undefined,
+              phone: stringValue(cd.phone) || undefined,
+              email: stringValue(cd.email) || undefined,
+              chefanweisung: stringValue(cd.chefanweisung ?? cd.executive_note) || undefined,
+              paymentTerms: cd.payment_terms != null ? numberValue(cd.payment_terms) : undefined,
             }
           } catch { /* Kunden-Prefill ist optional — Fehler blockiert nicht das Öffnen des Auftrags */ }
         }
@@ -520,22 +529,31 @@ export default function OrderEditorLegacyPage(): JSX.Element {
     let active = true
     const loadWorkflowCustomer = async (): Promise<void> => {
       try {
-        const cd = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${workflowCustomerId}`)
+        const cdResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/customers/${workflowCustomerId}`)
+        const cd = cdResponse.data
         if (!active) return
         const customer: Customer = {
-          id: cd.id ?? workflowCustomerId,
-          customerNumber: cd.customer_number ?? cd.customerNumber ?? workflowCustomerNumber,
-          name: cd.company_name ?? cd.name ?? workflowCustomerName,
-          debitorAccount: cd.customer_number ?? cd.customerNumber ?? workflowCustomerNumber,
-          representative: cd.contact_person ?? cd.representative,
-          postalCode: cd.postal_code ?? cd.postalCode,
-          city: cd.city,
-          creditLimit: cd.credit_limit?.toString(),
-          address: cd.address,
-          phone: cd.phone,
-          email: cd.email,
-          chefanweisung: cd.chefanweisung ?? cd.executive_note,
-          paymentTerms: cd.payment_terms,
+          id: stringValue(cd.id, workflowCustomerId),
+          customerNumber: stringValue(cd.customer_number ?? cd.customerNumber, workflowCustomerNumber),
+          name: stringValue(cd.company_name ?? cd.name, workflowCustomerName),
+          debitorAccount: stringValue(cd.customer_number ?? cd.customerNumber, workflowCustomerNumber),
+          representative: stringValue(cd.contact_person ?? cd.representative) || undefined,
+          postalCode: stringValue(cd.postal_code ?? cd.postalCode) || undefined,
+          city: stringValue(cd.city) || undefined,
+          creditLimit: stringValue(cd.credit_limit) || undefined,
+          address: isRecord(cd.address)
+            ? {
+                street: stringValue(cd.address.street),
+                postalCode: stringValue(cd.address.postalCode ?? cd.address.postal_code),
+                city: stringValue(cd.address.city),
+                phone: stringValue(cd.address.phone),
+                fax: stringValue(cd.address.fax),
+              }
+            : undefined,
+          phone: stringValue(cd.phone) || undefined,
+          email: stringValue(cd.email) || undefined,
+          chefanweisung: stringValue(cd.chefanweisung ?? cd.executive_note) || undefined,
+          paymentTerms: cd.payment_terms != null ? numberValue(cd.payment_terms) : undefined,
         }
         setState((prev) => ({ ...prev, customer }))
       } catch {
@@ -581,10 +599,11 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       if (!bestellInboxId) return
       try {
         const res = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/bestell-inbox/${bestellInboxId}`)
-        const data = res.data ?? res
-        const parsed = data?.parsed
-        if (!active || !parsed?.positionen?.length) return
-        const positionen = (parsed.positionen as BestellInboxPosition[]).map((p, i) => buildPositionFromBestell(i, p))
+        const data = res.data
+        const parsed = isRecord(data.parsed) ? data.parsed : {}
+        const parsedPositionen = Array.isArray(parsed.positionen) ? parsed.positionen as BestellInboxPosition[] : []
+        if (!active || parsedPositionen.length === 0) return
+        const positionen = parsedPositionen.map((p, i) => buildPositionFromBestell(i, p))
         setState((prev) => prev.positionen.length > 0 ? prev : {
           ...prev,
           positionen,
@@ -747,11 +766,11 @@ export default function OrderEditorLegacyPage(): JSX.Element {
     }))
     // Angebote für Kunden laden
     try {
-      const offers = await apiClient.get<Record<string, unknown>[]>(`/api/v1/sales/quotes?customer_id=${c.id}`)
-      const mapped = (offers || []).map((o) => ({
-        id: o.id,
-        angebotNr: o.quote_number || o.number || o.id,
-        datum: o.created_at?.split('T')[0] || '',
+      const offers = await apiClient.get<unknown>(`/api/v1/sales/quotes?customer_id=${c.id}`)
+      const mapped = recordArrayFromResponse(offers.data).map((o) => ({
+        id: stringValue(o.id),
+        angebotNr: stringValue(o.quote_number ?? o.number ?? o.id),
+        datum: stringValue(o.created_at).split('T')[0] || '',
       }))
       setAngebote(mapped)
       setVorgaengerCount(mapped.length)
@@ -802,20 +821,20 @@ export default function OrderEditorLegacyPage(): JSX.Element {
   }
 
   function handleArticleSelect(article: Record<string, unknown>) {
-    const listenpreis = article.sales_price || article.salesPrice || 0
-    const ekPreis = article.purchase_price || article.purchasePrice || 0
-    const artikelGewicht = article.weight || article.gewicht || 0
+    const listenpreis = numberValue(article.sales_price ?? article.salesPrice)
+    const ekPreis = numberValue(article.purchase_price ?? article.purchasePrice)
+    const artikelGewicht = numberValue(article.weight ?? article.gewicht)
     const artikelGefahrgutPunkte =
-      article.gefahrgut_punkte || article.gefahrgutPunkte ||
-      (article.gefahrgutklasse ? parseFloat(article.gefahrgutklasse) || 0 : 0)
-    const mwstProzent = Number(article.mehrwertsteuer_prozent || article.mwstProzent || 19)
+      numberValue(article.gefahrgut_punkte ?? article.gefahrgutPunkte) ||
+      (article.gefahrgutklasse ? numberValue(article.gefahrgutklasse) : 0)
+    const mwstProzent = numberValue(article.mehrwertsteuer_prozent ?? article.mwstProzent, 19)
     setCurrentPosition((prev) => ({
       ...prev,
-      artikelNr: article.article_number || article.articleNumber || '',
-      artikelId: article.id || null,
-      artikelBezeichnung: article.name || article.description || '',
-      artikelBezeichnung2: article.description2 || '',
-      einheit: article.unit || 'Stk',
+      artikelNr: stringValue(article.article_number ?? article.articleNumber),
+      artikelId: stringValue(article.id) || null,
+      artikelBezeichnung: stringValue(article.name ?? article.description),
+      artikelBezeichnung2: stringValue(article.description2),
+      einheit: stringValue(article.unit, 'Stk'),
       listenpreis,
       ekPreis,
       mwstProzent,
@@ -1205,10 +1224,11 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         const response = await apiClient.get<AuftragResponse | null>('/api/v1/sales/orders/last', {
           params: { customer_id: state.customer?.id || undefined },
         })
-        if (!response) { push('Kein vorheriger Auftrag gefunden'); return }
+        const previousOrder = response.data
+        if (!previousOrder) { push('Kein vorheriger Auftrag gefunden'); return }
         setState((prev) => ({
           ...prev,
-          positionen: mapResponseItemsToPositionen(response.items || []),
+          positionen: mapResponseItemsToPositionen(previousOrder.items || []),
         }))
         push('Daten vom vorherigen Auftrag übernommen')
       } catch (_rawErr: unknown) {

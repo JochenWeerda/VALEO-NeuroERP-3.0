@@ -129,9 +129,5 @@ export const entries: AutoGroupRouteEntry[] = [
     "module": "@/pages/finance/zahlungslauf-kreditoren",
     "path": "zahlungslauf-kreditoren"
   },
-  { "module": "@/pages/finance/reports/analyticschartcontent", "path": "reports/analyticschartcontent" },
-  { "module": "@/pages/finance/reports/charts/analyticsbalancesharechart", "path": "reports/charts/analyticsbalancesharechart" },
-  { "module": "@/pages/finance/reports/charts/analyticscashflowchart", "path": "reports/charts/analyticscashflowchart" },
-  { "module": "@/pages/finance/reports/financialcardsparkline", "path": "reports/financialcardsparkline" },
   { "module": "@/pages/finance/skonto-optimizer", "path": "skonto-optimizer" },
 ]

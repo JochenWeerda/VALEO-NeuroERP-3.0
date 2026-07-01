@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
 interface ActionHandler {
-  (_action: string, _data?: Record<string, unknown>): Promise<void> | void
+  (_action: string, _data: Record<string, unknown>): Promise<void> | void
 }
 
 export function useMaskActions(onAction?: ActionHandler) {
@@ -17,7 +17,7 @@ export function useMaskActions(onAction?: ActionHandler) {
     setLoadingActionKey(actionKey)
     try {
       if (onAction) {
-        await onAction(actionKey, data)
+        await onAction(actionKey, data ?? {})
       }
 
       // Show success toast for common actions that don't manage their own feedback

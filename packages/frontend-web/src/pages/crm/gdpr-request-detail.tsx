@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -15,6 +16,7 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 import { useAuth } from '@/hooks/useAuth'
 import { ArrowLeft, History, Download, FileText } from 'lucide-react'
+import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 
 // Zod-Schema für GDPR-Requests
@@ -240,7 +242,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
     const loadHistory = async () => {
       try {
         const response = await httpClient.get<unknown[]>(`/api/v1/gdpr/requests/${requestId}/history`)
-        setHistory(response.data || [])
+        setHistory(recordArrayFromResponse(response.data))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
@@ -263,39 +265,47 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
 
   return (
     <div className="space-y-4">
-      {history.map((entry) => (
-        <Card key={entry.id}>
+      {history.map((entry) => {
+        const entryId = stringValue(entry.id)
+        const action = stringValue(entry.action)
+        const oldStatus = stringValue(entry.old_status)
+        const newStatus = stringValue(entry.new_status)
+        const notes = stringValue(entry.notes)
+        const changedBy = stringValue(entry.changed_by)
+        const changedAt = stringValue(entry.changed_at)
+        return (
+        <Card key={entryId}>
           <CardContent className="pt-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="font-medium">{t(`crud.actions.${String(entry.action)}`, { defaultValue: entry.action as string })}</div>
+                <div className="font-medium">{t(`crud.actions.${action}`, { defaultValue: action })}</div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  {entry.old_status && (
+                  {oldStatus && (
                     <span className="line-through text-red-600">
-                      {getStatusLabel(t, entry.old_status, entry.old_status)}
+                      {getStatusLabel(t, oldStatus, oldStatus)}
                     </span>
                   )}
-                  {entry.old_status && entry.new_status && ' → '}
-                  {entry.new_status && (
+                  {oldStatus && newStatus && ' → '}
+                  {newStatus && (
                     <span className="text-green-600">
-                      {getStatusLabel(t, entry.new_status, entry.new_status)}
+                      {getStatusLabel(t, newStatus, newStatus)}
                     </span>
                   )}
                 </div>
-                {entry.notes && (
+                {notes && (
                   <div className="text-xs text-muted-foreground mt-1">
-                    {entry.notes}
+                    {notes}
                   </div>
                 )}
               </div>
               <div className="text-right text-sm text-muted-foreground">
-                <div>{entry.changed_by}</div>
-                <div>{formatDate(entry.changed_at)}</div>
+                <div>{changedBy}</div>
+                <div>{changedAt ? formatDate(changedAt) : '-'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
-      ))}
+      )})}
     </div>
   )
 }
@@ -434,6 +444,8 @@ export default function GDPRRequestDetailPage(): JSX.Element {
       </div>
     )
   }
+  const responseFilePath = stringValue(data?.response_file_path)
+  const responseFileFormat = stringValue(data?.response_file_format, 'json')
 
   return (
     <div className="space-y-4">
@@ -479,7 +491,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
               </CardContent>
             </Card>
 
-            {data?.response_file_path && (
+            {responseFilePath && (
               <Card className="mt-4">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -490,7 +502,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
                 <CardContent>
                   <div className="space-y-2">
                     <div className="text-sm">
-                      <strong>{t('crud.fields.fileFormat')}:</strong> {data.response_file_format?.toUpperCase()}
+                      <strong>{t('crud.fields.fileFormat')}:</strong> {responseFileFormat.toUpperCase()}
                     </div>
                     <Button
                       onClick={() => void handleAction('downloadExport')}

@@ -14,7 +14,7 @@ export class CrudPrintService {
    * Print list data as PDF
    */
   async printListAsPDF(
-    data: Record<string, unknown>[],
+    data: object[],
     columns: Array<{ header: string; field: string }>,
     options?: PrintOptions
   ): Promise<void> {
@@ -55,7 +55,7 @@ export class CrudPrintService {
    * Print list data as Excel
    */
   async printListAsExcel(
-    data: Record<string, unknown>[],
+    data: object[],
     columns: Array<{ header: string; field: string }>,
     options?: PrintOptions
   ): Promise<void> {
@@ -96,7 +96,7 @@ export class CrudPrintService {
    * Print detail as PDF
    */
   async printDetailAsPDF(
-    entity: Record<string, unknown>,
+    entity: object,
     entityType: string,
     options?: PrintOptions
   ): Promise<void> {

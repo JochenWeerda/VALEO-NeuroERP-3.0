@@ -334,6 +334,12 @@ async def get_customer_tab_data(
     sort: Optional[str] = Query(None),
     sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
     filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    filter_plan_legacy: Optional[str] = Query(
+        None,
+        alias="filterPlan",
+        include_in_schema=False,
+        description="Deprecated camelCase alias for filter_plan.",
+    ),
     db: Session = Depends(get_db),
 ):
     """Limitierte Tab-Listen fuer den Universal Mask Generator (read-only)."""
@@ -353,11 +359,12 @@ async def get_customer_tab_data(
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
 
     parsed_filter_plan: dict | None = None
-    if filter_plan:
+    raw_filter_plan = filter_plan or filter_plan_legacy
+    if raw_filter_plan:
         try:
-            parsed_filter_plan = json.loads(filter_plan)
+            parsed_filter_plan = json.loads(raw_filter_plan)
         except (ValueError, TypeError):
-            raise HTTPException(status_code=422, detail="filterPlan must be valid JSON")
+            raise HTTPException(status_code=422, detail="filter_plan must be valid JSON")
 
     table_key, items = _fetch_customer_tab_items(
         db,

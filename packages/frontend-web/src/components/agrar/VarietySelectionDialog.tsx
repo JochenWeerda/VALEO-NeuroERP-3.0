@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { nullableStringValue, recordArrayFromResponse, stringValue, type UnknownRecord } from '@/lib/record-utils'
 
 export type Variety = {
   id: string
@@ -42,6 +43,16 @@ const STANDARD_VARIETIES: Variety[] = [
   { id: '5', variety_number: '400', name: 'Raps', description: 'Standard-Raps', crop_type: 'RAPESEED' },
 ]
 
+function mapVariety(value: UnknownRecord): Variety {
+  return {
+    id: stringValue(value.id),
+    variety_number: stringValue(value.variety_number ?? value.varietyNumber),
+    name: stringValue(value.name),
+    description: nullableStringValue(value.description),
+    crop_type: nullableStringValue(value.crop_type ?? value.cropType),
+  }
+}
+
 export function VarietySelectionDialog({
   open,
   onClose,
@@ -54,8 +65,8 @@ export function VarietySelectionDialog({
     queryKey: ['agrar-varieties'],
     queryFn: async () => {
       try {
-        const res = await apiClient.get<Variety[]>('/api/v1/agrar/varieties')
-        return Array.isArray(res) ? res : (res as Record<string, unknown>)?.items ?? []
+        const res = await apiClient.get<unknown>('/api/v1/agrar/varieties')
+        return recordArrayFromResponse(res).map(mapVariety)
       } catch {
         return []
       }

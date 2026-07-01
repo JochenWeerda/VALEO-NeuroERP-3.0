@@ -1,5 +1,6 @@
-﻿import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useNavigate } from '@/app/routing/typed-router'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
@@ -9,6 +10,7 @@ import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 // Konfiguration für Campaign Templates ListReport
 const createTemplatesConfig = (t: TFunction, entityTypeLabel: string, handleAction: (actionKey: string, data?: Record<string, unknown>) => Promise<void>): ListConfig => ({
@@ -36,7 +38,8 @@ const createTemplatesConfig = (t: TFunction, entityTypeLabel: string, handleActi
           push: t('crud.campaigns.types.push'),
           social: t('crud.campaigns.types.social'),
         }
-        return <Badge variant="outline">{typeLabels[value] || value}</Badge>
+        const type = stringValue(value)
+        return <Badge variant="outline">{typeLabels[type] || type}</Badge>
       }
     },
     {
@@ -63,14 +66,14 @@ const createTemplatesConfig = (t: TFunction, entityTypeLabel: string, handleActi
       label: t('crud.fields.usageCount'),
       labelKey: 'crud.fields.usageCount',
       sortable: true,
-      render: (value) => value?.toLocaleString() || '0'
+      render: (value) => numberValue(value).toLocaleString()
     },
     {
       key: 'created_at',
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -100,19 +103,19 @@ const createTemplatesConfig = (t: TFunction, entityTypeLabel: string, handleActi
       key: 'activate',
       label: t('crud.actions.activate'),
       type: 'primary',
-      onClick: () => handleAction('activate', null)
+      onClick: () => handleAction('activate')
     },
     {
       key: 'deactivate',
       label: t('crud.actions.deactivate'),
       type: 'secondary',
-      onClick: () => handleAction('deactivate', null)
+      onClick: () => handleAction('deactivate')
     },
     {
       key: 'export',
       label: t('crud.actions.export'),
       type: 'secondary',
-      onClick: () => handleAction('export', null)
+      onClick: () => handleAction('export')
     }
   ],
   actions: [
@@ -126,19 +129,19 @@ const createTemplatesConfig = (t: TFunction, entityTypeLabel: string, handleActi
       key: 'edit',
       label: t('crud.actions.edit'),
       type: 'secondary',
-      onClick: item => handleAction('edit', item)
+      onClick: item => handleAction('edit', isRecord(item) ? item : undefined)
     },
     {
       key: 'delete',
       label: t('crud.actions.delete'),
       type: 'danger',
-      onClick: item => handleAction('delete', item)
+      onClick: item => handleAction('delete', isRecord(item) ? item : undefined)
     },
     {
       key: 'duplicate',
       label: t('crud.actions.duplicate'),
       type: 'secondary',
-      onClick: item => handleAction('duplicate', item)
+      onClick: item => handleAction('duplicate', isRecord(item) ? item : undefined)
     }
   ],
   api: {
@@ -164,8 +167,8 @@ export default function CampaignTemplatesPage(): JSX.Element {
   const { data: queryData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['crm', 'campaign-templates'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/v1/crm/campaigns/templates')
-      const items = Array.isArray(r.data) ? r.data : (( r.data as Record<string, unknown>).data || [])
+      const r = await apiClient.get<Record<string, unknown>[] | { data?: Record<string, unknown>[] }>('/api/v1/crm/campaigns/templates')
+      const items = recordArrayFromResponse(r.data)
       return { items, total: items.length }
     },
     staleTime: 2 * 60 * 1000,
@@ -180,15 +183,15 @@ export default function CampaignTemplatesPage(): JSX.Element {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'campaign-templates'] })
 
-  const handleAction = async (action: string, item: Record<string, unknown> | null = null) => {
+  const handleAction = async (action: string, item?: Record<string, unknown>) => {
     if (action === 'create') {
       navigate('/crm/campaign-template/new')
     } else if (action === 'edit' && item) {
-      navigate(`/crm/campaign-template/${item.id as string}`)
+      navigate(`/crm/campaign-template/${stringValue(item.id)}`)
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/api/v1/crm/campaigns/templates/${item.id as string}`)
+          await apiClient.delete(`/api/v1/crm/campaigns/templates/${stringValue(item.id)}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })
@@ -202,7 +205,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'duplicate' && item) {
       try {
-        const response = await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id as string}/duplicate`)
+        const response = await apiClient.post(`/api/v1/crm/campaigns/templates/${stringValue(item.id)}/duplicate`)
         if (response.data) {
           toast({
             title: t('crud.messages.templateDuplicated'),
@@ -217,7 +220,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'activate' && item) {
       try {
-        await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id as string}/activate`)
+        await apiClient.post(`/api/v1/crm/campaigns/templates/${stringValue(item.id)}/activate`)
         toast({
           title: t('crud.messages.templateActivated'),
         })
@@ -230,7 +233,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'deactivate' && item) {
       try {
-        await apiClient.post(`/api/v1/crm/campaigns/templates/${item.id as string}/deactivate`)
+        await apiClient.post(`/api/v1/crm/campaigns/templates/${stringValue(item.id)}/deactivate`)
         toast({
           title: t('crud.messages.templateDeactivated'),
         })

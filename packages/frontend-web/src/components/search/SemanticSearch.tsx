@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Search, Loader2, User, Package, FileText, ArrowRight } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type SearchResult = {
   id: string
@@ -26,6 +27,17 @@ type SearchResult = {
   score: number
   link: string
   metadata?: Record<string, string>
+}
+
+function resultType(value: unknown): SearchResult['type'] {
+  return value === 'customer' || value === 'article' || value === 'document' ? value : 'document'
+}
+
+function stringMetadata(value: unknown): Record<string, string> | undefined {
+  if (!isRecord(value)) return undefined
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+  )
 }
 
 export function SemanticSearch() {
@@ -67,22 +79,24 @@ export function SemanticSearch() {
       
       try {
         // Call RAG API
-        const response = await apiClient.get('/api/v1/rag/search', {
+        const response = await apiClient.get<unknown>('/api/v1/rag/search', {
           params: { query, limit: 10 }
         })
 
-        const data = response.data
-
-        // Transform to SearchResults
-        const searchResults: SearchResult[] = ((data as Record<string, unknown>).results as Record<string, unknown>[] | undefined)?.map(r => ({
-          id: r.id || r.metadata?.id || 'unknown',
-          type: r.metadata?.type || 'document',
-          title: r.metadata?.name || r.document || 'Unbekannt',
-          subtitle: r.metadata?.description || r.metadata?.email,
-          score: r.score || 0,
-          link: getLink(r.metadata?.type, r.metadata?.id || r.id),
-          metadata: r.metadata
-        })) || []
+        const searchResults: SearchResult[] = recordArrayFromResponse(response.data).map((r) => {
+          const metadata = isRecord(r.metadata) ? r.metadata : {}
+          const type = resultType(metadata.type)
+          const id = stringValue(metadata.id ?? r.id, 'unknown')
+          return {
+            id,
+            type,
+            title: stringValue(metadata.name ?? r.document, 'Unbekannt'),
+            subtitle: stringValue(metadata.description ?? metadata.email) || undefined,
+            score: numberValue(r.score),
+            link: getLink(type, id),
+            metadata: stringMetadata(metadata)
+          }
+        })
 
         setResults(searchResults)
       } catch (error) {

@@ -4,8 +4,8 @@ type: reference
 audience: [entwickler, agent]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-29
-version: 3.2.0
+last_reviewed: 2026-06-30
+version: 3.3.0
 description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
 ---
 
@@ -107,7 +107,7 @@ Human+Agent-Gedanke:        umgesetzt (AgentMaskContract, ActionRuntime, FilterP
 Runtime-Basis:              vorhanden (useUniversalMaskRuntime)
 Readiness-Governance:       vorhanden (030 Basis + 033 pro Tabelle)
 CRM 360 native Pfad:        vorhanden; fachliche Parität offen (034)
-CI-/Release-Nachweis:       teilweise — pytest 43/43 lokal; Frontend-Gates + GitHub Actions offen
+CI-/Release-Nachweis:       teilweise — lokale Frontend-/BFF-Gates und Universal-Masken-Playwright gruen; GitHub Actions nach Push offen
 Doku-Konsistenz:            nach UIX-031 + DOC-UIX-RUNTIME-001 synchron
 Produktionsreife:           noch nicht bewiesen
 ```
@@ -148,6 +148,13 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | commandEndpoints | Gestubte Actions (neue_bestellung, freigeben, mahnen, drucken) | P2 |
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
+
+Nachzug 2026-06-30 (UIX-044/045): Der FilterPlan-HTTP-Vertrag ist auf `filter_plan`
+kanonisiert; Backend akzeptiert `filterPlan` nur noch als Kompatibilitaetsalias.
+Native Detailseiten fuehren Actions nicht mehr als No-op aus, sondern ueber
+`ActionRuntime` gegen `commandEndpoint` aus der `ScreenDefinition`. Offen bleiben
+fachliche CommandEndpoint-Implementierungen fuer die oben genannten gestubten
+Actions.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 

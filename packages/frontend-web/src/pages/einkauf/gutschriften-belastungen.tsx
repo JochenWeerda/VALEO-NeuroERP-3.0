@@ -40,13 +40,20 @@ type APInvoice = {
   number: string
   supplierId: string
   supplierName: string
+  customerId?: string
+  customerName?: string
+  date?: string
   invoiceDate: string
   dueDate: string
   netAmount: number
   taxAmount: number
   grossAmount: number
+  subtotalNet?: number
+  totalTax?: number
+  totalGross?: number
   status: string
   openAmount: number
+  open_amount?: number
 }
 
 type CreditMemo = {
@@ -178,8 +185,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const loadCreditMemos = async () => {
     try {
       setLoading(true)
-      const response = (await apiClient.get<CreditMemo[]>('/api/v1/einkauf/credit-memos')) as unknown as CreditMemo[]
-      setCreditMemos(response ?? [])
+      const response = await apiClient.get<CreditMemo[]>('/api/v1/einkauf/credit-memos')
+      setCreditMemos(response.data ?? [])
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -194,8 +201,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const loadDebitMemos = async () => {
     try {
       setLoading(true)
-      const response = (await apiClient.get<DebitMemo[]>('/api/v1/einkauf/debit-memos')) as unknown as DebitMemo[]
-      setDebitMemos(response ?? [])
+      const response = await apiClient.get<DebitMemo[]>('/api/v1/einkauf/debit-memos')
+      setDebitMemos(response.data ?? [])
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -209,14 +216,14 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
 
   const loadOpenInvoices = async () => {
     try {
-      const response = (await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=APPROVED')) as unknown as APInvoice[]
-      const rawList = Array.isArray(response) ? response : []
+      const response = await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=APPROVED')
+      const rawList = Array.isArray(response.data) ? response.data : []
       const openItemsMap: Record<string, number> = {}
       try {
-        const opRes = (await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
+        const opRes = await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
           '/api/v1/finance/open-items?konto_typ=kreditoren&limit=500'
-        )) as unknown as { items?: Array<{ rechnungsnr?: string; offen?: number }> }
-        const items = opRes?.items ?? []
+        )
+        const items = opRes.data?.items ?? []
         items.forEach((op: { rechnungsnr?: string; offen?: number }) => {
           if (op.rechnungsnr != null) openItemsMap[op.rechnungsnr] = Number(op.offen ?? 0)
         })
@@ -249,18 +256,18 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
 
   const loadSettlementCorrectionDraft = async (targetSettlementId: string, memoType: 'credit' | 'debit') => {
     try {
-      const response = (await apiClient.get<SettlementCorrectionDraft>(
+      const response = await apiClient.get<SettlementCorrectionDraft>(
         `/api/v1/agrar/settlements/${targetSettlementId}/correction-draft?memo_type=${memoType}`
-      )) as unknown as SettlementCorrectionDraft
-      setSettlementDraft(response)
+      )
+      setSettlementDraft(response.data)
       setMemoData((prev) => ({
         ...prev,
-        supplierId: response.supplier_id,
+        supplierId: response.data.supplier_id,
         invoiceId: '',
-        settlementId: response.settlement_id,
-        reason: response.suggested_reason,
-        notes: response.suggested_notes,
-        items: response.items,
+        settlementId: response.data.settlement_id,
+        reason: response.data.suggested_reason,
+        notes: response.data.suggested_notes,
+        items: response.data.items,
       }))
     } catch (error) {
       toast({

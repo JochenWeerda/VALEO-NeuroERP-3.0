@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
-import { WizardConfig } from '@/components/mask-builder/types'
+import { WizardConfig, type Field } from '@/components/mask-builder/types'
 import { validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 

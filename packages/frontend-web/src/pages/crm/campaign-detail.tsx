@@ -1,6 +1,7 @@
-﻿import { Suspense, lazy, useState, useEffect } from 'react'
+import { Suspense, lazy, useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 
@@ -15,6 +16,7 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, Users, BarChart3, Mail, Play, Pause, X } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
+import { numberValue, recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 
 const CampaignDetailPerformanceChart = lazy(() =>
   import('@/pages/crm/charts/CampaignDetailPerformanceChart').then((module) => ({ default: module.default })),
@@ -133,8 +135,7 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
     const loadRecipients = async () => {
       try {
         const response = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
-        const data = response.data
-        setRecipients(Array.isArray(data) ? data : ((data as { items?: Record<string, unknown>[] }).items ?? []))
+        setRecipients(recordArrayFromResponse(response.data))
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Empfänger', description: (error as Error).message })
       } finally {
@@ -148,7 +149,7 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
   if (recipients.length === 0) return <div className="p-4 text-muted-foreground">{t('crud.messages.noRecipients')}</div>
 
   const columns = [
-    { key: 'email' as const, label: t('crud.fields.email'), render: (recipient: Record<string, unknown>) => (recipient.email as string) || '-' },
+    { key: 'email' as const, label: t('crud.fields.email'), render: (recipient: Record<string, unknown>) => stringValue(recipient.email, '-') },
     {
       key: 'status' as const,
       label: t('crud.fields.status'),
@@ -160,14 +161,15 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
           bounced: 'destructive',
           failed: 'destructive',
         }
-        return <Badge variant={statusVariants[recipient.status as string] || 'secondary'}>{(recipient.status as string) || '-'}</Badge>
+        const status = stringValue(recipient.status)
+        return <Badge variant={statusVariants[status] || 'secondary'}>{status || '-'}</Badge>
       },
     },
-    { key: 'sent_at' as const, label: t('crud.fields.sentAt'), render: (recipient: Record<string, unknown>) => (recipient.sent_at ? formatDate(recipient.sent_at as string) : '-') },
-    { key: 'opened_at' as const, label: t('crud.fields.openedAt'), render: (recipient: Record<string, unknown>) => (recipient.opened_at ? formatDate(recipient.opened_at as string) : '-') },
-    { key: 'clicked_at' as const, label: t('crud.fields.clickedAt'), render: (recipient: Record<string, unknown>) => (recipient.clicked_at ? formatDate(recipient.clicked_at as string) : '-') },
-    { key: 'open_count' as const, label: t('crud.fields.openCount'), render: (recipient: Record<string, unknown>) => (recipient.open_count as number) || 0 },
-    { key: 'click_count' as const, label: t('crud.fields.clickCount'), render: (recipient: Record<string, unknown>) => (recipient.click_count as number) || 0 },
+    { key: 'sent_at' as const, label: t('crud.fields.sentAt'), render: (recipient: Record<string, unknown>) => stringValue(recipient.sent_at) ? formatDate(stringValue(recipient.sent_at)) : '-' },
+    { key: 'opened_at' as const, label: t('crud.fields.openedAt'), render: (recipient: Record<string, unknown>) => stringValue(recipient.opened_at) ? formatDate(stringValue(recipient.opened_at)) : '-' },
+    { key: 'clicked_at' as const, label: t('crud.fields.clickedAt'), render: (recipient: Record<string, unknown>) => stringValue(recipient.clicked_at) ? formatDate(stringValue(recipient.clicked_at)) : '-' },
+    { key: 'open_count' as const, label: t('crud.fields.openCount'), render: (recipient: Record<string, unknown>) => numberValue(recipient.open_count) },
+    { key: 'click_count' as const, label: t('crud.fields.clickCount'), render: (recipient: Record<string, unknown>) => numberValue(recipient.click_count) },
   ]
 
   return <DataTable data={recipients} columns={columns} />
@@ -184,7 +186,7 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
       try {
         const response = await apiClient.get<{ timeline?: unknown[] }>(`/api/v1/crm/campaigns/${campaignId}/analytics`)
         const perfData = response.data
-        setPerformance(Array.isArray(perfData?.timeline) ? perfData.timeline : [])
+        setPerformance(recordArrayFromResponse(perfData?.timeline))
         const campaignResponse = await apiClient.get<Record<string, unknown>>(`/api/v1/crm/campaigns/${campaignId}`)
         setMetrics(campaignResponse.data)
       } catch (error: unknown) {
@@ -198,22 +200,26 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
 
   if (loading) return <div className="p-4">Lade Performance...</div>
 
+  const sentCount = numberValue(metrics?.sent_count)
+  const openCount = numberValue(metrics?.open_count)
+  const clickCount = numberValue(metrics?.click_count)
+  const conversionCount = numberValue(metrics?.conversion_count)
   const chartData = performance.map((perf) => ({
-    date: formatDate(perf.date),
-    sent: perf.sent_count || 0,
-    opened: perf.open_count || 0,
-    clicked: perf.click_count || 0,
-    converted: perf.conversion_count || 0,
+    date: formatDate(stringValue(perf.date)),
+    sent: numberValue(perf.sent_count),
+    opened: numberValue(perf.open_count),
+    clicked: numberValue(perf.click_count),
+    converted: numberValue(perf.conversion_count),
   }))
 
   return (
     <div className="space-y-6">
       {metrics && (
         <div className="grid grid-cols-4 gap-4">
-          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.sentCount')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{metrics.sent_count || 0}</div></CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.openRate')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{metrics.sent_count > 0 ? `${(((metrics.open_count || 0) / metrics.sent_count) * 100).toFixed(1)}%` : '0%'}</div></CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.clickRate')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{metrics.sent_count > 0 ? `${(((metrics.click_count || 0) / metrics.sent_count) * 100).toFixed(1)}%` : '0%'}</div></CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.conversionRate')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{metrics.sent_count > 0 ? `${(((metrics.conversion_count || 0) / metrics.sent_count) * 100).toFixed(1)}%` : '0%'}</div></CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.sentCount')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{sentCount}</div></CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.openRate')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{sentCount > 0 ? `${((openCount / sentCount) * 100).toFixed(1)}%` : '0%'}</div></CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.clickRate')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{sentCount > 0 ? `${((clickCount / sentCount) * 100).toFixed(1)}%` : '0%'}</div></CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-sm font-medium">{t('crud.fields.conversionRate')}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{sentCount > 0 ? `${((conversionCount / sentCount) * 100).toFixed(1)}%` : '0%'}</div></CardContent></Card>
         </div>
       )}
 
@@ -250,8 +256,7 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
     const loadEvents = async () => {
       try {
         const response = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
-        const evData = response.data
-        setEvents(Array.isArray(evData) ? evData : ((evData as { items?: Record<string, unknown>[] }).items ?? []))
+        setEvents(recordArrayFromResponse(response.data))
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Events', description: (error as Error).message })
       } finally {
@@ -277,11 +282,12 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
           bounced: t('crud.campaigns.events.bounced'),
           converted: t('crud.campaigns.events.converted'),
         }
-        return <Badge variant="outline">{typeLabels[event.event_type as string] || (event.event_type as string)}</Badge>
+        const eventType = stringValue(event.event_type)
+        return <Badge variant="outline">{typeLabels[eventType] || eventType}</Badge>
       },
     },
-    { key: 'timestamp' as const, label: t('crud.fields.timestamp'), render: (event: Record<string, unknown>) => formatDate(event.timestamp as string) },
-    { key: 'recipient_id' as const, label: t('crud.entities.recipient'), render: (event: Record<string, unknown>) => (event.recipient_id as string) || '-' },
+    { key: 'timestamp' as const, label: t('crud.fields.timestamp'), render: (event: Record<string, unknown>) => formatDate(stringValue(event.timestamp)) },
+    { key: 'recipient_id' as const, label: t('crud.entities.recipient'), render: (event: Record<string, unknown>) => stringValue(event.recipient_id, '-') },
   ]
 
   return <DataTable data={events} columns={columns} />
@@ -373,19 +379,20 @@ export default function CampaignDetailPage(): JSX.Element {
   if (dataLoading && !isNew) {
     return <div className="flex items-center justify-center p-8"><div className="text-center"><div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-primary" /><p>{t('crud.messages.loading')}</p></div></div>
   }
+  const campaignStatus = stringValue(data?.status)
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <Button variant="ghost" onClick={() => navigate('/crm/campaigns')} className="mb-2"><ArrowLeft className="mr-2 h-4 w-4" />{t('crud.actions.back')}</Button>
-          <h1 className="text-3xl font-bold">{isNew ? t('crud.actions.create', { entityType: entityTypeLabel }) : getDetailTitle(t, entityTypeLabel, data?.name || id || '')}</h1>
+          <h1 className="text-3xl font-bold">{isNew ? t('crud.actions.create', { entityType: entityTypeLabel }) : getDetailTitle(t, entityTypeLabel, renderValue(data?.name, id || ''))}</h1>
         </div>
-        {!isNew && id && data?.status && (
+        {!isNew && id && campaignStatus && (
           <div className="flex gap-2">
-            {(data.status === 'draft' || data.status === 'scheduled' || data.status === 'paused') && <Button onClick={handleStart} variant="default" disabled={pendingAction !== null}><Play className="mr-2 h-4 w-4" />{t('crud.actions.start')}</Button>}
-            {data.status === 'running' && <Button onClick={handlePause} variant="secondary" disabled={pendingAction !== null}><Pause className="mr-2 h-4 w-4" />{t('crud.actions.pause')}</Button>}
-            {data.status !== 'completed' && data.status !== 'cancelled' && <Button onClick={handleCancelCampaign} variant="destructive" disabled={pendingAction !== null}><X className="mr-2 h-4 w-4" />{t('crud.actions.cancel')}</Button>}
+            {(campaignStatus === 'draft' || campaignStatus === 'scheduled' || campaignStatus === 'paused') && <Button onClick={handleStart} variant="default" disabled={pendingAction !== null}><Play className="mr-2 h-4 w-4" />{t('crud.actions.start')}</Button>}
+            {campaignStatus === 'running' && <Button onClick={handlePause} variant="secondary" disabled={pendingAction !== null}><Pause className="mr-2 h-4 w-4" />{t('crud.actions.pause')}</Button>}
+            {campaignStatus !== 'completed' && campaignStatus !== 'cancelled' && <Button onClick={handleCancelCampaign} variant="destructive" disabled={pendingAction !== null}><X className="mr-2 h-4 w-4" />{t('crud.actions.cancel')}</Button>}
           </div>
         )}
       </div>

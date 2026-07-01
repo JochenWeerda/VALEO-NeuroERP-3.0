@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListReport } from '@/components/mask-builder'
@@ -8,6 +9,7 @@ import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient } from '@/lib/api-client'
+import { recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
@@ -32,13 +34,14 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
       labelKey: 'crud.fields.channel',
       sortable: true,
       render: (value) => {
+        const channel = stringValue(value)
         const channelLabels: Record<string, string> = {
           email: t('crud.channels.email'),
           sms: t('crud.channels.sms'),
           phone: t('crud.channels.phone'),
           postal: t('crud.channels.postal'),
         }
-        return <Badge variant="outline">{channelLabels[value] || value}</Badge>
+        return <Badge variant="outline">{channelLabels[channel] || channel}</Badge>
       }
     },
     {
@@ -47,12 +50,13 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
       labelKey: 'crud.fields.consentType',
       sortable: true,
       render: (value) => {
+        const consentType = stringValue(value)
         const typeLabels: Record<string, string> = {
           marketing: t('crud.consentTypes.marketing'),
           service: t('crud.consentTypes.service'),
           required: t('crud.consentTypes.required'),
         }
-        return typeLabels[value] || value
+        return typeLabels[consentType] || consentType
       }
     },
     {
@@ -61,6 +65,7 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
       labelKey: 'crud.fields.status',
       sortable: true,
       render: (value) => {
+        const status = stringValue(value)
         const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
           pending: 'secondary',
           granted: 'default',
@@ -68,8 +73,8 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
           revoked: 'outline',
         }
         return (
-          <Badge variant={statusVariants[value] || 'secondary'}>
-            {getStatusLabel(t, value, value)}
+          <Badge variant={statusVariants[status] || 'secondary'}>
+            {getStatusLabel(t, status, status)}
           </Badge>
         )
       }
@@ -79,14 +84,14 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
       label: t('crud.fields.grantedAt'),
       labelKey: 'crud.fields.grantedAt',
       sortable: true,
-      render: (value) => value ? formatDate(value) : '-'
+      render: (value) => value ? formatDate(stringValue(value)) : '-'
     },
     {
       key: 'double_opt_in_confirmed_at',
       label: t('crud.fields.confirmedAt'),
       labelKey: 'crud.fields.confirmedAt',
       sortable: true,
-      render: (value) => value ? formatDate(value) : '-'
+      render: (value) => value ? formatDate(stringValue(value)) : '-'
     },
     {
       key: 'source',
@@ -94,13 +99,14 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
       labelKey: 'crud.fields.source',
       sortable: true,
       render: (value) => {
+        const source = stringValue(value)
         const sourceLabels: Record<string, string> = {
           web_form: t('crud.sources.webForm'),
           api: t('crud.sources.api'),
           import: t('crud.sources.import'),
           manual: t('crud.sources.manual'),
         }
-        return sourceLabels[value] || value
+        return sourceLabels[source] || source
       }
     },
     {
@@ -108,7 +114,7 @@ const createConsentConfig = (t: TFunction, entityTypeLabel: string): ListConfig 
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -207,8 +213,7 @@ export default function ConsentManagementPage(): JSX.Element {
     queryKey: ['crm', 'consents'],
     queryFn: async () => {
       const r = await apiClient.get('/api/v1/crm/consents')
-      const raw = r.data as Record<string, unknown>
-      const items = Array.isArray(raw) ? raw : (raw.data || [])
+      const items = recordArrayFromResponse(r.data)
       return { items, total: items.length }
     },
     staleTime: 2 * 60 * 1000,
@@ -228,12 +233,12 @@ export default function ConsentManagementPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/consent/${item.id as string}`)
+      navigate(`/crm/consent/${stringValue(item.id)}`)
     } else if (action === 'delete' && item) {
       if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
-      await withPending(String(item.id), async () => {
+      await withPending(stringValue(item.id), async () => {
         try {
-          await apiClient.delete(`/api/v1/crm/consents/${item.id as string}`)
+          await apiClient.delete(`/api/v1/crm/consents/${stringValue(item.id)}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
           invalidate()
         } catch {
@@ -241,9 +246,9 @@ export default function ConsentManagementPage(): JSX.Element {
         }
       })
     } else if (action === 'revoke' && item) {
-      await withPending(String(item.id), async () => {
+      await withPending(stringValue(item.id), async () => {
         try {
-          await apiClient.post(`/api/v1/crm/consents/${item.id as string}/revoke`)
+          await apiClient.post(`/api/v1/crm/consents/${stringValue(item.id)}/revoke`)
           toast({ title: t('crud.messages.consentRevoked') })
           invalidate()
         } catch {
@@ -268,7 +273,7 @@ export default function ConsentManagementPage(): JSX.Element {
     try {
       const csvHeader = `${t('crud.fields.contact')};${t('crud.fields.channel')};${t('crud.fields.consentType')};${t('crud.fields.status')};${t('crud.fields.grantedAt')};${t('crud.fields.source')}\n`
       const csvContent = data.map(item =>
-        `"${item.contact_id || ''}";"${item.channel || ''}";"${item.consent_type || ''}";"${item.status || ''}";"${item.granted_at || ''}";"${item.source || ''}"`
+        `"${renderValue(item.contact_id)}";"${renderValue(item.channel)}";"${renderValue(item.consent_type)}";"${renderValue(item.status)}";"${renderValue(item.granted_at)}";"${renderValue(item.source)}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

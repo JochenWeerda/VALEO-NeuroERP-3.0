@@ -17,6 +17,7 @@ export type FieldType =
   | 'percentage'
   | 'lookup'
   | 'table'
+  | 'custom'
 
 export interface BaseField {
   name?: string
@@ -88,13 +89,18 @@ export interface Tab {
   customRender?: (_data: Record<string, unknown>, _onChange: (_data: Record<string, unknown>) => void) => React.ReactNode
 }
 
+type ActionPayload = object | object[]
+type ActionClickHandler = {
+  bivarianceHack(_payload?: ActionPayload): unknown | Promise<unknown>
+}['bivarianceHack']
+
 export interface Action {
   key: string
   label: string
   labelKey?: string
   type?: 'primary' | 'secondary' | 'danger' | 'default' | 'destructive' | 'outline'
   icon?: string
-  onClick?: (..._args: unknown[]) => unknown | Promise<unknown>
+  onClick?: ActionClickHandler
   disabled?: boolean
   [key: string]: unknown
 }
@@ -119,6 +125,7 @@ export interface MaskConfig {
   }
   validation?: unknown
   permissions?: string[]
+  domain?: string
 }
 
 export interface WizardStep {

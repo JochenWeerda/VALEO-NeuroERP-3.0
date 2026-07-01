@@ -49,6 +49,24 @@ def test_paginate_tab_items_filters_and_pages() -> None:
     assert len(page) == 1
 
 
+def test_paginate_tab_items_applies_filter_plan() -> None:
+    items = [
+        {"name": "Anna", "rolle": "Einkauf"},
+        {"name": "Bernd", "rolle": "Logistik"},
+        {"name": "Clara", "rolle": "Einkauf"},
+    ]
+
+    page, total = paginate_tab_items(
+        items,
+        page=1,
+        limit=25,
+        filter_plan={"rolle": {"op": "eq", "value": "Einkauf"}},
+    )
+
+    assert total == 2
+    assert [row["name"] for row in page] == ["Anna", "Clara"]
+
+
 @pytest.mark.parametrize("screen_id", all_rollout_screen_ids())
 def test_rollout_screen_definitions_exist(screen_id: str) -> None:
     definition = get_screen_definition(screen_id)

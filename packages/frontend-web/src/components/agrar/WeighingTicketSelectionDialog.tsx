@@ -16,6 +16,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/api-client'
+import {
+  nullableNumberValue,
+  nullableStringValue,
+  numberValue,
+  recordArrayFromResponse,
+  stringValue,
+  type UnknownRecord,
+} from '@/lib/record-utils'
 
 export type WeighingTicket = {
   id: string
@@ -46,6 +54,30 @@ type WeighingTicketSelectionDialogProps = {
   customerId?: string | null
 }
 
+function mapWeighingTicket(t: UnknownRecord): WeighingTicket {
+  return {
+    id: stringValue(t.id),
+    ticket_number: stringValue(t.ticket_number ?? t.ticketNumber),
+    scale_id: nullableStringValue(t.scale_id ?? t.scaleId),
+    vehicle_plate: nullableStringValue(t.vehicle_plate ?? t.vehiclePlate),
+    gross_weight: nullableNumberValue(t.gross_weight ?? t.grossWeight),
+    tare_weight: nullableNumberValue(t.tare_weight ?? t.tareWeight),
+    net_weight: nullableNumberValue(t.net_weight ?? t.netWeight),
+    first_weighing_at: nullableStringValue(t.first_weighing_at ?? t.firstWeighingAt),
+    second_weighing_at: nullableStringValue(t.second_weighing_at ?? t.secondWeighingAt),
+    moisture_pct: nullableNumberValue(t.moisture_pct ?? t.moisturePct),
+    protein_pct: nullableNumberValue(t.protein_pct ?? t.proteinPct),
+    impurities_pct: nullableNumberValue(t.impurities_pct ?? t.impuritiesPct),
+    hl_weight: nullableNumberValue(t.hl_weight ?? t.hlWeight),
+    billing_weight: nullableNumberValue(t.billing_weight ?? t.billingWeight),
+    status: stringValue(t.status, 'open'),
+    direction: stringValue(t.direction, 'in'),
+    article_group: nullableStringValue(t.article_group ?? t.articleGroup),
+    article_id: nullableStringValue(t.article_id ?? t.articleId),
+    notes: nullableStringValue(t.notes),
+  }
+}
+
 export function WeighingTicketSelectionDialog({
   open,
   onClose,
@@ -65,42 +97,8 @@ export function WeighingTicketSelectionDialog({
       }
       
       try {
-        const response = await apiClient.get<Record<string, unknown>>('/api/v1/weighing-tickets', { params })
-        
-        let items: Record<string, unknown>[] = []
-        if (Array.isArray(response)) {
-          items = response
-        } else if (response?.items && Array.isArray(response.items)) {
-          items = response.items
-        } else if (response?.data) {
-          if (Array.isArray(response.data)) {
-            items = response.data
-          } else if (response.data.items && Array.isArray(response.data.items)) {
-            items = response.data.items
-          }
-        }
-        
-        return items.map((t: Record<string, unknown>) => ({
-          id: t.id as string,
-          ticket_number: (t.ticket_number || t.ticketNumber || '') as string,
-          scale_id: t.scale_id || t.scaleId || null,
-          vehicle_plate: t.vehicle_plate || t.vehiclePlate || null,
-          gross_weight: t.gross_weight || t.grossWeight || null,
-          tare_weight: t.tare_weight || t.tareWeight || null,
-          net_weight: t.net_weight || t.netWeight || null,
-          first_weighing_at: t.first_weighing_at || t.firstWeighingAt || null,
-          second_weighing_at: t.second_weighing_at || t.secondWeighingAt || null,
-          moisture_pct: t.moisture_pct || t.moisturePct || null,
-          protein_pct: t.protein_pct || t.proteinPct || null,
-          impurities_pct: t.impurities_pct || t.impuritiesPct || null,
-          hl_weight: t.hl_weight || t.hlWeight || null,
-          billing_weight: t.billing_weight || t.billingWeight || null,
-          status: t.status || 'open',
-          direction: t.direction || 'in',
-          article_group: t.article_group || t.articleGroup || null,
-          article_id: t.article_id || t.articleId || null,
-          notes: t.notes || null,
-        }))
+        const response = await apiClient.get<unknown>('/api/v1/weighing-tickets', { params })
+        return recordArrayFromResponse(response).map(mapWeighingTicket)
       } catch (err: unknown) {
         console.error('[WeighingTicketSelectionDialog] Error fetching tickets:', err)
         return []

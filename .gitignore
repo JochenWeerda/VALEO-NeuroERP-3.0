@@ -94,6 +94,7 @@ packages/mobile-app/package-lock.json
 packages/purchase-domain/package-lock.json
 
 # ── Build-Artefakte ───────────────────────────────────────────────────────────
+packages/bff/bff-web/dist/
 packages/erp-domain/dist/
 packages/sales-domain/dist/
 packages/inventory-domain/dist/

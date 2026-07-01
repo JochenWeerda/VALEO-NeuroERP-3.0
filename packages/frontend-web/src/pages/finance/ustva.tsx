@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -25,6 +26,7 @@ import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensit
 import { useFibuCockpit } from '@/lib/api/fibu'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { inputValue, isRecord, recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 
 type VatRoleFocus = 'all' | 'accounting' | 'tax-advisor' | 'controller' | 'management'
 
@@ -52,7 +54,7 @@ const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as Field,
+         },
         {
           name: 'voranmeldungszeitraum',
           label: t('crud.fields.declarationPeriod'),
@@ -232,14 +234,14 @@ const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       key: 'abweichungen',
       label: t('crud.fields.deviations'),
       fields: []
-    } as Field,
+    },
     {
       key: 'abweichungen_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <AbweichungenTable
-          data={_data.abweichungen || []}
+          data={recordArrayFromResponse(_data.abweichungen)}
           onChange={(abweichungen) => onChange({ ..._data, abweichungen })}
         />
       )
@@ -306,7 +308,7 @@ const createUstvaConfig = (t: TFunction, entityTypeLabel: string): MaskConfig =>
       update: '/api/v1/finance/vat-return/{id}',
       delete: '/api/v1/finance/vat-return/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
@@ -361,7 +363,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: Record<string, unk
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={abweichung.position}
+                    value={inputValue(abweichung.position)}
                     onChange={(e) => updateAbweichung(index, 'position', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.position')}
@@ -370,7 +372,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: Record<string, unk
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={abweichung.beschreibung}
+                    value={inputValue(abweichung.beschreibung)}
                     onChange={(e) => updateAbweichung(index, 'beschreibung', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.deviationDescription')}
@@ -380,7 +382,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: Record<string, unk
                   <input
                     type="number"
                     step="0.01"
-                    value={abweichung.betrag}
+                    value={inputValue(abweichung.betrag)}
                     onChange={(e) => updateAbweichung(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -388,7 +390,7 @@ function AbweichungenTable({ data: _data, onChange }: { data: Record<string, unk
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={abweichung.grund}
+                    value={inputValue(abweichung.grund)}
                     onChange={(e) => updateAbweichung(index, 'grund', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.reason')}
@@ -455,7 +457,7 @@ export default function UStVAPage(): JSX.Element {
   const { data, loading } = useMaskData({
     apiUrl: ustvaConfig.api.baseUrl,
     id: 'new',
-    transformResponse: (payload: Record<string, unknown>) => mapVatReturnPayload(payload) ?? payload,
+    transformResponse: (payload: unknown) => isRecord(payload) ? (mapVatReturnPayload(payload) ?? payload) : {},
   })
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(ustvaConfig), formData ?? {})
@@ -478,7 +480,7 @@ export default function UStVAPage(): JSX.Element {
           period: formData?.periode,
         })
         toast({ title: t('crud.messages.calculationCompleted'), description: t('crud.messages.ustvaAmountsRecalculated') })
-        applyVATReturnResponse(result as Record<string, unknown>)
+        applyVATReturnResponse(result.data)
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: t('common.error'), description: getAxiosErrorMessage(error) })
       }
@@ -506,10 +508,10 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id as string}/approve`, {
+        const response = await apiClient.post<Record<string, unknown>>(`/api/v1/finance/vat-return/${stringValue(formData.id)}/approve`, {
           approved_by: currentActor,
         })
-        applyVATReturnResponse(response as Record<string, unknown>)
+        applyVATReturnResponse(response.data)
         toast({
           title: t('crud.messages.approvalSuccess'),
           description: t('crud.messages.ustvaApproved'),
@@ -545,10 +547,10 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id as string}/submit`, {
+        const response = await apiClient.post<Record<string, unknown>>(`/api/v1/finance/vat-return/${stringValue(formData.id)}/submit`, {
           submitted_by: currentActor,
         })
-        applyVATReturnResponse(response as Record<string, unknown>)
+        applyVATReturnResponse(response.data)
         setIsDirty(false)
         if (workflowInstanceId && workflowProcess) {
           try {
@@ -578,7 +580,7 @@ export default function UStVAPage(): JSX.Element {
           format: 'xml',
           id: formData.id,
         })
-        if (res?.url) window.open(res.url, '_blank')
+        if (res.data?.url) window.open(res.data.url, '_blank')
         toast({ title: t('crud.actions.xmlExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: t('common.error'), description: getAxiosErrorMessage(error) })
@@ -601,7 +603,7 @@ export default function UStVAPage(): JSX.Element {
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-vat', approvalDecisionView)
   const operationalStatus = normalizeOperationalStatus(
-    effectiveData?.status || (effectiveData?.approval_can_submit ? 'wartet_auf_mensch' : workflowInstanceId ? 'in_pruefung' : 'offen'),
+    stringValue(effectiveData?.status, effectiveData?.approval_can_submit ? 'wartet_auf_mensch' : workflowInstanceId ? 'in_pruefung' : 'offen'),
   )
   const operationalBlocker =
     effectiveData?.approval_can_submit === false
@@ -611,9 +613,9 @@ export default function UStVAPage(): JSX.Element {
     {
       title: 'Meldekontext',
       items: [
-        { label: 'Periode', value: effectiveData?.periode || fibuCockpit.tax.latest_period || 'n/a' },
-        { label: 'Status', value: effectiveData?.status || 'Entwurf' },
-        { label: 'ELSTER-Referenz', value: effectiveData?.elsterReferenz || 'noch nicht vergeben' },
+        { label: 'Periode', value: renderValue(effectiveData?.periode, fibuCockpit.tax.latest_period || 'n/a') },
+        { label: 'Status', value: renderValue(effectiveData?.status, 'Entwurf') },
+        { label: 'ELSTER-Referenz', value: renderValue(effectiveData?.elsterReferenz, 'noch nicht vergeben') },
       ],
     },
     {
@@ -631,7 +633,7 @@ export default function UStVAPage(): JSX.Element {
       detail: effectiveData?.status === 'submitted'
         ? 'Die Meldung hat den fachlichen Uebergang in den Einreichungspfad erreicht.'
         : 'Der Vorgang befindet sich noch in Berechnung, Pruefung oder Freigabe.',
-      timestamp: effectiveData?.abgegebenAm || effectiveData?.freigegebenAm || null,
+      timestamp: stringValue(effectiveData?.abgegebenAm, stringValue(effectiveData?.freigegebenAm)) || null,
     },
     {
       label: workflowInstanceId ? 'Flow-Spine aktiv' : 'Kein Workflowpfad aktiv',
@@ -640,7 +642,10 @@ export default function UStVAPage(): JSX.Element {
         : 'Die Maske laeuft ohne expliziten Flow-Spine-Kontext.',
     },
   ]
-  const deviations = Array.isArray(effectiveData?.abweichungen) ? effectiveData.abweichungen : []
+  const deviations = recordArrayFromResponse(effectiveData?.abweichungen)
+  const approvalOverrideResolution = isRecord(effectiveData?.approval_override_resolution)
+    ? effectiveData.approval_override_resolution
+    : null
   const nextVatAction = effectiveData?.approval_can_submit ? 'ELSTER-Einreichung vorbereiten' : 'Abweichungen, Regeln oder Freigabe klaeren'
   const taskItems: UxTaskItem[] = [
     {
@@ -745,7 +750,7 @@ export default function UStVAPage(): JSX.Element {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_status || effectiveData.status || '-'}</div>
+              <div className="mt-1 font-medium">{renderValue(effectiveData.approval_status, renderValue(effectiveData.status, '-'))}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Abgabefaehig</div>
@@ -753,7 +758,7 @@ export default function UStVAPage(): JSX.Element {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_override_resolution?.rule_id || '-'}</div>
+              <div className="mt-1 font-medium">{renderValue(approvalOverrideResolution?.rule_id, '-')}</div>
             </div>
           </div>
         </ProcessStatusPanel>

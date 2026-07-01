@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from 'react'
+import { memo, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
@@ -101,6 +101,9 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
   const totalPages = total !== undefined ? Math.ceil(total / table.pageSize) : undefined
   const activeFilterPlan = filterPlan && Object.keys(filterPlan).length > 0 ? filterPlan : undefined
+  const filterableColumns = table.columns.filter((column) => column.filterable)
+  const [filterColumn, setFilterColumn] = useState<string>(filterableColumns[0]?.key ?? '')
+  const [filterValue, setFilterValue] = useState('')
 
   function handleRemoveFilter(colKey: string) {
     if (!onQueryChange || !filterPlan) return
@@ -109,10 +112,22 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     onQueryChange({ filterPlan: Object.keys(next).length > 0 ? next : undefined, page: 1 })
   }
 
+  function handleApplyFilter() {
+    const value = filterValue.trim()
+    if (!onQueryChange || !filterColumn || !value) return
+    onQueryChange({
+      filterPlan: {
+        ...(filterPlan ?? {}),
+        [filterColumn]: { op: 'contains', value, label: value },
+      },
+      page: 1,
+    })
+  }
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-base">{table.label}</CardTitle>
           {onQueryChange && (
             <input
@@ -126,6 +141,46 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             />
           )}
         </div>
+        {onQueryChange && filterableColumns.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2 pt-2">
+            <select
+              value={filterColumn}
+              onChange={(event) => setFilterColumn(event.target.value)}
+              className="h-7 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label={`Filterspalte fuer ${table.label}`}
+              data-testid={`filter-column-${table.key}`}
+            >
+              {filterableColumns.map((column) => (
+                <option key={column.key} value={column.key}>
+                  {column.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={filterValue}
+              onChange={(event) => setFilterValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') handleApplyFilter()
+              }}
+              placeholder="Filterwert"
+              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label={`Filterwert fuer ${table.label}`}
+              data-testid={`filter-value-${table.key}`}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={handleApplyFilter}
+              disabled={!filterColumn || filterValue.trim().length === 0}
+              data-testid={`apply-filter-${table.key}`}
+            >
+              Filtern
+            </Button>
+          </div>
+        ) : null}
       </CardHeader>
       <CardContent>
         {activeFilterPlan && (

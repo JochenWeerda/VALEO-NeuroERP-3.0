@@ -696,21 +696,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/analytics/analyticsdashboardcharts",
-      "path": "analytics/analyticsdashboardcharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/analytics/charts/inventorybarchart",
-      "path": "analytics/charts/inventorybarchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/analytics/charts/salestrendlinechart",
-      "path": "analytics/charts/salestrendlinechart",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/annahme/abrechnung",
       "path": "annahme/abrechnung",
       "source": "auto"
@@ -1136,66 +1121,6 @@
       "source": "navigation"
     },
     {
-      "module": "@/pages/crm/charts/campaign-performance/campaigncomparisonbarchart",
-      "path": "crm/charts/campaign-performance/campaigncomparisonbarchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/campaign-performance/campaignperformancetrendchart",
-      "path": "crm/charts/campaign-performance/campaignperformancetrendchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/campaign-performance/campaigntypedistributionchart",
-      "path": "crm/charts/campaign-performance/campaigntypedistributionchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/campaigndetailperformancechart",
-      "path": "crm/charts/campaigndetailperformancechart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/campaignperformancecharts",
-      "path": "crm/charts/campaignperformancecharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunities-forecast/expectedrevenuebarchart",
-      "path": "crm/charts/opportunities-forecast/expectedrevenuebarchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunities-forecast/expectedrevenuelinechart",
-      "path": "crm/charts/opportunities-forecast/expectedrevenuelinechart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunities-forecast/opportunitycountbarchart",
-      "path": "crm/charts/opportunities-forecast/opportunitycountbarchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunities-forecast/stagedistributiondonut",
-      "path": "crm/charts/opportunities-forecast/stagedistributiondonut",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunities-forecast/totalamountbarchart",
-      "path": "crm/charts/opportunities-forecast/totalamountbarchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunities-forecast/totalamountlinechart",
-      "path": "crm/charts/opportunities-forecast/totalamountlinechart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/charts/opportunitiesforecastcharts",
-      "path": "crm/charts/opportunitiesforecastcharts",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/crm/consent-confirm",
       "path": "crm/consent-confirm",
       "source": "auto"
@@ -1361,16 +1286,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/crm/kunden-stamm-modern/customermaskeditpage",
-      "path": "crm/kunden-stamm-modern/customermaskeditpage",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/kunden-stamm-modern/legacykundenstammmodern",
-      "path": "crm/kunden-stamm-modern/legacykundenstammmodern",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/crm/kunden-zuordnung",
       "path": "crm/kunden-zuordnung",
       "source": "alias"
@@ -1383,16 +1298,6 @@
     {
       "module": "@/pages/crm/lead-detail",
       "path": "crm/lead-detail",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/lead-detail/leadmaskdetailpage",
-      "path": "crm/lead-detail/leadmaskdetailpage",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/crm/lead-detail/legacyleaddetailpage",
-      "path": "crm/lead-detail/legacyleaddetailpage",
       "source": "auto"
     },
     {
@@ -2042,11 +1947,6 @@
     },
     {
       "module": "@runtime/fibu-suite",
-      "path": "fibu-suite",
-      "source": "system"
-    },
-    {
-      "module": "@runtime/fibu-suite",
       "path": "fibu-suite/$",
       "source": "system"
     },
@@ -2576,26 +2476,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/finance/reports/analyticschartcontent",
-      "path": "finance/reports/analyticschartcontent",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/finance/reports/charts/analyticsbalancesharechart",
-      "path": "finance/reports/charts/analyticsbalancesharechart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/finance/reports/charts/analyticscashflowchart",
-      "path": "finance/reports/charts/analyticscashflowchart",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/finance/reports/financialcardsparkline",
-      "path": "finance/reports/financialcardsparkline",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/finance/skonto-optimizer",
       "path": "finance/skonto-optimizer",
       "source": "auto"
@@ -2971,21 +2851,6 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/kontrakte/dlgauswahlverkaufkontrakte",
-      "path": "kontrakte/dlgauswahlverkaufkontrakte",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/kontrakte/dlgkontraktumsaetze",
-      "path": "kontrakte/dlgkontraktumsaetze",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/kontrakte/dlgmatifpreisfixierung",
-      "path": "kontrakte/dlgmatifpreisfixierung",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/kontrakte/FrmKontraktDetail",
       "path": "kontrakte/FrmKontraktDetail",
       "source": "auto"
@@ -3314,6 +3179,11 @@
       "module": "@/pages/personal/bewerbungen",
       "path": "personal/bewerbungen",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/personal/hrm-operations-gates",
+      "path": "personal/hrm-freigaben",
+      "source": "alias"
     },
     {
       "module": "@/pages/personal/hrm-operations-gates",
@@ -3713,31 +3583,6 @@
     {
       "module": "@/pages/reports",
       "path": "reports",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/customeranalyticscharts",
-      "path": "reports/charts/customeranalyticscharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/financialanalyticscharts",
-      "path": "reports/charts/financialanalyticscharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/productanalyticscharts",
-      "path": "reports/charts/productanalyticscharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/salesperformancecharts",
-      "path": "reports/charts/salesperformancecharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/charts/trendanalyticscharts",
-      "path": "reports/charts/trendanalyticscharts",
       "source": "auto"
     },
     {
@@ -4223,11 +4068,6 @@
     {
       "module": "@/pages/verkauf/kunde-neu",
       "path": "verkauf/kunde-neu",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage",
-      "path": "verkauf/kunde-neu/kundeneumaskbuilderpage",
       "source": "auto"
     },
     {

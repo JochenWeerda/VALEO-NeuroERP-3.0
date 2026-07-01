@@ -1,6 +1,7 @@
-﻿import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
@@ -20,6 +21,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeOpportunityOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 
 // Zod-Schema für Opportunities
@@ -296,7 +298,7 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
       try {
         const response = await apiClient.get<unknown[]>(`/api/v1/crm/opportunities/${opportunityId}/history`)
         if (response.data) {
-          setHistory(response.data || [])
+          setHistory(recordArrayFromResponse(response.data))
         }
       } catch (error: unknown) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: (error as Error).message })
@@ -320,29 +322,29 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
   return (
     <div className="space-y-4">
       {history.map((entry) => (
-        <Card key={entry.id}>
+        <Card key={stringValue(entry.id)}>
           <CardContent className="pt-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="font-medium">{entry.field_name}</div>
+                <div className="font-medium">{stringValue(entry.field_name)}</div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  {entry.old_value && (
-                    <span className="line-through text-red-600">{entry.old_value}</span>
+                  {Boolean(entry.old_value) && (
+                    <span className="line-through text-red-600">{stringValue(entry.old_value)}</span>
                   )}
-                  {entry.old_value && entry.new_value && ' → '}
-                  {entry.new_value && (
-                    <span className="text-green-600">{entry.new_value}</span>
+                  {Boolean(entry.old_value) && Boolean(entry.new_value) && ' -> '}
+                  {Boolean(entry.new_value) && (
+                    <span className="text-green-600">{stringValue(entry.new_value)}</span>
                   )}
                 </div>
-                {entry.change_reason && (
+                {Boolean(entry.change_reason) && (
                   <div className="text-xs text-muted-foreground mt-1">
-                    {t('crud.fields.reason')}: {entry.change_reason}
+                    {t('crud.fields.reason')}: {stringValue(entry.change_reason)}
                   </div>
                 )}
               </div>
               <div className="text-right text-sm text-muted-foreground">
-                <div>{entry.changed_by}</div>
-                <div>{formatDate(entry.changed_at)}</div>
+                <div>{stringValue(entry.changed_by)}</div>
+                <div>{formatDate(stringValue(entry.changed_at))}</div>
               </div>
             </div>
           </CardContent>
@@ -364,7 +366,7 @@ function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
       try {
         const response = await apiClient.get(`/api/v1/crm/opportunities/${opportunityId}/quotes`)
         if (response.data) {
-          setQuotes((response.data as Record<string, unknown>) || [])
+          setQuotes(recordArrayFromResponse(response.data))
         }
       } catch {
         setQuotes([])
@@ -396,22 +398,22 @@ function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
   return (
     <div className="space-y-4">
       {quotes.map((quote) => (
-        <Card key={quote.id}>
+        <Card key={stringValue(quote.id)}>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>{quote.quote_number}</span>
-              <Badge>{quote.status}</Badge>
+              <span>{stringValue(quote.quote_number)}</span>
+              <Badge>{stringValue(quote.status)}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.totalAmount')}</div>
-                <div className="font-medium">{formatCurrency(quote.total_amount, quote.currency || 'EUR')}</div>
+                <div className="font-medium">{formatCurrency(numberValue(quote.total_amount), stringValue(quote.currency, 'EUR'))}</div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">{t('crud.fields.validUntil')}</div>
-                <div>{quote.valid_until ? formatDate(quote.valid_until) : '-'}</div>
+                <div>{quote.valid_until ? formatDate(stringValue(quote.valid_until)) : '-'}</div>
               </div>
             </div>
           </CardContent>
@@ -432,7 +434,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: customersData } = useQuery({
     queryKey: ['crm', 'customers-lookup'],
     queryFn: async () => {
-      const r = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers')
+      const r = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers/')
       return r.data?.items || []
     },
     staleTime: 10 * 60 * 1000,
@@ -448,13 +450,13 @@ export default function OpportunityDetailPage(): JSX.Element {
   })
 
   const customerOpts = useMemo(() =>
-    (customersData || []).map(c => ({ value: c.id, label: c.name || c.firma || c.id })),
+    (customersData || []).map(c => ({ value: stringValue(c.id), label: stringValue(c.name ?? c.firma ?? c.id) })),
     [customersData],
   )
   const contactOpts = useMemo(() =>
     (contactsData || []).map(c => ({
-      value: c.id,
-      label: [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email || c.id,
+      value: stringValue(c.id),
+      label: [stringValue(c.first_name), stringValue(c.last_name)].filter(Boolean).join(' ') || stringValue(c.email ?? c.id),
     })),
     [contactsData],
   )
@@ -471,7 +473,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   // Pure worker — no loading management. Callers own the guard.
   const persistOpportunity = async (formData: Record<string, unknown>) => {
     if (formData.amount && formData.probability) {
-      formData.expected_revenue = formData.amount * (formData.probability / 100)
+      formData.expected_revenue = numberValue(formData.amount) * (numberValue(formData.probability) / 100)
     }
     if (!formData.owner_id && formData.assigned_to) {
       formData.owner_id = formData.assigned_to
@@ -566,59 +568,59 @@ export default function OpportunityDetailPage(): JSX.Element {
   })
 
   const operationalStatus = normalizeOperationalStatus(
-    data?.status === 'closed_won'
+    stringValue(data?.status) === 'closed_won'
       ? 'abgeschlossen'
-      : data?.status === 'closed_lost'
+      : stringValue(data?.status) === 'closed_lost'
         ? 'blockiert'
-        : data?.stage === 'proposal_price_quote' || data?.status === 'proposal'
+        : stringValue(data?.stage) === 'proposal_price_quote' || stringValue(data?.status) === 'proposal'
           ? 'wartet_auf_mensch'
-          : data?.status || 'offen',
+          : stringValue(data?.status, 'offen'),
   )
-  const operationalBlocker = data?.status === 'closed_lost'
+  const operationalBlocker = stringValue(data?.status) === 'closed_lost'
     ? 'Die Opportunity ist verloren. Reaktivierung braucht einen neuen Vertriebsansatz.'
-    : data?.probability != null && data.probability < 30
+    : data?.probability != null && numberValue(data.probability) < 30
       ? 'Niedrige Abschlusswahrscheinlichkeit. Qualifizierung oder Exit entscheiden.'
       : null
   const opportunityOps = data
     ? summarizeOpportunityOperations({
-        probability: data.probability,
-        status: data.status,
+        probability: numberValue(data.probability),
+        status: stringValue(data.status) || null,
         hasOwner: Boolean(data.owner_id || data.assigned_to),
         hasCustomer: Boolean(data.customer_id),
         quoteCount: data.status === 'proposal' || data.stage === 'proposal_price_quote' ? 1 : 0,
-        expectedCloseDate: data.expected_close_date,
+        expectedCloseDate: stringValue(data.expected_close_date) || null,
       })
     : null
   const contextSections = data ? [
     {
       title: 'Deal',
       items: [
-        { label: 'Kunde', value: customerOpts.find((option) => option.value === data.customer_id)?.label || data.customer_id || 'Nicht zugeordnet' },
-        { label: 'Betrag', value: data.amount ? formatCurrency(data.amount, data.currency || 'EUR') : 'Noch offen' },
+        { label: 'Kunde', value: customerOpts.find((option) => option.value === data.customer_id)?.label || stringValue(data.customer_id, 'Nicht zugeordnet') },
+        { label: 'Betrag', value: data.amount ? formatCurrency(numberValue(data.amount), stringValue(data.currency, 'EUR')) : 'Noch offen' },
         { label: 'Wahrscheinlichkeit', value: data.probability != null ? `${String(data.probability)}%` : 'Nicht bewertet' },
       ],
     },
     {
       title: 'Vertrieb',
       items: [
-        { label: 'Stage', value: data.stage || 'initial_contact' },
-        { label: 'Status', value: data.status || 'prospecting' },
-        { label: 'Owner', value: data.owner_id || data.assigned_to || 'Nicht zugewiesen' },
+        { label: 'Stage', value: stringValue(data.stage, 'initial_contact') },
+        { label: 'Status', value: stringValue(data.status, 'prospecting') },
+        { label: 'Owner', value: stringValue(data.owner_id ?? data.assigned_to, 'Nicht zugewiesen') },
       ],
     },
     {
       title: 'Naechster Hebel',
       items: [
-        { label: 'Angebotspfad', value: data.status === 'closed_won' ? 'Abgeschlossen' : 'Angebot / Quote moeglich' },
-        { label: 'Zieldatum', value: data.expected_close_date || 'Nicht geplant' },
-        { label: 'Quelle', value: data.source || data.lead_source || 'Unbekannt' },
+        { label: 'Angebotspfad', value: stringValue(data.status) === 'closed_won' ? 'Abgeschlossen' : 'Angebot / Quote moeglich' },
+        { label: 'Zieldatum', value: stringValue(data.expected_close_date, 'Nicht geplant') },
+        { label: 'Quelle', value: stringValue(data.source ?? data.lead_source, 'Unbekannt') },
       ],
     },
   ] : []
   const timelineItems = data ? [
-    { label: 'Opportunity aktiv', detail: data.number || id || undefined },
-    ...(data.expected_close_date ? [{ label: 'Erwarteter Abschluss', detail: formatDate(data.expected_close_date) }] : []),
-    data.actual_close_date ? { label: 'Tatsaechlicher Abschluss', detail: formatDate(data.actual_close_date) } : { label: 'Aktuelle Stage', detail: data.stage || 'initial_contact' },
+    { label: 'Opportunity aktiv', detail: stringValue(data.number ?? id) || undefined },
+    ...(data.expected_close_date ? [{ label: 'Erwarteter Abschluss', detail: formatDate(stringValue(data.expected_close_date)) }] : []),
+    data.actual_close_date ? { label: 'Tatsaechlicher Abschluss', detail: formatDate(stringValue(data.actual_close_date)) } : { label: 'Aktuelle Stage', detail: stringValue(data.stage, 'initial_contact') },
   ] : []
 
   if (dataLoading && !isNew) {
@@ -643,7 +645,7 @@ export default function OpportunityDetailPage(): JSX.Element {
           <h1 className="text-3xl font-bold">
             {isNew 
               ? t('crud.actions.create', { entityType: entityTypeLabel })
-              : getDetailTitle(t, entityTypeLabel, data?.number || id || '')
+                : getDetailTitle(t, entityTypeLabel, stringValue(data?.number ?? id))
             }
           </h1>
         </div>
@@ -654,17 +656,17 @@ export default function OpportunityDetailPage(): JSX.Element {
             title="Opportunity steuern"
             description="Der Vertriebsfall bleibt oben verdichtet: Deal-Lage, Wahrscheinlichkeit und die naechste saubere Folgeaktion."
             status={operationalStatus}
-            owner={data.owner_id || data.assigned_to || 'Vertrieb'}
+            owner={stringValue(data.owner_id ?? data.assigned_to, 'Vertrieb')}
             blocker={operationalBlocker}
             nextAction={
               opportunityOps?.nextAction ||
-              (data.status === 'closed_won'
+              (stringValue(data.status) === 'closed_won'
                 ? 'Angebot und Auftrag nachhalten'
-                : data.status === 'closed_lost'
+                : stringValue(data.status) === 'closed_lost'
                   ? 'Verlustgrund sichern'
                   : 'Qualifizieren oder in Angebot ueberfuehren')
             }
-            caseLabel={data.number || 'Opportunity'}
+            caseLabel={stringValue(data.number, 'Opportunity')}
             tags={['CRM', 'Vertrieb']}
           />
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
@@ -732,4 +734,3 @@ export default function OpportunityDetailPage(): JSX.Element {
     </div>
   )
 }
-

@@ -247,7 +247,7 @@ export function useExecutiveDashboard() {
           total_orders: number
           avg_order_value: number
         }>(`/api/v1/sales/reports/summary?period_from=${periodFrom}&period_to=${periodTo}`),
-        apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers'),
+        apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers/'),
         apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/articles'),
         apiClient.get<{ items: JournalEntry[] }>('/api/v1/journal-entries'),
       ])

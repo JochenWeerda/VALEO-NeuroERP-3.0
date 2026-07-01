@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -12,6 +13,7 @@ import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/api-client'
 import { useTenant } from '@/hooks/useTenant'
+import { stringValue } from '@/lib/record-utils'
 
 const createKreditorenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -157,22 +159,22 @@ const createKreditorenConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           name: 'zahlungsziel',
           label: t('crud.fields.paymentDueDays'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'skontoTage',
           label: t('crud.fields.discountDays'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'skontoProzent',
           label: t('crud.fields.discountPercent'),
           type: 'number'
-        } as Field,
+        },
         {
           name: 'kreditlimit',
           label: t('crud.fields.creditLimit'),
           type: 'number'
-        } as Field
+        }
       ],
       layout: 'grid',
       columns: 2
@@ -351,7 +353,7 @@ export default function KreditorenStammPage(): JSX.Element {
 
   // Auto-lookup IBAN when it changes and seems complete
   useEffect(() => {
-    const iban = formData?.iban
+    const iban = stringValue(formData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
@@ -403,7 +405,7 @@ export default function KreditorenStammPage(): JSX.Element {
           geprueft_am: string
           hinweis: string
         }>('/api/v1/crm/sanktionspruefung', { name, land })
-        const result = res as Record<string, unknown>
+        const result = res.data
         if (result?.treffer) {
           toast.error(`Sanktionstreffer: ${String(result.ergebnis ?? '')}`)
         } else {
@@ -417,12 +419,12 @@ export default function KreditorenStammPage(): JSX.Element {
     } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'creditors', format: 'pdf', id: formData?.id })
-        if (res?.url) window.open(res.url, '_blank')
+        if (res.data?.url) window.open(res.data.url, '_blank')
         toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
-        toast.error(msg)
+        toast.error(stringValue(msg, t('crud.messages.exportError')))
       }
     }
   })
@@ -433,7 +435,7 @@ export default function KreditorenStammPage(): JSX.Element {
     setIsDirty(true)
     
     // Auto-lookup IBAN when it changes
-    const iban = newData?.iban
+    const iban = stringValue(newData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {

@@ -6,6 +6,25 @@ import { useFutterQualitaet } from '@/lib/api/futter'
 import { toast } from '@/hooks/use-toast'
 import { EvidenceTemplateLink, NextActionPanel, OperationalTaskPlan } from '@/components/workflow'
 
+function toWorklistItem(item: Record<string, unknown>): WorklistItem | null {
+  if (!(typeof item.id === 'string'
+    && typeof item.title === 'string'
+    && (item.status === 'pending' || item.status === 'in-progress' || item.status === 'completed' || item.status === 'overdue')
+    && (item.priority === 'low' || item.priority === 'medium' || item.priority === 'high' || item.priority === 'urgent'))) {
+    return null
+  }
+  return {
+    id: item.id,
+    title: item.title,
+    description: typeof item.description === 'string' ? item.description : undefined,
+    status: item.status,
+    priority: item.priority,
+    dueDate: typeof item.dueDate === 'string' ? item.dueDate : undefined,
+    assignedTo: typeof item.assignedTo === 'string' ? item.assignedTo : undefined,
+    metadata: typeof item.metadata === 'object' && item.metadata !== null ? item.metadata as Record<string, unknown> : undefined,
+  }
+}
+
 // Konfiguration fuer Qualitaetskontrolle Worklist
 const qualityControlConfig: WorklistConfig = {
   title: 'Futtermittel-Qualitaetskontrolle',
@@ -95,7 +114,8 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
     }
   }, [apiItems, items.length])
 
-  const { handleAction } = useMaskActions(async (action: string, item: WorklistItem) => {
+  const { handleAction } = useMaskActions(async (action: string, payload: Record<string, unknown>) => {
+    const item = toWorklistItem(payload)
     if (!item) return
 
     switch (action) {
@@ -130,7 +150,7 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
   })
 
   const handleActionClick = (item: WorklistItem, action: string) => {
-    handleAction(action, item)
+    handleAction(action, { ...item })
   }
 
   return (

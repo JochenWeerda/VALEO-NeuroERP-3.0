@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -74,7 +75,7 @@ const createCreditNoteConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           label: t('crud.entities.customer'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/v1/crm/customers',
+          endpoint: '/api/v1/crm/customers/',
           displayField: 'name',
           valueField: 'id'
         },

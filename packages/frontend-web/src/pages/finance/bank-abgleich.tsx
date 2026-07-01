@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -13,6 +14,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { inputValue, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -41,14 +43,14 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as Field,
+         },
         {
           name: 'camtFile',
           label: t('crud.fields.camtFile'),
           type: 'file',
           accept: '.xml,.camt,.940,.sta,.csv',
           helpText: t('crud.tooltips.fields.camtFile')
-        } as Field,
+        },
         {
           name: 'abgleichsDatum',
           label: t('crud.fields.reconciliationDate'),
@@ -95,14 +97,14 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
       key: 'zuordnung',
       label: t('crud.fields.assignment'),
       fields: []
-    } as Field,
+    },
     {
       key: 'zuordnung_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <BankZuordnungTable
-          data={_data.zuordnungData || []}
+          data={recordArrayFromResponse(_data.zuordnungData)}
           onChange={(zuordnungData) => onChange({ ..._data, zuordnungData })}
         />
       )
@@ -117,10 +119,10 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           type: 'custom',
           customRender: (value: unknown) => (
             <div className="space-y-2">
-              {(value || []).map((regel, index) => (
+              {recordArrayFromResponse(value).map((regel, index) => (
                 <div key={index} className="flex justify-between p-2 bg-gray-50 rounded">
-                  <span>{regel.regelName}</span>
-                  <span>{regel.zugeordnet}/{regel.treffer} {t('crud.fields.matches')}</span>
+                  <span>{stringValue(regel.regelName)}</span>
+                  <span>{numberValue(regel.zugeordnet)}/{numberValue(regel.treffer)} {t('crud.fields.matches')}</span>
                 </div>
               ))}
             </div>
@@ -133,9 +135,9 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
       label: t('crud.fields.importLog', { defaultValue: 'Import-Protokoll' }),
       fields: [],
       customRender: (_data: Record<string, unknown>) => (
-        <BankImportErrorList errors={_data.importErrors || []} />
+        <BankImportErrorList errors={Array.isArray(_data.importErrors) ? _data.importErrors.map(String) : []} />
       )
-    } as Field,
+    },
     {
       key: 'abgleich',
       label: t('crud.fields.reconciliation'),
@@ -189,7 +191,7 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
       update: '/api/v1/finance/bank-statements/{id}',
       delete: '/api/v1/finance/bank-statements/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -232,17 +234,17 @@ function BankZuordnungTable({ data: _data, onChange }: { data: Record<string, un
           <tbody>
             {_data.map((row, index) => (
               <tr key={index} className={`border ${row.zugeordnet ? 'bg-green-50' : ''}`}>
-                <td className="px-4 py-2 border">{row.datum}</td>
+                <td className="px-4 py-2 border">{stringValue(row.datum)}</td>
                 <td className="px-4 py-2 border text-right">
-                  {row.betrag?.toFixed(2)} €
+                  {numberValue(row.betrag).toFixed(2)} EUR
                 </td>
-                <td className="px-4 py-2 border max-w-xs truncate" title={row.verwendungszweck}>
-                  {row.verwendungszweck}
+                <td className="px-4 py-2 border max-w-xs truncate" title={stringValue(row.verwendungszweck)}>
+                  {stringValue(row.verwendungszweck)}
                 </td>
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={row.gegenkonto || ''}
+                    value={inputValue(row.gegenkonto)}
                     onChange={(e) => updateZuordnung(index, 'gegenkonto', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
                     placeholder={t('crud.tooltips.placeholders.account')}
@@ -251,7 +253,7 @@ function BankZuordnungTable({ data: _data, onChange }: { data: Record<string, un
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={row.opReferenz || ''}
+                    value={inputValue(row.opReferenz)}
                     onChange={(e) => updateZuordnung(index, 'opReferenz', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
                     placeholder={t('crud.tooltips.placeholders.opReference')}
@@ -260,7 +262,7 @@ function BankZuordnungTable({ data: _data, onChange }: { data: Record<string, un
                 <td className="px-4 py-2 border text-center">
                   <input
                     type="checkbox"
-                    checked={row.zugeordnet || false}
+                    checked={row.zugeordnet === true}
                     onChange={() => toggleZuordnung(index)}
                     className="h-4 w-4"
                   />
@@ -322,32 +324,32 @@ export default function BankAbgleichPage(): JSX.Element {
     {
       title: 'Objekt',
       items: [
-        { label: 'Bankkonto', value: data?.kontoId || 'Noch nicht gewaehlt' },
-        { label: 'Statement', value: data?.statementId || 'Noch nicht importiert' },
-        { label: 'Periode', value: data?.periode || '-' },
+        { label: 'Bankkonto', value: stringValue(data?.kontoId, 'Noch nicht gewaehlt') },
+        { label: 'Statement', value: stringValue(data?.statementId, 'Noch nicht importiert') },
+        { label: 'Periode', value: stringValue(data?.periode, '-') },
       ],
     },
     {
       title: 'Wirtschaftslage',
       items: [
-        { label: 'Startsaldo', value: `${Number(data?.startSaldo || 0).toFixed(2)} EUR` },
-        { label: 'Endsaldo', value: `${Number(data?.endSaldo || 0).toFixed(2)} EUR` },
-        { label: 'Differenz', value: `${Math.abs(Number(data?.abgleichsDifferenz || 0)).toFixed(2)} EUR` },
+        { label: 'Startsaldo', value: `${numberValue(data?.startSaldo).toFixed(2)} EUR` },
+        { label: 'Endsaldo', value: `${numberValue(data?.endSaldo).toFixed(2)} EUR` },
+        { label: 'Differenz', value: `${Math.abs(numberValue(data?.abgleichsDifferenz)).toFixed(2)} EUR` },
       ],
     },
     {
       title: 'Governance',
       items: [
-        { label: 'Nicht zugeordnet', value: String(Number(data?.nichtZugeordnet || 0)) },
+        { label: 'Nicht zugeordnet', value: String(numberValue(data?.nichtZugeordnet)) },
         { label: 'Importfehler', value: String(Array.isArray(data?.importErrors) ? data.importErrors.length : 0) },
-        { label: 'Naechste Aktion', value: Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung pruefen und validieren' : 'Abgleich verbuchen' },
+        { label: 'Naechste Aktion', value: numberValue(data?.nichtZugeordnet) > 0 ? 'Zuordnung pruefen und validieren' : 'Abgleich verbuchen' },
       ],
     },
   ]
   const timelineItems = [
     { label: 'Bankabgleich geoeffnet', detail: entityTypeLabel },
-    data?.statementId ? { label: 'Statement importiert', detail: data.statementId } : null,
-    Number(data?.nichtZugeordnet || 0) > 0 ? { label: 'Manuelle Klaerung offen', detail: `${data.nichtZugeordnet} Umsatzzeile(n) ohne Zuordnung` } : null,
+    data?.statementId ? { label: 'Statement importiert', detail: stringValue(data.statementId) } : null,
+    numberValue(data?.nichtZugeordnet) > 0 ? { label: 'Manuelle Klaerung offen', detail: `${numberValue(data?.nichtZugeordnet)} Umsatzzeile(n) ohne Zuordnung` } : null,
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
   type ReconcileResult = {
@@ -390,7 +392,8 @@ export default function BankAbgleichPage(): JSX.Element {
 
       try {
         // Determine file format from extension
-        const fileName = formData.camtFile.name || ''
+        const camtFile = formData.camtFile instanceof Blob ? formData.camtFile : null
+        const fileName = camtFile instanceof File ? camtFile.name : ''
         let format = 'CSV'
         if (fileName.endsWith('.xml') || fileName.endsWith('.camt')) {
           format = 'CAMT'
@@ -400,7 +403,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
         // Create FormData for file upload
         const uploadFormData = new FormData()
-        uploadFormData.append('file', formData.camtFile)
+        if (camtFile) uploadFormData.append('file', camtFile)
 
         // Call import API
         type ImportResult = {
@@ -428,9 +431,9 @@ export default function BankAbgleichPage(): JSX.Element {
         const result = res.data
 
         // Transform API response to form data format
-        const umsaetze = result.lines.map((line: Record<string, unknown>) => ({
+        const umsaetze = result.lines.map((line) => ({
           datum: line.booking_date,
-          betrag: parseFloat(line.amount),
+          betrag: Number(line.amount),
           verwendungszweck: line.remittance_info || line.reference || '',
           gegenkonto: '', // Will be assigned during matching
           opReferenz: line.reference || '',
@@ -445,7 +448,7 @@ export default function BankAbgleichPage(): JSX.Element {
         formData.gebuchteUmsaetze = umsaetze.reduce((sum, u) => sum + Number((u as Record<string, unknown>).betrag || 0), 0)
         formData.nichtZugeordnet = umsaetze.filter(u => !u.zugeordnet).length
         formData.zugeordnet = umsaetze.filter(u => u.zugeordnet).length
-        formData.abgleichsDifferenz = Math.abs(Number(formData.startSaldo) + Number(formData.gebuchteUmsaetze) - formData.endSaldo)
+        formData.abgleichsDifferenz = Math.abs(Number(formData.startSaldo) + Number(formData.gebuchteUmsaetze) - Number(formData.endSaldo))
         formData.statementId = result.statement_id
         formData.importErrors = result.import_errors || []
 
@@ -471,7 +474,8 @@ export default function BankAbgleichPage(): JSX.Element {
       }
     } else if (action === 'auto-assign') {
       // Auto-Zuordnung - wende einfache Regeln an
-      if (!formData.zuordnungData || formData.zuordnungData.length === 0) {
+      const zuordnungData = recordArrayFromResponse(formData.zuordnungData)
+      if (zuordnungData.length === 0) {
         toast({
           variant: 'destructive',
           title: t('crud.messages.noData'),
@@ -490,10 +494,10 @@ export default function BankAbgleichPage(): JSX.Element {
       let zugeordnetCount = 0
       const regelStats = rules.map(regel => ({ regelName: regel.name, treffer: 0, zugeordnet: 0 }))
 
-      formData.zuordnungData.forEach(umsatz => {
-        if (!umsatz.zugeordnet) {
+      zuordnungData.forEach((umsatz) => {
+        if (umsatz.zugeordnet !== true) {
           rules.forEach((regel, index) => {
-            if (regel.pattern.test(umsatz.verwendungszweck)) {
+            if (regel.pattern.test(stringValue(umsatz.verwendungszweck))) {
               regelStats[index].treffer++
               if (!umsatz.gegenkonto) {
                 umsatz.gegenkonto = regel.konto
@@ -508,7 +512,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
       formData.regelAngewendet = regelStats
       formData.zugeordnet = (Number(formData.zugeordnet) || 0) + zugeordnetCount
-      formData.nichtZugeordnet = formData.zuordnungData.length - formData.zugeordnet
+      formData.nichtZugeordnet = zuordnungData.length - numberValue(formData.zugeordnet)
 
       toast({
         title: t('crud.messages.autoAssignCompleted'),
@@ -573,7 +577,7 @@ export default function BankAbgleichPage(): JSX.Element {
         toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: t('crud.messages.importCamtFileFirst') })
         return
       }
-      const differenz = Math.abs(formData.abgleichsDifferenz || 0)
+      const differenz = Math.abs(numberValue(formData.abgleichsDifferenz))
       if (differenz >= 0.01) {
         toast({ variant: 'destructive', title: t('crud.messages.bookingNotPossible'), description: t('crud.messages.reconciliationMustBeBalanced') })
         return
@@ -601,7 +605,7 @@ export default function BankAbgleichPage(): JSX.Element {
       }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_reconciliation', format: 'pdf', id: formData.id })
-        if (res?.url) window.open(res.url, '_blank')
+        if (res.data.url) window.open(res.data.url, '_blank')
         toast({ title: t('crud.actions.export'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -631,7 +635,7 @@ export default function BankAbgleichPage(): JSX.Element {
         owner="Finanzbuchhaltung"
         blocker={Math.abs(Number(data?.abgleichsDifferenz || 0)) >= 0.01 ? 'Abgleichsdifferenz ist noch nicht null.' : Number(data?.nichtZugeordnet || 0) > 0 ? 'Es gibt noch nicht zugeordnete Umsatzzeilen.' : null}
         nextAction={Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung abschliessen' : data?.statementId ? 'Validieren und verbuchen' : 'Kontoauszug importieren'}
-        caseLabel={data?.statementId || 'Neuer Abgleich'}
+        caseLabel={stringValue(data?.statementId, 'Neuer Abgleich')}
         tags={['FIBU', 'Bank']}
       />
       <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">

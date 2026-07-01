@@ -21,6 +21,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import {
   ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer,
   Save, Trash2, FileText, Folder, Search, Send,
@@ -107,15 +108,15 @@ function LieferantSuchDialog({
     if (!search.trim()) return
     setLoading(true)
     try {
-      const data = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers', {
+      const response = await apiClient.get<Record<string, unknown>[]>('/api/v1/crm/customers/', {
         params: { search: search.trim(), limit: 30 },
       })
-      setResults((data || []).map(c => ({
-        id: c.id,
-        lieferantNr: c.customer_number || '',
-        name: c.company_name || c.name || '',
-        kreditorAccount: c.customer_number || '',
-        address: c.address,
+      setResults(recordArrayFromResponse(response.data).map(c => ({
+        id: stringValue(c.id),
+        lieferantNr: stringValue(c.customer_number),
+        name: stringValue(c.company_name, stringValue(c.name)),
+        kreditorAccount: stringValue(c.customer_number),
+        address: isRecord(c.address) ? c.address : undefined,
       })))
     } catch { setResults([]) }
     finally { setLoading(false) }
@@ -220,14 +221,15 @@ export default function AnfrageErfassungPage(): JSX.Element {
     if (!anfrageId) return
     void (async () => {
       try {
-        const data = await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${anfrageId}`)
+        const response = await apiClient.get<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${anfrageId}`)
+        const data = response.data
         setState((p) => ({
-          ...p, id: data.id, anfrageNr: data.anfrage_nr || '',
-          anfrageDat: data.anfrage_datum?.substring(0, 10) || today(),
-          niederlassung: data.niederlassung || '',
-          erledigt: data.erledigt || false,
+          ...p, id: stringValue(data.id) || null, anfrageNr: stringValue(data.anfrage_nr),
+          anfrageDat: stringValue(data.anfrage_datum).substring(0, 10) || today(),
+          niederlassung: stringValue(data.niederlassung),
+          erledigt: data.erledigt === true,
           lieferant: data.lieferant_id
-            ? { id: data.lieferant_id, lieferantNr: data.lieferant_id, name: data.lieferant_name || '', kreditorAccount: data.lieferant_id }
+            ? { id: stringValue(data.lieferant_id), lieferantNr: stringValue(data.lieferant_id), name: stringValue(data.lieferant_name), kreditorAccount: stringValue(data.lieferant_id) }
             : null,
         }))
         push('Anfrage geladen')
@@ -247,12 +249,12 @@ export default function AnfrageErfassungPage(): JSX.Element {
   const handleArticleSelect = (article: Record<string, unknown>): void => {
     setCurrentPos((p) => ({
       ...p,
-      artikelNr: article.article_number || article.articleNumber || '',
-      artikelId: article.id || null,
-      artikelBezeichnung: article.name || '',
-      artikelBezeichnung2: article.description || '',
-      einheit: article.unit || 'Stk',
-      einhPreis: article.purchase_price || article.sales_price || 0,
+      artikelNr: stringValue(article.article_number, stringValue(article.articleNumber)),
+      artikelId: stringValue(article.id) || null,
+      artikelBezeichnung: stringValue(article.name),
+      artikelBezeichnung2: stringValue(article.description),
+      einheit: stringValue(article.unit, 'Stk'),
+      einhPreis: numberValue(article.purchase_price, numberValue(article.sales_price)),
     }))
   }
 
@@ -308,13 +310,13 @@ export default function AnfrageErfassungPage(): JSX.Element {
       }
       let resp: Record<string, unknown>
       if (state.id) {
-        resp = await apiClient.patch(`/api/v1/einkauf/anfragen/${state.id}`, payload)
+        resp = (await apiClient.patch<Record<string, unknown>>(`/api/v1/einkauf/anfragen/${state.id}`, payload)).data
       } else {
-        resp = await apiClient.post('/api/v1/einkauf/anfragen', payload)
+        resp = (await apiClient.post<Record<string, unknown>>('/api/v1/einkauf/anfragen', payload)).data
       }
-      setState((p) => ({ ...p, id: resp.id, anfrageNr: resp.anfrage_nr || p.anfrageNr }))
+      setState((p) => ({ ...p, id: stringValue(resp.id) || null, anfrageNr: stringValue(resp.anfrage_nr, p.anfrageNr) }))
       push('Anfrage gespeichert')
-      return resp.id
+      return stringValue(resp.id) || null
     } catch (_rawErr: unknown) {
         const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${err.response?.data?.detail || err.message}`)

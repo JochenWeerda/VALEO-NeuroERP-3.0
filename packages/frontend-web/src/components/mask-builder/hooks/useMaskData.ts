@@ -2,14 +2,23 @@ import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 
-interface UseMaskDataOptions {
+interface UseMaskDataOptions<TData> {
   apiUrl: string
   id?: string
   autoLoad?: boolean
-  transformResponse?: (_data: unknown) => unknown
+  transformResponse?: (_data: unknown) => TData
 }
 
-export function useMaskData<T = unknown>({ apiUrl, id, autoLoad = true, transformResponse }: UseMaskDataOptions) {
+function resolveData<T>(rawData: unknown, transformResponse?: (_data: unknown) => T): T {
+  return (typeof transformResponse === 'function' ? transformResponse(rawData) : rawData) as T
+}
+
+export function useMaskData<T extends object = Record<string, unknown>>({
+  apiUrl,
+  id,
+  autoLoad = true,
+  transformResponse,
+}: UseMaskDataOptions<T>) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +32,7 @@ export function useMaskData<T = unknown>({ apiUrl, id, autoLoad = true, transfor
 
     try {
       const response = await apiClient.get<T>(`${apiUrl}/${id}`)
-      const nextData = typeof transformResponse === 'function' ? transformResponse(response.data) : response.data
+      const nextData = resolveData<T>(response.data, transformResponse)
       setData(nextData)
     } catch (err) {
       const errorMessage = getAxiosErrorMessage(err)
@@ -47,7 +56,7 @@ export function useMaskData<T = unknown>({ apiUrl, id, autoLoad = true, transfor
         ? await apiClient.put<T>(`${apiUrl}/${id}`, formData)
         : await apiClient.post<T>(apiUrl, formData)
 
-      const nextData = typeof transformResponse === 'function' ? transformResponse(response.data) : response.data
+      const nextData = resolveData<T>(response.data, transformResponse)
       setData(nextData)
 
       toast({

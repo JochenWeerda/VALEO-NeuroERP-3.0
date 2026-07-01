@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -14,6 +15,7 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
+import { stringValue } from '@/lib/record-utils'
 
 // Zod-Schema für Bankkonten-Stammdaten
 const createBankKontenSchema = (t: TFunction) => z.object({
@@ -128,7 +130,7 @@ const createBankKontenConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       update: '/api/v1/finance/bank-accounts/{id}',
       delete: '/api/v1/finance/bank-accounts/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -186,7 +188,7 @@ export default function BankKontenStammPage(): JSX.Element {
 
   // Auto-lookup IBAN when it changes and seems complete
   useEffect(() => {
-    const iban = formData?.iban
+    const iban = stringValue(formData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
@@ -220,7 +222,7 @@ export default function BankKontenStammPage(): JSX.Element {
     setIsDirty(true)
     
     // Auto-lookup IBAN when it changes
-    const iban = newData?.iban
+    const iban = stringValue(newData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
@@ -244,7 +246,7 @@ export default function BankKontenStammPage(): JSX.Element {
       try {
         // Format IBAN before saving
         if (formData.iban) {
-          formData.iban = formatIBAN(formData.iban)
+          formData.iban = formatIBAN(stringValue(formData.iban))
         }
 
         await saveData({
@@ -267,12 +269,12 @@ export default function BankKontenStammPage(): JSX.Element {
     } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_accounts', format: 'pdf', id: formData?.id })
-        if (res?.url) window.open(res.url, '_blank')
+        if (res.data?.url) window.open(res.data.url, '_blank')
         toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
-        toast.error(msg)
+        toast.error(stringValue(msg, t('crud.messages.exportError')))
       }
     }
   })

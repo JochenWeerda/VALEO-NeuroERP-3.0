@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { api } from '@/lib/axios'
 import { apiClient } from '@/lib/api-client'
+import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 // Konfiguration für die ListReport
 const futtermittelListConfig: ListConfig = {
@@ -193,7 +194,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
         type: 'danger' as const,
         onClick: async (items: Record<string, unknown>[]) => {
           if (!confirm(`${items.length} Einzelfuttermittel wirklich löschen?`)) return
-          const result = await bulkDeleteFutterItems('einzelfuttermittel', items.map((item) => item.id))
+          const result = await bulkDeleteFutterItems('einzelfuttermittel', items.map((item) => stringValue(item.id)).filter(Boolean))
           queryClient.invalidateQueries({ queryKey: ['futter', 'einzel'] })
           toast({
             title: 'Bulk-Löschen',
@@ -241,7 +242,8 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
       const res = await api.post('/api/v1/futter/import/einzelfuttermittel', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const { created = 0, updated = 0, errors = [] } = (res.data as Record<string, unknown>) ?? {}
+      const { created = 0, updated = 0, errors: rawErrors = [] } = (res.data as Record<string, unknown>) ?? {}
+      const errors = recordArrayFromResponse(rawErrors)
       toast({
         title: 'Import abgeschlossen',
         description: `${String(created ?? '')} neu, ${String(updated ?? '')} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,

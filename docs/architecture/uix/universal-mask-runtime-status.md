@@ -11,7 +11,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
-> **Kurzfassung (2026-06-30):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. 20 Frontend thin wrapper pages + route-aliases. 60 Tests grün. Keine weiteren Migrations-Kandidaten unter den entity-detail ObjectPage-Masken.
+> **Kurzfassung (2026-06-30):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. 20 Frontend thin wrapper pages + route-aliases. Frontend-Typecheck, Frontend-Build, BFF-Build und Universal-Masken-Playwright-Smoke sind lokal grün. Keine weiteren Migrations-Kandidaten unter den entity-detail ObjectPage-Masken.
 
 ## Lieferstand
 
@@ -39,6 +39,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-042a | Advisory-Score 1.00 für alle SDs inkl. sales-order, kontrakte, crm-360 | ✅ | 13 SDs gesamt |
 | UIX-042b | UniversalNativeDetailPage + 7 thin wrapper pages + 7 route-aliases | ✅ | generischer Wrapper |
 | UIX-043 | 13 weitere ObjectPage-Masken migriert; vollständige Inventur; 18 bewusst exempt | ✅ | **26 SDs gesamt** |
+| UIX-044/045 | FilterPlan-HTTP-Vertrag `filter_plan` + Native ActionRuntime-Anschluss | ✅ lokal | `universal-mask-filter-plan.spec.ts`, `UniversalNativeDetailPage` |
 
 ## Architektur (Single Source of Truth)
 
@@ -52,6 +53,7 @@ Backend: GET /api/v1/masks/{id}/screen-definition   ({mask_id:path} — Slash in
          GET /api/v1/masks/{id}/readiness
          GET /api/v1/masks/{id}/entity/{entity_id}   (generischer Kopf-Stub Wave 2)
          GET /api/v1/mask-rollouts/.../tabs/{tab}?page&limit&q&sort&sort_dir&filter_plan
+         POST commandEndpoint aus ScreenDefinition.actions (Human execute via ActionRuntime)
 ```
 
 Referenz-Code: `packages/frontend-web/src/components/mask-builder/runtime/`
@@ -139,8 +141,12 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 
 | pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov`; Coverage-Dateilock unter Windows bei parallelem Lauf umgangen |
 | pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py`, inkl. native Promotionen 038–040 |
-| Frontend type-check | 2026-06-29 | ❌ | Global weiterhin rot durch breit gestreute Bestands-/Parallel-WIP-Typfehler; Verkauf-`lieferschein-erfassung.tsx` lokal bereinigt, verbleibende Lieferschein-Treffer liegen in `pages/einkauf/lieferschein-erfassung.tsx` |
-| Frontend build | — | ausstehend | UIX-032 |
+| Frontend type-check | 2026-06-30 | ✅ | `pnpm --dir packages/frontend-web run type-check` |
+| Frontend build | 2026-06-30 | ✅ | `pnpm --dir packages/frontend-web run build` |
+| BFF build | 2026-06-30 | ✅ | `pnpm --dir packages/bff run build` |
+| Universal-Masken Playwright | 2026-06-30 | ✅ 8/8 | CRM Customer Pilot, Sales Order Pilot, Mask Render Performance; Flags `VITE_ENABLE_UNIVERSAL_MASK_*` |
+| FilterPlan Playwright | 2026-06-30 | ✅ 1/1 | `universal-mask-filter-plan.spec.ts`; native `/crm/lead/:id`, Chip + `filter_plan` Request |
+| FilterPlan Contract | 2026-06-30 | ✅ 3/3 | `tests/test_uix044_filter_plan_contract.py`; isolierter Pytest-Lauf ohne Plugin-Autoload |
 | Frontend vitest (readiness) | 2026-06-29 | ✅ 15/15 | `generatorReadiness.test.ts` |
 | Frontend vitest (gesamt) | — | ausstehend | UIX-032 |
 | GitHub Actions quality-gate | — | ausstehend | kein sichtbarer Run für UIX-028…030 |

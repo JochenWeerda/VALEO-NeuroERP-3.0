@@ -16,6 +16,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/api-client'
+import {
+  literalValue,
+  nullableNumberValue,
+  nullableStringValue,
+  numberValue,
+  recordArrayFromResponse,
+  stringValue,
+  type UnknownRecord,
+} from '@/lib/record-utils'
 
 export type AgrarContract = {
   id: string
@@ -41,6 +50,25 @@ type ContractSelectionDialogProps = {
   customerId?: string | null
 }
 
+function mapContract(c: UnknownRecord): AgrarContract {
+  return {
+    id: stringValue(c.id),
+    contract_number: stringValue(c.contract_number ?? c.contractNumber),
+    contract_type: literalValue(c.contract_type ?? c.contractType, ['buy', 'sell'] as const, 'buy'),
+    harvest_year: numberValue(c.harvest_year ?? c.harvestYear, new Date().getFullYear()),
+    partner_id: stringValue(c.partner_id ?? c.partnerId),
+    article_id: stringValue(c.article_id ?? c.articleId),
+    pricing_model: literalValue(c.pricing_model ?? c.pricingModel, ['fixed', 'follow', 'pool'] as const, 'fixed'),
+    fixed_price: nullableNumberValue(c.fixed_price ?? c.fixedPrice),
+    currency: stringValue(c.currency, 'EUR'),
+    total_quantity_kg: numberValue(c.total_quantity_kg ?? c.totalQuantityKg),
+    remaining_quantity_kg: numberValue(c.remaining_quantity_kg ?? c.remainingQuantityKg),
+    status: stringValue(c.status, 'open'),
+    valid_from: nullableStringValue(c.valid_from ?? c.validFrom),
+    valid_until: nullableStringValue(c.valid_until ?? c.validUntil),
+  }
+}
+
 export function ContractSelectionDialog({
   open,
   onClose,
@@ -60,37 +88,8 @@ export function ContractSelectionDialog({
       }
       
       try {
-        const response = await apiClient.get<Record<string, unknown>>('/api/v1/agrar/contracts', { params })
-        
-        let items: Record<string, unknown>[] = []
-        if (Array.isArray(response)) {
-          items = response
-        } else if (response?.items && Array.isArray(response.items)) {
-          items = response.items
-        } else if (response?.data) {
-          if (Array.isArray(response.data)) {
-            items = response.data
-          } else if (response.data.items && Array.isArray(response.data.items)) {
-            items = response.data.items
-          }
-        }
-        
-        return items.map(c => ({
-          id: c.id,
-          contract_number: c.contract_number || c.contractNumber || '',
-          contract_type: c.contract_type || c.contractType || 'buy',
-          harvest_year: c.harvest_year || c.harvestYear || new Date().getFullYear(),
-          partner_id: c.partner_id || c.partnerId || '',
-          article_id: c.article_id || c.articleId || '',
-          pricing_model: c.pricing_model || c.pricingModel || 'fixed',
-          fixed_price: c.fixed_price || c.fixedPrice || null,
-          currency: c.currency || 'EUR',
-          total_quantity_kg: c.total_quantity_kg || c.totalQuantityKg || 0,
-          remaining_quantity_kg: c.remaining_quantity_kg || c.remainingQuantityKg || 0,
-          status: c.status || 'open',
-          valid_from: c.valid_from || c.validFrom || null,
-          valid_until: c.valid_until || c.validUntil || null,
-        }))
+        const response = await apiClient.get<unknown>('/api/v1/agrar/contracts', { params })
+        return recordArrayFromResponse(response).map(mapContract)
       } catch (err: unknown) {
         console.error('[ContractSelectionDialog] Error fetching contracts:', err)
         return []

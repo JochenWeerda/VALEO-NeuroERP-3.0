@@ -18,6 +18,17 @@ interface BarcodeScannerProps {
 
 type ScannerState = 'idle' | 'requesting' | 'scanning' | 'error' | 'unsupported'
 
+type DetectedBarcode = {
+  rawValue: string
+  format: string
+}
+
+type BarcodeDetectorInstance = {
+  detect: (image: HTMLVideoElement) => Promise<DetectedBarcode[]>
+}
+
+type BarcodeDetectorConstructor = new (options: { formats: string[] }) => BarcodeDetectorInstance
+
 /**
  * Camera-based barcode/QR scanner using the BarcodeDetector Web API.
  * Falls back to a visible error if the API is unavailable.
@@ -30,7 +41,7 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
   const [errorMsg, setErrorMsg] = useState<string>('')
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const detectorRef = useRef<{ detect?: unknown }>(null)
+  const detectorRef = useRef<BarcodeDetectorInstance | null>(null)
   const animFrameRef = useRef<number>(0)
   const activeRef = useRef(false)
 
@@ -57,8 +68,12 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
       }
 
       if (!detectorRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        detectorRef.current = new (window as any).BarcodeDetector({
+        const BarcodeDetector = (window as Window & { BarcodeDetector?: BarcodeDetectorConstructor }).BarcodeDetector
+        if (!BarcodeDetector) {
+          setState('unsupported')
+          return
+        }
+        detectorRef.current = new BarcodeDetector({
           formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'code_39', 'data_matrix', 'upc_a', 'upc_e'],
         })
       }
@@ -67,9 +82,10 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
       activeRef.current = true
 
       const detect = async (): Promise<void> => {
-        if (!activeRef.current || !videoRef.current) return
+        const detector = detectorRef.current
+        if (!activeRef.current || !videoRef.current || !detector) return
         try {
-          const barcodes = await detectorRef.current.detect(videoRef.current)
+          const barcodes = await detector.detect(videoRef.current)
           if (barcodes.length > 0) {
             const result: BarcodeScanResult = {
               rawValue: barcodes[0].rawValue,

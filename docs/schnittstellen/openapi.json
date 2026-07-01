@@ -121557,6 +121557,89 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/events": {
+      "get": {
+        "description": "Compatibility endpoint used by the frontend SSE client.",
+        "operationId": "stream_events_api_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "stream",
+            "required": false,
+            "schema": {
+              "default": "mcp",
+              "title": "Stream",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Events",
+        "tags": [
+          "sse"
+        ]
+      }
+    },
+    "/api/stream/{channel}": {
+      "get": {
+        "description": "Stream server-sent events for a specific channel.",
+        "operationId": "stream_channel_api_stream__channel__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel",
+            "required": true,
+            "schema": {
+              "title": "Channel",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Channel",
+        "tags": [
+          "sse"
+        ]
+      }
+    },
     "/api/v1/$batch": {
       "post": {
         "description": "OData-style batch endpoint. Accepts up to 10 GET sub-requests, runs them\nconcurrently, and returns all responses in one payload. Auth context and\ntenant headers are inherited from the outer request.",
@@ -139177,6 +139260,62 @@
         ]
       }
     },
+    "/api/v1/agrar/kulturen": {
+      "get": {
+        "description": "Referenzliste der bewirtschafteten Kulturen / Fruchtarten.",
+        "operationId": "list_kulturen_api_v1_agrar_kulturen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Agrar-Kulturen-Stammdaten auflisten",
+        "tags": [
+          "agrar",
+          "wetter",
+          "agrar",
+          "wetter"
+        ]
+      }
+    },
     "/api/v1/agrar/maschinen": {
       "get": {
         "description": "Liste aller Maschinen mit optionalen Filtern.",
@@ -142992,6 +143131,76 @@
           "psm",
           "proplanta",
           "integration"
+        ]
+      }
+    },
+    "/api/v1/agrar/psm/schadbilder": {
+      "get": {
+        "description": "Stub: Schadbilder/Schaderreger-Katalog.",
+        "operationId": "list_schadbilder_api_v1_agrar_psm_schadbilder_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kultur",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kultur"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schadbilder auflisten",
+        "tags": [
+          "agrar",
+          "psm"
         ]
       }
     },
@@ -152190,7 +152399,8 @@
     },
     "/api/v1/annahme/warteschlange": {
       "get": {
-        "operationId": "annahme_warteschlange_api_v1_annahme_warteschlange_get",
+        "description": "Stub: Gibt die aktuelle Eingangs-Warteschlange zurück.",
+        "operationId": "list_warteschlange_api_v1_annahme_warteschlange_get",
         "parameters": [
           {
             "in": "header",
@@ -152214,7 +152424,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnnahmeEntryOut"
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Warteschlange Api V1 Annahme Warteschlange Get",
+                  "type": "array"
                 }
               }
             },
@@ -152236,13 +152451,17 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Warteschlange annahme",
+        "summary": "Annahme-Warteschlange abrufen",
         "tags": [
-          "compat"
+          "annahme",
+          "warteschlange",
+          "annahme",
+          "warteschlange"
         ]
       },
       "post": {
-        "operationId": "create_lkw_warteschlange_alias_api_v1_annahme_warteschlange_post",
+        "description": "Stub: Nimmt eine neue Anlieferung in die Warteschlange auf.",
+        "operationId": "create_warteschlange_entry_api_v1_annahme_warteschlange_post",
         "parameters": [
           {
             "in": "header",
@@ -152265,18 +152484,22 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LKWRegistrierungIn"
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LKWRegistrierungOut"
+                  "additionalProperties": true,
+                  "title": "Response Create Warteschlange Entry Api V1 Annahme Warteschlange Post",
+                  "type": "object"
                 }
               }
             },
@@ -152298,10 +152521,93 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Lkw warteschlange alias anlegen",
+        "summary": "Anlieferung in Warteschlange aufnehmen",
         "tags": [
-          "compat",
-          "annahme"
+          "annahme",
+          "warteschlange",
+          "annahme",
+          "warteschlange"
+        ]
+      }
+    },
+    "/api/v1/annahme/warteschlange/{entry_id}/repair-article": {
+      "post": {
+        "description": "Stub: Korrigiert die Artikel-Nr. eines Warteschlangen-Eintrags.",
+        "operationId": "repair_article_api_v1_annahme_warteschlange__entry_id__repair_article_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "title": "Entry Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Repair Article Api V1 Annahme Warteschlange  Entry Id  Repair Article Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Artikel-Nummer reparieren",
+        "tags": [
+          "annahme",
+          "warteschlange",
+          "annahme",
+          "warteschlange"
         ]
       }
     },
@@ -177826,6 +178132,1399 @@
         ]
       }
     },
+    "/api/v1/crm/campaigns": {
+      "get": {
+        "description": "Kampagnen auflisten",
+        "operationId": "list_campaigns_api_v1_crm_campaigns_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaign_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Campaign Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmCampaignOut"
+                  },
+                  "title": "Response List Campaigns Api V1 Crm Campaigns Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaigns auflisten",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "post": {
+        "description": "Neue Kampagne anlegen (Status: draft)",
+        "operationId": "create_campaign_api_v1_crm_campaigns_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign anlegen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/templates": {
+      "get": {
+        "description": "Kampagnen-Vorlagen auflisten",
+        "operationId": "list_templates_api_v1_crm_campaigns_templates_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_active",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmCampaignOut"
+                  },
+                  "title": "Response List Templates Api V1 Crm Campaigns Templates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Templates auflisten",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "post": {
+        "description": "Neue Kampagnen-Vorlage anlegen",
+        "operationId": "create_template_api_v1_crm_campaigns_templates_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template anlegen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/templates/{template_id}": {
+      "delete": {
+        "operationId": "delete_template_api_v1_crm_campaigns_templates__template_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template lÃ¶schen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "get": {
+        "operationId": "get_template_api_v1_crm_campaigns_templates__template_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template abrufen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "put": {
+        "operationId": "update_template_api_v1_crm_campaigns_templates__template_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template aktualisieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/templates/{template_id}/activate": {
+      "post": {
+        "operationId": "activate_template_api_v1_crm_campaigns_templates__template_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template aktivieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/templates/{template_id}/deactivate": {
+      "post": {
+        "operationId": "deactivate_template_api_v1_crm_campaigns_templates__template_id__deactivate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template deaktivieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/templates/{template_id}/duplicate": {
+      "post": {
+        "description": "Vorlage duplizieren",
+        "operationId": "duplicate_template_api_v1_crm_campaigns_templates__template_id__duplicate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template duplicate",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}": {
+      "delete": {
+        "operationId": "delete_campaign_api_v1_crm_campaigns__campaign_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign lÃ¶schen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "get": {
+        "operationId": "get_campaign_api_v1_crm_campaigns__campaign_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign abrufen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "put": {
+        "operationId": "update_campaign_api_v1_crm_campaigns__campaign_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign aktualisieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/activate": {
+      "post": {
+        "description": "Kampagne aktivieren (draft/paused â†’ active)",
+        "operationId": "activate_campaign_api_v1_crm_campaigns__campaign_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign aktivieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/analytics": {
+      "get": {
+        "description": "Detaillierte Kampagnen-Analytik",
+        "operationId": "get_analytics_api_v1_crm_campaigns__campaign_id__analytics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Analytics abrufen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/archive": {
+      "post": {
+        "description": "Kampagne archivieren",
+        "operationId": "archive_campaign_api_v1_crm_campaigns__campaign_id__archive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign archivieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/complete": {
+      "post": {
+        "description": "Kampagne abschlieÃŸen (active â†’ completed)",
+        "operationId": "complete_campaign_api_v1_crm_campaigns__campaign_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign complete",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/pause": {
+      "post": {
+        "description": "Kampagne pausieren (active â†’ paused)",
+        "operationId": "pause_campaign_api_v1_crm_campaigns__campaign_id__pause_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign pausieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/recipients": {
+      "get": {
+        "description": "EmpfÃ¤nger einer Kampagne auflisten",
+        "operationId": "list_recipients_api_v1_crm_campaigns__campaign_id__recipients_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmCampaignOut"
+                  },
+                  "title": "Response List Recipients Api V1 Crm Campaigns  Campaign Id  Recipients Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recipients auflisten",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      },
+      "post": {
+        "description": "EmpfÃ¤nger zu Kampagne hinzufÃ¼gen",
+        "operationId": "add_recipient_api_v1_crm_campaigns__campaign_id__recipients_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipientAdd"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recipient hinzufÃ¼gen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/recipients/{recipient_id}": {
+      "patch": {
+        "description": "EmpfÃ¤nger-Status aktualisieren (z.B. sent, opened, clicked, converted)",
+        "operationId": "update_recipient_status_api_v1_crm_campaigns__campaign_id__recipients__recipient_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "recipient_id",
+            "required": true,
+            "schema": {
+              "title": "Recipient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipientStatusUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recipient status aktualisieren",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
+    "/api/v1/crm/campaigns/{campaign_id}/resume": {
+      "post": {
+        "description": "Pausierte Kampagne fortsetzen (paused â†’ active)",
+        "operationId": "resume_campaign_api_v1_crm_campaigns__campaign_id__resume_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCampaignOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign fortsetzen",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
     "/api/v1/crm/cases/": {
       "get": {
         "description": "List support cases from crm-service with pagination.",
@@ -178644,1399 +180343,6 @@
         "tags": [
           "crm",
           "contacts"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns": {
-      "get": {
-        "description": "Kampagnen auflisten",
-        "operationId": "list_campaigns_api_v1_crm_crm_campaigns_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "state",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "State"
-            }
-          },
-          {
-            "in": "query",
-            "name": "campaign_type",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Campaign Type"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CrmCampaignOut"
-                  },
-                  "title": "Response List Campaigns Api V1 Crm Crm Campaigns Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaigns auflisten",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "post": {
-        "description": "Neue Kampagne anlegen (Status: draft)",
-        "operationId": "create_campaign_api_v1_crm_crm_campaigns_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CampaignCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign anlegen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/templates": {
-      "get": {
-        "description": "Kampagnen-Vorlagen auflisten",
-        "operationId": "list_templates_api_v1_crm_crm_campaigns_templates_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "is_active",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Is Active"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CrmCampaignOut"
-                  },
-                  "title": "Response List Templates Api V1 Crm Crm Campaigns Templates Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Templates auflisten",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "post": {
-        "description": "Neue Kampagnen-Vorlage anlegen",
-        "operationId": "create_template_api_v1_crm_crm_campaigns_templates_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TemplateCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template anlegen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/templates/{template_id}": {
-      "delete": {
-        "operationId": "delete_template_api_v1_crm_crm_campaigns_templates__template_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template lÃ¶schen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "get": {
-        "operationId": "get_template_api_v1_crm_crm_campaigns_templates__template_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template abrufen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "put": {
-        "operationId": "update_template_api_v1_crm_crm_campaigns_templates__template_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TemplateUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template aktualisieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/templates/{template_id}/activate": {
-      "post": {
-        "operationId": "activate_template_api_v1_crm_crm_campaigns_templates__template_id__activate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template aktivieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/templates/{template_id}/deactivate": {
-      "post": {
-        "operationId": "deactivate_template_api_v1_crm_crm_campaigns_templates__template_id__deactivate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template deaktivieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/templates/{template_id}/duplicate": {
-      "post": {
-        "description": "Vorlage duplizieren",
-        "operationId": "duplicate_template_api_v1_crm_crm_campaigns_templates__template_id__duplicate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Template duplicate",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}": {
-      "delete": {
-        "operationId": "delete_campaign_api_v1_crm_crm_campaigns__campaign_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign lÃ¶schen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "get": {
-        "operationId": "get_campaign_api_v1_crm_crm_campaigns__campaign_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign abrufen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "put": {
-        "operationId": "update_campaign_api_v1_crm_crm_campaigns__campaign_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CampaignUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign aktualisieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/activate": {
-      "post": {
-        "description": "Kampagne aktivieren (draft/paused â†’ active)",
-        "operationId": "activate_campaign_api_v1_crm_crm_campaigns__campaign_id__activate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign aktivieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/analytics": {
-      "get": {
-        "description": "Detaillierte Kampagnen-Analytik",
-        "operationId": "get_analytics_api_v1_crm_crm_campaigns__campaign_id__analytics_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Analytics abrufen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/archive": {
-      "post": {
-        "description": "Kampagne archivieren",
-        "operationId": "archive_campaign_api_v1_crm_crm_campaigns__campaign_id__archive_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign archivieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/complete": {
-      "post": {
-        "description": "Kampagne abschlieÃŸen (active â†’ completed)",
-        "operationId": "complete_campaign_api_v1_crm_crm_campaigns__campaign_id__complete_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign complete",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/pause": {
-      "post": {
-        "description": "Kampagne pausieren (active â†’ paused)",
-        "operationId": "pause_campaign_api_v1_crm_crm_campaigns__campaign_id__pause_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign pausieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/recipients": {
-      "get": {
-        "description": "EmpfÃ¤nger einer Kampagne auflisten",
-        "operationId": "list_recipients_api_v1_crm_crm_campaigns__campaign_id__recipients_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CrmCampaignOut"
-                  },
-                  "title": "Response List Recipients Api V1 Crm Crm Campaigns  Campaign Id  Recipients Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Recipients auflisten",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      },
-      "post": {
-        "description": "EmpfÃ¤nger zu Kampagne hinzufÃ¼gen",
-        "operationId": "add_recipient_api_v1_crm_crm_campaigns__campaign_id__recipients_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecipientAdd"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Recipient hinzufÃ¼gen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/recipients/{recipient_id}": {
-      "patch": {
-        "description": "EmpfÃ¤nger-Status aktualisieren (z.B. sent, opened, clicked, converted)",
-        "operationId": "update_recipient_status_api_v1_crm_crm_campaigns__campaign_id__recipients__recipient_id__patch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "recipient_id",
-            "required": true,
-            "schema": {
-              "title": "Recipient Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecipientStatusUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Recipient status aktualisieren",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
-        ]
-      }
-    },
-    "/api/v1/crm/crm/campaigns/{campaign_id}/resume": {
-      "post": {
-        "description": "Pausierte Kampagne fortsetzen (paused â†’ active)",
-        "operationId": "resume_campaign_api_v1_crm_crm_campaigns__campaign_id__resume_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmCampaignOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Campaign fortsetzen",
-        "tags": [
-          "crm",
-          "campaigns",
-          "marketing"
         ]
       }
     },
@@ -188047,6 +188353,376 @@
         ]
       }
     },
+    "/api/v1/crm/segments": {
+      "get": {
+        "operationId": "list_segments_api_v1_crm_segments_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Segments Api V1 Crm Segments Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundensegmente auflisten",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      },
+      "post": {
+        "operationId": "create_segment_api_v1_crm_segments_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Segment Api V1 Crm Segments Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundensegment anlegen",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      }
+    },
+    "/api/v1/crm/segments/{segment_id}": {
+      "delete": {
+        "operationId": "delete_segment_api_v1_crm_segments__segment_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundensegment löschen",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      },
+      "get": {
+        "operationId": "get_segment_api_v1_crm_segments__segment_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Segment Api V1 Crm Segments  Segment Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundensegment abrufen",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      },
+      "put": {
+        "operationId": "update_segment_api_v1_crm_segments__segment_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Segment Api V1 Crm Segments  Segment Id  Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundensegment aktualisieren",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      }
+    },
     "/api/v1/crm/suppliers": {
       "get": {
         "operationId": "crm_suppliers_api_v1_crm_suppliers_get",
@@ -194999,7 +195675,8 @@
     },
     "/api/v1/einkauf/audit-trail/{doc_type}/{doc_id}": {
       "get": {
-        "operationId": "einkauf_audit_trail_api_v1_einkauf_audit_trail__doc_type___doc_id__get",
+        "description": "Stub: Audit-Trail für Einkaufsdokument.",
+        "operationId": "get_einkauf_audit_trail_api_v1_einkauf_audit_trail__doc_type___doc_id__get",
         "parameters": [
           {
             "in": "path",
@@ -195040,9 +195717,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -195063,9 +195738,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Audit trail einkauf",
+        "summary": "Einkauf Audit-Trail abrufen",
         "tags": [
-          "compat"
+          "einkauf",
+          "kpi",
+          "einkauf",
+          "kpi"
         ]
       }
     },
@@ -257215,6 +257893,112 @@
         ]
       }
     },
+    "/api/v1/masks/{mask_id}/entity/{entity_id}/tabs/{tab_key}": {
+      "get": {
+        "description": "Stub-Endpunkt fuer Tabellen-Tabs nativer SDs.\n\nLiefert leere Ergebnisliste damit das Frontend kein 404 erhaelt.\nWird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.",
+        "operationId": "get_mask_tab_stub_api_v1_masks__mask_id__entity__entity_id__tabs__tab_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mask_id",
+            "required": true,
+            "schema": {
+              "title": "Mask Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tab_key",
+            "required": true,
+            "schema": {
+              "title": "Tab Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Mask Tab Stub Api V1 Masks  Mask Id  Entity  Entity Id  Tabs  Tab Key  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Generischer Tab-Stub fuer native SDs ohne dedizierten Tab-Endpunkt",
+        "tags": [
+          "ui",
+          "masks",
+          "screen-definition"
+        ]
+      }
+    },
     "/api/v1/masks/{mask_id}/readiness": {
       "get": {
         "description": "Prueft alle Generator-Readiness-Gates fuer eine Maske.\n\nMandatory gates (blockieren generatorReady):\nschema_valid, non_temporary, data_sources, table_data_source_bound,\ntable_columns_complete, actions_classified.\n\nAdvisory gates (nur Warnungen, kein Block):\nsort_whitelist, filter_columns, agent_contract, workflow_declared,\nstable_test_selectors, table_query_contract.",
@@ -300463,32 +301247,33 @@
     },
     "/api/v1/reports/export/{report_type}": {
       "get": {
-        "description": "Export report data in various formats",
+        "description": "Stub: Export-Endpunkt für Berichte. Gibt leere Erfolgsmeldung zurück.",
         "operationId": "export_report_api_v1_reports_export__report_type__get",
         "parameters": [
           {
+            "description": "Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag",
             "in": "path",
             "name": "report_type",
             "required": true,
             "schema": {
+              "description": "Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag",
               "title": "Report Type",
               "type": "string"
             }
           },
           {
-            "description": "Export format: json, csv",
+            "description": "Ausgabeformat: xlsx, csv, pdf",
             "in": "query",
             "name": "format",
             "required": false,
             "schema": {
-              "default": "json",
-              "description": "Export format: json, csv",
+              "default": "xlsx",
+              "description": "Ausgabeformat: xlsx, csv, pdf",
               "title": "Format",
               "type": "string"
             }
           },
           {
-            "description": "Start date (YYYY-MM-DD)",
             "in": "query",
             "name": "start_date",
             "required": false,
@@ -300501,12 +301286,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Start date (YYYY-MM-DD)",
               "title": "Start Date"
             }
           },
           {
-            "description": "End date (YYYY-MM-DD)",
             "in": "query",
             "name": "end_date",
             "required": false,
@@ -300519,8 +301302,23 @@
                   "type": "null"
                 }
               ],
-              "description": "End date (YYYY-MM-DD)",
               "title": "End Date"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -300528,11 +301326,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Export Report Api V1 Reports Export  Report Type  Get",
-                  "type": "object"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -300553,12 +301347,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Export Report",
+        "summary": "Bericht exportieren",
         "tags": [
           "reports",
-          "analytics",
-          "dashboard",
-          "reports"
+          "export",
+          "reports",
+          "export"
         ]
       }
     },

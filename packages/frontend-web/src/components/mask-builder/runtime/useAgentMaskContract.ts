@@ -8,7 +8,8 @@ export function useAgentMaskContract(maskId: string | undefined, opts?: { enable
   return useQuery<AgentMaskContract>({
     queryKey: ['agent-mask-contract', maskId],
     queryFn: async () => {
-      const res = await apiClient.get<AgentMaskContract>(`/api/v1/masks/${maskId}/agent-contract`)
+      const encoded = maskId?.replace(/\//g, '__')
+      const res = await apiClient.get<AgentMaskContract>(`/api/v1/masks/${encoded}/agent-contract`)
       return res.data
     },
     enabled: Boolean(maskId) && (opts?.enabled !== false),

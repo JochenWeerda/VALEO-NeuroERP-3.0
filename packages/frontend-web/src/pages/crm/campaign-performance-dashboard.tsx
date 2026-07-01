@@ -12,7 +12,7 @@ import { apiClient } from '@/lib/api-client'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
-import { DataTable } from '@/components/ui/data-table'
+import { DataTable, type LegacyColumnDef } from '@/components/ui/data-table'
 
 const CampaignPerformanceCharts = lazy(() =>
   import('@/pages/crm/charts/CampaignPerformanceCharts').then((module) => ({ default: module.default })),
@@ -136,7 +136,7 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
     { value: '1y', label: t('crud.campaigns.timeRange.1y') },
   ]
 
-  const campaignColumns = [
+  const campaignColumns: LegacyColumnDef<CampaignSummary>[] = [
     {
       key: 'name' as const,
       label: t('crud.fields.name'),
@@ -152,13 +152,14 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
           push: t('crud.campaigns.types.push'),
           social: t('crud.campaigns.types.social'),
         }
-        return <Badge variant="outline">{typeLabels[campaign.type] || campaign.type}</Badge>
+        const type = campaign.type || 'unknown'
+        return <Badge variant="outline">{typeLabels[type] || type}</Badge>
       },
     },
     { key: 'sent_count' as const, label: t('crud.fields.sentCount'), render: campaign => (campaign.sent_count || 0).toLocaleString() },
-    { key: 'open_rate' as const, label: t('crud.fields.openRate'), render: campaign => `${campaign.sent_count > 0 ? (((campaign.open_count || 0) / campaign.sent_count) * 100).toFixed(1) : '0.0'}%` },
-    { key: 'click_rate' as const, label: t('crud.fields.clickRate'), render: campaign => `${campaign.sent_count > 0 ? (((campaign.click_count || 0) / campaign.sent_count) * 100).toFixed(1) : '0.0'}%` },
-    { key: 'conversion_rate' as const, label: t('crud.fields.conversionRate'), render: campaign => `${campaign.sent_count > 0 ? (((campaign.conversion_count || 0) / campaign.sent_count) * 100).toFixed(1) : '0.0'}%` },
+    { key: 'open_rate', label: t('crud.fields.openRate'), render: campaign => `${(campaign.sent_count ?? 0) > 0 ? (((campaign.open_count || 0) / (campaign.sent_count ?? 1)) * 100).toFixed(1) : '0.0'}%` },
+    { key: 'click_rate', label: t('crud.fields.clickRate'), render: campaign => `${(campaign.sent_count ?? 0) > 0 ? (((campaign.click_count || 0) / (campaign.sent_count ?? 1)) * 100).toFixed(1) : '0.0'}%` },
+    { key: 'conversion_rate', label: t('crud.fields.conversionRate'), render: campaign => `${(campaign.sent_count ?? 0) > 0 ? (((campaign.conversion_count || 0) / (campaign.sent_count ?? 1)) * 100).toFixed(1) : '0.0'}%` },
     { key: 'spent' as const, label: t('crud.fields.spent'), render: campaign => formatCurrency(campaign.spent || 0) },
   ]
 

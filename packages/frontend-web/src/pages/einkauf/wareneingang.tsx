@@ -20,6 +20,7 @@ import {
   RoleFocusBar,
   type UxTaskItem,
 } from '@/components/workflow'
+import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type GoodsReceiptRoleFocus = 'all' | 'receiving' | 'procurement' | 'quality' | 'warehouse' | 'finance'
 
@@ -95,6 +96,30 @@ type GoodsReceiptData = {
   damageReport?: string
 }
 
+function mapPurchaseOrderItem(line: Record<string, unknown>, orderId: string): PurchaseOrderItem {
+  return {
+    id: stringValue(line.id, `${orderId}-${stringValue(line.articleId, stringValue(line.description))}`),
+    productId: stringValue(line.articleId, stringValue(line.productId)),
+    productName: stringValue(line.description, stringValue(line.productName)),
+    quantityOrdered: numberValue(line.quantity),
+    quantityReceived: numberValue(line.quantityReceived),
+    unit: stringValue(line.unit, 'Stk'),
+    price: numberValue(line.unitPrice, numberValue(line.price)),
+  }
+}
+
+function mapPurchaseOrder(po: Record<string, unknown>): PurchaseOrder {
+  const orderId = stringValue(po.id)
+  return {
+    id: orderId,
+    number: stringValue(po.purchaseOrderNumber, stringValue(po.number)),
+    supplierId: stringValue(po.supplierId),
+    supplierName: stringValue(po.subject, stringValue(po.supplierName)),
+    status: stringValue(po.status),
+    items: recordArrayFromResponse(po.items).map((line) => mapPurchaseOrderItem(line, orderId)),
+  }
+}
+
 export default function WareneingangPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -144,23 +169,8 @@ export default function WareneingangPage(): JSX.Element {
 
   const loadPurchaseOrders = async () => {
     try {
-      const rows = (await apiClient.get<Record<string, unknown>[]>('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')) as unknown as Record<string, unknown>[]
-      setPurchaseOrders(rows.map(po => ({
-        id: po.id,
-        number: po.purchaseOrderNumber || po.number,
-        supplierId: po.supplierId || '',
-        supplierName: po.subject || po.supplierName || '',
-        status: po.status,
-        items: (po.items || []).map(line => ({
-          id: line.id || `${String(po.id ?? '')}-${String(line.articleId ?? line.description ?? '')}`,
-          productId: line.articleId || line.productId || '',
-          productName: line.description || line.productName || '',
-          quantityOrdered: Number(line.quantity || 0),
-          quantityReceived: Number(line.quantityReceived || 0),
-          unit: line.unit || 'Stk',
-          price: Number(line.unitPrice || line.price || 0),
-        })),
-      })))
+      const rows = await apiClient.get<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')
+      setPurchaseOrders(recordArrayFromResponse(rows.data).map(mapPurchaseOrder))
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -172,25 +182,11 @@ export default function WareneingangPage(): JSX.Element {
   const loadPurchaseOrder = async (orderId: string) => {
     setLoading(true)
     try {
-      const po = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${orderId}`)
-      setPurchaseOrder({
-        id: po.id,
-        number: po.purchaseOrderNumber || po.number,
-        supplierId: po.supplierId || '',
-        supplierName: po.subject || po.supplierName || '',
-        status: po.status,
-        items: (po.items || []).map(line => ({
-          id: line.id || `${String(po.id ?? '')}-${String(line.articleId ?? line.description ?? '')}`,
-          productId: line.articleId || line.productId || '',
-          productName: line.description || line.productName || '',
-          quantityOrdered: Number(line.quantity || 0),
-          quantityReceived: Number(line.quantityReceived || 0),
-          unit: line.unit || 'Stk',
-          price: Number(line.unitPrice || line.price || 0),
-        })),
-      })
-      const items: GoodsReceiptItem[] = (po.items || []).map(item => ({
-        purchaseOrderItemId: item.id || `${String(po.id ?? '')}-${String(item.articleId ?? item.description ?? '')}`,
+      const response = await apiClient.get<Record<string, unknown>>(`/api/v1/purchase-orders/${orderId}`)
+      const po = mapPurchaseOrder(response.data)
+      setPurchaseOrder(po)
+      const items: GoodsReceiptItem[] = po.items.map(item => ({
+        purchaseOrderItemId: item.id,
         receivedQuantity: 0,
         acceptedQuantity: 0,
         rejectedQuantity: 0,
@@ -217,8 +213,8 @@ export default function WareneingangPage(): JSX.Element {
       
       // Auto-berechnen: acceptedQuantity = receivedQuantity - rejectedQuantity
       if (field === 'receivedQuantity' || field === 'rejectedQuantity') {
-        const received = field === 'receivedQuantity' ? value : newItems[index].receivedQuantity
-        const rejected = field === 'rejectedQuantity' ? value : newItems[index].rejectedQuantity
+        const received = field === 'receivedQuantity' ? numberValue(value) : newItems[index].receivedQuantity
+        const rejected = field === 'rejectedQuantity' ? numberValue(value) : newItems[index].rejectedQuantity
         newItems[index].acceptedQuantity = Math.max(0, received - rejected)
       }
       

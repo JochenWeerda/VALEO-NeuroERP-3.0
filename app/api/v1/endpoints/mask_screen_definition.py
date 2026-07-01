@@ -16,6 +16,10 @@ router = APIRouter(prefix="/masks", tags=["ui", "masks", "screen-definition"])
 _SENSITIVE_PATTERN = re.compile(r"passw|token|secret|iban|bic|konto_nr|credit_card", re.IGNORECASE)
 
 
+def _normalize_mask_id(mask_id: str) -> str:
+    return mask_id.strip("/").replace("__", "/")
+
+
 def _generate_agent_contract(definition: dict[str, Any]) -> dict[str, Any]:
     """Derives an AgentMaskContract from a raw ScreenDefinition dict."""
 
@@ -95,7 +99,7 @@ async def get_mask_screen_definition(
     """Liefert die native ScreenDefinition fuer Generator-faehige Masken."""
 
     _ = tenant_id
-    normalized = mask_id.strip("/")
+    normalized = _normalize_mask_id(mask_id)
     definition = get_screen_definition(normalized)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
@@ -113,7 +117,7 @@ async def get_agent_mask_contract(
     noetig. Explizite agentContract-Felder im Screen ueberschreiben die generierten Werte.
     """
     _ = tenant_id
-    normalized = mask_id.strip("/")
+    normalized = _normalize_mask_id(mask_id)
     definition = get_screen_definition(normalized)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
@@ -257,7 +261,7 @@ async def get_mask_readiness(
     stable_test_selectors, table_query_contract.
     """
     _ = tenant_id
-    normalized = mask_id.strip("/")
+    normalized = _normalize_mask_id(mask_id)
     definition = get_screen_definition(normalized)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
@@ -280,7 +284,7 @@ async def get_mask_entity_stub(
     Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
     """
     _ = tenant_id
-    normalized = mask_id.strip("/")
+    normalized = _normalize_mask_id(mask_id)
     definition = get_screen_definition(normalized)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
@@ -294,3 +298,38 @@ async def get_mask_entity_stub(
     for f in fields:
         stub.setdefault(f["key"], None)
     return stub
+
+
+@router.get(
+    "/{mask_id:path}/entity/{entity_id}/tabs/{tab_key}",
+    response_model=dict[str, Any],
+    summary="Generischer Tab-Stub fuer native SDs ohne dedizierten Tab-Endpunkt",
+)
+async def get_mask_tab_stub(
+    mask_id: str,
+    entity_id: str,
+    tab_key: str,
+    page: int = 1,
+    page_size: int = 25,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Stub-Endpunkt fuer Tabellen-Tabs nativer SDs.
+
+    Liefert leere Ergebnisliste damit das Frontend kein 404 erhaelt.
+    Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
+    """
+    _ = tenant_id
+    normalized = _normalize_mask_id(mask_id)
+    definition = get_screen_definition(normalized)
+    if definition is None:
+        raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
+    return {
+        "items": [],
+        "total": 0,
+        "page": page,
+        "page_size": page_size,
+        "_stub": True,
+        "_mask_id": normalized,
+        "_entity_id": entity_id,
+        "_tab_key": tab_key,
+    }

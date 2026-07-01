@@ -98,7 +98,7 @@ export function ShortcutHelpPanel({
       )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      {...(!isExpanded ? { inert: true as const } : {})}
+      {...(!isExpanded ? { inert: '' } : {})}
     >
       <Card
         className={clsx(

@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListReport } from '@/components/mask-builder'
@@ -8,6 +9,7 @@ import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient } from '@/lib/api-client'
+import { recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
@@ -32,13 +34,14 @@ const createGDPRRequestsConfig = (t: TFunction, entityTypeLabel: string): ListCo
       labelKey: 'crud.fields.requestType',
       sortable: true,
       render: (value) => {
+        const requestType = stringValue(value)
         const typeLabels: Record<string, string> = {
           access: t('crud.gdpr.requestTypes.access'),
           deletion: t('crud.gdpr.requestTypes.deletion'),
           portability: t('crud.gdpr.requestTypes.portability'),
           objection: t('crud.gdpr.requestTypes.objection'),
         }
-        return <Badge variant="outline">{typeLabels[value] || value}</Badge>
+        return <Badge variant="outline">{typeLabels[requestType] || requestType}</Badge>
       }
     },
     {
@@ -47,6 +50,7 @@ const createGDPRRequestsConfig = (t: TFunction, entityTypeLabel: string): ListCo
       labelKey: 'crud.fields.status',
       sortable: true,
       render: (value) => {
+        const status = stringValue(value)
         const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
           pending: 'secondary',
           in_progress: 'default',
@@ -55,8 +59,8 @@ const createGDPRRequestsConfig = (t: TFunction, entityTypeLabel: string): ListCo
           cancelled: 'outline',
         }
         return (
-          <Badge variant={statusVariants[value] || 'secondary'}>
-            {getStatusLabel(t, value, value)}
+          <Badge variant={statusVariants[status] || 'secondary'}>
+            {getStatusLabel(t, status, status)}
           </Badge>
         )
       }
@@ -66,21 +70,21 @@ const createGDPRRequestsConfig = (t: TFunction, entityTypeLabel: string): ListCo
       label: t('crud.fields.requestedAt'),
       labelKey: 'crud.fields.requestedAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     },
     {
       key: 'completed_at',
       label: t('crud.fields.completedAt'),
       labelKey: 'crud.fields.completedAt',
       sortable: true,
-      render: (value) => value ? formatDate(value) : '-'
+      render: (value) => value ? formatDate(stringValue(value)) : '-'
     },
     {
       key: 'verified_at',
       label: t('crud.fields.verifiedAt'),
       labelKey: 'crud.fields.verifiedAt',
       sortable: true,
-      render: (value) => value ? formatDate(value) : '-'
+      render: (value) => value ? formatDate(stringValue(value)) : '-'
     },
     {
       key: 'is_self_request',
@@ -169,8 +173,7 @@ export default function GDPRRequestsPage(): JSX.Element {
     queryKey: ['crm', 'gdpr-requests'],
     queryFn: async () => {
       const r = await apiClient.get('/api/v1/gdpr/requests')
-      const raw = r.data as Record<string, unknown>
-      const items = Array.isArray(raw) ? raw : (raw.data || [])
+      const items = recordArrayFromResponse(r.data)
       return { items, total: items.length }
     },
     staleTime: 2 * 60 * 1000,
@@ -190,12 +193,12 @@ export default function GDPRRequestsPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/crm/gdpr-request/${item.id as string}`)
+      navigate(`/crm/gdpr-request/${stringValue(item.id)}`)
     } else if (action === 'delete' && item) {
       if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
-      await withPending(String(item.id), async () => {
+      await withPending(stringValue(item.id), async () => {
         try {
-          await apiClient.delete(`/api/v1/gdpr/requests/${item.id as string}`)
+          await apiClient.delete(`/api/v1/gdpr/requests/${stringValue(item.id)}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
           invalidate()
         } catch {
@@ -220,7 +223,7 @@ export default function GDPRRequestsPage(): JSX.Element {
     try {
       const csvHeader = `${t('crud.fields.contact')};${t('crud.fields.requestType')};${t('crud.fields.status')};${t('crud.fields.requestedAt')};${t('crud.fields.completedAt')}\n`
       const csvContent = data.map(item =>
-        `"${item.contact_id || ''}";"${item.request_type || ''}";"${item.status || ''}";"${item.requested_at || ''}";"${item.completed_at || ''}"`
+        `"${renderValue(item.contact_id)}";"${renderValue(item.request_type)}";"${renderValue(item.status)}";"${renderValue(item.requested_at)}";"${renderValue(item.completed_at)}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

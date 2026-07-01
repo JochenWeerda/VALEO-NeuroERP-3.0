@@ -14,12 +14,13 @@ import { CUSTOMER_PILOT_TAB_TABLES } from '@/features/crm-masks/customer-tab-tab
 import { mapCustomerToMask } from '@/features/crm-masks/mappers'
 import { mapTabDataToTables, useCustomerTabData } from '@/features/crm-masks/use-customer-tab-data'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
-import { usePilotRenderPlan } from '@/features/mask-pilot/use-pilot-render-plan'
+import { usePilotRenderPlan, type PilotScreenSummaryLike } from '@/features/mask-pilot/use-pilot-render-plan'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useCustomer, useCustomerScreenSummary } from '@/lib/api/crm'
 import { useScreenDefinition } from '@/lib/api/masks'
 
 const CRM360_SUPPLEMENTAL_TABS: ScreenTabDefinition[] = [
+  { key: 'contacts', label: 'Ansprechpartner', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.contacts },
   { key: 'auftraege', label: 'Auftraege', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.auftraege },
   { key: 'aktivitaeten', label: 'Aktivitaeten', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.aktivitaeten },
   { key: 'dokumente', label: 'Dokumente', lazy: true, keepAlive: true, tables: CUSTOMER_PILOT_TAB_TABLES.dokumente },
@@ -62,6 +63,20 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     () => buildSummaryItems(summaryQuery.data),
     [summaryQuery.data],
   )
+  const summaryForRenderPlan = useMemo<PilotScreenSummaryLike | undefined>(() => {
+    const summary = summaryQuery.data
+    if (!summary) return undefined
+    return {
+      title: summary.title,
+      subtitle: summary.subtitle ?? undefined,
+      available_tabs: summary.available_tabs,
+      actions: summary.actions,
+      performance: {
+        initial_payload_budget_kb: summary.performance.initial_payload_budget_kb,
+        lookup_min_chars: summary.performance.lookup_min_chars,
+      },
+    }
+  }, [summaryQuery.data])
 
   // Phase 028: use native runtime when non-temporary ScreenDefinition available
   const useNativeRuntime = Boolean(
@@ -75,7 +90,7 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     tabEndpoints: summaryQuery.data?.tab_endpoints,
     availableTabs: summaryQuery.data?.available_tabs,
     summaryTitle: summaryQuery.data?.title,
-    summarySubtitle: summaryQuery.data?.subtitle,
+    summarySubtitle: summaryQuery.data?.subtitle ?? undefined,
     summaryItems,
     enabled: useNativeRuntime && Boolean(id),
   })
@@ -99,7 +114,7 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
     },
     entityId: id,
     summaryEndpointPrefix: '/api/v1/crm/customers',
-    summary: summaryQuery.data,
+    summary: summaryForRenderPlan,
     nativeScreen: nativeScreenQuery.data,
     supplementalTabs: CRM360_SUPPLEMENTAL_TABS,
     enrichTabs: enrichTabsWithTables,

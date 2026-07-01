@@ -1,6 +1,7 @@
-﻿import { useState, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
+import { useState, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { apiClient } from '@/lib/api-client'
@@ -9,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { isRecord, numberValue, recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 import {
   CrudCapabilityChecklist,
   ManagementDecisionPanel,
@@ -60,9 +62,9 @@ const createOpportunitiesConfig = (
   t: TFunction,
   entityTypeLabel: string,
   handlers: {
-    convertToQuote: (items: unknown[]) => void
-    markAsWon: (items: unknown[]) => void
-    markAsLost: (items: unknown[]) => void
+    convertToQuote: (items: Record<string, unknown>[]) => void
+    markAsWon: (items: Record<string, unknown>[]) => void
+    markAsLost: (items: Record<string, unknown>[]) => void
   },
 ): ListConfig => ({
   title: entityTypeLabel,
@@ -76,7 +78,7 @@ const createOpportunitiesConfig = (
       label: t('crud.fields.number'),
       labelKey: 'crud.fields.number',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'name',
@@ -92,7 +94,8 @@ const createOpportunitiesConfig = (
       sortable: true,
       filterable: true,
       render: (value, item: Record<string, unknown>) => {
-        const name = item?.customer_name ?? item?.customer?.name ?? value
+        const customer = isRecord(item.customer) ? item.customer : null
+        const name = renderValue(item.customer_name, renderValue(customer?.name, renderValue(value)))
         return name ? <span>{name}</span> : '-'
       }
     },
@@ -114,8 +117,8 @@ const createOpportunitiesConfig = (
       sortable: true,
       render: (value, item) => {
         if (!value) return '-'
-        const currency = item.currency || 'EUR'
-        return formatCurrency(value, currency)
+        const currency = stringValue(item.currency, 'EUR')
+        return formatCurrency(numberValue(value), currency)
       }
     },
     {
@@ -123,7 +126,7 @@ const createOpportunitiesConfig = (
       label: t('crud.fields.probability'),
       labelKey: 'crud.fields.probability',
       sortable: true,
-      render: (value) => value ? `${value}%` : '-'
+      render: (value) => value ? `${renderValue(value)}%` : '-'
     },
     {
       key: 'expected_revenue',
@@ -132,8 +135,8 @@ const createOpportunitiesConfig = (
       sortable: true,
       render: (value, item) => {
         if (!value) return '-'
-        const currency = item.currency || 'EUR'
-        return formatCurrency(value, currency)
+        const currency = stringValue(item.currency, 'EUR')
+        return formatCurrency(numberValue(value), currency)
       }
     },
     {
@@ -141,7 +144,7 @@ const createOpportunitiesConfig = (
       label: t('crud.fields.expectedCloseDate'),
       labelKey: 'crud.fields.expectedCloseDate',
       sortable: true,
-      render: (value) => value ? formatDate(value) : '-'
+      render: (value) => value ? formatDate(stringValue(value)) : '-'
     },
     {
       key: 'owner_id',
@@ -149,7 +152,7 @@ const createOpportunitiesConfig = (
       labelKey: 'crud.fields.owner',
       sortable: true,
       filterable: true,
-      render: (value) => value || '-'
+      render: (value) => renderValue(value, '-')
     },
     {
       key: 'status',
@@ -175,7 +178,7 @@ const createOpportunitiesConfig = (
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -283,10 +286,9 @@ export default function OpportunitiesListePage(): JSX.Element {
     setLoading(true)
     try {
       const response = await apiClient.get('/api/v1/crm/opportunities')
-      if (response.data) {
-        setData((response.data as Record<string, unknown>).items || [])
-        setTotal((response.data as Record<string, unknown>).total || 0)
-      }
+      const items = recordArrayFromResponse(response.data)
+      setData(items)
+      setTotal(numberValue(isRecord(response.data) ? response.data.total : undefined, items.length))
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -322,7 +324,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     }
 
     try {
-      await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/opportunities/${item.id as string}`, payload)))
+      await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/opportunities/${stringValue(item.id)}`, payload)))
       toast({ title: successTitle, description: successDescription })
       await loadData()
     } catch (error) {
@@ -346,7 +348,7 @@ export default function OpportunitiesListePage(): JSX.Element {
 
     const lead = items[0]
     if (items.length === 1) {
-      navigate(`/sales/angebot-erstellen?opportunityId=${lead.id as string}`)
+      navigate(`/sales/angebot-erstellen?opportunityId=${stringValue(lead.id)}`)
       return
     }
 
@@ -445,15 +447,15 @@ export default function OpportunitiesListePage(): JSX.Element {
     [t, entityTypeLabel],
   )
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     handleAction('edit', item)
   }
 
-  const handleDelete = item => {
+  const handleDelete = (item: Record<string, unknown>) => {
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
-    void withPending(String(item.id), async () => {
+    void withPending(stringValue(item.id), async () => {
       try {
-        await apiClient.delete(`/api/v1/crm/opportunities/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/opportunities/${stringValue(item.id)}`)
         loadData()
       } catch {
         toast({ variant: 'destructive', title: t('crud.messages.deleteError', { entityType: entityTypeLabel }) })

@@ -1,9 +1,10 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
+import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { toast } from '@/hooks/use-toast'
@@ -15,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { stringValue } from '@/lib/record-utils'
 
 const createAuftragsbestaetigungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -134,7 +136,7 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
     autoApprovalEligible: data?.status === 'GEPRUEFT' || data?.status === 'BESTAETIGT',
     hasGoodsReceipt: Boolean(data?.bestellungId),
   })
-  const operationalStatus = normalizeOperationalStatus(data?.status)
+  const operationalStatus = normalizeOperationalStatus(stringValue(data?.status))
   const operationalBlocker = data?.status === 'OFFEN'
     ? 'Die Auftragsbestaetigung ist noch nicht geprueft und kann Termin- oder Preisabweichungen enthalten.'
     : null

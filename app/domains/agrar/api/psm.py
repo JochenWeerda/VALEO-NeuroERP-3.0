@@ -92,6 +92,15 @@ def _get_wasserschutz_zonen_data() -> list[dict]:
     return zones
 
 
+@router.get("/schadbilder", summary="Schadbilder auflisten")
+async def list_schadbilder(
+    kultur: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+):
+    """Stub: Schadbilder/Schaderreger-Katalog."""
+    return []
+
+
 @router.get("/wasserschutz-zonen")
 async def list_wasserschutz_zonen(
     lat: Optional[float] = Query(None, description="Breitengrad des Schlags"),

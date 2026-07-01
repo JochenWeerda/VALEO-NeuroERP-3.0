@@ -162,7 +162,7 @@ export function useCustomers(filters?: { search?: string; is_active?: boolean })
       if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active))
 
       const response = await apiClient.get<PaginatedResponse<Customer>>(
-        `/api/v1/crm/customers?${String(params)}`,
+        `/api/v1/crm/customers/?${String(params)}`,
       )
       return response.data
     },
@@ -199,7 +199,7 @@ export function useCreateCustomer() {
 
   return useMutation({
     mutationFn: async (data: CustomerCreate) => {
-      const response = await apiClient.post<Customer>('/api/v1/crm/customers', data)
+      const response = await apiClient.post<Customer>('/api/v1/crm/customers/', data)
       return response.data
     },
     onSuccess: () => {

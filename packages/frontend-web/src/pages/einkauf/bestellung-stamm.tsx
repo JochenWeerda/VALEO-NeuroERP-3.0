@@ -1,9 +1,10 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
+import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { CrudAuditTrailPanel } from '@/features/crud/components'
 import { useCrudAuditTrail } from '@/features/crud/hooks'
@@ -27,6 +28,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -249,7 +251,7 @@ export default function BestellungStammPage(): JSX.Element {
     apiUrl: bestellungConfig.api.baseUrl,
     id: id || undefined
   })
-  const poCommunicationId = id || data?.nummer || data?.purchaseOrderNumber || data?.id || ''
+  const poCommunicationId = stringValue(id || data?.nummer || data?.purchaseOrderNumber || data?.id)
   const { data: poCommunications = [] } = usePoCommunications(poCommunicationId)
   const sendPoEmail = useSendPoCommunication(poCommunicationId, 'email')
   const sendPoPortal = useSendPoCommunication(poCommunicationId, 'portal')
@@ -261,18 +263,21 @@ export default function BestellungStammPage(): JSX.Element {
     entityType: 'purchaseOrder',
     entityId: id || '',
     fetchAuditTrail: async (entityType: string, entityId: string) => {
-      const response = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/audit/logs?entity_type=${entityType}&entity_id=${entityId}&limit=50`)) as unknown as Record<string, unknown>[]
-      return (response || []).map(log => ({
-        id: log.id,
-        timestamp: new Date(log.timestamp),
-        action: log.action,
-        userId: log.user_id || log.user_email || 'system',
-        userName: log.user_email || log.user_id || 'system',
-        changedFields: Array.isArray(log.changes) ? log.changes : Object.keys(log.changes || {}),
-        oldValue: log.changes?.before,
-        newValue: log.changes?.after,
-        reason: log.reason || '',
-      })) as ChangeLog[]
+      const response = await apiClient.get<unknown>(`/api/v1/audit/logs?entity_type=${entityType}&entity_id=${entityId}&limit=50`)
+      return recordArrayFromResponse(response.data).map(log => {
+        const changes = isRecord(log.changes) ? log.changes : {}
+        return {
+        id: stringValue(log.id),
+        timestamp: new Date(stringValue(log.timestamp)),
+        action: stringValue(log.action),
+        userId: stringValue(log.user_id ?? log.user_email, 'system'),
+        userName: stringValue(log.user_email ?? log.user_id, 'system'),
+        changedFields: Array.isArray(log.changes) ? log.changes.map(String) : Object.keys(changes),
+        oldValue: changes.before,
+        newValue: changes.after,
+        reason: stringValue(log.reason),
+        }
+      }) as ChangeLog[]
     },
   })
 
@@ -447,7 +452,7 @@ export default function BestellungStammPage(): JSX.Element {
     ],
   }
 
-  const normalizedStatus = normalizeOperationalStatus(data?.status)
+  const normalizedStatus = normalizeOperationalStatus(stringValue(data?.status))
   const blocker =
     data?.status === 'STORNIERT'
       ? 'Die Bestellung ist storniert und kann nicht weiter disponiert werden.'
@@ -490,10 +495,10 @@ export default function BestellungStammPage(): JSX.Element {
       {workflowContext ? <WorkflowEntryBanner context={workflowContext} /> : null}
 
       <OperationalCaseHeader
-        title={data?.nummer || data?.purchaseOrderNumber || 'Bestellung'}
+        title={stringValue(data?.nummer ?? data?.purchaseOrderNumber, 'Bestellung')}
         description="Bestellung als gefuehrter Beschaffungsvorgang mit Objekt-, Governance- und Kommunikationskontext."
         status={normalizedStatus}
-        owner={data?.lieferant || data?.supplierName || 'Einkauf'}
+        owner={stringValue(data?.lieferant ?? data?.supplierName, 'Einkauf')}
         blocker={blocker}
         nextAction={
           data?.status === 'ENTWURF'
@@ -508,9 +513,9 @@ export default function BestellungStammPage(): JSX.Element {
         }
         caseLabel={workflowContext?.caseNumber || 'Beschaffungsvorgang'}
         tags={[
-          data?.zahlungsbedingungen || 'Zahlungsziel offen',
-          data?.incoterms || 'Incoterms offen',
-          data?.status || 'Status offen',
+          stringValue(data?.zahlungsbedingungen, 'Zahlungsziel offen'),
+          stringValue(data?.incoterms, 'Incoterms offen'),
+          stringValue(data?.status, 'Status offen'),
         ]}
       />
 
@@ -522,15 +527,15 @@ export default function BestellungStammPage(): JSX.Element {
             {
               title: 'Ressourcenlage',
               items: [
-                { label: 'Positionen', value: String(data?.positionen?.length ?? data?.items?.length ?? 0) },
-                { label: 'Liefertermin', value: data?.liefertermin || data?.deliveryDate || '-' },
+                { label: 'Positionen', value: String((Array.isArray(data?.positionen) ? data.positionen.length : undefined) ?? (Array.isArray(data?.items) ? data.items.length : 0)) },
+                { label: 'Liefertermin', value: stringValue(data?.liefertermin ?? data?.deliveryDate, '-') },
               ],
             },
             {
               title: 'Wirtschaftslage',
               items: [
-                { label: 'Zahlungsbedingungen', value: data?.zahlungsbedingungen || data?.paymentTerms || '-' },
-                { label: 'Incoterms', value: data?.incoterms || '-' },
+                { label: 'Zahlungsbedingungen', value: stringValue(data?.zahlungsbedingungen ?? data?.paymentTerms, '-') },
+                { label: 'Incoterms', value: stringValue(data?.incoterms, '-') },
               ],
             },
             {
@@ -561,9 +566,9 @@ export default function BestellungStammPage(): JSX.Element {
             <CardTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
               {t('crud.audit.title')}
-              {data?.version && (
+              {Boolean(data?.version) && (
                 <Badge variant="outline" className="ml-2">
-                  {t('crud.fields.version')}: {data.version}
+                  {t('crud.fields.version')}: {stringValue(data?.version)}
                 </Badge>
               )}
             </CardTitle>
@@ -702,9 +707,9 @@ export default function BestellungStammPage(): JSX.Element {
               <div>
                 <Label>{t('crud.fields.recipients')}</Label>
                 <div className="space-y-2">
-                  {data?.lieferant && (
+                  {Boolean(data?.lieferant) && (
                     <div className="flex items-center justify-between p-2 border rounded">
-                      <span>{data.lieferant}</span>
+                      <span>{stringValue(data?.lieferant)}</span>
                       <Badge variant="outline">{t('crud.entities.supplier')}</Badge>
                     </div>
                   )}
@@ -757,8 +762,8 @@ export default function BestellungStammPage(): JSX.Element {
                 try {
                   const poId = id || data?.nummer
                   const sendPayload = {
-                    subject: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || poId}`,
-                    recipient: sendRecipients[0] || data?.lieferantId || data?.supplierId,
+                    subject: `Bestellung ${stringValue(data?.nummer ?? data?.purchaseOrderNumber ?? poId)}`,
+                    recipient: sendRecipients[0] || stringValue(data?.lieferantId ?? data?.supplierId),
                     message: sendMessage || undefined,
                     language: sendLanguage,
                   }
@@ -830,5 +835,3 @@ export default function BestellungStammPage(): JSX.Element {
     </div>
   )
 }
-
-

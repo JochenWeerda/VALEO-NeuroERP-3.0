@@ -50,13 +50,17 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
     // Zyklische Schaltlogik: always → hover → hidden → always
     // Warte kurz, falls die Funktion noch nicht initialisiert ist
     const cycleMode = (): void => {
-      if (typeof (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode === 'function') {
-        (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode()
+      const shortcutWindow = window as unknown as { __cycleShortcutDisplayMode?: () => void }
+      const cycleShortcutDisplayMode = shortcutWindow.__cycleShortcutDisplayMode
+      if (typeof cycleShortcutDisplayMode === 'function') {
+        cycleShortcutDisplayMode()
       } else {
         // Retry nach kurzer Verzögerung
         setTimeout(() => {
-          if (typeof (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode === 'function') {
-            (window as unknown as { __cycleShortcutDisplayMode?: () => void }).__cycleShortcutDisplayMode()
+          const retryShortcutWindow = window as unknown as { __cycleShortcutDisplayMode?: () => void }
+          const retryCycleShortcutDisplayMode = retryShortcutWindow.__cycleShortcutDisplayMode
+          if (typeof retryCycleShortcutDisplayMode === 'function') {
+            retryCycleShortcutDisplayMode()
           } else {
             console.warn('ShortcutHelpPanel cycle function not found')
           }

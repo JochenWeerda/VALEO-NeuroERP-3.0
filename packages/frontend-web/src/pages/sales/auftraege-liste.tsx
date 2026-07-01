@@ -15,6 +15,7 @@ import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { saveDocument } from '@/lib/document-api'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+import { stringValue } from '@/lib/record-utils'
 import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
 import {
   CrudCapabilityChecklist,
@@ -117,13 +118,13 @@ export default function AuftraegeListePage(): JSX.Element {
 
   const filteredAuftraege = auftraege.filter((auftrag) => {
     const matchesSearch =
-      auftrag.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      auftrag.kunde.toLowerCase().includes(searchTerm.toLowerCase())
+      stringValue(auftrag.nummer).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stringValue(auftrag.kunde).toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || auftrag.status === statusFilter
     
     // Erweiterte Filter
     if (filterValues.status && auftrag.status !== filterValues.status) return false
-    if (filterValues.kunde && !auftrag.kunde.toLowerCase().includes(filterValues.kunde.toLowerCase())) return false
+    if (filterValues.kunde && !stringValue(auftrag.kunde).toLowerCase().includes(stringValue(filterValues.kunde).toLowerCase())) return false
     if (filterValues.datum) {
       const auftragDate = new Date(auftrag.datum).toISOString().split('T')[0]
       if (auftragDate !== filterValues.datum) return false
@@ -249,7 +250,7 @@ export default function AuftraegeListePage(): JSX.Element {
           lines: [],
           subtotalNet: 0,
           totalTax: 0,
-          totalGross: parseFloat(row.Betrag?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
+          totalGross: parseFloat(stringValue(row.Betrag).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
         }
         await saveDocument('sales_order', doc)
       }

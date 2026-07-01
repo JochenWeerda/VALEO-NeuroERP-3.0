@@ -1,6 +1,7 @@
-﻿import { useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -8,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { unwrapCrmListPage, type CrmListEnvelope } from '@/lib/api/crm-list-response'
+import { stringValue } from '@/lib/record-utils'
 import { toast } from '@/hooks/use-toast'
 
 // Konfiguration für Lieferanten ListReport
@@ -348,8 +350,8 @@ export default function LieferantenListePage(): JSX.Element {
       }
       try {
         await Promise.all(
-          items.map((l: { id: string }) =>
-            apiClient.put(`/api/v1/crm/business-partners/${l.id}`, { status: 'inactive' }),
+          items.map((l) =>
+            apiClient.put(`/api/v1/crm/business-partners/${stringValue(l.id)}`, { status: 'inactive' }),
           ),
         )
         toast({ title: 'Gesperrt', description: `${items.length} Lieferant(en) gesperrt.`, variant: 'destructive' })
@@ -378,14 +380,14 @@ export default function LieferantenListePage(): JSX.Element {
     navigate('/crm/lieferanten/stamm/new')
   }
 
-  const handleEdit = item => {
-    navigate(`/crm/lieferanten/stamm/${item.id}`)
+  const handleEdit = (item: Record<string, unknown>) => {
+    navigate(`/crm/lieferanten/stamm/${stringValue(item.id)}`)
   }
 
-  const handleDelete = async item => {
-    if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${item.firma}" wirklich löschen?` }))) {
+  const handleDelete = async (item: Record<string, unknown>) => {
+    if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${String(item.firma)}" wirklich löschen?` }))) {
       try {
-        await apiClient.delete(`/api/v1/crm/business-partners/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/business-partners/${stringValue(item.id)}`)
         invalidate()
       } catch {
         toast({

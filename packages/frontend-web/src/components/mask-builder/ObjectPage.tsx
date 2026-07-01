@@ -14,9 +14,18 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { MaskConfig, Tab as MaskTab, Field } from './types'
 import { createMaskResolver, getFieldName, getFieldsFromMaskConfig } from './validation'
 
+function inputValue(value: unknown): string | number | readonly string[] | undefined {
+  if (typeof value === 'string' || typeof value === 'number' || Array.isArray(value)) return value
+  return ''
+}
+
+function checkedValue(value: unknown): boolean {
+  return value === true
+}
+
 interface ObjectPageProps {
   config: MaskConfig
-  data?: Record<string, unknown>
+  data?: Record<string, unknown> | null
   onChange?: (_data: Record<string, unknown>) => void
   onSave: (_data: Record<string, unknown>) => Promise<void>
   onCancel: () => void
@@ -202,6 +211,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
+                    value={inputValue(controllerField.value)}
                     id={fieldName}
                     type={field.type}
                     placeholder={field.placeholder}
@@ -217,6 +227,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Textarea
                     {...controllerField}
+                    value={inputValue(controllerField.value)}
                     id={fieldName}
                     placeholder={field.placeholder}
                     readOnly={field.readonly ?? field.readOnly}
@@ -225,14 +236,15 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 )
 
               case 'boolean':
-              case 'checkbox':
+              case 'checkbox': {
+                const { value: _value, ...checkboxField } = controllerField
                 return (
                   <div className="flex items-center space-x-2">
                     <input
-                      {...controllerField}
+                      {...checkboxField}
                       id={fieldName}
                       type="checkbox"
-                      checked={controllerField.value || false}
+                      checked={checkedValue(controllerField.value)}
                       className="h-4 w-4"
                     />
                     <Label htmlFor={fieldName} className="text-sm">
@@ -240,6 +252,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     </Label>
                   </div>
                 )
+              }
 
               case 'select': {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -261,6 +274,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
+                    value={inputValue(controllerField.value)}
                     id={fieldName}
                     type="date"
                     readOnly={field.readonly ?? field.readOnly}
@@ -272,6 +286,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
+                    value={inputValue(controllerField.value)}
                     id={fieldName}
                     type="datetime-local"
                     readOnly={field.readonly ?? field.readOnly}
@@ -283,6 +298,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
+                    value={inputValue(controllerField.value)}
                     id={fieldName}
                     placeholder={field.placeholder}
                     readOnly={field.readonly ?? field.readOnly}

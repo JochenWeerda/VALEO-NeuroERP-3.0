@@ -151,6 +151,7 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
   }
 
   const blocker = useUnsavedChanges(isDirty)
+  const objectData = data ?? {}
   const objectConfig = useMemo(
     () => ({
       ...futtermittelConfig,
@@ -159,17 +160,17 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
           key: 'validate',
           label: 'Validieren',
           type: 'secondary' as const,
-          onClick: () => { void handleAction('validate', data) },
+          onClick: () => { void handleAction('validate', objectData) },
         },
         {
           key: 'save',
           label: 'Speichern',
           type: 'primary' as const,
-          onClick: () => { void handleAction('save', data) },
+          onClick: () => { void handleAction('save', objectData) },
         },
       ],
     }),
-    [data, handleAction],
+    [objectData, handleAction],
   )
 
   return (
@@ -181,13 +182,13 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
       />
       <LeaveConfirmDialog
         blocker={blocker}
-        onSave={() => handleSave(data)}
+        onSave={() => handleSave(objectData)}
         title="Ungespeicherte Aenderungen"
         description="Moechten Sie speichern, verwerfen oder hier bleiben?"
       />
       <ObjectPage
         config={objectConfig}
-        data={data}
+        data={objectData}
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}

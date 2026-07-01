@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -14,7 +15,7 @@ import {
   type UxTaskItem,
 } from '@/components/workflow'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
+import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -27,6 +28,7 @@ import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { apiClient } from '@/lib/api-client'
+import { inputValue, isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 type FinanceRoleFocus = 'all' | 'accounting' | 'treasury' | 'controller' | 'tax-advisor' | 'management'
 
@@ -121,14 +123,14 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
       key: 'zahlungen',
       label: t('crud.fields.payments'),
       fields: []
-    } as Field,
+    },
     {
       key: 'zahlungen_custom',
       label: '',
       fields: [],
       customRender: (_data: Record<string, unknown>, onChange: (_data: Record<string, unknown>) => void) => (
         <ZahlungenTable
-          data={_data.zahlungen || []}
+          data={recordArrayFromResponse(_data.zahlungen)}
           onChange={(zahlungen) => {
             // Berechne Gesamtbetrag mit Skonto
             const gesamtBetrag = zahlungen.reduce((sum: number, z) => {
@@ -314,7 +316,8 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
         try {
           const res = await apiClient.get<Record<string, unknown>>(`/api/v1/finance/payment-runs/${data.id as string}`)
           const run = res.data
-          const returnedCount = (run?.payments ?? []).filter(p => p.status === 'returned').length
+          const payments = Array.isArray(run.payments) ? run.payments.filter(isRecord) : []
+          const returnedCount = payments.filter((p) => p.status === 'returned').length
           if (returnedCount > 0) {
             toast({
               variant: 'destructive',
@@ -347,7 +350,7 @@ const createZahlungslaufConfig = (t: TFunction, entityTypeLabel: string): MaskCo
       update: '/api/v1/finance/payment-runs/{id}',
       delete: '/api/v1/finance/payment-runs/{id}'
     }
-  } as Field,
+  },
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
@@ -373,7 +376,7 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
     
     // Format IBAN if field is iban
     if (field === 'iban' && value) {
-      const normalized = value.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+      const normalized = String(value).replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       const formatted = formatIBAN(normalized)
       newData[index] = { ...newData[index], [field]: formatted }
       
@@ -444,14 +447,14 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
                   <div>
                     <input
                       type="text"
-                      value={zahlung.kreditorId}
+                      value={inputValue(zahlung.kreditorId)}
                       onChange={(e) => updateZahlung(index, 'kreditorId', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
                       placeholder={t('crud.tooltips.placeholders.creditorNumber')}
                     />
                     <input
                       type="text"
-                      value={zahlung.kreditorName}
+                      value={inputValue(zahlung.kreditorName)}
                       onChange={(e) => updateZahlung(index, 'kreditorName', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
                       placeholder={t('crud.fields.name')}
@@ -462,14 +465,14 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
                   <div>
                     <input
                       type="text"
-                      value={zahlung.iban}
+                      value={inputValue(zahlung.iban)}
                       onChange={(e) => updateZahlung(index, 'iban', e.target.value)}
                       className="w-full p-1 border rounded text-sm mb-1"
                       placeholder={t('crud.fields.iban')}
                     />
                     <input
                       type="text"
-                      value={zahlung.bic}
+                      value={inputValue(zahlung.bic)}
                       onChange={(e) => updateZahlung(index, 'bic', e.target.value)}
                       className="w-full p-1 border rounded text-sm"
                       placeholder={t('crud.fields.bic')}
@@ -480,7 +483,7 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
                   <input
                     type="number"
                     step="0.01"
-                    value={zahlung.betrag}
+                    value={inputValue(zahlung.betrag)}
                     onChange={(e) => updateZahlung(index, 'betrag', parseFloat(e.target.value) || 0)}
                     className="w-full p-1 border rounded"
                   />
@@ -488,7 +491,7 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={zahlung.verwendungszweck}
+                    value={inputValue(zahlung.verwendungszweck)}
                     onChange={(e) => updateZahlung(index, 'verwendungszweck', e.target.value)}
                     className="w-full p-1 border rounded"
                     placeholder={t('crud.tooltips.placeholders.invoiceNumber')}
@@ -498,14 +501,14 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
                   <div>
                     <input
                       type="checkbox"
-                      checked={zahlung.skontoGenutzt || false}
+                      checked={zahlung.skontoGenutzt === true}
                       onChange={(e) => updateZahlung(index, 'skontoGenutzt', e.target.checked)}
                       className="mr-2"
                     />
                     <input
                       type="number"
                       step="0.01"
-                      value={zahlung.skontoBetrag}
+                      value={inputValue(zahlung.skontoBetrag)}
                       onChange={(e) => updateZahlung(index, 'skontoBetrag', parseFloat(e.target.value) || 0)}
                       className="w-20 p-1 border rounded text-sm"
                       placeholder={t('crud.tooltips.placeholders.amount')}
@@ -515,7 +518,7 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
                 <td className="px-4 py-2 border">
                   <input
                     type="text"
-                    value={zahlung.opReferenz || ''}
+                    value={inputValue(zahlung.opReferenz)}
                     onChange={(e) => updateZahlung(index, 'opReferenz', e.target.value)}
                     className="w-full p-1 border rounded text-sm"
                     placeholder={t('crud.tooltips.placeholders.opReference')}
@@ -552,31 +555,33 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { data, loading, saveData, updateData } = useMaskData({
     apiUrl: zahlungslaufConfig.api.baseUrl,
     id: 'new',
-    transformResponse: (response: unknown) => {
+    transformResponse: (response: unknown): Record<string, unknown> => {
       // Transform API response to match frontend format
-      if (response.data) {
+      const responseRecord = isRecord(response) ? response : {}
+      const responseData = isRecord(responseRecord.data) ? responseRecord.data : responseRecord
+      if (Object.keys(responseData).length > 0) {
         return {
-          ...response.data,
-          laufNummer: response.data.run_number,
-          ausfuehrungsDatum: response.data.execution_date,
-          gesamtBetrag: response.data.total_amount,
-          anzahlZahlungen: response.data.payment_count,
-          status: response.data.status,
-          auftraggeberName: response.data.initiator_name,
-          auftraggeberIban: response.data.initiator_iban,
-          auftraggeberBic: response.data.initiator_bic,
-          zahlungen: response.data.payments || [],
-          freigegebenAm: response.data.approved_at,
-          freigegebenDurch: response.data.approved_by,
-          ausgefuehrtAm: response.data.executed_at,
-          notizen: response.data.notes,
-          approval_status: response.data.approval_status,
-          approval_can_execute: response.data.approval_can_execute,
-          approval_override_resolution: response.data.approval_override_resolution,
-          approval_explainability: response.data.approval_explainability
+          ...responseData,
+          laufNummer: responseData.run_number,
+          ausfuehrungsDatum: responseData.execution_date,
+          gesamtBetrag: responseData.total_amount,
+          anzahlZahlungen: responseData.payment_count,
+          status: responseData.status,
+          auftraggeberName: responseData.initiator_name,
+          auftraggeberIban: responseData.initiator_iban,
+          auftraggeberBic: responseData.initiator_bic,
+          zahlungen: recordArrayFromResponse(responseData.payments),
+          freigegebenAm: responseData.approved_at,
+          freigegebenDurch: responseData.approved_by,
+          ausgefuehrtAm: responseData.executed_at,
+          notizen: responseData.notes,
+          approval_status: responseData.approval_status,
+          approval_can_execute: responseData.approval_can_execute,
+          approval_override_resolution: responseData.approval_override_resolution,
+          approval_explainability: responseData.approval_explainability
         }
       }
-      return response
+      return {}
     }
   })
 
@@ -618,7 +623,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     // Auto-lookup Auftraggeber-IBAN
     if (newData?.auftraggeberIban) {
       const timer = setTimeout(() => {
-        handleAuftraggeberIbanChange(newData.auftraggeberIban)
+        handleAuftraggeberIbanChange(String(newData.auftraggeberIban))
       }, 1000)
       return () => clearTimeout(timer)
     }
@@ -723,10 +728,10 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const effectiveData = data || formData
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-payment-run', approvalDecisionView)
-  const payments = Array.isArray(effectiveData?.zahlungen) ? effectiveData.zahlungen : []
-  const totalAmount = Number(effectiveData?.gesamtBetrag || 0)
-  const paymentCount = Number(effectiveData?.anzahlZahlungen || payments.length || 0)
-  const skontoCount = payments.filter(payment => payment.skontoGenutzt && Number(payment.skontoBetrag || 0) > 0).length
+  const payments = recordArrayFromResponse(effectiveData?.zahlungen)
+  const totalAmount = numberValue(effectiveData?.gesamtBetrag)
+  const paymentCount = numberValue(effectiveData?.anzahlZahlungen, payments.length)
+  const skontoCount = payments.filter(payment => Boolean(payment.skontoGenutzt) && numberValue(payment.skontoBetrag) > 0).length
   const operationalStatus = normalizeOperationalStatus(
     effectiveData?.status === 'executed'
       ? 'abgeschlossen'
@@ -740,15 +745,15 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     {
       title: 'Zahlungslage',
       items: [
-        { label: 'Laufnummer', value: effectiveData?.laufNummer || effectiveData?.run_number || 'Noch kein Lauf' },
+        { label: 'Laufnummer', value: stringValue(effectiveData?.laufNummer || effectiveData?.run_number, 'Noch kein Lauf') },
         { label: 'Zahlungen', value: `${paymentCount}` },
-        { label: 'Ausfuehrung', value: effectiveData?.ausfuehrungsDatum || '-' },
+        { label: 'Ausfuehrung', value: stringValue(effectiveData?.ausfuehrungsDatum, '-') },
       ],
     },
     {
       title: 'Governance',
       items: [
-        { label: 'Approval-Status', value: effectiveData?.approval_status || effectiveData?.status || 'draft' },
+        { label: 'Approval-Status', value: stringValue(effectiveData?.approval_status || effectiveData?.status, 'draft') },
         { label: 'Skonto genutzt', value: `${skontoCount}` },
         { label: 'Naechste Aktion', value: effectiveData?.approval_can_execute ? 'SEPA exportieren oder Lauf ausfuehren' : paymentCount > 0 ? 'Freigabe und Pruefung abschliessen' : 'Zahlungen erfassen' },
       ],
@@ -857,7 +862,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_status || effectiveData.status || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(effectiveData.approval_status || effectiveData.status, '-')}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Ausfuehrbar</div>
@@ -865,7 +870,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
-              <div className="mt-1 font-medium">{effectiveData.approval_override_resolution?.rule_id || '-'}</div>
+              <div className="mt-1 font-medium">{stringValue(isRecord(effectiveData.approval_override_resolution) ? effectiveData.approval_override_resolution.rule_id : undefined, '-')}</div>
             </div>
           </div>
         </ProcessStatusPanel>

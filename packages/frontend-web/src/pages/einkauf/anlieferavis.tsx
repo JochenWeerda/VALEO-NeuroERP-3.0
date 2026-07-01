@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
+import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
@@ -13,6 +13,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, stringValue } from '@/lib/record-utils'
 
 const anlieferavisConfig: MaskConfig = {
   title: 'Anlieferavis',
@@ -155,7 +156,8 @@ export default function AnlieferavisPage(): JSX.Element {
     bestaetigen: 'confirm',
     stornieren: 'cancel',
   }
-  const operationalStatus = normalizeOperationalStatus(data?.status)
+  const fahrzeug = isRecord(data?.fahrzeug) ? data.fahrzeug : null
+  const operationalStatus = normalizeOperationalStatus(stringValue(data?.status))
   const avisOps = summarizeProcurementMatch({
     exceptionsCount: Array.isArray(data?.positionen) ? data.positionen.filter(row => !row?.chargenNummer).length : 0,
     variancePercentage: data?.status === 'STORNIERT' ? 12 : data?.status === 'BESTAETIGT' ? 0 : 5,
@@ -180,8 +182,8 @@ export default function AnlieferavisPage(): JSX.Element {
       title: 'Logistik',
       items: [
         { label: 'Anlieferdatum', value: String(data?.geplantesAnlieferDatum ?? 'Nicht gesetzt') },
-        { label: 'Kennzeichen', value: String(data?.fahrzeug?.kennzeichen ?? 'Noch offen') },
-        { label: 'Fahrer', value: String(data?.fahrzeug?.fahrer ?? 'Noch offen') },
+        { label: 'Kennzeichen', value: stringValue(fahrzeug?.kennzeichen, 'Noch offen') },
+        { label: 'Fahrer', value: stringValue(fahrzeug?.fahrer, 'Noch offen') },
       ],
     },
   ]

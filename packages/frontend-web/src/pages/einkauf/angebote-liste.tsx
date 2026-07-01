@@ -1,6 +1,7 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -14,6 +15,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
 
 const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -27,14 +29,14 @@ const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.offerNumber'),
       labelKey: 'crud.fields.offerNumber',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'anfrage',
       label: t('crud.entities.purchaseRequest'),
       labelKey: 'crud.entities.purchaseRequest',
       sortable: true,
-      render: (value) => value?.anfrageNummer || '-'
+      render: (value) => isRecord(value) ? renderValue(value.anfrageNummer, '-') : '-'
     },
     {
       key: 'lieferant',
@@ -55,14 +57,14 @@ const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.price'),
       labelKey: 'crud.fields.price',
       sortable: true,
-      render: (value, item) => `${formatNumber(value, 2)} EUR/${item.einheit || t('crud.fields.unit')}`
+      render: (value, item) => `${formatNumber(value, 2)} EUR/${renderValue(item.einheit, t('crud.fields.unit'))}`
     },
     {
       key: 'gueltigBis',
       label: t('crud.fields.validUntil'),
       labelKey: 'crud.fields.validUntil',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     },
     {
       key: 'status',
@@ -92,7 +94,7 @@ const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig
         if (typeof value === 'number') {
           return `${value} ${t('crud.fields.days')}`
         }
-        return value || '-'
+        return renderValue(value, '-')
       }
     },
     {
@@ -100,7 +102,7 @@ const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.createdAt'),
       labelKey: 'crud.fields.createdAt',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     }
   ],
   filters: [
@@ -163,7 +165,7 @@ async function bulkOfferMutation(
       const response = await apiClient.post<{
         purchaseOrderId?: string
         purchaseOrderNumber?: string
-      }>(`/api/v1/einkauf/angebote/${encodeURIComponent(item.id)}/${endpointSuffix}`)
+      }>(`/api/v1/einkauf/angebote/${encodeURIComponent(stringValue(item.id))}/${endpointSuffix}`)
       createdOrderId = createdOrderId || response.data?.purchaseOrderId
       createdOrderNumber = createdOrderNumber || response.data?.purchaseOrderNumber
       ok += 1
@@ -277,17 +279,17 @@ export default function AngeboteListePage(): JSX.Element {
     navigate('/einkauf/angebot/neu')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: Record<string, unknown>) => {
     if (item?.id) {
-      navigate(`/einkauf/angebote/${item.id}`)
+      navigate(`/einkauf/angebote/${stringValue(item.id)}`)
     }
   }
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: Record<string, unknown>) => {
     if (!item?.id) return
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     try {
-      await apiClient.delete(`/api/v1/einkauf/angebote/${item.id}`)
+      await apiClient.delete(`/api/v1/einkauf/angebote/${stringValue(item.id)}`)
       toast({ title: t('crud.messages.deleteSuccess') })
       queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
     } catch (_rawErr: unknown) {

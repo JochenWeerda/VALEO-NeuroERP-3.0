@@ -1605,6 +1605,10 @@
       "path": "personal/zeiterfassung"
     },
     {
+      "module": "@/pages/personal/hrm-operations-gates",
+      "path": "personal/hrm-freigaben"
+    },
+    {
       "module": "@/pages/portal/anfragen",
       "path": "portal/anfragen"
     },

@@ -33,6 +33,7 @@ export interface UseUniversalMaskRuntimeResult {
   lookupBindings: Record<string, LookupBinding>
   isEntityLoading: boolean
   entityError: unknown
+  refetch: () => Promise<void>
 }
 
 function hasContentChange(patch: Partial<TableQueryState>): boolean {
@@ -173,5 +174,11 @@ export function useUniversalMaskRuntime({
     lookupBindings: binding?.lookupBindings ?? {},
     isEntityLoading: entityQuery.isLoading,
     entityError: entityQuery.error,
+    refetch: async () => {
+      await Promise.all([
+        entityQuery.refetch(),
+        ...tableResults.map((result) => result.refetch()),
+      ])
+    },
   }
 }

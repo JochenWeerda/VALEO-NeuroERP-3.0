@@ -70,7 +70,7 @@ export class PipelineProgressMonitor {
           this.stop()
         }
       } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+        const error = _rawErr as { response?: { status?: number; data?: { detail?: string } }; message?: string; name?: string }
         if (error.response?.status === 404) {
           // Job nicht gefunden - möglicherweise noch nicht gestartet oder abgelaufen
           return

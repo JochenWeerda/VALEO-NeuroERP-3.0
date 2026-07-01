@@ -1,6 +1,7 @@
-﻿import { useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -8,8 +9,25 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { resolveBusinessPartnerIdForCrmCustomer } from '@/lib/crm/fetch-customer-chef-hints'
+import { recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+
+type KundenListItem = Record<string, unknown> & {
+  id: string
+  kunden_nr: string
+  business_partner_id: string | null
+  customer_number: string
+  firma: string
+  vorname: string
+  nachname: string
+  ort: string
+  plz: string
+  telefon: string
+  email: string
+  umsatzGesamt: number
+  status: string
+}
 
 // Konfiguration für Kunden ListReport (wird in Komponente mit i18n erstellt)
 const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
@@ -206,11 +224,11 @@ const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConf
   defaultSort: { field: 'firma', direction: 'asc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/v1/crm/customers',
+    baseUrl: '/api/v1/crm/customers/',
     endpoints: {
-      list: '/api/v1/crm/customers',
+      list: '/api/v1/crm/customers/',
       get: '/api/v1/crm/customers/{id}',
-      create: '/api/v1/crm/customers',
+      create: '/api/v1/crm/customers/',
       update: '/api/v1/crm/customers/{id}',
       delete: '/api/v1/crm/customers/{id}'
     }
@@ -240,15 +258,20 @@ export default function KundenListePage(): JSX.Element {
           '/api/v1/crm/customers/lookup',
           { params: { q: '', limit: 1000 } },
         )
-        const arr = Array.isArray(r.data) ? r.data : []
-        const items = arr.map((k) => ({
-          id: (k.business_partner_id as string) || (k.kunden_nr as string),
-          kunden_nr: k.kunden_nr,
-          business_partner_id: k.business_partner_id ?? null,
-          customer_number: k.kunden_nr,
-          firma: k.name,
-          ort: k.ort,
-          plz: k.plz,
+        const arr = recordArrayFromResponse(r.data)
+        const items: KundenListItem[] = arr.map((k) => ({
+          id: stringValue(k.business_partner_id, stringValue(k.kunden_nr)),
+          kunden_nr: stringValue(k.kunden_nr),
+          business_partner_id: stringValue(k.business_partner_id) || null,
+          customer_number: stringValue(k.kunden_nr),
+          firma: stringValue(k.name),
+          vorname: stringValue(k.vorname),
+          nachname: stringValue(k.nachname),
+          ort: stringValue(k.ort),
+          plz: stringValue(k.plz),
+          telefon: stringValue(k.telefon),
+          email: stringValue(k.email),
+          umsatzGesamt: Number(k.umsatzGesamt ?? k.umsatz_gesamt ?? 0),
           kundengruppe: k.kundengruppe ?? null,
           betreuer: k.betreuer ?? null,
           status: k.aktiv ? 'aktiv' : (k.sperrgrund ? 'gesperrt' : 'inaktiv'),
@@ -292,8 +315,8 @@ export default function KundenListePage(): JSX.Element {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
       try {
         await Promise.all(
-          items.map((k: { id: string }) =>
-            apiClient.put(`/api/v1/crm/customers/${k.id}`, { is_active: false }),
+          items.map((k) =>
+            apiClient.put(`/api/v1/crm/customers/${stringValue(k.id)}`, { is_active: false }),
           ),
         )
         toast({ title: 'Gesperrt', description: `${items.length} Kunde(n) gesperrt.`, variant: 'destructive' })
@@ -344,7 +367,7 @@ export default function KundenListePage(): JSX.Element {
     navigate('/verkauf/kunde/neu')
   }
 
-  const handleEdit = item => {
+  const handleEdit = (item: KundenListItem) => {
     void (async () => {
       // Verbrückte Kunden -> BP-Kundenstamm; sonst Schnellauswahl-Detail (echter Stamm).
       const bp = item.business_partner_id ?? null
@@ -355,7 +378,7 @@ export default function KundenListePage(): JSX.Element {
       try {
         const partnerId = await resolveBusinessPartnerIdForCrmCustomer({
           crmCustomerId: item.id,
-          customerNumber: item.customer_number ?? item.customerNumber ?? null,
+          customerNumber: item.customer_number || stringValue(item.customerNumber) || null,
           businessPartnerIdHint: null,
         })
         if (partnerId) {
@@ -369,10 +392,10 @@ export default function KundenListePage(): JSX.Element {
     })()
   }
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: KundenListItem) => {
     if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
       try {
-        await apiClient.delete(`/api/v1/crm/customers/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/customers/${stringValue(item.id)}`)
         invalidate()
       } catch {
         toast({
@@ -386,8 +409,8 @@ export default function KundenListePage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.company')};${t('crud.fields.city')};${t('crud.fields.phone')};${t('crud.fields.email')};${t('crud.fields.totalRevenue')};${t('crud.fields.status')}\n`
-      const csvContent = data.map(customer =>
-        `"${String(customer.firma ?? `${String(customer.vorname ?? '')} ${String(customer.nachname ?? '')}`)}";"${String(customer.plz ?? '')} ${String(customer.ort ?? '')}";"${String(customer.telefon ?? '')}";"${String(customer.email ?? '')}";"${String(customer.umsatzGesamt ?? 0)}";"${t(`status.${String(customer.status ?? 'active')}`, { defaultValue: String(customer.status ?? 'aktiv') })}"`
+      const csvContent = data.map((customer) =>
+        `"${renderValue(customer.firma, `${customer.vorname} ${customer.nachname}`)}";"${customer.plz} ${customer.ort}";"${customer.telefon}";"${customer.email}";"${customer.umsatzGesamt}";"${t(`status.${customer.status}`, { defaultValue: customer.status })}"`
       ).join('\n')
 
       const csv = csvHeader + csvContent

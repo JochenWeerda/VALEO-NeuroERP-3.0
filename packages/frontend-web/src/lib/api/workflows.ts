@@ -127,7 +127,7 @@ export function useTriggerWorkflow() {
         runtime: response.data.runtime,
       }
     },
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: { workflow_id: string }) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.status(data.workflow_id) })
     },
   })

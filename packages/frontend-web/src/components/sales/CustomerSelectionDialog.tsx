@@ -14,6 +14,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/api-client'
+import {
+  isRecord,
+  nullableNumberValue,
+  recordArrayFromResponse,
+  stringValue,
+  type UnknownRecord,
+} from '@/lib/record-utils'
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -64,6 +71,70 @@ type CustomerSelectionDialogProps = {
   title?: string
 }
 
+type CustomerAddress = NonNullable<Customer['address']>
+
+function booleanValue(value: unknown, fallback = false): boolean {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+function mapCustomerAddress(record: UnknownRecord): CustomerAddress {
+  const rawAddress = record.address
+  if (typeof rawAddress === 'string') {
+    return {
+      street: rawAddress,
+      postalCode: stringValue(record.postal_code),
+      city: stringValue(record.city),
+      phone: stringValue(record.phone),
+      fax: stringValue(record.fax),
+    }
+  }
+
+  if (isRecord(rawAddress)) {
+    return {
+      street: stringValue(rawAddress.street),
+      postalCode: stringValue(rawAddress.postal_code ?? rawAddress.postalCode),
+      city: stringValue(rawAddress.city),
+      phone: stringValue(rawAddress.phone),
+      fax: stringValue(rawAddress.fax),
+    }
+  }
+
+  return {
+    postalCode: stringValue(record.postal_code),
+    city: stringValue(record.city),
+  }
+}
+
+function mapCustomer(record: UnknownRecord): Customer {
+  const customerNumber = stringValue(record.customer_number ?? record.customerNumber)
+  const paymentTerms = nullableNumberValue(record.payment_terms)
+  return {
+    id: stringValue(record.id),
+    customerNumber,
+    name: stringValue(record.company_name ?? record.name).trim(),
+    debitorAccount: customerNumber,
+    representative: stringValue(record.contact_person ?? record.representative),
+    postalCode: stringValue(record.postal_code ?? record.postalCode),
+    city: stringValue(record.city),
+    customerGroup: stringValue(record.customer_group ?? record.customerGroup),
+    creditLimit: stringValue(record.credit_limit ?? record.creditLimit),
+    paymentTerms: paymentTerms ?? undefined,
+    address: mapCustomerAddress(record),
+    company_name: stringValue(record.company_name),
+    customer_number: stringValue(record.customer_number),
+    contact_person: stringValue(record.contact_person),
+    phone: stringValue(record.phone),
+    email: stringValue(record.email),
+    address_backend: typeof record.address_backend === 'string' || isRecord(record.address_backend)
+      ? record.address_backend
+      : undefined,
+    is_active: booleanValue(record.is_active, true),
+    customer_type: stringValue(record.customer_type),
+    chefanweisung: stringValue(record.chefanweisung ?? record.executive_note),
+    executiveNote: stringValue(record.executive_note ?? record.chefanweisung),
+  }
+}
+
 export function CustomerSelectionDialog({
   open,
   onClose,
@@ -79,39 +150,10 @@ export function CustomerSelectionDialog({
   const { data: customers = [], isLoading, error: fetchError } = useQuery({
     queryKey: ['crm', 'customers', 'search', debouncedSearch],
     queryFn: async () => {
-      const response = await apiClient.get<Record<string, unknown>>('/api/v1/crm/customers/', {
+      const response = await apiClient.get<unknown>('/api/v1/crm/customers/', {
         params: { search: debouncedSearch, limit: 50 },
       })
-      let items: Record<string, unknown>[] = []
-      if (Array.isArray(response)) {
-        items = response
-      } else if (response?.items && Array.isArray(response.items)) {
-        items = response.items
-      }
-      return items.map((c): Customer => ({
-        id: c.id,
-        customerNumber: c.customer_number || c.customerNumber || '',
-        name: (c.company_name || c.name || '').trim(),
-        debitorAccount: c.customer_number || c.customerNumber || '',
-        representative: c.contact_person || c.representative,
-        postalCode: c.postal_code || c.postalCode,
-        city: c.city,
-        customerGroup: c.customer_group || c.customerGroup,
-        creditLimit: c.credit_limit?.toString() || c.creditLimit,
-        paymentTerms: c.payment_terms !== undefined ? Number(c.payment_terms) : undefined,
-        address: typeof c.address === 'string'
-          ? { street: c.address, postalCode: c.postal_code, city: c.city, phone: c.phone, fax: c.fax }
-          : c.address || { postalCode: c.postal_code, city: c.city },
-        company_name: c.company_name,
-        customer_number: c.customer_number,
-        contact_person: c.contact_person,
-        phone: c.phone,
-        email: c.email,
-        is_active: c.is_active ?? true,
-        customer_type: c.customer_type,
-        chefanweisung: c.chefanweisung || c.executive_note,
-        executiveNote: c.executive_note || c.chefanweisung,
-      }))
+      return recordArrayFromResponse(response).map(mapCustomer)
     },
     enabled: open && debouncedSearch.length >= 2,
     staleTime: 30_000,

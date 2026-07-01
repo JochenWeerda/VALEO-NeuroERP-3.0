@@ -1,6 +1,7 @@
-﻿import { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -23,6 +24,7 @@ import {
   RoleFocusBar,
   type UxTaskItem,
 } from '@/components/workflow'
+import { numberValue, recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
 type PurchaseRoleFocus = 'all' | 'procurement' | 'goods-receipt' | 'finance' | 'supplier' | 'management'
@@ -78,7 +80,7 @@ const createBestellungenConfig = (
       label: t('crud.fields.orderNumber'),
       labelKey: 'crud.fields.orderNumber',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{value}</code>
+      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
     },
     {
       key: 'subject',
@@ -94,7 +96,8 @@ const createBestellungenConfig = (
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const status = stringValue(value)
+        const statusLabel = getStatusLabel(t, status, status)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           'ENTWURF': 'secondary',
           'FREIGEGEBEN': 'default',
@@ -103,7 +106,7 @@ const createBestellungenConfig = (
           'GELIEFERT': 'outline',
           'STORNIERT': 'destructive'
         }
-        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
+        return <Badge variant={variants[status] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -113,8 +116,9 @@ const createBestellungenConfig = (
       sortable: true,
       render: (value) => {
         if (!value) return <span className="text-muted-foreground">–</span>
-        const option = INCOTERM_OPTIONS.find(o => o.value === value)
-        return <span title={option?.label}>{value as string}</span>
+        const incoterm = stringValue(value)
+        const option = INCOTERM_OPTIONS.find(o => o.value === incoterm)
+        return <span title={option?.label}>{incoterm}</span>
       }
     },
     {
@@ -122,20 +126,20 @@ const createBestellungenConfig = (
       label: t('crud.fields.deliveryDate'),
       labelKey: 'crud.fields.deliveryDate',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value) => formatDate(stringValue(value))
     },
     {
       key: 'totalAmount',
       label: t('crud.fields.totalAmount'),
       labelKey: 'crud.fields.totalAmount',
       sortable: true,
-      render: (value) => `${formatNumber(value, 2)} €`
+      render: (value) => `${formatNumber(numberValue(value), 2)} €`
     },
     {
       key: 'externalReference',
       label: 'Ext. Referenz',
       sortable: true,
-      render: (value) => value ? <span className="text-xs font-mono">{value as string}</span> : <span className="text-muted-foreground">–</span>
+      render: (value) => value ? <span className="text-xs font-mono">{stringValue(value)}</span> : <span className="text-muted-foreground">–</span>
     },
   ],
   filters: [
@@ -166,21 +170,21 @@ const createBestellungenConfig = (
       label: t('crud.actions.approve'),
       labelKey: 'crud.actions.approve',
       type: 'primary',
-      onClick: (items) => { onBulkApprove?.(items ?? []) }
+      onClick: (items) => { onBulkApprove?.(recordArrayFromResponse(items)) }
     },
     {
       key: 'stornieren',
       label: t('crud.actions.cancel'),
       labelKey: 'crud.actions.cancel',
       type: 'danger',
-      onClick: (items) => { onBulkCancel?.(items ?? []) }
+      onClick: (items) => { onBulkCancel?.(recordArrayFromResponse(items)) }
     },
     {
       key: 'drucken',
       label: t('crud.actions.print'),
       labelKey: 'crud.actions.print',
       type: 'secondary',
-      onClick: (items) => { onBulkPrint?.(items ?? []) }
+      onClick: (items) => { onBulkPrint?.(recordArrayFromResponse(items)) }
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },
@@ -211,7 +215,7 @@ export default function BestellungenListePage(): JSX.Element {
       return
     }
     const rows = items.map(o =>
-      `<tr><td>${escapeHtml(o.purchaseOrderNumber ?? o.id)}</td><td>${escapeHtml(o.supplier ?? o.subject ?? '')}</td><td>${escapeHtml(o.status ?? '')}</td><td>${escapeHtml(o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString('de-DE') : '')}</td><td>${escapeHtml(o.totalAmount != null ? `${Number(o.totalAmount).toFixed(2)} EUR` : '')}</td></tr>`
+      `<tr><td>${escapeHtml(stringValue(o.purchaseOrderNumber ?? o.id))}</td><td>${escapeHtml(stringValue(o.supplier ?? o.subject))}</td><td>${escapeHtml(stringValue(o.status))}</td><td>${escapeHtml(o.deliveryDate ? new Date(stringValue(o.deliveryDate)).toLocaleDateString('de-DE') : '')}</td><td>${escapeHtml(o.totalAmount != null ? `${numberValue(o.totalAmount).toFixed(2)} EUR` : '')}</td></tr>`
     ).join('')
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bestellungen</title></head><body><h1>Bestellungen (${items.length})</h1><table border="1" cellpadding="4"><thead><tr><th>Bestellnr.</th><th>Lieferant</th><th>Status</th><th>Lieferdatum</th><th>Betrag</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:1em">Erstellt: ${escapeHtml(new Date().toLocaleString('de-DE'))}</p></body></html>`
     const w = window.open('', '_blank')
@@ -230,10 +234,10 @@ export default function BestellungenListePage(): JSX.Element {
     if (items.length === 0) return
     for (const item of items) {
       try {
-        await approveMutation.mutateAsync(item.id)
-        toast({ title: 'Bestellung freigegeben', description: item.purchaseOrderNumber })
+        await approveMutation.mutateAsync(stringValue(item.id))
+        toast({ title: 'Bestellung freigegeben', description: stringValue(item.purchaseOrderNumber) })
       } catch {
-        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: item.purchaseOrderNumber })
+        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: stringValue(item.purchaseOrderNumber) })
       }
     }
     if (items.length > 1) toast({ title: 'Bulk-Freigabe', description: `${items.length} Bestellungen freigegeben.` })
@@ -244,10 +248,10 @@ export default function BestellungenListePage(): JSX.Element {
     if (!reason) return
     for (const item of items) {
       try {
-        await cancelMutation.mutateAsync({ id: item.id, reason })
-        toast({ title: 'Bestellung storniert', description: item.purchaseOrderNumber })
+        await cancelMutation.mutateAsync({ id: stringValue(item.id), reason })
+        toast({ title: 'Bestellung storniert', description: stringValue(item.purchaseOrderNumber) })
       } catch {
-        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: item.purchaseOrderNumber })
+        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: stringValue(item.purchaseOrderNumber) })
       }
     }
     if (items.length > 1) toast({ title: 'Bulk-Storno', description: `${items.length} Bestellungen storniert.` })
@@ -359,11 +363,11 @@ export default function BestellungenListePage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, item: Record<string, unknown>) => {
     if (action === 'edit' && item) {
-      navigate(`/einkauf/bestellungen/${item.id as string}`)
+      navigate(`/einkauf/bestellungen/${stringValue(item.id)}`)
     } else if (action === 'freigeben' && item) {
       await withPending(String(item.id), async () => {
         try {
-          await approveMutation.mutateAsync(item.id)
+          await approveMutation.mutateAsync(stringValue(item.id))
           toast({ title: 'Bestellung freigegeben' })
         } catch {
           toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })
@@ -374,7 +378,7 @@ export default function BestellungenListePage(): JSX.Element {
       if (!reason) return
       await withPending(String(item.id), async () => {
         try {
-          await cancelMutation.mutateAsync({ id: item.id, reason })
+          await cancelMutation.mutateAsync({ id: stringValue(item.id), reason })
           toast({ title: 'Bestellung storniert' })
         } catch {
           toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })

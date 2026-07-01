@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 import { apiClient } from '@/lib/api-client';
+import { apiErrorDetail, errorMessage } from '@/lib/record-utils';
 
 // API response type (server returns strings for dates, all fields optional)
 interface DuengerApiData {
@@ -188,9 +189,10 @@ const DuengerStammPage: React.FC = () => {
       navigate('/agrar/duenger-liste');
     },
     onError: (error: unknown) => {
-      toast.error(`Fehler beim Erstellen: ${error.message}`);
-      if (error.response?.data?.detail) {
-        setErrors({ general: error.response.data.detail });
+      toast.error(`Fehler beim Erstellen: ${errorMessage(error)}`);
+      const detail = apiErrorDetail(error);
+      if (detail) {
+        setErrors({ general: detail });
       }
     },
   });
@@ -202,7 +204,7 @@ const DuengerStammPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['duenger', id] });
     },
     onError: (error: unknown) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      toast.error(`Fehler beim Aktualisieren: ${errorMessage(error)}`);
     },
   });
 

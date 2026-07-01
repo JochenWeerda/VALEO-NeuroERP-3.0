@@ -13,6 +13,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeCustomerOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { stringValue } from '@/lib/record-utils'
 
 
 const createKontaktListConfig = (handlers: {
@@ -440,7 +441,7 @@ export default function KontaktManagementPage(): JSX.Element {
     () =>
       data.filter((item) => {
         if (!item.naechsterKontakt) return false
-        return new Date(item.naechsterKontakt).getTime() < Date.now()
+        return new Date(stringValue(item.naechsterKontakt)).getTime() < Date.now()
       }).length,
     [data],
   )

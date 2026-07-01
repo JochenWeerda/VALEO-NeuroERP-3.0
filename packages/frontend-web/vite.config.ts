@@ -145,6 +145,7 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         secure: false,
         ws: true, // WebSocket-Support
+        followRedirects: true, // Verhindert CORS bei FastAPI trailing-slash 307-Redirects
       },
       // MCP Documents laufen im Backend (FastAPI), nicht im BFF
       '/api/mcp/documents': {

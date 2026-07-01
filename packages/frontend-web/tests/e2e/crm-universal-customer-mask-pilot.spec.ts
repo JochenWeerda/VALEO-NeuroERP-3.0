@@ -24,7 +24,7 @@ test.describe('CRM Universal Customer Mask Pilot', () => {
             credit_status: 'ok',
           },
           badges: [],
-          available_tabs: ['stammdaten', 'kontakte', 'auftraege'],
+          available_tabs: ['address', 'contacts', 'auftraege'],
           tab_endpoints: {
             contacts: '/api/v1/crm/customers/e2e-customer/tabs/contacts',
             auftraege: '/api/v1/crm/customers/e2e-customer/tabs/auftraege',
@@ -40,7 +40,7 @@ test.describe('CRM Universal Customer Mask Pilot', () => {
       })
     })
 
-    await page.route(/\/api\/v1\/crm\/customers\/e2e-customer\/tabs\/contacts$/, async (route) => {
+    await page.route(/\/api\/v1\/crm\/customers\/e2e-customer\/tabs\/contacts(?:\?.*)?$/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -61,7 +61,7 @@ test.describe('CRM Universal Customer Mask Pilot', () => {
       })
     })
 
-    await page.route(/\/api\/v1\/masks\/crm%2Fcustomer-360\/screen-definition$/, async (route) => {
+    await page.route(/\/api\/v1\/masks\/(?:crm%2Fcustomer-360|crm__customer-360)\/screen-definition$/, async (route) => {
       await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'mock fallback' }) })
     })
 
@@ -99,7 +99,7 @@ test.describe('CRM Universal Customer Mask Pilot', () => {
   })
 
   test('loads lazy tab data after switching tabs', async ({ page }) => {
-    const tabResponse = page.waitForResponse(/\/api\/v1\/crm\/customers\/e2e-customer\/tabs\/contacts$/)
+    const tabResponse = page.waitForResponse(/\/api\/v1\/crm\/customers\/e2e-customer\/tabs\/contacts(?:\?.*)?$/)
     await page.goto('/crm/kunden-stamm-modern?id=e2e-customer', { waitUntil: 'domcontentloaded' })
 
     await page.getByRole('tab', { name: /ansprechpartner/i }).click()
