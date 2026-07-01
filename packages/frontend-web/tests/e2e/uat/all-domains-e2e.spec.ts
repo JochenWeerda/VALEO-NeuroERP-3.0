@@ -24,7 +24,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
 import { prepareE2EAuth } from '../helpers/auth-from-env'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3001'
-const API = process.env.API_URL ?? 'http://localhost:8000'
+const API = process.env.API_URL ?? 'http://127.0.0.1:8000'
 const TOKEN = process.env.API_DEV_TOKEN ?? 'dev-token'
 const TENANT = process.env.TENANT_ID ?? 'default'
 const PERF_THRESHOLD_MS = 6000
@@ -217,7 +217,7 @@ test.describe('3. Lager', () => {
 
   test('3.6 API: GET /lager/bestaende antwortet', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const { status, ms, body } = await apiGet(request, '/api/v1/lager/bestaende?tenant_id=default')
+    const { status, ms, body } = await apiGet(request, '/api/v1/lager/bestaende?tenant_id=00000000-0000-0000-0000-000000000001')
     test.info().annotations.push({ type: 'Ladezeit', description: `GET /lager/bestaende: ${ms} ms` })
     test.info().annotations.push({ type: 'API-Status', description: `HTTP ${status}` })
     expect([200, 401, 403], `Status ${status} unerwartet`).toContain(status)
@@ -437,7 +437,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
 
   test('10.1 GET /lager/bestaende antwortet 200', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const { status, ms, body } = await apiGet(request, '/api/v1/lager/bestaende?tenant_id=default')
+    const { status, ms, body } = await apiGet(request, '/api/v1/lager/bestaende?tenant_id=00000000-0000-0000-0000-000000000001')
     test.info().annotations.push({ type: 'Ladezeit', description: `GET /lager/bestaende: ${ms} ms` })
     if (status === 0) {
       test.info().annotations.push({ type: 'Skip', description: 'Backend nicht erreichbar (offline)' })
@@ -454,7 +454,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
 
   test('10.2 POST /scan/barcode Fremdware-Erkennung', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const { status, ms, body } = await apiPost(request, '/api/v1/scan/barcode?tenant_id=default', {
+    const { status, ms, body } = await apiPost(request, '/api/v1/scan/barcode?tenant_id=00000000-0000-0000-0000-000000000001', {
       barcode: 'FREMDWARE-9999-NICHT-IM-STAMM',
       action: 'info',
     })
@@ -472,7 +472,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
 
   test('10.3 POST /scan/barcode bekannter Artikel', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=default')
+    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=00000000-0000-0000-0000-000000000001')
     if (listResp.status === 0 || listResp.status !== 200) {
       test.info().annotations.push({ type: 'Skip', description: 'Backend offline oder Artikel-API nicht erreichbar' })
       return
@@ -483,7 +483,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
       return
     }
     const testBarcode = articles[0].ean ?? articles[0].article_number ?? 'UNKNOWN'
-    const { status, ms, body } = await apiPost(request, '/api/v1/scan/barcode?tenant_id=default', {
+    const { status, ms, body } = await apiPost(request, '/api/v1/scan/barcode?tenant_id=00000000-0000-0000-0000-000000000001', {
       barcode: testBarcode,
       action: 'info',
     })
@@ -498,7 +498,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
 
   test('10.4 GET /pricing/find Preisfindung', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=default')
+    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=00000000-0000-0000-0000-000000000001')
     if (listResp.status === 0 || listResp.status !== 200) {
       test.info().annotations.push({ type: 'Skip', description: 'Backend offline' })
       return
@@ -506,7 +506,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
     const articles = listResp.body as { id?: string }[]
     if (!articles?.length) { test.info().annotations.push({ type: 'Skip', description: 'Keine Artikel in DB' }); return }
     const articleId = articles[0].id ?? ''
-    const { status, ms, body } = await apiGet(request, `/api/v1/pricing/find?article_id=${articleId}&quantity=10&tenant_id=default`)
+    const { status, ms, body } = await apiGet(request, `/api/v1/pricing/find?article_id=${articleId}&quantity=10&tenant_id=00000000-0000-0000-0000-000000000001`)
     test.info().annotations.push({ type: 'Ladezeit', description: `GET /pricing/find: ${ms} ms` })
     if (status === 200) {
       const resp = body as { net_price?: number; source?: string }
@@ -518,11 +518,11 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
 
   test('10.5 POST /pricing/staffelrabatte anlegen', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=default')
+    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=00000000-0000-0000-0000-000000000001')
     if (listResp.status === 0) { test.info().annotations.push({ type: 'Skip', description: 'Backend offline' }); return }
     const articles = listResp.body as { id?: string }[]
     const artikelId = listResp.status === 200 ? (articles?.[0]?.id ?? null) : null
-    const { status, ms, body } = await apiPost(request, '/api/v1/pricing/staffelrabatte?tenant_id=default', {
+    const { status, ms, body } = await apiPost(request, '/api/v1/pricing/staffelrabatte?tenant_id=00000000-0000-0000-0000-000000000001', {
       artikel_id: artikelId,
       artikelgruppe: artikelId ? undefined : 'Saatgut',
       bezeichnung: 'Test-Staffel Mais 10+ VE',
@@ -547,8 +547,8 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
 
   test('10.6 POST /lager/bewegungen Wareneingang', async ({ request }) => {
     if (!backendOnline) { test.skip(true, 'Backend offline'); return }
-    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=default')
-    const warehouseResp = await apiGet(request, '/api/v1/warehouses?limit=1&tenant_id=default')
+    const listResp = await apiGet(request, '/api/v1/articles?limit=1&tenant_id=00000000-0000-0000-0000-000000000001')
+    const warehouseResp = await apiGet(request, '/api/v1/warehouses?limit=1&tenant_id=00000000-0000-0000-0000-000000000001')
     if (listResp.status === 0) { test.info().annotations.push({ type: 'Skip', description: 'Backend offline' }); return }
     if (listResp.status !== 200 || warehouseResp.status !== 200) {
       test.info().annotations.push({ type: 'Skip', description: 'Artikel oder Lager-API nicht erreichbar' })
@@ -563,7 +563,7 @@ test.describe('10. API-Smoke: neue Endpoints', () => {
       test.info().annotations.push({ type: 'Skip', description: 'Keine Artikel/Lager-IDs verfügbar' })
       return
     }
-    const { status, ms, body } = await apiPost(request, '/api/v1/lager/bewegungen?tenant_id=default', {
+    const { status, ms, body } = await apiPost(request, '/api/v1/lager/bewegungen?tenant_id=00000000-0000-0000-0000-000000000001', {
       article_id: articleId,
       warehouse_id: warehouseId,
       quantity: 100,
