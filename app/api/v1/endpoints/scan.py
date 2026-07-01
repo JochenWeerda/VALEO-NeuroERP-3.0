@@ -83,15 +83,16 @@ async def scan_barcode(
                 id,
                 article_number,
                 name,
-                base_unit,
-                ean,
+                unit,
+                ean_code,
+                barcode,
                 purchase_price,
                 sales_price
             FROM domain_inventory.articles
             WHERE tenant_id = :tenant_id
               AND is_active = TRUE
               AND (
-                  ean = :barcode
+                  ean_code = :barcode
                   OR article_number = :barcode
                   OR barcode = :barcode
               )
@@ -114,12 +115,15 @@ async def scan_barcode(
             ),
         )
 
-    # Bestand im angegebenen Lager ermitteln
+    # Bestand im angegebenen Lager (vereinfacht: alle gebuchten Mengen)
     lagerbestand: Optional[float] = None
     if payload.warehouse_id:
         lagerbestand = db.execute(
             text("""
-                SELECT COALESCE(SUM(quantity), 0)
+                SELECT COALESCE(SUM(CASE
+                    WHEN movement_type IN ('wareneingang','inventur') THEN quantity
+                    WHEN movement_type IN ('warenausgang') THEN -quantity
+                    ELSE quantity END), 0)
                 FROM domain_inventory.inventory_stock_movements
                 WHERE tenant_id = :tenant_id
                   AND article_id = :article_id
@@ -146,8 +150,8 @@ async def scan_barcode(
             artikel_id=artikel_row["id"],
             artikel_nummer=artikel_row["article_number"],
             name=artikel_row["name"],
-            einheit=artikel_row["base_unit"],
-            ean=artikel_row["ean"],
+            einheit=artikel_row["unit"],
+            ean=artikel_row["ean_code"],
             charge=None,
             lagerbestand=float(lagerbestand) if lagerbestand is not None else None,
             warehouse_id=payload.warehouse_id,

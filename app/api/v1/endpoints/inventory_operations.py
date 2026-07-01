@@ -764,15 +764,19 @@ async def get_bestaende(
                 a.name AS article_name,
                 sm.warehouse_id,
                 w.name AS warehouse_name,
-                SUM(sm.quantity) AS menge,
-                a.base_unit AS einheit,
+                SUM(CASE WHEN sm.movement_type IN ('wareneingang','inventur','umbuchung_eingang')
+                         THEN sm.quantity
+                         WHEN sm.movement_type IN ('warenausgang','umbuchung_ausgang')
+                         THEN -sm.quantity
+                         ELSE sm.quantity END) AS menge,
+                a.unit AS einheit,
                 sm.charge,
-                SUM(sm.quantity * COALESCE(a.purchase_price, 0)) AS bestandswert
+                SUM(sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)) AS bestandswert
             FROM domain_inventory.inventory_stock_movements sm
             LEFT JOIN domain_inventory.articles a ON a.id = sm.article_id
             LEFT JOIN domain_inventory.warehouses w ON w.id = sm.warehouse_id
             WHERE {where_clause}
-            GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.base_unit, sm.charge
+            GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.unit, sm.charge
             {having}
             ORDER BY a.name, sm.warehouse_id
         """),
@@ -847,14 +851,32 @@ async def create_lagerbewegung(
     if not article:
         raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
 
+    # previous_stock und new_stock sind NOT NULL in der Tabelle
+    prev_stock_row = db.execute(
+        text("""
+            SELECT COALESCE(SUM(CASE
+                WHEN movement_type IN ('wareneingang','inventur') THEN quantity
+                WHEN movement_type IN ('warenausgang') THEN -quantity
+                ELSE quantity END), 0)
+            FROM domain_inventory.inventory_stock_movements
+            WHERE tenant_id = :tid AND article_id = :aid AND warehouse_id = :wid
+        """),
+        {"tid": t_id, "aid": payload.article_id, "wid": payload.warehouse_id},
+    ).scalar() or 0
+    direction = -1 if payload.movement_type == "warenausgang" else 1
+    new_stock = float(prev_stock_row) + direction * payload.quantity
+
     db.execute(
         text("""
             INSERT INTO domain_inventory.inventory_stock_movements
                 (id, tenant_id, article_id, warehouse_id, quantity, movement_type,
-                 charge, reference_id, reference_type, notes, booked_at)
+                 charge, reference_number, source_document_type, unit_cost, notes,
+                 movement_date, previous_stock, new_stock, auto_created, ownership_type,
+                 storage_fee_relevant)
             VALUES
                 (:id, :tenant_id, :article_id, :warehouse_id, :quantity, :movement_type,
-                 :charge, :reference_id, :reference_type, :notes, :booked_at)
+                 :charge, :reference_number, :source_document_type, :unit_cost, :notes,
+                 :movement_date, :prev_stock, :new_stock, false, 'eigen', false)
         """),
         {
             "id": movement_id,
@@ -864,10 +886,13 @@ async def create_lagerbewegung(
             "quantity": payload.quantity,
             "movement_type": payload.movement_type,
             "charge": payload.charge,
-            "reference_id": payload.reference_id,
-            "reference_type": payload.reference_type,
+            "reference_number": payload.reference_id,
+            "source_document_type": payload.reference_type,
+            "unit_cost": payload.unit_cost,
             "notes": payload.bemerkung,
-            "booked_at": buch_datum,
+            "movement_date": buch_datum,
+            "prev_stock": float(prev_stock_row),
+            "new_stock": new_stock,
         },
     )
     db.commit()
