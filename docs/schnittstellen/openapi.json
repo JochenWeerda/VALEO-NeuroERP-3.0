@@ -200326,6 +200326,71 @@
         ]
       }
     },
+    "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung": {
+      "post": {
+        "description": "Stub: Neue Bestellung für Lieferant anlegen — dryRun-Phase, execute folgt in UIX-046+.",
+        "operationId": "action_neue_bestellung_api_v1_einkauf_lieferanten__entity_id__actions_neue_bestellung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung anlegen (UIX-046)",
+        "tags": [
+          "einkauf",
+          "kpi",
+          "einkauf",
+          "kpi"
+        ]
+      }
+    },
     "/api/v1/einkauf/lieferanten/{lieferant_id}": {
       "get": {
         "operationId": "get_lieferant_api_v1_einkauf_lieferanten__lieferant_id__get",
@@ -219630,6 +219695,71 @@
           }
         ],
         "summary": "Settle open items Batch",
+        "tags": [
+          "finance",
+          "open-items",
+          "finance",
+          "open-items"
+        ]
+      }
+    },
+    "/api/v1/finance/open-items/{entity_id}/actions/mahnen": {
+      "post": {
+        "description": "Stub: Mahnung für offenen Posten erstellen — requiresConfirmation, execute folgt.",
+        "operationId": "action_mahnen_api_v1_finance_open_items__entity_id__actions_mahnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mahnung erstellen (UIX-046)",
         "tags": [
           "finance",
           "open-items",
