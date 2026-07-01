@@ -103,8 +103,10 @@ class TestUIX051AllSDs26Routes:
         ("lager/stock-movement", "lager/stock-movement/:id"),
         ("sales/delivery-note", "sales/delivery-note/:id"),
         ("agrar/harvest-settlement", "agrar/harvest-settlement/:id"),
+        ("agrar/kontrakte", "agrar/kontrakt/:id"),
         ("agrar/duenger", "agrar/duenger/:id"),
         ("agrar/saatgut", "agrar/saatgut/:id"),
+        ("sales/sales-order", "sales/sales-order/:id"),
         ("qualitaet/reklamation", "qualitaet/reklamation/:id"),
         ("futtermittel/einzelfuttermittel", "futtermittel/einzelfuttermittel/:id"),
         ("futtermittel/mischfuttermittel", "futtermittel/mischfuttermittel/:id"),
@@ -119,7 +121,7 @@ class TestUIX051AllSDs26Routes:
         )
 
     def test_total_native_module_count(self):
-        """Mindestens 24 verschiedene *-native Module registriert."""
+        """Mindestens 26 verschiedene *-native Module registriert (alle 26 SDs)."""
         aliases = _load_aliases()
         native = _native_modules(aliases)
-        assert len(native) >= 24, f"Erwartet ≥24 native Module, gefunden: {len(native)}: {sorted(native)}"
+        assert len(native) >= 26, f"Erwartet ≥26 native Module, gefunden: {len(native)}: {sorted(native)}"

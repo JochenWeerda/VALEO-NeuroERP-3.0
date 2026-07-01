@@ -2523,6 +2523,18 @@
     {
       "module": "@/pages/lager/article-stock-native",
       "path": "lager/artikel/:id"
+    },
+    {
+      "module": "@/pages/sales/sales-order-native",
+      "path": "sales/sales-order/:id"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-native",
+      "path": "agrar/kontrakt/:id"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-native",
+      "path": "agrar/kontrakte/:id"
     }
   ]
 }
