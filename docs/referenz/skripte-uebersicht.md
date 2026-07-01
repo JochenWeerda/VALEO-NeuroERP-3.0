@@ -18,6 +18,7 @@ version: 3.1.0
 |--------|-------|
 | `scripts/generate_openapi.py` | OpenAPI-Spec → `docs/schnittstellen/openapi.json` |
 | `scripts/generate_mcp_tool_reference.py` | MCP-Tool-Referenz aus `config/mcp_erp_tools.yaml` |
+| `scripts/generate_agent_handbuch.py` | Agent-Handbuch (Prozessketten, Masken-API, Automatisierung) → `docs/agent-handbuch/` |
 | `scripts/generate_adr_nav.py` | MkDocs ADR-Navigation patchen |
 | `scripts/generate_code_inventories.py` | Endpoint-/Service-/Migrations-Inventare |
 | `scripts/generate_container_inventory.py` | Docker-Compose-Container-Inventar → C4-Drift-Check |

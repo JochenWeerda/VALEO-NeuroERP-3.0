@@ -11,6 +11,7 @@ Katalog der Gates für Architecture OS (bestehend + neu).
 | Container Inventar | `scripts/generate_container_inventory.py --check` |
 | OpenAPI | `scripts/generate_openapi.py --check` |
 | Code-Inventare | `scripts/generate_code_inventories.py --check` |
+| Agent-Handbuch | `scripts/generate_agent_handbuch.py --check` |
 
 Aufruf gebündelt: `scripts/check_all_doc_generators.sh --check`
 

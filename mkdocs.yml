@@ -420,6 +420,11 @@ nav:
       - Mask Runtime Agent-Modus: agent-docs/runbooks/mask-runtime-agent-modus.md
       - ai_harness-Verträge: agent-docs/contracts.md
       - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
+      - Agent-Handbuch:
+          - Überblick: agent-handbuch/index.md
+          - Prozessketten: agent-handbuch/prozessketten.md
+          - Masken-API-Katalog: agent-handbuch/masken-api-katalog.md
+          - Automatisierung: agent-handbuch/automatisierung.md
       - Agent-Ops:
           - Überblick: agent-ops/README.md
           - Active Workboard: agent-ops/active-workboard.md

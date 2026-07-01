@@ -19,6 +19,7 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 6. Bei **Mask Generator / UniversalMaskRuntime**-Arbeit: [`universal-mask-runtime-status.md`](docs/architecture/uix/universal-mask-runtime-status.md) und [`open-gaps-and-known-issues.md`](docs/project-context/open-gaps-and-known-issues.md) § UIX-RUNTIME
 7. relevante Dateien unter `docs/project-context/`
 8. relevante Dateien unter `docs/workflows/` und `docs/quality-assurance/`
+9. Bei **API-, Prozess- oder Masken-Automatisierung:** [Agent-Handbuch](docs/agent-handbuch/index.md) (generiert; Drift-Gate: `python scripts/generate_agent_handbuch.py --check`)
 
 ## Nicht verhandelbare Regeln
 

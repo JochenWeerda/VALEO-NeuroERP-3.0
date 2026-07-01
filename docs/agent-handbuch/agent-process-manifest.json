@@ -1,0 +1,1917 @@
+{
+  "generatedAt": "2026-07-01",
+  "schemaVersion": 1,
+  "sources": [
+    "app/core/flow_spine_registry.py",
+    "app/core/screen_definitions.py",
+    "config/mcp_erp_tools.yaml",
+    "scripts/extract_events.py"
+  ],
+  "processes": [
+    {
+      "process_key": "order-to-cash",
+      "label": "Order-to-Cash",
+      "route_path": "/workflow/flow-spine-order-to-cash",
+      "domain": "sales",
+      "summary": "Vertrieb, Lieferung, Faktura und Zahlung in einem agentenfaehigen Steuerraum.",
+      "api_base": "/api/v1/process/flow-spines/order-to-cash",
+      "instance_api": "/api/v1/process/flow-spines/order-to-cash/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/order-to-cash/agent-action",
+      "nodes": [
+        {
+          "id": "order",
+          "label": "Auftrag",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Auftrag erfassen",
+              "href": "/sales/orders/new",
+              "api_path": "/api/v1/sales/orders",
+              "variant": "primary"
+            },
+            {
+              "label": "Neukunde (Stammdaten)",
+              "href": "/verkauf/kunde/neu",
+              "api_path": "/api/v1/crm/customers",
+              "variant": "secondary"
+            },
+            {
+              "label": "Kundenliste",
+              "href": "/crm/kunden",
+              "api_path": "/api/v1/crm/customers",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "check",
+          "label": "Pruefung",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Freigaben anzeigen",
+              "href": "/workflows/approval",
+              "api_path": "/api/v1/process/approval-density/overview",
+              "variant": "primary"
+            },
+            {
+              "label": "Preisabweichungen pruefen",
+              "href": "/sales/order",
+              "api_path": "/api/v1/sales/orders",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "delivery",
+          "label": "Lieferung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Lieferschein anlegen",
+              "href": "/sales/lieferungen",
+              "api_path": "/api/v1/sales-shipping/delivery-notes",
+              "variant": "primary"
+            },
+            {
+              "label": "Disposition oeffnen",
+              "href": "/verladung",
+              "api_path": "/api/v1/tours",
+              "variant": "secondary"
+            },
+            {
+              "label": "Positionen pruefen",
+              "href": "/sales/order",
+              "api_path": "/api/v1/sales/orders",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "invoice",
+          "label": "Rechnung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Rechnung erzeugen",
+              "href": "/sales/invoices/new",
+              "api_path": "/api/v1/finance/invoices",
+              "variant": "primary"
+            },
+            {
+              "label": "Lieferschein pruefen",
+              "href": "/sales/lieferungen",
+              "api_path": "/api/v1/sales-shipping/delivery-notes",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "payment",
+          "label": "Zahlung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Offene Posten",
+              "href": "/finance/reconciliation",
+              "api_path": "/api/v1/finance/reconciliation",
+              "variant": "primary"
+            },
+            {
+              "label": "Zahlungslauf",
+              "href": "/finance/zahlungslauf-kreditoren",
+              "api_path": "/api/v1/finance/payment-runs",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "close",
+          "label": "Abschluss",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Abschlusspruefung",
+              "href": "/finance/abschluss",
+              "api_path": "/api/v1/process/settlement/completion/evaluate",
+              "variant": "primary"
+            },
+            {
+              "label": "Gutschrift/Belastung",
+              "href": "/einkauf/gutschriften-belastungen",
+              "api_path": "/api/v1/credit-debit-memos",
+              "variant": "secondary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "crm/customer-360",
+        "sales/sales-order",
+        "sales/delivery-note",
+        "finance/ar-open-item",
+        "finance/payment-run",
+        "crm/opportunity"
+      ]
+    },
+    {
+      "process_key": "procure-to-pay",
+      "label": "Procure-to-Pay",
+      "route_path": "/workflow/flow-spine-procure-to-pay",
+      "domain": "procurement",
+      "summary": "Bedarf, Bestellung, Wareneingang, Rechnung und Zahlung mit ETA- und Match-Fokus.",
+      "api_base": "/api/v1/process/flow-spines/procure-to-pay",
+      "instance_api": "/api/v1/process/flow-spines/procure-to-pay/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/procure-to-pay/agent-action",
+      "nodes": [
+        {
+          "id": "requisition",
+          "label": "Bedarf",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Bedarf oeffnen",
+              "href": "/einkauf/anfragen",
+              "api_path": "/api/v1/einkauf/anfragen",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "approval",
+          "label": "Freigabe",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Freigaben",
+              "href": "/workflows/approval",
+              "api_path": "/api/v1/finance/ap/approval-rules",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "purchase-order",
+          "label": "Bestellung",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Bestellung oeffnen",
+              "href": "/einkauf/bestellungen",
+              "api_path": "/api/v1/einkauf-bestellvorschlag",
+              "variant": "primary"
+            },
+            {
+              "label": "Lieferantenanfrage",
+              "href": "/einkauf/anfragen",
+              "api_path": "/api/v1/messages",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "goods-receipt",
+          "label": "Wareneingang",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Wareneingang",
+              "href": "/einkauf/wareneingang",
+              "api_path": "/api/v1/einkauf/wareneingang",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "invoice",
+          "label": "Rechnung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Rechnungsabgleich",
+              "href": "/einkauf/rechnung-abgleich",
+              "api_path": "/api/v1/finance/ap/invoices",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "payment",
+          "label": "Zahlung",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Zahlungslauf",
+              "href": "/finance/zahlungslauf-kreditoren",
+              "api_path": "/api/v1/finance/payment-runs",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "einkauf/supplier",
+        "einkauf/purchase-order",
+        "finance/ap-invoice",
+        "finance/payment-run"
+      ]
+    },
+    {
+      "process_key": "inventory-to-settlement",
+      "label": "Inventory-to-Settlement",
+      "route_path": "/workflow/flow-spine-inventory-to-settlement",
+      "domain": "inventory",
+      "summary": "Lager, Versand und Settlement als gemeinsamer Operations-Flow.",
+      "api_base": "/api/v1/process/flow-spines/inventory-to-settlement",
+      "instance_api": "/api/v1/process/flow-spines/inventory-to-settlement/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/inventory-to-settlement/agent-action",
+      "nodes": [
+        {
+          "id": "inventory-check",
+          "label": "Bestandsaufnahme",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Lagerbestand",
+              "href": "/lager/bestandsuebersicht",
+              "api_path": "/api/v1/inventory",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "transfer",
+          "label": "Umlagerung",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Umlagerung",
+              "href": "/lager/auslagerung",
+              "api_path": "/api/v1/warehouses/transfers",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "picking",
+          "label": "Kommissionierung",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Kommissionierung",
+              "href": "/lager/terminal",
+              "api_path": "/api/v1/pick-lists",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "dispatch",
+          "label": "Versand",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Verladung",
+              "href": "/verladung",
+              "api_path": "/api/v1/tours",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "billing",
+          "label": "Faktura",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Rechnungen",
+              "href": "/sales/rechnungen",
+              "api_path": "/api/v1/finance/invoices",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "settlement",
+          "label": "Settlement",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Settlement pruefen",
+              "href": "/annahme/abrechnung",
+              "api_path": "/api/v1/process/settlement/completion/evaluate",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "lager/article-stock",
+        "lager/stock-movement"
+      ]
+    },
+    {
+      "process_key": "harvest-to-settlement",
+      "label": "Harvest-to-Settlement",
+      "route_path": "/workflow/flow-spine-harvest-to-settlement",
+      "domain": "agrar",
+      "summary": "Ernteannahme, Trocknung, Einlagerung und Abrechnung als Kampagnenfluss.",
+      "api_base": "/api/v1/process/flow-spines/harvest-to-settlement",
+      "instance_api": "/api/v1/process/flow-spines/harvest-to-settlement/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/harvest-to-settlement/agent-action",
+      "nodes": [
+        {
+          "id": "annahme",
+          "label": "Annahme",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Annahme oeffnen",
+              "href": "/agrar/ernte-annahme-erfassung",
+              "api_path": "/api/v1/agrar/harvest-acceptance",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "trocknung",
+          "label": "Trocknung",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Trockner planen",
+              "href": "/workflow/workflow-monitoring",
+              "api_path": "/api/v1/background-jobs/queues",
+              "variant": "primary"
+            },
+            {
+              "label": "Silokapazitaet pruefen",
+              "href": "/silo/kapazitaeten",
+              "api_path": "/api/v1/inventory",
+              "variant": "secondary"
+            }
+          ]
+        },
+        {
+          "id": "einlagerung",
+          "label": "Einlagerung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Siloansicht",
+              "href": "/silo/kapazitaeten",
+              "api_path": "/api/v1/inventory",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "kontrakt",
+          "label": "Kontrakt",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Kontrakt pruefen",
+              "href": "/kontrakte",
+              "api_path": "/api/v1/agrar/contracts",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "abrechnung",
+          "label": "Abrechnung",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Abrechnung pruefen",
+              "href": "/annahme/abrechnung",
+              "api_path": "/api/v1/agrar/settlements",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "zahlung",
+          "label": "Zahlung",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Zahlungslauf",
+              "href": "/finance/zahlungslauf-kreditoren",
+              "api_path": "/api/v1/finance/payment-runs",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "agrar/harvest-settlement",
+        "agrar/kontrakte"
+      ]
+    },
+    {
+      "process_key": "contract-to-settlement",
+      "label": "Contract-to-Settlement",
+      "route_path": "/workflow/flow-spine-contract-to-settlement",
+      "domain": "agrar",
+      "summary": "Kontrakt, Annahme, Qualitaet und Settlement ohne Medienbruch.",
+      "api_base": "/api/v1/process/flow-spines/contract-to-settlement",
+      "instance_api": "/api/v1/process/flow-spines/contract-to-settlement/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/contract-to-settlement/agent-action",
+      "nodes": [
+        {
+          "id": "contract",
+          "label": "Kontrakt",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Kontrakt oeffnen",
+              "href": "/kontrakte",
+              "api_path": "/api/v1/agrar/contracts",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "acceptance",
+          "label": "Annahme",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Annahme bearbeiten",
+              "href": "/agrar/ernte-annahme-erfassung",
+              "api_path": "/api/v1/agrar/harvest-acceptance",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "quality",
+          "label": "Qualitaet",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Qualitaet oeffnen",
+              "href": "/annahme/qualitaets-check",
+              "api_path": "/api/v1/agrar/quality-protocols",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "settlement",
+          "label": "Settlement",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Abrechnung",
+              "href": "/annahme/abrechnung",
+              "api_path": "/api/v1/agrar/settlements",
+              "variant": "primary"
+            },
+            {
+              "label": "Abschlusspruefung",
+              "href": "/finance/abschluss",
+              "api_path": "/api/v1/process/settlement/completion/evaluate",
+              "variant": "secondary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "agrar/harvest-settlement",
+        "agrar/kontrakte"
+      ]
+    },
+    {
+      "process_key": "complaint-to-resolution",
+      "label": "Complaint-to-Resolution",
+      "route_path": "/workflow/flow-spine-complaint-to-resolution",
+      "domain": "quality",
+      "summary": "Reklamationen End-to-End ueber CRM, DMS und Freigaben.",
+      "api_base": "/api/v1/process/flow-spines/complaint-to-resolution",
+      "instance_api": "/api/v1/process/flow-spines/complaint-to-resolution/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/complaint-to-resolution/agent-action",
+      "nodes": [
+        {
+          "id": "capture",
+          "label": "Erfassung",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Reklamation oeffnen",
+              "href": "/qualitaet/reklamationen",
+              "api_path": "/api/v1/reklamationen",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "triage",
+          "label": "Triage",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Case aktualisieren",
+              "href": "/qualitaet/reklamationen",
+              "api_path": "/api/v1/reklamationen/REK-2026-044/transition",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "investigation",
+          "label": "Analyse",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "DMS ansehen",
+              "href": "/dokumente/ablage",
+              "api_path": "/api/v1/docflow",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "resolution",
+          "label": "Loesung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Freigabe senden",
+              "href": "/workflows/approval",
+              "api_path": "/api/v1/reklamationen/REK-2026-044/transition",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "closure",
+          "label": "Abschluss",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Audit oeffnen",
+              "href": "/admin/audit-log",
+              "api_path": "/api/v1/reklamationen/REK-2026-044/audit",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "qualitaet/reklamation"
+      ]
+    },
+    {
+      "process_key": "service-to-customer",
+      "label": "Service-to-Customer",
+      "route_path": "/workflow/flow-spine-service-to-customer",
+      "domain": "service",
+      "summary": "Serviceanfragen, Einsatzsteuerung und Rueckmeldung in einem Arbeitsraum.",
+      "api_base": "/api/v1/process/flow-spines/service-to-customer",
+      "instance_api": "/api/v1/process/flow-spines/service-to-customer/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/service-to-customer/agent-action",
+      "nodes": [
+        {
+          "id": "request",
+          "label": "Anfrage",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Anfrage oeffnen",
+              "href": "/service/anfragen",
+              "api_path": "/api/v1/crm/cases",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "planning",
+          "label": "Disposition",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Disposition",
+              "href": "/agribusiness/field-service-tasks",
+              "api_path": "/api/v1/crm/cases",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "dispatch",
+          "label": "Einsatz",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Field Task",
+              "href": "/agribusiness/field-service-tasks",
+              "api_path": "/api/v1/crm/cases",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "report",
+          "label": "Rueckmeldung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Aktivitaet buchen",
+              "href": "/crm/aktivitaeten",
+              "api_path": "/api/v1/crm/activities",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "closure",
+          "label": "Kundenabschluss",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Abschluss senden",
+              "href": "/service/anfragen",
+              "api_path": "/api/v1/crm/cases",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "crm/customer-360"
+      ]
+    },
+    {
+      "process_key": "finance-to-close",
+      "label": "Finance-to-Close",
+      "route_path": "/workflow/flow-spine-finance-to-close",
+      "domain": "finance",
+      "summary": "Buchung, Abstimmung, Meldewesen und Abschluss als periodischer Steuerraum.",
+      "api_base": "/api/v1/process/flow-spines/finance-to-close",
+      "instance_api": "/api/v1/process/flow-spines/finance-to-close/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/finance-to-close/agent-action",
+      "nodes": [
+        {
+          "id": "buchung",
+          "label": "Buchung",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Buchungen oeffnen",
+              "href": "/finance/bookings/new",
+              "api_path": "/api/v1/journal-entries",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "abstimmung",
+          "label": "Abstimmung",
+          "status": "active",
+          "actions": [
+            {
+              "label": "Nebenbuch-Abstimmung",
+              "href": "/finance/nebenbuch-abstimmung",
+              "api_path": "/api/v1/finance/reconciliation",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "meldewesen",
+          "label": "Meldewesen",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "USTVA oeffnen",
+              "href": "/finance/ustva",
+              "api_path": "/api/v1/compliance/ustva",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "abschluss-check",
+          "label": "Abschluss-Check",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Abschluss pruefen",
+              "href": "/finance/abschluss",
+              "api_path": "/api/v1/process/settlement/completion/evaluate",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "genehmigung",
+          "label": "Genehmigung",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Sign-off anfordern",
+              "href": "/workflows/approval",
+              "api_path": "/api/v1/channels/slack/process-actions/execute",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "abschluss",
+          "label": "Abschluss",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "Abschluss cockpit",
+              "href": "/fibu/abschluss-cockpit",
+              "api_path": "/api/v1/finance/close-readiness",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": [
+        "finance/payment-run"
+      ]
+    },
+    {
+      "process_key": "compliance-to-report",
+      "label": "Compliance-to-Report",
+      "route_path": "/workflow/flow-spine-compliance-to-report",
+      "domain": "compliance",
+      "summary": "Nachhaltigkeit, Compliance, Freigabe und Reporting als auditierbarer End-to-End-Prozess.",
+      "api_base": "/api/v1/process/flow-spines/compliance-to-report",
+      "instance_api": "/api/v1/process/flow-spines/compliance-to-report/instances",
+      "agent_action_api": "/api/v1/process/flow-spines/compliance-to-report/agent-action",
+      "nodes": [
+        {
+          "id": "collection",
+          "label": "Datensammlung",
+          "status": "ok",
+          "actions": [
+            {
+              "label": "Datenqualitaet",
+              "href": "/admin/data-quality",
+              "api_path": "/api/v1/data-quality/rules",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "aggregation",
+          "label": "Aggregation",
+          "status": "active",
+          "actions": [
+            {
+              "label": "CO2 Bilanz",
+              "href": "/nachhaltigkeit/co2-bilanz",
+              "api_path": "/api/v1/sustainability/read-model",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "validation",
+          "label": "Validierung",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "EUDR pruefen",
+              "href": "/nachhaltigkeit/eudr-compliance",
+              "api_path": "/api/v1/compliance/eudr",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "approval",
+          "label": "Freigabe",
+          "status": "warning",
+          "actions": [
+            {
+              "label": "Freigabe senden",
+              "href": "/workflows/approval",
+              "api_path": "/api/v1/channels/slack/process-actions/execute",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "id": "reporting",
+          "label": "Reporting",
+          "status": "critical",
+          "actions": [
+            {
+              "label": "ESG Report",
+              "href": "/nachhaltigkeit/esg-report",
+              "api_path": "/api/v1/sustainability/read-model",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "mask_ids": []
+    }
+  ],
+  "masks": [
+    {
+      "mask_id": "agrar/duenger",
+      "title": "Duenger",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__duenger/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/duenger/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/duenger/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/duenger/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.duenger.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "preis"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/harvest-settlement",
+      "title": "Ernte-Abrechnung",
+      "domain": "agrar",
+      "process_keys": [
+        "harvest-to-settlement",
+        "contract-to-settlement"
+      ],
+      "rollout_route": "/mask-rollout/agrar__harvest-settlement/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/harvest-settlement/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/harvest-settlement/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/harvest-settlement/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "drucken",
+          "label": "Abrechnung drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.abrechnung.drucken",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "PDF-Druck commandEndpoint folgt"
+        }
+      ],
+      "sensitive_fields": [
+        "gesamtbetrag"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/kontrakte",
+      "title": "Kontrakt",
+      "domain": "agrar",
+      "process_keys": [
+        "contract-to-settlement",
+        "harvest-to-settlement"
+      ],
+      "rollout_route": "/mask-rollout/agrar__kontrakte/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/kontrakte/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/kontrakte/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/kontrakte/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "kontrakt.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "preis"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/saatgut",
+      "title": "Saatgut",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__saatgut/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/saatgut/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/saatgut/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/saatgut/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.saatgut.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "crm/customer-360",
+      "title": "Kundenstamm",
+      "domain": "crm",
+      "process_keys": [
+        "order-to-cash",
+        "service-to-customer"
+      ],
+      "rollout_route": "/mask-rollout/crm__customer-360/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/customer-360/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/customer-360/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/customer-360/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_activity",
+          "label": "Aktivitaet anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.activity.create",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "kreditlimit",
+        "zahlungsbedingungen",
+        "notizen"
+      ],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.contact.log"
+      ]
+    },
+    {
+      "mask_id": "crm/lead",
+      "title": "Lead",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__lead/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/lead/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/lead/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/lead/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.lead.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "qualifizieren",
+          "label": "Als Opportunity qualifizieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.lead.qualify",
+          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "wert"
+      ],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.contact.log"
+      ]
+    },
+    {
+      "mask_id": "crm/opportunity",
+      "title": "Opportunity",
+      "domain": "crm",
+      "process_keys": [
+        "order-to-cash"
+      ],
+      "rollout_route": "/mask-rollout/crm__opportunity/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/opportunity/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/opportunity/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/opportunity/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.opportunity.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_activity",
+          "label": "Aktivitaet anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.activity.create",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "commandEndpoint ueber crm_360 bei Bedarf"
+        }
+      ],
+      "sensitive_fields": [
+        "wert",
+        "wahrscheinlichkeit"
+      ],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.contact.log"
+      ]
+    },
+    {
+      "mask_id": "einkauf/anfrage",
+      "title": "Einkaufsanfrage",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__anfrage/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/anfrage/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/anfrage/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/anfrage/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.anfrage.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "einkauf/angebot",
+      "title": "Lieferantenangebot",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__angebot/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/angebot/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/angebot/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/angebot/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bestellen",
+          "label": "Bestellung erstellen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.angebot.order",
+          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "gesamtbetrag",
+        "einzelpreis"
+      ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "einkauf/anlieferavis",
+      "title": "Anlieferavis",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__anlieferavis/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/anlieferavis/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/anlieferavis/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/anlieferavis/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "wareneingang",
+          "label": "Wareneingang buchen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "lager.wareneingang.create",
+          "commandEndpoint": "/api/v1/lager/artikel/{entity_id}/actions/wareneingang",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "einkauf/auftragsbestaetigung",
+      "title": "Auftragsbestaetigung",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__auftragsbestaetigung/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/auftragsbestaetigung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/auftragsbestaetigung/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/auftragsbestaetigung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.ab.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "einzelpreis"
+      ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "einkauf/purchase-order",
+      "title": "Bestellung",
+      "domain": "einkauf",
+      "process_keys": [
+        "procure-to-pay"
+      ],
+      "rollout_route": "/mask-rollout/einkauf__purchase-order/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/purchase-order/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/purchase-order/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/purchase-order/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "zahlungsbedingungen",
+        "betrag"
+      ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "einkauf/supplier",
+      "title": "Lieferant",
+      "domain": "einkauf",
+      "process_keys": [
+        "procure-to-pay"
+      ],
+      "rollout_route": "/mask-rollout/einkauf__supplier/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/supplier/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/supplier/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/supplier/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "neue_bestellung",
+          "label": "Bestellung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellung.create",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "zahlungsbedingungen",
+        "lieferzeit_tage"
+      ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "finance/ap-invoice",
+      "title": "Eingangsrechnung",
+      "domain": "finance",
+      "process_keys": [
+        "procure-to-pay"
+      ],
+      "rollout_route": "/mask-rollout/finance__ap-invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/ap-invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/ap-invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/ap-invoice/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "freigeben",
+          "label": "Freigeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "finance.ap.freigabe",
+          "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "brutto",
+        "mwst",
+        "faellig_am"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/ar-open-item",
+      "title": "Offener Posten",
+      "domain": "finance",
+      "process_keys": [
+        "order-to-cash"
+      ],
+      "rollout_route": "/mask-rollout/finance__ar-open-item/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/ar-open-item/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/ar-open-item/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/ar-open-item/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "mahnen",
+          "label": "Mahnung erstellen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "finance.ar.mahnung",
+          "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "brutto",
+        "offen",
+        "skonto",
+        "faellig_am"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/bankkonto",
+      "title": "Bankkonto",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__bankkonto/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/bankkonto/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/bankkonto/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/bankkonto/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.bankkonto.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "konto_nr",
+        "iban",
+        "bic",
+        "saldo"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/debitor",
+      "title": "Debitor",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__debitor/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/debitor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/debitor/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/debitor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.debitor.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "kreditlimit",
+        "steuernummer",
+        "ust_id"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/kreditor",
+      "title": "Kreditor",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__kreditor/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/kreditor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/kreditor/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/kreditor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.kreditor.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "iban",
+        "steuernummer",
+        "ust_id"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/payment-run",
+      "title": "Zahlungslauf",
+      "domain": "finance",
+      "process_keys": [
+        "procure-to-pay",
+        "order-to-cash",
+        "finance-to-close"
+      ],
+      "rollout_route": "/mask-rollout/finance__payment-run/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/payment-run/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/payment-run/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/payment-run/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "freigeben",
+          "label": "Zahlungslauf freigeben",
+          "dangerLevel": "critical",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "finance.payment_run.freigabe",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe"
+        }
+      ],
+      "sensitive_fields": [
+        "gesamtbetrag",
+        "bank"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "futtermittel/einzelfuttermittel",
+      "title": "Einzelfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__einzelfuttermittel/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/einzelfuttermittel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/einzelfuttermittel/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/einzelfuttermittel/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.einzelfm.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "preis"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futtermittel/mischfuttermittel",
+      "title": "Mischfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__mischfuttermittel/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/mischfuttermittel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/mischfuttermittel/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/mischfuttermittel/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.mischfm.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "preis_je_t"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "lager/article-stock",
+      "title": "Artikelbestand",
+      "domain": "lager",
+      "process_keys": [
+        "inventory-to-settlement"
+      ],
+      "rollout_route": "/mask-rollout/lager__article-stock/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/article-stock/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/article-stock/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/article-stock/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "lager.artikel.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "mindestbestand",
+        "meldebestand"
+      ],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status"
+      ]
+    },
+    {
+      "mask_id": "lager/stock-movement",
+      "title": "Lagerbewegung",
+      "domain": "lager",
+      "process_keys": [
+        "inventory-to-settlement"
+      ],
+      "rollout_route": "/mask-rollout/lager__stock-movement/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/stock-movement/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/stock-movement/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/stock-movement/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "stornieren",
+          "label": "Stornieren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "lager.bewegung.stornieren",
+          "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status"
+      ]
+    },
+    {
+      "mask_id": "qualitaet/reklamation",
+      "title": "Reklamation",
+      "domain": "qualitaet",
+      "process_keys": [
+        "complaint-to-resolution"
+      ],
+      "rollout_route": "/mask-rollout/qualitaet__reklamation/:entityId",
+      "agent_contract_url": "/api/v1/masks/qualitaet/reklamation/agent-contract",
+      "screen_definition_url": "/api/v1/masks/qualitaet/reklamation/screen-definition",
+      "readiness_url": "/api/v1/masks/qualitaet/reklamation/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "qualitaet.reklamation.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "abschliessen",
+          "label": "Abschliessen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "qualitaet.reklamation.close",
+          "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "sales/delivery-note",
+      "title": "Lieferschein",
+      "domain": "sales",
+      "process_keys": [
+        "order-to-cash"
+      ],
+      "rollout_route": "/mask-rollout/sales__delivery-note/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/delivery-note/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/delivery-note/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/delivery-note/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "drucken",
+          "label": "Lieferschein drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.lieferschein.drucken",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "PDF-Druck commandEndpoint folgt"
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "sales/sales-order",
+      "title": "Verkaufsauftrag",
+      "domain": "sales",
+      "process_keys": [
+        "order-to-cash"
+      ],
+      "rollout_route": "/mask-rollout/sales__sales-order/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/sales-order/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/sales-order/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/sales-order/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.order.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "einzelpreis",
+        "betrag"
+      ],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    }
+  ],
+  "mcp_tools": [
+    {
+      "tool_id": "crm.customer.search",
+      "domain": "crm",
+      "scope": "crm:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/kunden?search={query}&limit={limit}"
+    },
+    {
+      "tool_id": "crm.customer.summary360",
+      "domain": "crm",
+      "scope": "crm:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/crm/kunden/{kunden_nr}/360"
+    },
+    {
+      "tool_id": "crm.contact.log",
+      "domain": "crm",
+      "scope": "crm:write",
+      "idempotent": false,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/crm/kontakte"
+    },
+    {
+      "tool_id": "sales.order.status",
+      "domain": "sales",
+      "scope": "sales:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/sales-orders/{auftrag_nr}/status"
+    },
+    {
+      "tool_id": "sales.invoice.propose",
+      "domain": "sales",
+      "scope": "sales:write",
+      "idempotent": false,
+      "risk_class": "high",
+      "human_approval_required": true,
+      "endpoint": "POST /api/v1/sales-invoices/propose"
+    },
+    {
+      "tool_id": "fibu.open_items.list",
+      "domain": "finance",
+      "scope": "finance:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}"
+    },
+    {
+      "tool_id": "fibu.dunning.status",
+      "domain": "finance",
+      "scope": "finance:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/dunning/status/{kunden_nr}"
+    },
+    {
+      "tool_id": "wms.lot.trace",
+      "domain": "inventory",
+      "scope": "inventory:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/inventory/lots/{lot_id}/trace"
+    },
+    {
+      "tool_id": "wms.cell.status",
+      "domain": "inventory",
+      "scope": "inventory:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/silo/cells/{cell_code}/status"
+    },
+    {
+      "tool_id": "dms.document.search",
+      "domain": "nachweisraum",
+      "scope": "nachweisraum:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/nachweisraum/dokumente"
+    },
+    {
+      "tool_id": "dms.gobd.export_status",
+      "domain": "nachweisraum",
+      "scope": "nachweisraum:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/nachweisraum/gobd-exporte/{export_id}"
+    },
+    {
+      "tool_id": "compliance.gate.status",
+      "domain": "compliance",
+      "scope": "compliance:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/compliance/external-gates"
+    },
+    {
+      "tool_id": "agrar.contract.get",
+      "domain": "agrar",
+      "scope": "agrar:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/agrar/contracts/{kontrakt_id}"
+    },
+    {
+      "tool_id": "agrar.weighing_ticket.list",
+      "domain": "agrar",
+      "scope": "agrar:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/agrar/weighing-tickets"
+    },
+    {
+      "tool_id": "lager.bestand.get",
+      "domain": "lager",
+      "scope": "lager:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/lager/bestand"
+    },
+    {
+      "tool_id": "lager.inventur.status",
+      "domain": "lager",
+      "scope": "lager:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/lager/inventuren/status"
+    },
+    {
+      "tool_id": "einkauf.bestellung.list",
+      "domain": "einkauf",
+      "scope": "einkauf:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/einkauf/bestellungen"
+    },
+    {
+      "tool_id": "agent.proposal.list",
+      "domain": "agent",
+      "scope": "agent:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": null,
+      "endpoint": "GET /api/v1/agent/proposals"
+    }
+  ],
+  "event_count": 53
+}
