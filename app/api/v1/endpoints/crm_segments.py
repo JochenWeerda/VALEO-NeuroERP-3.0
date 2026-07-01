@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
+from fastapi.responses import Response
 
 from app.core.tenant import get_tenant_id
 
@@ -75,9 +76,10 @@ async def update_segment(
     return _SEGMENTS[segment_id]
 
 
-@router.delete("/{segment_id}", status_code=204, summary="Kundensegment löschen")
+@router.delete("/{segment_id}", status_code=204, summary="Kundensegment löschen", response_class=Response)
 async def delete_segment(
     segment_id: str = Path(...),
     tenant_id: str = Depends(get_tenant_id),
-) -> None:
+) -> Response:
     _SEGMENTS.pop(segment_id, None)
+    return Response(status_code=204)
