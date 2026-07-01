@@ -20,6 +20,7 @@ Die vollständige Startseite mit Diátaxis-Navigation liegt unter **[index.md](i
 | Rolle | Nächster Schritt |
 |---|---|
 | Agent / Entwickler | [AGENTS.md](../AGENTS.md) → [Process Kernel STATUS](architecture/process-kernel/STATUS.md) |
+| KI-Agent (API/Prozesse) | [Agent-Handbuch](agent-handbuch/index.md) (generiert aus Code) |
 | Architektur | [Architektur-Index](architecture/index.md) → [arc42](architecture/arc42/01-einfuehrung.md) |
 | Entscheidungen | [ADR-Index](adr/README.md) |
 | Offene Lücken | [Open Gaps](project-context/open-gaps-and-known-issues.md) |

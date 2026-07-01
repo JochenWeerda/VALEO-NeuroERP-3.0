@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-AGENT-HANDBUCH-001 — Generiertes Agent-Handbuch (Code → Doku)
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** abgeschlossen 2026-07-01 — `scripts/generate_agent_handbuch.py` erzeugt Prozessketten, Masken-API-Katalog, Automatisierung und JSON-Manifest aus Flow Spine, ScreenDefinitions, MCP und Events. CI: `docs.yml` + `check_all_doc_generators.sh`; Pre-Commit-Regen bei Quell-Aenderungen.
+**Ziel:** Wartbare Agent-Bedienungsanleitung ohne manuelle Doppelpflege.
+**Dateibesitz:** `scripts/generate_agent_handbuch.py`, `scripts/agent_handbuch_sources.py`, `docs/agent-handbuch/`, `tests/test_generate_agent_handbuch.py`, `config/docs-code-sync-map.yaml`, `mkdocs.yml`.
+**Abnahme:** `python scripts/generate_agent_handbuch.py --check` gruen; 9 Unit-Tests; MkDocs-Nav Agent-Handbuch.
+
 ## UIX-047 — AP-Freigabe CommandEndpoint + Bestätigungsdialog-Fortsetzung
 
 **Von:** Cursor Agent

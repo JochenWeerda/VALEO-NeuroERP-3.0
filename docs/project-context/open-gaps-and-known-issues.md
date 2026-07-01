@@ -129,6 +129,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | UIX-039 | crm/opportunity native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 | UIX-040 | lager/article-stock native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 | DOC-UIX-RUNTIME-001 | Doku-Paket Handbuch, Entwickler-API, Agent-Runbook, Parity, In-App-Hilfe | P1 | ✅ |
+| DOC-AGENT-HANDBUCH-001 | Generiertes Agent-Handbuch: Flow Spine, ScreenDefinitions, MCP, Events; CI-Drift + Pre-Commit-Regen | P1 | ✅ |
 | UIX-041 | 7 native SDs Wave 1 (delivery-note, purchase-order, ap-invoice, ar-open-item, stock-movement, harvest-settlement, payment-run) | P1 | ✅ |
 | UIX-042a/b | advisory-Score 1.00 alle SDs + UniversalNativeDetailPage + 7 Frontend-Wrapper | P1 | ✅ |
 | UIX-043 | 13 verbliebene ObjectPage-Masken migriert; 26 native SDs gesamt; Vollständige Inventur | P1 | ✅ |

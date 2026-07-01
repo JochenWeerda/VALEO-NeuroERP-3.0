@@ -2,4 +2,5 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 node scripts/guard-forbidden-paths.cjs --staged
+python scripts/maybe_regenerate_agent_handbuch.py --staged
 node scripts/run-staged-checks.cjs
