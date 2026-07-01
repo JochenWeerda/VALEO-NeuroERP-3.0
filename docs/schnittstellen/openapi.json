@@ -187037,6 +187037,68 @@
         ]
       }
     },
+    "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": {
+      "post": {
+        "description": "Stub: Lead als Opportunity qualifizieren — Opportunity-Erzeugungsflow folgt.",
+        "operationId": "action_crm_qualifizieren_api_v1_crm_leads__entity_id__actions_qualifizieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lead als Opportunity qualifizieren (UIX-053)",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/crm/leads/{lead_id}": {
       "delete": {
         "operationId": "delete_lead_api_v1_crm_leads__lead_id__delete",
@@ -196515,6 +196577,68 @@
           "lager-konten",
           "einkauf",
           "bestellvorschlag"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen": {
+      "post": {
+        "description": "Stub: Bestellung aus Angebot erzeugen — dryRun zeigt proposedChanges.",
+        "operationId": "action_einkauf_bestellen_api_v1_einkauf_bestellungen__entity_id__actions_bestellen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung erteilen (UIX-053)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -248731,6 +248855,68 @@
         ]
       }
     },
+    "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": {
+      "post": {
+        "description": "Stub: Wareneingang für Artikel buchen — requiresConfirmation.",
+        "operationId": "action_lager_wareneingang_api_v1_lager_artikel__entity_id__actions_wareneingang_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wareneingang buchen (UIX-053)",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/lager/auslagerung": {
       "post": {
         "description": "Auslagerung buchen â€” StockMovement mit Strategie (FIFO/FEFO/Manuell).",
@@ -250677,6 +250863,68 @@
           "lager",
           "inventory",
           "lager"
+        ]
+      }
+    },
+    "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren": {
+      "post": {
+        "description": "Stub: Lagerbewegung stornieren — humanApprovalRequired, dryRun-Phase.",
+        "operationId": "action_lager_stornieren_api_v1_lager_stock_movements__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lagerbewegung stornieren (UIX-053)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -300163,6 +300411,68 @@
         "summary": "Ueberfaellige abrufen",
         "tags": [
           "reklamationen"
+        ]
+      }
+    },
+    "/api/v1/reklamationen/{entity_id}/actions/abschliessen": {
+      "post": {
+        "description": "Stub: Reklamation abschliessen — requiresConfirmation.",
+        "operationId": "action_reklamation_abschliessen_api_v1_reklamationen__entity_id__actions_abschliessen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reklamation abschliessen (UIX-053)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
