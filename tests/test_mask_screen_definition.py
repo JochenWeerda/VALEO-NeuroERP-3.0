@@ -1,4 +1,8 @@
+import pytest
+
 from app.core.screen_definitions import get_screen_definition
+
+pytestmark = pytest.mark.unit
 
 
 def test_get_crm_customer_360_screen_definition() -> None:
