@@ -951,3 +951,19 @@ async def reverse_settlement(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
 
+
+@router.post("/{entity_id}/actions/mahnen", summary="Mahnung erstellen (UIX-046)")
+async def action_mahnen(
+    entity_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Stub: Mahnung für offenen Posten erstellen — requiresConfirmation, execute folgt."""
+    return {
+        "success": True,
+        "actionKey": "mahnen",
+        "entityId": entity_id,
+        "tenantId": tenant_id,
+        "message": "Mahnung wird erstellt.",
+        "proposedChanges": {"mahnstatus": "erste_mahnung", "op_id": entity_id},
+    }
+

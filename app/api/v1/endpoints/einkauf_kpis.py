@@ -220,3 +220,19 @@ async def get_einkauf_audit_trail(
         "events": [],
         "tenant_id": tenant_id,
     }
+
+
+@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", summary="Bestellung anlegen (UIX-046)")
+async def action_neue_bestellung(
+    entity_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Stub: Neue Bestellung für Lieferant anlegen — dryRun-Phase, execute folgt in UIX-046+."""
+    return {
+        "success": True,
+        "actionKey": "neue_bestellung",
+        "entityId": entity_id,
+        "tenantId": tenant_id,
+        "message": "Bestellvorgang wird vorbereitet.",
+        "proposedChanges": {"status": "draft", "lieferant_id": entity_id},
+    }

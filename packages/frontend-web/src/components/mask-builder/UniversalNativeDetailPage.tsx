@@ -7,6 +7,16 @@ import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { getAxiosErrorMessage } from '@/lib/api-client'
@@ -19,6 +29,12 @@ interface UniversalNativeDetailPageProps {
   testId?: string
 }
 
+interface PendingAction {
+  actionKey: string
+  payload: Record<string, unknown>
+  label: string
+}
+
 export function UniversalNativeDetailPage({
   screenId,
   entityId,
@@ -29,6 +45,7 @@ export function UniversalNativeDetailPage({
   const schemaQuery = useScreenDefinition(screenId, { enabled: Boolean(entityId) })
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionSummary, setActionSummary] = useState<string | null>(null)
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
 
   const runtime = useUniversalMaskRuntime({
     screenId,
@@ -42,7 +59,7 @@ export function UniversalNativeDetailPage({
     permissions: schemaQuery.data?.permissions ?? [],
   })
 
-  async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
+  async function executeConfirmedAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
     setActionError(null)
     setActionSummary(null)
     const result = await actionRuntime.executeAction({
@@ -58,6 +75,22 @@ export function UniversalNativeDetailPage({
     }
     setActionSummary(result.summary ?? `Aktion "${actionKey}" wurde ausgefuehrt.`)
     await runtime.refetch()
+  }
+
+  async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
+    const actionDef = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)
+    if (actionDef?.requiresConfirmation) {
+      setPendingAction({ actionKey, payload, label: actionDef.label ?? actionKey })
+      return
+    }
+    await executeConfirmedAction(actionKey, payload)
+  }
+
+  function handleConfirmDialogConfirm(): void {
+    if (!pendingAction) return
+    const { actionKey, payload } = pendingAction
+    setPendingAction(null)
+    void executeConfirmedAction(actionKey, payload)
   }
 
   if (!entityId) {
@@ -111,38 +144,58 @@ export function UniversalNativeDetailPage({
   }
 
   return (
-    <div data-testid={testId ?? `native-detail-${screenId.replace('/', '-')}`} data-runtime="native">
-      {runtime.isEntityLoading && (
-        <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
-          Daten werden geladen…
-        </div>
-      )}
-      {actionRuntime.loadingActionKey && (
-        <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
-          Aktion wird ausgefuehrt...
-        </div>
-      )}
-      {actionError && (
-        <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
-          {actionError}
-        </div>
-      )}
-      {actionSummary && (
-        <div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 md:px-8" role="status">
-          {actionSummary}
-        </div>
-      )}
-      <UniversalMaskRenderer
-        plan={runtime.plan}
-        data={runtime.entityData}
-        tables={runtime.tableRows}
-        tableQueryStates={runtime.tableQueryStates}
-        tableTotals={runtime.tableTotals}
-        lookupBindings={runtime.lookupBindings}
-        onTabChange={onTabChange}
-        onTableQueryChange={runtime.setTableQuery}
-        onAction={handleAction}
-      />
-    </div>
+    <>
+      <div data-testid={testId ?? `native-detail-${screenId.replace('/', '-')}`} data-runtime="native">
+        {runtime.isEntityLoading && (
+          <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
+            Daten werden geladen…
+          </div>
+        )}
+        {actionRuntime.loadingActionKey && (
+          <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
+            Aktion wird ausgefuehrt...
+          </div>
+        )}
+        {actionError && (
+          <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
+            {actionError}
+          </div>
+        )}
+        {actionSummary && (
+          <div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 md:px-8" role="status">
+            {actionSummary}
+          </div>
+        )}
+        <UniversalMaskRenderer
+          plan={runtime.plan}
+          data={runtime.entityData}
+          tables={runtime.tableRows}
+          tableQueryStates={runtime.tableQueryStates}
+          tableTotals={runtime.tableTotals}
+          lookupBindings={runtime.lookupBindings}
+          onTabChange={onTabChange}
+          onTableQueryChange={runtime.setTableQuery}
+          onAction={handleAction}
+        />
+      </div>
+
+      <AlertDialog open={pendingAction !== null} onOpenChange={(open) => { if (!open) setPendingAction(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aktion bestätigen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Möchten Sie die Aktion <strong>{pendingAction?.label}</strong> wirklich ausführen?
+              Diese Aktion kann nicht ohne weiteres rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDialogConfirm}>
+              Bestätigen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
