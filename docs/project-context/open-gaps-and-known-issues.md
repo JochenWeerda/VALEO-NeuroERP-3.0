@@ -150,7 +150,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 | UIX-054 Route Inventory | Generierte Route-Wahrheit (`route-inventory.gen.json`) | P1 | ✅ |
-| UIX-055 universal-mask-ci | GitHub Actions sichtbar grün | P1 | ⏳ |
+| UIX-055 universal-mask-ci | GitHub Actions sichtbar grün | P1 | ✅ Run 28540744515 |
 | UIX-056 Native Route Smoke | Playwright über 5 repräsentative `/:id`-Routen | P1 | ✅ lokal |
 | UIX-057 Rollback-Matrix | Legacy-Fallback je kritischer Maske | P1 | ✅ |
 

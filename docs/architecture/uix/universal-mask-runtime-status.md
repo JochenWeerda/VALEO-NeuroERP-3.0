@@ -47,7 +47,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-050/053 | 5 weitere CommandEndpoints (stornieren, bestellen, wareneingang, abschliessen, qualifizieren) + AuditReasonDialog + dryRun-Preview + BFF MCP-Tool | ✅ | `mask_actions.py`, `maskActions.ts` |
 | UIX-051 | Alle 26 nativen SDs mit `/:id`-Routen + native Wrapper (sales-order, kontrakte) | ✅ | `d87de90a5`, `test_uix051_legacy_route_migration.py` |
 | UIX-054 | Finale Route-Wahrheit: `route-inventory.gen.json` + `route-tree.gen.tsx` | ✅ lokal | `test_uix054_route_inventory_verification.py` |
-| UIX-055 | GitHub Actions `universal-mask-ci` + `workflow_dispatch` | ⏳ | Push/CI-Run ausstehend |
+| UIX-055 | GitHub Actions `universal-mask-ci` + `workflow_dispatch` | ✅ | Run `28540744515` — backend/frontend/bff/e2e grün |
 | UIX-056 | Browser-Smoke native `/:id`-Routen (5 repräsentative Masken) | ✅ lokal | `uix-056-native-route-smoke.spec.ts` |
 | UIX-057 | Rollback-/Fallback-Matrix | ✅ | [`uix-057-native-route-rollback-matrix.md`](uix-057-native-route-rollback-matrix.md) |
 
@@ -181,7 +181,7 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | pytest UIX-051 Route Migration | 2026-07-01 | ✅ 49/49 | `test_uix051_legacy_route_migration.py` |
 | pytest UIX-054 Route Inventory | 2026-07-01 | ✅ 46/46 | `route-inventory.gen.json` + native Priorität |
 | UIX-056 Native Route Playwright | 2026-07-01 | ✅ 6/6 lokal | `uix-056-native-route-smoke.spec.ts` |
-| GitHub Actions universal-mask-ci | 2026-07-01 | ⏳ | `workflow_dispatch` + Push triggert Run; Ergebnis nach CI-Run eintragen |
+| GitHub Actions universal-mask-ci | 2026-07-01 | ✅ | Run `28540744515` — UIX-051/054 + routes:generate-Drift + E2E-Smoke |
 
 ## Bewertung (Stakeholder-Audit 2026-06-29)
 

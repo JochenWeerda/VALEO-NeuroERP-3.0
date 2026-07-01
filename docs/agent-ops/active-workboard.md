@@ -15,7 +15,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Cursor Agent
 **Owner:** Cursor Agent
-**Stand:** in arbeit 2026-07-01 — UIX-054 Inventory-Tests, UIX-056 Playwright-Smoke, UIX-057 Rollback-Matrix; UIX-055 CI-Run nach Push/workflow_dispatch.
+**Stand:** abgeschlossen 2026-07-01 — UIX-054 Inventory-Tests, UIX-056 Playwright 6/6, UIX-057 Rollback-Matrix; UIX-055 CI Run `28540744515` grün; route-inventory nach UIX-051 nachgezogen (`5686f2177`).
 **Ziel:** Generierte Route-Wahrheit prüfen, CI sichtbar grün, Browser-Smoke, Rollback dokumentiert — keine weiteren Routen migrieren.
 **Dateibesitz:** `tests/test_uix054_route_inventory_verification.py`, `packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts`, `docs/architecture/uix/uix-057-native-route-rollback-matrix.md`, `.github/workflows/universal-mask-ci.yml`.
 **Abnahme:** pytest UIX-054 grün; universal-mask-ci Run grün; Playwright UIX-056 grün.
