@@ -10,7 +10,7 @@
  */
 
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, AlertCircle } from 'lucide-react'
+import { ArrowLeft, AlertCircle, AlertTriangle, ShieldAlert } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,6 +37,7 @@ import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime 
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
+import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
 
 interface UniversalNativeDetailPageProps {
@@ -49,9 +50,35 @@ interface PendingAction {
   actionKey: string
   payload: Record<string, unknown>
   label: string
+  dangerLevel: string
   requiresConfirmation: boolean
   auditReasonRequired: boolean
   hasDryRun: boolean
+}
+
+interface ProposedChange {
+  field?: string
+  from?: unknown
+  to?: unknown
+  description?: string
+  [key: string]: unknown
+}
+
+function renderProposedChange(change: unknown, index: number): string {
+  if (typeof change === 'string') return change
+  if (typeof change !== 'object' || change === null) return String(change)
+  const c = change as ProposedChange
+  if (c.description) return c.description
+  if (c.field !== undefined && c.from !== undefined && c.to !== undefined) {
+    const label = String(c.field).replace(/_/g, ' ')
+    return `${label.charAt(0).toUpperCase() + label.slice(1)} wird von „${c.from}" auf „${c.to}" geändert.`
+  }
+  if (c.field !== undefined && c.to !== undefined) {
+    const label = String(c.field).replace(/_/g, ' ')
+    return `${label.charAt(0).toUpperCase() + label.slice(1)} wird auf „${c.to}" gesetzt.`
+  }
+  const entries = Object.entries(c).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
+  return entries.join(', ') || `Änderung ${index + 1}`
 }
 
 const MODERATE_OR_ABOVE = new Set(['moderate', 'high', 'critical'])
@@ -63,9 +90,10 @@ export function UniversalNativeDetailPage({
 }: UniversalNativeDetailPageProps): JSX.Element {
   const { onTabChange } = useMaskPilotState()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const schemaQuery = useScreenDefinition(screenId, { enabled: Boolean(entityId) })
   const [actionError, setActionError] = useState<string | null>(null)
-  const [actionSummary, setActionSummary] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<{ field?: string; message: string }[]>([])
 
   // Multi-step dialog state
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
@@ -95,18 +123,27 @@ export function UniversalNativeDetailPage({
       auditReason: reason,
     })
     if (!result.success) {
-      const validationMessage = result.validationErrors?.map((e) => e.message).join('; ')
-      setActionError(result.error ?? validationMessage ?? `Aktion "${actionKey}" fehlgeschlagen.`)
+      const errs = result.validationErrors ?? []
+      if (errs.length > 0) {
+        setValidationErrors(errs)
+        setActionError(null)
+      } else {
+        setActionError(result.error ?? `Aktion "${actionKey}" fehlgeschlagen.`)
+        setValidationErrors([])
+      }
       return
     }
-    setActionSummary(result.summary ?? `Aktion "${actionKey}" wurde ausgefuehrt.`)
+    setActionError(null)
+    setValidationErrors([])
+    const label = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)?.label ?? actionKey
+    toast({ title: `${label} erfolgreich`, description: result.summary })
     await runtime.refetch()
   }
 
   // --- Handler: called by UniversalMaskRenderer ---
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
     setActionError(null)
-    setActionSummary(null)
+    setValidationErrors([])
     const actionDef = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)
     const hasDryRun = Boolean(
       actionDef?.commandEndpoint &&
@@ -117,6 +154,7 @@ export function UniversalNativeDetailPage({
       actionKey,
       payload,
       label: actionDef?.label ?? actionKey,
+      dangerLevel: actionDef?.dangerLevel ?? 'safe',
       requiresConfirmation: actionDef?.requiresConfirmation ?? false,
       auditReasonRequired: actionDef?.auditReasonRequired ?? false,
       hasDryRun,
@@ -173,6 +211,8 @@ export function UniversalNativeDetailPage({
     setStage(null)
     setDryRunResult(null)
     setAuditReason('')
+    setActionError(null)
+    setValidationErrors([])
   }
 
   // --- Empty entity guard ---
@@ -239,13 +279,22 @@ export function UniversalNativeDetailPage({
           </div>
         )}
         {actionError && (
-          <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
-            {actionError}
+          <div className="flex items-start gap-2 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{actionError}</span>
           </div>
         )}
-        {actionSummary && (
-          <div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 md:px-8" role="status">
-            {actionSummary}
+        {validationErrors.length > 0 && (
+          <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
+            <div className="flex items-center gap-2 font-medium">
+              <AlertCircle className="h-4 w-4" />
+              Validierungsfehler:
+            </div>
+            <ul className="mt-1 list-inside list-disc space-y-0.5">
+              {validationErrors.map((e, i) => (
+                <li key={i}>{e.field ? <strong>{e.field}:</strong> : null} {e.message}</li>
+              ))}
+            </ul>
           </div>
         )}
         <UniversalMaskRenderer
@@ -261,22 +310,47 @@ export function UniversalNativeDetailPage({
         />
       </div>
 
-      {/* UIX-047/050: Confirmation Dialog */}
+      {/* UIX-047: Confirmation Dialog — danger-aware styling */}
       <AlertDialog
         open={stage === 'confirm'}
         onOpenChange={(open) => { if (!open) resetDialogs() }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Aktion bestätigen</AlertDialogTitle>
-            <AlertDialogDescription>
-              Möchten Sie <strong>{pendingAction?.label}</strong> wirklich ausführen?
-              Diese Aktion kann nicht ohne weiteres rückgängig gemacht werden.
+            <AlertDialogTitle className="flex items-center gap-2">
+              {pendingAction?.dangerLevel === 'critical' || pendingAction?.dangerLevel === 'high' ? (
+                <ShieldAlert className="h-5 w-5 text-destructive" />
+              ) : pendingAction?.dangerLevel === 'moderate' ? (
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+              ) : null}
+              Aktion bestätigen
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                <p>
+                  Möchten Sie <strong>{pendingAction?.label}</strong> wirklich ausführen?
+                </p>
+                {(pendingAction?.dangerLevel === 'critical' || pendingAction?.dangerLevel === 'high') && (
+                  <p className="mt-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+                    Diese Aktion ist unwiderruflich und kann weitreichende Folgen haben.
+                  </p>
+                )}
+                {pendingAction?.dangerLevel === 'moderate' && (
+                  <p className="mt-2 text-sm text-amber-700">
+                    Diese Aktion kann nicht ohne weiteres rückgängig gemacht werden.
+                  </p>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={resetDialogs}>Abbrechen</AlertDialogCancel>
             <AlertDialogAction
+              className={
+                pendingAction?.dangerLevel === 'critical' || pendingAction?.dangerLevel === 'high'
+                  ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  : ''
+              }
               onClick={() => {
                 if (pendingAction) void advanceFromConfirm(pendingAction)
               }}
@@ -287,7 +361,7 @@ export function UniversalNativeDetailPage({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* UIX-051: dryRun Preview Dialog */}
+      {/* UIX-047: dryRun Preview Dialog — human-readable proposedChanges */}
       <Dialog open={stage === 'preview'} onOpenChange={(open) => { if (!open) resetDialogs() }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -298,10 +372,11 @@ export function UniversalNativeDetailPage({
           </DialogHeader>
           <div className="rounded-md border bg-muted/40 p-3 text-sm">
             {dryRunResult?.proposedChanges && dryRunResult.proposedChanges.length > 0 ? (
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {dryRunResult.proposedChanges.map((change, i) => (
-                  <li key={i} className="font-mono text-xs">
-                    {typeof change === 'object' ? JSON.stringify(change) : String(change)}
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/40" />
+                    <span>{renderProposedChange(change, i)}</span>
                   </li>
                 ))}
               </ul>
@@ -322,30 +397,43 @@ export function UniversalNativeDetailPage({
         </DialogContent>
       </Dialog>
 
-      {/* UIX-050: Audit Reason Dialog */}
+      {/* UIX-047: Audit Reason Dialog — min 10 chars, better hint */}
       <Dialog open={stage === 'audit'} onOpenChange={(open) => { if (!open) resetDialogs() }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Begründung erforderlich</DialogTitle>
-            <DialogDescription>
-              Bitte geben Sie eine Begründung für <strong>{pendingAction?.label}</strong> an.
-              Diese wird im Audit-Log festgehalten.
+            <DialogDescription asChild>
+              <div>
+                <p>
+                  Bitte geben Sie eine Begründung für <strong>{pendingAction?.label}</strong> an.
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Die Begründung wird im Audit-Log festgehalten und ist für Revisionen nachvollziehbar.
+                </p>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="audit-reason">Begründung</Label>
+            <Label htmlFor="audit-reason">
+              Begründung <span className="text-muted-foreground">(mindestens 10 Zeichen)</span>
+            </Label>
             <Input
               id="audit-reason"
               value={auditReason}
               onChange={(e) => setAuditReason(e.target.value)}
-              placeholder="Begründung eingeben…"
+              placeholder="z. B. Kundenwunsch, Fehlerkorrektur…"
               autoFocus
             />
+            {auditReason.length > 0 && auditReason.trim().length < 10 && (
+              <p className="text-xs text-destructive">
+                Bitte mindestens 10 Zeichen eingeben ({10 - auditReason.trim().length} fehlen).
+              </p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={resetDialogs}>Abbrechen</Button>
             <Button
-              disabled={auditReason.trim().length < 3}
+              disabled={auditReason.trim().length < 10}
               onClick={() => void advanceFromAudit()}
             >
               Bestätigen & Ausführen

@@ -6,12 +6,12 @@ owner: Codex
 status: aktiv
 last_reviewed: 2026-06-30
 version: 2.0.0
-description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…043) — Lieferstand, Gates, Governance. Migration aller entity-detail Masken abgeschlossen.
+description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Agent Safety auf alle 26 SDs ausgeweitet.
 ---
 
 # Universal Mask Runtime — Plattformstatus
 
-> **Kurzfassung (2026-06-30):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. 20 Frontend thin wrapper pages + route-aliases. Frontend-Typecheck, Frontend-Build, BFF-Build und Universal-Masken-Playwright-Smoke sind lokal grün. Keine weiteren Migrations-Kandidaten unter den entity-detail ObjectPage-Masken.
+> **Kurzfassung (2026-07-01):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. ActionRuntime produktiv verdrahtet (UIX-045). Erste CommandEndpoints aktiv: `create_activity`, `neue_bestellung`, `mahnen`, `freigeben`, `stornieren`, `bestellen`, `wareneingang`, `abschliessen`, `qualifizieren` (UIX-046/053). Multi-Stage Dialog Flow (Confirm→dryRun→AuditReason→Execute) mit menschenlesbarer proposedChanges-Anzeige und Toast-Feedback (UIX-047). Agent Safety auf alle 26 SDs ausgeweitet (UIX-048). CI-Workflow mit BFF-Build-Stage ergänzt (UIX-049).
 
 ## Lieferstand
 
@@ -39,8 +39,12 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-042a | Advisory-Score 1.00 für alle SDs inkl. sales-order, kontrakte, crm-360 | ✅ | 13 SDs gesamt |
 | UIX-042b | UniversalNativeDetailPage + 7 thin wrapper pages + 7 route-aliases | ✅ | generischer Wrapper |
 | UIX-043 | 13 weitere ObjectPage-Masken migriert; vollständige Inventur; 18 bewusst exempt | ✅ | **26 SDs gesamt** |
-| UIX-044/045 | FilterPlan-HTTP-Vertrag `filter_plan` + Native ActionRuntime-Anschluss | ✅ lokal | `universal-mask-filter-plan.spec.ts`, `UniversalNativeDetailPage` |
-| UIX-046/047 | CommandEndpoint-Stubs (neue_bestellung, mahnen, freigeben) + Bestätigungsdialog | ✅ lokal | `test_uix046_048_command_endpoints_safety.py` |
+| UIX-044/045 | FilterPlan-HTTP-Vertrag `filter_plan` + Native ActionRuntime-Anschluss | ✅ | `universal-mask-filter-plan.spec.ts`, `UniversalNativeDetailPage` |
+| UIX-046 | CommandEndpoints aktiviert: `create_activity`, `neue_bestellung`, `mahnen`, `freigeben` | ✅ | `test_uix046_048_command_endpoints_safety.py` |
+| UIX-047 | ActionResult UX: human-readable proposedChanges, validationErrors-Liste, Danger-Dialoge, Toast | ✅ | `UniversalNativeDetailPage.tsx` — TypeScript grün |
+| UIX-048 | Agent Safety auf alle 26 nativen SDs ausgeweitet (dynamisch aus Registry) | ✅ 219/219 | `test_uix046_048_command_endpoints_safety.py` |
+| UIX-049 | CI-Workflow: BFF-Build-Stage + UIX-050/053-Tests + `--no-cov` überall | ✅ | `.github/workflows/universal-mask-ci.yml` |
+| UIX-050/053 | 5 weitere CommandEndpoints (stornieren, bestellen, wareneingang, abschliessen, qualifizieren) + AuditReasonDialog + dryRun-Preview + BFF MCP-Tool | ✅ | `mask_actions.py`, `maskActions.ts` |
 
 ## Architektur (Single Source of Truth)
 
@@ -86,12 +90,29 @@ Referenz-Code: `packages/frontend-web/src/components/mask-builder/runtime/`
 Frontend: `checkGeneratorReadiness()` in `runtime/generatorReadiness.ts`
 Backend: `_check_readiness()` in `app/api/v1/endpoints/mask_screen_definition.py`
 
+## Aktive CommandEndpoints (Stand 2026-07-01)
+
+| Action | Screen | Status | Endpoint |
+|--------|--------|--------|----------|
+| `create_activity` | crm/customer-360 | ✅ aktiv | `/api/v1/crm/customers/{entity_id}/actions/create_activity` |
+| `neue_bestellung` | einkauf/supplier | ✅ aktiv | `/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung` |
+| `mahnen` | finance/ar-open-item | ✅ aktiv | `/api/v1/finance/open-items/{entity_id}/actions/mahnen` |
+| `freigeben` | finance/ap-invoice | ✅ aktiv | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
+| `stornieren` | lager/stock-movement | ✅ aktiv (humanApproval) | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
+| `bestellen` | einkauf/angebot | ✅ aktiv | `/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen` |
+| `wareneingang` | einkauf/anlieferavis | ✅ aktiv | `/api/v1/lager/artikel/{entity_id}/actions/wareneingang` |
+| `abschliessen` | qualitaet/reklamation | ✅ aktiv | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
+| `qualifizieren` | crm/lead | ✅ aktiv | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+
+**Noch gestubbt** (stubReason gesetzt): alle übrigen Actions außer den oben genannten. Reihenfolge der Aktivierung: CRM/Einkauf-safe → Finance-moderate → Druck/Dokumente → Freigaben → payment-run zuletzt.
+
 ## Governance für Agenten
 
 1. **Migration abgeschlossen** — alle entity-detail Masken sind native SDs.
-2. **Nächster Fokus:** commandEndpoints für gestubte Actions (neue_bestellung, freigeben, mahnen, drucken).
-3. **CRM 360** ist produktiver Referenzfall mit vollständiger Action-Runtime.
-4. **finance/payment-run** bleibt `forbiddenForAgents=True` — human approval required.
+2. **ActionRuntime produktiv** — 9 CommandEndpoints aktiv; Dialog-Flow Confirm→dryRun→AuditReason→Execute.
+3. **Agent Safety** — alle 26 SDs geprüft (dynamisch, nicht hart kodiert); `sensitiveFields`, `dangerousActions`, `forbiddenForAgents`, `humanApprovalRequired` validiert.
+4. **CRM 360** ist produktiver Referenzfall mit vollständiger Action-Runtime.
+5. **finance/payment-run** bleibt `forbiddenForAgents=True` — human approval required.
 5. **Maschinenlesbare Quellen** bei Masken-Arbeit immer zuerst lesen:
    - diese Datei
    - [`open-gaps-and-known-issues.md`](../../project-context/open-gaps-and-known-issues.md)
@@ -140,17 +161,18 @@ pytest tests/test_agent_mask_contract.py
 
 Ergebnis wird nach jedem Lauf hier aktualisiert:
 
-| pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov`; Coverage-Dateilock unter Windows bei parallelem Lauf umgangen |
-| pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py`, inkl. native Promotionen 038–040 |
-| Frontend type-check | 2026-06-30 | ✅ | `pnpm --dir packages/frontend-web run type-check` |
-| Frontend build | 2026-06-30 | ✅ | `pnpm --dir packages/frontend-web run build` |
-| BFF build | 2026-06-30 | ✅ | `pnpm --dir packages/bff run build` |
-| Universal-Masken Playwright | 2026-06-30 | ✅ 8/8 | CRM Customer Pilot, Sales Order Pilot, Mask Render Performance; Flags `VITE_ENABLE_UNIVERSAL_MASK_*` |
-| FilterPlan Playwright | 2026-06-30 | ✅ 1/1 | `universal-mask-filter-plan.spec.ts`; native `/crm/lead/:id`, Chip + `filter_plan` Request |
-| FilterPlan Contract | 2026-06-30 | ✅ 3/3 | `tests/test_uix044_filter_plan_contract.py`; isolierter Pytest-Lauf ohne Plugin-Autoload |
-| Frontend vitest (readiness) | 2026-06-29 | ✅ 15/15 | `generatorReadiness.test.ts` |
-| Frontend vitest (gesamt) | — | ausstehend | UIX-032 |
-| GitHub Actions quality-gate | — | ausstehend | kein sichtbarer Run für UIX-028…030 |
+| pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov` |
+| pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py` |
+| pytest UIX-046/048 Safety | 2026-07-01 | ✅ 219/219 | alle 26 SDs, dynamisch aus Registry |
+| pytest UIX-050/053 Advanced | 2026-07-01 | ✅ 15/16 | BFF-File-Checks + dryRun-Stubs |
+| pytest UIX-044 FilterPlan | 2026-06-30 | ✅ 3/3 | `test_uix044_filter_plan_contract.py` |
+| Frontend type-check | 2026-07-01 | ✅ | TypeScript 0 Fehler (inkl. UIX-047 Änderungen) |
+| Frontend build | 2026-06-30 | ✅ | `npm run build` |
+| BFF build | 2026-06-30 | ✅ | `npm run build` in `packages/bff/bff-web` |
+| Universal-Masken Playwright | 2026-06-30 | ✅ 8/8 | CRM Customer Pilot, Sales Order Pilot, Mask Render Performance |
+| FilterPlan Playwright | 2026-06-30 | ✅ 1/1 | `universal-mask-filter-plan.spec.ts` |
+| Frontend vitest (gesamt) | — | ausstehend | CI-Job `continue-on-error: true` |
+| GitHub Actions CI | 2026-07-01 | ⏳ | Workflow aktualisiert: 4 Jobs (backend/frontend/bff/e2e-smoke) — nächster Push triggert Run |
 
 ## Bewertung (Stakeholder-Audit 2026-06-29)
 

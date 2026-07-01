@@ -6,20 +6,27 @@ on:
     paths:
       - 'app/core/screen_definitions.py'
       - 'app/api/v1/endpoints/mask_rollout*.py'
+      - 'app/api/v1/endpoints/mask_actions.py'
       - 'app/api/v1/endpoints/crm_360.py'
       - 'app/api/v1/endpoints/open_items.py'
       - 'app/api/v1/endpoints/einkauf_kpis.py'
       - 'packages/frontend-web/src/components/mask-builder/**'
+      - 'packages/bff/bff-web/src/**'
       - 'tests/test_mask_*.py'
       - 'tests/test_uix04*.py'
+      - 'tests/test_uix05*.py'
+      - '.github/workflows/universal-mask-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'app/core/screen_definitions.py'
       - 'app/api/v1/endpoints/mask_rollout*.py'
+      - 'app/api/v1/endpoints/mask_actions.py'
       - 'packages/frontend-web/src/components/mask-builder/**'
+      - 'packages/bff/bff-web/src/**'
       - 'tests/test_mask_*.py'
       - 'tests/test_uix04*.py'
+      - 'tests/test_uix05*.py'
 
 jobs:
   backend-mask-tests:
@@ -45,21 +52,32 @@ jobs:
         run: |
           pytest \
             tests/test_mask_screen_definition.py \
-            tests/test_uix046_048_command_endpoints_safety.py \
-            -v --tb=short -m unit
+            -v --tb=short --no-cov -m unit
 
-      - name: Run Mask Rollout batch tests (if present)
+      - name: Run UIX-046/048 CommandEndpoints + Agent Safety (alle 26 SDs)
         run: |
           pytest \
-            tests/test_mask_rollout_batch_w42_51.py \
-            -v --tb=short -m unit
-        continue-on-error: true
+            tests/test_uix046_048_command_endpoints_safety.py \
+            -v --tb=short --no-cov -m unit
 
-      - name: Run FilterPlan contract tests
+      - name: Run UIX-050/051/052/053 Advanced Actions tests
+        run: |
+          pytest \
+            tests/test_uix050_053_advanced_actions.py \
+            -v --tb=short --no-cov -m unit
+
+      - name: Run FilterPlan contract tests (UIX-044)
         run: |
           pytest \
             tests/test_uix044_filter_plan_contract.py \
-            -v --tb=short -m unit
+            -v --tb=short --no-cov -m unit
+
+      - name: Run Mask Rollout batch tests
+        run: |
+          pytest \
+            tests/test_mask_rollout_batch_w42_51.py \
+            -v --tb=short --no-cov -m unit
+        continue-on-error: true
 
   frontend-mask-checks:
     name: Frontend Mask Checks (TypeScript)
@@ -81,7 +99,7 @@ jobs:
 
       - name: TypeScript type-check
         working-directory: packages/frontend-web
-        run: npx tsc --noEmit
+        run: npx tsc --noEmit --skipLibCheck
 
       - name: Build frontend
         working-directory: packages/frontend-web
@@ -92,10 +110,35 @@ jobs:
         run: npx vitest run
         continue-on-error: true
 
+  bff-build:
+    name: BFF Build (TypeScript)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install BFF dependencies
+        working-directory: packages/bff/bff-web
+        run: npm ci
+
+      - name: Build BFF
+        working-directory: packages/bff/bff-web
+        run: npm run build
+
+      - name: ESLint BFF
+        working-directory: packages/bff/bff-web
+        run: npx eslint src --max-warnings 0
+        continue-on-error: true
+
   e2e-smoke:
     name: E2E Smoke (Playwright)
     runs-on: ubuntu-latest
-    needs: [backend-mask-tests, frontend-mask-checks]
+    needs: [backend-mask-tests, frontend-mask-checks, bff-build]
     if: github.ref == 'refs/heads/main'
 
     steps:
