@@ -1,12 +1,20 @@
 /**
  * Generic page wrapper for native ScreenDefinitions (temporary=False).
  * Replaces legacy handcrafted detail pages when a non-temporary SD is available.
+ *
+ * Dialog flow:
+ *  1. Action triggered → check requiresConfirmation → ConfirmationDialog
+ *  2. After confirm → if dangerLevel >= moderate and commandEndpoint exists → dryRun call → PreviewDialog
+ *  3. After preview → if auditReasonRequired → AuditReasonDialog
+ *  4. Execute with collected auditReason
  */
 
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,15 +25,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
+import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
 
 interface UniversalNativeDetailPageProps {
   screenId: string
   entityId: string | undefined
-  /** data-testid applied to the root div */
   testId?: string
 }
 
@@ -33,7 +49,12 @@ interface PendingAction {
   actionKey: string
   payload: Record<string, unknown>
   label: string
+  requiresConfirmation: boolean
+  auditReasonRequired: boolean
+  hasDryRun: boolean
 }
+
+const MODERATE_OR_ABOVE = new Set(['moderate', 'high', 'critical'])
 
 export function UniversalNativeDetailPage({
   screenId,
@@ -45,7 +66,12 @@ export function UniversalNativeDetailPage({
   const schemaQuery = useScreenDefinition(screenId, { enabled: Boolean(entityId) })
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionSummary, setActionSummary] = useState<string | null>(null)
+
+  // Multi-step dialog state
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
+  const [stage, setStage] = useState<'confirm' | 'preview' | 'audit' | null>(null)
+  const [dryRunResult, setDryRunResult] = useState<ActionResult | null>(null)
+  const [auditReason, setAuditReason] = useState('')
 
   const runtime = useUniversalMaskRuntime({
     screenId,
@@ -59,40 +85,97 @@ export function UniversalNativeDetailPage({
     permissions: schemaQuery.data?.permissions ?? [],
   })
 
-  async function executeConfirmedAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
-    setActionError(null)
-    setActionSummary(null)
+  // --- Worker: final execute (no UI state ownership) ---
+  async function doExecute(actionKey: string, payload: Record<string, unknown>, reason?: string): Promise<void> {
     const result = await actionRuntime.executeAction({
       actionKey,
       entityId,
       payload,
       mode: 'execute',
+      auditReason: reason,
     })
     if (!result.success) {
-      const validationMessage = result.validationErrors?.map((error) => error.message).join('; ')
-      setActionError(result.error ?? validationMessage ?? `Aktion "${actionKey}" konnte nicht ausgefuehrt werden.`)
+      const validationMessage = result.validationErrors?.map((e) => e.message).join('; ')
+      setActionError(result.error ?? validationMessage ?? `Aktion "${actionKey}" fehlgeschlagen.`)
       return
     }
     setActionSummary(result.summary ?? `Aktion "${actionKey}" wurde ausgefuehrt.`)
     await runtime.refetch()
   }
 
+  // --- Handler: called by UniversalMaskRenderer ---
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
+    setActionError(null)
+    setActionSummary(null)
     const actionDef = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)
-    if (actionDef?.requiresConfirmation) {
-      setPendingAction({ actionKey, payload, label: actionDef.label ?? actionKey })
+    const hasDryRun = Boolean(
+      actionDef?.commandEndpoint &&
+      !actionDef?.stubReason &&
+      MODERATE_OR_ABOVE.has(actionDef?.dangerLevel ?? 'safe'),
+    )
+    const pending: PendingAction = {
+      actionKey,
+      payload,
+      label: actionDef?.label ?? actionKey,
+      requiresConfirmation: actionDef?.requiresConfirmation ?? false,
+      auditReasonRequired: actionDef?.auditReasonRequired ?? false,
+      hasDryRun,
+    }
+
+    if (pending.requiresConfirmation) {
+      setPendingAction(pending)
+      setStage('confirm')
       return
     }
-    await executeConfirmedAction(actionKey, payload)
+    await advanceFromConfirm(pending)
   }
 
-  function handleConfirmDialogConfirm(): void {
+  // --- Step 1: after ConfirmationDialog ---
+  async function advanceFromConfirm(pending: PendingAction): Promise<void> {
+    if (pending.hasDryRun) {
+      const result = await actionRuntime.executeAction({
+        actionKey: pending.actionKey,
+        entityId,
+        payload: pending.payload,
+        mode: 'dryRun',
+      })
+      if (result.proposedChanges && result.proposedChanges.length > 0) {
+        setDryRunResult(result)
+        setPendingAction(pending)
+        setStage('preview')
+        return
+      }
+    }
+    await advanceFromPreview(pending)
+  }
+
+  // --- Step 2: after PreviewDialog ---
+  async function advanceFromPreview(pending: PendingAction): Promise<void> {
+    if (pending.auditReasonRequired) {
+      setAuditReason('')
+      setPendingAction(pending)
+      setStage('audit')
+      return
+    }
+    await doExecute(pending.actionKey, pending.payload)
+    resetDialogs()
+  }
+
+  // --- Step 3: after AuditReasonDialog ---
+  async function advanceFromAudit(): Promise<void> {
     if (!pendingAction) return
-    const { actionKey, payload } = pendingAction
-    setPendingAction(null)
-    void executeConfirmedAction(actionKey, payload)
+    await doExecute(pendingAction.actionKey, pendingAction.payload, auditReason)
+    resetDialogs()
   }
 
+  function resetDialogs(): void {
+    setPendingAction(null)
+    setStage(null)
+    setDryRunResult(null)
+    setAuditReason('')
+  }
+
+  // --- Empty entity guard ---
   if (!entityId) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
@@ -111,6 +194,7 @@ export function UniversalNativeDetailPage({
     )
   }
 
+  // --- Error state ---
   if (schemaQuery.error || runtime.entityError) {
     const errMsg = getAxiosErrorMessage(schemaQuery.error ?? runtime.entityError)
     const isNotFound = errMsg?.includes('404') || errMsg?.toLowerCase().includes('not found')
@@ -122,9 +206,7 @@ export function UniversalNativeDetailPage({
             {isNotFound ? 'Datensatz nicht gefunden' : 'Fehler beim Laden'}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isNotFound
-              ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.'
-              : errMsg}
+            {isNotFound ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.' : errMsg}
           </p>
         </div>
         <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
@@ -179,23 +261,98 @@ export function UniversalNativeDetailPage({
         />
       </div>
 
-      <AlertDialog open={pendingAction !== null} onOpenChange={(open) => { if (!open) setPendingAction(null) }}>
+      {/* UIX-047/050: Confirmation Dialog */}
+      <AlertDialog
+        open={stage === 'confirm'}
+        onOpenChange={(open) => { if (!open) resetDialogs() }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Aktion bestätigen</AlertDialogTitle>
             <AlertDialogDescription>
-              Möchten Sie die Aktion <strong>{pendingAction?.label}</strong> wirklich ausführen?
+              Möchten Sie <strong>{pendingAction?.label}</strong> wirklich ausführen?
               Diese Aktion kann nicht ohne weiteres rückgängig gemacht werden.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDialogConfirm}>
+            <AlertDialogCancel onClick={resetDialogs}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingAction) void advanceFromConfirm(pendingAction)
+              }}
+            >
               Bestätigen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* UIX-051: dryRun Preview Dialog */}
+      <Dialog open={stage === 'preview'} onOpenChange={(open) => { if (!open) resetDialogs() }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Vorschau: {pendingAction?.label}</DialogTitle>
+            <DialogDescription>
+              Die folgenden Änderungen werden nach Bestätigung durchgeführt.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-md border bg-muted/40 p-3 text-sm">
+            {dryRunResult?.proposedChanges && dryRunResult.proposedChanges.length > 0 ? (
+              <ul className="space-y-1">
+                {dryRunResult.proposedChanges.map((change, i) => (
+                  <li key={i} className="font-mono text-xs">
+                    {typeof change === 'object' ? JSON.stringify(change) : String(change)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">Keine Vorab-Änderungen verfügbar.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetDialogs}>Abbrechen</Button>
+            <Button
+              onClick={() => {
+                if (pendingAction) void advanceFromPreview(pendingAction)
+              }}
+            >
+              Ausführen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* UIX-050: Audit Reason Dialog */}
+      <Dialog open={stage === 'audit'} onOpenChange={(open) => { if (!open) resetDialogs() }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Begründung erforderlich</DialogTitle>
+            <DialogDescription>
+              Bitte geben Sie eine Begründung für <strong>{pendingAction?.label}</strong> an.
+              Diese wird im Audit-Log festgehalten.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="audit-reason">Begründung</Label>
+            <Input
+              id="audit-reason"
+              value={auditReason}
+              onChange={(e) => setAuditReason(e.target.value)}
+              placeholder="Begründung eingeben…"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetDialogs}>Abbrechen</Button>
+            <Button
+              disabled={auditReason.trim().length < 3}
+              onClick={() => void advanceFromAudit()}
+            >
+              Bestätigen & Ausführen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
