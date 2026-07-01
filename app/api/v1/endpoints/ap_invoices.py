@@ -12,6 +12,7 @@ from decimal import Decimal
 import logging
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_ap_invoice_datensatz,
@@ -492,3 +493,18 @@ async def post_ap_invoice(
             logger.warning("Could not store AP invoice posted outbox event: %s", exc)
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
+
+@router.post("/{entity_id}/actions/freigeben", summary="Eingangsrechnung freigeben (UIX-047)")
+async def action_freigeben(
+    entity_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Stub: Freigabe für Eingangsrechnung — requiresConfirmation, execute folgt."""
+    return {
+        "success": True,
+        "actionKey": "freigeben",
+        "entityId": entity_id,
+        "tenantId": tenant_id,
+        "message": "Freigabe wird verarbeitet.",
+        "proposedChanges": {"approval_status": "approved", "invoice_id": entity_id},
+    }

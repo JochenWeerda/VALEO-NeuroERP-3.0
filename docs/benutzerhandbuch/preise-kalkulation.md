@@ -46,6 +46,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/preise/historie` · **Modul:** `@/pages/preise/historie`
 
+**Ziel:** Historie in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Historie — Bedienoberfläche](img/preise__historie.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Historie** öffnen (`/preise/historie`).
@@ -66,6 +71,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Individualpreise
 
 **Route:** `/preise/individualpreise` · **Modul:** `@/pages/preise/individualpreise`
+
+**Ziel:** Individualpreise in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Individualpreise — Bedienoberfläche](img/preise__individualpreise.webp)
+
 
 **Schritte:**
 
@@ -88,6 +98,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/preise/kalkulation` · **Modul:** `@/pages/preise/kalkulation`
 
+**Ziel:** Kalkulation in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kalkulation — Bedienoberfläche](img/preise__kalkulation.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kalkulation** öffnen (`/preise/kalkulation`).
@@ -108,6 +123,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Konditionen
 
 **Route:** `/preise/konditionen` · **Modul:** `@/pages/preise/konditionen`
+
+**Ziel:** Konditionen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Konditionen — Bedienoberfläche](img/preise__konditionen.webp)
+
 
 **Schritte:**
 
@@ -130,6 +150,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/preise/rabattgruppen` · **Modul:** `@/pages/preise/rabattgruppen`
 
+**Ziel:** Rabattgruppen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rabattgruppen — Bedienoberfläche](img/preise__rabattgruppen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rabattgruppen** öffnen (`/preise/rabattgruppen`).
@@ -151,6 +176,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/preise/zu-abschlaggruppen` · **Modul:** `@/pages/preise/zu-abschlaggruppen`
 
+**Ziel:** Zu Abschlaggruppen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zu Abschlaggruppen — Bedienoberfläche](img/preise__zu-abschlaggruppen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Zu Abschlaggruppen** öffnen (`/preise/zu-abschlaggruppen`).
@@ -171,6 +201,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Pricing
 
 **Route:** `/pricing` · **Modul:** `@/pages/pricing`
+
+**Ziel:** Pricing in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Pricing — Bedienoberfläche](img/pricing.webp)
+
 
 **Schritte:**
 

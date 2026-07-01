@@ -40,6 +40,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-042b | UniversalNativeDetailPage + 7 thin wrapper pages + 7 route-aliases | ✅ | generischer Wrapper |
 | UIX-043 | 13 weitere ObjectPage-Masken migriert; vollständige Inventur; 18 bewusst exempt | ✅ | **26 SDs gesamt** |
 | UIX-044/045 | FilterPlan-HTTP-Vertrag `filter_plan` + Native ActionRuntime-Anschluss | ✅ lokal | `universal-mask-filter-plan.spec.ts`, `UniversalNativeDetailPage` |
+| UIX-046/047 | CommandEndpoint-Stubs (neue_bestellung, mahnen, freigeben) + Bestätigungsdialog | ✅ lokal | `test_uix046_048_command_endpoints_safety.py` |
 
 ## Architektur (Single Source of Truth)
 

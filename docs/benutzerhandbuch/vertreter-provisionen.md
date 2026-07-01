@@ -41,6 +41,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/vertreterprovisionen` · **Modul:** `@/pages/crm/vertreterprovisionen`
 
+**Ziel:** Vertreterprovisionen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Vertreterprovisionen — Bedienoberfläche](img/crm__vertreterprovisionen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Vertreterprovisionen** öffnen (`/crm/vertreterprovisionen`).
@@ -61,6 +66,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Vertreterstamm
 
 **Route:** `/crm/vertreterstamm` · **Modul:** `@/pages/crm/vertreterstamm`
+
+**Ziel:** Vertreterstamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Vertreterstamm — Bedienoberfläche](img/crm__vertreterstamm.webp)
+
 
 **Schritte:**
 

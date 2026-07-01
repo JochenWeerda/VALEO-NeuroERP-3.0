@@ -75,6 +75,7 @@ Vollständige Abdeckung: **57** App-Routen
 | Delivery | `/sales/delivery` | `@/pages/verkauf/lieferschein-erfassung` |
 | Delivery Editor | `/sales/delivery-editor` | `@/pages/sales/delivery-editor` |
 | Delivery Editor New | `/sales/delivery-editor-new` | `@/pages/sales/delivery-editor-new` |
+| :Id | `/sales/delivery-note/:id` | `@/pages/verkauf/lieferschein-native` |
 | Invoice | `/sales/invoice` | `@/pages/sales/invoice-editor` |
 | Invoice Editor | `/sales/invoice-editor` | `@/pages/sales/invoice-editor` |
 | :Id | `/sales/invoice/:id` | `@/pages/sales/invoice-editor` |
@@ -99,7 +100,6 @@ Vollständige Abdeckung: **57** App-Routen
 | Dauerauftraege | `/verkauf/dauerauftraege` | `@/pages/verkauf/dauerauftraege` |
 | Kommissions Auftraege | `/verkauf/kommissions-auftraege` | `@/pages/verkauf/kommissions-auftraege` |
 | Kunde Neu | `/verkauf/kunde-neu` | `@/pages/verkauf/kunde-neu` |
-| Kundeneumaskbuilderpage | `/verkauf/kunde-neu/kundeneumaskbuilderpage` | `@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage` |
 | :Id | `/verkauf/kunde/:id` | `@/pages/verkauf/kunden-stamm` |
 | Neu | `/verkauf/kunde/neu` | `@/pages/verkauf/kunden-stamm` |
 | Kunden Liste | `/verkauf/kunden-liste` | `@/pages/verkauf/kunden-liste` |
@@ -123,6 +123,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales` · **Modul:** `@/pages/sales/auftraege-liste`
 
+**Ziel:** Sales in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Sales — Bedienoberfläche](img/sales.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Sales** öffnen (`/sales`).
@@ -143,6 +148,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Angebot Erstellen
 
 **Route:** `/sales/angebot-erstellen` · **Modul:** `@/pages/sales/angebot-erstellen`
+
+**Ziel:** Angebot Erstellen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebot Erstellen — Bedienoberfläche](img/sales__angebot-erstellen.webp)
+
 
 **Schritte:**
 
@@ -165,6 +175,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/angebot/:id` · **Modul:** `@/pages/sales/angebot-erstellen`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/sales__angebot__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/sales/angebot/:id`).
@@ -185,6 +200,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/sales/angebot/neu` · **Modul:** `@/pages/sales/angebot-erstellen`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/sales__angebot__neu.webp)
+
 
 **Schritte:**
 
@@ -207,6 +227,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/angebote` · **Modul:** `@/pages/sales/angebot-erstellen`
 
+**Ziel:** Angebote in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebote — Bedienoberfläche](img/sales__angebote.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Angebote** öffnen (`/sales/angebote`).
@@ -227,6 +252,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Angebote Liste
 
 **Route:** `/sales/angebote-liste` · **Modul:** `@/pages/sales/angebote-liste`
+
+**Ziel:** Angebote Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebote Liste — Bedienoberfläche](img/sales__angebote-liste.webp)
+
 
 **Schritte:**
 
@@ -249,6 +279,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/angebote/neu` · **Modul:** `@/pages/sales/angebot-erstellen`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/sales__angebote__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/sales/angebote/neu`).
@@ -269,6 +304,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Auftraege
 
 **Route:** `/sales/auftraege` · **Modul:** `@/pages/sales/auftraege-liste`
+
+**Ziel:** Auftraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftraege — Bedienoberfläche](img/sales__auftraege.webp)
+
 
 **Schritte:**
 
@@ -291,6 +331,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/auftraege-liste` · **Modul:** `@/pages/sales/auftraege-liste`
 
+**Ziel:** Auftraege Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftraege Liste — Bedienoberfläche](img/sales__auftraege-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Auftraege Liste** öffnen (`/sales/auftraege-liste`).
@@ -311,6 +356,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/sales/auftraege/neu` · **Modul:** `@/pages/sales/order-editor`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/sales__auftraege__neu.webp)
+
 
 **Schritte:**
 
@@ -333,6 +383,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/auftrag-lieferschein-abgleich` · **Modul:** `@/pages/sales/auftrag-lieferschein-abgleich`
 
+**Ziel:** Auftrag Lieferschein Abgleich in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftrag Lieferschein Abgleich — Bedienoberfläche](img/sales__auftrag-lieferschein-abgleich.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Auftrag Lieferschein Abgleich** öffnen (`/sales/auftrag-lieferschein-abgleich`).
@@ -353,6 +408,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Auftragskette
 
 **Route:** `/sales/auftragskette` · **Modul:** `@/pages/sales/auftragskette`
+
+**Ziel:** Auftragskette in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftragskette — Bedienoberfläche](img/sales__auftragskette.webp)
+
 
 **Schritte:**
 
@@ -375,6 +435,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/credit-note-editor` · **Modul:** `@/pages/sales/credit-note-editor`
 
+**Ziel:** Credit Note Editor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Credit Note Editor — Bedienoberfläche](img/sales__credit-note-editor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Credit Note Editor** öffnen (`/sales/credit-note-editor`).
@@ -395,6 +460,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Credit Notes
 
 **Route:** `/sales/credit-notes` · **Modul:** `@/pages/sales/credit-note-editor`
+
+**Ziel:** Credit Notes in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Credit Notes — Bedienoberfläche](img/sales__credit-notes.webp)
+
 
 **Schritte:**
 
@@ -417,6 +487,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/deliveries/new` · **Modul:** `@/pages/verkauf/lieferschein-erfassung`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/sales__deliveries__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/sales/deliveries/new`).
@@ -437,6 +512,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Delivery
 
 **Route:** `/sales/delivery` · **Modul:** `@/pages/verkauf/lieferschein-erfassung`
+
+**Ziel:** Delivery in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Delivery — Bedienoberfläche](img/sales__delivery.webp)
+
 
 **Schritte:**
 
@@ -459,6 +539,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/delivery-editor` · **Modul:** `@/pages/sales/delivery-editor`
 
+**Ziel:** Delivery Editor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Delivery Editor — Bedienoberfläche](img/sales__delivery-editor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Delivery Editor** öffnen (`/sales/delivery-editor`).
@@ -480,6 +565,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/delivery-editor-new` · **Modul:** `@/pages/sales/delivery-editor-new`
 
+**Ziel:** Delivery Editor New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Delivery Editor New — Bedienoberfläche](img/sales__delivery-editor-new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Delivery Editor New** öffnen (`/sales/delivery-editor-new`).
@@ -497,9 +587,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### :Id
+
+**Route:** `/sales/delivery-note/:id` · **Modul:** `@/pages/verkauf/lieferschein-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/sales__delivery-note__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/sales/delivery-note/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Invoice
 
 **Route:** `/sales/invoice` · **Modul:** `@/pages/sales/invoice-editor`
+
+**Ziel:** Invoice in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Invoice — Bedienoberfläche](img/sales__invoice.webp)
+
 
 **Schritte:**
 
@@ -522,6 +643,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/invoice-editor` · **Modul:** `@/pages/sales/invoice-editor`
 
+**Ziel:** Invoice Editor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Invoice Editor — Bedienoberfläche](img/sales__invoice-editor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Invoice Editor** öffnen (`/sales/invoice-editor`).
@@ -542,6 +668,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/sales/invoice/:id` · **Modul:** `@/pages/sales/invoice-editor`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/sales__invoice__demo-1.webp)
+
 
 **Schritte:**
 
@@ -564,6 +695,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/invoices/new` · **Modul:** `@/pages/sales/invoice-editor`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/sales__invoices__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/sales/invoices/new`).
@@ -584,6 +720,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/sales/kalkulationen/neu` · **Modul:** `@/pages/preise/kalkulation`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/sales__kalkulationen__neu.webp)
+
 
 **Schritte:**
 
@@ -606,6 +747,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/kreditlimit-pruefung` · **Modul:** `@/pages/sales/kreditlimit-pruefung`
 
+**Ziel:** Kreditlimit Pruefung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kreditlimit Pruefung — Bedienoberfläche](img/sales__kreditlimit-pruefung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kreditlimit Pruefung** öffnen (`/sales/kreditlimit-pruefung`).
@@ -626,6 +772,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferung Storno
 
 **Route:** `/sales/lieferung-storno` · **Modul:** `@/pages/sales/lieferung-storno`
+
+**Ziel:** Lieferung Storno in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferung Storno — Bedienoberfläche](img/sales__lieferung-storno.webp)
+
 
 **Schritte:**
 
@@ -648,6 +799,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/lieferungen` · **Modul:** `@/pages/sales/lieferungen-liste`
 
+**Ziel:** Lieferungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferungen — Bedienoberfläche](img/sales__lieferungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferungen** öffnen (`/sales/lieferungen`).
@@ -668,6 +824,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferungen Liste
 
 **Route:** `/sales/lieferungen-liste` · **Modul:** `@/pages/sales/lieferungen-liste`
+
+**Ziel:** Lieferungen Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferungen Liste — Bedienoberfläche](img/sales__lieferungen-liste.webp)
+
 
 **Schritte:**
 
@@ -690,6 +851,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/lieferungen/neu` · **Modul:** `@/pages/sales/lieferungen-liste`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/sales__lieferungen__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/sales/lieferungen/neu`).
@@ -710,6 +876,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Order
 
 **Route:** `/sales/order` · **Modul:** `@/pages/sales/order-editor`
+
+**Ziel:** Order in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Order — Bedienoberfläche](img/sales__order.webp)
+
 
 **Schritte:**
 
@@ -732,6 +903,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/order-editor` · **Modul:** `@/pages/sales/order-editor`
 
+**Ziel:** Order Editor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Order Editor — Bedienoberfläche](img/sales__order-editor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Order Editor** öffnen (`/sales/order-editor`).
@@ -752,6 +928,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/sales/order-editor/:id` · **Modul:** `@/pages/sales/order-editor`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -774,6 +952,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/orders-modern` · **Modul:** `@/pages/sales/orders-modern`
 
+**Ziel:** Orders Modern in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Orders Modern — Bedienoberfläche](img/sales__orders-modern.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Orders Modern** öffnen (`/sales/orders-modern`).
@@ -794,6 +977,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### New
 
 **Route:** `/sales/orders/new` · **Modul:** `@/pages/sales/order-editor`
+
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/sales__orders__new.webp)
+
 
 **Schritte:**
 
@@ -816,6 +1004,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/sales/rechnungen` · **Modul:** `@/pages/sales/rechnungen-liste`
 
+**Ziel:** Rechnungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungen — Bedienoberfläche](img/sales__rechnungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rechnungen** öffnen (`/sales/rechnungen`).
@@ -836,6 +1029,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rechnungen Liste
 
 **Route:** `/sales/rechnungen-liste` · **Modul:** `@/pages/sales/rechnungen-liste`
+
+**Ziel:** Rechnungen Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungen Liste — Bedienoberfläche](img/sales__rechnungen-liste.webp)
+
 
 **Schritte:**
 
@@ -858,6 +1056,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf` · **Modul:** `@/pages/verkauf/lieferschein-erfassung`
 
+**Ziel:** Verkauf in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Verkauf — Bedienoberfläche](img/verkauf.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Verkauf** öffnen (`/verkauf`).
@@ -878,6 +1081,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Auftraege
 
 **Route:** `/verkauf/auftraege` · **Modul:** `@/pages/sales/auftraege-liste`
+
+**Ziel:** Auftraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftraege — Bedienoberfläche](img/verkauf__auftraege.webp)
+
 
 **Schritte:**
 
@@ -900,6 +1108,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/auftraege/neu` · **Modul:** `@/pages/sales/order-editor`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/verkauf__auftraege__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/verkauf/auftraege/neu`).
@@ -920,6 +1133,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Betriebs Auftraege
 
 **Route:** `/verkauf/betriebs-auftraege` · **Modul:** `@/pages/verkauf/betriebs-auftraege`
+
+**Ziel:** Betriebs Auftraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Betriebs Auftraege — Bedienoberfläche](img/verkauf__betriebs-auftraege.webp)
+
 
 **Schritte:**
 
@@ -942,6 +1160,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/dauerauftraege` · **Modul:** `@/pages/verkauf/dauerauftraege`
 
+**Ziel:** Dauerauftraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Dauerauftraege — Bedienoberfläche](img/verkauf__dauerauftraege.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Dauerauftraege** öffnen (`/verkauf/dauerauftraege`).
@@ -962,6 +1185,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kommissions Auftraege
 
 **Route:** `/verkauf/kommissions-auftraege` · **Modul:** `@/pages/verkauf/kommissions-auftraege`
+
+**Ziel:** Kommissions Auftraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kommissions Auftraege — Bedienoberfläche](img/verkauf__kommissions-auftraege.webp)
+
 
 **Schritte:**
 
@@ -984,6 +1212,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/kunde-neu` · **Modul:** `@/pages/verkauf/kunde-neu`
 
+**Ziel:** Kunde Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunde Neu — Bedienoberfläche](img/verkauf__kunde-neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunde Neu** öffnen (`/verkauf/kunde-neu`).
@@ -1001,30 +1234,14 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Kundeneumaskbuilderpage
-
-**Route:** `/verkauf/kunde-neu/kundeneumaskbuilderpage` · **Modul:** `@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Kundeneumaskbuilderpage** öffnen (`/verkauf/kunde-neu/kundeneumaskbuilderpage`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
 ### :Id
 
 **Route:** `/verkauf/kunde/:id` · **Modul:** `@/pages/verkauf/kunden-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/verkauf__kunde__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1047,6 +1264,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/kunde/neu` · **Modul:** `@/pages/verkauf/kunden-stamm`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/verkauf__kunde__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/verkauf/kunde/neu`).
@@ -1067,6 +1289,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kunden Liste
 
 **Route:** `/verkauf/kunden-liste` · **Modul:** `@/pages/verkauf/kunden-liste`
+
+**Ziel:** Kunden Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Liste — Bedienoberfläche](img/verkauf__kunden-liste.webp)
+
 
 **Schritte:**
 
@@ -1089,6 +1316,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/kunden-stamm` · **Modul:** `@/pages/verkauf/kunden-stamm`
 
+**Ziel:** Kunden Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Stamm — Bedienoberfläche](img/verkauf__kunden-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunden Stamm** öffnen (`/verkauf/kunden-stamm`).
@@ -1109,6 +1341,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kunden Stamm Enhanced
 
 **Route:** `/verkauf/kunden-stamm-enhanced` · **Modul:** `@/pages/verkauf/kunden-stamm-enhanced`
+
+**Ziel:** Kunden Stamm Enhanced in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Stamm Enhanced — Bedienoberfläche](img/verkauf__kunden-stamm-enhanced.webp)
+
 
 **Schritte:**
 
@@ -1131,6 +1368,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/kunden-stamm-enhanced/:id` · **Modul:** `@/pages/verkauf/kunden-stamm-enhanced`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/verkauf__kunden-stamm-enhanced__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/verkauf/kunden-stamm-enhanced/:id`).
@@ -1151,6 +1393,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/verkauf/kunden-stamm/:id` · **Modul:** `@/pages/verkauf/kunden-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/verkauf__kunden-stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1173,6 +1420,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/lieferschein-erfassung` · **Modul:** `@/pages/verkauf/lieferschein-erfassung`
 
+**Ziel:** Lieferschein Erfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferschein Erfassung — Bedienoberfläche](img/verkauf__lieferschein-erfassung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferschein Erfassung** öffnen (`/verkauf/lieferschein-erfassung`).
@@ -1193,6 +1445,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/verkauf/lieferschein-erfassung/:id` · **Modul:** `@/pages/verkauf/lieferschein-erfassung`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/verkauf__lieferschein-erfassung__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1215,6 +1472,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/rechnungen` · **Modul:** `@/pages/sales/rechnungen-liste`
 
+**Ziel:** Rechnungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungen — Bedienoberfläche](img/verkauf__rechnungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rechnungen** öffnen (`/verkauf/rechnungen`).
@@ -1235,6 +1497,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/verkauf/rechnungen/:id` · **Modul:** `@/pages/sales/invoice-editor`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/verkauf__rechnungen__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1257,6 +1524,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/rechnungen/neu` · **Modul:** `@/pages/sales/invoice-editor`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/verkauf__rechnungen__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/verkauf/rechnungen/neu`).
@@ -1278,6 +1550,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verkauf/unerledigte-auftrags-positionen` · **Modul:** `@/pages/verkauf/unerledigte-auftrags-positionen`
 
+**Ziel:** Unerledigte Auftrags Positionen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Unerledigte Auftrags Positionen — Bedienoberfläche](img/verkauf__unerledigte-auftrags-positionen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Unerledigte Auftrags Positionen** öffnen (`/verkauf/unerledigte-auftrags-positionen`).
@@ -1298,6 +1575,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kundenumsatz
 
 **Route:** `/vertrieb/kundenumsatz` · **Modul:** `@/pages/vertrieb/kundenumsatz`
+
+**Ziel:** Kundenumsatz in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kundenumsatz — Bedienoberfläche](img/vertrieb__kundenumsatz.webp)
+
 
 **Schritte:**
 

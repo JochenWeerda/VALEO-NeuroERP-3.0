@@ -54,6 +54,22 @@ class TestUIX046CommandEndpoints:
         actions = self._get_actions("finance/ar-open-item")
         assert actions["mahnen"]["dangerLevel"] == "moderate"
 
+    def test_finance_ap_invoice_freigeben_has_command_endpoint(self):
+        actions = self._get_actions("finance/ap-invoice")
+        a = actions["freigeben"]
+        assert "commandEndpoint" in a, "freigeben muss commandEndpoint haben"
+        assert "stubReason" not in a, "freigeben darf keinen stubReason mehr haben"
+        assert "/ap/invoices/" in a["commandEndpoint"]
+        assert "{entity_id}" in a["commandEndpoint"]
+
+    def test_freigeben_requires_confirmation(self):
+        actions = self._get_actions("finance/ap-invoice")
+        assert actions["freigeben"].get("requiresConfirmation") is True
+
+    def test_freigeben_danger_level_moderate(self):
+        actions = self._get_actions("finance/ap-invoice")
+        assert actions["freigeben"]["dangerLevel"] == "moderate"
+
 
 # ---------------------------------------------------------------------------
 # UIX-048 — Agent Safety Contract

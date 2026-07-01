@@ -56,6 +56,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kasse/historie` · **Modul:** `@/pages/kasse/tagesabschluss`
 
+**Ziel:** Historie in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Historie — Bedienoberfläche](img/kasse__historie.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Historie** öffnen (`/kasse/historie`).
@@ -76,6 +81,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Tagesabschluss
 
 **Route:** `/kasse/tagesabschluss` · **Modul:** `@/pages/kasse/tagesabschluss`
+
+**Ziel:** Tagesabschluss in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tagesabschluss — Bedienoberfläche](img/kasse__tagesabschluss.webp)
+
 
 **Schritte:**
 
@@ -98,6 +108,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/customer-display` · **Modul:** `@/pages/pos/customer-display`
 
+**Ziel:** Customer Display in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Customer Display — Bedienoberfläche](img/pos__customer-display.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Customer Display** öffnen (`/pos/customer-display`).
@@ -118,6 +133,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Gift Card Neu
 
 **Route:** `/pos/gift-card-neu` · **Modul:** `@/pages/pos/gift-cards`
+
+**Ziel:** Gift Card Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gift Card Neu — Bedienoberfläche](img/pos__gift-card-neu.webp)
+
 
 **Schritte:**
 
@@ -140,6 +160,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/gift-card/:id` · **Modul:** `@/pages/pos/gift-cards`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/pos__gift-card__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/pos/gift-card/:id`).
@@ -160,6 +185,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Gift Cards
 
 **Route:** `/pos/gift-cards` · **Modul:** `@/pages/pos/gift-cards`
+
+**Ziel:** Gift Cards in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gift Cards — Bedienoberfläche](img/pos__gift-cards.webp)
+
 
 **Schritte:**
 
@@ -182,6 +212,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/promotionen` · **Modul:** `@/pages/pos/promotionen`
 
+**Ziel:** Promotionen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Promotionen — Bedienoberfläche](img/pos__promotionen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Promotionen** öffnen (`/pos/promotionen`).
@@ -202,6 +237,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rabatt Neu
 
 **Route:** `/pos/rabatt-neu` · **Modul:** `@/pages/pos/rabatte`
+
+**Ziel:** Rabatt Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rabatt Neu — Bedienoberfläche](img/pos__rabatt-neu.webp)
+
 
 **Schritte:**
 
@@ -224,6 +264,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/rabatt/:id` · **Modul:** `@/pages/pos/rabatte`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/pos__rabatt__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/pos/rabatt/:id`).
@@ -244,6 +289,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rabatte
 
 **Route:** `/pos/rabatte` · **Modul:** `@/pages/pos/rabatte`
+
+**Ziel:** Rabatte in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rabatte — Bedienoberfläche](img/pos__rabatte.webp)
+
 
 **Schritte:**
 
@@ -266,6 +316,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/retoure` · **Modul:** `@/pages/pos/retoure`
 
+**Ziel:** Retoure in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Retoure — Bedienoberfläche](img/pos__retoure.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Retoure** öffnen (`/pos/retoure`).
@@ -286,6 +341,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Suspended Sales
 
 **Route:** `/pos/suspended-sales` · **Modul:** `@/pages/pos/suspended-sales`
+
+**Ziel:** Suspended Sales in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Suspended Sales — Bedienoberfläche](img/pos__suspended-sales.webp)
+
 
 **Schritte:**
 
@@ -308,6 +368,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/tagesabschluss` · **Modul:** `@/pages/pos/tagesabschluss-enhanced`
 
+**Ziel:** Tagesabschluss in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tagesabschluss — Bedienoberfläche](img/pos__tagesabschluss.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Tagesabschluss** öffnen (`/pos/tagesabschluss`).
@@ -328,6 +393,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Tagesabschluss Enhanced
 
 **Route:** `/pos/tagesabschluss-enhanced` · **Modul:** `@/pages/pos/tagesabschluss-enhanced`
+
+**Ziel:** Tagesabschluss Enhanced in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tagesabschluss Enhanced — Bedienoberfläche](img/pos__tagesabschluss-enhanced.webp)
+
 
 **Schritte:**
 
@@ -350,6 +420,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/terminal` · **Modul:** `@/pages/pos/terminal`
 
+**Ziel:** Terminal in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Terminal — Bedienoberfläche](img/pos__terminal.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Terminal** öffnen (`/pos/terminal`).
@@ -371,6 +446,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/pos/tse-journal` · **Modul:** `@/pages/pos/tse-journal`
 
+**Ziel:** Tse Journal in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tse Journal — Bedienoberfläche](img/pos__tse-journal.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Tse Journal** öffnen (`/pos/tse-journal`).
@@ -391,6 +471,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Uebernahme Kasse
 
 **Route:** `/pos/uebernahme-kasse` · **Modul:** `@/pages/pos/uebernahme-kasse`
+
+**Ziel:** Uebernahme Kasse in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Uebernahme Kasse — Bedienoberfläche](img/pos__uebernahme-kasse.webp)
+
 
 **Schritte:**
 

@@ -110,6 +110,45 @@ Details für Betreiber: [Agent-Runbook Mask Runtime](../agent-docs/runbooks/mask
 | Legacy statt native Maske | Feature-Flag aus oder `temporary=true` | Flag prüfen; Admin kontaktieren |
 | Rollout-Route 404 | Flag `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS` aus | Flag setzen |
 
+## Maskenregister
+
+Vollständige Abdeckung: **1** App-Routen
+(0 explizit in der Sidebar-Navigation).
+
+| Maske | Route | Modul |
+|-------|-------|-------|
+| :Entityid | `/mask-rollout/:screenId/:entityId` | `@/pages/workflow/mask-rollout/MaskRolloutRoute` |
+
+## Masken im Detail
+
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
+
+### :Entityid
+
+**Route:** `/mask-rollout/:screenId/:entityId` · **Modul:** `@/pages/workflow/mask-rollout/MaskRolloutRoute`
+
+**Ziel:** :Entityid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Entityid — Bedienoberfläche](img/mask-rollout__demo-1__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Entityid** öffnen (`/mask-rollout/:screenId/:entityId`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ## Weiterführend
 
 - [Release Notes v3.1.0](release-notes.md) — Änderungsprotokoll

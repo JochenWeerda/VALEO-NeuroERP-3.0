@@ -49,7 +49,7 @@ Vollständige Abdeckung: **43** App-Routen
 | Neu | `/futtermittel/chargen/neu` | `@/pages/futtermittel/charge-verfolgung` |
 | Einzelfuttermittel Liste | `/futtermittel/einzelfuttermittel-liste` | `@/pages/futtermittel/einzelfuttermittel-liste` |
 | Einzelfuttermittel Stamm | `/futtermittel/einzelfuttermittel-stamm` | `@/pages/futtermittel/einzelfuttermittel-stamm` |
-| :Id | `/futtermittel/einzelfuttermittel/:id` | `@/pages/futtermittel/einzelfuttermittel-stamm` |
+| :Id | `/futtermittel/einzelfuttermittel/:id` | `@/pages/futtermittel/einzelfuttermittel-native` |
 | Liste | `/futtermittel/einzelfuttermittel/liste` | `@/pages/futtermittel/einzelfuttermittel-liste` |
 | :Id | `/futtermittel/einzelfuttermittel/stamm/:id` | `@/pages/futtermittel/einzelfuttermittel-stamm` |
 | New | `/futtermittel/einzelfuttermittel/stamm/new` | `@/pages/futtermittel/einzelfuttermittel-stamm` |
@@ -60,7 +60,7 @@ Vollständige Abdeckung: **43** App-Routen
 | Grundfutteranalysen | `/futtermittel/grundfutteranalysen` | `@/pages/futtermittel/grundfutteranalysen` |
 | Mischfuttermittel Liste | `/futtermittel/mischfuttermittel-liste` | `@/pages/futtermittel/mischfuttermittel-liste` |
 | Mischfuttermittel Stamm | `/futtermittel/mischfuttermittel-stamm` | `@/pages/futtermittel/mischfuttermittel-stamm` |
-| :Id | `/futtermittel/mischfuttermittel/:id` | `@/pages/futtermittel/mischfuttermittel-stamm` |
+| :Id | `/futtermittel/mischfuttermittel/:id` | `@/pages/futtermittel/mischfuttermittel-native` |
 | Liste | `/futtermittel/mischfuttermittel/liste` | `@/pages/futtermittel/mischfuttermittel-liste` |
 | :Id | `/futtermittel/mischfuttermittel/stamm/:id` | `@/pages/futtermittel/mischfuttermittel-stamm` |
 | New | `/futtermittel/mischfuttermittel/stamm/new` | `@/pages/futtermittel/mischfuttermittel-stamm` |
@@ -81,6 +81,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Einzel
 
 **Route:** `/futter/einzel` · **Modul:** `@/pages/futter/einzel/liste`
+
+**Ziel:** Einzel in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einzel — Bedienoberfläche](img/futter__einzel.webp)
+
 
 **Schritte:**
 
@@ -103,6 +108,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futter/einzel/:id` · **Modul:** `@/pages/futter/einzel/stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futter__einzel__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/futter/einzel/:id`).
@@ -123,6 +133,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/futter/einzel/liste` · **Modul:** `@/pages/futter/einzel/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/futter__einzel__liste.webp)
+
 
 **Schritte:**
 
@@ -145,6 +160,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futter/einzel/stamm` · **Modul:** `@/pages/futter/einzel/stamm`
 
+**Ziel:** Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stamm — Bedienoberfläche](img/futter__einzel__stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Stamm** öffnen (`/futter/einzel/stamm`).
@@ -165,6 +185,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/futter/einzel/stamm/:id` · **Modul:** `@/pages/futter/einzel/stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futter__einzel__stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -187,6 +212,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futter/einzel/stamm/neu` · **Modul:** `@/pages/futter/einzel/stamm`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/futter__einzel__stamm__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/futter/einzel/stamm/neu`).
@@ -207,6 +237,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Misch
 
 **Route:** `/futter/misch` · **Modul:** `@/pages/futter/misch/liste`
+
+**Ziel:** Misch in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Misch — Bedienoberfläche](img/futter__misch.webp)
+
 
 **Schritte:**
 
@@ -229,6 +264,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futter/misch/:id` · **Modul:** `@/pages/futter/misch/stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futter__misch__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/futter/misch/:id`).
@@ -249,6 +289,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/futter/misch/liste` · **Modul:** `@/pages/futter/misch/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/futter__misch__liste.webp)
+
 
 **Schritte:**
 
@@ -271,6 +316,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futter/misch/stamm` · **Modul:** `@/pages/futter/misch/stamm`
 
+**Ziel:** Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stamm — Bedienoberfläche](img/futter__misch__stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Stamm** öffnen (`/futter/misch/stamm`).
@@ -291,6 +341,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/futter/misch/stamm/:id` · **Modul:** `@/pages/futter/misch/stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futter__misch__stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -313,6 +368,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futter/misch/stamm/neu` · **Modul:** `@/pages/futter/misch/stamm`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/futter__misch__stamm__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/futter/misch/stamm/neu`).
@@ -333,6 +393,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Futtermittel
 
 **Route:** `/futtermittel` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-liste`
+
+**Ziel:** Futtermittel in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Futtermittel — Bedienoberfläche](img/futtermittel.webp)
+
 
 **Schritte:**
 
@@ -355,6 +420,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/bestellungen` · **Modul:** `@/pages/futtermittel/futtermittel-bestellung`
 
+**Ziel:** Bestellungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellungen — Bedienoberfläche](img/futtermittel__bestellungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestellungen** öffnen (`/futtermittel/bestellungen`).
@@ -375,6 +445,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Charge Verfolgung
 
 **Route:** `/futtermittel/charge-verfolgung` · **Modul:** `@/pages/futtermittel/charge-verfolgung`
+
+**Ziel:** Charge Verfolgung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Charge Verfolgung — Bedienoberfläche](img/futtermittel__charge-verfolgung.webp)
+
 
 **Schritte:**
 
@@ -397,6 +472,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/chargen/:id` · **Modul:** `@/pages/futtermittel/charge-verfolgung`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futtermittel__chargen__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/futtermittel/chargen/:id`).
@@ -417,6 +497,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/futtermittel/chargen/neu` · **Modul:** `@/pages/futtermittel/charge-verfolgung`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/futtermittel__chargen__neu.webp)
+
 
 **Schritte:**
 
@@ -439,6 +524,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/einzelfuttermittel-liste` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-liste`
 
+**Ziel:** Einzelfuttermittel Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einzelfuttermittel Liste — Bedienoberfläche](img/futtermittel__einzelfuttermittel-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Einzelfuttermittel Liste** öffnen (`/futtermittel/einzelfuttermittel-liste`).
@@ -460,6 +550,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/einzelfuttermittel-stamm` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-stamm`
 
+**Ziel:** Einzelfuttermittel Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einzelfuttermittel Stamm — Bedienoberfläche](img/futtermittel__einzelfuttermittel-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Einzelfuttermittel Stamm** öffnen (`/futtermittel/einzelfuttermittel-stamm`).
@@ -479,7 +574,12 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/futtermittel/einzelfuttermittel/:id` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-stamm`
+**Route:** `/futtermittel/einzelfuttermittel/:id` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futtermittel__einzelfuttermittel__demo-1.webp)
+
 
 **Schritte:**
 
@@ -502,6 +602,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/einzelfuttermittel/liste` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/futtermittel__einzelfuttermittel__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/futtermittel/einzelfuttermittel/liste`).
@@ -522,6 +627,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/futtermittel/einzelfuttermittel/stamm/:id` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futtermittel__einzelfuttermittel__stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -544,6 +654,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/einzelfuttermittel/stamm/new` · **Modul:** `@/pages/futtermittel/einzelfuttermittel-stamm`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/futtermittel__einzelfuttermittel__stamm__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/futtermittel/einzelfuttermittel/stamm/new`).
@@ -564,6 +679,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Futtermittel Bestellung
 
 **Route:** `/futtermittel/futtermittel-bestellung` · **Modul:** `@/pages/futtermittel/futtermittel-bestellung`
+
+**Ziel:** Futtermittel Bestellung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Futtermittel Bestellung — Bedienoberfläche](img/futtermittel__futtermittel-bestellung.webp)
+
 
 **Schritte:**
 
@@ -586,6 +706,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/futtermittel-qualitaetskontrolle` · **Modul:** `@/pages/futtermittel/futtermittel-qualitaetskontrolle`
 
+**Ziel:** Futtermittel Qualitaetskontrolle in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Futtermittel Qualitaetskontrolle — Bedienoberfläche](img/futtermittel__futtermittel-qualitaetskontrolle.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Futtermittel Qualitaetskontrolle** öffnen (`/futtermittel/futtermittel-qualitaetskontrolle`).
@@ -606,6 +731,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Futtermittel Statistik
 
 **Route:** `/futtermittel/futtermittel-statistik` · **Modul:** `@/pages/futtermittel/futtermittel-statistik`
+
+**Ziel:** Futtermittel Statistik in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Futtermittel Statistik — Bedienoberfläche](img/futtermittel__futtermittel-statistik.webp)
+
 
 **Schritte:**
 
@@ -628,6 +758,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/futtermittel-wareneingang` · **Modul:** `@/pages/futtermittel/futtermittel-wareneingang`
 
+**Ziel:** Futtermittel Wareneingang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Futtermittel Wareneingang — Bedienoberfläche](img/futtermittel__futtermittel-wareneingang.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Futtermittel Wareneingang** öffnen (`/futtermittel/futtermittel-wareneingang`).
@@ -648,6 +783,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Grundfutteranalysen
 
 **Route:** `/futtermittel/grundfutteranalysen` · **Modul:** `@/pages/futtermittel/grundfutteranalysen`
+
+**Ziel:** Grundfutteranalysen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Grundfutteranalysen — Bedienoberfläche](img/futtermittel__grundfutteranalysen.webp)
+
 
 **Schritte:**
 
@@ -670,6 +810,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/mischfuttermittel-liste` · **Modul:** `@/pages/futtermittel/mischfuttermittel-liste`
 
+**Ziel:** Mischfuttermittel Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mischfuttermittel Liste — Bedienoberfläche](img/futtermittel__mischfuttermittel-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Mischfuttermittel Liste** öffnen (`/futtermittel/mischfuttermittel-liste`).
@@ -691,6 +836,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/mischfuttermittel-stamm` · **Modul:** `@/pages/futtermittel/mischfuttermittel-stamm`
 
+**Ziel:** Mischfuttermittel Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mischfuttermittel Stamm — Bedienoberfläche](img/futtermittel__mischfuttermittel-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Mischfuttermittel Stamm** öffnen (`/futtermittel/mischfuttermittel-stamm`).
@@ -710,7 +860,12 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/futtermittel/mischfuttermittel/:id` · **Modul:** `@/pages/futtermittel/mischfuttermittel-stamm`
+**Route:** `/futtermittel/mischfuttermittel/:id` · **Modul:** `@/pages/futtermittel/mischfuttermittel-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futtermittel__mischfuttermittel__demo-1.webp)
+
 
 **Schritte:**
 
@@ -733,6 +888,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/mischfuttermittel/liste` · **Modul:** `@/pages/futtermittel/mischfuttermittel-liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/futtermittel__mischfuttermittel__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/futtermittel/mischfuttermittel/liste`).
@@ -753,6 +913,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/futtermittel/mischfuttermittel/stamm/:id` · **Modul:** `@/pages/futtermittel/mischfuttermittel-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/futtermittel__mischfuttermittel__stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -775,6 +940,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/mischfuttermittel/stamm/new` · **Modul:** `@/pages/futtermittel/mischfuttermittel-stamm`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/futtermittel__mischfuttermittel__stamm__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/futtermittel/mischfuttermittel/stamm/new`).
@@ -795,6 +965,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rations Zugang
 
 **Route:** `/futtermittel/rations-zugang` · **Modul:** `@/pages/futtermittel/rations-zugang`
+
+**Ziel:** Rations Zugang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rations Zugang — Bedienoberfläche](img/futtermittel__rations-zugang.webp)
+
 
 **Schritte:**
 
@@ -817,6 +992,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/futtermittel/rationsoptimierung` · **Modul:** `@/pages/futtermittel/rationsoptimierung`
 
+**Ziel:** Rationsoptimierung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rationsoptimierung — Bedienoberfläche](img/futtermittel__rationsoptimierung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rationsoptimierung** öffnen (`/futtermittel/rationsoptimierung`).
@@ -837,6 +1017,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wareneingang
 
 **Route:** `/futtermittel/wareneingang` · **Modul:** `@/pages/futtermittel/futtermittel-wareneingang`
+
+**Ziel:** Wareneingang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wareneingang — Bedienoberfläche](img/futtermittel__wareneingang.webp)
+
 
 **Schritte:**
 
@@ -859,6 +1044,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/produktion` · **Modul:** `@/pages/produktion/mischfutter-produktion`
 
+**Ziel:** Produktion in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Produktion — Bedienoberfläche](img/produktion.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Produktion** öffnen (`/produktion`).
@@ -879,6 +1069,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Dokumente
 
 **Route:** `/produktion/dokumente` · **Modul:** `@/pages/produktion/produktions-dokumente-drucken`
+
+**Ziel:** Dokumente in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Dokumente — Bedienoberfläche](img/produktion__dokumente.webp)
+
 
 **Schritte:**
 
@@ -901,6 +1096,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/produktion/mischfutter` · **Modul:** `@/pages/produktion/mischfutter-produktion`
 
+**Ziel:** Mischfutter in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mischfutter — Bedienoberfläche](img/produktion__mischfutter.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Mischfutter** öffnen (`/produktion/mischfutter`).
@@ -921,6 +1121,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Mischfutter Produktion
 
 **Route:** `/produktion/mischfutter-produktion` · **Modul:** `@/pages/produktion/mischfutter-produktion`
+
+**Ziel:** Mischfutter Produktion in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mischfutter Produktion — Bedienoberfläche](img/produktion__mischfutter-produktion.webp)
+
 
 **Schritte:**
 
@@ -943,6 +1148,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/produktion/produktions-dokumente-drucken` · **Modul:** `@/pages/produktion/produktions-dokumente-drucken`
 
+**Ziel:** Produktions Dokumente Drucken in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Produktions Dokumente Drucken — Bedienoberfläche](img/produktion__produktions-dokumente-drucken.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Produktions Dokumente Drucken** öffnen (`/produktion/produktions-dokumente-drucken`).
@@ -963,6 +1173,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Editor
 
 **Route:** `/rezepte/editor` · **Modul:** `@/pages/rezepte/editor`
+
+**Ziel:** Editor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Editor — Bedienoberfläche](img/rezepte__editor.webp)
+
 
 **Schritte:**
 

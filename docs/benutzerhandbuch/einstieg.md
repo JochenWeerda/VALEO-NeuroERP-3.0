@@ -132,6 +132,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/alerts` · **Modul:** `@/pages/workflow/workflow-monitoring`
 
+**Ziel:** Alerts in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Alerts — Bedienoberfläche](img/alerts.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Alerts** öffnen (`/alerts`).
@@ -152,6 +157,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Callback
 
 **Route:** `/auth/Callback` · **Modul:** `@/pages/auth/Callback`
+
+**Ziel:** Callback in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -174,6 +181,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/auth/Login` · **Modul:** `@/pages/auth/Login`
 
+**Ziel:** Login in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Login** öffnen (`/auth/Login`).
@@ -194,6 +203,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Callback
 
 **Route:** `/auth/callback` · **Modul:** `@/pages/auth/Callback`
+
+**Ziel:** Callback in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -216,6 +227,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/auth/login` · **Modul:** `@/pages/auth/Login`
 
+**Ziel:** Login in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Login** öffnen (`/auth/login`).
@@ -236,6 +249,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Benachrichtigungen
 
 **Route:** `/benachrichtigungen` · **Modul:** `@/pages/benachrichtigungen/liste`
+
+**Ziel:** Benachrichtigungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Benachrichtigungen — Bedienoberfläche](img/benachrichtigungen.webp)
+
 
 **Schritte:**
 
@@ -258,6 +276,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/benachrichtigungen/liste` · **Modul:** `@/pages/benachrichtigungen/liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/benachrichtigungen__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/benachrichtigungen/liste`).
@@ -278,6 +301,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Einstellungen
 
 **Route:** `/einstellungen` · **Modul:** `@/pages/einstellungen/system`
+
+**Ziel:** Einstellungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einstellungen — Bedienoberfläche](img/einstellungen.webp)
+
 
 **Schritte:**
 
@@ -300,6 +328,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einstellungen/system` · **Modul:** `@/pages/einstellungen/system`
 
+**Ziel:** System in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![System — Bedienoberfläche](img/einstellungen__system.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **System** öffnen (`/einstellungen/system`).
@@ -320,6 +353,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Notfound
 
 **Route:** `/errors/NotFound` · **Modul:** `@/pages/errors/NotFound`
+
+**Ziel:** Notfound in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Notfound — Bedienoberfläche](img/errors__notfound.webp)
+
 
 **Schritte:**
 
@@ -342,6 +380,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/hilfe` · **Modul:** `@/pages/hilfe`
 
+**Ziel:** Hilfe in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Hilfe — Bedienoberfläche](img/hilfe.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Hilfe** öffnen (`/hilfe`).
@@ -362,6 +405,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Login
 
 **Route:** `/login` · **Modul:** `@/pages/auth/Login`
+
+**Ziel:** Login in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Login — Bedienoberfläche](img/login.webp)
+
 
 **Schritte:**
 
@@ -384,6 +432,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/public/verify` · **Modul:** `@/pages/public/verify`
 
+**Ziel:** Verify in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Verify — Bedienoberfläche](img/public__verify.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Verify** öffnen (`/public/verify`).
@@ -404,6 +457,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Firma
 
 **Route:** `/setup/firma` · **Modul:** `@/pages/setup/firma`
+
+**Ziel:** Firma in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Firma — Bedienoberfläche](img/setup__firma.webp)
+
 
 **Schritte:**
 
@@ -426,6 +484,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/start-dashboard` · **Modul:** `@/pages/start-dashboard`
 
+**Ziel:** Start Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Start Dashboard — Bedienoberfläche](img/start-dashboard.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Start Dashboard** öffnen (`/start-dashboard`).
@@ -447,6 +510,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verify/:domain/:number` · **Modul:** `@/pages/public/verify`
 
+**Ziel:** :Number in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Number** öffnen (`/verify/:domain/:number`).
@@ -467,6 +532,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Hash
 
 **Route:** `/verify/:domain/:number/:hash` · **Modul:** `@/pages/public/verify`
+
+**Ziel:** :Hash in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 

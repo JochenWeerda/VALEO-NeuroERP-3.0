@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8" /><title>Handbuch-Screenshot Review</title>
+<style>
+body { font-family: system-ui, sans-serif; margin: 1rem 2rem; background: #f8fafc; }
+h1 { margin-bottom: .25rem; } .stats { color: #475569; margin-bottom: 1.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: .75rem; }
+.card img { width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 4px; }
+.badge { color: #fff; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+.meta { font-size: 12px; color: #64748b; }
+code { font-size: 12px; }
+.help { background: #eff6ff; border: 1px solid #bfdbfe; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+</style></head><body>
+<h1>Handbuch-Screenshot Sichtkontrolle</h1>
+<p class="stats">approved=782 · pending=21 · rejected=28 · gesamt=831</p>
+<div class="help">
+  <strong>Freigabe:</strong> Nur <code>approval=approved</code> erscheint im Handbuch.<br />
+  Einzeln: <code>python scripts/handbuch_screenshot_qc.py approve --slug &lt;slug&gt;</code><br />
+  Alle pending mit Bild: <code>python scripts/handbuch_screenshot_qc.py approve-all-pending</code>
+</div>
+<h2>Pending (21)</h2><div class="grid">
+        <article class="card" data-slug="agrar__biostimulanzien" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/biostimulanzien</code></header>
+          <img src="img/agrar__biostimulanzien.png" alt="agrar__biostimulanzien" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×162)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__biostimulanzien-stamm" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/biostimulanzien-stamm</code></header>
+          <img src="img/agrar__biostimulanzien-stamm.png" alt="agrar__biostimulanzien-stamm" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×162)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger-stamm__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/duenger-stamm/:id</code></header>
+          <img src="img/agrar__duenger-stamm__demo-1.png" alt="agrar__duenger-stamm__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (878×156)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__stamm__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/duenger/stamm/:id</code></header>
+          <img src="img/agrar__duenger__stamm__demo-1.png" alt="agrar__duenger__stamm__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×144)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__stamm__demo-1__edit" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/duenger/stamm/:id/edit</code></header>
+          <img src="img/agrar__duenger__stamm__demo-1__edit.png" alt="agrar__duenger__stamm__demo-1__edit" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×144)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__ernte-annahme-erfassung" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/ernte-annahme-erfassung</code></header>
+          <img src="img/agrar__ernte-annahme-erfassung.png" alt="agrar__ernte-annahme-erfassung" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (590×134)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__ernte-annahme-erfassung__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/ernte-annahme-erfassung/:id</code></header>
+          <img src="img/agrar__ernte-annahme-erfassung__demo-1.png" alt="agrar__ernte-annahme-erfassung__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (590×134)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__ernte__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/ernte/:id</code></header>
+          <img src="img/agrar__ernte__demo-1.png" alt="agrar__ernte__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (590×134)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__pflanzenschutz__applikation" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/pflanzenschutz/applikation</code></header>
+          <img src="img/agrar__pflanzenschutz__applikation.png" alt="agrar__pflanzenschutz__applikation" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__saatgut" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/saatgut</code></header>
+          <img src="img/agrar__saatgut.png" alt="agrar__saatgut" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (864×162)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__saatgut__liste" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/saatgut/liste</code></header>
+          <img src="img/agrar__saatgut__liste.png" alt="agrar__saatgut__liste" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×162)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__saatgut__stamm" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/saatgut/stamm</code></header>
+          <img src="img/agrar__saatgut__stamm.png" alt="agrar__saatgut__stamm" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__saatgut__stamm__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>agrar/saatgut/stamm/:id</code></header>
+          <img src="img/agrar__saatgut__stamm__demo-1.png" alt="agrar__saatgut__stamm__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="einkauf__gutschriften-belastungen" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>einkauf/gutschriften-belastungen</code></header>
+          <img src="img/einkauf__gutschriften-belastungen.png" alt="einkauf__gutschriften-belastungen" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (928×171)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="einkauf__gutschriften-belastungen__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>einkauf/gutschriften-belastungen/:type</code></header>
+          <img src="img/einkauf__gutschriften-belastungen__demo-1.png" alt="einkauf__gutschriften-belastungen__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (928×171)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="einkauf__rechnungen__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>einkauf/rechnungen/:id</code></header>
+          <img src="img/einkauf__rechnungen__demo-1.png" alt="einkauf__rechnungen__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (599×171)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="etiketten__drucken" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>etiketten/drucken</code></header>
+          <img src="img/etiketten__drucken.png" alt="etiketten__drucken" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">471×242 · main section</p>
+        </article>
+        <article class="card" data-slug="export__umsatzsteuervoranmeldung" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>export/umsatzsteuervoranmeldung</code></header>
+          <img src="img/export__umsatzsteuervoranmeldung.png" alt="export__umsatzsteuervoranmeldung" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (864×151)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="lager__permanente-inventur" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>lager/permanente-inventur</code></header>
+          <img src="img/lager__permanente-inventur.png" alt="lager__permanente-inventur" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (243×273)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="sales__order-editor__demo-1" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>sales/order-editor/:id</code></header>
+          <img src="img/sales__order-editor__demo-1.png" alt="sales__order-editor__demo-1" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×148)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="waage__liste" data-approval="pending">
+          <header><span class="badge" style="background:#ca8a04">pending</span> <code>waage/liste</code></header>
+          <img src="img/waage__liste.png" alt="waage__liste" loading="lazy" />
+          <ul><li>Capture-Bereich zu klein (912×164)</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article></div>
+<h2>Approved (782)</h2><div class="grid">
+        <article class="card" data-slug="agrar" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar</code></header>
+          <img src="img/agrar.png" alt="agrar" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__aussaat" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/aussaat</code></header>
+          <img src="img/agrar__aussaat.png" alt="agrar__aussaat" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__aussaat__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/aussaat/:id</code></header>
+          <img src="img/agrar__aussaat__demo-1.png" alt="agrar__aussaat__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__aussaat__liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/aussaat/liste</code></header>
+          <img src="img/agrar__aussaat__liste.png" alt="agrar__aussaat__liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1216×656 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__aussaat__neu" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/aussaat/neu</code></header>
+          <img src="img/agrar__aussaat__neu.png" alt="agrar__aussaat__neu" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__biostimulanzien-liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/biostimulanzien-liste</code></header>
+          <img src="img/agrar__biostimulanzien-liste.png" alt="agrar__biostimulanzien-liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__bodenprobe__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/bodenprobe/:id</code></header>
+          <img src="img/agrar__bodenprobe__demo-1.png" alt="agrar__bodenprobe__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__bodenprobe__neu" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/bodenprobe/neu</code></header>
+          <img src="img/agrar__bodenprobe__neu.png" alt="agrar__bodenprobe__neu" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__bodenproben" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/bodenproben</code></header>
+          <img src="img/agrar__bodenproben.png" alt="agrar__bodenproben" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__bodenproben__liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/bodenproben/liste</code></header>
+          <img src="img/agrar__bodenproben__liste.png" alt="agrar__bodenproben__liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1216×643 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger</code></header>
+          <img src="img/agrar__duenger.png" alt="agrar__duenger" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger-liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger-liste</code></header>
+          <img src="img/agrar__duenger-liste.png" alt="agrar__duenger-liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1216×643 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger/:id</code></header>
+          <img src="img/agrar__duenger__demo-1.png" alt="agrar__duenger__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__bedarfsrechner" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger/bedarfsrechner</code></header>
+          <img src="img/agrar__duenger__bedarfsrechner.png" alt="agrar__duenger__bedarfsrechner" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger/liste</code></header>
+          <img src="img/agrar__duenger__liste.png" alt="agrar__duenger__liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__mischungen" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger/mischungen</code></header>
+          <img src="img/agrar__duenger__mischungen.png" alt="agrar__duenger__mischungen" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger__stamm" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duenger/stamm</code></header>
+          <img src="img/agrar__duenger__stamm.png" alt="agrar__duenger__stamm" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__duengung__planung" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/duengung/planung</code></header>
+          <img src="img/agrar__duengung__planung.png" alt="agrar__duengung__planung" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__ernte" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/ernte</code></header>
+          <img src="img/agrar__ernte.png" alt="agrar__ernte" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1216×656 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__ernte__liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/ernte/liste</code></header>
+          <img src="img/agrar__ernte__liste.png" alt="agrar__ernte__liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__ernte__neu" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/ernte/neu</code></header>
+          <img src="img/agrar__ernte__neu.png" alt="agrar__ernte__neu" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__erntefenster-konfig" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/erntefenster-konfig</code></header>
+          <img src="img/agrar__erntefenster-konfig.png" alt="agrar__erntefenster-konfig" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__feldbuch__massnahme__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/feldbuch/massnahme/:id</code></header>
+          <img src="img/agrar__feldbuch__massnahme__demo-1.png" alt="agrar__feldbuch__massnahme__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__feldbuch__massnahme__neu" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/feldbuch/massnahme/neu</code></header>
+          <img src="img/agrar__feldbuch__massnahme__neu.png" alt="agrar__feldbuch__massnahme__neu" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">928×309 · main [role="tabpanel"]</p>
+        </article>
+        <article class="card" data-slug="agrar__feldbuch__massnahmen" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/feldbuch/massnahmen</code></header>
+          <img src="img/agrar__feldbuch__massnahmen.png" alt="agrar__feldbuch__massnahmen" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__feldbuch__schlag__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/feldbuch/schlag/:id</code></header>
+          <img src="img/agrar__feldbuch__schlag__demo-1.png" alt="agrar__feldbuch__schlag__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__feldbuch__schlag__neu" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/feldbuch/schlag/neu</code></header>
+          <img src="img/agrar__feldbuch__schlag__neu.png" alt="agrar__feldbuch__schlag__neu" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">928×624 · main form</p>
+        </article>
+        <article class="card" data-slug="agrar__feldbuch__schlagkartei" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/feldbuch/schlagkartei</code></header>
+          <img src="img/agrar__feldbuch__schlagkartei.png" alt="agrar__feldbuch__schlagkartei" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">928×309 · main [role="tabpanel"]</p>
+        </article>
+        <article class="card" data-slug="agrar__harvest-settlement__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/harvest-settlement/:id</code></header>
+          <img src="img/agrar__harvest-settlement__demo-1.png" alt="agrar__harvest-settlement__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">683×484 · [data-runtime="native"]</p>
+        </article>
+        <article class="card" data-slug="agrar__kontrakt-engagement" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kontrakt-engagement</code></header>
+          <img src="img/agrar__kontrakt-engagement.png" alt="agrar__kontrakt-engagement" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kontrakt-erfuellung" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kontrakt-erfuellung</code></header>
+          <img src="img/agrar__kontrakt-erfuellung.png" alt="agrar__kontrakt-erfuellung" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1216×643 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kontrakt-fixierung" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kontrakt-fixierung</code></header>
+          <img src="img/agrar__kontrakt-fixierung.png" alt="agrar__kontrakt-fixierung" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kontrakt-settlement" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kontrakt-settlement</code></header>
+          <img src="img/agrar__kontrakt-settlement.png" alt="agrar__kontrakt-settlement" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kulturpflanzen" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kulturpflanzen</code></header>
+          <img src="img/agrar__kulturpflanzen.png" alt="agrar__kulturpflanzen" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kulturpflanzen__demo-1" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kulturpflanzen/:id</code></header>
+          <img src="img/agrar__kulturpflanzen__demo-1.png" alt="agrar__kulturpflanzen__demo-1" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1216×643 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kulturpflanzen__liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kulturpflanzen/liste</code></header>
+          <img src="img/agrar__kulturpflanzen__liste.png" alt="agrar__kulturpflanzen__liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__kulturpflanzen__neu" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/kulturpflanzen/neu</code></header>
+          <img src="img/agrar__kulturpflanzen__neu.png" alt="agrar__kulturpflanzen__neu" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__maschinenauslastung" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/maschinenauslastung</code></header>
+          <img src="img/agrar__maschinenauslastung.png" alt="agrar__maschinenauslastung" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__milchvieh-crosssell" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/milchvieh-crosssell</code></header>
+          <img src="img/agrar__milchvieh-crosssell.png" alt="agrar__milchvieh-crosssell" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__milchvieh-karte" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/milchvieh-karte</code></header>
+          <img src="img/agrar__milchvieh-karte.png" alt="agrar__milchvieh-karte" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm</code></header>
+          <img src="img/agrar__psm.png" alt="agrar__psm" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__abgabedokumentation" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/abgabedokumentation</code></header>
+          <img src="img/agrar__psm__abgabedokumentation.png" alt="agrar__psm__abgabedokumentation" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__auflagen-manager" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/auflagen-manager</code></header>
+          <img src="img/agrar__psm__auflagen-manager.png" alt="agrar__psm__auflagen-manager" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__auflagen__demo-1__bearbeiten" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/auflagen/:id/bearbeiten</code></header>
+          <img src="img/agrar__psm__auflagen__demo-1__bearbeiten.png" alt="agrar__psm__auflagen__demo-1__bearbeiten" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__beratung" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/beratung</code></header>
+          <img src="img/agrar__psm__beratung.png" alt="agrar__psm__beratung" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__liste" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/liste</code></header>
+          <img src="img/agrar__psm__liste.png" alt="agrar__psm__liste" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__resistenz" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/resistenz</code></header>
+          <img src="img/agrar__psm__resistenz.png" alt="agrar__psm__resistenz" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>
+        <article class="card" data-slug="agrar__psm__sachkunde-register" data-approval="approved">
+          <header><span class="badge" style="background:#16a34a">approved</span> <code>agrar/psm/sachkunde-register</code></header>
+          <img src="img/agrar__psm__sachkunde-register.png" alt="agrar__psm__sachkunde-register" loading="lazy" />
+          <ul><li>Keine Hinweise</li></ul>
+          <p class="meta">1015×641 · main</p>
+        </article>…</div>
+<h2>Rejected (28)</h2><div class="grid">
+        <article class="card" data-slug="agrar__biostimulanzien-stamm__demo-1" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>agrar/biostimulanzien-stamm/:id</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Capture-Bereich zu klein (912×162)</li><li>Capture-Bereich zu klein (912×162)</li><li>zu klein (596×93)</li></ul>
+          <p class="meta">596×93 · main section</p>
+        </article>
+        <article class="card" data-slug="agrar__duenger-stamm" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>agrar/duenger-stamm</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Capture-Bereich zu klein (878×156)</li><li>Capture-Bereich zu klein (878×156)</li><li>zu klein (878×154)</li></ul>
+          <p class="meta">878×154 · main [role="tabpanel"]</p>
+        </article>
+        <article class="card" data-slug="agrar__kunden-schlagkartei" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>agrar/kunden-schlagkartei</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main [role="tabpanel"]</p>
+        </article>
+        <article class="card" data-slug="agrar__kunden-schlagkartei__demo-1" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>agrar/kunden-schlagkartei/:kunden_nr</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main [role="tabpanel"]</p>
+        </article>
+        <article class="card" data-slug="agrar__saatgut-liste" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>agrar/saatgut-liste</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Capture-Bereich zu klein (864×162)</li><li>Capture-Bereich zu klein (864×162)</li><li>zu klein (596×92)</li></ul>
+          <p class="meta">596×92 · main section</p>
+        </article>
+        <article class="card" data-slug="annahme__warteschlange" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>annahme/warteschlange</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Capture-Bereich zu klein (912×164)</li><li>Capture-Bereich zu klein (912×164)</li><li>zu klein (862×104)</li></ul>
+          <p class="meta">862×104 · main section</p>
+        </article>
+        <article class="card" data-slug="docflow__artefakt-freigabe" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>docflow/artefakt-freigabe</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>empty</li></ul>
+          <p class="meta">?×? · </p>
+        </article>
+        <article class="card" data-slug="docflow__gobd-export" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>docflow/gobd-export</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>empty</li></ul>
+          <p class="meta">?×? · </p>
+        </article>
+        <article class="card" data-slug="docflow__nachweisraum" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>docflow/nachweisraum</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>empty</li></ul>
+          <p class="meta">?×? · </p>
+        </article>
+        <article class="card" data-slug="docflow__wiedervorlagen" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>docflow/wiedervorlagen</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>empty</li></ul>
+          <p class="meta">?×? · </p>
+        </article>
+        <article class="card" data-slug="export__ustva" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>export/ustva</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Capture-Bereich zu klein (864×151)</li><li>Capture-Bereich zu klein (864×151)</li><li>zu klein (810×81)</li></ul>
+          <p class="meta">810×81 · main section</p>
+        </article>
+        <article class="card" data-slug="finance__payment-run__demo-1" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>finance/payment-run/:id</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>locator.screenshot: Element is not attached to the DOM
+Call log:
+[2m  - taking element screenshot[22m
+[2m    - disabled all CSS animations[22m
+[2m  - waiting for fonts to load...[22m
+[2m  - fon</li></ul>
+          <p class="meta">?×? · </p>
+        </article>
+        <article class="card" data-slug="foerderung__antrag__demo-1" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>foerderung/antrag/:id</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>zu klein (809×157)</li></ul>
+          <p class="meta">809×157 · main section</p>
+        </article>
+        <article class="card" data-slug="lager__umlagerung" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>lager/umlagerung</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>locator.screenshot: Element is not attached to the DOM
+Call log:
+[2m  - taking element screenshot[22m
+[2m    - disabled all CSS animations[22m
+[2m  - waiting for fonts to load...[22m
+[2m  - fon</li></ul>
+          <p class="meta">?×? · </p>
+        </article>
+        <article class="card" data-slug="portal__anfragen" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/anfragen</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="portal__dokumente" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/dokumente</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main [role="tabpanel"]</p>
+        </article>
+        <article class="card" data-slug="portal__feldbuch" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/feldbuch</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="portal__naehrstoffbilanzen" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/naehrstoffbilanzen</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="portal__onboarding" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/onboarding</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="portal__shop" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/shop</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="portal__vertraege" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/vertraege</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="portal__whatsapp-simulator" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>portal/whatsapp-simulator</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main</p>
+        </article>
+        <article class="card" data-slug="qualitaet__labor-auftrag" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>qualitaet/labor-auftrag</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Zu wenig sichtbarer Maskeninhalt</li><li>Zu wenig sichtbarer Maskeninhalt</li></ul>
+          <p class="meta">?×? · main section</p>
+        </article>
+        <article class="card" data-slug="qualitaet__reklamationen" data-approval="rejected">
+          <header><span class="badge" style="background:#dc2626">rejected</span> <code>qualitaet/reklamationen</code></header>
+          <p><em>Kein Bild</em></p>
+          <ul><li>Capture-Bereich zu klein (912×164)</li><li>zu klein (862×104)</li></ul>
+          <p class="meta">862×104 · main</p>
+        </article></div>
+</body></html>

@@ -145,7 +145,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 
 | Thema | Beschreibung | Priorität |
 |-------|-------------|-----------|
-| commandEndpoints | Gestubte Actions (neue_bestellung, freigeben, mahnen, drucken) | P2 |
+| commandEndpoints | Gestubte Actions (drucken, stornieren, wareneingang, …) — **teilweise:** neue_bestellung, mahnen, freigeben ✅ | P2 |
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 

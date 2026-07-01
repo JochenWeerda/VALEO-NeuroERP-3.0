@@ -59,6 +59,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal` · **Modul:** `@/pages/portal/index`
 
+**Ziel:** Portal in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Portal — Bedienoberfläche](img/portal.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Portal** öffnen (`/portal`).
@@ -79,6 +84,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anfragen
 
 **Route:** `/portal/anfragen` · **Modul:** `@/pages/portal/anfragen`
+
+**Ziel:** Anfragen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -101,6 +108,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/bestellungen` · **Modul:** `@/pages/portal/bestellungen`
 
+**Ziel:** Bestellungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellungen — Bedienoberfläche](img/portal__bestellungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestellungen** öffnen (`/portal/bestellungen`).
@@ -121,6 +133,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Dokumente
 
 **Route:** `/portal/dokumente` · **Modul:** `@/pages/portal/dokumente`
+
+**Ziel:** Dokumente in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -143,6 +157,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/empfehlungen` · **Modul:** `@/pages/portal/empfehlungen`
 
+**Ziel:** Empfehlungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Empfehlungen — Bedienoberfläche](img/portal__empfehlungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Empfehlungen** öffnen (`/portal/empfehlungen`).
@@ -163,6 +182,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Feldbuch
 
 **Route:** `/portal/feldbuch` · **Modul:** `@/pages/portal/feldbuch`
+
+**Ziel:** Feldbuch in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -185,6 +206,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/lohndienste` · **Modul:** `@/pages/portal/lohndienste`
 
+**Ziel:** Lohndienste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lohndienste — Bedienoberfläche](img/portal__lohndienste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lohndienste** öffnen (`/portal/lohndienste`).
@@ -205,6 +231,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/portal/lohndienste/neu` · **Modul:** `@/pages/portal/lohndienste`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/portal__lohndienste__neu.webp)
+
 
 **Schritte:**
 
@@ -227,6 +258,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/naehrstoffbilanzen` · **Modul:** `@/pages/portal/naehrstoffbilanzen`
 
+**Ziel:** Naehrstoffbilanzen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Naehrstoffbilanzen** öffnen (`/portal/naehrstoffbilanzen`).
@@ -247,6 +280,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Onboarding
 
 **Route:** `/portal/onboarding` · **Modul:** `@/pages/portal/onboarding`
+
+**Ziel:** Onboarding in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -269,6 +304,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/portal` · **Modul:** `@/pages/portal/index`
 
+**Ziel:** Portal in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Portal — Bedienoberfläche](img/portal__portal.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Portal** öffnen (`/portal/portal`).
@@ -289,6 +329,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Preisspiegel
 
 **Route:** `/portal/preisspiegel` · **Modul:** `@/pages/portal/preisspiegel`
+
+**Ziel:** Preisspiegel in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Preisspiegel — Bedienoberfläche](img/portal__preisspiegel.webp)
+
 
 **Schritte:**
 
@@ -311,6 +356,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/profil` · **Modul:** `@/pages/portal/index`
 
+**Ziel:** Profil in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Profil — Bedienoberfläche](img/portal__profil.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Profil** öffnen (`/portal/profil`).
@@ -331,6 +381,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rationsoptimierung
 
 **Route:** `/portal/rationsoptimierung` · **Modul:** `@/pages/portal/rationsoptimierung`
+
+**Ziel:** Rationsoptimierung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rationsoptimierung — Bedienoberfläche](img/portal__rationsoptimierung.webp)
+
 
 **Schritte:**
 
@@ -353,6 +408,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/rechnungen` · **Modul:** `@/pages/portal/rechnungen`
 
+**Ziel:** Rechnungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungen — Bedienoberfläche](img/portal__rechnungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rechnungen** öffnen (`/portal/rechnungen`).
@@ -373,6 +433,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Shop
 
 **Route:** `/portal/shop` · **Modul:** `@/pages/portal/shop`
+
+**Ziel:** Shop in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -395,6 +457,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/vertraege` · **Modul:** `@/pages/portal/vertraege`
 
+**Ziel:** Vertraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Vertraege** öffnen (`/portal/vertraege`).
@@ -415,6 +479,8 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Whatsapp Simulator
 
 **Route:** `/portal/whatsapp-simulator` · **Modul:** `@/pages/portal/whatsapp-simulator`
+
+**Ziel:** Whatsapp Simulator in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
 **Schritte:**
 
@@ -437,6 +503,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/portal/zertifikate` · **Modul:** `@/pages/portal/zertifikate`
 
+**Ziel:** Zertifikate in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zertifikate — Bedienoberfläche](img/portal__zertifikate.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Zertifikate** öffnen (`/portal/zertifikate`).
@@ -457,6 +528,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wissensbasis
 
 **Route:** `/wissen/wissensbasis` · **Modul:** `@/pages/wissen/wissensbasis`
+
+**Ziel:** Wissensbasis in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wissensbasis — Bedienoberfläche](img/wissen__wissensbasis.webp)
+
 
 **Schritte:**
 

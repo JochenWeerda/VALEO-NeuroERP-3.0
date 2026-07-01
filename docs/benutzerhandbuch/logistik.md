@@ -55,6 +55,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/logistik/frachtbrief/:id` · **Modul:** `@/pages/logistik/frachtbriefe`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/logistik__frachtbrief__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/logistik/frachtbrief/:id`).
@@ -75,6 +80,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/logistik/frachtbrief/neu` · **Modul:** `@/pages/logistik/frachtbriefe`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/logistik__frachtbrief__neu.webp)
+
 
 **Schritte:**
 
@@ -97,6 +107,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/logistik/frachtbriefe` · **Modul:** `@/pages/logistik/frachtbriefe`
 
+**Ziel:** Frachtbriefe in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frachtbriefe — Bedienoberfläche](img/logistik__frachtbriefe.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Frachtbriefe** öffnen (`/logistik/frachtbriefe`).
@@ -117,6 +132,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Frachttabellen
 
 **Route:** `/logistik/frachttabellen` · **Modul:** `@/pages/logistik/frachttabellen`
+
+**Ziel:** Frachttabellen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frachttabellen — Bedienoberfläche](img/logistik__frachttabellen.webp)
+
 
 **Schritte:**
 
@@ -139,6 +159,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/logistik/tour-fracht-arbeitsraum` · **Modul:** `@/pages/logistik/tour-fracht-arbeitsraum`
 
+**Ziel:** Tour Fracht Arbeitsraum in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tour Fracht Arbeitsraum — Bedienoberfläche](img/logistik__tour-fracht-arbeitsraum.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Tour Fracht Arbeitsraum** öffnen (`/logistik/tour-fracht-arbeitsraum`).
@@ -159,6 +184,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Tourenplanung
 
 **Route:** `/logistik/tourenplanung` · **Modul:** `@/pages/logistik/tourenplanung`
+
+**Ziel:** Tourenplanung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tourenplanung — Bedienoberfläche](img/logistik__tourenplanung.webp)
+
 
 **Schritte:**
 
@@ -181,6 +211,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/logistik/verladungen` · **Modul:** `@/pages/verladung/liste`
 
+**Ziel:** Verladungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Verladungen — Bedienoberfläche](img/logistik__verladungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Verladungen** öffnen (`/logistik/verladungen`).
@@ -201,6 +236,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Versandprofile
 
 **Route:** `/logistik/versandprofile` · **Modul:** `@/pages/logistik/versandprofile`
+
+**Ziel:** Versandprofile in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Versandprofile — Bedienoberfläche](img/logistik__versandprofile.webp)
+
 
 **Schritte:**
 
@@ -223,6 +263,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/transporte/fahrer` · **Modul:** `@/pages/transporte/fahrer-liste`
 
+**Ziel:** Fahrer in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fahrer — Bedienoberfläche](img/transporte__fahrer.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Fahrer** öffnen (`/transporte/fahrer`).
@@ -243,6 +288,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Fahrer Liste
 
 **Route:** `/transporte/fahrer-liste` · **Modul:** `@/pages/transporte/fahrer-liste`
+
+**Ziel:** Fahrer Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fahrer Liste — Bedienoberfläche](img/transporte__fahrer-liste.webp)
+
 
 **Schritte:**
 
@@ -265,6 +315,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/transporte/fahrer/:id` · **Modul:** `@/pages/transporte/fahrer-liste`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/transporte__fahrer__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/transporte/fahrer/:id`).
@@ -285,6 +340,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/transporte/fahrer/neu` · **Modul:** `@/pages/transporte/fahrer-liste`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/transporte__fahrer__neu.webp)
+
 
 **Schritte:**
 
@@ -307,6 +367,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/versand` · **Modul:** `@/pages/versand/frachtdokumente`
 
+**Ziel:** Versand in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Versand — Bedienoberfläche](img/versand.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Versand** öffnen (`/versand`).
@@ -327,6 +392,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Frachtdokumente
 
 **Route:** `/versand/frachtdokumente` · **Modul:** `@/pages/versand/frachtdokumente`
+
+**Ziel:** Frachtdokumente in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frachtdokumente — Bedienoberfläche](img/versand__frachtdokumente.webp)
+
 
 **Schritte:**
 
@@ -349,6 +419,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/versand/paket-etikett` · **Modul:** `@/pages/versand/paket-etikett`
 
+**Ziel:** Paket Etikett in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Paket Etikett — Bedienoberfläche](img/versand__paket-etikett.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Paket Etikett** öffnen (`/versand/paket-etikett`).
@@ -369,6 +444,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Versand Avis
 
 **Route:** `/versand/versand-avis` · **Modul:** `@/pages/versand/versand-avis`
+
+**Ziel:** Versand Avis in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Versand Avis — Bedienoberfläche](img/versand__versand-avis.webp)
+
 
 **Schritte:**
 

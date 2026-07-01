@@ -113,7 +113,7 @@ Vertriebssteuerung und Kampagnen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **107** App-Routen
+Vollständige Abdeckung: **91** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
@@ -143,18 +143,6 @@ Vollständige Abdeckung: **107** App-Routen
 | New | `/crm/campaign/new` | `@/pages/crm/campaign-detail` |
 | Campaigns | `/crm/campaigns` | `@/pages/crm/campaigns` |
 | New | `/crm/campaigns/new` | `@/pages/crm/campaign-detail` |
-| Campaigncomparisonbarchart | `/crm/charts/campaign-performance/campaigncomparisonbarchart` | `@/pages/crm/charts/campaign-performance/campaigncomparisonbarchart` |
-| Campaignperformancetrendchart | `/crm/charts/campaign-performance/campaignperformancetrendchart` | `@/pages/crm/charts/campaign-performance/campaignperformancetrendchart` |
-| Campaigntypedistributionchart | `/crm/charts/campaign-performance/campaigntypedistributionchart` | `@/pages/crm/charts/campaign-performance/campaigntypedistributionchart` |
-| Campaigndetailperformancechart | `/crm/charts/campaigndetailperformancechart` | `@/pages/crm/charts/campaigndetailperformancechart` |
-| Campaignperformancecharts | `/crm/charts/campaignperformancecharts` | `@/pages/crm/charts/campaignperformancecharts` |
-| Expectedrevenuebarchart | `/crm/charts/opportunities-forecast/expectedrevenuebarchart` | `@/pages/crm/charts/opportunities-forecast/expectedrevenuebarchart` |
-| Expectedrevenuelinechart | `/crm/charts/opportunities-forecast/expectedrevenuelinechart` | `@/pages/crm/charts/opportunities-forecast/expectedrevenuelinechart` |
-| Opportunitycountbarchart | `/crm/charts/opportunities-forecast/opportunitycountbarchart` | `@/pages/crm/charts/opportunities-forecast/opportunitycountbarchart` |
-| Stagedistributiondonut | `/crm/charts/opportunities-forecast/stagedistributiondonut` | `@/pages/crm/charts/opportunities-forecast/stagedistributiondonut` |
-| Totalamountbarchart | `/crm/charts/opportunities-forecast/totalamountbarchart` | `@/pages/crm/charts/opportunities-forecast/totalamountbarchart` |
-| Totalamountlinechart | `/crm/charts/opportunities-forecast/totalamountlinechart` | `@/pages/crm/charts/opportunities-forecast/totalamountlinechart` |
-| Opportunitiesforecastcharts | `/crm/charts/opportunitiesforecastcharts` | `@/pages/crm/charts/opportunitiesforecastcharts` |
 | Consent Confirm | `/crm/consent-confirm` | `@/pages/crm/consent-confirm` |
 | Consent Detail | `/crm/consent-detail` | `@/pages/crm/consent-detail` |
 | Consent Management | `/crm/consent-management` | `@/pages/crm/consent-management` |
@@ -188,15 +176,11 @@ Vollständige Abdeckung: **107** App-Routen
 | Kunden Schnellauswahl | `/crm/kunden-schnellauswahl` | `@/pages/crm/kunden-schnellauswahl` |
 | Kunden Stamm | `/crm/kunden-stamm` | `@/pages/crm/kunden-stamm` |
 | Kunden Stamm Modern | `/crm/kunden-stamm-modern` | `@/pages/crm/kunden-stamm-modern` |
-| Customermaskeditpage | `/crm/kunden-stamm-modern/customermaskeditpage` | `@/pages/crm/kunden-stamm-modern/customermaskeditpage` |
-| Legacykundenstammmodern | `/crm/kunden-stamm-modern/legacykundenstammmodern` | `@/pages/crm/kunden-stamm-modern/legacykundenstammmodern` |
 | Kunden Zuordnung | `/crm/kunden-zuordnung` | `@/pages/crm/kunden-zuordnung` |
 | :Id | `/crm/kunden/:id` | `@/pages/crm/kunden-stamm` |
 | Lead Detail | `/crm/lead-detail` | `@/pages/crm/lead-detail` |
-| Leadmaskdetailpage | `/crm/lead-detail/leadmaskdetailpage` | `@/pages/crm/lead-detail/leadmaskdetailpage` |
-| Legacyleaddetailpage | `/crm/lead-detail/legacyleaddetailpage` | `@/pages/crm/lead-detail/legacyleaddetailpage` |
 | Lead Generierung | `/crm/lead-generierung` | `@/pages/crm/lead-generierung` |
-| :Id | `/crm/lead/:id` | `@/pages/crm/lead-detail` |
+| :Id | `/crm/lead/:id` | `@/pages/crm/lead-native` |
 | Leads | `/crm/leads` | `@/pages/crm/leads` |
 | New | `/crm/leads/new` | `@/pages/crm/lead-detail` |
 | Lieferanten | `/crm/lieferanten` | `@/pages/crm/lieferanten-liste` |
@@ -234,6 +218,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm` · **Modul:** `@/pages/crm/kim/index`
 
+**Ziel:** Crm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Crm — Bedienoberfläche](img/crm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Crm** öffnen (`/crm`).
@@ -254,6 +243,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/crm/activities/neu` · **Modul:** `@/pages/crm/aktivitaeten`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/crm__activities__neu.webp)
+
 
 **Schritte:**
 
@@ -276,6 +270,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/aktivitaet-detail` · **Modul:** `@/pages/crm/aktivitaet-detail`
 
+**Ziel:** Aktivitaet Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Aktivitaet Detail — Bedienoberfläche](img/crm__aktivitaet-detail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Aktivitaet Detail** öffnen (`/crm/aktivitaet-detail`).
@@ -296,6 +295,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/crm/aktivitaet/:id` · **Modul:** `@/pages/crm/aktivitaet-detail`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__aktivitaet__demo-1.webp)
+
 
 **Schritte:**
 
@@ -318,6 +322,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/aktivitaeten` · **Modul:** `@/pages/crm/aktivitaeten`
 
+**Ziel:** Aktivitaeten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Aktivitaeten — Bedienoberfläche](img/crm__aktivitaeten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Aktivitaeten** öffnen (`/crm/aktivitaeten`).
@@ -338,6 +347,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/crm/audits/neu` · **Modul:** `@/pages/crm/lieferanten-liste`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/crm__audits__neu.webp)
+
 
 **Schritte:**
 
@@ -360,6 +374,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/bedarfsdeckung-cockpit` · **Modul:** `@/pages/crm/bedarfsdeckung-cockpit`
 
+**Ziel:** Bedarfsdeckung Cockpit in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bedarfsdeckung Cockpit — Bedienoberfläche](img/crm__bedarfsdeckung-cockpit.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bedarfsdeckung Cockpit** öffnen (`/crm/bedarfsdeckung-cockpit`).
@@ -380,6 +399,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Bestell Inbox
 
 **Route:** `/crm/bestell-inbox` · **Modul:** `@/pages/crm/bestell-inbox`
+
+**Ziel:** Bestell Inbox in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestell Inbox — Bedienoberfläche](img/crm__bestell-inbox.webp)
+
 
 **Schritte:**
 
@@ -402,6 +426,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/betrieb/:id` · **Modul:** `@/pages/crm/betriebsprofil-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__betrieb__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/betrieb/:id`).
@@ -422,6 +451,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Betriebsprofil Detail
 
 **Route:** `/crm/betriebsprofil-detail` · **Modul:** `@/pages/crm/betriebsprofil-detail`
+
+**Ziel:** Betriebsprofil Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Betriebsprofil Detail — Bedienoberfläche](img/crm__betriebsprofil-detail.webp)
+
 
 **Schritte:**
 
@@ -444,6 +478,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/betriebsprofil/:id` · **Modul:** `@/pages/crm/betriebsprofil-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__betriebsprofil__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/betriebsprofil/:id`).
@@ -464,6 +503,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Betriebsprofile
 
 **Route:** `/crm/betriebsprofile` · **Modul:** `@/pages/crm/betriebsprofile-liste`
+
+**Ziel:** Betriebsprofile in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Betriebsprofile — Bedienoberfläche](img/crm__betriebsprofile.webp)
+
 
 **Schritte:**
 
@@ -486,6 +530,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/betriebsprofile-liste` · **Modul:** `@/pages/crm/betriebsprofile-liste`
 
+**Ziel:** Betriebsprofile Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Betriebsprofile Liste — Bedienoberfläche](img/crm__betriebsprofile-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Betriebsprofile Liste** öffnen (`/crm/betriebsprofile-liste`).
@@ -506,6 +555,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Campaign Builder
 
 **Route:** `/crm/campaign-builder` · **Modul:** `@/pages/crm/campaign-builder`
+
+**Ziel:** Campaign Builder in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaign Builder — Bedienoberfläche](img/crm__campaign-builder.webp)
+
 
 **Schritte:**
 
@@ -528,6 +582,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/campaign-detail` · **Modul:** `@/pages/crm/campaign-detail`
 
+**Ziel:** Campaign Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaign Detail — Bedienoberfläche](img/crm__campaign-detail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Campaign Detail** öffnen (`/crm/campaign-detail`).
@@ -548,6 +607,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Campaign Performance
 
 **Route:** `/crm/campaign-performance` · **Modul:** `@/pages/crm/campaign-performance-dashboard`
+
+**Ziel:** Campaign Performance in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaign Performance — Bedienoberfläche](img/crm__campaign-performance.webp)
+
 
 **Schritte:**
 
@@ -570,6 +634,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/campaign-performance-dashboard` · **Modul:** `@/pages/crm/campaign-performance-dashboard`
 
+**Ziel:** Campaign Performance Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaign Performance Dashboard — Bedienoberfläche](img/crm__campaign-performance-dashboard.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Campaign Performance Dashboard** öffnen (`/crm/campaign-performance-dashboard`).
@@ -590,6 +659,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Campaign Template Detail
 
 **Route:** `/crm/campaign-template-detail` · **Modul:** `@/pages/crm/campaign-template-detail`
+
+**Ziel:** Campaign Template Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaign Template Detail — Bedienoberfläche](img/crm__campaign-template-detail.webp)
+
 
 **Schritte:**
 
@@ -612,6 +686,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/campaign-template/:id` · **Modul:** `@/pages/crm/campaign-template-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__campaign-template__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/campaign-template/:id`).
@@ -632,6 +711,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### New
 
 **Route:** `/crm/campaign-template/new` · **Modul:** `@/pages/crm/campaign-template-detail`
+
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__campaign-template__new.webp)
+
 
 **Schritte:**
 
@@ -654,6 +738,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/campaign-templates` · **Modul:** `@/pages/crm/campaign-templates`
 
+**Ziel:** Campaign Templates in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaign Templates — Bedienoberfläche](img/crm__campaign-templates.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Campaign Templates** öffnen (`/crm/campaign-templates`).
@@ -674,6 +763,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/crm/campaign/:id` · **Modul:** `@/pages/crm/campaign-detail`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__campaign__demo-1.webp)
+
 
 **Schritte:**
 
@@ -696,6 +790,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/campaign/new` · **Modul:** `@/pages/crm/campaign-detail`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__campaign__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/crm/campaign/new`).
@@ -716,6 +815,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Campaigns
 
 **Route:** `/crm/campaigns` · **Modul:** `@/pages/crm/campaigns`
+
+**Ziel:** Campaigns in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Campaigns — Bedienoberfläche](img/crm__campaigns.webp)
+
 
 **Schritte:**
 
@@ -738,6 +842,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/campaigns/new` · **Modul:** `@/pages/crm/campaign-detail`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__campaigns__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/crm/campaigns/new`).
@@ -755,261 +864,14 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Campaigncomparisonbarchart
-
-**Route:** `/crm/charts/campaign-performance/campaigncomparisonbarchart` · **Modul:** `@/pages/crm/charts/campaign-performance/campaigncomparisonbarchart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Campaigncomparisonbarchart** öffnen (`/crm/charts/campaign-performance/campaigncomparisonbarchart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Campaignperformancetrendchart
-
-**Route:** `/crm/charts/campaign-performance/campaignperformancetrendchart` · **Modul:** `@/pages/crm/charts/campaign-performance/campaignperformancetrendchart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Campaignperformancetrendchart** öffnen (`/crm/charts/campaign-performance/campaignperformancetrendchart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Campaigntypedistributionchart
-
-**Route:** `/crm/charts/campaign-performance/campaigntypedistributionchart` · **Modul:** `@/pages/crm/charts/campaign-performance/campaigntypedistributionchart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Campaigntypedistributionchart** öffnen (`/crm/charts/campaign-performance/campaigntypedistributionchart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Campaigndetailperformancechart
-
-**Route:** `/crm/charts/campaigndetailperformancechart` · **Modul:** `@/pages/crm/charts/campaigndetailperformancechart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Campaigndetailperformancechart** öffnen (`/crm/charts/campaigndetailperformancechart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Campaignperformancecharts
-
-**Route:** `/crm/charts/campaignperformancecharts` · **Modul:** `@/pages/crm/charts/campaignperformancecharts`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Campaignperformancecharts** öffnen (`/crm/charts/campaignperformancecharts`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Expectedrevenuebarchart
-
-**Route:** `/crm/charts/opportunities-forecast/expectedrevenuebarchart` · **Modul:** `@/pages/crm/charts/opportunities-forecast/expectedrevenuebarchart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Expectedrevenuebarchart** öffnen (`/crm/charts/opportunities-forecast/expectedrevenuebarchart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Expectedrevenuelinechart
-
-**Route:** `/crm/charts/opportunities-forecast/expectedrevenuelinechart` · **Modul:** `@/pages/crm/charts/opportunities-forecast/expectedrevenuelinechart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Expectedrevenuelinechart** öffnen (`/crm/charts/opportunities-forecast/expectedrevenuelinechart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Opportunitycountbarchart
-
-**Route:** `/crm/charts/opportunities-forecast/opportunitycountbarchart` · **Modul:** `@/pages/crm/charts/opportunities-forecast/opportunitycountbarchart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Opportunitycountbarchart** öffnen (`/crm/charts/opportunities-forecast/opportunitycountbarchart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Stagedistributiondonut
-
-**Route:** `/crm/charts/opportunities-forecast/stagedistributiondonut` · **Modul:** `@/pages/crm/charts/opportunities-forecast/stagedistributiondonut`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Stagedistributiondonut** öffnen (`/crm/charts/opportunities-forecast/stagedistributiondonut`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Totalamountbarchart
-
-**Route:** `/crm/charts/opportunities-forecast/totalamountbarchart` · **Modul:** `@/pages/crm/charts/opportunities-forecast/totalamountbarchart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Totalamountbarchart** öffnen (`/crm/charts/opportunities-forecast/totalamountbarchart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Totalamountlinechart
-
-**Route:** `/crm/charts/opportunities-forecast/totalamountlinechart` · **Modul:** `@/pages/crm/charts/opportunities-forecast/totalamountlinechart`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Totalamountlinechart** öffnen (`/crm/charts/opportunities-forecast/totalamountlinechart`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Opportunitiesforecastcharts
-
-**Route:** `/crm/charts/opportunitiesforecastcharts` · **Modul:** `@/pages/crm/charts/opportunitiesforecastcharts`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Opportunitiesforecastcharts** öffnen (`/crm/charts/opportunitiesforecastcharts`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
 ### Consent Confirm
 
 **Route:** `/crm/consent-confirm` · **Modul:** `@/pages/crm/consent-confirm`
+
+**Ziel:** Consent Confirm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Consent Confirm — Bedienoberfläche](img/crm__consent-confirm.webp)
+
 
 **Schritte:**
 
@@ -1032,6 +894,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/consent-detail` · **Modul:** `@/pages/crm/consent-detail`
 
+**Ziel:** Consent Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Consent Detail — Bedienoberfläche](img/crm__consent-detail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Consent Detail** öffnen (`/crm/consent-detail`).
@@ -1052,6 +919,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Consent Management
 
 **Route:** `/crm/consent-management` · **Modul:** `@/pages/crm/consent-management`
+
+**Ziel:** Consent Management in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Consent Management — Bedienoberfläche](img/crm__consent-management.webp)
+
 
 **Schritte:**
 
@@ -1074,6 +946,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/consent/:id` · **Modul:** `@/pages/crm/consent-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__consent__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/consent/:id`).
@@ -1094,6 +971,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Confirm
 
 **Route:** `/crm/consent/confirm` · **Modul:** `@/pages/crm/consent-confirm`
+
+**Ziel:** Confirm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Confirm — Bedienoberfläche](img/crm__consent__confirm.webp)
+
 
 **Schritte:**
 
@@ -1116,6 +998,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/consent/new` · **Modul:** `@/pages/crm/consent-detail`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__consent__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/crm/consent/new`).
@@ -1136,6 +1023,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Consents
 
 **Route:** `/crm/consents` · **Modul:** `@/pages/crm/consent-management`
+
+**Ziel:** Consents in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Consents — Bedienoberfläche](img/crm__consents.webp)
+
 
 **Schritte:**
 
@@ -1158,6 +1050,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/crm-dashboard` · **Modul:** `@/pages/crm/crm-dashboard`
 
+**Ziel:** Crm Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Crm Dashboard — Bedienoberfläche](img/crm__crm-dashboard.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Crm Dashboard** öffnen (`/crm/crm-dashboard`).
@@ -1178,6 +1075,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Customers
 
 **Route:** `/crm/customers` · **Modul:** `@/pages/crm/kunden-liste`
+
+**Ziel:** Customers in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Customers — Bedienoberfläche](img/crm__customers.webp)
+
 
 **Schritte:**
 
@@ -1200,6 +1102,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/customers/:id` · **Modul:** `@/pages/crm/kunden-stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__customers__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/customers/:id`).
@@ -1220,6 +1127,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Articles
 
 **Route:** `/crm/customers/:id/articles` · **Modul:** `@/pages/crm/kunden-cockpit`
+
+**Ziel:** Articles in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Articles — Bedienoberfläche](img/crm__customers__demo-1__articles.webp)
+
 
 **Schritte:**
 
@@ -1242,6 +1154,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/dubletten` · **Modul:** `@/pages/crm/dubletten`
 
+**Ziel:** Dubletten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Dubletten — Bedienoberfläche](img/crm__dubletten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Dubletten** öffnen (`/crm/dubletten`).
@@ -1262,6 +1179,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Durchdringungs Pipeline
 
 **Route:** `/crm/durchdringungs-pipeline` · **Modul:** `@/pages/crm/durchdringungs-pipeline`
+
+**Ziel:** Durchdringungs Pipeline in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Durchdringungs Pipeline — Bedienoberfläche](img/crm__durchdringungs-pipeline.webp)
+
 
 **Schritte:**
 
@@ -1284,6 +1206,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/gdpr-request-detail` · **Modul:** `@/pages/crm/gdpr-request-detail`
 
+**Ziel:** Gdpr Request Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gdpr Request Detail — Bedienoberfläche](img/crm__gdpr-request-detail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Gdpr Request Detail** öffnen (`/crm/gdpr-request-detail`).
@@ -1304,6 +1231,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Gdpr Request Public
 
 **Route:** `/crm/gdpr-request-public` · **Modul:** `@/pages/crm/gdpr-request-public`
+
+**Ziel:** Gdpr Request Public in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gdpr Request Public — Bedienoberfläche](img/crm__gdpr-request-public.webp)
+
 
 **Schritte:**
 
@@ -1326,6 +1258,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/gdpr-request/:id` · **Modul:** `@/pages/crm/gdpr-request-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__gdpr-request__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/gdpr-request/:id`).
@@ -1346,6 +1283,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### New
 
 **Route:** `/crm/gdpr-request/new` · **Modul:** `@/pages/crm/gdpr-request-detail`
+
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__gdpr-request__new.webp)
+
 
 **Schritte:**
 
@@ -1368,6 +1310,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/gdpr-requests` · **Modul:** `@/pages/crm/gdpr-requests`
 
+**Ziel:** Gdpr Requests in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gdpr Requests — Bedienoberfläche](img/crm__gdpr-requests.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Gdpr Requests** öffnen (`/crm/gdpr-requests`).
@@ -1388,6 +1335,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kim
 
 **Route:** `/crm/kim` · **Modul:** `@/pages/crm/kim/index`
+
+**Ziel:** Kim in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kim — Bedienoberfläche](img/crm__kim.webp)
+
 
 **Schritte:**
 
@@ -1410,6 +1362,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kontakt-detail` · **Modul:** `@/pages/crm/kontakt-detail`
 
+**Ziel:** Kontakt Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontakt Detail — Bedienoberfläche](img/crm__kontakt-detail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kontakt Detail** öffnen (`/crm/kontakt-detail`).
@@ -1430,6 +1387,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kontakt Management
 
 **Route:** `/crm/kontakt-management` · **Modul:** `@/pages/crm/kontakt-management`
+
+**Ziel:** Kontakt Management in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontakt Management — Bedienoberfläche](img/crm__kontakt-management.webp)
+
 
 **Schritte:**
 
@@ -1452,6 +1414,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kontakt/:id` · **Modul:** `@/pages/crm/kontakt-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__kontakt__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/kontakt/:id`).
@@ -1472,6 +1439,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kontakte
 
 **Route:** `/crm/kontakte` · **Modul:** `@/pages/crm/kontakte-liste`
+
+**Ziel:** Kontakte in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontakte — Bedienoberfläche](img/crm__kontakte.webp)
+
 
 **Schritte:**
 
@@ -1494,6 +1466,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kontakte-liste` · **Modul:** `@/pages/crm/kontakte-liste`
 
+**Ziel:** Kontakte Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontakte Liste — Bedienoberfläche](img/crm__kontakte-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kontakte Liste** öffnen (`/crm/kontakte-liste`).
@@ -1514,6 +1491,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/crm/kontakte/:id` · **Modul:** `@/pages/crm/kontakt-detail`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__kontakte__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1536,6 +1518,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kontakte/new` · **Modul:** `@/pages/crm/kontakt-detail`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__kontakte__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/crm/kontakte/new`).
@@ -1556,6 +1543,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kunden
 
 **Route:** `/crm/kunden` · **Modul:** `@/pages/crm/kunden-liste`
+
+**Ziel:** Kunden in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden — Bedienoberfläche](img/crm__kunden.webp)
+
 
 **Schritte:**
 
@@ -1578,6 +1570,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kunden-cockpit` · **Modul:** `@/pages/crm/kunden-cockpit`
 
+**Ziel:** Kunden Cockpit in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Cockpit — Bedienoberfläche](img/crm__kunden-cockpit.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunden Cockpit** öffnen (`/crm/kunden-cockpit`).
@@ -1598,6 +1595,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kunden Karte
 
 **Route:** `/crm/kunden-karte` · **Modul:** `@/pages/crm/kunden-karte`
+
+**Ziel:** Kunden Karte in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Karte — Bedienoberfläche](img/crm__kunden-karte.webp)
+
 
 **Schritte:**
 
@@ -1620,6 +1622,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kunden-liste` · **Modul:** `@/pages/crm/kunden-liste`
 
+**Ziel:** Kunden Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Liste — Bedienoberfläche](img/crm__kunden-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunden Liste** öffnen (`/crm/kunden-liste`).
@@ -1640,6 +1647,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kunden Schnellauswahl
 
 **Route:** `/crm/kunden-schnellauswahl` · **Modul:** `@/pages/crm/kunden-schnellauswahl`
+
+**Ziel:** Kunden Schnellauswahl in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Schnellauswahl — Bedienoberfläche](img/crm__kunden-schnellauswahl.webp)
+
 
 **Schritte:**
 
@@ -1662,6 +1674,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kunden-stamm` · **Modul:** `@/pages/crm/kunden-stamm`
 
+**Ziel:** Kunden Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Stamm — Bedienoberfläche](img/crm__kunden-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunden Stamm** öffnen (`/crm/kunden-stamm`).
@@ -1683,6 +1700,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kunden-stamm-modern` · **Modul:** `@/pages/crm/kunden-stamm-modern`
 
+**Ziel:** Kunden Stamm Modern in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Stamm Modern — Bedienoberfläche](img/crm__kunden-stamm-modern.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunden Stamm Modern** öffnen (`/crm/kunden-stamm-modern`).
@@ -1700,51 +1722,14 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Customermaskeditpage
-
-**Route:** `/crm/kunden-stamm-modern/customermaskeditpage` · **Modul:** `@/pages/crm/kunden-stamm-modern/customermaskeditpage`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Customermaskeditpage** öffnen (`/crm/kunden-stamm-modern/customermaskeditpage`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Legacykundenstammmodern
-
-**Route:** `/crm/kunden-stamm-modern/legacykundenstammmodern` · **Modul:** `@/pages/crm/kunden-stamm-modern/legacykundenstammmodern`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Legacykundenstammmodern** öffnen (`/crm/kunden-stamm-modern/legacykundenstammmodern`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
 ### Kunden Zuordnung
 
 **Route:** `/crm/kunden-zuordnung` · **Modul:** `@/pages/crm/kunden-zuordnung`
+
+**Ziel:** Kunden Zuordnung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kunden Zuordnung — Bedienoberfläche](img/crm__kunden-zuordnung.webp)
+
 
 **Schritte:**
 
@@ -1767,6 +1752,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/kunden/:id` · **Modul:** `@/pages/crm/kunden-stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__kunden__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/kunden/:id`).
@@ -1788,6 +1778,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/lead-detail` · **Modul:** `@/pages/crm/lead-detail`
 
+**Ziel:** Lead Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lead Detail — Bedienoberfläche](img/crm__lead-detail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lead Detail** öffnen (`/crm/lead-detail`).
@@ -1805,51 +1800,14 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Leadmaskdetailpage
-
-**Route:** `/crm/lead-detail/leadmaskdetailpage` · **Modul:** `@/pages/crm/lead-detail/leadmaskdetailpage`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Leadmaskdetailpage** öffnen (`/crm/lead-detail/leadmaskdetailpage`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Legacyleaddetailpage
-
-**Route:** `/crm/lead-detail/legacyleaddetailpage` · **Modul:** `@/pages/crm/lead-detail/legacyleaddetailpage`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Legacyleaddetailpage** öffnen (`/crm/lead-detail/legacyleaddetailpage`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
 ### Lead Generierung
 
 **Route:** `/crm/lead-generierung` · **Modul:** `@/pages/crm/lead-generierung`
+
+**Ziel:** Lead Generierung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lead Generierung — Bedienoberfläche](img/crm__lead-generierung.webp)
+
 
 **Schritte:**
 
@@ -1870,7 +1828,12 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/crm/lead/:id` · **Modul:** `@/pages/crm/lead-detail`
+**Route:** `/crm/lead/:id` · **Modul:** `@/pages/crm/lead-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__lead__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1893,6 +1856,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/leads` · **Modul:** `@/pages/crm/leads`
 
+**Ziel:** Leads in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Leads — Bedienoberfläche](img/crm__leads.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Leads** öffnen (`/crm/leads`).
@@ -1913,6 +1881,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### New
 
 **Route:** `/crm/leads/new` · **Modul:** `@/pages/crm/lead-detail`
+
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__leads__new.webp)
+
 
 **Schritte:**
 
@@ -1935,6 +1908,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/lieferanten` · **Modul:** `@/pages/crm/lieferanten-liste`
 
+**Ziel:** Lieferanten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten — Bedienoberfläche](img/crm__lieferanten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferanten** öffnen (`/crm/lieferanten`).
@@ -1955,6 +1933,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferanten Liste
 
 **Route:** `/crm/lieferanten-liste` · **Modul:** `@/pages/crm/lieferanten-liste`
+
+**Ziel:** Lieferanten Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten Liste — Bedienoberfläche](img/crm__lieferanten-liste.webp)
+
 
 **Schritte:**
 
@@ -1977,6 +1960,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/lieferanten-stamm` · **Modul:** `@/pages/crm/lieferanten-stamm`
 
+**Ziel:** Lieferanten Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten Stamm — Bedienoberfläche](img/crm__lieferanten-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferanten Stamm** öffnen (`/crm/lieferanten-stamm`).
@@ -1997,6 +1985,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/crm/lieferanten/:id` · **Modul:** `@/pages/crm/lieferanten-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__lieferanten__demo-1.webp)
+
 
 **Schritte:**
 
@@ -2019,6 +2012,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/lieferanten/liste` · **Modul:** `@/pages/crm/lieferanten-liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/crm__lieferanten__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/crm/lieferanten/liste`).
@@ -2039,6 +2037,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/crm/lieferanten/stamm/:id` · **Modul:** `@/pages/crm/lieferanten-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__lieferanten__stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -2061,6 +2064,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/lieferanten/stamm/new` · **Modul:** `@/pages/crm/lieferanten-stamm`
 
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__lieferanten__stamm__new.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **New** öffnen (`/crm/lieferanten/stamm/new`).
@@ -2081,6 +2089,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Opportunities
 
 **Route:** `/crm/opportunities` · **Modul:** `@/pages/crm/opportunities-liste`
+
+**Ziel:** Opportunities in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Opportunities — Bedienoberfläche](img/crm__opportunities.webp)
+
 
 **Schritte:**
 
@@ -2103,6 +2116,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/opportunities-forecast` · **Modul:** `@/pages/crm/opportunities-forecast`
 
+**Ziel:** Opportunities Forecast in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Opportunities Forecast — Bedienoberfläche](img/crm__opportunities-forecast.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Opportunities Forecast** öffnen (`/crm/opportunities-forecast`).
@@ -2123,6 +2141,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Opportunities Kanban
 
 **Route:** `/crm/opportunities-kanban` · **Modul:** `@/pages/crm/opportunities-kanban`
+
+**Ziel:** Opportunities Kanban in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Opportunities Kanban — Bedienoberfläche](img/crm__opportunities-kanban.webp)
+
 
 **Schritte:**
 
@@ -2145,6 +2168,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/opportunities-liste` · **Modul:** `@/pages/crm/opportunities-liste`
 
+**Ziel:** Opportunities Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Opportunities Liste — Bedienoberfläche](img/crm__opportunities-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Opportunities Liste** öffnen (`/crm/opportunities-liste`).
@@ -2165,6 +2193,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Opportunity Detail
 
 **Route:** `/crm/opportunity-detail` · **Modul:** `@/pages/crm/opportunity-detail`
+
+**Ziel:** Opportunity Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Opportunity Detail — Bedienoberfläche](img/crm__opportunity-detail.webp)
+
 
 **Schritte:**
 
@@ -2187,6 +2220,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/opportunity/:id` · **Modul:** `@/pages/crm/opportunity-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__opportunity__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/opportunity/:id`).
@@ -2207,6 +2245,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### New
 
 **Route:** `/crm/opportunity/new` · **Modul:** `@/pages/crm/opportunity-detail`
+
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__opportunity__new.webp)
+
 
 **Schritte:**
 
@@ -2229,6 +2272,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/potential-analyse` · **Modul:** `@/pages/crm/potential-analyse`
 
+**Ziel:** Potential Analyse in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Potential Analyse — Bedienoberfläche](img/crm__potential-analyse.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Potential Analyse** öffnen (`/crm/potential-analyse`).
@@ -2249,6 +2297,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Segment Detail
 
 **Route:** `/crm/segment-detail` · **Modul:** `@/pages/crm/segment-detail`
+
+**Ziel:** Segment Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Segment Detail — Bedienoberfläche](img/crm__segment-detail.webp)
+
 
 **Schritte:**
 
@@ -2271,6 +2324,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/segment/:id` · **Modul:** `@/pages/crm/segment-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/crm__segment__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/crm/segment/:id`).
@@ -2291,6 +2349,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### New
 
 **Route:** `/crm/segment/new` · **Modul:** `@/pages/crm/segment-detail`
+
+**Ziel:** New in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![New — Bedienoberfläche](img/crm__segment__new.webp)
+
 
 **Schritte:**
 
@@ -2313,6 +2376,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/crm/segments` · **Modul:** `@/pages/crm/segments`
 
+**Ziel:** Segments in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Segments — Bedienoberfläche](img/crm__segments.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Segments** öffnen (`/crm/segments`).
@@ -2333,6 +2401,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wiedervorlagen
 
 **Route:** `/crm/wiedervorlagen` · **Modul:** `@/pages/crm/wiedervorlagen`
+
+**Ziel:** Wiedervorlagen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wiedervorlagen — Bedienoberfläche](img/crm__wiedervorlagen.webp)
+
 
 **Schritte:**
 
@@ -2355,6 +2428,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/marketing/kampagne/:id` · **Modul:** `@/pages/marketing/kampagnen`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/marketing__kampagne__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/marketing/kampagne/:id`).
@@ -2375,6 +2453,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/marketing/kampagne/neu` · **Modul:** `@/pages/marketing/kampagnen`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/marketing__kampagne__neu.webp)
+
 
 **Schritte:**
 
@@ -2397,6 +2480,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/marketing/kampagnen` · **Modul:** `@/pages/marketing/kampagnen`
 
+**Ziel:** Kampagnen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kampagnen — Bedienoberfläche](img/marketing__kampagnen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kampagnen** öffnen (`/marketing/kampagnen`).
@@ -2417,6 +2505,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Leadexplorer
 
 **Route:** `/prospecting/LeadExplorer` · **Modul:** `@/pages/prospecting/LeadExplorer`
+
+**Ziel:** Leadexplorer in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Leadexplorer — Bedienoberfläche](img/prospecting__leadexplorer.webp)
+
 
 **Schritte:**
 
@@ -2439,6 +2532,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/prospecting/leads` · **Modul:** `@/pages/prospecting/LeadExplorer`
 
+**Ziel:** Leads in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Leads — Bedienoberfläche](img/prospecting__leads.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Leads** öffnen (`/prospecting/leads`).
@@ -2459,6 +2557,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kalender
 
 **Route:** `/termine/kalender` · **Modul:** `@/pages/termine/kalender`
+
+**Ziel:** Kalender in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kalender — Bedienoberfläche](img/termine__kalender.webp)
+
 
 **Schritte:**
 

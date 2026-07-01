@@ -46,6 +46,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/controlling/benchmark-cockpit` · **Modul:** `@/pages/controlling/benchmark-cockpit`
 
+**Ziel:** Benchmark Cockpit in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Benchmark Cockpit — Bedienoberfläche](img/controlling__benchmark-cockpit.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Benchmark Cockpit** öffnen (`/controlling/benchmark-cockpit`).
@@ -66,6 +71,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Dashboard Verwaltung
 
 **Route:** `/controlling/dashboard-verwaltung` · **Modul:** `@/pages/controlling/dashboard-verwaltung`
+
+**Ziel:** Dashboard Verwaltung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Dashboard Verwaltung — Bedienoberfläche](img/controlling__dashboard-verwaltung.webp)
+
 
 **Schritte:**
 
@@ -88,6 +98,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/controlling/kpi-verwaltung` · **Modul:** `@/pages/controlling/kpi-verwaltung`
 
+**Ziel:** Kpi Verwaltung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kpi Verwaltung — Bedienoberfläche](img/controlling__kpi-verwaltung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kpi Verwaltung** öffnen (`/controlling/kpi-verwaltung`).
@@ -108,6 +123,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Massnahmen
 
 **Route:** `/controlling/massnahmen` · **Modul:** `@/pages/controlling/massnahmen`
+
+**Ziel:** Massnahmen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Massnahmen — Bedienoberfläche](img/controlling__massnahmen.webp)
+
 
 **Schritte:**
 
@@ -130,6 +150,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/controlling/plan-ist` · **Modul:** `@/pages/controlling/plan-ist`
 
+**Ziel:** Plan Ist in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Plan Ist — Bedienoberfläche](img/controlling__plan-ist.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Plan Ist** öffnen (`/controlling/plan-ist`).
@@ -151,6 +176,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/controlling/timeseries-erfassung` · **Modul:** `@/pages/controlling/timeseries-erfassung`
 
+**Ziel:** Timeseries Erfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Timeseries Erfassung — Bedienoberfläche](img/controlling__timeseries-erfassung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Timeseries Erfassung** öffnen (`/controlling/timeseries-erfassung`).
@@ -171,6 +201,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Widget Verwaltung
 
 **Route:** `/controlling/widget-verwaltung` · **Modul:** `@/pages/controlling/widget-verwaltung`
+
+**Ziel:** Widget Verwaltung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Widget Verwaltung — Bedienoberfläche](img/controlling__widget-verwaltung.webp)
+
 
 **Schritte:**
 

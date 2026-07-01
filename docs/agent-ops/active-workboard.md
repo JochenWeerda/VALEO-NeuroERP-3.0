@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-047 — AP-Freigabe CommandEndpoint + Bestätigungsdialog-Fortsetzung
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** in arbeit 2026-07-01 — `freigeben` für `finance/ap-invoice` mit Stub-Endpoint `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` verdrahtet; folgt auf UIX-046 (neue_bestellung, mahnen, AlertDialog).
+**Ziel:** Weitere gestubte Actions schrittweise auf `commandEndpoint` umstellen — AP-Freigabe als nächster P2-Kandidat mit `requiresConfirmation`.
+**Dateibesitz:** `app/api/v1/endpoints/ap_invoices.py`, `app/core/screen_definitions.py`, `tests/test_uix046_048_command_endpoints_safety.py`.
+**Abnahme:** pytest UIX-046/048-Suite grün inkl. freigeben-Contract-Tests.
+
+## UIX-046 — CommandEndpoints neue_bestellung + mahnen + Bestätigungsdialog
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** abgeschlossen 2026-07-01 — Stub-Endpoints für Lieferanten-Bestellung und OP-Mahnung; `commandEndpoint` in ScreenDefinitions; `AlertDialog` für `requiresConfirmation` in `UniversalNativeDetailPage`; CI-Workflow `universal-mask-ci.yml`.
+**Ziel:** Erste Wave gestubter Actions auf ActionRuntime-Vertrag umstellen.
+**Dateibesitz:** `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/open_items.py`, `app/core/screen_definitions.py`, `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `tests/test_uix046_048_command_endpoints_safety.py`, `.github/workflows/universal-mask-ci.yml`.
+**Abnahme:** 71/71 pytest grün (`test_uix046_048_command_endpoints_safety.py`).
+
 ## UIX-044 — FilterPlan Query Contract + ActionRuntime Anschluss
 
 **Von:** Codex
