@@ -149,12 +149,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-## Weiterführend
+## Quellen und Reverse-Pflege
 
-- [Release Notes v3.1.0](release-notes.md) — Änderungsprotokoll
-- [In-App-Hilfe](in-app-hilfe.md) — Route → Dokumentation
-- Entwickler-API: [Mask Runtime API](../entwickler/mask-runtime-api.md)
-- Architektur: [Universal Mask Runtime Status](../architecture/uix/universal-mask-runtime-status.md)
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
 
-Reverse-Pflege: Bei neuen nativen Masken oder Rollout-Routen
-`scripts/generate_inapp_help_map.py` ausführen und dieses Kapitel ergänzen.
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

@@ -25,6 +25,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   benachrichtigungen: 'core',
   charge: 'operations',
   compliance: 'finance',
+  docflow: 'finance',
   'contracts-v2': 'commercial',
   controlling: 'finance',
   crm: 'commercial',

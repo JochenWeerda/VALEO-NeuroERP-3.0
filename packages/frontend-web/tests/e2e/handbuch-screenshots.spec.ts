@@ -108,6 +108,13 @@ async function captureRoute(
       page,
       Number(process.env.HANDBUCH_RENDER_TIMEOUT_MS ?? 45_000),
     )
+    if (route.path.startsWith('portal/')) {
+      await page
+        .locator('main h1, main [role="heading"]')
+        .first()
+        .waitFor({ state: 'visible', timeout: 30_000 })
+        .catch(() => {})
+    }
     if (renderState !== 'ready') {
       safeUnlink(png)
       safeUnlink(webp)
@@ -136,7 +143,10 @@ async function captureRoute(
       }
     }
 
-    const { locator } = await resolveCaptureLocator(page)
+    const { locator } =
+      qc.metrics?.captureSelector != null
+        ? { locator: page.locator(qc.metrics.captureSelector).first() }
+        : await resolveCaptureLocator(page)
     fs.mkdirSync(path.dirname(png), { recursive: true })
     await locator.screenshot({ path: png, animations: 'disabled', timeout: 30_000 })
 

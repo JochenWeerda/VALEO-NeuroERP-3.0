@@ -931,6 +931,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![:Id — Bedienoberfläche](img/sales__order-editor__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/sales/order-editor/:id`).

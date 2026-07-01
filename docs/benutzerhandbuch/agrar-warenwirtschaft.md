@@ -262,6 +262,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Biostimulanzien in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Biostimulanzien — Bedienoberfläche](img/agrar__biostimulanzien.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Biostimulanzien** öffnen (`/agrar/biostimulanzien`).
@@ -311,6 +314,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Biostimulanzien Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Biostimulanzien Stamm — Bedienoberfläche](img/agrar__biostimulanzien-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Biostimulanzien Stamm** öffnen (`/agrar/biostimulanzien-stamm`).
@@ -333,6 +339,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/biostimulanzien-stamm/:id` · **Modul:** `@/pages/agrar/biostimulanzien-liste`
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/agrar__biostimulanzien-stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -513,6 +522,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Duenger Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Duenger Stamm — Bedienoberfläche](img/agrar__duenger-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Duenger Stamm** öffnen (`/agrar/duenger-stamm`).
@@ -535,6 +547,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/duenger-stamm/:id` · **Modul:** `@/pages/agrar/duenger-stamm`
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/agrar__duenger-stamm__demo-1.webp)
+
 
 **Schritte:**
 
@@ -689,6 +704,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![:Id — Bedienoberfläche](img/agrar__duenger__stamm__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/agrar/duenger/stamm/:id`).
@@ -711,6 +729,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/duenger/stamm/:id/edit` · **Modul:** `@/pages/agrar/duenger/stamm`
 
 **Ziel:** Edit in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Edit — Bedienoberfläche](img/agrar__duenger__stamm__demo-1__edit.webp)
+
 
 **Schritte:**
 
@@ -787,6 +808,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Ernte Annahme Erfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Ernte Annahme Erfassung — Bedienoberfläche](img/agrar__ernte-annahme-erfassung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Ernte Annahme Erfassung** öffnen (`/agrar/ernte-annahme-erfassung`).
@@ -810,6 +834,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![:Id — Bedienoberfläche](img/agrar__ernte-annahme-erfassung__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/agrar/ernte-annahme-erfassung/:id`).
@@ -832,6 +859,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/ernte/:id` · **Modul:** `@/pages/agrar/ernte-annahme-erfassung`
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/agrar__ernte__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1324,6 +1354,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Kunden Schlagkartei in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Kunden Schlagkartei — Bedienoberfläche](img/agrar__kunden-schlagkartei.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kunden Schlagkartei** öffnen (`/agrar/kunden-schlagkartei`).
@@ -1346,6 +1379,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/kunden-schlagkartei/:kunden_nr` · **Modul:** `@/pages/agrar/kunden-schlagkartei`
 
 **Ziel:** :Kunden Nr in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Kunden Nr — Bedienoberfläche](img/agrar__kunden-schlagkartei__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1447,6 +1483,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/pflanzenschutz/applikation` · **Modul:** `@/pages/agrar/pflanzenschutz/applikation`
 
 **Ziel:** Applikation in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Applikation — Bedienoberfläche](img/agrar__pflanzenschutz__applikation.webp)
+
 
 **Schritte:**
 
@@ -1835,6 +1874,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Saatgut in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Saatgut — Bedienoberfläche](img/agrar__saatgut.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Saatgut** öffnen (`/agrar/saatgut`).
@@ -1857,6 +1899,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/saatgut-liste` · **Modul:** `@/pages/agrar/saatgut-liste`
 
 **Ziel:** Saatgut Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Saatgut Liste — Bedienoberfläche](img/agrar__saatgut-liste.webp)
+
 
 **Schritte:**
 
@@ -1985,6 +2030,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Liste — Bedienoberfläche](img/agrar__saatgut__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/agrar/saatgut/liste`).
@@ -2086,6 +2134,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Stamm — Bedienoberfläche](img/agrar__saatgut__stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Stamm** öffnen (`/agrar/saatgut/stamm`).
@@ -2108,6 +2159,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/agrar/saatgut/stamm/:id` · **Modul:** `@/pages/agrar/saatgut/stamm`
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/agrar__saatgut__stamm__demo-1.webp)
+
 
 **Schritte:**
 

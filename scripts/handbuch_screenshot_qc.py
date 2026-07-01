@@ -29,7 +29,8 @@ IMG_DIR = REPO / "docs" / "benutzerhandbuch" / "img"
 MANIFEST_PATH = REPO / "docs" / "benutzerhandbuch" / "screenshot-manifest.json"
 REVIEW_HTML = REPO / "docs" / "benutzerhandbuch" / "screenshot-review.html"
 SOURCE_SUFFIXES = {".png", ".jpg", ".jpeg"}
-MIN_W, MIN_H = 280, 160
+MIN_W, MIN_H = 280, 140
+MIN_H_AFTER_TRIM = 150
 
 
 def load_manifest() -> dict:
@@ -56,11 +57,13 @@ def trim_whitespace(path: Path, tolerance: int = 18) -> tuple[Path, tuple[int, i
         if bbox == (0, 0, rgb.width, rgb.height):
             return path, None
         cropped = rgb.crop(bbox)
+        if cropped.height < MIN_H_AFTER_TRIM:
+            return path, None
         cropped.save(path)
         return path, bbox
 
 
-def image_qc(path: Path) -> tuple[bool, str, dict]:
+def image_qc(path: Path, slug: str = "") -> tuple[bool, str, dict]:
     with Image.open(path) as img:
         rgb = img.convert("RGB")
         w, h = rgb.size
@@ -86,9 +89,12 @@ def image_qc(path: Path) -> tuple[bool, str, dict]:
         }
 
         if bg_ratio >= 0.94 and non_bg_ratio <= 0.012:
-            return False, "spinner/leer (uniform)", metrics
+            # Verify-/Fehlerkarten: großer neutraler Hintergrund, zentrierter Inhalt
+            if not (slug.startswith("verify__") and h >= 200 and non_bg_ratio >= 0.004):
+                return False, "spinner/leer (uniform)", metrics
         if non_bg_ratio < 0.006:
-            return False, "fast leer", metrics
+            if not (slug.startswith("verify__") and h >= 150):
+                return False, "fast leer", metrics
 
         return True, "ok", metrics
 
@@ -108,7 +114,7 @@ def cmd_process(args: argparse.Namespace) -> int:
         )
 
         trim_whitespace(path)
-        ok, reason, metrics = image_qc(path)
+        ok, reason, metrics = image_qc(path, slug)
         entry["imageQc"] = {"ok": ok, "reason": reason, **metrics}
 
         if not ok:

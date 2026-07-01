@@ -617,6 +617,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Permanente Inventur in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Permanente Inventur — Bedienoberfläche](img/lager__permanente-inventur.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Permanente Inventur** öffnen (`/lager/permanente-inventur`).
@@ -795,6 +798,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/lager/umlagerung` · **Modul:** `@/pages/lager/lagerbewegungen`
 
 **Ziel:** Umlagerung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Umlagerung — Bedienoberfläche](img/lager__umlagerung.webp)
+
 
 **Schritte:**
 

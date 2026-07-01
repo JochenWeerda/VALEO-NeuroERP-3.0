@@ -319,6 +319,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Warteschlange in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Warteschlange — Bedienoberfläche](img/annahme__warteschlange.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Warteschlange** öffnen (`/annahme/warteschlange`).
@@ -394,6 +397,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Liste — Bedienoberfläche](img/waage__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/waage/liste`).
@@ -416,6 +422,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/waage/neu` · **Modul:** `@/pages/waage/liste`
 
 **Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/waage__neu.webp)
+
 
 **Schritte:**
 

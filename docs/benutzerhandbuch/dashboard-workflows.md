@@ -674,6 +674,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Flow Spine Studio in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Flow Spine Studio — Bedienoberfläche](img/workflow__flow-spine-studio.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Flow Spine Studio** öffnen (`/workflow/flow-spine-studio`).

@@ -291,6 +291,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Umsatzsteuervoranmeldung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Umsatzsteuervoranmeldung — Bedienoberfläche](img/export__umsatzsteuervoranmeldung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Umsatzsteuervoranmeldung** öffnen (`/export/umsatzsteuervoranmeldung`).
@@ -313,6 +316,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/export/ustva` · **Modul:** `@/pages/export/umsatzsteuervoranmeldung`
 
 **Ziel:** Ustva in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Ustva — Bedienoberfläche](img/export__ustva.webp)
+
 
 **Schritte:**
 
@@ -2988,6 +2994,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/finance/payment-run/:id` · **Modul:** `@/pages/finance/payment-run-native`
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/finance__payment-run__demo-1.webp)
+
 
 **Schritte:**
 

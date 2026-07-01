@@ -40,7 +40,9 @@ export async function assessPageState(page: Page): Promise<PageRenderState> {
       bodyText,
     )
 
-    const main = document.querySelector('main, [role="main"]')
+    const main =
+      document.querySelector('main, [role="main"]') ??
+      document.querySelector('[data-page-surface], .min-h-screen')
     const mainText = ((main as HTMLElement | null)?.innerText ?? '').replace(/\s+/g, ' ').trim()
 
     const substantiveSelectors = [
@@ -73,7 +75,10 @@ export async function assessPageState(page: Page): Promise<PageRenderState> {
     }
 
     if (!main || !isVisible(main)) {
-      return 'empty'
+      const bodyTextLen = bodyText.length
+      if (bodyTextLen < 50) {
+        return 'empty'
+      }
     }
 
     if (!hasSubstantiveContent && contentText.length < 50) {

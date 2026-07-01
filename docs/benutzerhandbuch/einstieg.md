@@ -512,6 +512,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** :Number in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![:Number — Bedienoberfläche](img/verify__demo-1__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Number** öffnen (`/verify/:domain/:number`).
@@ -534,6 +537,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/verify/:domain/:number/:hash` · **Modul:** `@/pages/public/verify`
 
 **Ziel:** :Hash in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Hash — Bedienoberfläche](img/verify__demo-1__demo-1__demo-1.webp)
+
 
 **Schritte:**
 

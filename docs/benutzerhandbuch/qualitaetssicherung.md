@@ -237,6 +237,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Labor Auftrag in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Labor Auftrag — Bedienoberfläche](img/qualitaet__labor-auftrag.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Labor Auftrag** öffnen (`/qualitaet/labor-auftrag`).
@@ -389,6 +392,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/qualitaet/reklamationen` · **Modul:** `@/pages/qualitaet/reklamationen`
 
 **Ziel:** Reklamationen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Reklamationen — Bedienoberfläche](img/qualitaet__reklamationen.webp)
+
 
 **Schritte:**
 

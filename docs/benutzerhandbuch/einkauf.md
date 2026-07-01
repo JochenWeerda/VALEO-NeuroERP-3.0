@@ -1445,6 +1445,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Gutschriften Belastungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Gutschriften Belastungen — Bedienoberfläche](img/einkauf__gutschriften-belastungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Gutschriften Belastungen** öffnen (`/einkauf/gutschriften-belastungen`).
@@ -1467,6 +1470,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/einkauf/gutschriften-belastungen/:type` · **Modul:** `@/pages/einkauf/gutschriften-belastungen`
 
 **Ziel:** :Type in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Type — Bedienoberfläche](img/einkauf__gutschriften-belastungen__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1828,6 +1834,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 **Route:** `/einkauf/rechnungen/:id` · **Modul:** `@/pages/einkauf/rechnung-eingang-erfassung`
 
 **Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__rechnungen__demo-1.webp)
+
 
 **Schritte:**
 

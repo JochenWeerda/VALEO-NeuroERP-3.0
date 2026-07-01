@@ -319,6 +319,9 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Ziel:** Drucken in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
+![Drucken — Bedienoberfläche](img/etiketten__drucken.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Drucken** öffnen (`/etiketten/drucken`).

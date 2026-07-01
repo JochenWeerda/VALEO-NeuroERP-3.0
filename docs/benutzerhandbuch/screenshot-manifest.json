@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T05:09:53.760Z",
+  "generatedAt": "2026-07-01T09:33:35.583Z",
   "routeCount": 832,
   "policy": {
     "crop": "main-content-element",
@@ -279,36 +279,34 @@
       "path": "agrar/biostimulanzien-stamm/:id",
       "slug": "agrar__biostimulanzien-stamm__demo-1",
       "module": "@/pages/agrar/biostimulanzien-liste",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Capture-Bereich zu klein (912×162)",
-          "Capture-Bereich zu klein (912×162)"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 912,
-          "height": 162,
-          "textLength": 117,
-          "headingCount": 1,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 133,
+          "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 1
+          "substantiveCount": 4
         }
       },
-      "capturedAt": "2026-07-01T04:44:30.999Z",
+      "capturedAt": "2026-07-01T09:02:00.973Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (596×93)",
-        "width": 596,
-        "height": 93
-      },
-      "detail": "zu klein (596×93)"
+        "ok": true,
+        "reason": "ok",
+        "width": 1216,
+        "height": 656,
+        "bgRatio": 0.426,
+        "detailRatio": 0.161
+      }
     },
     {
       "path": "agrar/bodenprobe/:id",
@@ -512,36 +510,36 @@
       "path": "agrar/duenger-stamm",
       "slug": "agrar__duenger-stamm",
       "module": "@/pages/agrar/duenger-stamm",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
-        "autoPass": false,
+        "autoPass": true,
         "reviewRequired": false,
         "issues": [
-          "Capture-Bereich zu klein (878×156)",
           "Capture-Bereich zu klein (878×156)"
         ],
         "metrics": {
-          "captureSelector": "main [role=\"tabpanel\"]",
-          "width": 878,
-          "height": 156,
-          "textLength": 146,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 147,
           "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 5
         }
       },
-      "capturedAt": "2026-07-01T04:44:46.077Z",
+      "capturedAt": "2026-07-01T09:02:02.387Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (878×154)",
-        "width": 878,
-        "height": 154
-      },
-      "detail": "zu klein (878×154)"
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.938,
+        "detailRatio": 0.056
+      }
     },
     {
       "path": "agrar/duenger-stamm/:id",
@@ -1582,54 +1580,66 @@
       "path": "agrar/kunden-schlagkartei",
       "slug": "agrar__kunden-schlagkartei",
       "module": "@/pages/agrar/kunden-schlagkartei",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main [role=\"tabpanel\"]",
-          "width": 928,
-          "height": 184,
-          "textLength": 0,
-          "headingCount": 0,
+          "captureSelector": "main",
+          "width": 1040,
+          "height": 664,
+          "textLength": 311,
+          "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 7
         }
+      },
+      "capturedAt": "2026-07-01T09:02:03.903Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.96,
+        "detailRatio": 0.033
       }
     },
     {
       "path": "agrar/kunden-schlagkartei/:kunden_nr",
       "slug": "agrar__kunden-schlagkartei__demo-1",
       "module": "@/pages/agrar/kunden-schlagkartei",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main [role=\"tabpanel\"]",
-          "width": 928,
-          "height": 184,
-          "textLength": 0,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 133,
           "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 4
         }
+      },
+      "capturedAt": "2026-07-01T09:02:05.539Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.961,
+        "detailRatio": 0.032
       }
     },
     {
@@ -2265,36 +2275,34 @@
       "path": "agrar/saatgut-liste",
       "slug": "agrar__saatgut-liste",
       "module": "@/pages/agrar/saatgut-liste",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Capture-Bereich zu klein (864×162)",
-          "Capture-Bereich zu klein (864×162)"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 864,
-          "height": 162,
-          "textLength": 117,
-          "headingCount": 1,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 147,
+          "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 1
+          "substantiveCount": 5
         }
       },
-      "capturedAt": "2026-07-01T04:46:15.283Z",
+      "capturedAt": "2026-07-01T09:02:07.107Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (596×92)",
-        "width": 596,
-        "height": 92
-      },
-      "detail": "zu klein (596×92)"
+        "ok": true,
+        "reason": "ok",
+        "width": 1216,
+        "height": 656,
+        "bgRatio": 0.426,
+        "detailRatio": 0.162
+      }
     },
     {
       "path": "agrar/saatgut-stamm",
@@ -3391,36 +3399,34 @@
       "path": "annahme/warteschlange",
       "slug": "annahme__warteschlange",
       "module": "@/pages/annahme/warteschlange",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Capture-Bereich zu klein (912×164)",
-          "Capture-Bereich zu klein (912×164)"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 912,
-          "height": 164,
-          "textLength": 191,
-          "headingCount": 1,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 133,
+          "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 2
+          "substantiveCount": 4
         }
       },
-      "capturedAt": "2026-07-01T04:47:02.919Z",
+      "capturedAt": "2026-07-01T09:14:19.480Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (862×104)",
-        "width": 862,
-        "height": 104
-      },
-      "detail": "zu klein (862×104)"
+        "ok": true,
+        "reason": "ok",
+        "width": 1216,
+        "height": 656,
+        "bgRatio": 0.751,
+        "detailRatio": 0.218
+      }
     },
     {
       "path": "artikel",
@@ -8343,33 +8349,133 @@
       "path": "docflow/artefakt-freigabe",
       "slug": "docflow__artefakt-freigabe",
       "module": "@/pages/docflow/artefakt-freigabe",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "empty"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 151,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 5
+        }
+      },
+      "capturedAt": "2026-07-01T09:24:56.573Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1216,
+        "height": 643,
+        "bgRatio": 0.978,
+        "detailRatio": 0.018
+      }
     },
     {
       "path": "docflow/gobd-export",
       "slug": "docflow__gobd-export",
       "module": "@/pages/docflow/gobd-export",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "empty"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main",
+          "width": 1040,
+          "height": 664,
+          "textLength": 275,
+          "headingCount": 2,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 6
+        }
+      },
+      "capturedAt": "2026-07-01T09:24:57.885Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.959,
+        "detailRatio": 0.036
+      }
     },
     {
       "path": "docflow/nachweisraum",
       "slug": "docflow__nachweisraum",
       "module": "@/pages/docflow/nachweisraum",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "empty"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main",
+          "width": 1040,
+          "height": 664,
+          "textLength": 300,
+          "headingCount": 2,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 6
+        }
+      },
+      "capturedAt": "2026-07-01T09:24:59.576Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.961,
+        "detailRatio": 0.034
+      }
     },
     {
       "path": "docflow/wiedervorlagen",
       "slug": "docflow__wiedervorlagen",
       "module": "@/pages/docflow/wiedervorlagen",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "empty"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 148,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 5
+        }
+      },
+      "capturedAt": "2026-07-01T09:25:01.011Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.954,
+        "detailRatio": 0.041
+      }
     },
     {
       "path": "document",
@@ -11089,36 +11195,34 @@
       "path": "export/ustva",
       "slug": "export__ustva",
       "module": "@/pages/export/umsatzsteuervoranmeldung",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Capture-Bereich zu klein (864×151)",
-          "Capture-Bereich zu klein (864×151)"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 864,
-          "height": 151,
-          "textLength": 148,
+          "captureSelector": "[data-page-surface]",
+          "width": 928,
+          "height": 278,
+          "textLength": 187,
           "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 3
         }
       },
-      "capturedAt": "2026-07-01T04:55:38.403Z",
+      "capturedAt": "2026-07-01T09:18:21.032Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (810×81)",
-        "width": 810,
-        "height": 81
-      },
-      "detail": "zu klein (810×81)"
+        "ok": true,
+        "reason": "ok",
+        "width": 835,
+        "height": 199,
+        "bgRatio": 0.89,
+        "detailRatio": 0.053
+      }
     },
     {
       "path": "fibu",
@@ -14490,9 +14594,34 @@
       "path": "finance/payment-run/:id",
       "slug": "finance__payment-run__demo-1",
       "module": "@/pages/finance/payment-run-native",
-      "status": "error",
-      "approval": "rejected",
-      "detail": "locator.screenshot: Element is not attached to the DOM\nCall log:\n\u001b[2m  - taking element screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fon"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main",
+          "width": 1040,
+          "height": 664,
+          "textLength": 154,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 5
+        }
+      },
+      "capturedAt": "2026-07-01T09:06:12.144Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.974,
+        "detailRatio": 0.022
+      }
     },
     {
       "path": "finance/payments",
@@ -14960,8 +15089,8 @@
       "path": "foerderung/antrag/:id",
       "slug": "foerderung__antrag__demo-1",
       "module": "@/pages/foerderung/antrag",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "approved",
@@ -14969,24 +15098,25 @@
         "reviewRequired": false,
         "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 864,
-          "height": 231,
-          "textLength": 142,
+          "captureSelector": "[data-page-surface]",
+          "width": 928,
+          "height": 358,
+          "textLength": 194,
           "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 4
         }
       },
-      "capturedAt": "2026-07-01T04:58:29.027Z",
+      "capturedAt": "2026-07-01T09:18:22.202Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (809×157)",
-        "width": 809,
-        "height": 157
-      },
-      "detail": "zu klein (809×157)"
+        "ok": true,
+        "reason": "ok",
+        "width": 835,
+        "height": 276,
+        "bgRatio": 0.905,
+        "detailRatio": 0.053
+      }
     },
     {
       "path": "foerderung/liste",
@@ -18360,9 +18490,34 @@
       "path": "lager/umlagerung",
       "slug": "lager__umlagerung",
       "module": "@/pages/lager/lagerbewegungen",
-      "status": "error",
-      "approval": "rejected",
-      "detail": "locator.screenshot: Element is not attached to the DOM\nCall log:\n\u001b[2m  - taking element screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fon"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main",
+          "width": 1040,
+          "height": 664,
+          "textLength": 495,
+          "headingCount": 2,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 6
+        }
+      },
+      "capturedAt": "2026-07-01T09:06:15.749Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.921,
+        "detailRatio": 0.073
+      }
     },
     {
       "path": "login",
@@ -19886,27 +20041,33 @@
       "path": "portal/anfragen",
       "slug": "portal__anfragen",
       "module": "@/pages/portal/anfragen",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 486,
+          "textLength": 213,
+          "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 8
         }
+      },
+      "capturedAt": "2026-07-01T09:06:17.785Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1248,
+        "height": 429,
+        "bgRatio": 0.939,
+        "detailRatio": 0.055
       }
     },
     {
@@ -19946,27 +20107,33 @@
       "path": "portal/dokumente",
       "slug": "portal__dokumente",
       "module": "@/pages/portal/dokumente",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main [role=\"tabpanel\"]",
-          "width": 1248,
-          "height": 188,
-          "textLength": 24,
-          "headingCount": 0,
+          "captureSelector": "main",
+          "width": 1280,
+          "height": 937,
+          "textLength": 760,
+          "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 7
         }
+      },
+      "capturedAt": "2026-07-01T09:33:35.581Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1280,
+        "height": 910,
+        "bgRatio": 0.835,
+        "detailRatio": 0.049
       }
     },
     {
@@ -20006,27 +20173,33 @@
       "path": "portal/feldbuch",
       "slug": "portal__feldbuch",
       "module": "@/pages/portal/feldbuch",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 611,
+          "textLength": 447,
+          "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 7
         }
+      },
+      "capturedAt": "2026-07-01T09:18:24.811Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1248,
+        "height": 554,
+        "bgRatio": 0.645,
+        "detailRatio": 0.229
       }
     },
     {
@@ -20099,54 +20272,66 @@
       "path": "portal/naehrstoffbilanzen",
       "slug": "portal__naehrstoffbilanzen",
       "module": "@/pages/portal/naehrstoffbilanzen",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 1354,
+          "textLength": 1053,
+          "headingCount": 4,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 2
         }
+      },
+      "capturedAt": "2026-07-01T09:06:22.273Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1280,
+        "height": 1327,
+        "bgRatio": 0.821,
+        "detailRatio": 0.082
       }
     },
     {
       "path": "portal/onboarding",
       "slug": "portal__onboarding",
       "module": "@/pages/portal/onboarding",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 1211,
+          "textLength": 872,
+          "headingCount": 4,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 10
         }
+      },
+      "capturedAt": "2026-07-01T09:06:24.212Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1280,
+        "height": 1161,
+        "bgRatio": 0.921,
+        "detailRatio": 0.053
       }
     },
     {
@@ -20318,81 +20503,99 @@
       "path": "portal/shop",
       "slug": "portal__shop",
       "module": "@/pages/portal/shop",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 262,
+          "textLength": 155,
+          "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 1
         }
+      },
+      "capturedAt": "2026-07-01T09:25:04.645Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1248,
+        "height": 214,
+        "bgRatio": 0.957,
+        "detailRatio": 0.033
       }
     },
     {
       "path": "portal/vertraege",
       "slug": "portal__vertraege",
       "module": "@/pages/portal/vertraege",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 324,
+          "textLength": 119,
+          "headingCount": 1,
           "spinnerCount": 0,
           "clippedCount": 0,
           "substantiveCount": 0
         }
+      },
+      "capturedAt": "2026-07-01T09:06:26.974Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1248,
+        "height": 243,
+        "bgRatio": 0.932,
+        "detailRatio": 0.06
       }
     },
     {
       "path": "portal/whatsapp-simulator",
       "slug": "portal__whatsapp-simulator",
       "module": "@/pages/portal/whatsapp-simulator",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
           "captureSelector": "main",
           "width": 1280,
-          "height": 768,
-          "textLength": 0,
-          "headingCount": 0,
+          "height": 700,
+          "textLength": 591,
+          "headingCount": 3,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 10
         }
+      },
+      "capturedAt": "2026-07-01T09:06:28.807Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1280,
+        "height": 660,
+        "bgRatio": 0.904,
+        "detailRatio": 0.074
       }
     },
     {
@@ -21620,27 +21823,33 @@
       "path": "qualitaet/labor-auftrag",
       "slug": "qualitaet__labor-auftrag",
       "module": "@/pages/qualitaet/labor-auftrag",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "Zu wenig sichtbarer Maskeninhalt",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "rejected",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Zu wenig sichtbarer Maskeninhalt"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 864,
-          "height": 234,
-          "textLength": 26,
-          "headingCount": 1,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 147,
+          "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 0
+          "substantiveCount": 5
         }
+      },
+      "capturedAt": "2026-07-01T09:18:27.278Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.909,
+        "detailRatio": 0.053
       }
     },
     {
@@ -21812,35 +22021,34 @@
       "path": "qualitaet/reklamationen",
       "slug": "qualitaet__reklamationen",
       "module": "@/pages/qualitaet/reklamationen",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
+        "approval": "approved",
         "autoPass": true,
         "reviewRequired": false,
-        "issues": [
-          "Capture-Bereich zu klein (912×164)"
-        ],
+        "issues": [],
         "metrics": {
-          "captureSelector": "main",
-          "width": 1040,
-          "height": 664,
-          "textLength": 169,
-          "headingCount": 0,
+          "captureSelector": "[data-page-surface]",
+          "width": 976,
+          "height": 535,
+          "textLength": 659,
+          "headingCount": 7,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 5
+          "substantiveCount": 3
         }
       },
-      "capturedAt": "2026-07-01T05:04:43.699Z",
+      "capturedAt": "2026-07-01T09:18:28.966Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (862×104)",
-        "width": 862,
-        "height": 104
-      },
-      "detail": "zu klein (862×104)"
+        "ok": true,
+        "reason": "ok",
+        "width": 944,
+        "height": 515,
+        "bgRatio": 0.917,
+        "detailRatio": 0.071
+      }
     },
     {
       "path": "reports",
@@ -24785,17 +24993,67 @@
       "path": "verify/:domain/:number",
       "slug": "verify__demo-1__demo-1",
       "module": "@/pages/public/verify",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "empty"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": ".min-h-screen",
+          "width": 1280,
+          "height": 720,
+          "textLength": 75,
+          "headingCount": 1,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-01T09:30:55.391Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1280,
+        "height": 720,
+        "bgRatio": 0.994,
+        "detailRatio": 0.006
+      }
     },
     {
       "path": "verify/:domain/:number/:hash",
       "slug": "verify__demo-1__demo-1__demo-1",
       "module": "@/pages/public/verify",
-      "status": "rejected",
-      "approval": "rejected",
-      "detail": "empty"
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": ".min-h-screen",
+          "width": 1280,
+          "height": 720,
+          "textLength": 75,
+          "headingCount": 1,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-01T09:31:55.630Z",
+      "imageQc": {
+        "ok": true,
+        "reason": "ok",
+        "width": 1280,
+        "height": 720,
+        "bgRatio": 0.994,
+        "detailRatio": 0.006
+      }
     },
     {
       "path": "verkauf",
@@ -26024,36 +26282,36 @@
       "path": "waage/neu",
       "slug": "waage__neu",
       "module": "@/pages/waage/liste",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
-        "autoPass": false,
+        "autoPass": true,
         "reviewRequired": false,
         "issues": [
-          "Capture-Bereich zu klein (912×164)",
           "Capture-Bereich zu klein (912×164)"
         ],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 912,
-          "height": 164,
-          "textLength": 153,
-          "headingCount": 1,
+          "captureSelector": "main",
+          "width": 1216,
+          "height": 656,
+          "textLength": 137,
+          "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
-          "substantiveCount": 1
+          "substantiveCount": 5
         }
       },
-      "capturedAt": "2026-07-01T05:09:06.718Z",
+      "capturedAt": "2026-07-01T09:08:34.165Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (862×104)",
-        "width": 862,
-        "height": 104
-      },
-      "detail": "zu klein (862×104)"
+        "ok": true,
+        "reason": "ok",
+        "width": 1015,
+        "height": 641,
+        "bgRatio": 0.894,
+        "detailRatio": 0.075
+      }
     },
     {
       "path": "waage/vorlagen",
@@ -26686,18 +26944,18 @@
       "path": "workflow/flow-spine-studio",
       "slug": "workflow__flow-spine-studio",
       "module": "@/pages/workflow/flow-spine-studio",
-      "status": "rejected",
-      "approval": "rejected",
+      "status": "ok",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
         "issues": [],
         "metrics": {
-          "captureSelector": "main section",
-          "width": 912,
-          "height": 188,
+          "captureSelector": "[data-page-surface]",
+          "width": 976,
+          "height": 535,
           "textLength": 116,
           "headingCount": 1,
           "spinnerCount": 0,
@@ -26705,14 +26963,15 @@
           "substantiveCount": 0
         }
       },
-      "capturedAt": "2026-07-01T05:09:33.692Z",
+      "capturedAt": "2026-07-01T09:20:30.477Z",
       "imageQc": {
-        "ok": false,
-        "reason": "zu klein (862×132)",
-        "width": 862,
-        "height": 132
-      },
-      "detail": "zu klein (862×132)"
+        "ok": true,
+        "reason": "ok",
+        "width": 919,
+        "height": 484,
+        "bgRatio": 0.854,
+        "detailRatio": 0.017
+      }
     },
     {
       "path": "workflow/leitstand",
@@ -27210,5 +27469,5 @@
       }
     }
   ],
-  "updatedAt": "2026-07-01T08:57:20.667966+00:00"
+  "updatedAt": "2026-07-01T09:33:50.359443+00:00"
 }
