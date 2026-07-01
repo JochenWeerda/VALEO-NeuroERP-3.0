@@ -39,6 +39,8 @@ class TestUIX051NativeWrapperPages:
         "einkauf/supplier-native.tsx",
         "crm/opportunity-native.tsx",
         "lager/article-stock-native.tsx",
+        "sales/sales-order-native.tsx",
+        "agrar/kontrakt-native.tsx",
     ])
     def test_native_page_file_exists(self, rel_path: str):
         page = PAGES_DIR / rel_path
@@ -49,6 +51,8 @@ class TestUIX051NativeWrapperPages:
         ("einkauf/supplier-native.tsx", "einkauf/supplier"),
         ("crm/opportunity-native.tsx", "crm/opportunity"),
         ("lager/article-stock-native.tsx", "lager/article-stock"),
+        ("sales/sales-order-native.tsx", "sales/sales-order"),
+        ("agrar/kontrakt-native.tsx", "agrar/kontrakte"),
     ])
     def test_native_page_uses_correct_screen_id(self, rel_path: str, expected_screen_id: str):
         content = (PAGES_DIR / rel_path).read_text(encoding="utf-8")
@@ -69,6 +73,9 @@ class TestUIX051RouteAliases:
         ("crm/opportunity/:id", "opportunity-native"),
         ("lager/article-stock/:id", "article-stock-native"),
         ("lager/artikel/:id", "article-stock-native"),
+        ("sales/sales-order/:id", "sales-order-native"),
+        ("agrar/kontrakt/:id", "kontrakt-native"),
+        ("agrar/kontrakte/:id", "kontrakt-native"),
     ])
     def test_route_alias_registered(self, path: str, expected_module_fragment: str):
         aliases = _load_aliases()

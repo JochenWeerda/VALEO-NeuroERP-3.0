@@ -45,6 +45,11 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-048 | Agent Safety auf alle 26 nativen SDs ausgeweitet (dynamisch aus Registry) | ✅ 219/219 | `test_uix046_048_command_endpoints_safety.py` |
 | UIX-049 | CI-Workflow: BFF-Build-Stage + UIX-050/053-Tests + `--no-cov` überall | ✅ | `.github/workflows/universal-mask-ci.yml` |
 | UIX-050/053 | 5 weitere CommandEndpoints (stornieren, bestellen, wareneingang, abschliessen, qualifizieren) + AuditReasonDialog + dryRun-Preview + BFF MCP-Tool | ✅ | `mask_actions.py`, `maskActions.ts` |
+| UIX-051 | Alle 26 nativen SDs mit `/:id`-Routen + native Wrapper (sales-order, kontrakte) | ✅ | `d87de90a5`, `test_uix051_legacy_route_migration.py` |
+| UIX-054 | Finale Route-Wahrheit: `route-inventory.gen.json` + `route-tree.gen.tsx` | ✅ lokal | `test_uix054_route_inventory_verification.py` |
+| UIX-055 | GitHub Actions `universal-mask-ci` + `workflow_dispatch` | ⏳ | Push/CI-Run ausstehend |
+| UIX-056 | Browser-Smoke native `/:id`-Routen (5 repräsentative Masken) | ✅ lokal | `uix-056-native-route-smoke.spec.ts` |
+| UIX-057 | Rollback-/Fallback-Matrix | ✅ | [`uix-057-native-route-rollback-matrix.md`](uix-057-native-route-rollback-matrix.md) |
 
 ## Architektur (Single Source of Truth)
 
@@ -118,6 +123,7 @@ Backend: `_check_readiness()` in `app/api/v1/endpoints/mask_screen_definition.py
    - [`open-gaps-and-known-issues.md`](../../project-context/open-gaps-and-known-issues.md)
    - [`active-workboard.md`](../../agent-ops/active-workboard.md)
    - [`uix-043-mask-migration-inventory.md`](uix-043-mask-migration-inventory.md) — vollständige Inventur aller 26 SDs + Exemptions
+   - [`uix-057-native-route-rollback-matrix.md`](uix-057-native-route-rollback-matrix.md) — Legacy-Fallback je native Route
 
 ## Registry-Übersicht (Stand 2026-06-30)
 
@@ -172,7 +178,10 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | Universal-Masken Playwright | 2026-06-30 | ✅ 8/8 | CRM Customer Pilot, Sales Order Pilot, Mask Render Performance |
 | FilterPlan Playwright | 2026-06-30 | ✅ 1/1 | `universal-mask-filter-plan.spec.ts` |
 | Frontend vitest (gesamt) | — | ausstehend | CI-Job `continue-on-error: true` |
-| GitHub Actions CI | 2026-07-01 | ⏳ | Workflow aktualisiert: 4 Jobs (backend/frontend/bff/e2e-smoke) — nächster Push triggert Run |
+| pytest UIX-051 Route Migration | 2026-07-01 | ✅ 49/49 | `test_uix051_legacy_route_migration.py` |
+| pytest UIX-054 Route Inventory | 2026-07-01 | ✅ 46/46 | `route-inventory.gen.json` + native Priorität |
+| UIX-056 Native Route Playwright | 2026-07-01 | ✅ 6/6 lokal | `uix-056-native-route-smoke.spec.ts` |
+| GitHub Actions universal-mask-ci | 2026-07-01 | ⏳ | `workflow_dispatch` + Push triggert Run; Ergebnis nach CI-Run eintragen |
 
 ## Bewertung (Stakeholder-Audit 2026-06-29)
 

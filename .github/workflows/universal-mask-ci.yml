@@ -16,7 +16,11 @@ on:
       - 'tests/test_uix04*.py'
       - 'tests/test_uix05*.py'
       - 'packages/frontend-web/src/app/route-aliases.json'
+      - 'packages/frontend-web/src/app/routing/route-inventory.gen.json'
+      - 'packages/frontend-web/src/app/routing/route-tree.gen.tsx'
+      - 'packages/frontend-web/scripts/generate-tanstack-routes.mjs'
       - 'packages/frontend-web/src/pages/**/*-native.tsx'
+      - 'packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts'
       - '.github/workflows/universal-mask-ci.yml'
   pull_request:
     branches: [main]
@@ -30,7 +34,11 @@ on:
       - 'tests/test_uix04*.py'
       - 'tests/test_uix05*.py'
       - 'packages/frontend-web/src/app/route-aliases.json'
+      - 'packages/frontend-web/src/app/routing/route-inventory.gen.json'
+      - 'packages/frontend-web/scripts/generate-tanstack-routes.mjs'
       - 'packages/frontend-web/src/pages/**/*-native.tsx'
+      - 'packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts'
+  workflow_dispatch:
 
 jobs:
   backend-mask-tests:
@@ -74,6 +82,12 @@ jobs:
         run: |
           pytest \
             tests/test_uix051_legacy_route_migration.py \
+            -v --tb=short --no-cov -m unit
+
+      - name: Run UIX-054 Route Inventory verification
+        run: |
+          pytest \
+            tests/test_uix054_route_inventory_verification.py \
             -v --tb=short --no-cov -m unit
 
       - name: Run FilterPlan contract tests (UIX-044)
@@ -167,7 +181,11 @@ jobs:
 
       - name: Run Playwright smoke tests
         working-directory: packages/frontend-web
-        run: npx playwright test tests/e2e/universal-mask-filter-plan.spec.ts --project=chromium
+        run: |
+          npx playwright test \
+            tests/e2e/universal-mask-filter-plan.spec.ts \
+            tests/e2e/uix-056-native-route-smoke.spec.ts \
+            --project=chromium
         continue-on-error: true
         env:
           CI: true
