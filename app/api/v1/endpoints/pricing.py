@@ -19,6 +19,8 @@ from app.api.v1.schemas.base import BaseSchema
 
 router = APIRouter(prefix="/pricing", tags=["pricing"])
 
+# Alias-Prefix für Frontend-Konvention /preise/* — wird in api.py parallel eingebunden.
+
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
@@ -231,4 +233,180 @@ async def calculate_price(
         contract_id=contract_id_result,
     )
 
+
+@router.get(
+    "/find",
+    response_model=PriceCalculationResponse,
+    summary="Preisfindung (Frontend-Alias für /calculate)",
+)
+async def find_price(
+    article_id: str = Query(...),
+    customer_id: Optional[str] = Query(None),
+    quantity: Decimal = Query(Decimal("1"), ge=Decimal("0")),
+    contract_id: Optional[str] = Query(None),
+    user_role: Optional[str] = Query(None),
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+):
+    """Frontend-Alias für /pricing/calculate — identische Logik."""
+    return await calculate_price(
+        article_id=article_id,
+        customer_id=customer_id,
+        quantity=quantity,
+        contract_id=contract_id,
+        user_role=user_role,
+        tenant_id=tenant_id,
+        db=db,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Staffelrabatte  GET/POST /pricing/staffelrabatte
+# ---------------------------------------------------------------------------
+
+class StaffelStufe(BaseModel):
+    ab_menge: Decimal = Field(..., ge=Decimal("0"), description="Ab dieser Menge gilt der Rabatt")
+    rabatt_prozent: Optional[Decimal] = Field(None, description="Rabatt in Prozent")
+    festpreis: Optional[Decimal] = Field(None, description="Festpreis statt Rabatt")
+
+
+class StaffelrabattIn(BaseModel):
+    artikel_id: Optional[str] = Field(None)
+    artikelgruppe: Optional[str] = Field(None)
+    kunden_id: Optional[str] = Field(None)
+    kundengruppe: Optional[str] = Field(None)
+    gueltig_von: Optional[str] = Field(None)
+    gueltig_bis: Optional[str] = Field(None)
+    stufen: list[StaffelStufe] = Field(..., min_length=1)
+    bezeichnung: Optional[str] = Field(None)
+
+
+class StaffelrabattOut(BaseModel):
+    id: str
+    artikel_id: Optional[str]
+    artikelgruppe: Optional[str]
+    kunden_id: Optional[str]
+    kundengruppe: Optional[str]
+    gueltig_von: Optional[str]
+    gueltig_bis: Optional[str]
+    stufen: list[StaffelStufe]
+    bezeichnung: Optional[str]
+    tenant_id: str
+    status: str
+
+
+@router.get(
+    "/staffelrabatte",
+    response_model=list[StaffelrabattOut],
+    summary="Staffelrabatte auflisten",
+)
+async def list_staffelrabatte(
+    artikel_id: Optional[str] = Query(None),
+    kunden_id: Optional[str] = Query(None),
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+) -> list[StaffelrabattOut]:
+    """Staffelrabatte abfragen — filterbar nach Artikel und Kunde."""
+    import json as _json
+
+    conditions = ["tenant_id = :tenant_id"]
+    params: dict = {"tenant_id": tenant_id}
+    if artikel_id:
+        conditions.append("artikel_id = :artikel_id")
+        params["artikel_id"] = artikel_id
+    if kunden_id:
+        conditions.append("kunden_id = :kunden_id")
+        params["kunden_id"] = kunden_id
+
+    where = " AND ".join(conditions)
+    rows = db.execute(
+        text(f"SELECT * FROM domain_pricing.staffelrabatte WHERE {where} ORDER BY created_at DESC"),
+        params,
+    ).mappings().all()
+
+    result = []
+    for r in rows:
+        stufen_raw = r["stufen"]
+        if isinstance(stufen_raw, str):
+            stufen_raw = _json.loads(stufen_raw)
+        result.append(
+            StaffelrabattOut(
+                id=r["id"],
+                artikel_id=r.get("artikel_id"),
+                artikelgruppe=r.get("artikelgruppe"),
+                kunden_id=r.get("kunden_id"),
+                kundengruppe=r.get("kundengruppe"),
+                gueltig_von=str(r["gueltig_von"]) if r.get("gueltig_von") else None,
+                gueltig_bis=str(r["gueltig_bis"]) if r.get("gueltig_bis") else None,
+                stufen=[StaffelStufe(**s) for s in stufen_raw],
+                bezeichnung=r.get("bezeichnung"),
+                tenant_id=r["tenant_id"],
+                status=r.get("status", "aktiv"),
+            )
+        )
+    return result
+
+
+@router.post(
+    "/staffelrabatte",
+    response_model=StaffelrabattOut,
+    status_code=201,
+    summary="Staffelrabatt anlegen",
+)
+async def create_staffelrabatt(
+    payload: StaffelrabattIn,
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+) -> StaffelrabattOut:
+    """Staffelrabatt anlegen (Mengen-/Preisstufen für Artikel oder Artikelgruppe)."""
+    import json as _json
+    from uuid import uuid4 as _uuid4
+
+    if not payload.artikel_id and not payload.artikelgruppe:
+        raise HTTPException(status_code=422, detail="artikel_id oder artikelgruppe erforderlich")
+
+    new_id = str(_uuid4())
+    stufen_json = _json.dumps([s.model_dump(mode="json") for s in payload.stufen])
+
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_pricing.staffelrabatte
+                    (id, tenant_id, artikel_id, artikelgruppe, kunden_id, kundengruppe,
+                     gueltig_von, gueltig_bis, stufen, bezeichnung, status)
+                VALUES
+                    (:id, :tenant_id, :artikel_id, :artikelgruppe, :kunden_id, :kundengruppe,
+                     :gueltig_von, :gueltig_bis, :stufen::jsonb, :bezeichnung, 'aktiv')
+            """),
+            {
+                "id": new_id,
+                "tenant_id": tenant_id,
+                "artikel_id": payload.artikel_id,
+                "artikelgruppe": payload.artikelgruppe,
+                "kunden_id": payload.kunden_id,
+                "kundengruppe": payload.kundengruppe,
+                "gueltig_von": payload.gueltig_von,
+                "gueltig_bis": payload.gueltig_bis,
+                "stufen": stufen_json,
+                "bezeichnung": payload.bezeichnung,
+            },
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    return StaffelrabattOut(
+        id=new_id,
+        artikel_id=payload.artikel_id,
+        artikelgruppe=payload.artikelgruppe,
+        kunden_id=payload.kunden_id,
+        kundengruppe=payload.kundengruppe,
+        gueltig_von=payload.gueltig_von,
+        gueltig_bis=payload.gueltig_bis,
+        stufen=payload.stufen,
+        bezeichnung=payload.bezeichnung,
+        tenant_id=tenant_id,
+        status="aktiv",
+    )
 

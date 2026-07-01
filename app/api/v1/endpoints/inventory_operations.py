@@ -701,3 +701,188 @@ async def storno_bestandskorrektur(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# Lagerbestand-Abfrage  GET /lager/bestaende
+# ---------------------------------------------------------------------------
+
+class BestandItem(BaseModel):
+    article_id: str
+    article_number: Optional[str]
+    article_name: Optional[str]
+    warehouse_id: str
+    warehouse_name: Optional[str]
+    menge: float
+    einheit: Optional[str]
+    charge: Optional[str]
+    bestandswert: Optional[float]
+
+
+@router.get(
+    "/bestaende",
+    response_model=list[BestandItem],
+    tags=["lager"],
+    summary="Lagerbestände abfragen",
+)
+async def get_bestaende(
+    warehouse_id: Optional[str] = Query(None, description="Filter auf Lager"),
+    article_id: Optional[str] = Query(None, description="Filter auf Artikel"),
+    article_number: Optional[str] = Query(None, description="Filter auf Artikelnummer"),
+    charge: Optional[str] = Query(None, description="Filter auf Charge"),
+    only_positive: bool = Query(True, description="Nur positive Bestände"),
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+) -> list[BestandItem]:
+    """Aggregierte Lagerbestände aus StockMovements (Zugang - Abgang)."""
+    t_id = tenant_id or DEFAULT_TENANT
+
+    filters = ["sm.tenant_id = :tenant_id"]
+    params: dict[str, Any] = {"tenant_id": t_id}
+
+    if warehouse_id:
+        filters.append("sm.warehouse_id = :warehouse_id")
+        params["warehouse_id"] = warehouse_id
+    if article_id:
+        filters.append("sm.article_id = :article_id")
+        params["article_id"] = article_id
+    if article_number:
+        filters.append("a.article_number = :article_number")
+        params["article_number"] = article_number
+    if charge:
+        filters.append("sm.charge = :charge")
+        params["charge"] = charge
+
+    having = "HAVING SUM(sm.quantity) > 0" if only_positive else ""
+    where_clause = " AND ".join(filters)
+
+    rows = db.execute(
+        text(f"""
+            SELECT
+                sm.article_id,
+                a.article_number,
+                a.name AS article_name,
+                sm.warehouse_id,
+                w.name AS warehouse_name,
+                SUM(sm.quantity) AS menge,
+                a.base_unit AS einheit,
+                sm.charge,
+                SUM(sm.quantity * COALESCE(a.purchase_price, 0)) AS bestandswert
+            FROM domain_inventory.inventory_stock_movements sm
+            LEFT JOIN domain_inventory.articles a ON a.id = sm.article_id
+            LEFT JOIN domain_inventory.warehouses w ON w.id = sm.warehouse_id
+            WHERE {where_clause}
+            GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.base_unit, sm.charge
+            {having}
+            ORDER BY a.name, sm.warehouse_id
+        """),
+        params,
+    ).mappings().all()
+
+    return [BestandItem(**dict(r)) for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# Generische Lagerbuchung  POST /lager/bewegungen
+# ---------------------------------------------------------------------------
+
+class LagerbewegungIn(BaseModel):
+    article_id: str = Field(..., description="Artikel-ID")
+    warehouse_id: str = Field(..., description="Lager-ID")
+    quantity: float = Field(..., description="Menge (positiv=Zugang, negativ=Abgang)")
+    movement_type: str = Field(..., description="Typ: wareneingang|warenausgang|umbuchung|inventur")
+    charge: Optional[str] = Field(None)
+    reference_id: Optional[str] = Field(None, description="Belegnummer (Bestellung, Lieferschein, ...)")
+    reference_type: Optional[str] = Field(None, description="Belegtyp: bestellung|lieferschein|etc.")
+    unit_cost: Optional[float] = Field(None, description="Einstandspreis (optional)")
+    bemerkung: Optional[str] = Field(None)
+    buchungsdatum: Optional[date] = Field(None)
+
+
+class LagerbewegungOut(BaseModel):
+    id: str
+    article_id: str
+    warehouse_id: str
+    quantity: float
+    movement_type: str
+    charge: Optional[str]
+    reference_id: Optional[str]
+    reference_type: Optional[str]
+    unit_cost: Optional[float]
+    bemerkung: Optional[str]
+    buchungsdatum: date
+    status: str
+
+
+@router.post(
+    "/bewegungen",
+    response_model=LagerbewegungOut,
+    status_code=201,
+    tags=["lager"],
+    summary="Lagerbewegung buchen",
+)
+async def create_lagerbewegung(
+    payload: LagerbewegungIn,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+) -> LagerbewegungOut:
+    """Generische Lagerbuchung: Wareneingang, -ausgang, Umbuchung oder Inventur."""
+    t_id = tenant_id or DEFAULT_TENANT
+    from datetime import date as date_type
+
+    allowed_types = {"wareneingang", "warenausgang", "umbuchung", "inventur"}
+    if payload.movement_type not in allowed_types:
+        raise HTTPException(
+            status_code=422,
+            detail=f"movement_type muss eines von {allowed_types} sein",
+        )
+
+    buch_datum = payload.buchungsdatum or date_type.today()
+    movement_id = str(uuid4())
+
+    article = db.execute(
+        text("SELECT id FROM domain_inventory.articles WHERE id = :id AND tenant_id = :tid"),
+        {"id": payload.article_id, "tid": t_id},
+    ).scalar()
+    if not article:
+        raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
+
+    db.execute(
+        text("""
+            INSERT INTO domain_inventory.inventory_stock_movements
+                (id, tenant_id, article_id, warehouse_id, quantity, movement_type,
+                 charge, reference_id, reference_type, notes, booked_at)
+            VALUES
+                (:id, :tenant_id, :article_id, :warehouse_id, :quantity, :movement_type,
+                 :charge, :reference_id, :reference_type, :notes, :booked_at)
+        """),
+        {
+            "id": movement_id,
+            "tenant_id": t_id,
+            "article_id": payload.article_id,
+            "warehouse_id": payload.warehouse_id,
+            "quantity": payload.quantity,
+            "movement_type": payload.movement_type,
+            "charge": payload.charge,
+            "reference_id": payload.reference_id,
+            "reference_type": payload.reference_type,
+            "notes": payload.bemerkung,
+            "booked_at": buch_datum,
+        },
+    )
+    db.commit()
+
+    return LagerbewegungOut(
+        id=movement_id,
+        article_id=payload.article_id,
+        warehouse_id=payload.warehouse_id,
+        quantity=payload.quantity,
+        movement_type=payload.movement_type,
+        charge=payload.charge,
+        reference_id=payload.reference_id,
+        reference_type=payload.reference_type,
+        unit_cost=payload.unit_cost,
+        bemerkung=payload.bemerkung,
+        buchungsdatum=buch_datum,
+        status="posted",
+    )

@@ -501,6 +501,7 @@ api_router.include_router(
 )
 
 from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
+from .endpoints import scan as scan_module
 
 api_router.include_router(
     sales_delivery_notes.router,
@@ -516,6 +517,17 @@ api_router.include_router(
     pricing.router,
     tags=["pricing"]
 )
+
+# Preise-Alias: selber Router, zweiter Prefix für Frontend-Konvention /preise/*
+api_router.include_router(
+    pricing.router,
+    prefix="/preise",
+    tags=["pricing"],
+    include_in_schema=False,
+)
+
+# Mobile-Scan / Barcode
+api_router.include_router(scan_module.router)
 
 api_router.include_router(
     price_lists.router,
