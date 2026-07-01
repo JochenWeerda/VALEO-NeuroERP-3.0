@@ -177,7 +177,7 @@
       "slug": "agrar__biostimulanzien",
       "module": "@/pages/agrar/biostimulanzien-liste",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -245,7 +245,7 @@
       "slug": "agrar__biostimulanzien-stamm",
       "module": "@/pages/agrar/biostimulanzien-liste",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -548,7 +548,7 @@
       "slug": "agrar__duenger-stamm__demo-1",
       "module": "@/pages/agrar/duenger-stamm",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -748,7 +748,7 @@
       "slug": "agrar__duenger__stamm__demo-1",
       "module": "@/pages/agrar/duenger/stamm",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -783,7 +783,7 @@
       "slug": "agrar__duenger__stamm__demo-1__edit",
       "module": "@/pages/agrar/duenger/stamm",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -884,7 +884,7 @@
       "slug": "agrar__ernte-annahme-erfassung",
       "module": "@/pages/agrar/ernte-annahme-erfassung",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -919,7 +919,7 @@
       "slug": "agrar__ernte-annahme-erfassung__demo-1",
       "module": "@/pages/agrar/ernte-annahme-erfassung",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -954,7 +954,7 @@
       "slug": "agrar__ernte__demo-1",
       "module": "@/pages/agrar/ernte-annahme-erfassung",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -1736,7 +1736,7 @@
       "slug": "agrar__pflanzenschutz__applikation",
       "module": "@/pages/agrar/pflanzenschutz/applikation",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -2231,7 +2231,7 @@
       "slug": "agrar__saatgut",
       "module": "@/pages/agrar/saatgut-liste",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -2433,7 +2433,7 @@
       "slug": "agrar__saatgut__liste",
       "module": "@/pages/agrar/saatgut/liste",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -2567,7 +2567,7 @@
       "slug": "agrar__saatgut__stamm",
       "module": "@/pages/agrar/saatgut/stamm",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -2600,7 +2600,7 @@
       "slug": "agrar__saatgut__stamm__demo-1",
       "module": "@/pages/agrar/saatgut/stamm",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -9795,7 +9795,7 @@
       "slug": "einkauf__gutschriften-belastungen",
       "module": "@/pages/einkauf/gutschriften-belastungen",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -9830,7 +9830,7 @@
       "slug": "einkauf__gutschriften-belastungen__demo-1",
       "module": "@/pages/einkauf/gutschriften-belastungen",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -10294,7 +10294,7 @@
       "slug": "einkauf__rechnungen__demo-1",
       "module": "@/pages/einkauf/rechnung-eingang-erfassung",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -11022,7 +11022,7 @@
       "slug": "etiketten__drucken",
       "module": "@/pages/etiketten/drucken",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -11055,7 +11055,7 @@
       "slug": "export__umsatzsteuervoranmeldung",
       "module": "@/pages/export/umsatzsteuervoranmeldung",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -18128,7 +18128,7 @@
       "slug": "lager__permanente-inventur",
       "module": "@/pages/lager/permanente-inventur",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -23068,7 +23068,7 @@
       "slug": "sales__order-editor__demo-1",
       "module": "@/pages/sales/order-editor",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -25990,7 +25990,7 @@
       "slug": "waage__liste",
       "module": "@/pages/waage/liste",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
         "approval": "pending",
@@ -27210,5 +27210,5 @@
       }
     }
   ],
-  "updatedAt": "2026-07-01T05:20:29.038385+00:00"
+  "updatedAt": "2026-07-01T08:57:20.667966+00:00"
 }

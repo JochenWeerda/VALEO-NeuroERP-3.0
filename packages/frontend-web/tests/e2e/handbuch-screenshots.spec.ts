@@ -48,6 +48,16 @@ function safeUnlink(filePath: string): void {
   }
 }
 
+function loadExistingManifest(): ManifestEntry[] {
+  if (!fs.existsSync(MANIFEST_PATH)) return []
+  try {
+    const data = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as { entries?: ManifestEntry[] }
+    return data.entries ?? []
+  } catch {
+    return []
+  }
+}
+
 function writeManifest(entries: ManifestEntry[]): void {
   fs.mkdirSync(path.dirname(MANIFEST_PATH), { recursive: true })
   fs.writeFileSync(
@@ -94,7 +104,10 @@ async function captureRoute(
     })
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45_000 })
 
-    const renderState = await waitUntilRenderable(page, 45_000)
+    const renderState = await waitUntilRenderable(
+      page,
+      Number(process.env.HANDBUCH_RENDER_TIMEOUT_MS ?? 45_000),
+    )
     if (renderState !== 'ready') {
       safeUnlink(png)
       safeUnlink(webp)
@@ -178,12 +191,21 @@ test('Handbuch-Screenshots für alle App-Routen', async ({ page }) => {
   })
 
   const skipExisting = process.env.HANDBUCH_SKIP_EXISTING !== '0'
+  const slugFilter = process.env.HANDBUCH_SLUGS?.split(',').map((s) => s.trim()).filter(Boolean)
   const limit = process.env.HANDBUCH_SCREENSHOT_LIMIT
     ? Number(process.env.HANDBUCH_SCREENSHOT_LIMIT)
     : ROUTES.length
-  const batch = ROUTES.slice(0, limit)
 
-  const manifest: ManifestEntry[] = []
+  let batch = ROUTES
+  if (slugFilter?.length) {
+    const allowed = new Set(slugFilter)
+    batch = ROUTES.filter((r) => allowed.has(r.slug))
+  }
+  batch = batch.slice(0, limit)
+
+  const manifest: ManifestEntry[] = slugFilter?.length
+    ? loadExistingManifest().filter((e) => !slugFilter.includes(e.slug))
+    : []
   let ok = 0
   let approved = 0
   let pending = 0
