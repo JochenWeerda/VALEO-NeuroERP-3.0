@@ -119,6 +119,12 @@ jobs:
         working-directory: packages/frontend-web
         run: npm install --no-audit
 
+      - name: Route inventory drift check (generate-tanstack-routes)
+        working-directory: packages/frontend-web
+        run: |
+          npm run routes:generate
+          git diff --exit-code src/app/routing/route-inventory.gen.json src/app/routing/route-tree.gen.tsx
+
       - name: TypeScript type-check
         working-directory: packages/frontend-web
         run: npx tsc --noEmit --skipLibCheck
