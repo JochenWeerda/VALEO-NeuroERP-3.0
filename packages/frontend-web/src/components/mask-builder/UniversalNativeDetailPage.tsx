@@ -239,7 +239,11 @@ export function UniversalNativeDetailPage({
   // --- Error state ---
   if (schemaQuery.error || runtime.entityError) {
     const errMsg = getAxiosErrorMessage(schemaQuery.error ?? runtime.entityError)
-    const isNotFound = errMsg?.includes('404') || errMsg?.toLowerCase().includes('not found')
+    const isNotFound =
+      errMsg?.includes('404') ||
+      errMsg?.toLowerCase().includes('not found') ||
+      errMsg?.toLowerCase().includes('valid uuid') ||
+      errMsg?.toLowerCase().includes('uuid_parsing')
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
         <AlertCircle className="h-10 w-10 text-destructive" />
