@@ -48,51 +48,63 @@ async function gotoMeasured(page: Page, path: string, label?: string): Promise<n
   return ms
 }
 
-/** Native fetch mit AbortController — funktioniert auch bei Connection-refused zuverlässig */
-async function apiFetch(path: string, options?: RequestInit): Promise<{ status: number; ms: number; body: unknown }> {
+import * as net from 'net'
+
+/** TCP-Port-Check — erkennt Backend-Offline sofort (ECONNREFUSED) ohne HTTP-Hang */
+async function checkBackend(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new net.Socket()
+    socket.setTimeout(2000)
+    socket.once('connect', () => { socket.destroy(); resolve(true) })
+    socket.once('error', () => { socket.destroy(); resolve(false) })
+    socket.once('timeout', () => { socket.destroy(); resolve(false) })
+    socket.connect(8000, '127.0.0.1')
+  })
+}
+
+/** Playwright APIRequestContext-basierter API-Call mit 8s Timeout */
+async function apiGet(request: APIRequestContext, path: string): Promise<{ status: number; ms: number; body: unknown }> {
   const t0 = Date.now()
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 6000)
   try {
-    const resp = await fetch(`${API}${path}`, {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${TOKEN}`,
-        'X-Tenant-Id': TENANT,
-        'Content-Type': 'application/json',
-        ...(options?.headers ?? {}),
-      },
-      signal: controller.signal,
+    const resp = await request.get(`${API}${path}`, {
+      headers: { Authorization: `Bearer ${TOKEN}`, 'X-Tenant-Id': TENANT },
+      timeout: 8000,
     })
-    clearTimeout(timer)
     const ms = Date.now() - t0
     let body: unknown = null
     try { body = await resp.json() } catch { /* ignore */ }
-    return { status: resp.status, ms, body }
+    return { status: resp.status(), ms, body }
   } catch {
-    clearTimeout(timer)
     return { status: 0, ms: Date.now() - t0, body: null }
   }
 }
 
-async function apiGet(_request: APIRequestContext, path: string): Promise<{ status: number; ms: number; body: unknown }> {
-  return apiFetch(path, { method: 'GET' })
-}
-
 async function apiPost(
-  _request: APIRequestContext,
+  request: APIRequestContext,
   path: string,
   data: unknown,
 ): Promise<{ status: number; ms: number; body: unknown }> {
-  return apiFetch(path, { method: 'POST', body: JSON.stringify(data) })
+  const t0 = Date.now()
+  try {
+    const resp = await request.post(`${API}${path}`, {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        'X-Tenant-Id': TENANT,
+        'Content-Type': 'application/json',
+      },
+      data: data as Record<string, unknown>,
+      timeout: 8000,
+    })
+    const ms = Date.now() - t0
+    let body: unknown = null
+    try { body = await resp.json() } catch { /* ignore */ }
+    return { status: resp.status(), ms, body }
+  } catch {
+    return { status: 0, ms: Date.now() - t0, body: null }
+  }
 }
 
 let backendOnline = false
-
-async function checkBackend(): Promise<boolean> {
-  const result = await apiFetch('/health')
-  return result.status > 0
-}
 
 // ─── 1. Fibu / Finance ───────────────────────────────────────────────────────
 
