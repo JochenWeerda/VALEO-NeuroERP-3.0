@@ -326,7 +326,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
                       variant="outline"
                       role="combobox"
                       aria-expanded={customerPopoverOpen}
-                      className="w-full justify-between font-normal"
+                      className={`w-full justify-between font-normal hover:bg-muted hover:text-foreground ${customerName ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                       {customerName || "Kunde suchen..."}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
