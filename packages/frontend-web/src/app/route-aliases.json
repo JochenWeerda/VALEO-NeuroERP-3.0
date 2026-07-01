@@ -2495,6 +2495,34 @@
     {
       "module": "@/pages/crm/lead-native",
       "path": "crm/lead/:id"
+    },
+    {
+      "module": "@/pages/crm/customer-360-native",
+      "path": "crm/customer-360/:id"
+    },
+    {
+      "module": "@/pages/crm/customer-360-native",
+      "path": "crm/kunden/:id"
+    },
+    {
+      "module": "@/pages/einkauf/supplier-native",
+      "path": "einkauf/supplier/:id"
+    },
+    {
+      "module": "@/pages/einkauf/supplier-native",
+      "path": "einkauf/lieferanten/:id"
+    },
+    {
+      "module": "@/pages/crm/opportunity-native",
+      "path": "crm/opportunity/:id"
+    },
+    {
+      "module": "@/pages/lager/article-stock-native",
+      "path": "lager/article-stock/:id"
+    },
+    {
+      "module": "@/pages/lager/article-stock-native",
+      "path": "lager/artikel/:id"
     }
   ]
 }
