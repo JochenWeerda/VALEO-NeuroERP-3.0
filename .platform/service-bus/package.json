@@ -24,7 +24,7 @@
     "morgan": "^1.10.0",
     "dotenv": "^16.0.0",
     "winston": "^3.10.0",
-    "uuid": "^9.0.0",
+    "uuid": "^11.1.1",
     "joi": "^17.9.0"
   },
   "devDependencies": {

@@ -20,7 +20,7 @@
   "dependencies": {
     "@valero-neuroerp/data-models": "workspace:*",
     "@valero-neuroerp/utilities": "workspace:*",
-    "uuid": "^9.0.0",
+    "uuid": "^11.1.1",
     "zod": "^3.22.0",
     "express": "^4.18.0",
     "cors": "^2.8.5",
