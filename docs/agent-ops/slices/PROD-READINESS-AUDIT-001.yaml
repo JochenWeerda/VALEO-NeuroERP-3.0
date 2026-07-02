@@ -1,0 +1,58 @@
+slice_id: PROD-READINESS-AUDIT-001
+title: Production-Readiness-Audit und Agenten-Programm
+owner: Codex
+status: completed
+created_at: 2026-07-02
+coordination: >-
+  Eigenes Doku-Slice. Beruehrt keine laufenden Vordruck- oder E2E-Codeaenderungen
+  und vermischt keine PII-Remediation-Commits mit Fachcode. Bestehender Branch
+  fix/pii-remediation enthaelt bereits SPEC-P0-04-Vorarbeit.
+goal: >-
+  Den Production-Readiness-Audit vom 2026-07-02 als kanonische Operations-Doku,
+  Spec-Backlog und Agentenprogramm im Repo verankern.
+file_ownership:
+  - docs/operations/production-readiness-audit-2026-07-02.md
+  - docs/operations/production-readiness-runbook.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-AUDIT-001.yaml
+  - mkdocs.yml
+acceptance:
+  - Audit-Dokument liegt mit Frontmatter unter docs/operations/.
+  - MkDocs-Whitelist und Navigation referenzieren die Audit-Seite.
+  - Open-Gaps enthaelt P0/P1-Spec-Uebersicht mit Status.
+  - Runbook verweist auf den aktuellen Nachaudit als operative Gap-Closure-Sicht.
+  - Workboard ist aktualisiert.
+tests:
+  - node scripts/docs-governance-check.cjs docs/operations/production-readiness-audit-2026-07-02.md docs/operations/production-readiness-runbook.md docs/project-context/open-gaps-and-known-issues.md docs/agent-ops/active-workboard.md
+  - node scripts/ai-slice-readiness-check.cjs --slice PROD-READINESS-AUDIT-001
+risks:
+  - Audit-Aussagen sind teilweise Repo-Selbstauskunft und muessen durch Prompt A0 verifiziert werden.
+  - Externe Go-Live-Gates bleiben ausserhalb des Repo-Scopes.
+  - Arbeitsbaum enthaelt parallele uncommittete Vordruck-Aenderungen, die nicht Teil dieses Slices sind.
+ai_harness:
+  fachlicher_vertrag: >-
+    Production-Readiness wird als beweisbares Programm gefuehrt: Verifikation,
+    PII-Remediation, CI-Evidenz, Runtime-Sweep, Modulaktivierung, Coverage und Auditprofile.
+  architektur_vertrag: >-
+    Bestehendes Runbook, Open-Gaps und Process-Kernel-Status bleiben Source of Truth;
+    dieses Slice ergaenzt eine aktuelle Operations-Audit-Sicht.
+  daten_vertrag: >-
+    Keine Datenmodell-Aenderung. Datenschutzbezogene Findings werden dokumentiert,
+    aber keine produktiven Daten verarbeitet.
+  test_vertrag: >-
+    Doku-Governance und Slice-Harness pruefen die neue Dokumentation. Vollstaendige
+    technische Verifikation ist Folgearbeit A0.
+  security_vertrag: >-
+    PII-/Repo-Hygiene-Risiken werden als P0 explizit sichtbar gemacht; keine Secrets
+    oder personenbezogenen Daten werden neu aufgenommen.
+  betriebs_vertrag: >-
+    Runbook und Audit trennen repo-seitig loesbare Arbeit von external_gates fuer
+    Betrieb, DSB, Steuerberater, Provider und UAT.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML, Open-Gaps, Runbook und MkDocs-Navigation werden synchron aktualisiert.
+external_gates:
+  - Branch-Protection und GitHub-Environment-Reviewer
+  - Backup-/Restore-Drill im Zielbetrieb
+  - Datenschutz-/DSB-Freigabe
+  - Steuerberater-/DATEV-/TSE-/DSFinV-K-Abnahmen

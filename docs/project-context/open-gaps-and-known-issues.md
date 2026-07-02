@@ -11,6 +11,42 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## PROD-READINESS-AUDIT-001 — Production-Readiness-Audit & Agenten-Programm (2026-07-02)
+
+Status: **aktiv**. Der aktuelle Production-Readiness-Nachaudit ist unter
+[`docs/operations/production-readiness-audit-2026-07-02.md`](../operations/production-readiness-audit-2026-07-02.md)
+kanonisch abgelegt. Er ersetzt keine externen Go-Live-Freigaben, sondern
+verdichtet die repo-seitig loesbaren P0/P1-Arbeiten plus Agentenprogramm.
+
+P0-Specs aus dem Audit:
+
+| Spec | Status | Kurzinhalt |
+|---|---|---|
+| SPEC-P0-01 | offen | CI-Voll-Gruen oeffentlich nachweisen |
+| SPEC-P0-02 | offen | Live-API-Sweep als Dauergate |
+| SPEC-P0-03 | offen | Kat.-B/D-Produktionsentscheidung und `/readyz` |
+| SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
+| SPEC-P0-05 | offen | Coverage-Ratchet nur noch steigend, kritische Pfade hochziehen |
+| SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
+| SPEC-P0-07 | offen | SOC-2-Prueferprofil ergaenzen |
+| SPEC-P0-08 | offen/external_gate | Restore-/Backup-Drill reproduzierbar vorbereiten |
+
+P1-Specs aus dem Audit:
+
+| Spec | Status | Kurzinhalt |
+|---|---|---|
+| SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
+| SPEC-P1-04 | offen | Gestubte `commandEndpoints` fachlich implementieren |
+| SPEC-P1-05 | offen | SQL-Injection-Review fuer `nosec S608`-Stellen |
+| SPEC-P1-06 | offen | Legacy-Routen mit `response_model` typisieren |
+| SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
+| SPEC-P1-08 | offen | Chargen-/MHD-Tiefenmodell |
+| SPEC-P1-09 | offen | Lizenzinventar und THIRD_PARTY_NOTICES |
+| SPEC-P1-10 | offen | Erntepeak-Lasttest lokal reproduzierbar |
+
+Priorisierte Sequenz: A0 Verifikation und A2 PII parallel/sofort, danach
+A1 CI-Gruen, SPEC-P0-06 Governance, A3 Runtime-Sweep und A5 Modulaktivierung.
+
 ## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug (2026-07-02)
 
 Status: **done**. Fünf zuvor fehlende/fehlerhafte API-Endpoints wurden gegen

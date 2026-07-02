@@ -117,6 +117,7 @@ exclude_docs: |
   /migration/
   /operations/
   !/operations/production-readiness-runbook.md
+  !/operations/production-readiness-audit-2026-07-02.md
   !/operations/dependency-and-compatibility-maintenance.md
   /perf/
   /policies/
@@ -261,6 +262,7 @@ nav:
           - Alert-Handling: runbooks/ALERTS.md
           - Disaster Recovery: runbooks/DISASTER-RECOVERY.md
           - Production-Readiness: operations/production-readiness-runbook.md
+          - Production-Readiness-Audit 2026-07-02: operations/production-readiness-audit-2026-07-02.md
           - Dependency-Pflege: operations/dependency-and-compatibility-maintenance.md
       - Deployment:
           - ArgoCD / GitOps: deployment/gitops/argocd.md

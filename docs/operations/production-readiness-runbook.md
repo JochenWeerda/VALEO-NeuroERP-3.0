@@ -27,6 +27,13 @@ Anforderungen der referenzierten offiziellen Standards. Sie ersetzen keine:
 - BSI-/ISO-Zertifizierung
 - Hardware-, Eich- oder Wiederanlaufabnahme im Zielbetrieb
 
+Der aktuelle Nachaudit- und Umsetzungsbacklog liegt in
+[Production-Readiness-Audit 2026-07-02](production-readiness-audit-2026-07-02.md).
+Er behandelt Repo-Evidenz, Spec-P0/P1-Backlog, Agenten-Prompt-Serie und
+simulierte ISO-/SOC-2-/Technik-/DSGVO-Pruefprogramme. Der Runbook-Releasepfad
+bleibt massgeblich fuer reale Freigaben; das Audit ist die aktuelle operative
+Gap-Closure-Sicht.
+
 ## Kanonischer Releasepfad
 
 1. `quality-gate.yml` prueft Code, Tests, Abhaengigkeiten, SBOM und

@@ -15,7 +15,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-07-02 — Audit-Dokument wird kanonisch in Operations-Doku, Open-Gaps und Slice-Harness verankert.
+**Stand:** abgeschlossen 2026-07-02 — Audit-Dokument unter `docs/operations/production-readiness-audit-2026-07-02.md` verankert; Open-Gaps, Runbook, MkDocs und Slice-YAML synchronisiert; Slice-Verify gruen.
 **Ziel:** Den Production-Readiness-Audit vom 2026-07-02 als belastbaren Spec-Backlog und Agentenprogramm im Repo sichtbar machen, ohne bestehende PII-Remediation- oder Vordruck-Arbeit zu vermischen.
 **Dateibesitz:** `docs/operations/production-readiness-audit-2026-07-02.md`, `docs/operations/production-readiness-runbook.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/PROD-READINESS-AUDIT-001.yaml`, `docs/agent-ops/active-workboard.md`.
 **Abnahme:** Audit-Dokument mit Frontmatter unter `docs/operations/`; P0/P1-Spec-Backlog in Open-Gaps referenziert; Runbook verweist auf Audit und Agentenprogramm; Slice-YAML mit Ziel, Dateibesitz, Akzeptanz und Risiken vorhanden.
