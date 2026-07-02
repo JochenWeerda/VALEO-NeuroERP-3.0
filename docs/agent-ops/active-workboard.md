@@ -11,6 +11,55 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-07-02 — alle 5 API-Gaps geschlossen und regressionsgehärtet.
+
+| Gap | Status |
+|---|---|
+| Lager API-Gap (`GET /lager/bestaende`, `POST /lager/bewegungen`) | done |
+| Pricing API-Gap (`GET /pricing/find`, `POST /pricing/staffelrabatte`) | done |
+| Barcode API-Gap (`POST /scan/barcode`) | done |
+
+**Ziel:** Fünf produktionsblockierende API-Lücken (DB-Spaltenfehler, NOT-NULL-Verletzungen,
+kaputte jsonb-Casts, fehlende Tenant-Isolation) schließen und dauerhaft mit
+Regressionstests absichern.
+**Dateibesitz:** `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/pricing.py`,
+`app/api/v1/endpoints/scan.py`, `tests/test_api_gap_lager_pricing_scan.py`,
+`docs/project-context/open-gaps-and-known-issues.md`.
+**Abnahme:** `tests/test_api_gap_lager_pricing_scan.py` (18 Tests: Happy Path, negativer
+Payload, Tenant-Isolation, fehlende optionale Felder je Endpoint) grün gegen laufende
+Postgres-Instanz. Siehe auch `open-gaps-and-known-issues.md` → `API-GAP-STABILIZATION-001`.
+**Bekannte UI-Fails (nicht Teil dieses Gaps):** `UI-AGRAR-WIZARD-001` und
+`UI-PERSONAL-BADGES-001` sind isolierte Frontend-Rendering-Bugs, siehe
+`open-gaps-and-known-issues.md`. Nicht als API-Regression zählen.
+
+## E2E-DOMAIN-ROUTES-WAVES-001 — E2E-Domänen-Routen in Waves
+
+**Von:** Claude Code
+**Owner:** offen
+**Stand:** geplant 2026-07-02 — Folgeblock nach `API-GAP-STABILIZATION-001`, in 5 Waves
+aufgeteilt, um Domänen unabhängig freizugeben statt eines Big-Bang-Testlaufs.
+
+| Wave | Domänen | Status |
+|---|---|---|
+| Wave A | Lager, Pricing, Scan | done (Regressionstests in `API-GAP-STABILIZATION-001`) |
+| Wave B | CRM, Einkauf | offen |
+| Wave C | Finance | offen |
+| Wave D | Agrar | offen (blockiert von `UI-AGRAR-WIZARD-001` für Sammelabrechnung-Teilstrecke) |
+| Wave E | Personal, Admin | offen (blockiert von `UI-PERSONAL-BADGES-001` für Bewerbungen-Teilstrecke) |
+
+**Ziel:** Alle E2E-Domänen-Routen wellenweise stabilisieren, ohne dass ein einzelner
+UI-Bug den gesamten Testlauf rot färbt.
+**Dateibesitz:** `packages/frontend-web/tests/e2e/all-domains-e2e.spec.ts`,
+`packages/frontend-web/tests/e2e/workflow-chains.spec.ts`,
+`packages/frontend-web/tests/e2e/uat/`.
+**Abnahme:** je Wave ein eigener grüner Testlauf; Wave D/E dürfen erst als
+abgeschlossen gelten, wenn die zugehörigen UI-Tickets referenziert (nicht
+zwingend gefixt) sind — kein stummer Skip ohne Ticket-Kommentar.
+
 ## UIX-054…057 — Route-Verifikation, CI, Browser-Smoke, Rollback (nach UIX-051)
 
 **Von:** Cursor Agent

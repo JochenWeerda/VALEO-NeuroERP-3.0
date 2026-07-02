@@ -15,6 +15,14 @@ import { waitForDashboardShell } from '../helpers/wait-dashboard-shell'
 test.describe('UAT TC-AGR: Agrar-Kernprozesse', () => {
   // -------------------------------------------------------------------------
   // TC-AGR-001: Sammelabrechnung Wizard
+  //
+  // KNOWN ISSUE — UI-AGRAR-WIZARD-001 (siehe docs/project-context/open-gaps-and-known-issues.md)
+  // Die 3 Wizard-Step-Badges (Ernteerfassungen/Abrechnungsdetails/Bestätigung) in
+  // /agrar/sammelabrechnung werden nicht zuverlässig gerendert. Dies ist ein
+  // isolierter UI-Rendering-Bug im Agrar-Wizard, KEINE API-Regression — die
+  // zugrunde liegenden Sammelabrechnungs-Endpoints liefern korrekte Daten.
+  // Nicht stumm skippen; Ticket UI-AGRAR-WIZARD-001 offen halten, bis das
+  // Step-Badge-Rendering gefixt ist.
   // -------------------------------------------------------------------------
   test('TC-AGR-001: Sammelabrechnung — Wizard-Steps sichtbar und navigierbar', async ({ page }) => {
     const collector = attachConsoleErrorListener(page)

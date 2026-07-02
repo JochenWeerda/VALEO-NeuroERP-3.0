@@ -139,6 +139,13 @@ test.describe('UAT TC-PER: Personal-Modul', () => {
 
   // -------------------------------------------------------------------------
   // TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar
+  //
+  // KNOWN ISSUE — UI-PERSONAL-BADGES-001 (siehe docs/project-context/open-gaps-and-known-issues.md)
+  // Pipeline-Stage-Badges (Eingang/Vorauswahl/Interview/Angebot/Abgelehnt) werden
+  // in /personal/bewerbungen nicht zuverlässig gerendert. Dies ist ein isolierter
+  // UI-Rendering-Bug im Personal-Modul, KEINE API-Regression — die zugrunde
+  // liegenden Bewerbungs-Endpoints liefern korrekte Daten. Nicht stumm skippen;
+  // Ticket UI-PERSONAL-BADGES-001 offen halten, bis das Badge-Rendering gefixt ist.
   // -------------------------------------------------------------------------
   test('TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar', async ({ page }) => {
     const collector = attachConsoleErrorListener(page)

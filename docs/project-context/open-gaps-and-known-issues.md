@@ -11,6 +11,79 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug (2026-07-02)
+
+Status: **done**. Fünf zuvor fehlende/fehlerhafte API-Endpoints wurden gegen
+die reale Postgres-Instanz stabilisiert (siehe E2E-Produktionsteststand
+2026-07-02, 73/73 Tests grün) und mit Regressionstests gehärtet
+(`tests/test_api_gap_lager_pricing_scan.py`).
+
+| Endpoint | Status |
+|---|---|
+| `GET /api/v1/lager/bestaende` | done |
+| `POST /api/v1/lager/bewegungen` | done |
+| `POST /api/v1/scan/barcode` | done |
+| `GET /api/v1/pricing/find` | done |
+| `POST /api/v1/pricing/staffelrabatte` | done |
+
+Behobene technische Ursachen:
+- DB-Spaltenfehler `ean_code`/`unit`/`movement_date`/`reference_number` (Code
+  referenzierte alte Spaltennamen, die nicht mehr existieren).
+- `previous_stock`/`new_stock` sind `NOT NULL` in
+  `domain_inventory.inventory_stock_movements` — müssen bei jedem INSERT
+  mitgesetzt werden.
+- psycopg2/SQLAlchemy `text()`: `::jsonb`-Cast-Syntax bricht — auf
+  `CAST(:param AS jsonb)` umgestellt.
+- `domain_pricing.price_list_items` korrekt als eigene Tabelle angebunden
+  (nicht als JSON-Feld auf `price_lists`).
+- Fehlende/optionale Schemas (`domain_contracts`, `domain_pricing.discount_rules`)
+  defensiv mit try/except abgesichert, damit Preisfindung nicht 500et.
+- `localhost:8000` → `127.0.0.1:8000` (Windows-IPv6-Problem, siehe
+  `docs/project-context/...` Infra-Gotchas).
+- `tenant_id=default` → echte Tenant-UUID (`00000000-0000-0000-0000-000000000001`)
+  als Default in `app/core/config.py`.
+- CRM Customer/Interessenten-ID-Split korrigiert (`/crm/customers/` liest aus
+  `domain_crm.interessenten`, Sales-Order-`customer_id` validiert gegen
+  `domain_crm.customers` — unterschiedliche ID-Räume).
+
+**Regressionstests:** `tests/test_api_gap_lager_pricing_scan.py` — 18 Tests,
+je Endpoint Happy Path, negativer Payload, Tenant-Isolation und fehlende
+optionale Felder/Schemas. Benötigen `require_db` (laufende Postgres-Instanz),
+skippen automatisch sonst.
+
+**Nachfolgeblock:** E2E-Domänen-Routen (Wave A–E) sind ein eigener,
+separater Arbeitsblock — siehe `docs/agent-ops/active-workboard.md` →
+„E2E-DOMAIN-ROUTES-WAVES-001".
+
+## UI-AGRAR-WIZARD-001 — Sammelabrechnung Wizard-Step-Badges (2026-07-02)
+
+Status: **offen** (UI-Bug, keine API-Regression).
+
+- Betroffener Test: `packages/frontend-web/tests/e2e/uat/uat-agrar-kernprozesse.spec.ts`
+  → `TC-AGR-001: Sammelabrechnung — Wizard-Steps sichtbar und navigierbar`.
+- Symptom: die 3 Wizard-Step-Badges (Ernteerfassungen/Abrechnungsdetails/
+  Bestätigung) auf `/agrar/sammelabrechnung` werden nicht zuverlässig
+  gerendert.
+- Abgrenzung: die zugrunde liegenden Sammelabrechnungs-Endpoints liefern
+  korrekte Daten — dies ist ein isoliertes Frontend-Rendering-Problem im
+  Wizard-Step-Indikator, kein API-Gap.
+- Der Test ist bewusst **nicht** geskippt (kein stummer Skip), sondern trägt
+  einen Ticket-Kommentar im Testcode, der auf dieses Issue verweist.
+
+## UI-PERSONAL-BADGES-001 — Bewerbungen Stage-Pipeline-Badges (2026-07-02)
+
+Status: **offen** (UI-Bug, keine API-Regression).
+
+- Betroffener Test: `packages/frontend-web/tests/e2e/uat/uat-admin-personal.spec.ts`
+  → `TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar`.
+- Symptom: Pipeline-Stage-Badges (Eingang/Vorauswahl/Interview/Angebot/
+  Abgelehnt) auf `/personal/bewerbungen` werden nicht zuverlässig gerendert.
+- Abgrenzung: die zugrunde liegenden Bewerbungs-Endpoints liefern korrekte
+  Daten — dies ist ein isoliertes Frontend-Rendering-Problem im
+  Badge-Komponenten, kein API-Gap.
+- Der Test ist bewusst **nicht** geskippt (kein stummer Skip), sondern trägt
+  einen Ticket-Kommentar im Testcode, der auf dieses Issue verweist.
+
 ## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator (2026-06-28)
 
 Status: Skeleton geliefert als Architektur-Slice, kein offener UX-Baukasten-Rollout.
