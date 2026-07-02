@@ -10172,6 +10172,113 @@
         "title": "ArtikelFreigabeIn",
         "type": "object"
       },
+      "ArtikelInfo": {
+        "properties": {
+          "artikel_id": {
+            "title": "Artikel Id",
+            "type": "string"
+          },
+          "artikel_nummer": {
+            "title": "Artikel Nummer",
+            "type": "string"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "ean": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ean"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "lagerbestand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lagerbestand"
+          },
+          "letzter_einkaufspreis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzter Einkaufspreis"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "verkaufspreis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verkaufspreis"
+          },
+          "warehouse_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warehouse Id"
+          }
+        },
+        "required": [
+          "artikel_id",
+          "artikel_nummer",
+          "name",
+          "einheit",
+          "ean",
+          "charge",
+          "lagerbestand",
+          "warehouse_id",
+          "letzter_einkaufspreis",
+          "verkaufspreis"
+        ],
+        "title": "ArtikelInfo",
+        "type": "object"
+      },
       "ArtikelLagerParamCreate": {
         "properties": {
           "article_id": {
@@ -13195,6 +13302,120 @@
         "title": "BankverbindungOut",
         "type": "object"
       },
+      "BarcodeScanRequest": {
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "info",
+            "description": "Gewünschte Aktion: info|wareneingang|warenausgang|inventur",
+            "title": "Action"
+          },
+          "barcode": {
+            "description": "Barcode-String (EAN-13, EAN-8, Code128, interne Nr.)",
+            "title": "Barcode",
+            "type": "string"
+          },
+          "barcode_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Typ: ean13|ean8|code128|qr|intern",
+            "title": "Barcode Type"
+          },
+          "warehouse_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kontext-Lager für Bestandsinfo",
+            "title": "Warehouse Id"
+          }
+        },
+        "required": [
+          "barcode"
+        ],
+        "title": "BarcodeScanRequest",
+        "type": "object"
+      },
+      "BarcodeScanResponse": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ArtikelInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "barcode": {
+            "title": "Barcode",
+            "type": "string"
+          },
+          "barcode_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode Type"
+          },
+          "gefunden": {
+            "title": "Gefunden",
+            "type": "boolean"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "scan_id": {
+            "title": "Scan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scan_id",
+          "barcode",
+          "barcode_type",
+          "action",
+          "gefunden",
+          "artikel",
+          "hinweis"
+        ],
+        "title": "BarcodeScanResponse",
+        "type": "object"
+      },
       "BatchOut": {
         "properties": {
           "article_id": {
@@ -13389,6 +13610,101 @@
           }
         },
         "title": "BestaetigenIn",
+        "type": "object"
+      },
+      "BestandItem": {
+        "properties": {
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "article_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Name"
+          },
+          "article_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Number"
+          },
+          "bestandswert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestandswert"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "menge": {
+            "title": "Menge",
+            "type": "number"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          },
+          "warehouse_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warehouse Name"
+          }
+        },
+        "required": [
+          "article_id",
+          "article_number",
+          "article_name",
+          "warehouse_id",
+          "warehouse_name",
+          "menge",
+          "einheit",
+          "charge",
+          "bestandswert"
+        ],
+        "title": "BestandItem",
         "type": "object"
       },
       "BestandskorrekturIn": {
@@ -61513,6 +61829,212 @@
         "title": "LagerKontenzuordnungCreate",
         "type": "object"
       },
+      "LagerbewegungIn": {
+        "properties": {
+          "article_id": {
+            "description": "Artikel-ID",
+            "title": "Article Id",
+            "type": "string"
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "buchungsdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buchungsdatum"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "movement_type": {
+            "description": "Typ: wareneingang|warenausgang|umbuchung|inventur",
+            "title": "Movement Type",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "Menge (positiv=Zugang, negativ=Abgang)",
+            "title": "Quantity",
+            "type": "number"
+          },
+          "reference_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Belegnummer (Bestellung, Lieferschein, ...)",
+            "title": "Reference Id"
+          },
+          "reference_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Belegtyp: bestellung|lieferschein|etc.",
+            "title": "Reference Type"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Einstandspreis (optional)",
+            "title": "Unit Cost"
+          },
+          "warehouse_id": {
+            "description": "Lager-ID",
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "article_id",
+          "warehouse_id",
+          "quantity",
+          "movement_type"
+        ],
+        "title": "LagerbewegungIn",
+        "type": "object"
+      },
+      "LagerbewegungOut": {
+        "properties": {
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "buchungsdatum": {
+            "format": "date",
+            "title": "Buchungsdatum",
+            "type": "string"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "movement_type": {
+            "title": "Movement Type",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "number"
+          },
+          "reference_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Id"
+          },
+          "reference_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Type"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Cost"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "article_id",
+          "warehouse_id",
+          "quantity",
+          "movement_type",
+          "charge",
+          "reference_id",
+          "reference_type",
+          "unit_cost",
+          "bemerkung",
+          "buchungsdatum",
+          "status"
+        ],
+        "title": "LagerbewegungOut",
+        "type": "object"
+      },
       "LastOrderInfo": {
         "description": "Information zur letzten Bestellung eines Artikels",
         "properties": {
@@ -72390,6 +72912,48 @@
         "description": "Response schema for number ranges endpoints.",
         "properties": {},
         "title": "NumberRangesOut",
+        "type": "object"
+      },
+      "NumberingRequest": {
+        "properties": {
+          "domain": {
+            "title": "Domain",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "title": "NumberingRequest",
+        "type": "object"
+      },
+      "NumberingResponse": {
+        "properties": {
+          "number": {
+            "title": "Number",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "number"
+        ],
+        "title": "NumberingResponse",
         "type": "object"
       },
       "NutrientCompositionsOut": {
@@ -100107,6 +100671,96 @@
         "title": "StaffelBerechnungResult",
         "type": "object"
       },
+      "StaffelStufe-Input": {
+        "properties": {
+          "ab_menge": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Ab dieser Menge gilt der Rabatt",
+            "title": "Ab Menge"
+          },
+          "festpreis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Festpreis statt Rabatt",
+            "title": "Festpreis"
+          },
+          "rabatt_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rabatt in Prozent",
+            "title": "Rabatt Prozent"
+          }
+        },
+        "required": [
+          "ab_menge"
+        ],
+        "title": "StaffelStufe",
+        "type": "object"
+      },
+      "StaffelStufe-Output": {
+        "properties": {
+          "ab_menge": {
+            "description": "Ab dieser Menge gilt der Rabatt",
+            "title": "Ab Menge",
+            "type": "string"
+          },
+          "festpreis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Festpreis statt Rabatt",
+            "title": "Festpreis"
+          },
+          "rabatt_prozent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rabatt in Prozent",
+            "title": "Rabatt Prozent"
+          }
+        },
+        "required": [
+          "ab_menge"
+        ],
+        "title": "StaffelStufe",
+        "type": "object"
+      },
       "StaffelZeileCreate": {
         "properties": {
           "bis_wert": {
@@ -100171,6 +100825,215 @@
           "umrechnungsfaktor"
         ],
         "title": "StaffelZeileOut",
+        "type": "object"
+      },
+      "StaffelrabattIn": {
+        "properties": {
+          "artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Id"
+          },
+          "artikelgruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikelgruppe"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "gueltig_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Von"
+          },
+          "kunden_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Id"
+          },
+          "kundengruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kundengruppe"
+          },
+          "stufen": {
+            "items": {
+              "$ref": "#/components/schemas/StaffelStufe-Input"
+            },
+            "minItems": 1,
+            "title": "Stufen",
+            "type": "array"
+          }
+        },
+        "required": [
+          "stufen"
+        ],
+        "title": "StaffelrabattIn",
+        "type": "object"
+      },
+      "StaffelrabattOut": {
+        "properties": {
+          "artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Id"
+          },
+          "artikelgruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikelgruppe"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "gueltig_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Von"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kunden_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Id"
+          },
+          "kundengruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kundengruppe"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "stufen": {
+            "items": {
+              "$ref": "#/components/schemas/StaffelStufe-Output"
+            },
+            "title": "Stufen",
+            "type": "array"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "artikel_id",
+          "artikelgruppe",
+          "kunden_id",
+          "kundengruppe",
+          "gueltig_von",
+          "gueltig_bis",
+          "stufen",
+          "bezeichnung",
+          "tenant_id",
+          "status"
+        ],
+        "title": "StaffelrabattOut",
         "type": "object"
       },
       "StartTransactionCommand": {
@@ -120984,6 +121847,44 @@
         "title": "WebhookOut",
         "type": "object"
       },
+      "app__api__v1__endpoints__webshop_integration__ConnectorOut": {
+        "properties": {
+          "aktiv": {
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "api_key_masked": {
+            "title": "Api Key Masked",
+            "type": "string"
+          },
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "platform": {
+            "title": "Platform",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "platform",
+          "base_url",
+          "api_key_masked",
+          "aktiv"
+        ],
+        "title": "ConnectorOut",
+        "type": "object"
+      },
       "app__api__v1__schemas__agrar_schemas__QualityProtocolOut": {
         "additionalProperties": true,
         "properties": {},
@@ -121553,7 +122454,7 @@
   },
   "info": {
     "title": "VALEO-NeuroERP Test App",
-    "version": "3.0.0"
+    "version": "0.1.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -121597,6 +122498,44 @@
         "tags": [
           "sse"
         ]
+      }
+    },
+    "/api/numbering/next": {
+      "post": {
+        "operationId": "next_number_api_numbering_next_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberingResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Next Number"
       }
     },
     "/api/stream/{channel}": {
@@ -134598,9 +135537,9 @@
         ]
       }
     },
-    "/api/v1/agents/low-stock/simulate": {
+    "/api/v1/agents/agents/low-stock/simulate": {
       "post": {
-        "operationId": "simulate_low_stock_event_api_v1_agents_low_stock_simulate_post",
+        "operationId": "simulate_low_stock_event_api_v1_agents_agents_low_stock_simulate_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -134645,9 +135584,9 @@
         ]
       }
     },
-    "/api/v1/agents/low-stock/status": {
+    "/api/v1/agents/agents/low-stock/status": {
       "get": {
-        "operationId": "get_low_stock_agent_status_api_v1_agents_low_stock_status_get",
+        "operationId": "get_low_stock_agent_status_api_v1_agents_agents_low_stock_status_get",
         "responses": {
           "200": {
             "content": {
@@ -134666,6 +135605,1394 @@
           }
         ],
         "summary": "Low-Stock-Agent Status abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/capabilities": {
+      "get": {
+        "operationId": "list_neuroassist_capabilities_api_v1_agents_neuroassist_capabilities_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "productive_only",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Productive Only",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CapabilityResponse"
+                  },
+                  "title": "Response List Neuroassist Capabilities Api V1 Agents Neuroassist Capabilities Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist capabilities auflisten",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/budgets/{capability_key}": {
+      "post": {
+        "operationId": "update_neuroassist_budget_api_v1_agents_neuroassist_ops_budgets__capability_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capability_key",
+            "required": true,
+            "schema": {
+              "title": "Capability Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentBudgetUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist budget aktualisieren",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/config-revisions": {
+      "get": {
+        "operationId": "list_neuroassist_config_revisions_api_v1_agents_neuroassist_ops_config_revisions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentOut"
+                  },
+                  "title": "Response List Neuroassist Config Revisions Api V1 Agents Neuroassist Ops Config Revisions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist config revisions auflisten",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/control-center": {
+      "get": {
+        "operationId": "get_neuroassist_control_center_api_v1_agents_neuroassist_ops_control_center_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist control center abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/dashboard": {
+      "get": {
+        "operationId": "get_neuroassist_ops_dashboard_api_v1_agents_neuroassist_ops_dashboard_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist ops dashboard abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/heartbeats/{capability_key}": {
+      "post": {
+        "operationId": "update_neuroassist_heartbeat_api_v1_agents_neuroassist_ops_heartbeats__capability_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capability_key",
+            "required": true,
+            "schema": {
+              "title": "Capability Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentHeartbeatUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist heartbeat aktualisieren",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/incidents": {
+      "get": {
+        "operationId": "get_neuroassist_control_center_incidents_api_v1_agents_neuroassist_ops_incidents_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist control center incidents abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/incidents/{incident_id}/actions": {
+      "post": {
+        "operationId": "apply_neuroassist_control_center_incident_action_api_v1_agents_neuroassist_ops_incidents__incident_id__actions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "incident_id",
+            "required": true,
+            "schema": {
+              "title": "Incident Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlCenterIncidentActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist control center incident action apply",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/interventions": {
+      "get": {
+        "operationId": "list_neuroassist_interventions_api_v1_agents_neuroassist_ops_interventions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentOut"
+                  },
+                  "title": "Response List Neuroassist Interventions Api V1 Agents Neuroassist Ops Interventions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist interventions auflisten",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/mobile-overview": {
+      "get": {
+        "operationId": "get_neuroassist_mobile_ops_overview_api_v1_agents_neuroassist_ops_mobile_overview_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist mobile ops overview abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/overview": {
+      "get": {
+        "operationId": "get_neuroassist_ops_overview_api_v1_agents_neuroassist_ops_overview_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOpsOverviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist ops overview abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/persistence": {
+      "get": {
+        "operationId": "get_neuroassist_persistence_status_api_v1_agents_neuroassist_ops_persistence_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentPersistenceStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist persistence status abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/planning": {
+      "get": {
+        "operationId": "get_neuroassist_control_center_planning_api_v1_agents_neuroassist_ops_planning_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist control center planning abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/planning/items": {
+      "post": {
+        "operationId": "upsert_neuroassist_control_center_plan_item_api_v1_agents_neuroassist_ops_planning_items_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlCenterPlanItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist control center plan item upsert",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/plugin-boundary-review": {
+      "get": {
+        "operationId": "get_neuroassist_plugin_boundary_review_api_v1_agents_neuroassist_ops_plugin_boundary_review_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist plugin boundary review abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/profiles/{capability_key}": {
+      "post": {
+        "operationId": "update_neuroassist_profile_api_v1_agents_neuroassist_ops_profiles__capability_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capability_key",
+            "required": true,
+            "schema": {
+              "title": "Capability Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist profile aktualisieren",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/skill-packs": {
+      "get": {
+        "operationId": "list_neuroassist_skill_packs_api_v1_agents_neuroassist_ops_skill_packs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentOut"
+                  },
+                  "title": "Response List Neuroassist Skill Packs Api V1 Agents Neuroassist Ops Skill Packs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist skill packs auflisten",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/skill-packs/{skill_pack_key}": {
+      "post": {
+        "operationId": "update_neuroassist_skill_pack_api_v1_agents_neuroassist_ops_skill_packs__skill_pack_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "skill_pack_key",
+            "required": true,
+            "schema": {
+              "title": "Skill Pack Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentSkillPackUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist skill pack aktualisieren",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/templates/export": {
+      "get": {
+        "operationId": "export_neuroassist_template_api_v1_agents_neuroassist_ops_templates_export_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "template_key",
+            "required": false,
+            "schema": {
+              "default": "default",
+              "title": "Template Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist template exportieren",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/templates/import": {
+      "post": {
+        "operationId": "import_neuroassist_template_api_v1_agents_neuroassist_ops_templates_import_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentTemplateImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist template importieren",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/tickets": {
+      "get": {
+        "operationId": "list_neuroassist_ops_tickets_api_v1_agents_neuroassist_ops_tickets_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_closed",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Closed",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentTicketResponse"
+                  },
+                  "title": "Response List Neuroassist Ops Tickets Api V1 Agents Neuroassist Ops Tickets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist ops tickets auflisten",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/ops/tickets/{ticket_id}/interventions": {
+      "post": {
+        "operationId": "apply_neuroassist_intervention_api_v1_agents_neuroassist_ops_tickets__ticket_id__interventions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ticket_id",
+            "required": true,
+            "schema": {
+              "title": "Ticket Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentInterventionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist intervention apply",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/runs": {
+      "get": {
+        "operationId": "list_neuroassist_runs_api_v1_agents_neuroassist_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NeuroAssistRunResponse"
+                  },
+                  "title": "Response List Neuroassist Runs Api V1 Agents Neuroassist Runs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist runs auflisten",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      },
+      "post": {
+        "operationId": "run_neuroassist_capability_api_v1_agents_neuroassist_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NeuroAssistRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeuroAssistRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist capability ausführen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/runs/{run_id}": {
+      "get": {
+        "operationId": "get_neuroassist_run_status_api_v1_agents_neuroassist_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeuroAssistRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist run status abrufen",
+        "tags": [
+          "neuroassist",
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/neuroassist/runs/{run_id}/gates": {
+      "post": {
+        "operationId": "apply_neuroassist_gate_action_api_v1_agents_neuroassist_runs__run_id__gates_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NeuroAssistGateActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeuroAssistGateActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neuroassist gate action apply",
         "tags": [
           "neuroassist",
           "agents"
@@ -249050,6 +251377,151 @@
         ]
       }
     },
+    "/api/v1/lager/bestaende": {
+      "get": {
+        "description": "Aggregierte Lagerbestände aus StockMovements (Zugang - Abgang).",
+        "operationId": "get_bestaende_api_v1_lager_bestaende_get",
+        "parameters": [
+          {
+            "description": "Filter auf Lager",
+            "in": "query",
+            "name": "warehouse_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter auf Lager",
+              "title": "Warehouse Id"
+            }
+          },
+          {
+            "description": "Filter auf Artikel",
+            "in": "query",
+            "name": "article_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter auf Artikel",
+              "title": "Article Id"
+            }
+          },
+          {
+            "description": "Filter auf Artikelnummer",
+            "in": "query",
+            "name": "article_number",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter auf Artikelnummer",
+              "title": "Article Number"
+            }
+          },
+          {
+            "description": "Filter auf Charge",
+            "in": "query",
+            "name": "charge",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter auf Charge",
+              "title": "Charge"
+            }
+          },
+          {
+            "description": "Nur positive Bestände",
+            "in": "query",
+            "name": "only_positive",
+            "required": false,
+            "schema": {
+              "default": true,
+              "description": "Nur positive Bestände",
+              "title": "Only Positive",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BestandItem"
+                  },
+                  "title": "Response Get Bestaende Api V1 Lager Bestaende Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lagerbestände abfragen",
+        "tags": [
+          "lager",
+          "inventory",
+          "lager"
+        ]
+      }
+    },
     "/api/v1/lager/bestandskorrektur": {
       "post": {
         "description": "Bestandskorrektur buchen — StockMovement + automatische GL-Buchung.\n\nPositiver Betrag = Zugang (adjustment_in), negativer = Abgang (adjustment_out).",
@@ -249110,6 +251582,73 @@
           }
         ],
         "summary": "Bestandskorrektur anlegen",
+        "tags": [
+          "lager",
+          "inventory",
+          "lager"
+        ]
+      }
+    },
+    "/api/v1/lager/bewegungen": {
+      "post": {
+        "description": "Generische Lagerbuchung: Wareneingang, -ausgang, Umbuchung oder Inventur.",
+        "operationId": "create_lagerbewegung_api_v1_lager_bewegungen_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LagerbewegungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LagerbewegungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lagerbewegung buchen",
         "tags": [
           "lager",
           "inventory",
@@ -266167,1394 +268706,6 @@
         ]
       }
     },
-    "/api/v1/neuroassist/capabilities": {
-      "get": {
-        "operationId": "list_neuroassist_capabilities_api_v1_neuroassist_capabilities_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "productive_only",
-            "required": false,
-            "schema": {
-              "default": true,
-              "title": "Productive Only",
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CapabilityResponse"
-                  },
-                  "title": "Response List Neuroassist Capabilities Api V1 Neuroassist Capabilities Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist capabilities auflisten",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/budgets/{capability_key}": {
-      "post": {
-        "operationId": "update_neuroassist_budget_api_v1_neuroassist_ops_budgets__capability_key__post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "capability_key",
-            "required": true,
-            "schema": {
-              "title": "Capability Key",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentBudgetUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist budget aktualisieren",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/config-revisions": {
-      "get": {
-        "operationId": "list_neuroassist_config_revisions_api_v1_neuroassist_ops_config_revisions_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentOut"
-                  },
-                  "title": "Response List Neuroassist Config Revisions Api V1 Neuroassist Ops Config Revisions Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist config revisions auflisten",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/control-center": {
-      "get": {
-        "operationId": "get_neuroassist_control_center_api_v1_neuroassist_ops_control_center_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist control center abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/dashboard": {
-      "get": {
-        "operationId": "get_neuroassist_ops_dashboard_api_v1_neuroassist_ops_dashboard_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist ops dashboard abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/heartbeats/{capability_key}": {
-      "post": {
-        "operationId": "update_neuroassist_heartbeat_api_v1_neuroassist_ops_heartbeats__capability_key__post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "capability_key",
-            "required": true,
-            "schema": {
-              "title": "Capability Key",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentHeartbeatUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist heartbeat aktualisieren",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/incidents": {
-      "get": {
-        "operationId": "get_neuroassist_control_center_incidents_api_v1_neuroassist_ops_incidents_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist control center incidents abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/incidents/{incident_id}/actions": {
-      "post": {
-        "operationId": "apply_neuroassist_control_center_incident_action_api_v1_neuroassist_ops_incidents__incident_id__actions_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "incident_id",
-            "required": true,
-            "schema": {
-              "title": "Incident Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ControlCenterIncidentActionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist control center incident action apply",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/interventions": {
-      "get": {
-        "operationId": "list_neuroassist_interventions_api_v1_neuroassist_ops_interventions_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentOut"
-                  },
-                  "title": "Response List Neuroassist Interventions Api V1 Neuroassist Ops Interventions Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist interventions auflisten",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/mobile-overview": {
-      "get": {
-        "operationId": "get_neuroassist_mobile_ops_overview_api_v1_neuroassist_ops_mobile_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist mobile ops overview abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/overview": {
-      "get": {
-        "operationId": "get_neuroassist_ops_overview_api_v1_neuroassist_ops_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOpsOverviewResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist ops overview abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/persistence": {
-      "get": {
-        "operationId": "get_neuroassist_persistence_status_api_v1_neuroassist_ops_persistence_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentPersistenceStatusResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist persistence status abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/planning": {
-      "get": {
-        "operationId": "get_neuroassist_control_center_planning_api_v1_neuroassist_ops_planning_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist control center planning abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/planning/items": {
-      "post": {
-        "operationId": "upsert_neuroassist_control_center_plan_item_api_v1_neuroassist_ops_planning_items_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ControlCenterPlanItemRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist control center plan item upsert",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/plugin-boundary-review": {
-      "get": {
-        "operationId": "get_neuroassist_plugin_boundary_review_api_v1_neuroassist_ops_plugin_boundary_review_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist plugin boundary review abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/profiles/{capability_key}": {
-      "post": {
-        "operationId": "update_neuroassist_profile_api_v1_neuroassist_ops_profiles__capability_key__post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "capability_key",
-            "required": true,
-            "schema": {
-              "title": "Capability Key",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentProfileUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist profile aktualisieren",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/skill-packs": {
-      "get": {
-        "operationId": "list_neuroassist_skill_packs_api_v1_neuroassist_ops_skill_packs_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentOut"
-                  },
-                  "title": "Response List Neuroassist Skill Packs Api V1 Neuroassist Ops Skill Packs Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist skill packs auflisten",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/skill-packs/{skill_pack_key}": {
-      "post": {
-        "operationId": "update_neuroassist_skill_pack_api_v1_neuroassist_ops_skill_packs__skill_pack_key__post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "skill_pack_key",
-            "required": true,
-            "schema": {
-              "title": "Skill Pack Key",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentSkillPackUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist skill pack aktualisieren",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/templates/export": {
-      "get": {
-        "operationId": "export_neuroassist_template_api_v1_neuroassist_ops_templates_export_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "template_key",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Template Key",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist template exportieren",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/templates/import": {
-      "post": {
-        "operationId": "import_neuroassist_template_api_v1_neuroassist_ops_templates_import_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentTemplateImportRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist template importieren",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/tickets": {
-      "get": {
-        "operationId": "list_neuroassist_ops_tickets_api_v1_neuroassist_ops_tickets_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "include_closed",
-            "required": false,
-            "schema": {
-              "default": false,
-              "title": "Include Closed",
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AgentTicketResponse"
-                  },
-                  "title": "Response List Neuroassist Ops Tickets Api V1 Neuroassist Ops Tickets Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist ops tickets auflisten",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/ops/tickets/{ticket_id}/interventions": {
-      "post": {
-        "operationId": "apply_neuroassist_intervention_api_v1_neuroassist_ops_tickets__ticket_id__interventions_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "ticket_id",
-            "required": true,
-            "schema": {
-              "title": "Ticket Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgentInterventionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist intervention apply",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/runs": {
-      "get": {
-        "operationId": "list_neuroassist_runs_api_v1_neuroassist_runs_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/NeuroAssistRunResponse"
-                  },
-                  "title": "Response List Neuroassist Runs Api V1 Neuroassist Runs Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist runs auflisten",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      },
-      "post": {
-        "operationId": "run_neuroassist_capability_api_v1_neuroassist_runs_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NeuroAssistRunRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NeuroAssistRunResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist capability ausführen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/runs/{run_id}": {
-      "get": {
-        "operationId": "get_neuroassist_run_status_api_v1_neuroassist_runs__run_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "run_id",
-            "required": true,
-            "schema": {
-              "title": "Run Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NeuroAssistRunResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist run status abrufen",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
-    "/api/v1/neuroassist/runs/{run_id}/gates": {
-      "post": {
-        "operationId": "apply_neuroassist_gate_action_api_v1_neuroassist_runs__run_id__gates_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "run_id",
-            "required": true,
-            "schema": {
-              "title": "Run Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NeuroAssistGateActionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NeuroAssistGateActionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Neuroassist gate action apply",
-        "tags": [
-          "neuroassist",
-          "agents"
-        ]
-      }
-    },
     "/api/v1/nutrient-compositions/": {
       "get": {
         "description": "Return a paginated list of nutrient compositions.",
@@ -282649,6 +283800,131 @@
         ]
       }
     },
+    "/api/v1/pricing/find": {
+      "get": {
+        "description": "Frontend-Alias für /pricing/calculate — identische Logik.",
+        "operationId": "find_price_api_v1_pricing_find_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "article_id",
+            "required": true,
+            "schema": {
+              "title": "Article Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quantity",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "default": "1",
+              "title": "Quantity"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contract Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "user_role",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Role"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "00000000-0000-0000-0000-000000000001",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceCalculationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preisfindung (Frontend-Alias für /calculate)",
+        "tags": [
+          "pricing",
+          "pricing"
+        ]
+      }
+    },
     "/api/v1/pricing/governance": {
       "get": {
         "operationId": "get_governance_policy_api_v1_pricing_governance_get",
@@ -282760,6 +284036,150 @@
         "tags": [
           "pricing",
           "governance"
+        ]
+      }
+    },
+    "/api/v1/pricing/staffelrabatte": {
+      "get": {
+        "description": "Staffelrabatte abfragen — filterbar nach Artikel und Kunde.",
+        "operationId": "list_staffelrabatte_api_v1_pricing_staffelrabatte_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "artikel_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Artikel Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kunden_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kunden Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "00000000-0000-0000-0000-000000000001",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StaffelrabattOut"
+                  },
+                  "title": "Response List Staffelrabatte Api V1 Pricing Staffelrabatte Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Staffelrabatte auflisten",
+        "tags": [
+          "pricing",
+          "pricing"
+        ]
+      },
+      "post": {
+        "description": "Staffelrabatt anlegen (Mengen-/Preisstufen für Artikel oder Artikelgruppe).",
+        "operationId": "create_staffelrabatt_api_v1_pricing_staffelrabatte_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "00000000-0000-0000-0000-000000000001",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffelrabattIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffelrabattOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Staffelrabatt anlegen",
+        "tags": [
+          "pricing",
+          "pricing"
         ]
       }
     },
@@ -310208,6 +311628,72 @@
         ]
       }
     },
+    "/api/v1/scan/barcode": {
+      "post": {
+        "description": "Barcode-Lookup: sucht Artikel per EAN, Artikelnummer oder internem Code.\n\nRückgabe enthält Artikel-Stammdaten + aktuellen Bestand im angegebenen Lager.\nFalls der Artikel nicht gefunden wird, wird `gefunden=False` zurückgegeben\n(kein 404) — das ermöglicht Fremdware-Erkennung im Frontend.",
+        "operationId": "scan_barcode_api_v1_scan_barcode_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BarcodeScanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BarcodeScanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Barcode scannen und Artikel identifizieren",
+        "tags": [
+          "scan",
+          "mobile"
+        ]
+      }
+    },
     "/api/v1/schaeden/meldungen": {
       "get": {
         "description": "Alle Schadenmeldungen des Mandanten.",
@@ -327917,6 +329403,68 @@
         ]
       }
     },
+    "/api/v1/webshop/connectors": {
+      "get": {
+        "description": "Frontend-Alias: maps webshop/connectors → webshop/konfigurationen shape.",
+        "operationId": "list_connectors_api_v1_webshop_connectors_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/app__api__v1__endpoints__webshop_integration__ConnectorOut"
+                  },
+                  "title": "Response List Connectors Api V1 Webshop Connectors Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Connector-Liste (Frontend-Alias für /konfigurationen)",
+        "tags": [
+          "webshop",
+          "integration",
+          "webshop",
+          "integration"
+        ]
+      }
+    },
     "/api/v1/webshop/konfigurationen": {
       "get": {
         "description": "List shop configurations. API keys are never returned.",
@@ -328155,6 +329703,77 @@
           }
         ],
         "summary": "Orders auflisten",
+        "tags": [
+          "webshop",
+          "integration",
+          "webshop",
+          "integration"
+        ]
+      }
+    },
+    "/api/v1/webshop/orders/import": {
+      "post": {
+        "description": "Frontend-Alias: maps /orders/import → /bestellungen/import.",
+        "operationId": "import_orders_alias_api_v1_webshop_orders_import_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Import Orders Alias Api V1 Webshop Orders Import Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Orders importieren (Frontend-Alias)",
         "tags": [
           "webshop",
           "integration",
