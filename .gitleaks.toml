@@ -6,7 +6,7 @@ title = "VALEO-NeuroERP gitleaks config"
 [extend]
 useDefault = true
 
-[allowlist]
+[[allowlists]]
 description = "Allowlist for known non-secret test strings and generated artifacts."
 regexTarget = "match"
 
@@ -23,6 +23,7 @@ paths = [
   '''^playwright-report/''',
   '''^playwright-tests/artifacts/''',
   '''^evidence/''',
+  '''^artifacts/''',
   '''^FINAL-LINT-STATUS-REPORT\.md$''',
   '''^lint-results\.json$''',
 ]
@@ -43,4 +44,19 @@ regexes = [
   '''sonar\.projectKey=JochenWeerda_VALEO-NeuroERP-3\.0''',
   '''SUPERGLUE_MASTER_ENCRYPTION_KEY:\s*ci-only-not-a-production-secret''',
   '''SUPERGLUE_OPENAI_API_KEY:\s*ci-only-not-a-production-api-key''',
+  # Explicit redaction placeholders in archived docs and examples.
+  '''Authorization:\s*Bearer\s+REDACTED''',
+  '''FISKALY_API_KEY=\s*REDACTED''',
+  '''VITE_FISKALY_API_KEY=\s*REDACTED''',
+  '''access_token\"\s*:\s*\"REDACTED\"''',
+  '''TOKEN=\"REDACTED\"''',
+  '''key\"\s*:\s*\"REDACTED\"''',
+  '''templateKey\"\s*:\s*\"REDACTED\"''',
+]
+
+[[allowlists]]
+description = "Literal REDACTED placeholders are not secrets."
+regexTarget = "secret"
+regexes = [
+  '''^REDACTED$''',
 ]

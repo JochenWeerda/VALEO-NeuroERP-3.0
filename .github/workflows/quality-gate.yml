@@ -117,7 +117,6 @@ jobs:
             --no-git \
             --source . \
             --config .gitleaks.toml \
-            --baseline-path .gitleaks-baseline.json \
             --redact \
             --report-format json \
             --report-path gitleaks-report.json \
