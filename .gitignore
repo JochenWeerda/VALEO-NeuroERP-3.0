@@ -177,6 +177,9 @@ tmp_*/
 .tmp_*
 .tmp_export/
 dist/
+evidence/screenshots/
 *-results.json
 *_leads.json
+playwright-results.json
 playwright-results.json/
+ostfriesland_*.json
