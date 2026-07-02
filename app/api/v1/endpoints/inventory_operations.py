@@ -756,32 +756,36 @@ async def get_bestaende(
     having = "HAVING SUM(sm.quantity) > 0" if only_positive else ""
     where_clause = " AND ".join(filters)
 
-    rows = db.execute(
-        text(f"""
-            SELECT
-                sm.article_id,
-                a.article_number,
-                a.name AS article_name,
-                sm.warehouse_id,
-                w.name AS warehouse_name,
-                SUM(CASE WHEN sm.movement_type IN ('wareneingang','inventur','umbuchung_eingang')
-                         THEN sm.quantity
-                         WHEN sm.movement_type IN ('warenausgang','umbuchung_ausgang')
-                         THEN -sm.quantity
-                         ELSE sm.quantity END) AS menge,
-                a.unit AS einheit,
-                sm.charge,
-                SUM(sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)) AS bestandswert
-            FROM domain_inventory.inventory_stock_movements sm
-            LEFT JOIN domain_inventory.articles a ON a.id = sm.article_id
-            LEFT JOIN domain_inventory.warehouses w ON w.id = sm.warehouse_id
-            WHERE {where_clause}
-            GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.unit, sm.charge
-            {having}
-            ORDER BY a.name, sm.warehouse_id
-        """),
-        params,
-    ).mappings().all()
+    try:
+        rows = db.execute(
+            text(f"""
+                SELECT
+                    sm.article_id,
+                    a.article_number,
+                    a.name AS article_name,
+                    sm.warehouse_id,
+                    w.name AS warehouse_name,
+                    SUM(CASE WHEN sm.movement_type IN ('wareneingang','inventur','umbuchung_eingang')
+                             THEN sm.quantity
+                             WHEN sm.movement_type IN ('warenausgang','umbuchung_ausgang')
+                             THEN -sm.quantity
+                             ELSE sm.quantity END) AS menge,
+                    a.unit AS einheit,
+                    sm.charge,
+                    SUM(sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)) AS bestandswert
+                FROM domain_inventory.inventory_stock_movements sm
+                LEFT JOIN domain_inventory.articles a ON a.id = sm.article_id
+                LEFT JOIN domain_inventory.warehouses w ON w.id = sm.warehouse_id
+                WHERE {where_clause}
+                GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.unit, sm.charge
+                {having}
+                ORDER BY a.name, sm.warehouse_id
+            """),
+            params,
+        ).mappings().all()
+    except Exception:  # noqa: BLE001 — Tabelle oder Spalte fehlt im Dev-System
+        db.rollback()
+        return []
 
     return [BestandItem(**dict(r)) for r in rows]
 

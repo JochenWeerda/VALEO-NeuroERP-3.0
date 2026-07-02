@@ -27,7 +27,7 @@ export default function KundenumsatzPage(): JSX.Element {
   const { data: analyse = FALLBACK, isLoading } = useQuery({
     queryKey: ['crm', 'kundenumsatz'],
     queryFn: async () => {
-      const customersResponse = await apiClient.get<{ items: Array<{ id: string; name: string; revenue?: number }>; total: number }>('/api/v1/crm/customers/?limit=500')
+      const customersResponse = await apiClient.get<{ items: Array<{ id: string; name: string; revenue?: number }>; total: number }>('/api/v1/crm/customers/?limit=200')
       const customers = customersResponse.data?.items ?? []
 
       const totalRevenue = customers.reduce((sum, customer) => sum + (customer.revenue ?? 0), 0)

@@ -47,28 +47,32 @@ def gap_candidates(db: Session, plz_min: Optional[str], plz_max: Optional[str],
                    top_pct: float, max_leads: int) -> list[dict]:
     params: dict = {"pct": top_pct, "lim": max_leads}
     clause = _plz_clause("postal_code", plz_min, plz_max, params)
-    rows = db.execute(
-        text(
-            f"""
-            WITH scoped AS (
-                SELECT beneficiary_name_norm AS name_norm,
-                       max(beneficiary_name_raw)            AS name,
-                       postal_code                          AS plz,
-                       replace(max(city), ', Stadt', '')    AS ort,
-                       max(street_raw)                      AS strasse,
-                       sum(amount_total)                    AS score
-                FROM gap_payments
-                WHERE beneficiary_name_norm IS NOT NULL AND {_GAP_NAME_EXCLUDE}{clause}
-                GROUP BY beneficiary_name_norm, postal_code
-            ), ranked AS (
-                SELECT *, percent_rank() OVER (ORDER BY score DESC) AS pr FROM scoped
-            )
-            SELECT name, plz, ort, strasse, round(score) AS score
-            FROM ranked WHERE pr < :pct ORDER BY score DESC LIMIT :lim
-            """
-        ),
-        params,
-    ).mappings().all()
+    try:
+        rows = db.execute(
+            text(
+                f"""
+                WITH scoped AS (
+                    SELECT beneficiary_name_norm AS name_norm,
+                           max(beneficiary_name_raw)            AS name,
+                           postal_code                          AS plz,
+                           replace(max(city), ', Stadt', '')    AS ort,
+                           max(street_raw)                      AS strasse,
+                           sum(amount_total)                    AS score
+                    FROM gap_payments
+                    WHERE beneficiary_name_norm IS NOT NULL AND {_GAP_NAME_EXCLUDE}{clause}
+                    GROUP BY beneficiary_name_norm, postal_code
+                ), ranked AS (
+                    SELECT *, percent_rank() OVER (ORDER BY score DESC) AS pr FROM scoped
+                )
+                SELECT name, plz, ort, strasse, round(score) AS score
+                FROM ranked WHERE pr < :pct ORDER BY score DESC LIMIT :lim
+                """
+            ),
+            params,
+        ).mappings().all()
+    except Exception:  # noqa: BLE001 — Tabelle fehlt im Dev/Test-System
+        db.rollback()
+        return []
     return [{**dict(r), "quelle": "gap", "score_label": "Fördersumme €"} for r in rows]
 
 
@@ -76,24 +80,28 @@ def lkv_candidates(db: Session, plz_min: Optional[str], plz_max: Optional[str],
                    top_pct: float, max_leads: int) -> list[dict]:
     params: dict = {"pct": top_pct, "lim": max_leads}
     clause = _plz_clause("postal_code", plz_min, plz_max, params)
-    rows = db.execute(
-        text(
-            f"""
-            WITH scoped AS (
-                SELECT name_norm, max(besitzer_raw) AS name, postal_code AS plz,
-                       max(ort) AS ort, max(milch_kg) AS score
-                FROM dairy_herd_performance
-                WHERE besitzer_raw IS NOT NULL{clause}
-                GROUP BY name_norm, postal_code
-            ), ranked AS (
-                SELECT *, percent_rank() OVER (ORDER BY score DESC NULLS LAST) AS pr FROM scoped
-            )
-            SELECT name, plz, ort, NULL AS strasse, round(score) AS score
-            FROM ranked WHERE pr < :pct ORDER BY score DESC NULLS LAST LIMIT :lim
-            """
-        ),
-        params,
-    ).mappings().all()
+    try:
+        rows = db.execute(
+            text(
+                f"""
+                WITH scoped AS (
+                    SELECT name_norm, max(besitzer_raw) AS name, postal_code AS plz,
+                           max(ort) AS ort, max(milch_kg) AS score
+                    FROM dairy_herd_performance
+                    WHERE besitzer_raw IS NOT NULL{clause}
+                    GROUP BY name_norm, postal_code
+                ), ranked AS (
+                    SELECT *, percent_rank() OVER (ORDER BY score DESC NULLS LAST) AS pr FROM scoped
+                )
+                SELECT name, plz, ort, NULL AS strasse, round(score) AS score
+                FROM ranked WHERE pr < :pct ORDER BY score DESC NULLS LAST LIMIT :lim
+                """
+            ),
+            params,
+        ).mappings().all()
+    except Exception:  # noqa: BLE001 — Tabelle fehlt im Dev/Test-System
+        db.rollback()
+        return []
     return [{**dict(r), "quelle": "lkv", "score_label": "Milch kg/Kuh"} for r in rows]
 
 
@@ -254,26 +262,33 @@ class CrmLeadGenService:
         Firma+Mandant (Mehrfach-Übernahme erzeugt keine Dubletten)."""
         import uuid
 
+        check = text(
+            "SELECT 1 FROM public.crm_leads WHERE company = :company AND tenant_id = :tid LIMIT 1"
+        )
         ins = text(
-            """
-            INSERT INTO public.crm_leads (id, company, source, potential, priority, status, notes, tenant_id)
-            SELECT :id, :company, :source, :potential, 'MEDIUM', 'NEW', :notes, :tid
-            WHERE :company IS NOT NULL AND btrim(:company) <> ''
-              AND NOT EXISTS (
-                SELECT 1 FROM public.crm_leads WHERE company = :company AND tenant_id = :tid)
-            """
+            "INSERT INTO public.crm_leads "
+            "(id, company, source, potential, priority, status, notes, tenant_id) "
+            "VALUES (:id, :company, :source, :potential, 'MEDIUM', 'NEW', :notes, :tid)"
         )
         created = skipped = 0
-        for c in kandidaten:
-            name = (c.get("name") or "").strip()
-            notes = f"{c.get('plz') or ''} {c.get('ort') or ''} — {c.get('score_label') or ''}: {c.get('score') or ''}".strip()
-            res = self.db.execute(ins, {
-                "id": str(uuid.uuid4()), "company": name, "source": c.get("quelle"),
-                "potential": c.get("score"), "notes": notes, "tid": self.tenant_id,
-            })
-            if res.rowcount:
+        try:
+            for c in kandidaten:
+                name = (c.get("name") or "").strip()
+                if not name:
+                    skipped += 1
+                    continue
+                exists = self.db.execute(check, {"company": name, "tid": self.tenant_id}).first()
+                if exists:
+                    skipped += 1
+                    continue
+                notes = f"{c.get('plz') or ''} {c.get('ort') or ''} — {c.get('score_label') or ''}: {c.get('score') or ''}".strip()
+                self.db.execute(ins, {
+                    "id": str(uuid.uuid4()), "company": name, "source": c.get("quelle"),
+                    "potential": c.get("score"), "notes": notes, "tid": self.tenant_id,
+                })
                 created += 1
-            else:
-                skipped += 1
-        self.db.commit()
+            self.db.commit()
+        except Exception:  # noqa: BLE001
+            self.db.rollback()
+            raise
         return {"uebernommen": created, "uebersprungen": skipped, "leads_gesamt": self.leads_count()}

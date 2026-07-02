@@ -64,7 +64,7 @@ async function fetchConsent(id: string): Promise<Consent | null> {
 // Fetch contacts for select dropdown
 async function fetchContacts(): Promise<Contact[]> {
   try {
-    const response = await authenticatedFetch('/api/v1/crm/contacts?limit=500')
+    const response = await authenticatedFetch('/api/v1/crm/contacts?limit=200')
 
     if (!response.ok) {
       return []

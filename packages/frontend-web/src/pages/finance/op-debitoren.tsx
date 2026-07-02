@@ -413,7 +413,7 @@ export default function OPDebitorenPage(): JSX.Element {
   const { data: customers } = useQuery({
     queryKey: ['crm', 'customers', 'debitor-select'],
     queryFn: async () => {
-      const res = await apiClient.get<Array<{ id: string; customer_number?: string; company_name?: string; name?: string }>>('/api/v1/crm/customers/?limit=500')
+      const res = await apiClient.get<Array<{ id: string; customer_number?: string; company_name?: string; name?: string }>>('/api/v1/crm/customers/?limit=200')
       return (Array.isArray(res) ? res : []).map((c) => ({
         value: c.customer_number ?? c.id,
         label: `${c.customer_number ?? c.id} - ${c.company_name ?? c.name ?? ''}`.trim(),

@@ -221,7 +221,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       const openItemsMap: Record<string, number> = {}
       try {
         const opRes = await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
-          '/api/v1/finance/open-items?konto_typ=kreditoren&limit=500'
+          '/api/v1/finance/open-items?konto_typ=kreditoren&limit=200'
         )
         const items = opRes.data?.items ?? []
         items.forEach((op: { rechnungsnr?: string; offen?: number }) => {

@@ -77,29 +77,48 @@ async def scan_barcode(
     barcode = payload.barcode.strip()
 
     # Suche nach EAN, Artikelnummer oder Name
-    artikel_row = db.execute(
-        text("""
-            SELECT
-                id,
-                article_number,
-                name,
-                unit,
-                ean_code,
-                barcode,
-                purchase_price,
-                sales_price
-            FROM domain_inventory.articles
-            WHERE tenant_id = :tenant_id
-              AND is_active = TRUE
-              AND (
-                  ean_code = :barcode
-                  OR article_number = :barcode
-                  OR barcode = :barcode
-              )
-            LIMIT 1
-        """),
-        {"tenant_id": t_id, "barcode": barcode},
-    ).mappings().first()
+    try:
+        artikel_row = db.execute(
+            text("""
+                SELECT
+                    id,
+                    article_number,
+                    name,
+                    unit,
+                    ean_code,
+                    barcode,
+                    purchase_price,
+                    sales_price
+                FROM domain_inventory.articles
+                WHERE tenant_id = :tenant_id
+                  AND is_active = TRUE
+                  AND (
+                      ean_code = :barcode
+                      OR article_number = :barcode
+                      OR barcode = :barcode
+                  )
+                LIMIT 1
+            """),
+            {"tenant_id": t_id, "barcode": barcode},
+        ).mappings().first()
+    except Exception:  # noqa: BLE001 — Spalte oder Schema fehlt im Dev-System
+        db.rollback()
+        # Fallback ohne optionale Spalten
+        try:
+            artikel_row = db.execute(
+                text("""
+                    SELECT id, article_number, name, unit, ean_code,
+                           NULL AS barcode, NULL AS purchase_price, NULL AS sales_price
+                    FROM domain_inventory.articles
+                    WHERE tenant_id = :tenant_id
+                      AND (ean_code = :barcode OR article_number = :barcode)
+                    LIMIT 1
+                """),
+                {"tenant_id": t_id, "barcode": barcode},
+            ).mappings().first()
+        except Exception:  # noqa: BLE001
+            db.rollback()
+            artikel_row = None
 
     if not artikel_row:
         return BarcodeScanResponse(

@@ -71,7 +71,7 @@ async function fetchOpportunity(id: string): Promise<Opportunity> {
 // Fetch customers for select dropdown
 async function fetchCustomers(): Promise<Customer[]> {
   try {
-    const response = await authenticatedFetch('/api/v1/crm/customers/?limit=500')
+    const response = await authenticatedFetch('/api/v1/crm/customers/?limit=200')
 
     if (!response.ok) {
       return []
@@ -88,8 +88,8 @@ async function fetchCustomers(): Promise<Customer[]> {
 async function fetchContacts(customerId?: string): Promise<Contact[]> {
   try {
     const url = customerId
-      ? `/api/v1/crm/contacts?customer_id=${customerId}&limit=500`
-      : '/api/v1/crm/contacts?limit=500'
+      ? `/api/v1/crm/contacts?customer_id=${customerId}&limit=200`
+      : '/api/v1/crm/contacts?limit=200'
     const response = await authenticatedFetch(url)
 
     if (!response.ok) {

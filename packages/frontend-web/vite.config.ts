@@ -185,6 +185,11 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         secure: false,
       },
+      '/api/numbering': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
       '/api/crm-sales': {
         target: DEFAULT_BACKEND_PROXY,
         changeOrigin: true,
