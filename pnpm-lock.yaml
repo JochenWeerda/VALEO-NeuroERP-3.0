@@ -79,8 +79,8 @@ importers:
         version: 4.1.12
     devDependencies:
       '@playwright/test':
-        specifier: 1.48.0
-        version: 1.48.0
+        specifier: 1.60.0
+        version: 1.60.0
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
@@ -6550,11 +6550,6 @@ packages:
   '@playwright/browser-chromium@1.55.0':
     resolution: {integrity: sha512-HxG0+6v8NGLFLYMxrGb4T4DAmKwwx6C0V3uIn/i91tOVqcNnaBBllhpxLEqXCnxjprL3HDDMXsVPjk1/vsCVAw==}
     engines: {node: '>=18'}
-
-  '@playwright/test@1.48.0':
-    resolution: {integrity: sha512-W5lhqPUVPqhtc/ySvZI5Q8X2ztBOUgZ8LbAFy0JQgrXZs2xaILrUcNO3rQjwbLPfGK13+rZsDa1FpG+tqYkT5w==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   '@playwright/test@1.55.0':
     resolution: {integrity: sha512-04IXzPwHrW69XusN/SIdDdKZBzMfOT9UNT/YiJit/xpy2VuAoB8NHc8Aplb96zsWDddLnbkPL3TsmrS04ZU2xQ==}
@@ -14215,11 +14210,6 @@ packages:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}
     engines: {node: '>=8'}
 
-  playwright-core@1.48.0:
-    resolution: {integrity: sha512-RBvzjM9rdpP7UUFrQzRwR8L/xR4HyC1QXMzGYTbf1vjw25/ya9NRAVnXi/0fvFopjebvyPzsmoK58xxeEOaVvA==}
-    engines: {node: '>=18'}
-    hasBin: true
-
   playwright-core@1.55.0:
     resolution: {integrity: sha512-GvZs4vU3U5ro2nZpeiwyb0zuFaqb9sUiAJuyrWpcGouD8y9/HLgGbNRjIph7zU9D3hnPaisMl9zG9CgFi/biIg==}
     engines: {node: '>=18'}
@@ -14227,11 +14217,6 @@ packages:
 
   playwright-core@1.60.0:
     resolution: {integrity: sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==}
-    engines: {node: '>=18'}
-    hasBin: true
-
-  playwright@1.48.0:
-    resolution: {integrity: sha512-qPqFaMEHuY/ug8o0uteYJSRfMGFikhUysk8ZvAtfKmUK3kc/6oNl/y3EczF8OFGYIi/Ex2HspMfzYArk6+XQSA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -21873,10 +21858,6 @@ snapshots:
   '@playwright/browser-chromium@1.55.0':
     dependencies:
       playwright-core: 1.55.0
-
-  '@playwright/test@1.48.0':
-    dependencies:
-      playwright: 1.48.0
 
   '@playwright/test@1.55.0':
     dependencies:
@@ -31755,17 +31736,9 @@ snapshots:
     dependencies:
       find-up: 3.0.0
 
-  playwright-core@1.48.0: {}
-
   playwright-core@1.55.0: {}
 
   playwright-core@1.60.0: {}
-
-  playwright@1.48.0:
-    dependencies:
-      playwright-core: 1.48.0
-    optionalDependencies:
-      fsevents: 2.3.2
 
   playwright@1.55.0:
     dependencies:

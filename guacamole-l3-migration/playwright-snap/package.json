@@ -10,7 +10,7 @@
     "analyze": "node analyze-screenshots.js"
   },
   "dependencies": {
-    "playwright": "^1.48.0",
+    "playwright": "^1.55.1",
     "sharp": "^0.33.5",
     "tesseract.js": "^5.1.1"
   }
