@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P0-04-PII-REMEDIATION — Repo-Hygiene & PII-Bereinigung
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-07-02 — Fortsetzung der bereits begonnenen PII-/Repo-Hygiene-Remediation auf Branch `fix/pii-remediation`.
+**Ziel:** SPEC-P0-04 aus dem Production-Readiness-Audit abschliessen: PII-/Tmp-/Build-Artefakte entfernen, `.gitignore` haerten, gitleaks-Baseline auditieren, History-Purge-Plan und DSB-Bewertung dokumentieren.
+**Dateibesitz:** `.gitignore`, `.gitleaks-baseline.json`, `scripts/purge_pii_history.sh`, `artifacts/pii-remediation-report.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/SPEC-P0-04-PII-REMEDIATION.yaml`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Arbeitsbaum enthaelt keine getrackten PII-/Tmp-/Build-Artefakte aus SPEC-P0-04; Scan-Ergebnisse und DSB-Bewertung liegen in `artifacts/pii-remediation-report.md`; History-Purge-Plan ist dokumentiert; Slice-Verify und relevante Security-/Doku-Checks gruen oder mit external_gate begruendet.
+
 ## PROD-READINESS-AUDIT-001 — Production-Readiness-Audit & Agenten-Programm
 
 **Von:** Codex
