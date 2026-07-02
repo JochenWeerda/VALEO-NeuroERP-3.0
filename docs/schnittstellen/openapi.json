@@ -106,6 +106,115 @@
         "title": "APInvoiceCockpitReadModel",
         "type": "object"
       },
+      "AbgleichPayload": {
+        "properties": {
+          "bestellung_id": {
+            "title": "Bestellung Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bestellung_id"
+        ],
+        "title": "AbgleichPayload",
+        "type": "object"
+      },
+      "AbgleichPosition": {
+        "properties": {
+          "artikel_nr": {
+            "title": "Artikel Nr",
+            "type": "string"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "differenz": {
+            "default": 0.0,
+            "title": "Differenz",
+            "type": "number"
+          },
+          "menge_bestellt": {
+            "default": 0.0,
+            "title": "Menge Bestellt",
+            "type": "number"
+          },
+          "menge_geliefert": {
+            "default": 0.0,
+            "title": "Menge Geliefert",
+            "type": "number"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artikel_nr",
+          "status"
+        ],
+        "title": "AbgleichPosition",
+        "type": "object"
+      },
+      "AbgleichResult": {
+        "properties": {
+          "abweichungen": {
+            "title": "Abweichungen",
+            "type": "integer"
+          },
+          "bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellnummer"
+          },
+          "bestellung_id": {
+            "title": "Bestellung Id",
+            "type": "string"
+          },
+          "bestellung_status": {
+            "title": "Bestellung Status",
+            "type": "string"
+          },
+          "lieferschein_id": {
+            "title": "Lieferschein Id",
+            "type": "string"
+          },
+          "match": {
+            "title": "Match",
+            "type": "integer"
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/AbgleichPosition"
+            },
+            "title": "Positionen",
+            "type": "array"
+          }
+        },
+        "required": [
+          "lieferschein_id",
+          "bestellung_id",
+          "positionen",
+          "match",
+          "abweichungen",
+          "bestellung_status"
+        ],
+        "title": "AbgleichResult",
+        "type": "object"
+      },
       "AblehnenBody": {
         "properties": {
           "abgelehnt_von": {
@@ -7741,6 +7850,69 @@
             "title": "Einfuegen Summe Nach Zu Abschlag",
             "type": "boolean"
           },
+          "einheit_faktor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Conversion factor to base unit",
+            "title": "Einheit Faktor"
+          },
+          "einheit_preiseinheit": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price reference unit, e.g. '100 kg'",
+            "title": "Einheit Preiseinheit"
+          },
+          "einheit_typ": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unit type (weight, volume, etc.)",
+            "title": "Einheit Typ"
+          },
+          "gebinde_einheit": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Package unit code, e.g. 'Sa' (Sack)",
+            "title": "Gebinde Einheit"
+          },
+          "gebinde_groesse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Package/container size",
+            "title": "Gebinde Groesse"
+          },
           "gefahrgut_anhaenge": {
             "anyOf": [
               {
@@ -8583,6 +8755,76 @@
             "description": "Insert total line after surcharge",
             "title": "Einfuegen Summe Nach Zu Abschlag",
             "type": "boolean"
+          },
+          "einheit_faktor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Conversion factor to base unit",
+            "title": "Einheit Faktor"
+          },
+          "einheit_preiseinheit": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price reference unit, e.g. '100 kg'",
+            "title": "Einheit Preiseinheit"
+          },
+          "einheit_typ": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unit type (weight, volume, etc.)",
+            "title": "Einheit Typ"
+          },
+          "gebinde_einheit": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Package unit code, e.g. 'Sa' (Sack)",
+            "title": "Gebinde Einheit"
+          },
+          "gebinde_groesse": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Package/container size",
+            "title": "Gebinde Groesse"
           },
           "gefahrgut_anhaenge": {
             "anyOf": [
@@ -9511,6 +9753,76 @@
             ],
             "description": "Dimensions",
             "title": "Dimensions"
+          },
+          "einheit_faktor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Conversion factor to base unit",
+            "title": "Einheit Faktor"
+          },
+          "einheit_preiseinheit": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price reference unit, e.g. '100 kg'",
+            "title": "Einheit Preiseinheit"
+          },
+          "einheit_typ": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unit type (weight, volume, etc.)",
+            "title": "Einheit Typ"
+          },
+          "gebinde_einheit": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Package unit code, e.g. 'Sa' (Sack)",
+            "title": "Gebinde Einheit"
+          },
+          "gebinde_groesse": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Package/container size",
+            "title": "Gebinde Groesse"
           },
           "gefahrgut_anhaenge": {
             "anyOf": [
@@ -88447,6 +88759,198 @@
         "title": "QualifyRequest",
         "type": "object"
       },
+      "QualityBatchIn": {
+        "description": "Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch.",
+        "properties": {
+          "analysendatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Datum der Analyse, gilt für alle Zeilen",
+            "title": "Analysendatum"
+          },
+          "labor_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Labor/Gerät, gilt für alle Zeilen",
+            "title": "Labor Code"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/QualityBatchRowIn"
+            },
+            "minItems": 1,
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "title": "QualityBatchIn",
+        "type": "object"
+      },
+      "QualityBatchOut": {
+        "properties": {
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/QualityBatchRowResult"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "succeeded",
+          "failed",
+          "results"
+        ],
+        "title": "QualityBatchOut",
+        "type": "object"
+      },
+      "QualityBatchRowIn": {
+        "description": "Eine Laborbuch-Zeile für den Qualitäts-Nachtrag.",
+        "properties": {
+          "acceptance_id": {
+            "title": "Acceptance Id",
+            "type": "string"
+          },
+          "bemerkungen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkungen"
+          },
+          "besatz": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Besatz (Prozent)",
+            "title": "Besatz"
+          },
+          "fallzahl": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallzahl"
+          },
+          "feuchte_prozent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feuchte Prozent"
+          },
+          "hektolitergewicht_kg_hl": {
+            "anyOf": [
+              {
+                "maximum": 120.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hektolitergewicht Kg Hl"
+          },
+          "protein_prozent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protein Prozent"
+          }
+        },
+        "required": [
+          "acceptance_id"
+        ],
+        "title": "QualityBatchRowIn",
+        "type": "object"
+      },
+      "QualityBatchRowResult": {
+        "properties": {
+          "acceptance_id": {
+            "title": "Acceptance Id",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "acceptance_id",
+          "ok"
+        ],
+        "title": "QualityBatchRowResult",
+        "type": "object"
+      },
       "QualityEvidenceSummary": {
         "properties": {
           "dimensions": {
@@ -100840,6 +101344,21 @@
             ],
             "title": "Artikel Id"
           },
+          "artikel_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mehrere Artikel gleichzeitig zuordnen (M2M)",
+            "title": "Artikel Ids"
+          },
           "artikelgruppe": {
             "anyOf": [
               {
@@ -100933,6 +101452,13 @@
               }
             ],
             "title": "Artikel Id"
+          },
+          "artikel_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artikel Ids",
+            "type": "array"
           },
           "artikelgruppe": {
             "anyOf": [
@@ -122454,7 +122980,7 @@
   },
   "info": {
     "title": "VALEO-NeuroERP Test App",
-    "version": "0.1.0"
+    "version": "3.0.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -140311,6 +140837,18 @@
             }
           },
           {
+            "description": "Nur unterbrochene Annahmen ohne Qualitätsprotokoll (Labor-Nachtrag ausstehend)",
+            "in": "query",
+            "name": "missing_quality",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Nur unterbrochene Annahmen ohne Qualitätsprotokoll (Labor-Nachtrag ausstehend)",
+              "title": "Missing Quality",
+              "type": "boolean"
+            }
+          },
+          {
             "in": "header",
             "name": "X-Tenant-ID",
             "required": false,
@@ -140527,6 +141065,74 @@
           }
         ],
         "summary": "Last harvest acceptance abrufen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/quality-batch": {
+      "post": {
+        "description": "Laborwerte (hl-Gewicht, Feuchte, Besatz, ...) für mehrere unterbrochene\nAnnahmen in einem Schritt nachtragen — typischer Nachtrag aus dem Laborbuch,\nseitenweise oder als Batch. Zeilenfehler brechen den Batch nicht ab.",
+        "operationId": "create_quality_batch_api_v1_agrar_harvest_acceptance_quality_batch_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QualityBatchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityBatchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Qualitätswerte als Batch nachtragen",
         "tags": [
           "agrar",
           "harvest",
@@ -203360,6 +203966,76 @@
           }
         ],
         "summary": "Lieferschein aktualisieren",
+        "tags": [
+          "einkauf",
+          "lieferschein",
+          "frachtauftrag"
+        ]
+      }
+    },
+    "/api/v1/einkauf/lieferscheine/{ls_id}/bestellung-abgleich": {
+      "post": {
+        "description": "Positionsabgleich Eingangslieferschein ↔ Einkaufsbestellung (per artikel_nr,\nFallback Lieferanten-Artikelnummer). Schreibt menge_geliefert/menge_offen und\nPositionsstatus auf der Bestellung fort und setzt den Bestellstatus auf\nteilgeliefert/geliefert. Meldet UNTER-/UEBERLIEFERUNG, UNBESTELLT, UNGELIEFERT.",
+        "operationId": "abgleich_lieferschein_bestellung_api_v1_einkauf_lieferscheine__ls_id__bestellung_abgleich_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ls_id",
+            "required": true,
+            "schema": {
+              "title": "Ls Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbgleichPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbgleichResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangslieferschein gegen Bestellung abgleichen",
         "tags": [
           "einkauf",
           "lieferschein",
