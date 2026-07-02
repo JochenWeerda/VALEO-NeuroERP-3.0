@@ -57,32 +57,36 @@ separater Arbeitsblock — siehe `docs/agent-ops/active-workboard.md` →
 
 ## UI-AGRAR-WIZARD-001 — Sammelabrechnung Wizard-Step-Badges (2026-07-02)
 
-Status: **offen** (UI-Bug, keine API-Regression).
+Status: **erledigt 2026-07-02** (Root-Cause war API-Verdrahtung, kein Rendering-Bug).
 
 - Betroffener Test: `packages/frontend-web/tests/e2e/uat/uat-agrar-kernprozesse.spec.ts`
-  → `TC-AGR-001: Sammelabrechnung — Wizard-Steps sichtbar und navigierbar`.
-- Symptom: die 3 Wizard-Step-Badges (Ernteerfassungen/Abrechnungsdetails/
-  Bestätigung) auf `/agrar/sammelabrechnung` werden nicht zuverlässig
-  gerendert.
-- Abgrenzung: die zugrunde liegenden Sammelabrechnungs-Endpoints liefern
-  korrekte Daten — dies ist ein isoliertes Frontend-Rendering-Problem im
-  Wizard-Step-Indikator, kein API-Gap.
-- Der Test ist bewusst **nicht** geskippt (kein stummer Skip), sondern trägt
-  einen Ticket-Kommentar im Testcode, der auf dieses Issue verweist.
+  → `TC-AGR-001: Sammelabrechnung — Wizard-Steps sichtbar und navigierbar` — **grün**.
+- Tatsächlicher Root-Cause: das Frontend rief `/api/v1/rohware/sammelabrechnung`
+  (existiert nicht, 404), der Backend-Router liegt auf
+  `/api/v1/agrar/sammelabrechnung`. Zusätzlich passte das Payload-Schema nicht
+  (`ernte_ids/abrechnungsdatum/notiz` vs. `harvest_acceptance_ids (min. 2)/
+  abrechnungsperiode/bezeichnung/sammeldatum`). Der 404 führte zu `isError`
+  → `ErrorState` ersetzte die ganze Seite inkl. Step-Badges — daher das
+  scheinbare „Rendering-Problem".
+- Fix: `src/pages/agrar/sammelabrechnung.tsx` auf den echten Backend-Vertrag
+  verdrahtet (Auswahlliste aus `GET /agrar/harvest-acceptance/`, Anlage +
+  direktes `/berechnen`, min-2-Validierung, Fehler-Feedback im Bestätigungs-Step).
 
 ## UI-PERSONAL-BADGES-001 — Bewerbungen Stage-Pipeline-Badges (2026-07-02)
 
-Status: **offen** (UI-Bug, keine API-Regression).
+Status: **erledigt 2026-07-02** (Root-Cause war fehlender Endpoint-Pfad + fehlende Tabelle).
 
 - Betroffener Test: `packages/frontend-web/tests/e2e/uat/uat-admin-personal.spec.ts`
-  → `TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar`.
-- Symptom: Pipeline-Stage-Badges (Eingang/Vorauswahl/Interview/Angebot/
-  Abgelehnt) auf `/personal/bewerbungen` werden nicht zuverlässig gerendert.
-- Abgrenzung: die zugrunde liegenden Bewerbungs-Endpoints liefern korrekte
-  Daten — dies ist ein isoliertes Frontend-Rendering-Problem im
-  Badge-Komponenten, kein API-Gap.
-- Der Test ist bewusst **nicht** geskippt (kein stummer Skip), sondern trägt
-  einen Ticket-Kommentar im Testcode, der auf dieses Issue verweist.
+  → `TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar` — **grün**.
+- Tatsächlicher Root-Cause (zweiteilig):
+  1. Frontend rief `/api/v1/personal/bewerbungen` (existiert nicht, 404) statt
+     `/api/v1/personal/applications`; der Fehler ersetzte die Seite durch
+     `ErrorState` — daher das scheinbare Badge-Rendering-Problem.
+  2. Die Tabelle `domain_hr.applications` war nie migriert worden — die
+     Applications-Endpoints liefen seit Wave-104 in den 503-Fallback.
+- Fix: `src/pages/personal/bewerbungen.tsx` auf `/personal/applications` mit
+  Feldmapping (`applicant_name/position_title/status/applied_at`) umgestellt;
+  Migration `alembic/versions/hr_applications_table_20260702.py` ergänzt.
 
 ## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator (2026-06-28)
 

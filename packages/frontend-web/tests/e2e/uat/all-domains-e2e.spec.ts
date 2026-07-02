@@ -26,7 +26,9 @@ import { prepareE2EAuth } from '../helpers/auth-from-env'
 const BASE = process.env.BASE_URL ?? 'http://localhost:3001'
 const API = process.env.API_URL ?? 'http://127.0.0.1:8000'
 const TOKEN = process.env.API_DEV_TOKEN ?? 'dev-token'
-const TENANT = process.env.TENANT_ID ?? 'default'
+// Tenant-Konvention: kanonische UUID (siehe docs/project-context/open-gaps-and-known-issues.md
+// → TENANT-UUID-KONVENTION). String-Aliase wie 'default' sind deprecated.
+const TENANT = process.env.TENANT_ID ?? '00000000-0000-0000-0000-000000000001'
 const PERF_THRESHOLD_MS = 6000
 
 async function measureLoad(page: Page, label: string): Promise<number> {

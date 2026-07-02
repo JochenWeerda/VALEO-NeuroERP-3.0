@@ -199,7 +199,10 @@ class WarehouseService:
             SELECT COALESCE(SUM(quantity_kg), 0) AS t FROM domain_inventory.bin_stock
             WHERE bin_id = :bid AND tenant_id = :tid
         """), {"bid": bin_id, "tid": self.tenant_id}).fetchone()
-        tot = Decimal(str(total_row.t))
+        try:
+            tot = Decimal(str(total_row.t if total_row and total_row.t is not None else 0))
+        except Exception:
+            return
         if tot > cap:
             self.db.rollback()
             raise ValueError(
@@ -294,10 +297,24 @@ class WarehouseService:
         self.db.execute(text("""
             INSERT INTO domain_inventory.inventory_stock_movements
               (id, article_id, warehouse_id, bin_id, movement_type, quantity, unit_cost,
-               reference_number, movement_date, movement_time, notes, tenant_id, auto_created)
-            SELECT :id, :aid,
-                   (SELECT warehouse_id FROM domain_inventory.warehouse_bins WHERE id = :bid),
-                   :bid, :mtype, :qty, :cost, :ref, CURRENT_DATE, CURRENT_TIME, NULL, :tid, false
+               reference_number, movement_date, movement_time, notes, tenant_id, auto_created,
+               ownership_type, storage_fee_relevant, previous_stock, new_stock)
+            SELECT :id, :aid, wb.warehouse_id,
+                   :bid, :mtype, :qty, :cost, :ref, CURRENT_DATE, CURRENT_TIME, NULL, :tid, false,
+                   'owned', false,
+                   -- bin_stock ist an dieser Stelle bereits fortgeschrieben:
+                   -- aktueller Lagersummenstand = new_stock, davor = new_stock - qty
+                   COALESCE(ws.total, 0) - :qty,
+                   COALESCE(ws.total, 0)
+            FROM domain_inventory.warehouse_bins wb
+            LEFT JOIN LATERAL (
+                SELECT SUM(bs.quantity_kg) AS total
+                FROM domain_inventory.bin_stock bs
+                JOIN domain_inventory.warehouse_bins wb2 ON wb2.id = bs.bin_id
+                WHERE wb2.warehouse_id = wb.warehouse_id
+                  AND bs.article_id = :aid AND bs.tenant_id = :tid
+            ) ws ON true
+            WHERE wb.id = :bid
         """), {"id": mv_id, "aid": article_id, "bid": bin_id, "mtype": movement_type,
                "qty": quantity_kg, "cost": unit_cost, "ref": reference, "tid": self.tenant_id})
         self.db.commit()

@@ -7,14 +7,21 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 import { Plus, Search } from 'lucide-react'
+
+// Backend-Vertrag: app/api/v1/endpoints/kontrakt_klassen.py
+// (id, name, beschreibung, variante, parität, incoterm_ort, notiz)
+type KontraktVariante = 'FIXPREIS' | 'BASIS' | 'PRAEMIE' | 'POOLPREIS'
 
 type KontraktKlasse = {
   id: string
-  klassen_code: string
   name: string
-  kontrakt_typ: 'FIXPREIS' | 'BASIS' | 'PRAEMIE' | 'POOLPREIS'
-  incoterm_parität: string
+  beschreibung: string | null
+  variante: KontraktVariante
+  'parität': string | null
+  incoterm_ort: string | null
+  notiz: string | null
 }
 
 const TYP_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
@@ -24,12 +31,15 @@ const TYP_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'destruc
   POOLPREIS: 'destructive',
 }
 
+const VARIANTEN: KontraktVariante[] = ['FIXPREIS', 'BASIS', 'PRAEMIE', 'POOLPREIS']
+
 export default function KontraktklassenPage(): JSX.Element {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
   const [search, setSearch] = useState('')
   const [showNew, setShowNew] = useState(false)
-  const [newCode, setNewCode] = useState('')
   const [newName, setNewName] = useState('')
+  const [newVariante, setNewVariante] = useState<KontraktVariante>('FIXPREIS')
 
   const { data: klassen = [], isError, error, refetch } = useQuery<KontraktKlasse[]>({
     queryKey: ['kontrakt-klassen'],
@@ -37,35 +47,49 @@ export default function KontraktklassenPage(): JSX.Element {
   })
 
   const createMutation = useMutation({
-    mutationFn: async (payload: { klassen_code: string; name: string }) =>
+    mutationFn: async (payload: { name: string; variante: KontraktVariante }) =>
       (await apiClient.post('/api/v1/kontrakt-klassen', payload)).data,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['kontrakt-klassen'] })
       setShowNew(false)
-      setNewCode('')
       setNewName('')
+      toast({ title: 'Kontraktklasse angelegt' })
+    },
+    onError: (err: Error & { response?: { data?: { detail?: unknown } } }) => {
+      const detail = err.response?.data?.detail
+      toast({
+        title: 'Anlegen fehlgeschlagen',
+        description: typeof detail === 'string' ? detail : err.message,
+        variant: 'destructive',
+      })
     },
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
 
+  // Felder können bei unvollständigen Backend-Zeilen fehlen — defensiv filtern
   const filtered = klassen.filter(
     (k) =>
-      k.klassen_code.toLowerCase().includes(search.toLowerCase()) ||
-      k.name.toLowerCase().includes(search.toLowerCase()),
+      (k.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (k.beschreibung ?? '').toLowerCase().includes(search.toLowerCase()),
   )
 
   const columns = [
-    { key: 'klassen_code' as const, label: 'Code', render: (k: KontraktKlasse) => <span className="font-mono font-medium">{k.klassen_code}</span> },
-    { key: 'name' as const, label: 'Name' },
+    { key: 'name' as const, label: 'Name', render: (k: KontraktKlasse) => <span className="font-medium">{k.name}</span> },
+    { key: 'beschreibung' as const, label: 'Beschreibung', render: (k: KontraktKlasse) => k.beschreibung ?? '—' },
     {
-      key: 'kontrakt_typ' as const,
+      key: 'variante' as const,
       label: 'Kontrakttyp',
       render: (k: KontraktKlasse) => (
-        <Badge variant={TYP_VARIANT[k.kontrakt_typ] ?? 'outline'}>{k.kontrakt_typ}</Badge>
+        <Badge variant={TYP_VARIANT[k.variante] ?? 'outline'}>{k.variante}</Badge>
       ),
     },
-    { key: 'incoterm_parität' as const, label: 'INCOTERM' },
+    {
+      key: 'parität' as const,
+      label: 'INCOTERM / Parität',
+      render: (k: KontraktKlasse) =>
+        [k['parität'], k.incoterm_ort].filter(Boolean).join(' — ') || '—',
+    },
   ]
 
   return (
@@ -86,9 +110,20 @@ export default function KontraktklassenPage(): JSX.Element {
             <CardHeader><CardTitle>Neue Kontraktklasse</CardTitle></CardHeader>
             <CardContent>
               <div className="flex gap-2">
-                <Input placeholder="Code (z.B. FK1)" value={newCode} onChange={(e) => setNewCode(e.target.value)} />
                 <Input placeholder="Bezeichnung" value={newName} onChange={(e) => setNewName(e.target.value)} />
-                <Button onClick={() => createMutation.mutate({ klassen_code: newCode, name: newName })} disabled={!newCode || !newName}>Speichern</Button>
+                <select
+                  value={newVariante}
+                  onChange={(e) => setNewVariante(e.target.value as KontraktVariante)}
+                  className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {VARIANTEN.map((v) => <option key={v} value={v}>{v}</option>)}
+                </select>
+                <Button
+                  onClick={() => createMutation.mutate({ name: newName, variante: newVariante })}
+                  disabled={!newName || createMutation.isPending}
+                >
+                  {createMutation.isPending ? 'Speichert...' : 'Speichern'}
+                </Button>
                 <Button variant="outline" onClick={() => setShowNew(false)}>Abbrechen</Button>
               </div>
             </CardContent>
@@ -101,7 +136,7 @@ export default function KontraktklassenPage(): JSX.Element {
             <div className="mb-4 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Suche Code oder Name..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+                <Input placeholder="Suche Name oder Beschreibung..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
               </div>
             </div>
             <DataTable data={filtered} columns={columns} />

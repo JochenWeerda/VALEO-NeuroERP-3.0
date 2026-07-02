@@ -233,9 +233,10 @@ function EmpfehlungsBanner() {
 
   if (!data || data.ungesehen === 0) return null
 
-  const ankauf = data.nach_typ['ankauf_kontrakt'] ?? 0
-  const lohn = data.nach_typ['lohndienst'] ?? 0
-  const rohware = data.nach_typ['rohware_angebot'] ?? 0
+  // nach_typ kann bei Fehler-/Minimal-Antworten des Portals fehlen
+  const ankauf = data.nach_typ?.['ankauf_kontrakt'] ?? 0
+  const lohn = data.nach_typ?.['lohndienst'] ?? 0
+  const rohware = data.nach_typ?.['rohware_angebot'] ?? 0
 
   return (
     <Link to="/portal/empfehlungen">

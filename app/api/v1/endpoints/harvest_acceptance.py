@@ -341,6 +341,7 @@ async def list_harvest_acceptances(
     contract_id: Optional[str] = Query(None, description="Filter nach Vertrag"),
     release_status: Optional[ReleaseStatus] = Query(None, description="Filter nach Freigabe-Status"),
     origin_nuts2_code: Optional[str] = Query(None, description="Filter nach NUTS-2-Code"),
+    missing_quality: bool = Query(False, description="Nur unterbrochene Annahmen ohne Qualitätsprotokoll (Labor-Nachtrag ausstehend)"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -350,6 +351,7 @@ async def list_harvest_acceptances(
         contract_id=contract_id,
         release_status=release_status,
         origin_nuts2_code=origin_nuts2_code,
+        missing_quality=missing_quality,
     )
 
 
@@ -513,6 +515,96 @@ async def get_qualitaetsprotokoll(
         return _svc(db, tenant_id).get_quality_protocol(acceptance_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
+
+
+# ============================================================================
+# QUALITÄTS-NACHTRAG (BATCH) — Laborbuch-Werte für unterbrochene Annahmen
+# ============================================================================
+
+class QualityBatchRowIn(BaseModel):
+    """Eine Laborbuch-Zeile für den Qualitäts-Nachtrag."""
+    acceptance_id: str
+    feuchte_prozent: Optional[float] = Field(None, ge=0, le=100)
+    hektolitergewicht_kg_hl: Optional[float] = Field(None, ge=0, le=120)
+    besatz: Optional[float] = Field(None, ge=0, le=100, description="Besatz (Prozent)")
+    protein_prozent: Optional[float] = Field(None, ge=0, le=100)
+    fallzahl: Optional[float] = Field(None, ge=0)
+    bemerkungen: Optional[str] = None
+
+
+class QualityBatchIn(BaseModel):
+    """Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch."""
+    rows: list[QualityBatchRowIn] = Field(..., min_length=1)
+    labor_code: Optional[str] = Field(None, description="Labor/Gerät, gilt für alle Zeilen")
+    analysendatum: Optional[str] = Field(None, description="ISO-Datum der Analyse, gilt für alle Zeilen")
+
+
+class QualityBatchRowResult(BaseModel):
+    acceptance_id: str
+    ok: bool
+    error: Optional[str] = None
+
+
+class QualityBatchOut(BaseModel):
+    total: int
+    succeeded: int
+    failed: int
+    results: list[QualityBatchRowResult]
+
+
+@router.post("/quality-batch", response_model=QualityBatchOut, summary="Qualitätswerte als Batch nachtragen")
+async def create_quality_batch(
+    payload: QualityBatchIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Laborwerte (hl-Gewicht, Feuchte, Besatz, ...) für mehrere unterbrochene
+    Annahmen in einem Schritt nachtragen — typischer Nachtrag aus dem Laborbuch,
+    seitenweise oder als Batch. Zeilenfehler brechen den Batch nicht ab."""
+    svc = _svc(db, tenant_id)
+    results: list[QualityBatchRowResult] = []
+    for row in payload.rows:
+        measurement_fields = (
+            row.feuchte_prozent,
+            row.hektolitergewicht_kg_hl,
+            row.besatz,
+            row.protein_prozent,
+            row.fallzahl,
+        )
+        if all(v is None for v in measurement_fields):
+            results.append(QualityBatchRowResult(
+                acceptance_id=row.acceptance_id, ok=False, error="Keine Messwerte in der Zeile",
+            ))
+            continue
+        data = {
+            "feuchte_prozent": row.feuchte_prozent,
+            "hektolitergewicht_kg_hl": row.hektolitergewicht_kg_hl,
+            "besatz": row.besatz,
+            "protein_prozent": row.protein_prozent,
+            "fallzahl": row.fallzahl,
+            "bemerkungen": row.bemerkungen,
+            "labor_code": payload.labor_code,
+            "analysendatum": payload.analysendatum,
+        }
+        try:
+            svc.create_quality_protocol_for_acceptance(row.acceptance_id, data)
+            results.append(QualityBatchRowResult(acceptance_id=row.acceptance_id, ok=True))
+        except EntityNotFoundError as exc:
+            db.rollback()
+            results.append(QualityBatchRowResult(acceptance_id=row.acceptance_id, ok=False, error=str(exc.detail)))
+        except ValidationFailedError as exc:
+            db.rollback()
+            results.append(QualityBatchRowResult(acceptance_id=row.acceptance_id, ok=False, error=str(exc.detail)))
+        except Exception as exc:  # noqa: BLE001 — Zeilenfehler dürfen den Laborbuch-Batch nicht abbrechen
+            db.rollback()
+            results.append(QualityBatchRowResult(acceptance_id=row.acceptance_id, ok=False, error=str(exc)))
+    succeeded = sum(1 for r in results if r.ok)
+    return QualityBatchOut(
+        total=len(results),
+        succeeded=succeeded,
+        failed=len(results) - succeeded,
+        results=results,
+    )
 
 
 # ============================================================================

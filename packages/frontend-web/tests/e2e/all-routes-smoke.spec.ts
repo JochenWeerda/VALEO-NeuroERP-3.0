@@ -76,10 +76,19 @@ async function testRoute(
   const onConsole = (msg: ConsoleMessage) => {
     if (msg.type() === 'error') {
       const text = msg.text()
+      // Externe Karten-Tiles (MapLibre → OSM) sind in der Testumgebung ohne
+      // Internet nicht erreichbar — kein App-Fehler. Bare "Failed to fetch"
+      // nur ausfiltern, wenn er aus dem maplibre-Bundle stammt.
+      const sourceUrl = msg.location()?.url ?? ''
+      const isExternalMapNoise =
+        text.includes('tile.openstreetmap.org') ||
+        text.includes('AJAXError') ||
+        sourceUrl.includes('maplibre-gl')
       if (
         !text.includes('favicon.ico') &&
         !text.includes('net::ERR_') &&
-        !text.includes('Failed to load resource')
+        !text.includes('Failed to load resource') &&
+        !isExternalMapNoise
       ) {
         consoleErrors.push(text.substring(0, 300))
       }

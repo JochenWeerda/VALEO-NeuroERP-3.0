@@ -231,6 +231,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/agrar/annahmen-qualitaet-nachtrag",
+      "path": "agrar/annahmen-qualitaet-nachtrag",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/agrar/aussaat/liste",
       "path": "agrar/aussaat",
       "source": "alias"

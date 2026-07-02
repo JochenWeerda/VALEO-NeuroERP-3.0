@@ -133,6 +133,10 @@
       "path": "agrar/ernte-annahme-erfassung/:id"
     },
     {
+      "module": "@/pages/agrar/annahmen-qualitaet-nachtrag",
+      "path": "agrar/annahmen-qualitaet-nachtrag"
+    },
+    {
       "module": "@/pages/agrar/kulturpflanzen/liste",
       "path": "agrar/kulturpflanzen"
     },

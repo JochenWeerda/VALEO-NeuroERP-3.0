@@ -108,6 +108,11 @@ def _seed_contract_test_tenants():
     session = SessionLocal()
     try:
         for tenant_id, name in (
+            # Kanonische Tenant-UUIDs (Konvention seit 2026-07-02): neue Tests
+            # verwenden ausschliesslich diese UUIDs als X-Tenant-Id.
+            ("00000000-0000-0000-0000-000000000001", "Dev/Test Tenant A (kanonisch)"),
+            ("00000000-0000-0000-0000-000000000002", "Test Tenant B (Tenant-Isolation)"),
+            # Legacy-String-Tenants: nur noch fuer Bestandstests, nicht neu verwenden.
             ("test-tenant", "Integration Test Tenant"),
             ("default", "Default Test Tenant"),
         ):

@@ -16,13 +16,10 @@ test.describe('UAT TC-AGR: Agrar-Kernprozesse', () => {
   // -------------------------------------------------------------------------
   // TC-AGR-001: Sammelabrechnung Wizard
   //
-  // KNOWN ISSUE — UI-AGRAR-WIZARD-001 (siehe docs/project-context/open-gaps-and-known-issues.md)
-  // Die 3 Wizard-Step-Badges (Ernteerfassungen/Abrechnungsdetails/Bestätigung) in
-  // /agrar/sammelabrechnung werden nicht zuverlässig gerendert. Dies ist ein
-  // isolierter UI-Rendering-Bug im Agrar-Wizard, KEINE API-Regression — die
-  // zugrunde liegenden Sammelabrechnungs-Endpoints liefern korrekte Daten.
-  // Nicht stumm skippen; Ticket UI-AGRAR-WIZARD-001 offen halten, bis das
-  // Step-Badge-Rendering gefixt ist.
+  // UI-AGRAR-WIZARD-001 erledigt 2026-07-02: Root-Cause war ein 404 durch den
+  // falschen API-Pfad (rohware/ statt agrar/sammelabrechnung) — der ErrorState
+  // ersetzte die Seite inkl. Step-Badges. Frontend ist jetzt auf den echten
+  // Backend-Vertrag verdrahtet (siehe open-gaps-and-known-issues.md).
   // -------------------------------------------------------------------------
   test('TC-AGR-001: Sammelabrechnung — Wizard-Steps sichtbar und navigierbar', async ({ page }) => {
     const collector = attachConsoleErrorListener(page)

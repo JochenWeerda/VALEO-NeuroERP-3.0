@@ -20,8 +20,8 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-TENANT_A = "test-tenant"
-TENANT_B = "default"
+TENANT_A = "00000000-0000-0000-0000-000000000001"
+TENANT_B = "00000000-0000-0000-0000-000000000002"
 HEADERS = {"Authorization": "Bearer dev-token"}
 
 

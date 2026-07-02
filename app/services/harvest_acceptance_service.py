@@ -117,6 +117,7 @@ class HarvestAcceptanceService:
         contract_id=None,
         release_status=None,
         origin_nuts2_code=None,
+        missing_quality=False,
     ) -> list[dict]:
         q = self.db.query(HarvestAcceptance).filter(HarvestAcceptance.tenant_id == self.tenant_id)
         if customer_id:
@@ -127,6 +128,16 @@ class HarvestAcceptanceService:
             q = q.filter(HarvestAcceptance.release_status == release_status)
         if origin_nuts2_code:
             q = q.filter(HarvestAcceptance.origin_nuts2_code == origin_nuts2_code.upper())
+        if missing_quality:
+            # Unterbrochene Annahmen: Laborwerte (Qualitätsprotokoll) stehen noch
+            # aus und die Annahme ist noch nicht endabgerechnet/storniert.
+            # (draft/provisional/disputed dürfen Laborwerte nachtragen)
+            q = q.filter(
+                HarvestAcceptance.quality_protocol_id.is_(None),
+                HarvestAcceptance.release_status.notin_(
+                    ["final", "credit_note_created", "paid", "cancelled"]
+                ),
+            )
         items = q.order_by(
             HarvestAcceptance.delivery_date.desc(),
             HarvestAcceptance.acceptance_number.desc(),

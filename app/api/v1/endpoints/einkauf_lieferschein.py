@@ -410,6 +410,26 @@ async def delete_frachtauftrag(fa_id: str, tenant_id: str = Query("system"), db:
 
 # ── Wareneingang buchen (Belegbruch: Einkauf-LS → Lager) ──────────────────
 
+def _resolve_article_id(db: Session, artikel_nr: Optional[str]) -> Optional[str]:
+    """Löst eine Positions-Artikelnummer auf articles.id auf.
+
+    Reihenfolge: exakte article_number im Artikelstamm, dann direkte id
+    (Bestandstests übergeben teils bereits UUIDs in artikel_nr)."""
+    if not artikel_nr:
+        return None
+    row = db.execute(
+        text("SELECT id FROM domain_inventory.articles WHERE article_number = :nr LIMIT 1"),
+        {"nr": artikel_nr},
+    ).first()
+    if row:
+        return row[0]
+    row = db.execute(
+        text("SELECT id FROM domain_inventory.articles WHERE id = :nr LIMIT 1"),
+        {"nr": artikel_nr},
+    ).first()
+    return row[0] if row else None
+
+
 class EinbuchenPayload(BaseModel):
     warehouse_id: str
     default_bin_id: Optional[str] = None
@@ -460,11 +480,14 @@ async def einbuchen_lieferschein(
     reference = f"LS-EK-{ls['lieferschein_nr']}"
 
     for pos in positions:
-        artikel_id = pos.get("artikel_nr")
+        # artikel_nr kann Lieferanten-/Stammdaten-Artikelnummer ODER direkt eine
+        # Artikel-UUID sein — für die Lagerbuchung immer auf articles.id auflösen.
+        artikel_id = _resolve_article_id(db, pos.get("artikel_nr"))
         menge = Decimal(str(pos.get("menge") or 0))
         if not artikel_id or menge <= 0:
             positions_skipped += 1
-            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": "keine artikel_nr oder menge=0"})
+            reason = "menge=0" if artikel_id else f"Artikel '{pos.get('artikel_nr')}' nicht im Artikelstamm"
+            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": reason})
             continue
 
         # Resolve bin: prefer position's lagerfach, then payload default_bin_id
@@ -517,4 +540,162 @@ async def einbuchen_lieferschein(
         movements_created=movements_created,
         positions_skipped=positions_skipped,
         detail=detail,
+    )
+
+
+# ── Bestellabgleich (Eingangslieferschein ↔ Einkaufsbestellung) ─────────────
+
+class AbgleichPayload(BaseModel):
+    bestellung_id: str
+
+
+class AbgleichPosition(BaseModel):
+    artikel_nr: str
+    bezeichnung: Optional[str] = None
+    menge_bestellt: float = 0.0
+    menge_geliefert: float = 0.0
+    differenz: float = 0.0
+    status: str  # MATCH | UNTERLIEFERUNG | UEBERLIEFERUNG | UNBESTELLT | UNGELIEFERT
+
+
+class AbgleichResult(BaseModel):
+    lieferschein_id: str
+    bestellung_id: str
+    bestellnummer: Optional[str] = None
+    positionen: list[AbgleichPosition]
+    match: int
+    abweichungen: int
+    bestellung_status: str
+
+
+@router.post("/lieferscheine/{ls_id}/bestellung-abgleich", response_model=AbgleichResult,
+             summary="Eingangslieferschein gegen Bestellung abgleichen")
+async def abgleich_lieferschein_bestellung(
+    ls_id: str,
+    payload: AbgleichPayload,
+    tenant_id: str = Query("system"),
+    db: Session = Depends(get_db),
+):
+    """Positionsabgleich Eingangslieferschein ↔ Einkaufsbestellung (per artikel_nr,
+    Fallback Lieferanten-Artikelnummer). Schreibt menge_geliefert/menge_offen und
+    Positionsstatus auf der Bestellung fort und setzt den Bestellstatus auf
+    teilgeliefert/geliefert. Meldet UNTER-/UEBERLIEFERUNG, UNBESTELLT, UNGELIEFERT."""
+    ls = db.execute(
+        text("SELECT id FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tid"),
+        {"id": ls_id, "tid": tenant_id},
+    ).mappings().first()
+    if not ls:
+        raise HTTPException(status_code=404, detail="Lieferschein nicht gefunden")
+
+    bestellung = db.execute(
+        text("SELECT id, bestellnummer, status FROM domain_einkauf.bestellungen "
+             "WHERE id = :id AND tenant_id = :tid"),
+        {"id": payload.bestellung_id, "tid": tenant_id},
+    ).mappings().first()
+    if not bestellung:
+        raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+
+    ls_positionen = db.execute(
+        text("SELECT artikel_nr, lieferant_artikel_nr, bezeichnung, menge "
+             "FROM einkauf_lieferschein_positionen WHERE lieferschein_id = :id"),
+        {"id": ls_id},
+    ).mappings().all()
+    best_positionen = db.execute(
+        text("SELECT id, artikel_nr, lieferanten_artnr, artikel_bezeichnung, menge, "
+             "menge_geliefert FROM domain_einkauf.bestellung_positionen "
+             "WHERE bestellung_id = :id"),
+        {"id": payload.bestellung_id},
+    ).mappings().all()
+
+    # Geliefert je Artikelnummer aggregieren (mehrere LS-Zeilen je Artikel möglich)
+    geliefert: dict[str, Decimal] = {}
+    ls_bezeichnung: dict[str, str] = {}
+    for p in ls_positionen:
+        key = p["artikel_nr"] or p["lieferant_artikel_nr"]
+        if not key:
+            continue
+        geliefert[key] = geliefert.get(key, Decimal("0")) + Decimal(str(p["menge"] or 0))
+        if p["bezeichnung"]:
+            ls_bezeichnung[key] = p["bezeichnung"]
+
+    result_positionen: list[AbgleichPosition] = []
+    matched_keys: set[str] = set()
+
+    for bp in best_positionen:
+        key = bp["artikel_nr"] if bp["artikel_nr"] in geliefert else (bp["lieferanten_artnr"] or bp["artikel_nr"])
+        menge_bestellt = Decimal(str(bp["menge"] or 0))
+        menge_gel = geliefert.get(key, Decimal("0"))
+        if key in geliefert:
+            matched_keys.add(key)
+        differenz = menge_gel - menge_bestellt
+        if menge_gel == 0:
+            status_pos = "UNGELIEFERT"
+        elif differenz == 0:
+            status_pos = "MATCH"
+        elif differenz < 0:
+            status_pos = "UNTERLIEFERUNG"
+        else:
+            status_pos = "UEBERLIEFERUNG"
+        result_positionen.append(AbgleichPosition(
+            artikel_nr=bp["artikel_nr"],
+            bezeichnung=bp["artikel_bezeichnung"],
+            menge_bestellt=float(menge_bestellt),
+            menge_geliefert=float(menge_gel),
+            differenz=float(differenz),
+            status=status_pos,
+        ))
+        # Fortschreibung auf der Bestellposition
+        neue_geliefert = Decimal(str(bp["menge_geliefert"] or 0)) + menge_gel
+        neue_offen = max(Decimal("0"), menge_bestellt - neue_geliefert)
+        pos_status = "geliefert" if neue_offen == 0 and menge_gel > 0 else (
+            "teilgeliefert" if menge_gel > 0 else "offen"
+        )
+        db.execute(
+            text("UPDATE domain_einkauf.bestellung_positionen "
+                 "SET menge_geliefert = :gel, menge_offen = :offen, status = :status "
+                 "WHERE id = :id"),
+            {"gel": neue_geliefert, "offen": neue_offen, "status": pos_status, "id": bp["id"]},
+        )
+
+    # Lieferschein-Positionen ohne Bestellbezug
+    for key, menge_gel in geliefert.items():
+        if key in matched_keys:
+            continue
+        best_keys = {bp["artikel_nr"] for bp in best_positionen} | {
+            bp["lieferanten_artnr"] for bp in best_positionen if bp["lieferanten_artnr"]
+        }
+        if key in best_keys:
+            continue
+        result_positionen.append(AbgleichPosition(
+            artikel_nr=key,
+            bezeichnung=ls_bezeichnung.get(key),
+            menge_bestellt=0.0,
+            menge_geliefert=float(menge_gel),
+            differenz=float(menge_gel),
+            status="UNBESTELLT",
+        ))
+
+    offene = db.execute(
+        text("SELECT COUNT(*) FROM domain_einkauf.bestellung_positionen "
+             "WHERE bestellung_id = :id AND status NOT IN ('geliefert', 'storniert')"),
+        {"id": payload.bestellung_id},
+    ).scalar() or 0
+    bestellung_status = "geliefert" if offene == 0 else "teilgeliefert"
+    db.execute(
+        text("UPDATE domain_einkauf.bestellungen SET status = :status, lieferdatum_ist = :heute "
+             "WHERE id = :id AND tenant_id = :tid"),
+        {"status": bestellung_status, "heute": date.today(),
+         "id": payload.bestellung_id, "tid": tenant_id},
+    )
+    db.commit()
+
+    match_count = sum(1 for p in result_positionen if p.status == "MATCH")
+    return AbgleichResult(
+        lieferschein_id=ls_id,
+        bestellung_id=payload.bestellung_id,
+        bestellnummer=bestellung["bestellnummer"],
+        positionen=result_positionen,
+        match=match_count,
+        abweichungen=len(result_positionen) - match_count,
+        bestellung_status=bestellung_status,
     )

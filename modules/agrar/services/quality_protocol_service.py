@@ -14,6 +14,8 @@ import json
 import csv
 from io import StringIO
 
+from app.core.uuid7 import uuid7
+
 from app.core.data_quality_enforcement import (
     DQValidationException,
     evaluate_quality_protocol_datensatz,
@@ -167,7 +169,10 @@ def create_quality_protocol(
         protocol_number = _generate_protocol_number(create_input.harvest_acceptance_id, version)
     
     protocol = QualityProtocol(
-        id=f"qp_{datetime.now().strftime('%Y%m%d%H%M%S')}_{version:03d}",
+        # UUIDv7 statt Sekunden-Timestamp: der alte Schlüssel qp_<YYYYMMDDHHMMSS>_<version>
+        # kollidierte, sobald zwei Protokolle (verschiedener Annahmen) in derselben
+        # Sekunde entstanden — genau der Batch-Nachtrag-Fall aus dem Laborbuch.
+        id=f"qp_{uuid7()}",
         tenant_id=create_input.tenant_id,
         harvest_acceptance_id=create_input.harvest_acceptance_id,
         protocol_number=protocol_number,
