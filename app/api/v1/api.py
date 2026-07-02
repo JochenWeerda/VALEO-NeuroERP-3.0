@@ -99,6 +99,7 @@ from app.api.v1.endpoints import (
     channel_work_surfaces,
     dms_images,
     dms_inbox,
+    agent_ops,
     admin_dms,
     sales_shipping_ext,
     master_data,
@@ -1419,6 +1420,11 @@ api_router.include_router(
     dms_inbox.router,
     prefix="/dms",
     tags=["dms"]
+)
+
+api_router.include_router(
+    agent_ops.router,
+    tags=["agents", "neuroassist", "ops"]
 )
 
 api_router.include_router(
