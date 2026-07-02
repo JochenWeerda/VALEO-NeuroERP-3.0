@@ -2539,6 +2539,10 @@
     {
       "module": "@/pages/agrar/kontrakt-native",
       "path": "agrar/kontrakte/:id"
+    },
+    {
+      "module": "@/pages/admin/vordruck-editor",
+      "path": "admin/vordruck-editor"
     }
   ]
 }

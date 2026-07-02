@@ -9,11 +9,25 @@ vom ActionRuntime automatisch gesetzt.
 """
 from __future__ import annotations
 
+from typing import Any, Optional
+
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 
 from app.core.tenant import get_tenant_id
 
 router = APIRouter(tags=["mask-actions"])
+
+
+class MaskActionResult(BaseModel):
+    """Einheitliches Ergebnis eines Mask-Action-Stubs (UIX-053)."""
+
+    success: bool
+    actionKey: str
+    entityId: str
+    tenantId: str
+    message: str
+    proposedChanges: Optional[dict[str, Any]] = None
 
 
 # ---------------------------------------------------------------------------
@@ -22,6 +36,7 @@ router = APIRouter(tags=["mask-actions"])
 
 @router.post(
     "/lager/stock-movements/{entity_id}/actions/stornieren",
+    response_model=MaskActionResult,
     summary="Lagerbewegung stornieren (UIX-053)",
 )
 async def action_lager_stornieren(
@@ -45,6 +60,7 @@ async def action_lager_stornieren(
 
 @router.post(
     "/einkauf/bestellungen/{entity_id}/actions/bestellen",
+    response_model=MaskActionResult,
     summary="Bestellung erteilen (UIX-053)",
 )
 async def action_einkauf_bestellen(
@@ -68,6 +84,7 @@ async def action_einkauf_bestellen(
 
 @router.post(
     "/lager/artikel/{entity_id}/actions/wareneingang",
+    response_model=MaskActionResult,
     summary="Wareneingang buchen (UIX-053)",
 )
 async def action_lager_wareneingang(
@@ -91,6 +108,7 @@ async def action_lager_wareneingang(
 
 @router.post(
     "/reklamationen/{entity_id}/actions/abschliessen",
+    response_model=MaskActionResult,
     summary="Reklamation abschliessen (UIX-053)",
 )
 async def action_reklamation_abschliessen(
@@ -114,6 +132,7 @@ async def action_reklamation_abschliessen(
 
 @router.post(
     "/crm/leads/{entity_id}/actions/qualifizieren",
+    response_model=MaskActionResult,
     summary="Lead als Opportunity qualifizieren (UIX-053)",
 )
 async def action_crm_qualifizieren(

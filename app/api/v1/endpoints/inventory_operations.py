@@ -554,6 +554,7 @@ class LotConsumeIn(BaseModel):
 @router.post(
     "/lots",
     status_code=201,
+    response_model=dict,
     tags=["lager", "inventory", "lots"],
     summary="Inventory-Lot anlegen (DOM-INV-004.2)",
 )
@@ -584,6 +585,7 @@ async def create_inventory_lot(
 
 @router.get(
     "/lots",
+    response_model=list[dict],
     tags=["lager", "inventory", "lots"],
     summary="Inventory-Lots (FEFO) auflisten (DOM-INV-004.2)",
 )
@@ -611,6 +613,7 @@ async def list_inventory_lots(
 
 @router.post(
     "/lots/{lot_id}/consume",
+    response_model=dict,
     tags=["lager", "inventory", "lots"],
     summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)",
 )
@@ -644,6 +647,7 @@ async def consume_inventory_lot(
 
 @router.post(
     "/inventur/{count_id}/differenz-buchen",
+    response_model=dict,
     status_code=201,
     tags=["lager", "inventory", "inventur"],
     summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)",
@@ -677,6 +681,7 @@ class StornoIn(BaseModel):
 
 @router.post(
     "/korrekturen/{korrektur_id}/storno",
+    response_model=dict,
     status_code=201,
     tags=["lager", "inventory", "korrekturen"],
     summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)",
@@ -758,6 +763,7 @@ async def get_bestaende(
 
     try:
         rows = db.execute(
+            # nosec S608 — where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
             text(f"""
                 SELECT
                     sm.article_id,

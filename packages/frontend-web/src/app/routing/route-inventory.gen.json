@@ -216,6 +216,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/vordruck-editor",
+      "path": "admin/vordruck-editor",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/webhooks",
       "path": "admin/webhooks",
       "source": "auto"

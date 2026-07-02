@@ -68002,6 +68002,52 @@
         "title": "MaschineUpdate",
         "type": "object"
       },
+      "MaskActionResult": {
+        "description": "Einheitliches Ergebnis eines Mask-Action-Stubs (UIX-053).",
+        "properties": {
+          "actionKey": {
+            "title": "Actionkey",
+            "type": "string"
+          },
+          "entityId": {
+            "title": "Entityid",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "proposedChanges": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposedchanges"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "tenantId": {
+            "title": "Tenantid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "actionKey",
+          "entityId",
+          "tenantId",
+          "message"
+        ],
+        "title": "MaskActionResult",
+        "type": "object"
+      },
       "MaskClass": {
         "enum": [
           "A",
@@ -91605,6 +91651,18 @@
         "title": "ReminderIn",
         "type": "object"
       },
+      "RenderRequest": {
+        "properties": {
+          "daten": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Daten",
+            "type": "object"
+          }
+        },
+        "title": "RenderRequest",
+        "type": "object"
+      },
       "RenewBody": {
         "properties": {
           "new_end_date": {
@@ -98131,6 +98189,58 @@
           "sod_warnings"
         ],
         "title": "SecuritySimulationOut",
+        "type": "object"
+      },
+      "SegmentListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SegmentOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "SegmentListOut",
+        "type": "object"
+      },
+      "SegmentOut": {
+        "additionalProperties": true,
+        "description": "Kundensegment — freie Zusatzfelder erlaubt (Stub-Datenmodell).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id"
+        ],
+        "title": "SegmentOut",
         "type": "object"
       },
       "SelectPolicyVariantRequest": {
@@ -112252,6 +112362,288 @@
         "title": "VoiceResolveOut",
         "type": "object"
       },
+      "VordruckCreate": {
+        "properties": {
+          "aktiv": {
+            "default": true,
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "ausrichtung": {
+            "default": "hoch",
+            "enum": [
+              "hoch",
+              "quer"
+            ],
+            "title": "Ausrichtung",
+            "type": "string"
+          },
+          "beispieldaten": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Beispieldaten",
+            "type": "object"
+          },
+          "beschreibung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschreibung"
+          },
+          "kategorie": {
+            "default": "sonstig",
+            "enum": [
+              "wiegeschein",
+              "stundenzettel",
+              "fahrtenbuch",
+              "beleg",
+              "gutschein",
+              "rabatt_coupon",
+              "info_schreiben",
+              "handout",
+              "sackanhaenger",
+              "sonstig"
+            ],
+            "title": "Kategorie",
+            "type": "string"
+          },
+          "layout": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/VordruckElement"
+            },
+            "title": "Layout",
+            "type": "array"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "papierformat": {
+            "default": "A4",
+            "enum": [
+              "A4",
+              "A5",
+              "A6",
+              "label_100x50",
+              "label_60x30"
+            ],
+            "title": "Papierformat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "VordruckCreate",
+        "type": "object"
+      },
+      "VordruckElement": {
+        "description": "Ein Layout-Element auf dem Vordruck (Koordinaten in mm, Ursprung oben links).",
+        "properties": {
+          "align": {
+            "default": "left",
+            "enum": [
+              "left",
+              "center",
+              "right"
+            ],
+            "title": "Align",
+            "type": "string"
+          },
+          "bold": {
+            "default": false,
+            "title": "Bold",
+            "type": "boolean"
+          },
+          "breite": {
+            "default": 50,
+            "exclusiveMinimum": 0.0,
+            "title": "Breite",
+            "type": "number"
+          },
+          "feld_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feld Key"
+          },
+          "font_size": {
+            "default": 10,
+            "exclusiveMinimum": 0.0,
+            "maximum": 72.0,
+            "title": "Font Size",
+            "type": "number"
+          },
+          "hoehe": {
+            "default": 8,
+            "exclusiveMinimum": 0.0,
+            "title": "Hoehe",
+            "type": "number"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "typ": {
+            "enum": [
+              "text",
+              "feld",
+              "linie",
+              "rechteck",
+              "qrcode"
+            ],
+            "title": "Typ",
+            "type": "string"
+          },
+          "x": {
+            "minimum": 0.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "minimum": 0.0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "typ",
+          "x",
+          "y"
+        ],
+        "title": "VordruckElement",
+        "type": "object"
+      },
+      "VordruckOut": {
+        "properties": {
+          "aktiv": {
+            "default": true,
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "ausrichtung": {
+            "default": "hoch",
+            "enum": [
+              "hoch",
+              "quer"
+            ],
+            "title": "Ausrichtung",
+            "type": "string"
+          },
+          "beispieldaten": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Beispieldaten",
+            "type": "object"
+          },
+          "beschreibung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschreibung"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kategorie": {
+            "default": "sonstig",
+            "enum": [
+              "wiegeschein",
+              "stundenzettel",
+              "fahrtenbuch",
+              "beleg",
+              "gutschein",
+              "rabatt_coupon",
+              "info_schreiben",
+              "handout",
+              "sackanhaenger",
+              "sonstig"
+            ],
+            "title": "Kategorie",
+            "type": "string"
+          },
+          "layout": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/VordruckElement"
+            },
+            "title": "Layout",
+            "type": "array"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "papierformat": {
+            "default": "A4",
+            "enum": [
+              "A4",
+              "A5",
+              "A6",
+              "label_100x50",
+              "label_60x30"
+            ],
+            "title": "Papierformat",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "name",
+          "id"
+        ],
+        "title": "VordruckOut",
+        "type": "object"
+      },
       "VorschlagSaveRequest": {
         "properties": {
           "bezeichnung": {
@@ -122980,7 +123372,7 @@
   },
   "info": {
     "title": "VALEO-NeuroERP Test App",
-    "version": "3.0.0"
+    "version": "0.1.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -133200,6 +133592,563 @@
         ]
       }
     },
+    "/api/v1/admin/vordrucke": {
+      "get": {
+        "operationId": "list_vordrucke_api_v1_admin_vordrucke_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kategorie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kategorie"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VordruckOut"
+                  },
+                  "title": "Response List Vordrucke Api V1 Admin Vordrucke Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordrucke auflisten",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      },
+      "post": {
+        "operationId": "create_vordruck_api_v1_admin_vordrucke_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VordruckCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VordruckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordruck anlegen",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      }
+    },
+    "/api/v1/admin/vordrucke/seed-standard": {
+      "post": {
+        "description": "Legt die mitgelieferten Standard-Vorlagen an; vorhandene Namen werden übersprungen.",
+        "operationId": "seed_standard_vorlagen_api_v1_admin_vordrucke_seed_standard_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VordruckOut"
+                  },
+                  "title": "Response Seed Standard Vorlagen Api V1 Admin Vordrucke Seed Standard Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Standard-Vorlagen anlegen (idempotent je Name)",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      }
+    },
+    "/api/v1/admin/vordrucke/{vordruck_id}": {
+      "delete": {
+        "operationId": "delete_vordruck_api_v1_admin_vordrucke__vordruck_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vordruck_id",
+            "required": true,
+            "schema": {
+              "title": "Vordruck Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordruck löschen",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      },
+      "get": {
+        "operationId": "get_vordruck_api_v1_admin_vordrucke__vordruck_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vordruck_id",
+            "required": true,
+            "schema": {
+              "title": "Vordruck Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VordruckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordruck abrufen",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      },
+      "put": {
+        "operationId": "update_vordruck_api_v1_admin_vordrucke__vordruck_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vordruck_id",
+            "required": true,
+            "schema": {
+              "title": "Vordruck Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VordruckCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VordruckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordruck aktualisieren",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      }
+    },
+    "/api/v1/admin/vordrucke/{vordruck_id}/duplizieren": {
+      "post": {
+        "operationId": "duplicate_vordruck_api_v1_admin_vordrucke__vordruck_id__duplizieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vordruck_id",
+            "required": true,
+            "schema": {
+              "title": "Vordruck Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VordruckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordruck duplizieren",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      }
+    },
+    "/api/v1/admin/vordrucke/{vordruck_id}/render": {
+      "post": {
+        "operationId": "render_vordruck_api_v1_admin_vordrucke__vordruck_id__render_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vordruck_id",
+            "required": true,
+            "schema": {
+              "title": "Vordruck Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vordruck als PDF rendern",
+        "tags": [
+          "admin",
+          "vordrucke",
+          "druck",
+          "admin",
+          "vordrucke",
+          "druck"
+        ]
+      }
+    },
     "/api/v1/admin/workflow-sandbox/preview": {
       "post": {
         "operationId": "preview_workflow_sandbox_api_v1_admin_workflow_sandbox_preview_post",
@@ -136063,9 +137012,9 @@
         ]
       }
     },
-    "/api/v1/agents/agents/low-stock/simulate": {
+    "/api/v1/agents/low-stock/simulate": {
       "post": {
-        "operationId": "simulate_low_stock_event_api_v1_agents_agents_low_stock_simulate_post",
+        "operationId": "simulate_low_stock_event_api_v1_agents_low_stock_simulate_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -136110,9 +137059,9 @@
         ]
       }
     },
-    "/api/v1/agents/agents/low-stock/status": {
+    "/api/v1/agents/low-stock/status": {
       "get": {
-        "operationId": "get_low_stock_agent_status_api_v1_agents_agents_low_stock_status_get",
+        "operationId": "get_low_stock_agent_status_api_v1_agents_low_stock_status_get",
         "responses": {
           "200": {
             "content": {
@@ -190005,7 +190954,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -191413,9 +192364,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Segments Api V1 Crm Segments Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SegmentListOut"
                 }
               }
             },
@@ -191482,9 +192431,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Segment Api V1 Crm Segments Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SegmentOut"
                 }
               }
             },
@@ -191607,9 +192554,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Segment Api V1 Crm Segments  Segment Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SegmentOut"
                 }
               }
             },
@@ -191685,9 +192630,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Update Segment Api V1 Crm Segments  Segment Id  Put",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SegmentOut"
                 }
               }
             },
@@ -199548,7 +200491,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -251960,7 +252905,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -252851,7 +253798,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {},
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response List Inventory Lots Api V1 Lager Lots Get",
                   "type": "array"
                 }
@@ -254183,7 +255133,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -302612,7 +303564,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -333814,11 +334768,6 @@
         ],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
             "description": "Successful Response"
           },
           "422": {
@@ -333879,11 +334828,6 @@
         ],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
             "description": "Successful Response"
           },
           "422": {

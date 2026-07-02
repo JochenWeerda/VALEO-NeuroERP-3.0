@@ -12,10 +12,26 @@ from __future__ import annotations
 from typing import Any, Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 from fastapi.responses import Response
+from pydantic import BaseModel, ConfigDict
 
 from app.core.tenant import get_tenant_id
 
 router = APIRouter(prefix="/crm/segments", tags=["crm", "segments"])
+
+
+class SegmentOut(BaseModel):
+    """Kundensegment — freie Zusatzfelder erlaubt (Stub-Datenmodell)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    tenant_id: str
+    name: Optional[str] = None
+
+
+class SegmentListOut(BaseModel):
+    items: list[SegmentOut]
+    total: int
 
 _SEGMENTS: dict[str, dict[str, Any]] = {}
 _ID_SEQ = 0
@@ -27,8 +43,8 @@ def _next_id() -> str:
     return str(_ID_SEQ)
 
 
-@router.get("", summary="Kundensegmente auflisten")
-@router.get("/", summary="Kundensegmente auflisten", include_in_schema=False)
+@router.get("", response_model=SegmentListOut, summary="Kundensegmente auflisten")
+@router.get("/", response_model=SegmentListOut, summary="Kundensegmente auflisten", include_in_schema=False)
 async def list_segments(
     search: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
@@ -41,8 +57,8 @@ async def list_segments(
     return {"items": items[offset : offset + limit], "total": len(items)}
 
 
-@router.post("", status_code=201, summary="Kundensegment anlegen")
-@router.post("/", status_code=201, include_in_schema=False)
+@router.post("", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen")
+@router.post("/", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen", include_in_schema=False)
 async def create_segment(
     body: dict[str, Any] = Body(default={}),
     tenant_id: str = Depends(get_tenant_id),
@@ -53,7 +69,7 @@ async def create_segment(
     return segment
 
 
-@router.get("/{segment_id}", summary="Kundensegment abrufen")
+@router.get("/{segment_id}", response_model=SegmentOut, summary="Kundensegment abrufen")
 async def get_segment(
     segment_id: str = Path(...),
     tenant_id: str = Depends(get_tenant_id),
@@ -64,7 +80,7 @@ async def get_segment(
     return seg
 
 
-@router.put("/{segment_id}", summary="Kundensegment aktualisieren")
+@router.put("/{segment_id}", response_model=SegmentOut, summary="Kundensegment aktualisieren")
 async def update_segment(
     segment_id: str = Path(...),
     body: dict[str, Any] = Body(default={}),

@@ -37,8 +37,20 @@ SKIP_PAGE_NAMES = frozenset({"not-found", "error", "layout"})
 SKIP_PAGE_PARENT_DIRS = frozenset({"charts", "components", "reports"})
 # File-name prefixes that indicate dialog/helper components:
 SKIP_PAGE_NAME_PREFIXES = ("Dlg", "Legacy")
-# File-name suffixes that indicate embedded chart aggregators or UI atoms:
-SKIP_PAGE_NAME_SUFFIXES = ("Charts", "Chart", "Card", "Sparkline", "Table", "Sidebar")
+# File-name suffixes that indicate embedded chart aggregators or UI atoms.
+# "PilotPage"/"LegacyPage": Universal-Mask-Piloten bzw. Rollback-Fallbacks (UIX-057),
+# die vom Router indirekt importiert werden und bewusst keine eigene Route haben.
+SKIP_PAGE_NAME_SUFFIXES = (
+    "Charts", "Chart", "Card", "Sparkline", "Table", "Sidebar",
+    "PilotPage", "LegacyPage",
+)
+# Indirekt eingebundene Masken-Komponenten (Fallback-/Edit-Varianten der
+# Universal-Mask-Plattform) — referenziert aus Router-Fallback-Maps, nicht geroutet:
+SKIP_PAGE_NAMES_INDIRECT = frozenset({
+    "CustomerMaskEditPage",
+    "LeadMaskDetailPage",
+    "KundeNeuMaskBuilderPage",
+})
 
 
 def _read(path: Path) -> str:
@@ -130,7 +142,7 @@ def check_pages_without_route_or_nav(
         return issues
     for f in sorted(PAGES_DIR.rglob("*.tsx")):
         name = f.stem
-        if name.startswith("_") or name in SKIP_PAGE_NAMES:
+        if name.startswith("_") or name in SKIP_PAGE_NAMES or name in SKIP_PAGE_NAMES_INDIRECT:
             continue
         # Skip sub-components (chart widgets, component fragments, dialog helpers)
         parts = {p.name for p in f.relative_to(PAGES_DIR).parents}
