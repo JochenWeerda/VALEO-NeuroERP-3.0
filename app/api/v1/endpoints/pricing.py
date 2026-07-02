@@ -237,6 +237,7 @@ class StaffelStufe(BaseModel):
 
 class StaffelrabattIn(BaseModel):
     artikel_id: Optional[str] = Field(None)
+    artikel_ids: Optional[list[str]] = Field(None, description="Mehrere Artikel gleichzeitig zuordnen (M2M)")
     artikelgruppe: Optional[str] = Field(None)
     kunden_id: Optional[str] = Field(None)
     kundengruppe: Optional[str] = Field(None)
@@ -249,6 +250,7 @@ class StaffelrabattIn(BaseModel):
 class StaffelrabattOut(BaseModel):
     id: str
     artikel_id: Optional[str]
+    artikel_ids: list[str] = Field(default_factory=list)
     artikelgruppe: Optional[str]
     kunden_id: Optional[str]
     kundengruppe: Optional[str]
@@ -289,6 +291,19 @@ async def list_staffelrabatte(
         params,
     ).mappings().all()
 
+    ids = [r["id"] for r in rows]
+    artikel_ids_by_staffel: dict[str, list[str]] = {i: [] for i in ids}
+    if ids:
+        m2m_rows = db.execute(
+            text("""
+                SELECT staffelrabatt_id, artikel_id FROM domain_pricing.staffelrabatt_artikel
+                WHERE tenant_id = :tenant_id AND staffelrabatt_id = ANY(:ids)
+            """),
+            {"tenant_id": tenant_id, "ids": ids},
+        ).mappings().all()
+        for m in m2m_rows:
+            artikel_ids_by_staffel.setdefault(m["staffelrabatt_id"], []).append(m["artikel_id"])
+
     result = []
     for r in rows:
         stufen_raw = r["stufen"]
@@ -298,6 +313,7 @@ async def list_staffelrabatte(
             StaffelrabattOut(
                 id=r["id"],
                 artikel_id=r.get("artikel_id"),
+                artikel_ids=artikel_ids_by_staffel.get(r["id"], []),
                 artikelgruppe=r.get("artikelgruppe"),
                 kunden_id=r.get("kunden_id"),
                 kundengruppe=r.get("kundengruppe"),

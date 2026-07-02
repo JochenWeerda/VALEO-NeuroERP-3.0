@@ -89,7 +89,19 @@
       "Bash(cd \"C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web\" && npm run build 2>&1)",
       "PowerShell(Get-ChildItem C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\ -File | Where-Object { $_.Name -match \"board|BOARD|Board\" })",
       "PowerShell(Get-ChildItem C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\docs\\\\ -File | Where-Object { $_.Name -match \"board|BOARD|Board|status|STATUS\" })",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(pnpm install *)",
+      "Bash(awk 'NR<=81 && /^  [a-zA-Z._]/{last=$0; line=NR} END{}' pnpm-lock.yaml)",
+      "Bash(awk 'NR<=25188 && /^  [a-zA-Z0-9_.\\\\/-]+:$/{last=$0} END{print last, NR}' pnpm-lock.yaml)",
+      "Bash(npm view *)",
+      "Bash(awk -F: '$1<3268')",
+      "Skill(run)",
+      "Bash(node \"C:/Users/Jochen/AppData/Local/Temp/claude/C--Users-Jochen-VALEO-NeuroERP-3-0/30116dda-16c0-42c7-923c-9313eb1b0737/scratchpad/check_agenten_integration.mjs\")",
+      "Bash(cp \"C:/Users/Jochen/AppData/Local/Temp/claude/C--Users-Jochen-VALEO-NeuroERP-3-0/30116dda-16c0-42c7-923c-9313eb1b0737/scratchpad/check_agenten_integration.mjs\" C:/Users/Jochen/VALEO-NeuroERP-3.0/packages/frontend-web/check_agenten_integration.mjs)",
+      "Bash(node check_agenten_integration.mjs)",
+      "Bash(pkill -f \"uvicorn app.main:app\")",
+      "Bash(pkill -f \"vite\")",
+      "Bash(pip index *)"
     ]
   }
 }
