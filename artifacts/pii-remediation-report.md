@@ -128,6 +128,22 @@ Bis dahin bleibt der Punkt `external_gate`, nicht endgültig freigegeben.
 | `trufflehog filesystem --fail` auf Git-Index-Export per Docker | 0 verified secrets, 43 unverified Beispiel-/Platzhalter-DSNs und Token-Muster. |
 | `trufflehog filesystem --only-verified --fail` auf Git-Index-Export per Docker | Wird als blockierender lokaler Nachweis verwendet; unverified Findings bleiben als False-Positive-Haertung offen. |
 
+## Nachtrag: gitleaks-Scan über die volle Git-Historie (2026-07-02)
+
+`gitleaks git` (Docker, Default-Regeln, ohne Baseline) über alle 2.076+ Commits:
+**50 Findings, 10 unique Secrets**, davon nach Einzelprüfung:
+
+| Klasse | Anzahl | Bewertung |
+|---|---|---|
+| **Echtes Secret** | **1** | 36-Zeichen-**LinkUp-API-Key**, 9 Vorkommen in Altversionen von `scripts/genxais_prompt_generator_simple.py`, `scripts/mcp_server.py`, `scripts/test_mcp_api.py` (aktuelle Versionen laden env-only). **Rotation zwingend** (external_gate); Purge-Skript Schritt 4 deckt das Scrubbing ab. |
+| JWT-Fragmente | 1 | `POLICY-AUTH-COMPLETE.md` (Altversionen): auf 39 Zeichen gekürzte `eyJhbG…`-Beispiele — Header-Fragment, kein vollständiges Token mehr in der Historie. |
+| Platzhalter | 5 | `abc123…`-DMS-Token-Beispiele (infra/dms-Doku), `YOUR_TOKEN`, `dev-token` |
+| Identifier/FP | 3 | `sonar.projectKey=JochenWeerda_…`, `inventory_annual_2025`, Event-Topic `p2p.…` |
+
+Damit ist die Secret-Lage der Historie vollständig inventarisiert: Rotationsbedarf konzentriert
+sich auf den LinkUp-Key sowie vorsorglich die in der sanitisierten Baseline genannten
+Keycloak-DB-Passwörter/Fiskaly-Werte, deren Originale vor der Sanitisierung öffentlich waren.
+
 ## Restgates
 
 - `external_gate`: History-Purge per `scripts/purge_pii_history.sh`.
