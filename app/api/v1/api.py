@@ -1974,6 +1974,14 @@ api_router.include_router(
     tags=["agrar", "waage", "vorlagen"],
 )
 
+# Belegformular-Vordruck-Editor (Admin): Druckvorlagen für Papier/PDF-Ausdrucke
+from app.api.v1.endpoints import beleg_vordrucke  # noqa: E402
+
+api_router.include_router(
+    beleg_vordrucke.router,
+    tags=["admin", "vordrucke", "druck"],
+)
+
 # GS1 Barcode Parse Service (service-erp.de analog)
 api_router.include_router(
     gs1_barcode.router,

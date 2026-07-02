@@ -78,7 +78,9 @@ behoben; Optimierungen wurden mit Vorher/Nachher-Messung verifiziert.
   Invalidierung): gezielter Nachtest rendert die Seite in 3,6 s fehlerfrei,
   API antwortet in 22 ms.
 - `/produktion/produktions-dokumente-drucken` und `/policies` laden >25 s (bestanden,
-  aber langsam) — Kandidaten für die nächste Optimierungsrunde.
+  aber langsam) — **nachgemessen 2026-07-02:** kalt 1,9 s bzw. 1,1 s, warm <1 s.
+  Die Ausreißer waren Vite-Dev-Transform beim Erstaufruf unter 766-Routen-Volllast
+  (Dev-Server-Artefakt, kein Produktfehler). Produktions-Build nicht betroffen.
 - TC-AGR-003 (Saatzucht-Badges) flake-te einmalig unter Volllast des Gesamtlaufs,
   besteht einzeln in 6,1 s — beobachten, kein Codefehler identifiziert.
 
