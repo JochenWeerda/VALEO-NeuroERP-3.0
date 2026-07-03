@@ -201,6 +201,32 @@ def main() -> None:
         measured[filename] = line_rate
 
     failures: list[str] = []
+
+    # SPEC-P0-05 "only up": Schwellwerte duerfen gegenueber der committeten
+    # Baseline nie sinken; Pfade duerfen nicht entfernt werden. Beim Anheben
+    # eines Schwellwerts die Baseline mit anheben.
+    import json
+    baseline_path = PROJECT_ROOT / "config" / "coverage_ratchet_baseline.json"
+    if baseline_path.exists():
+        baseline = json.loads(baseline_path.read_text(encoding="utf-8")).get("thresholds", {})
+        for filename, base_value in baseline.items():
+            current = CRITICAL_THRESHOLDS.get(filename)
+            if current is None:
+                failures.append(
+                    f"{filename}: aus CRITICAL_THRESHOLDS entfernt — Ratchet-Absenkung verboten (Baseline {base_value:.0%})"
+                )
+            elif current < base_value:
+                failures.append(
+                    f"{filename}: Schwellwert {current:.0%} < Baseline {base_value:.0%} — Ratchet darf nur steigen"
+                )
+        for filename, current in CRITICAL_THRESHOLDS.items():
+            base_value = baseline.get(filename)
+            if base_value is not None and current > base_value:
+                print(
+                    f"HINWEIS: {filename} Schwellwert {current:.0%} > Baseline {base_value:.0%} — "
+                    "bitte config/coverage_ratchet_baseline.json mit anheben."
+                )
+
     for filename, threshold in CRITICAL_THRESHOLDS.items():
         actual = measured.get(filename)
         if actual is None:
