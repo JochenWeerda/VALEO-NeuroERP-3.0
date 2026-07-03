@@ -139,6 +139,72 @@ async def list_cases(
     )
 
 
+@router.get("/sla-dashboard", response_model=CasesOut, tags=["crm", "cases", "sla"], summary="Sla dashboard abrufen")
+async def get_sla_dashboard(
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """SLA-Dashboard: total, on_time, warning, breached, avg_resolution_hours."""
+    try:
+        sql = text(
+            """
+            SELECT
+                priority,
+                status,
+                created_at,
+                first_response_at,
+                resolved_at
+            FROM cases
+            WHERE :tid IS NULL OR tenant_id = :tid
+            """
+        )
+        rows = db.execute(sql, {"tid": tenant_id}).fetchall()
+    except Exception:
+        db.rollback()
+        rows = []
+
+    now = datetime.now(timezone.utc)
+    total = len(rows)
+    on_time = warning = breached = 0
+    resolution_hours: list[float] = []
+
+    for row in rows:
+        priority = (row[0] or "MEDIUM").upper()
+        created_at = row[2]
+        first_resp = row[3]
+        resolved_at = row[4]
+
+        if created_at is None:
+            continue
+
+        sla = _compute_sla(created_at, priority, first_resp, resolved_at, now)
+        s = sla["sla_status"]
+        if s == "ok":
+            on_time += 1
+        elif s == "warning":
+            warning += 1
+        else:
+            breached += 1
+
+        if resolved_at:
+            if resolved_at.tzinfo is None:
+                resolved_at = resolved_at.replace(tzinfo=timezone.utc)
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=timezone.utc)
+            resolution_hours.append((resolved_at - created_at).total_seconds() / 3600)
+
+    avg_res = round(sum(resolution_hours) / len(resolution_hours), 2) if resolution_hours else None
+
+    return {
+        "total": total,
+        "on_time": on_time,
+        "warning": warning,
+        "breached": breached,
+        "avg_resolution_hours": avg_res,
+        "sla_rules": {k: {"first_response_h": v[0], "resolution_h": v[1]} for k, v in SLA_RULES.items()},
+    }
+
+
 @router.get("/{case_id}", response_model=Case, summary="Case abrufen")
 async def get_case(case_id: str):
     """Get a specific support case by ID."""
@@ -239,71 +305,6 @@ async def escalate_case(
 # ---------------------------------------------------------------------------
 # SLA endpoints
 # ---------------------------------------------------------------------------
-
-@router.get("/sla-dashboard", response_model=CasesOut, tags=["crm", "cases", "sla"], summary="Sla dashboard abrufen")
-async def get_sla_dashboard(
-    tenant_id: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-):
-    """SLA-Dashboard: total, on_time, warning, breached, avg_resolution_hours."""
-    try:
-        sql = text(
-            """
-            SELECT
-                priority,
-                status,
-                created_at,
-                first_response_at,
-                resolved_at
-            FROM cases
-            WHERE :tid IS NULL OR tenant_id = :tid
-            """
-        )
-        rows = db.execute(sql, {"tid": tenant_id}).fetchall()
-    except Exception:
-        db.rollback()
-        rows = []
-
-    now = datetime.now(timezone.utc)
-    total = len(rows)
-    on_time = warning = breached = 0
-    resolution_hours: list[float] = []
-
-    for row in rows:
-        priority = (row[0] or "MEDIUM").upper()
-        created_at = row[2]
-        first_resp = row[3]
-        resolved_at = row[4]
-
-        if created_at is None:
-            continue
-
-        sla = _compute_sla(created_at, priority, first_resp, resolved_at, now)
-        s = sla["sla_status"]
-        if s == "ok":
-            on_time += 1
-        elif s == "warning":
-            warning += 1
-        else:
-            breached += 1
-
-        if resolved_at:
-            if resolved_at.tzinfo is None:
-                resolved_at = resolved_at.replace(tzinfo=timezone.utc)
-            if created_at.tzinfo is None:
-                created_at = created_at.replace(tzinfo=timezone.utc)
-            resolution_hours.append((resolved_at - created_at).total_seconds() / 3600)
-
-    avg_res = round(sum(resolution_hours) / len(resolution_hours), 2) if resolution_hours else None
-
-    return {
-        "total": total,
-        "on_time": on_time,
-        "warning": warning,
-        "breached": breached,
-        "avg_resolution_hours": avg_res,
-        "sla_rules": {k: {"first_response_h": v[0], "resolution_h": v[1]} for k, v in SLA_RULES.items()},
-    }
 
 
 @router.get("/{case_id}/sla-status", response_model=CasesOut, tags=["crm", "cases", "sla"], summary="Case sla status abrufen")

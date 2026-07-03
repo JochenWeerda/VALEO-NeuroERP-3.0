@@ -87,6 +87,11 @@ async def list_contacts(
             skip=skip,
             limit=limit,
         )
+    except (httpx.RequestError, RuntimeError):
+        # crm-core nicht erreichbar (Kategorie D): leere Liste statt 500,
+        # konsistent zu cases/activities.
+        core_contacts, total = [], 0
+    try:
         data = [_adapt_contact(contact) for contact in core_contacts]
         if search:
             needle = search.lower()

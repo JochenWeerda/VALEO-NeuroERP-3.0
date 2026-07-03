@@ -243,6 +243,27 @@ def customer_detail_by_partner(
     return svc.get_customer_detail(kunden_nr)
 
 
+@router.get("/interessenten", summary="Interessenten auflisten",
+    response_model=list[CustomersOut]
+)
+def list_interessenten(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict]:
+    try:
+        rows = db.execute(
+            _text(
+                "SELECT id, interessenten_nr, name, email, telefon, adresse, branche, "
+                "herkunft, notizen, status, erstellt_am "
+                "FROM domain_crm.interessenten WHERE tenant_id=:tenant_id ORDER BY erstellt_am DESC"
+            ),
+            {"tenant_id": tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
 @router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen",
     response_model=CustomersOut
 )
@@ -460,26 +481,6 @@ def create_interessent(
         **payload.model_dump(),
     }
 
-
-@router.get("/interessenten", summary="Interessenten auflisten",
-    response_model=list[CustomersOut]
-)
-def list_interessenten(
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> list[dict]:
-    try:
-        rows = db.execute(
-            _text(
-                "SELECT id, interessenten_nr, name, email, telefon, adresse, branche, "
-                "herkunft, notizen, status, erstellt_am "
-                "FROM domain_crm.interessenten WHERE tenant_id=:tenant_id ORDER BY erstellt_am DESC"
-            ),
-            {"tenant_id": tenant_id},
-        ).mappings().all()
-        return [dict(r) for r in rows]
-    except Exception:
-        return []
 
 
 @router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren")

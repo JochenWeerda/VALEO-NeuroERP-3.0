@@ -26,6 +26,12 @@ jobs:
       POSTGRES_PASSWORD: postgres
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_sweep
       API_DEV_TOKEN: dev-token
+      # CRM-Sidecar-Services existieren im Sweep-Job nicht. Default-URLs zeigen
+      # auf Port 8000 (= Backend selbst) => 404 statt sauberem Connection-Error.
+      # Geschlossener Port erzwingt den definierten Degrade-Pfad (leere Liste).
+      CRM_CORE_BASE_URL: http://127.0.0.1:59990
+      CRM_SALES_BASE_URL: http://127.0.0.1:59991
+      CRM_SERVICE_BASE_URL: http://127.0.0.1:59992
     services:
       postgres:
         image: postgres:15

@@ -55,6 +55,12 @@ allowed_503:
   - path: /api/v1/sustainability/nutrients/crop
     reason: "Externe Abhaengigkeit: FAOSTAT-Upstream; bei Nichtverfuegbarkeit 503 mit Problem-Details"
     expires: 2026-09-30
+  - path: /api/v1/admin/quality-evidence/
+    reason: "Kategorie B: Quality-Evidence liest artifacts/-Reports; ohne generierte Artefakte bewusst 503"
+    expires: 2026-09-30
+  - path: /api/v1/admin/quality-evidence/drift
+    reason: "Kategorie B: Quality-Evidence liest artifacts/-Reports; ohne generierte Artefakte bewusst 503"
+    expires: 2026-09-30
 
 # Streams/Long-Polling: werden nicht gesweept (Timeout by design)
 skip_paths:
