@@ -236,17 +236,16 @@ async def list_journal_entries(
             has_next=(skip + limit) < total,
             has_prev=skip > 0
         )
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db.rollback()
-        return PaginatedResponse[JournalEntry](
-            items=[],
-            total=0,
-            page=(skip // limit) + 1,
-            size=limit,
-            pages=0,
-            has_next=False,
-            has_prev=skip > 0,
-        )
+        # SPEC-P0-03 harte Regel: FIBU-Endpoints duerfen bei DB-Fehlern niemals
+        # still leere Daten liefern — RFC-7807-Fehler + Alerting-Metrik.
+        from app.core.metrics import critical_data_path_errors_total
+        critical_data_path_errors_total.labels(endpoint="journal_entries_list", error_type="db_error").inc()
+        raise HTTPException(
+            status_code=503,
+            detail=f"Journalbuchungen nicht verfuegbar — Datenbank-/Schemafehler: {e.__class__.__name__}",
+        ) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list journal entries: {str(e)}")
 

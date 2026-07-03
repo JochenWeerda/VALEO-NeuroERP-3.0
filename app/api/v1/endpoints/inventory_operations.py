@@ -789,9 +789,16 @@ async def get_bestaende(
             """),
             params,
         ).mappings().all()
-    except Exception:  # noqa: BLE001 — Tabelle oder Spalte fehlt im Dev-System
+    except Exception as exc:  # noqa: BLE001
         db.rollback()
-        return []
+        # SPEC-P0-03 harte Regel: Bestands-Endpoints duerfen bei DB-Fehlern
+        # niemals still leere Daten liefern — RFC-7807-Fehler + Alerting-Metrik.
+        from app.core.metrics import critical_data_path_errors_total
+        critical_data_path_errors_total.labels(endpoint="inventory_bestand", error_type="db_error").inc()
+        raise HTTPException(
+            status_code=503,
+            detail=f"Lagerbestand nicht verfuegbar — Datenbank-/Schemafehler: {exc.__class__.__name__}",
+        ) from exc
 
     return [BestandItem(**dict(r)) for r in rows]
 
