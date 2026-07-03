@@ -12,7 +12,7 @@ JSON ein.
 Verwendung:
     python scripts/generate_openapi.py
     python scripts/generate_openapi.py --check   # nur pruefen, ob aktuell
-    VALEO_API_VERSION=3.0.0 python scripts/generate_openapi.py
+    VALEO_API_VERSION=3.0.0 python scripts/generate_openapi.py  # optionaler Override
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = REPO_ROOT / "docs" / "schnittstellen" / "openapi.json"
+DEFAULT_API_VERSION = "3.0.0"
 
 
 def build_spec() -> dict:
@@ -35,9 +36,8 @@ def build_spec() -> dict:
     app = getattr(main, "app")
     spec = app.openapi()
 
-    version = os.environ.get("VALEO_API_VERSION")
-    if version:
-        spec.setdefault("info", {})["version"] = version
+    version = os.environ.get("VALEO_API_VERSION", DEFAULT_API_VERSION)
+    spec.setdefault("info", {})["version"] = version
     spec.setdefault("info", {}).setdefault("title", "VALEO NeuroERP API")
     return spec
 

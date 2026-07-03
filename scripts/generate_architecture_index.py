@@ -440,6 +440,7 @@ def main() -> int:
         existing = OUTPUT.read_text(encoding="utf-8")
 
         def normalize(s: str) -> str:
+            s = re.sub(r"^# Architecture Index .*generiert \d{4}-\d{2}-\d{2}$", "# Architecture Index -- generiert X", s, flags=re.MULTILINE)
             return re.sub(r"^generated_at:.*$", "generated_at: X", s, flags=re.MULTILINE)
 
         if normalize(existing) != normalize(content):

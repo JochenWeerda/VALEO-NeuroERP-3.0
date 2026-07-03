@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -163,6 +164,25 @@ def build_markdown(report: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def normalize_for_check(content: str) -> str:
+    lines: list[str] = []
+    for line in content.splitlines():
+        if line.startswith("last_reviewed:"):
+            continue
+        line = re.sub(
+            r"^> Generiert via `scripts/generate_action_matrix_report.py` · .*$",
+            "> Generiert via `scripts/generate_action_matrix_report.py` · <timestamp>",
+            line,
+        )
+        line = re.sub(
+            r"^\*Stand: .* · (\d+) Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002\*$",
+            r"*Stand: <timestamp> · \1 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*",
+            line,
+        )
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="Exit 1 wenn Top-50-Routen ohne Matrix")
@@ -176,12 +196,24 @@ def main() -> int:
     route_prefixes = load_route_prefixes()
     report = build_report(matrices, route_prefixes)
     md = build_markdown(report)
+
+    if args.check:
+        if report["top50_missing_matrix"]:
+            print(f"FEHLER: {len(report['top50_missing_matrix'])} Top-50-Routen ohne Matrix-Eintrag", file=sys.stderr)
+            return 1
+        if not OUTPUT_MD.exists():
+            print(f"DRIFT: {OUTPUT_MD} fehlt", file=sys.stderr)
+            return 1
+        existing = normalize_for_check(OUTPUT_MD.read_text(encoding="utf-8"))
+        expected = normalize_for_check(md)
+        if existing != expected:
+            print(f"DRIFT: {OUTPUT_MD} weicht ab — python scripts/generate_action_matrix_report.py ausfuehren", file=sys.stderr)
+            return 1
+        print(f"OK: {OUTPUT_MD} ({report['total_actions']} Aktionen, {report['gap']} Gaps)")
+        return 0
+
     OUTPUT_MD.write_text(md, encoding="utf-8")
     print(f"Geschrieben: {OUTPUT_MD} ({report['total_actions']} Aktionen, {report['gap']} Gaps)")
-
-    if args.check and report["top50_missing_matrix"]:
-        print(f"FEHLER: {len(report['top50_missing_matrix'])} Top-50-Routen ohne Matrix-Eintrag", file=sys.stderr)
-        return 1
     return 0
 
 
