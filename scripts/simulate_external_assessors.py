@@ -154,6 +154,61 @@ PROFILES = (
             Check("OPS-04", "Wiederanlauf, RTO/RPO und Alarmierung im Zielbetrieb", ("k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml",), "Beobachteter Restore-/Incident-Drill im produktionsnahen Cluster"),
         ),
     ),
+    Profile(
+        "soc2",
+        "Simulierter SOC-2-Pruefer (Type-I-Readiness)",
+        "AICPA Trust Services Criteria: Security (Pflicht) + Availability + Confidentiality + Processing Integrity",
+        "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2",
+        (
+            Check(
+                "SOC2-CC1",
+                "Kontrollumfeld: Review-Verantwortung und Arbeitssteuerung dokumentiert",
+                (".github/CODEOWNERS", "docs/agent-ops/active-workboard.md"),
+                required_content=((".github/CODEOWNERS", "SPEC-P0-06"),),
+            ),
+            Check(
+                "SOC2-CC6",
+                "Logischer Zugriff: OIDC/JWKS, Bearer-Enforcement, Tenant-Isolation mit Negativtests",
+                ("app/middleware/tenant_enforcement.py", "tests/test_tenant_enforcement.py", "app/core/security.py"),
+                "Offboarding-/Access-Review-Prozess des Betreibers (Prozessnachweis ausserhalb des Repos)",
+            ),
+            Check(
+                "SOC2-CC7",
+                "Betrieb: Monitoring/Alerting, Incident-Runbook, nightly Runtime-Sweep als Betriebsevidenz",
+                ("docs/operations/production-readiness-runbook.md", ".github/workflows/runtime-sweep.yml", "scripts/api_runtime_sweep.py"),
+                "Beobachteter Incident-/Restore-Drill im Zielbetrieb",
+            ),
+            Check(
+                "SOC2-CC8",
+                "Change Management: CI-Pflichtgates, unveraenderliche SHA-Images, only-up-Coverage-Ratchet",
+                (".github/workflows/quality-gate.yml", "config/coverage_ratchet_baseline.json", "scripts/check_critical_backend_coverage.py"),
+                "Branch-Protection auf main (Review + required Status-Checks) — GitHub-Einstellung des Betreibers",
+            ),
+            Check(
+                "SOC2-CC9",
+                "Lieferanten/Subprozessoren: Risiko- und Vertragsuebersicht inkl. LLM-Provider",
+                ("docs/operations/production-readiness-runbook.md",),
+                "AVV-/Subprozessor-Verzeichnis mit Unterschriften (Keycloak-Betrieb, Fiskaly, Paperless, DATEV, LLM-Provider)",
+            ),
+            Check(
+                "SOC2-A1",
+                "Verfuegbarkeit: Backup-/Restore-Automation und Wiederanlauf-Vertrag",
+                ("k8s/helm/valeo-erp/templates/backup-cronjob.yaml", "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml"),
+                "15-min-RTO-Drill und Erntepeak-Lasttest auf Staging (Betreiber)",
+            ),
+            Check(
+                "SOC2-C1",
+                "Vertraulichkeit: Secret-Scanning ohne Baseline, PII-Vorfall dokumentiert und remediert",
+                (".gitleaks.toml", "artifacts/pii-remediation-report.md", "scripts/purge_pii_history.sh"),
+                "History-Purge-Ausfuehrung, Secret-Rotation und DSB-Entscheidung (external)",
+            ),
+            Check(
+                "SOC2-PI1",
+                "Verarbeitungsintegritaet: 3-Wege-Match, GoBD-Nachweisraum, Audit-Kette",
+                ("tests/test_einkauf_3way_match_ers_rfq.py", "tests/test_docflow_gobd.py", "app/middleware/audit_middleware.py"),
+            ),
+        ),
+    ),
 )
 
 
