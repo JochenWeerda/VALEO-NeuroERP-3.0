@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P0-01/02-CI-GRUEN-RUNTIME-SWEEP — quality-gate Voll-Gruen + Runtime-Sweep-Dauergate
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-03 — quality-gate-Blocker behoben (sql_fstrings-nosec, Low-Stock-Doppelprefix, Klasse-A-Explainability, response_model/summary-Gates, Doku-Drift 15→0, Secret-Scan-False-Positives inkl. Baseline-Referenz-Entfernung aus quality-gate.yml); `scripts/api_runtime_sweep.py` + `config/runtime_sweep_allowlist.yaml` + `.github/workflows/runtime-sweep.yml` neu; erster Sweep fand 32×5xx gegen frische DB → Repair-Migration `runtime_sweep_repair_20260702` (Fresh-DB-Drift: 12 Tabellen/60+ Spalten), `scripts/init_db.py` ergänzt ORM-create_all, 15 Code-Bugfixes (DI-Container-Registrierung wurde nie importiert, Route-Shadowing lineage, frozen-Dataclass-Mutation, Routen-Reihenfolge accounts/hierarchy, uuid/text-Casts, Response-Model-Mismatches, HTTPException-Passthrough proplanta, FAOSTAT 502→503).
+**Ziel:** SPEC-P0-01 (drei Ziel-Workflows auf main sichtbar gruen, Evidenz in `artifacts/ci-green-evidence.md`) und SPEC-P0-02 (Nightly-Sweep 0×5xx gegen frisch migrierte DB, Allowlist nur mit Begruendung+Ablaufdatum).
+**Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/runtime-sweep.yml`, `scripts/api_runtime_sweep.py`, `scripts/init_db.py`, `scripts/doc_drift_report.py`, `config/runtime_sweep_allowlist.yaml`, `config/architecture-domain-prefixes.yaml`, `alembic/versions/runtime_sweep_repair_20260702.py`, `app/main.py`, betroffene Endpoint-/Service-Dateien.
+**Abnahme:** quality-gate, security-scan und universal-mask-ci auf main gruen; `python scripts/api_runtime_sweep.py` Exit 0 (0×5xx, keine nicht-allowgelisteten 503, Allowlist nicht abgelaufen); Report in `artifacts/runtime-sweep-<datum>.json`.
+
 ## SPEC-P0-04-PII-REMEDIATION — Repo-Hygiene & PII-Bereinigung
 
 **Von:** Codex

@@ -198,7 +198,7 @@ def sync_status(
 
 
 @router.get("/orders", summary="Orders auflisten",
-    response_model=WebshopIntegrationOut
+    response_model=list[dict]
 )
 def list_orders(
     db: Session = Depends(get_db),
@@ -245,7 +245,7 @@ def convert_order(
 
 
 @router.get("/sync-log", summary="Log synchronisieren",
-    response_model=WebshopIntegrationOut
+    response_model=list[dict]
 )
 def sync_log(
     db: Session = Depends(get_db),

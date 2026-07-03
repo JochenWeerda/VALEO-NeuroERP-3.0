@@ -33,8 +33,9 @@ def _adapt_activity(core_activity: crm_core_client.CRMCoreActivity) -> dict:
         "id": core_activity.id,
         "type": core_activity.type,
         "title": core_activity.title,
-        "customer": core_activity.customer_name or "",
-        "contact_person": "",
+        # Schema verlangt min_length=1 — fehlende Werte als "-" mappen
+        "customer": core_activity.customer_name or "-",
+        "contact_person": "-",
         "date": core_activity.scheduled_at,
         "status": core_activity.status,
         "assigned_to": core_activity.assigned_to or "",

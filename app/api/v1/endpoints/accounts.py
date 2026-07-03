@@ -85,6 +85,93 @@ async def list_accounts(
         raise HTTPException(status_code=500, detail=f"Failed to list accounts: {str(e)}")
 
 
+@router.get("/hierarchy", response_model=List[AccountHierarchy], summary="Accounts hierarchy abrufen")
+async def get_accounts_hierarchy(
+    tenant_id: str = Depends(get_tenant_id),
+    account_type: Optional[str] = Query(None, description="Filter by account type"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get accounts as hierarchical tree.
+
+    Retrieve all accounts organized in a hierarchical structure based on parent_account_id.
+    """
+    try:
+        from ....infrastructure.models import Account as AccountModel
+        
+        # Query all accounts for the tenant
+        query = db.query(AccountModel).filter(
+            AccountModel.tenant_id == tenant_id,
+            AccountModel.is_active == True,
+            AccountModel.deleted_at.is_(None)
+        )
+        
+        if account_type:
+            query = query.filter(AccountModel.account_type == account_type)
+        
+        all_accounts = query.all()
+        
+        # Build account map by id and by account_number (for prefix fallback)
+        account_map: Dict[str, AccountHierarchy] = {}
+        number_to_node: Dict[str, AccountHierarchy] = {}
+        root_accounts: List[AccountHierarchy] = []
+        
+        # First pass: create all account objects
+        from datetime import datetime
+        for acc in all_accounts:
+            account_dict = {
+                "id": str(acc.id),
+                "tenant_id": acc.tenant_id,
+                "account_number": acc.account_number,
+                "account_name": acc.account_name,
+                "account_type": acc.account_type,
+                "category": acc.category,
+                "currency": getattr(acc, 'currency', 'EUR') or "EUR",
+                "allow_manual_entries": getattr(acc, 'allow_manual_entries', True),
+                "balance": float(acc.balance) if acc.balance else 0.0,
+                "is_active": acc.is_active,
+                "parent_account_id": str(acc.parent_account_id) if acc.parent_account_id else None,
+                "created_at": acc.created_at if acc.created_at else datetime.now(),
+                "updated_at": acc.updated_at if acc.updated_at else datetime.now(),
+                "children": []
+            }
+            account_hierarchy = AccountHierarchy(**account_dict)
+            account_map[str(acc.id)] = account_hierarchy
+            number_to_node[acc.account_number] = account_hierarchy
+        
+        # Second pass: build hierarchy (parent_account_id or fallback: longest account_number prefix)
+        for acc in all_accounts:
+            account_hierarchy = account_map[str(acc.id)]
+            parent = None
+            if acc.parent_account_id:
+                parent_id = str(acc.parent_account_id)
+                if parent_id in account_map:
+                    parent = account_map[parent_id]
+            if parent is None and acc.account_number:
+                # Fallback: find parent by longest existing prefix (e.g. 1400 -> 140, 14, 1)
+                num = acc.account_number.strip()
+                for length in range(max(1, len(num) - 1), 0, -1):
+                    prefix = num[:length]
+                    if prefix in number_to_node:
+                        parent = number_to_node[prefix]
+                        break
+            if parent:
+                parent.children.append(account_hierarchy)
+            else:
+                root_accounts.append(account_hierarchy)
+        
+        # Sort roots and children by account_number for consistent display
+        def sort_children(nodes: List[AccountHierarchy]) -> None:
+            nodes.sort(key=lambda n: n.account_number)
+            for n in nodes:
+                sort_children(n.children)
+        sort_children(root_accounts)
+        
+        return root_accounts
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve account hierarchy: {str(e)}")
+
+
 @router.get("/{account_id}", response_model=Account, summary="Account abrufen")
 async def get_account(
     account_id: str,
@@ -196,88 +283,3 @@ async def get_account_balance(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account balance: {str(e)}")
 
 
-@router.get("/hierarchy", response_model=List[AccountHierarchy], summary="Accounts hierarchy abrufen")
-async def get_accounts_hierarchy(
-    tenant_id: str = Depends(get_tenant_id),
-    account_type: Optional[str] = Query(None, description="Filter by account type"),
-    db: Session = Depends(get_db)
-):
-    """
-    Get accounts as hierarchical tree.
-
-    Retrieve all accounts organized in a hierarchical structure based on parent_account_id.
-    """
-    try:
-        from ....infrastructure.models import Account as AccountModel
-        
-        # Query all accounts for the tenant
-        query = db.query(AccountModel).filter(
-            AccountModel.tenant_id == tenant_id,
-            AccountModel.is_active == True,
-            AccountModel.deleted_at.is_(None)
-        )
-        
-        if account_type:
-            query = query.filter(AccountModel.account_type == account_type)
-        
-        all_accounts = query.all()
-        
-        # Build account map by id and by account_number (for prefix fallback)
-        account_map: Dict[str, AccountHierarchy] = {}
-        number_to_node: Dict[str, AccountHierarchy] = {}
-        root_accounts: List[AccountHierarchy] = []
-        
-        # First pass: create all account objects
-        from datetime import datetime
-        for acc in all_accounts:
-            account_dict = {
-                "id": str(acc.id),
-                "tenant_id": acc.tenant_id,
-                "account_number": acc.account_number,
-                "account_name": acc.account_name,
-                "account_type": acc.account_type,
-                "category": acc.category,
-                "currency": getattr(acc, 'currency', 'EUR') or "EUR",
-                "allow_manual_entries": getattr(acc, 'allow_manual_entries', True),
-                "balance": float(acc.balance) if acc.balance else 0.0,
-                "is_active": acc.is_active,
-                "parent_account_id": str(acc.parent_account_id) if acc.parent_account_id else None,
-                "created_at": acc.created_at if acc.created_at else datetime.now(),
-                "updated_at": acc.updated_at if acc.updated_at else datetime.now(),
-                "children": []
-            }
-            account_hierarchy = AccountHierarchy(**account_dict)
-            account_map[str(acc.id)] = account_hierarchy
-            number_to_node[acc.account_number] = account_hierarchy
-        
-        # Second pass: build hierarchy (parent_account_id or fallback: longest account_number prefix)
-        for acc in all_accounts:
-            account_hierarchy = account_map[str(acc.id)]
-            parent = None
-            if acc.parent_account_id:
-                parent_id = str(acc.parent_account_id)
-                if parent_id in account_map:
-                    parent = account_map[parent_id]
-            if parent is None and acc.account_number:
-                # Fallback: find parent by longest existing prefix (e.g. 1400 -> 140, 14, 1)
-                num = acc.account_number.strip()
-                for length in range(max(1, len(num) - 1), 0, -1):
-                    prefix = num[:length]
-                    if prefix in number_to_node:
-                        parent = number_to_node[prefix]
-                        break
-            if parent:
-                parent.children.append(account_hierarchy)
-            else:
-                root_accounts.append(account_hierarchy)
-        
-        # Sort roots and children by account_number for consistent display
-        def sort_children(nodes: List[AccountHierarchy]) -> None:
-            nodes.sort(key=lambda n: n.account_number)
-            for n in nodes:
-                sort_children(n.children)
-        sort_children(root_accounts)
-        
-        return root_accounts
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve account hierarchy: {str(e)}")

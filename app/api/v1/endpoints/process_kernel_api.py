@@ -5309,8 +5309,9 @@ def pruefe_kollaborations_ergebnis(payload: dict):
 
 
 # === Wave 64: Data Lineage + Process Simulation ===
-from app.core.process_lineage_contracts import (  # noqa: F401,F811
-    get_default_lineage_graph, LineageGraph, LineageKnoten,
+from app.core.process_lineage_contracts import (  # noqa: F401
+    get_default_lineage_graph as get_default_process_lineage_graph,
+    LineageGraph, LineageKnoten,
     LineageKante, LineageKnotenTyp, LineageOperationTyp,
 )
 from app.core.workflow_simulation_contracts_wave64 import (
@@ -5322,7 +5323,7 @@ from app.core.workflow_simulation_contracts_wave64 import (
     response_model=ProcessKernelOut
 )
 def get_lineage_graph_w64():
-    g = get_default_lineage_graph()
+    g = get_default_process_lineage_graph()
     return {
         "graph_id": g.graph_id,
         "knoten_anzahl": len(g.knoten),
@@ -5339,7 +5340,7 @@ def get_lineage_graph_w64():
 def get_upstream_w64(payload: dict):
     """Payload: {"knoten_id": str}"""
     knoten_id = payload.get("knoten_id", "")
-    g = get_default_lineage_graph()
+    g = get_default_process_lineage_graph()
     upstream = g.upstream_knoten(knoten_id)
     return {"knoten_id": knoten_id, "upstream": [k.knoten_id for k in upstream]}
 

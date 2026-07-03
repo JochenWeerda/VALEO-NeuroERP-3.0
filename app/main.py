@@ -9,6 +9,7 @@ from app.api.v1.api import api_router, ws_router
 from app.api.numbering import router as numbering_router
 from app.routers.sse_router import router as sse_router
 from app.core.config import settings
+import app.core.container_config  # noqa: F401 — registriert DI-Factories (container.resolve in Endpoints)
 from app.core.exceptions import register_domain_exception_handlers
 from app.domains.shared.events import (
     startup_event_publisher,

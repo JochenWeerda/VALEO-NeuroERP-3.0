@@ -69,6 +69,14 @@ def main() -> None:
 
     print("Database schema migrated to head.")
 
+    # ORM-Vertrag sicherstellen: Modelle, die (noch) keine eigene Migration
+    # haben, additiv anlegen (create_all ist idempotent). Ohne diesen Schritt
+    # fehlen auf frischen Installationen ORM-definierte Tabellen — Befund
+    # RUNTIME-SWEEP-REPAIR-001 (77 Tabellen ausserhalb der Migrationskette).
+    from app.core.database import create_tables
+    create_tables()
+    print("ORM metadata create_all applied (additive).")
+
 
 if __name__ == "__main__":
     main()
