@@ -353,7 +353,7 @@ services:
     container_name: valeo-neuro-erp-crm-sales
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       SERVICE_NAME: crm-sales
       DEBUG: "true"
       DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
@@ -373,7 +373,7 @@ services:
     container_name: valeo-neuro-erp-crm-service
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       SERVICE_NAME: crm-service
       DEBUG: "true"
       DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
@@ -393,7 +393,7 @@ services:
     container_name: valeo-neuro-erp-crm-workflow
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/2
       SERVICE_NAME: crm-workflow
       DEBUG: "true"
@@ -417,7 +417,7 @@ services:
     container_name: valeo-neuro-erp-crm-analytics
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/4
       SERVICE_NAME: crm-analytics
       DEBUG: "true"
@@ -444,7 +444,7 @@ services:
     container_name: valeo-neuro-erp-crm-communication
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/6
       SERVICE_NAME: crm-communication
       DEBUG: "true"
@@ -474,7 +474,7 @@ services:
     container_name: valeo-neuro-erp-crm-ai
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/8
       SERVICE_NAME: crm-ai
       DEBUG: "true"
@@ -502,7 +502,7 @@ services:
     container_name: valeo-neuro-erp-crm-multichannel
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/10
       SERVICE_NAME: crm-multichannel
       DEBUG: "true"
@@ -533,7 +533,7 @@ services:
     container_name: valeo-neuro-erp-crm-security
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
       REDIS_URL: redis://redis:6379/12
       SERVICE_NAME: crm-security
       DEBUG: "true"
