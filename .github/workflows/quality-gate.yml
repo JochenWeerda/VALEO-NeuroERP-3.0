@@ -191,9 +191,10 @@ jobs:
         run: python scripts/check_file_size.py --threshold 12
 
       - name: Mask performance contract (UIX-PERF-GATE-006)
-        # --transpile-only: Backend-Job hat kein pnpm install (kein @types/node
-        # in der npx-Sandbox); der Gate-Wert liegt in der Contract-Logik.
-        run: npx --yes ts-node --transpile-only scripts/check_mask_performance_contract.ts
+        # Gepinnte Toolchain + --transpile-only: Backend-Job hat kein pnpm install;
+        # neuere npx-TypeScript-Versionen lehnen die Repo-tsconfig ab (TS5011/5101/5109).
+        # Der Gate-Wert liegt in der Contract-Logik, nicht im Typecheck.
+        run: npx --yes -p typescript@5.5.4 -p ts-node@10.9.2 ts-node --transpile-only scripts/check_mask_performance_contract.ts
 
       - name: OpenAPI docs coverage (summary= on all routes)
         run: python scripts/check_openapi_docs.py --threshold 0
