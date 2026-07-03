@@ -151,7 +151,17 @@ PROFILES = (
                     (".github/workflows/valeo-erp-deployment.yml", "helm rollback"),
                 ),
             ),
-            Check("OPS-04", "Wiederanlauf, RTO/RPO und Alarmierung im Zielbetrieb", ("k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml",), "Beobachteter Restore-/Incident-Drill im produktionsnahen Cluster"),
+            Check(
+                "OPS-04",
+                "Wiederanlauf, RTO/RPO und Alarmierung im Zielbetrieb",
+                (
+                    "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml",
+                    "scripts/run_restore_drill.sh",
+                    "scripts/check_restore_drill_evidence.py",
+                    "docs/operations/drill-protocols/README.md",
+                ),
+                "Beobachteter Restore-/Incident-Drill im produktionsnahen Cluster (Protokoll via scripts/run_restore_drill.sh committen)",
+            ),
         ),
     ),
     Profile(
@@ -193,8 +203,12 @@ PROFILES = (
             Check(
                 "SOC2-A1",
                 "Verfuegbarkeit: Backup-/Restore-Automation und Wiederanlauf-Vertrag",
-                ("k8s/helm/valeo-erp/templates/backup-cronjob.yaml", "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml"),
-                "15-min-RTO-Drill und Erntepeak-Lasttest auf Staging (Betreiber)",
+                (
+                    "k8s/helm/valeo-erp/templates/backup-cronjob.yaml",
+                    "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml",
+                    "scripts/run_restore_drill.sh",
+                ),
+                "15-min-RTO-Drill (Protokoll in docs/operations/drill-protocols/) und Erntepeak-Lasttest auf Staging (Betreiber)",
             ),
             Check(
                 "SOC2-C1",
