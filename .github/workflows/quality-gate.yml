@@ -211,6 +211,8 @@ jobs:
           }
 
       - name: OpenAPI spec drift check (DOC-OPENAPI-CI-001)
+        env:
+          VALEO_API_VERSION: "3.0.0"  # identisch zu openapi-drift.yml, sonst Versions-Ping-Pong
         run: |
           python scripts/generate_openapi.py --check || {
             echo ""
