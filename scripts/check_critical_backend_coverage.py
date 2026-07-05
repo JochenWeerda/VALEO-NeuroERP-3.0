@@ -27,7 +27,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # Finance ergänzend (neu)
     "api/v1/endpoints/journal_entries.py": 0.25,    #  COV-RATCHET-002: +6pp (Ziel 30%)
     "api/v1/endpoints/open_items.py": 0.42,         #  COV-RATCHET-002: +3pp
-    "api/v1/endpoints/financial_reports.py": 0.25,  #  25.4% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/financial_reports.py": 0.5,  #  25.4% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
 
     # ── Inventory / Warehouse (COV-INV-001/002) ───────────────────────────────
     "api/v1/endpoints/waage.py": 0.88,              #  91.1% measured  (COV-RATCHET-004: +3pp)
@@ -101,9 +101,9 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/sanctions_compliance.py": 0.66,  #  69% measured — Sanktionsliste
     "api/v1/endpoints/webhook_system.py": 0.61,     #  64% measured — Webhook-System
     "api/v1/endpoints/erechnung_import.py": 0.78,   #  81% measured — E-Rechnung Import
-    "api/v1/endpoints/sales_invoice_einvoice.py": 0.30,  #  33% measured — XRechnung/ZUGFeRD Export
+    "api/v1/endpoints/sales_invoice_einvoice.py": 0.42,  #  33% measured — XRechnung/ZUGFeRD Export
     "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
-    "api/v1/endpoints/rohware_sammelabrechnung.py": 0.32,  #  35% measured — Sammelabrechnung
+    "api/v1/endpoints/rohware_sammelabrechnung.py": 0.58,  #  35% measured — Sammelabrechnung
 
     # ── COV-RATCHET-009 (2026-06-26): Welle-13-Endpoints ────────────────────
     "api/v1/endpoints/futtermittel_qs.py": 0.40,       # FEED-QS-001: HACCP/VLOG/QS-Pruefpunkte

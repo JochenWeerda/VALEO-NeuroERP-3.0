@@ -21,6 +21,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/runtime-sweep.yml`, `scripts/api_runtime_sweep.py`, `scripts/init_db.py`, `scripts/doc_drift_report.py`, `config/runtime_sweep_allowlist.yaml`, `config/architecture-domain-prefixes.yaml`, `alembic/versions/runtime_sweep_repair_20260702.py`, `app/main.py`, betroffene Endpoint-/Service-Dateien.
 **Abnahme:** quality-gate, security-scan und universal-mask-ci auf main gruen; `python scripts/api_runtime_sweep.py` Exit 0 (0×5xx, keine nicht-allowgelisteten 503, Allowlist nicht abgelaufen); Report in `artifacts/runtime-sweep-<datum>.json`.
 
+## A6-COVERAGE-OFFENSIVE — Finanz-Report-/Rechnungspfade
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — 3 vom Audit als nicht go-live-faehig markierte Finanzpfade mit Endpoint-Tests gehoben (isoliert gemessen, Vollsuite hoeher): financial_reports 25->53%, rohware_sammelabrechnung 32->61%, sales_invoice_einvoice 30->44%. Ratchets konservativ auf 50/58/42% angehoben (only-up, Baseline mitgezogen). Offen: psm_proplanta/portal_innendienst/hrm_abwesenheit/kaeufergruppe (Audit-Ziel je >=60).
+**Ziel:** SPEC-P0-05 — kritische Beleg-/Report-Pfade aus dem 25-32%-Bereich heben.
+**Dateibesitz:** `tests/test_financial_reports_endpoints.py`, `tests/test_rohware_sammelabrechnung_endpoints.py`, `tests/test_sales_invoice_einvoice_endpoints.py`, `scripts/check_critical_backend_coverage.py`, `config/coverage_ratchet_baseline.json`.
+**Abnahme:** neue Tests gruen; Ratchet mit angehobenen Schwellen gruen in CI.
+
 ## A7-RESPONSE-MODEL-TYPING — API-Vertragshaertung + PII-Praevention
 
 **Von:** Claude
