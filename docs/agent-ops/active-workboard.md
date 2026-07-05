@@ -60,10 +60,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-07-05 - Folge-Slice fuer den offenen Meridian-Abnahmepunkt Visual-Audit bei 1366x768, 1440x900 und 1920x1080.
+**Stand:** abgeschlossen 2026-07-05 - Fokussierter Meridian-Visual-Audit nutzt die Benutzerhandbuch-Screenshot-Helfer fuer Render-Wait, Content-QC und Capture-Ziel; Finance, CRM 360 und Lager laufen bei 1366x768, 1440x900 und 1920x1080 gruen.
 **Ziel:** Einen fokussierten Playwright-Visual-Audit fuer Finance, CRM 360 und Lager auf der bestehenden Single-Mask-Builder-Kette ergaenzen.
 **Dateibesitz:** `packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts`, `docs/agent-ops/slices/UIX-MERIDIAN-VISUAL-AUDIT-002.yaml`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`.
-**Abnahme:** Visual-Audit prueft 1366x768, 1440x900 und 1920x1080 auf repraesentativen nativen Masken; keine separate Referenzmasken-UI; Header, ActionBar, Tabs, Tabellenprofil, Context-Rail-Kontrakt und Basis-Overflow sind automatisiert abgesichert.
+**Abnahme:** Visual-Audit prueft 1366x768, 1440x900 und 1920x1080 auf repraesentativen nativen Masken; keine separate Referenzmasken-UI; Header, ActionBar, Tabs, Tabellenprofil, Context-Rail-Kontrakt und Basis-Overflow sind automatisiert abgesichert. Lokal gruen: `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium` (9 passed). Hinweis: Playwright globalTeardown meldet bestehende Repo-weite Visual-Tour-Console-Issues, nicht den fokussierten Meridian-Audit.
 ## AUDIT-1/2/5 — ISO-27001-/SOC-2-Readiness + Audit-Orchestrator
 
 **Von:** Claude

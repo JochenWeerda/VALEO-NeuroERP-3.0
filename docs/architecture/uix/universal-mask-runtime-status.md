@@ -16,6 +16,8 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 > **Nachtrag 2026-07-05:** Meridian ist als Builder-Capability im Single Mask Builder verankert. `ScreenDefinition.layout` liefert `floorplan`, `density`, `contextRail` und `tableProfile`; `RenderPlan.shell` uebernimmt diese Felder zentral; Frontend- und Backend-Readiness blockieren fehlende Meridian-Metadaten.
 
+> **Visual-Audit 2026-07-05:** `tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-Screenshot-Helfer (`waitUntilRenderable`, Content-QC, Capture-Locator) fuer Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080. Lokal gruen: `pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium` (9 passed). Der Playwright-Global-Teardown meldet bestehende Repo-weite Visual-Tour-Console-Issues, nicht den fokussierten Meridian-Audit.
+
 ## Lieferstand
 
 | Slice | Inhalt | Status | Commit / Nachweis |

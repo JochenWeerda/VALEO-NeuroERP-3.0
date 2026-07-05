@@ -136,6 +136,12 @@ Layout-Metadaten. Low-Fidelity-/Wireframe-Triage ist im Design-Regelwerk
 [`docs/design/valeo-meridian-experience.md`](../design/valeo-meridian-experience.md)
 festgelegt.
 
+Nachzug 2026-07-05 (`UIX-MERIDIAN-VISUAL-AUDIT-002`): Der offene
+Visual-Audit-Abnahmepunkt ist als fokussierter Playwright-Test umgesetzt.
+`tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-
+Screenshot-Helfer fuer Render-Wait, Content-QC und Capture-Ziel und prueft
+Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.
