@@ -47,6 +47,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Ziel:** SPEC-P1-06 (response_model-Gate absenken) + SPEC-P0-04-Praevention (kein erneuter Lead-Daten-Push).
 **Dateibesitz:** `app/api/v1/endpoints/*.py`, `.github/workflows/quality-gate.yml`, `scripts/check_no_pii_data.py`, `scripts/run-staged-checks.cjs`, `.pii-guard-allow.txt`, `docs/schnittstellen/openapi.json`.
 **Abnahme:** `check_response_models.py --threshold 20` gruen; PII-Guard blockiert Muster+Inhalt; OpenAPI-Drift 0.
+## UIX-MERIDIAN-BUILDER-001 - Meridian als Single-Mask-Builder-Vertrag
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-07-05 - Meridian wird zentral in ScreenDefinition.layout, RenderPlan.shell, UniversalMaskRenderer/Fast-Renderern und Readiness-Gates verankert; keine separaten Referenzmasken.
+**Ziel:** Den bestehenden Single Mask Builder als verbindliche Meridian-Render-, Layout- und Governance-Capability haerten.
+**Dateibesitz:** `app/core/screen_definitions.py`, `app/api/v1/endpoints/mask_screen_definition.py`, `tests/test_agent_mask_contract.py`, `tests/test_uix046_048_command_endpoints_safety.py`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/__tests__/components/mask-builder/**`, `packages/frontend-web/src/__tests__/render-plan/schema-compiler.test.ts`, `docs/design/valeo-meridian-experience.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/UIX-MERIDIAN-BUILDER-001.yaml`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Layout-Metadaten fuer alle nativen SDs; RenderPlan.shell aus Layout; Frontend-/Backend-Readiness-Gates blockieren fehlende Meridian-Metadaten; Finance/CRM/Inventory-Referenzen bestehen ueber native SDs; Meridian-Doku als Builder-Regelwerk.
 
 ## AUDIT-1/2/5 — ISO-27001-/SOC-2-Readiness + Audit-Orchestrator
 
