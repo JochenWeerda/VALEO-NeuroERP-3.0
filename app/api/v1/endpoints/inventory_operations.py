@@ -893,7 +893,7 @@ async def create_lagerbewegung(
             VALUES
                 (:id, :tenant_id, :article_id, :warehouse_id, :quantity, :movement_type,
                  :charge, :reference_number, :source_document_type, :unit_cost, :notes,
-                 :movement_date, :prev_stock, :new_stock, false, 'eigen', false)
+                 :movement_date, :prev_stock, :new_stock, false, 'owned', false)
         """),
         {
             "id": movement_id,

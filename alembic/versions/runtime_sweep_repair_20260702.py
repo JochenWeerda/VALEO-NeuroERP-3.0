@@ -360,6 +360,33 @@ def upgrade() -> None:
         )
     """)
 
+    # Model/Migrations-Divergenz: 001_initial_schema legte diverse *.address-Spalten
+    # als JSONB an; die ORM-Modelle und Endpoints behandeln diese als Freitext-String.
+    # WAREHOUSE-REPAIR-001 (CREATE TABLE IF NOT EXISTS) war ein No-op auf der schon
+    # existierenden Tabelle => auf frisch migrierter DB blieb address JSONB und der
+    # ORM-Insert eines Strings scheitert ("invalid input syntax for type json").
+    # Idempotente Konvertierung JSONB->text nur wo noetig; bereits varchar/text = No-op.
+    op.execute("""
+        DO $$
+        DECLARE r RECORD;
+        BEGIN
+            FOR r IN
+                SELECT table_schema, table_name
+                FROM information_schema.columns
+                WHERE column_name = 'address'
+                  AND data_type = 'jsonb'
+                  AND (table_schema, table_name) IN (
+                        ('domain_inventory', 'warehouses')
+                  )
+            LOOP
+                EXECUTE format(
+                    'ALTER TABLE %I.%I ALTER COLUMN address TYPE varchar(200) '
+                    'USING NULLIF(trim(both ''\"'' from address::text), '''')',
+                    r.table_schema, r.table_name
+                );
+            END LOOP;
+        END $$;
+    """)
 
 
 def downgrade() -> None:

@@ -118,20 +118,25 @@ async def test_crm_opportunity_list_degrades_when_downstream_unreachable(monkeyp
 
 
 @pytest.mark.asyncio
-async def test_journal_entry_list_degrades_on_sqlalchemy_error():
+async def test_journal_entry_list_raises_503_on_sqlalchemy_error():
+    # SPEC-P0-03 harte Regel: FIBU-Journal ist KEIN Kategorie-D-Endpoint —
+    # bei DB-Fehler RFC-7807 503 statt stiller leerer Liste (Datenintegritaet).
+    from fastapi import HTTPException
+
     db = _FailingDb()
 
-    response = await journal_entries.list_journal_entries(
-        request=_Request(),
-        tenant_id="tenant-1",
-        skip=0,
-        limit=50,
-        db=db,
-    )
+    with pytest.raises(HTTPException) as exc_info:
+        await journal_entries.list_journal_entries(
+            request=_Request(),
+            tenant_id="tenant-1",
+            skip=0,
+            limit=50,
+            db=db,
+        )
 
     assert db.rolled_back is True
-    assert response.total == 0
-    assert response.items == []
+    assert exc_info.value.status_code == 503
+    assert "nicht verfuegbar" in str(exc_info.value.detail)
 
 
 @pytest.mark.asyncio
