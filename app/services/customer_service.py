@@ -6,6 +6,8 @@ import json
 import logging
 from datetime import datetime
 from math import ceil
+
+from app.core.address import parse_address
 from typing import Any, Optional, Union
 from uuid import UUID
 
@@ -356,22 +358,15 @@ class CustomerService:
         items: list[dict[str, Any]] = []
         for row in rows:
             try:
+                # Kanonisches Adress-Value-Object (app/core/address.py) — normalisiert
+                # dict-/JSON-String-/Freitext-Formen inkl. Alias-Keys (plz/zip/ort/…).
                 city = postal_code = country = address_str = None
                 if row.address:
-                    if isinstance(row.address, dict):
-                        city = row.address.get("city")
-                        postal_code = row.address.get("postal_code")
-                        country = row.address.get("country")
-                        address_str = row.address.get("street") or str(row.address)
-                    elif isinstance(row.address, str):
-                        try:
-                            addr = json.loads(row.address)
-                            city = addr.get("city")
-                            postal_code = addr.get("postal_code")
-                            country = addr.get("country")
-                            address_str = addr.get("street") or row.address
-                        except Exception:
-                            address_str = row.address
+                    _addr = parse_address(row.address)
+                    city = _addr.city
+                    postal_code = _addr.postal_code
+                    country = _addr.country
+                    address_str = _addr.street or (row.address if isinstance(row.address, str) else str(row.address))
                 payment_terms_val = 30
                 if row.payment_terms:
                     try:

@@ -21,6 +21,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/runtime-sweep.yml`, `scripts/api_runtime_sweep.py`, `scripts/init_db.py`, `scripts/doc_drift_report.py`, `config/runtime_sweep_allowlist.yaml`, `config/architecture-domain-prefixes.yaml`, `alembic/versions/runtime_sweep_repair_20260702.py`, `app/main.py`, betroffene Endpoint-/Service-Dateien.
 **Abnahme:** quality-gate, security-scan und universal-mask-ci auf main gruen; `python scripts/api_runtime_sweep.py` Exit 0 (0×5xx, keine nicht-allowgelisteten 503, Allowlist nicht abgelaufen); Report in `artifacts/runtime-sweep-<datum>.json`.
 
+## ADDRESS-VALUE-OBJECT — kanonisches Adressmodell (P2-Fundament)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — kanonisches Adress-Value-Object `app/core/address.py` (Alias-Normalisierung country/countryCode/plz/zip/ort/…, Freitext- und JSON-String-Parsing, Geo lat/lon), bidirektionale Adapter (flach↔VO, JSONB↔VO), 21 Unit-Tests; ADR-038; erste Adoption in customer_service.py (Ad-hoc-Alias-Handling ersetzt). Nicht-brechend: Bestandsspeicherformen bleiben, Migration schrittweise ueber Adapter (Plan im ADR).
+**Ziel:** Adressmodell-Vereinheitlichung (vom User angestossen) — eine kanonische Repraesentation statt flach-vs-JSONB-Divergenz.
+**Dateibesitz:** `app/core/address.py`, `tests/test_address_value_object.py`, `docs/adr/adr-038-address-value-object.md`, `app/services/customer_service.py`, `mkdocs.yml`.
+**Abnahme:** VO-Tests + customer-Tests gruen; ADR-Nav aktuell; Doku-Drift 0.
+
 ## A6-COVERAGE-OFFENSIVE — Finanz-Report-/Rechnungspfade
 
 **Von:** Claude
