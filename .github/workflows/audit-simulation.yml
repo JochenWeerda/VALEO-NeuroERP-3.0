@@ -1,0 +1,60 @@
+name: Audit Simulation
+
+# AUDIT-5: Orchestriert die simulierten Prueferprofile + Matrix-Validierung.
+# nightly + auf Release-Trigger; aggregiert Readiness je Standard.
+# External_gates werden gelistet, nie als "bestanden" gewertet.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-simulation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Simulierte Prueferprofile + Audit-Matrizen
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Validate audit matrices (ISO 93/93 + SOC-2 CC1-CC9)
+        run: python scripts/check_audit_matrices.py
+
+      - name: External assessor simulation (alle Profile inkl. soc2)
+        run: |
+          mkdir -p artifacts/audit
+          python scripts/simulate_external_assessors.py \
+            --output-json artifacts/audit/assessors.json \
+            --output-markdown artifacts/audit/assessors.md
+
+      - name: Aggregate audit dashboard
+        run: python scripts/aggregate_audit_dashboard.py
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-simulation
+          path: artifacts/audit/
+          retention-days: 90
