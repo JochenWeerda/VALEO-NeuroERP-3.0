@@ -35,9 +35,12 @@ def build_spec() -> dict:
     app = getattr(main, "app")
     spec = app.openapi()
 
-    version = os.environ.get("VALEO_API_VERSION")
-    if version:
-        spec.setdefault("info", {})["version"] = version
+    # Kanonische Spec-Version: fest 3.0.0, ueberschreibbar per VALEO_API_VERSION.
+    # Ohne festen Default nimmt app.openapi() 0.1.0 => Drift gegen committetes Spec
+    # (alle Aufrufwege — Drift-Step, Doc-Generator-Meta-Check, openapi-drift.yml —
+    # muessen dieselbe Version erzeugen).
+    version = os.environ.get("VALEO_API_VERSION", "3.0.0")
+    spec.setdefault("info", {})["version"] = version
     spec.setdefault("info", {}).setdefault("title", "VALEO NeuroERP API")
     return spec
 
