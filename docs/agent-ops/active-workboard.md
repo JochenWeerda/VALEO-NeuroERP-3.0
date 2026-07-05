@@ -21,6 +21,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/runtime-sweep.yml`, `scripts/api_runtime_sweep.py`, `scripts/init_db.py`, `scripts/doc_drift_report.py`, `config/runtime_sweep_allowlist.yaml`, `config/architecture-domain-prefixes.yaml`, `alembic/versions/runtime_sweep_repair_20260702.py`, `app/main.py`, betroffene Endpoint-/Service-Dateien.
 **Abnahme:** quality-gate, security-scan und universal-mask-ci auf main gruen; `python scripts/api_runtime_sweep.py` Exit 0 (0×5xx, keine nicht-allowgelisteten 503, Allowlist nicht abgelaufen); Report in `artifacts/runtime-sweep-<datum>.json`.
 
+## AUDIT-1/2/5 — ISO-27001-/SOC-2-Readiness + Audit-Orchestrator
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — `config/audit/iso27001-annex-a-matrix.yaml` (93/93 Controls: 33 conform, 12 minor, 48 external_gate, 0 offener major) und `config/audit/soc2-tsc-matrix.yaml` (CC1-CC9/A1/C1/PI1) angelegt; SOC-2-Profil in `simulate_external_assessors.py`; `scripts/check_audit_matrices.py` (fail-closed Vollstaendigkeits-/Konsistenzcheck) und `scripts/aggregate_audit_dashboard.py` (Ampel je Standard, external_gates nie als bestanden) neu; Orchestrator-Workflow `.github/workflows/audit-simulation.yml` (nightly + Release-Tag).
+**Ziel:** AUDIT-1 (ISO Annex-A-SoA 93/93 mit Verdikt), AUDIT-2 (SOC-2-TSC-Matrix + Profil), AUDIT-5 (maschinenlesbares Dashboard). LLM-/Agenten-Zugriffe als eigenes Risiko erfasst.
+**Dateibesitz:** `config/audit/*.yaml`, `scripts/check_audit_matrices.py`, `scripts/aggregate_audit_dashboard.py`, `scripts/simulate_external_assessors.py`, `.github/workflows/audit-simulation.yml`.
+**Abnahme:** `python scripts/check_audit_matrices.py` Exit 0; Dashboard-Artefakt erzeugt; external_gates gelistet, nie als bestanden gewertet.
+
 ## SPEC-P0-04-PII-REMEDIATION — Repo-Hygiene & PII-Bereinigung
 
 **Von:** Codex
