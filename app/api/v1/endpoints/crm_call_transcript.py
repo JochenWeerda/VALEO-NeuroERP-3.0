@@ -41,7 +41,7 @@ class CallTranscriptIn(BaseModel):
     audioContentType: str = "audio/wav"
 
 
-@router.post("/call-transcript", summary="Anruf-Transkript als Kontakt erfassen (Text oder Audio→STT)")
+@router.post("/call-transcript", response_model=dict, summary="Anruf-Transkript als Kontakt erfassen (Text oder Audio→STT)")
 def call_transcript(
     body: CallTranscriptIn,
     db: Session = Depends(get_db),

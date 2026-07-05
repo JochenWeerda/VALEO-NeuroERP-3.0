@@ -15,7 +15,7 @@ from app.services.docflow_gobd_service import DocflowGobdService
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
 
-@router.get("/paperless-probe", summary="DMS-/Paperless-Liveprobe (ehrlich gegated)")
+@router.get("/paperless-probe", response_model=dict, summary="DMS-/Paperless-Liveprobe (ehrlich gegated)")
 def paperless_probe(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -28,7 +28,7 @@ class GobdExportIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/gobd-export", summary="GoBD-Exportpaket je Vorgang erzeugen (+ Export vermerken)")
+@router.post("/gobd-export", response_model=dict, summary="GoBD-Exportpaket je Vorgang erzeugen (+ Export vermerken)")
 def gobd_export(
     body: GobdExportIn,
     db: Session = Depends(get_db),

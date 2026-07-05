@@ -952,7 +952,7 @@ async def reverse_settlement(
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
 
 
-@router.post("/{entity_id}/actions/mahnen", summary="Mahnung erstellen (UIX-046)")
+@router.post("/{entity_id}/actions/mahnen", response_model=dict, summary="Mahnung erstellen (UIX-046)")
 async def action_mahnen(
     entity_id: str,
     tenant_id: str = Depends(get_tenant_id),

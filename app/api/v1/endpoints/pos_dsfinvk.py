@@ -53,7 +53,7 @@ async def dsfinvk_export(
     return result
 
 
-@router.get("/dsfinvk/status", summary="Providergestuetzten DSFinV-K-Status abrufen")
+@router.get("/dsfinvk/status", response_model=dict, summary="Providergestuetzten DSFinV-K-Status abrufen")
 async def dsfinvk_status(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

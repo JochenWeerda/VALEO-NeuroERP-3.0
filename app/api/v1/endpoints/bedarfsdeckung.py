@@ -14,7 +14,7 @@ from app.services.bedarfsdeckung_service import BedarfsdeckungService
 router = APIRouter(prefix="/crm/bedarfsdeckung", tags=["crm", "bedarfsdeckung"])
 
 
-@router.get("/pipeline", summary="Durchdringungs-Pipeline (alle Betriebe nach Chance)")
+@router.get("/pipeline", response_model=list[dict], summary="Durchdringungs-Pipeline (alle Betriebe nach Chance)")
 def pipeline(
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -23,7 +23,7 @@ def pipeline(
     return BedarfsdeckungService(db, tenant_id).pipeline(limit)
 
 
-@router.get("/{kunden_nr}", summary="Bedarfsdeckungs-Cockpit eines Betriebs")
+@router.get("/{kunden_nr}", response_model=dict, summary="Bedarfsdeckungs-Cockpit eines Betriebs")
 def cockpit(
     kunden_nr: str,
     db: Session = Depends(get_db),

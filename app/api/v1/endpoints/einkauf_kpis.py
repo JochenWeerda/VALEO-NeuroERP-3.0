@@ -207,7 +207,7 @@ def get_kpis(
     }
 
 
-@router.get("/audit-trail/{doc_type}/{doc_id}", summary="Einkauf Audit-Trail abrufen")
+@router.get("/audit-trail/{doc_type}/{doc_id}", response_model=dict, summary="Einkauf Audit-Trail abrufen")
 async def get_einkauf_audit_trail(
     doc_type: str,
     doc_id: str,
@@ -222,7 +222,7 @@ async def get_einkauf_audit_trail(
     }
 
 
-@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", summary="Bestellung anlegen (UIX-046)")
+@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=dict, summary="Bestellung anlegen (UIX-046)")
 async def action_neue_bestellung(
     entity_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -21,6 +21,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/runtime-sweep.yml`, `scripts/api_runtime_sweep.py`, `scripts/init_db.py`, `scripts/doc_drift_report.py`, `config/runtime_sweep_allowlist.yaml`, `config/architecture-domain-prefixes.yaml`, `alembic/versions/runtime_sweep_repair_20260702.py`, `app/main.py`, betroffene Endpoint-/Service-Dateien.
 **Abnahme:** quality-gate, security-scan und universal-mask-ci auf main gruen; `python scripts/api_runtime_sweep.py` Exit 0 (0×5xx, keine nicht-allowgelisteten 503, Allowlist nicht abgelaufen); Report in `artifacts/runtime-sweep-<datum>.json`.
 
+## A7-RESPONSE-MODEL-TYPING — API-Vertragshaertung + PII-Praevention
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — 55 untypisierte Routen mit response_model versehen (66->14, 99,6%), CI-Schwelle 80->20 gezogen; OpenAPI-Spec regeneriert. PII-Praevention: scripts/check_no_pii_data.py (Muster+Inhalt) in pre-commit + CI-Path-Guard, Art.-33-Meldeentwurf entfernt (Vorfall vom Verantwortlichen als nicht meldepflichtig eingestuft). Offen in diesem Slice: SQL-S608-Review.
+**Ziel:** SPEC-P1-06 (response_model-Gate absenken) + SPEC-P0-04-Praevention (kein erneuter Lead-Daten-Push).
+**Dateibesitz:** `app/api/v1/endpoints/*.py`, `.github/workflows/quality-gate.yml`, `scripts/check_no_pii_data.py`, `scripts/run-staged-checks.cjs`, `.pii-guard-allow.txt`, `docs/schnittstellen/openapi.json`.
+**Abnahme:** `check_response_models.py --threshold 20` gruen; PII-Guard blockiert Muster+Inhalt; OpenAPI-Drift 0.
+
 ## AUDIT-1/2/5 — ISO-27001-/SOC-2-Readiness + Audit-Orchestrator
 
 **Von:** Claude

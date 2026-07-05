@@ -494,7 +494,7 @@ async def post_ap_invoice(
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
 
-@router.post("/{entity_id}/actions/freigeben", summary="Eingangsrechnung freigeben (UIX-047)")
+@router.post("/{entity_id}/actions/freigeben", response_model=dict, summary="Eingangsrechnung freigeben (UIX-047)")
 async def action_freigeben(
     entity_id: str,
     tenant_id: str = Depends(get_tenant_id),

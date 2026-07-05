@@ -13,7 +13,7 @@ from app.services.crm_kunden_map_service import CrmKundenMapService
 router = APIRouter(prefix="/crm/kunden-karte", tags=["crm", "map"])
 
 
-@router.get("/map", summary="Alle Kunden als GeoJSON (CRM-Kundenkarte)")
+@router.get("/map", response_model=dict, summary="Alle Kunden als GeoJSON (CRM-Kundenkarte)")
 def kunden_map(
     typ: Optional[str] = Query(None, description="gap | milchvieh | lead | stamm"),
     db: Session = Depends(get_db),

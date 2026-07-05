@@ -642,7 +642,7 @@ async def get_frachtkosten(
 
 # ── QS-CHARGE-001: QS-Abschlag-Kalkulator ────────────────────────────────────
 
-@router.get("/{acceptance_id}/qs-abschlag", summary="QS-CHARGE-001: QS-Abschläge berechnen")
+@router.get("/{acceptance_id}/qs-abschlag", response_model=dict, summary="QS-CHARGE-001: QS-Abschläge berechnen")
 async def get_qs_abschlag(
     acceptance_id: str,
     net_weight_kg: float = Query(..., description="Nettomenge in kg"),
@@ -665,7 +665,7 @@ async def get_qs_abschlag(
     )
 
 
-@router.post("/{acceptance_id}/qs-protokoll-link", summary="QS-Protokoll mit Annahme verknüpfen")
+@router.post("/{acceptance_id}/qs-protokoll-link", response_model=dict, summary="QS-Protokoll mit Annahme verknüpfen")
 async def link_qs_protokoll(
     acceptance_id: str,
     quality_protocol_id: str = Query(...),

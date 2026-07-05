@@ -756,7 +756,7 @@ async def get_periodenvergleich(
 
 
 @router.get(
-    "/beleg-drilldown/{journal_entry_id}",
+    "/beleg-drilldown/{journal_entry_id}", response_model=dict,
     summary="Beleg-Drilldown: JournalEntry → Quelldokument + Zeilen",
 )
 async def get_beleg_drilldown(

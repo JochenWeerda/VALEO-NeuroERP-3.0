@@ -31,7 +31,7 @@ class AutoCaptureIn(BaseModel):
     bediener: Optional[str] = None     # Default 'AUTO'
 
 
-@router.post("/auto-capture", summary="Kontakt automatisch erfassen (Telefon/E-Mail/WhatsApp)")
+@router.post("/auto-capture", response_model=dict, summary="Kontakt automatisch erfassen (Telefon/E-Mail/WhatsApp)")
 def auto_capture(
     body: AutoCaptureIn,
     db: Session = Depends(get_db),

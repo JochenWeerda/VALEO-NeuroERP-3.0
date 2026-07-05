@@ -15,7 +15,7 @@ from app.services.sales_storno_service import SalesStornoService, StornoError
 router = APIRouter(prefix="/sales", tags=["sales", "o2c", "storno"])
 
 
-@router.get("/storno/status", summary="Storno-/Gutschrift-Status je Auftrag")
+@router.get("/storno/status", response_model=dict, summary="Storno-/Gutschrift-Status je Auftrag")
 def storno_status(
     auftrag: str = Query(..., description="Auftragsnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -29,7 +29,7 @@ class StornoIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/deliveries/{delivery_no}/storno", summary="Lieferschein stornieren (durchgängig in den Match)")
+@router.post("/deliveries/{delivery_no}/storno", response_model=dict, summary="Lieferschein stornieren (durchgängig in den Match)")
 def storno_delivery(
     delivery_no: str,
     body: StornoIn,

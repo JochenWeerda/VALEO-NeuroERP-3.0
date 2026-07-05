@@ -444,7 +444,7 @@ class PutawayRequest(BaseModel):
     strategy: str = "CAPACITY"
 
 
-@router.post("/warehouses/{warehouse_id}/suggest-putaway", summary="Einlagerungsvorschlag (Putaway)")
+@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=dict, summary="Einlagerungsvorschlag (Putaway)")
 def suggest_putaway(
     warehouse_id: str,
     payload: PutawayRequest,

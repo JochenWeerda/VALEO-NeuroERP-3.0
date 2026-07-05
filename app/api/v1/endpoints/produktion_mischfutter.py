@@ -416,7 +416,7 @@ async def list_auftraege(
     return [_to_out(a) for a in auftraege]
 
 
-@router.get("/auftraege/{ref}/trace", summary="Belegkette Auftrag ↔ Charge ↔ Komponenten")
+@router.get("/auftraege/{ref}/trace", response_model=dict, summary="Belegkette Auftrag ↔ Charge ↔ Komponenten")
 async def trace_auftrag(
     ref: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -429,7 +429,7 @@ async def trace_auftrag(
     return result
 
 
-@router.get("/inventory-links", summary="Einzelfutter ↔ Lagerartikel-Mapping (FEED-CHAIN-004)")
+@router.get("/inventory-links", response_model=dict, summary="Einzelfutter ↔ Lagerartikel-Mapping (FEED-CHAIN-004)")
 async def list_inventory_links(
     limit: int = Query(100, ge=1, le=500),
     tenant_id: str = Depends(get_tenant_id),
@@ -439,7 +439,7 @@ async def list_inventory_links(
 
 
 @router.post(
-    "/inventory-links/{einzelfutter_id}/ensure",
+    "/inventory-links/{einzelfutter_id}/ensure", response_model=dict,
     summary="Lagerartikel für Einzelfuttermittel anlegen oder verknüpfen",
 )
 async def ensure_inventory_link(

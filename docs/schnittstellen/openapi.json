@@ -143168,7 +143168,14 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Kulturen Api V1 Agrar Kulturen Get",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -199655,7 +199662,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Einkauf Audit Trail Api V1 Einkauf Audit Trail  Doc Type   Doc Id  Get",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -204363,7 +204374,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Action Neue Bestellung Api V1 Einkauf Lieferanten  Entity Id  Actions Neue Bestellung Post",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -211935,7 +211950,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Action Freigeben Api V1 Finance Ap Invoices  Entity Id  Actions Freigeben Post",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -223877,7 +223896,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Action Mahnen Api V1 Finance Open Items  Entity Id  Actions Mahnen Post",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -258402,7 +258425,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Suggest Putaway Api V1 Lager Wms Warehouses  Warehouse Id  Suggest Putaway Post",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -279858,7 +279885,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dsfinvk Status Api V1 Pos Dsfinvk Status Get",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
