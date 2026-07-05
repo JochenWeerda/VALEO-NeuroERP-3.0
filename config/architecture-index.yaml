@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-05
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-05T05:26:45Z'
+generated_at: '2026-07-05T10:57:42Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -723,6 +723,7 @@ domains:
     - docs/adr/adr-027-process-kernel-event-namenskonvention.md
     - docs/adr/adr-034-tenant-isolation-klassifizierungssystem.md
     - docs/adr/adr-036-architecture-documentation-stack.md
+    - docs/adr/adr-038-address-value-object.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1329,6 +1330,7 @@ domains:
     - docs/adr/adr-033-rollback-strategie-get-db.md
     - docs/adr/adr-036-architecture-documentation-stack.md
     - docs/adr/adr-037-structurizr-c4-source-of-truth.md
+    - docs/adr/adr-038-address-value-object.md
     status: active
   logistics:
     owner: domain/logistics
