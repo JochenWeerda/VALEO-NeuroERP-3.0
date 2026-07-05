@@ -227,6 +227,11 @@ jobs:
       - name: Doc generator meta-check
         run: bash scripts/check_all_doc_generators.sh --check
 
+      - name: Setup pnpm for Architecture OS
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Architecture OS validate (ARCH-OS-004)
         run: pnpm arch:validate
 
