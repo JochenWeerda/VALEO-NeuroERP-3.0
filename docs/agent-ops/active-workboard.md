@@ -25,7 +25,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** in Arbeit 2026-07-05 — 55 untypisierte Routen mit response_model versehen (66->14, 99,6%), CI-Schwelle 80->20 gezogen; OpenAPI-Spec regeneriert. PII-Praevention: scripts/check_no_pii_data.py (Muster+Inhalt) in pre-commit + CI-Path-Guard, Art.-33-Meldeentwurf entfernt (Vorfall vom Verantwortlichen als nicht meldepflichtig eingestuft). Offen in diesem Slice: SQL-S608-Review.
+**Stand:** in Arbeit 2026-07-05 — 55 untypisierte Routen mit response_model versehen (66->14, 99,6%), CI-Schwelle 80->20 gezogen; OpenAPI-Spec regeneriert. PII-Praevention: scripts/check_no_pii_data.py (Muster+Inhalt) in pre-commit + CI-Path-Guard, Art.-33-Meldeentwurf entfernt (Vorfall vom Verantwortlichen als nicht meldepflichtig eingestuft). SQL-S608-Review abgeschlossen (artifacts/appsec-s608-review.md): 121 Stellen musterbelegt sicher (Identifier aus Literalen/festen Listen/Pydantic-Whitelist, Werte gebunden).
 **Ziel:** SPEC-P1-06 (response_model-Gate absenken) + SPEC-P0-04-Praevention (kein erneuter Lead-Daten-Push).
 **Dateibesitz:** `app/api/v1/endpoints/*.py`, `.github/workflows/quality-gate.yml`, `scripts/check_no_pii_data.py`, `scripts/run-staged-checks.cjs`, `.pii-guard-allow.txt`, `docs/schnittstellen/openapi.json`.
 **Abnahme:** `check_response_models.py --threshold 20` gruen; PII-Guard blockiert Muster+Inhalt; OpenAPI-Drift 0.
