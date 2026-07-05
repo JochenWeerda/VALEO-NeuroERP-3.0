@@ -1,0 +1,4 @@
+# Allowlist fuer scripts/check_no_pii_data.py — bewusste Ausnahmen (ein Pfad-Glob je Zeile).
+# NUR fuer nachweislich anonyme/synthetische Testdaten. Jede Zeile im Commit begruenden.
+# Beispiel:
+#   tests/fixtures/synthetic_customers_anonymized.json

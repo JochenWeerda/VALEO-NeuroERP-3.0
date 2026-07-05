@@ -56,6 +56,9 @@ jobs:
       - name: Run forbidden path guard
         run: node scripts/guard-forbidden-paths.cjs --range "${{ steps.range.outputs.range }}"
 
+      - name: PII/Lead-Daten-Guard (DSGVO)
+        run: python3 scripts/check_no_pii_data.py --tracked
+
   docs-code-sync:
     name: Docs/code sync for critical paths
     runs-on: ubuntu-latest

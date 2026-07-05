@@ -33,6 +33,22 @@ if (stagedFiles.length === 0) {
   process.exit(0)
 }
 
+// PII-/Lead-Daten-Guard (DSGVO): blockiert Personen-/GAP-Lead-Daten vor dem Commit.
+// python/python3-Fallback; wenn kein Interpreter gefunden wird, warnen (CI ist Backstop).
+;(function runPiiGuard() {
+  const guard = path.join('scripts', 'check_no_pii_data.py')
+  for (const py of ['python', 'python3']) {
+    try {
+      execFileSync(py, [guard, '--staged'], { cwd: repoRoot, stdio: 'inherit', shell: false })
+      return
+    } catch (err) {
+      if (err && err.code === 'ENOENT') continue // Interpreter nicht gefunden -> naechsten versuchen
+      process.exit(err.status || 1) // Guard hat blockiert (PII gefunden)
+    }
+  }
+  console.warn('WARN: kein python/python3 fuer PII-Guard gefunden — CI-Gate greift stattdessen.')
+})()
+
 const scriptLikeFiles = stagedFiles.filter(
   (file) =>
     /\.(ts|tsx|js|jsx)$/i.test(file) &&

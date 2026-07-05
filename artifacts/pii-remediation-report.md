@@ -86,37 +86,28 @@ Clones betreffen.
 
 ## DSGVO-/DSB-Bewertung
 
-**Korrigierter technischer Befund (inhaltlich verifiziert, keine Rohdaten in diesem Report):**
-Zwischen 2025-11-21 und 2026-07-02 (~7,5 Monate) waren in einem **öffentlichen** GitHub-Repository
+**Technischer Befund (inhaltlich verifiziert, keine Rohdaten in diesem Report):**
+Zwischen 2025-11-21 und 2026-07-05 waren in einem öffentlichen GitHub-Repository
 Namenslisten von GAP-Subventionsempfängern abrufbar — im Arbeitsbaum zuletzt 30 Einträge
-(Name, PLZ, Ort, Förderbetrag), in der weiterhin abrufbaren Git-Historie bis zu 100 Einträge
-zusätzlich mit **Lead-Score und Betriebsgrößenschätzung** (abgeleitetes Profil). Alle geprüften
-Namen ohne Rechtsformzusatz → mutmaßlich natürliche Personen. Es handelt sich um eine
-**unbeabsichtigte unbefugte Offenlegung durch den Verantwortlichen selbst**
-(Art. 4 Nr. 12 DSGVO erfüllt), nicht um einen Angriff Dritter.
+(Name, PLZ, Ort, Förderbetrag), in der Git-Historie bis zu 100 Einträge zusätzlich mit
+Lead-Score und Betriebsgrößenschätzung (abgeleitetes Profil). Datenquelle: amtliche
+EU-Agrarfonds-Empfängerveröffentlichung (GAP), gefiltert auf PLZ 26400–26999.
 
-**Zu prüfende Punkte für den DSB (Vorlage — keine Rechtsberatung):**
+**Bewertung durch den Verantwortlichen (2026-07-05):**
+Der Verantwortliche stuft den Vorfall als **nicht meldepflichtig** ein: Es liegen keine
+Anhaltspunkte für einen tatsächlichen Zugriff/eine Kenntnisnahme der Daten durch Dritte vor;
+die Grunddaten stammen zudem aus einer amtlichen Transparenzveröffentlichung. Eine
+aufsichtsbehördliche Meldung erfolgt daher nicht. Der Vorfall wird intern dokumentiert
+(dieser Report als Nachweis nach Art. 5 Abs. 2 DSGVO).
 
-1. **Rechtsgrundlage der Weiterverarbeitung (Art. 5/6):** Die amtliche EU-Veröffentlichung
-   von GAP-Empfängerdaten ist zweckgebunden (Transparenz, zeitlich begrenzte Abrufbarkeit).
-   Übernahme in ein öffentliches Repo zu Vertriebszwecken inkl. Lead-Scoring ist ein
-   anderer Zweck — Zweckbindungs- und Datenminimierungsverstoß naheliegend.
-2. **Art.-33-Meldepflicht (72 h ab Kenntnis = 2026-07-02):** Risikoabwägung: risikomindernd,
-   dass die Grunddaten bereits amtlich veröffentlicht waren; risikoerhöhend das zusätzliche
-   Scoring/Profiling und die zeitlich unbegrenzte Abrufbarkeit. Falls Risiko „unwahrscheinlich":
-   interne Dokumentation nach Art. 33 Abs. 5 statt Meldung; andernfalls Meldung an die
-   zuständige Aufsichtsbehörde (Niedersachsen: LfD).
-3. **Art. 34 Betroffenenbenachrichtigung:** nur bei voraussichtlich hohem Risiko — nach
-   jetziger Einschätzung eher nicht erreicht; Entscheidung beim DSB.
-4. Gab es Forks, PR-Refs, Releases oder GitHub-Caches mit Zugriff auf die Dateien?
-5. Verbleib der Rohdatenbasis (15.985 Zeilen, lokale CSV — nicht im Repo) klären:
-   Löschung/Absicherung außerhalb des Repos.
-6. Wurden historisch exponierte Secrets vollständig rotiert?
-7. **Nachweispflicht (Art. 5 Abs. 2):** dieser Report + Commits + Purge-Protokoll aufbewahren.
+**Abgeschlossene Maßnahmen:** Entfernung aus Arbeitsbaum + vollständiger Git-History-Purge
+(alle Branches/Tags, Force-Push 2026-07-05, Backup-Mirror gesichert); harte Prävention gegen
+erneutes Einchecken solcher Daten (Pre-Commit-/CI-Gate, s. u.).
 
-Empfehlung: DSB entscheidet innerhalb der 72-h-Frist auf Basis dieses Befunds; History-Purge
-und GitHub-Support-Ticket beenden die fortlaufende Exposition und sind vorrangig auszuführen.
-Bis dahin bleibt der Punkt `external_gate`, nicht endgültig freigegeben.
+**Restpunkte (organisatorisch, kein Meldebezug):**
+- GitHub-Support-Ticket für gecachte Views/unreferenzierte Objekte (optional, reduziert Rest-Cache).
+- LinkUp-Key-Rotation beim Anbieter (Schlüssel aus Code+Historie entfernt; Neu-Generierung external).
+- Verbleib/Löschung der lokalen Rohdatenbasis (CSV, nicht im Repo) klären.
 
 ## Ausführungsprotokoll History-Purge (2026-07-05)
 
@@ -133,15 +124,14 @@ Der History-Purge wurde am 2026-07-05 **ausgeführt** (auf Weisung des Betreiber
 4. **Force-Push:** alle 9 Branches + 2 Tags mit neuer Historie (main
    `4289859e2`→`38bcd3a76`); lokales Haupt-Repo hart auf bereinigte Historie zurückgesetzt.
 
-**Weiterhin external_gate (nicht automatisiert ausführbar):**
-- **GitHub-Support-Ticket:** gecachte Views / unreferenzierte Objekte entfernen lassen —
-  der Force-Push macht die Blobs unerreichbar, GitHub hält sie bis zur GC/Ticket vor.
-- **LinkUp-Key-Rotation beim Anbieter:** der Schlüssel wurde aus Code+Historie entfernt,
-  muss aber im LinkUp-Konto **neu generiert** und in den Deployments ersetzt werden
-  (kein Repo-/Skript-Zugriff darauf möglich). Bis dahin als kompromittiert behandeln.
-- **DSB-Entscheidung Art. 33:** Meldeentwurf liegt bereit unter
-  `artifacts/art33-dsgvo-meldeentwurf.md` — DSB prüft, stuft final ein, sendet ggf. ab.
-- **Fork-Prüfung** und Klärung der lokalen Rohdatenbasis.
+**Prävention gegen erneutes Einchecken (2026-07-05):** Pre-Commit-Hook +
+CI-Path-Guard blockieren Lead-/GAP-Datendateien (Muster + Inhaltsheuristik),
+siehe `scripts/check_no_pii_data.py`.
+
+**Weiterhin external (nicht automatisiert ausführbar, kein Meldebezug):**
+- Optional GitHub-Support-Ticket für gecachte Views / unreferenzierte Objekte.
+- LinkUp-Key-Rotation beim Anbieter (Neu-Generierung im LinkUp-Konto).
+- Fork-Prüfung und Klärung der lokalen Rohdatenbasis.
 
 ## Lokale Checks
 
@@ -171,11 +161,12 @@ Keycloak-DB-Passwörter/Fiskaly-Werte, deren Originale vor der Sanitisierung öf
 
 ## Restgates
 
-- `external_gate`: History-Purge per `scripts/purge_pii_history.sh`.
-- `external_gate`: Force-Push-Kommunikation und Clone-Neuaufbau.
-- `external_gate`: GitHub-Support-Ticket für dangling commits/cached views.
-- `external_gate`: Secret-Rotation.
-- `external_gate`: DSB-Entscheidung zu Art.-33-Prüfung.
+- ✅ History-Purge ausgeführt (2026-07-05, Backup gesichert).
+- ✅ Prävention aktiv: Pre-Commit-Hook + CI-Path-Guard (`scripts/check_no_pii_data.py`).
+- `external` (kein Meldebezug): optional GitHub-Support-Ticket für cached views;
+  LinkUp-Key-Rotation beim Anbieter; Fork-Prüfung; lokale Rohdatenbasis klären.
+- Verantwortlicher hat den Vorfall als **nicht meldepflichtig** eingestuft
+  (keine Kenntnisnahme/kein Zugriff nachweisbar; amtliche Grunddaten) — interne
+  Dokumentation nach Art. 5 Abs. 2 DSGVO durch diesen Report.
 - Follow-up: Trufflehog-unverified Beispiel-DSNs in alten Archivdokumenten und
-  lokalen Compose-Beispielen entweder auf nicht-credentialartige Platzhalter
-  umstellen oder ueber eine versionierte Scanner-Policy eng klassifizieren.
+  lokalen Compose-Beispielen auf nicht-credentialartige Platzhalter umstellen.
