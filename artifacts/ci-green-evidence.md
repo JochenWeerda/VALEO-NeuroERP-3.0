@@ -35,13 +35,37 @@ Regel: keine Tests gelöscht, keine Schwellen gesenkt, kein `continue-on-error` 
 3. **Runde 3** (dieser Stand): Workboard-Eintrag SPEC-P0-01/02; zusätzlich Runtime-Sweep-Programm
    (32×5xx auf frischer DB behoben: Repair-Migration + init_db-create_all + 15 Code-Bugfixes).
 
-## Grüne Runs auf main (wird je Runde ergänzt)
+## quality-gate — der Weg durch die latenten Fehlerschichten
 
-| # | Workflow | Run | Commit | Datum |
-|---|---|---|---|---|
-| 1 | security-scan | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28582265012 | `4a32d41c7` | 2026-07-02 |
-| 2 | security-scan | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28621749137 | `89d1ea4ca` | 2026-07-02 |
-| 1 | universal-mask-ci | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28582264967 | `4a32d41c7` | 2026-07-02 |
-| – | quality-gate | _ausstehend — Runde 3 nach diesem Push_ | | |
+`quality-gate` war seit vor 2026-05-26 dauerhaft rot und scheiterte immer am
+jeweils **ersten** noch offenen Gate — jede grüne Schicht legte die nächste frei.
+Alle Ursachen waren echte, seit Monaten latente Defekte, die nur nie in einem
+CI-Volllauf sichtbar wurden (Kernbefund des Audits: „verifizieren statt behaupten"):
 
-Akzeptanz (3 aufeinanderfolgende grüne Runs je Workflow) wird nach Runde 3 fortgeschrieben.
+1. sql_fstrings-Gate (2 ungeflaggte Stellen)
+2. response_model- + summary-Gate
+3. Doku-Drift 15→0 (Inventare/C4/Route regeneriert)
+4. Secret-Scan-False-Positives (artifacts-Prosa, tote `--baseline-path`-Referenz, `.env.example`)
+5. docs-code-sync (Workflow-/app-Änderung ohne Workboard-Update)
+6. Frontend erp-domain-Tests (typechekten gegen nie committetes `dist/`)
+7. Mask-Performance-Gate (npx-TypeScript-Drift → gepinnte ts-node-Toolchain)
+8. OpenAPI-Versions-Ping-Pong (0.1.0 vs 3.0.0 → fester Default im Generator)
+9. Doc-Generator-Meta-Check-Kaskade (openapi/container-inventory/c4/architecture-index)
+10. **pytest-Volllauf** — Model/Migrations-Divergenzen: `warehouses.address` JSONB↔String,
+    `ownership_type='eigen'` gegen CHECK-Constraint, 2 Vertragskonflikte mit der Parallel-Session
+11. Coverage-Ratchet — `psm_proplanta.py` 0,1 pp unter Schwelle durch eigene defensive Zeilen
+    → Test statt Schwellensenkung (only-up-Regel)
+
+## Grüne Runs auf main
+
+| Workflow | Ergebnis | Commit | Run |
+|---|---|---|---|
+| **quality-gate** | ✅ success | `a4ce0f3c2` | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28732436888 |
+| **security-scan** | ✅ success | `a4ce0f3c2` | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28732436857 |
+| **universal-mask-ci** | ✅ success | `44d713a23` | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28620959114 |
+| **runtime-sweep** | ✅ success (0×5xx) | `28b79b4d0` | https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/28731916535 |
+
+Stand 2026-07-05: quality-gate erstmals seit Monaten vollständig grün auf `main`.
+`universal-mask-ci` ist pfadgetriggert (grün, seit die zugehörigen Pfade zuletzt geändert
+wurden); für den kontinuierlichen 3-Runs-Nachweis läuft er bei nächster Maskenänderung erneut.
+Backend-pytest im CI-Volllauf: **11 810 passed, 0 Fehler**, Gesamt-Coverage 65,66 %.
