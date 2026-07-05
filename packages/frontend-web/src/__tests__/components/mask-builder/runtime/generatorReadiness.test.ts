@@ -9,6 +9,11 @@ const baseScreen: ScreenDefinition = {
   domain: 'crm',
   mode: 'list',
   title: 'Kundenstamm',
+  layout: {
+    floorplan: 'worklist',
+    density: 'compact',
+    contextRail: 'none',
+  },
 }
 
 /** Screen with tables — needs dataSources, serverPagination binding, and columns. */
@@ -18,6 +23,12 @@ const screenWithTables: ScreenDefinition = {
   domain: 'crm',
   mode: 'list',
   title: 'Kundenstamm',
+  layout: {
+    floorplan: 'objectPage',
+    density: 'compact',
+    contextRail: 'combined',
+    tableProfile: 'standard',
+  },
   dataSources: [
     { key: 'orders', endpoint: '/api/v1/crm/customers/{entity_id}/auftraege' },
   ],
@@ -63,7 +74,7 @@ describe('checkGeneratorReadiness — mandatory/advisory split', () => {
     const report = checkGeneratorReadiness(screenWithTables)
     const mandatoryGates = report.gates.filter((g) => g.severity === 'mandatory')
     const advisoryGates = report.gates.filter((g) => g.severity === 'advisory')
-    expect(mandatoryGates.length).toBe(6)
+    expect(mandatoryGates.length).toBe(8)
     expect(advisoryGates.length).toBe(6)
   })
 
@@ -149,6 +160,34 @@ describe('checkGeneratorReadiness — mandatory/advisory split', () => {
     }
     const report = checkGeneratorReadiness(screen)
     const gate = report.gates.find((g) => g.gate === 'actions_classified')
+    expect(gate!.passed).toBe(false)
+    expect(gate!.severity).toBe('mandatory')
+    expect(report.generatorReady).toBe(false)
+  })
+
+  it('fails layout_metadata when Meridian floorplan metadata is missing', () => {
+    const { layout: _layout, ...screen } = baseScreen
+    const report = checkGeneratorReadiness(screen)
+    const gate = report.gates.find((g) => g.gate === 'layout_metadata')
+    expect(gate!.passed).toBe(false)
+    expect(gate!.severity).toBe('mandatory')
+    expect(report.generatorReady).toBe(false)
+  })
+
+  it('fails table_profile for financial table screens without financial profile', () => {
+    const screen: ScreenDefinition = {
+      ...screenWithTables,
+      id: 'finance/ap-invoice',
+      domain: 'finance',
+      layout: {
+        floorplan: 'objectPage',
+        density: 'expertDense',
+        contextRail: 'audit',
+        tableProfile: 'standard',
+      },
+    }
+    const report = checkGeneratorReadiness(screen)
+    const gate = report.gates.find((g) => g.gate === 'table_profile')
     expect(gate!.passed).toBe(false)
     expect(gate!.severity).toBe('mandatory')
     expect(report.generatorReady).toBe(false)

@@ -138,6 +138,12 @@ READY_SCREEN = {
     "mode": "detail",
     "title": "Kundenstamm",
     "noWorkflowReason": "Verwaltungsmaske ohne eigenen Workflow.",
+    "layout": {
+        "floorplan": "objectPage",
+        "density": "compact",
+        "contextRail": "combined",
+        "tableProfile": "standard",
+    },
     "dataSources": [{"key": "entity", "endpoint": "/api/v1/crm/customers/{entity_id}"}],
     "tabs": [
         {
@@ -245,6 +251,32 @@ def test_readiness_allows_explicit_stub_action():
     report = _check_readiness(screen)
     assert report["generatorReady"] is True
     assert not any("actions_classified" in e for e in report["errors"])
+
+
+@pytest.mark.unit
+def test_readiness_fails_missing_meridian_layout_metadata():
+    screen = {k: v for k, v in READY_SCREEN.items() if k != "layout"}
+    report = _check_readiness(screen)
+    assert report["generatorReady"] is False
+    assert any("layout_metadata" in e for e in report["errors"])
+
+
+@pytest.mark.unit
+def test_readiness_fails_finance_table_without_financial_profile():
+    screen = {
+        **READY_SCREEN,
+        "id": "finance/ap-invoice",
+        "domain": "finance",
+        "layout": {
+            "floorplan": "objectPage",
+            "density": "expertDense",
+            "contextRail": "audit",
+            "tableProfile": "standard",
+        },
+    }
+    report = _check_readiness(screen)
+    assert report["generatorReady"] is False
+    assert any("table_profile" in e for e in report["errors"])
 
 
 @pytest.mark.unit

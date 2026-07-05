@@ -72,6 +72,7 @@ Invalidierung bei Logout oder `schemaVersion`-Wechsel.
 - Tabs: Schnittmenge Schema ∩ `summary.available_tabs`
 - Tabellen: `virtualized: true`, `pageSize ≤ 50`, `serverPagination: true`
 - Lookups: min 2 Zeichen, max 25 Treffer, Cache 15min, Debounce 300ms
+- Meridian: `ScreenDefinition.layout.floorplan`, `density`, `contextRail` und `tableProfile` werden in `RenderPlan.shell` uebernommen und steuern Header, Dichte, Kontextbereich und Tabellenprofil zentral.
 
 ## DataBindingPlan-Regeln
 
@@ -96,7 +97,7 @@ Siehe ADR-011 Erweiterung RenderPlan Engine und `scripts/check_mask_performance_
 | `runtime/useActionRuntime.ts` | Actions: execute/dryRun/validate/propose, Audit, Idempotenz |
 | `runtime/useWorkflowState.ts` | Workflow-Panel, BlockingReasons |
 | `runtime/generateAgentMaskContract.ts` | Agent-Vertrag aus ScreenDefinition |
-| `runtime/generatorReadiness.ts` | 6 mandatory + 6 advisory Gates pro Tabelle |
+| `runtime/generatorReadiness.ts` | 8 mandatory + 6 advisory Gates pro Tabelle inkl. Meridian-Layout |
 
 Backend-Spiegel: `GET /api/v1/masks/{id}/readiness`, `GET /api/v1/masks/{id}/agent-contract`.
 

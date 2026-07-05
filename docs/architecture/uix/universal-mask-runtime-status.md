@@ -13,6 +13,9 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 > **Kurzfassung (2026-07-01):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. ActionRuntime produktiv verdrahtet (UIX-045). Erste CommandEndpoints aktiv: `create_activity`, `neue_bestellung`, `mahnen`, `freigeben`, `stornieren`, `bestellen`, `wareneingang`, `abschliessen`, `qualifizieren` (UIX-046/053). Multi-Stage Dialog Flow (Confirm→dryRun→AuditReason→Execute) mit menschenlesbarer proposedChanges-Anzeige und Toast-Feedback (UIX-047). Agent Safety auf alle 26 SDs ausgeweitet (UIX-048). CI-Workflow mit BFF-Build-Stage ergänzt (UIX-049).
 
+
+> **Nachtrag 2026-07-05:** Meridian ist als Builder-Capability im Single Mask Builder verankert. `ScreenDefinition.layout` liefert `floorplan`, `density`, `contextRail` und `tableProfile`; `RenderPlan.shell` uebernimmt diese Felder zentral; Frontend- und Backend-Readiness blockieren fehlende Meridian-Metadaten.
+
 ## Lieferstand
 
 | Slice | Inhalt | Status | Commit / Nachweis |
@@ -80,7 +83,8 @@ Referenz-Code: `packages/frontend-web/src/components/mask-builder/runtime/`
 | `table_data_source_bound` | jede `serverPagination`-Tabelle hat passenden `dataSourceKey` |
 | `table_columns_complete` | jede Tabelle ≥2 nicht-triviale Spalten |
 | `actions_classified` | jede Action: `dangerLevel` + `permission` oder `stubReason` |
-
+| `layout_metadata` | `layout.floorplan`, `layout.density`, `layout.contextRail`; Detail-/Cockpit-/Workflow-Masken nicht `contextRail=none` |
+| `table_profile` | Tabellenmasken haben `layout.tableProfile`; Finance=`financial`, Lager/Inventory=`inventory` |
 **Advisory** (Warnings, `advisoryScore` 0–1):
 
 | Gate | Prüfung |

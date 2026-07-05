@@ -1,7 +1,7 @@
 slice_id: UIX-MERIDIAN-BUILDER-001
 title: Meridian als Single-Mask-Builder-Vertrag
 owner: Codex
-status: reserved
+status: completed
 created_at: 2026-07-05
 coordination: >-
   Neuer UIX-Slice ohne Ueberschneidung mit aktiven Coverage-, API- oder Audit-Slices.
@@ -19,6 +19,7 @@ file_ownership:
   - packages/frontend-web/src/components/mask-builder/**
   - packages/frontend-web/src/__tests__/components/mask-builder/**
   - packages/frontend-web/src/__tests__/render-plan/schema-compiler.test.ts
+  - packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts
   - docs/design/valeo-meridian-experience.md
   - docs/architecture/uix/universal-mask-runtime-status.md
   - docs/project-context/open-gaps-and-known-issues.md
@@ -37,6 +38,21 @@ tests:
 risks:
   - Bestehende 26 native SDs muessen in einem Durchlauf nachgezogen werden, sonst wird generatorReady erwartbar rot.
   - Parallel geaenderte Workboard- und Coverage-Dateien duerfen nicht versehentlich mitcommittet werden.
+result: >-
+  Code umgesetzt und fokussiert verifiziert: Meridian-Layout-Metadaten werden im
+  Registry-Ausgang angereichert, in RenderPlan.shell kompiliert, als Renderer-
+  Datenattribute/Tabellenprofil genutzt und in Frontend-/Backend-Readiness als
+  mandatory Gates geprueft. Design-Regelwerk inklusive Low-Fidelity-/Wireframe-
+  Triage angelegt.
+evidence:
+  - pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/runtime/generatorReadiness.test.ts src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx src/__tests__/render-plan/schema-compiler.test.ts -> 25 passed
+  - pytest tests/test_agent_mask_contract.py tests/test_uix046_048_command_endpoints_safety.py -q --no-cov -> 270 passed
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> gruen
+  - python scripts/generate_agent_handbuch.py --check -> 5 Artefakte aktuell
+  - pnpm --dir packages/frontend-web exec playwright test tests/e2e/uix-056-native-route-smoke.spec.ts --project=chromium -> 7 passed
+  - VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER=true pnpm --dir packages/frontend-web exec playwright test tests/e2e/mask-render-performance.spec.ts --project=chromium -> 2 passed
+open_items:
+  - Playwright globalTeardown meldet bestehende Visual-Tour-Console-Issues aus dem Repo-weiten Artefakt; die fokussierten Meridian-Smokes sind gruen.
 ai_harness:
   fachlicher_vertrag: >-
     Meridian soll ERP-Fachmasken als professionelle Desktop-Arbeitsoberflaechen

@@ -128,6 +128,14 @@ Status: **erledigt 2026-07-02** (Root-Cause war fehlender Endpoint-Pfad + fehlen
 
 Status: Skeleton geliefert als Architektur-Slice, kein offener UX-Baukasten-Rollout.
 
+Nachzug 2026-07-05 (`UIX-MERIDIAN-BUILDER-001`): Meridian ist als zentrale
+Builder-Capability verankert. `ScreenDefinition.layout` liefert `floorplan`,
+`density`, `contextRail` und `tableProfile`; `RenderPlan.shell` transportiert
+diese Felder; Frontend- und Backend-Readiness blockieren fehlende
+Layout-Metadaten. Low-Fidelity-/Wireframe-Triage ist im Design-Regelwerk
+[`docs/design/valeo-meridian-experience.md`](../design/valeo-meridian-experience.md)
+festgelegt.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

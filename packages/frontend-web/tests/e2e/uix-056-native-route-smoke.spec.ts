@@ -11,6 +11,10 @@ type SmokeCase = {
   testId: string
   title: string
   entityId: string
+  floorplan: 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
+  density: 'comfortable' | 'compact' | 'expertDense'
+  contextRail: 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
+  tableProfile: 'standard' | 'financial' | 'inventory' | 'audit'
   actions?: Array<{
     key: string
     label: string
@@ -29,6 +33,10 @@ const SMOKE_CASES: SmokeCase[] = [
     testId: 'crm-customer-360',
     title: 'Smoke Kunde',
     entityId: 'smoke-customer',
+    floorplan: 'cockpit',
+    density: 'compact',
+    contextRail: 'combined',
+    tableProfile: 'standard',
   },
   {
     label: 'einkauf/lieferanten/:id',
@@ -37,6 +45,10 @@ const SMOKE_CASES: SmokeCase[] = [
     testId: 'einkauf-supplier',
     title: 'Smoke Lieferant',
     entityId: 'smoke-supplier',
+    floorplan: 'objectPage',
+    density: 'compact',
+    contextRail: 'combined',
+    tableProfile: 'standard',
   },
   {
     label: 'sales/sales-order/:id',
@@ -45,6 +57,10 @@ const SMOKE_CASES: SmokeCase[] = [
     testId: 'sales-sales-order',
     title: 'Smoke Auftrag',
     entityId: 'smoke-order',
+    floorplan: 'objectPage',
+    density: 'compact',
+    contextRail: 'combined',
+    tableProfile: 'standard',
   },
   {
     label: 'agrar/kontrakt/:id',
@@ -53,6 +69,22 @@ const SMOKE_CASES: SmokeCase[] = [
     testId: 'agrar-kontrakt',
     title: 'Smoke Kontrakt',
     entityId: 'smoke-contract',
+    floorplan: 'objectPage',
+    density: 'compact',
+    contextRail: 'combined',
+    tableProfile: 'standard',
+  },
+  {
+    label: 'lager/article-stock/:id',
+    path: '/lager/article-stock/smoke-article',
+    screenId: 'lager/article-stock',
+    testId: 'lager-article-stock',
+    title: 'Smoke Artikelbestand',
+    entityId: 'smoke-article',
+    floorplan: 'objectPage',
+    density: 'expertDense',
+    contextRail: 'combined',
+    tableProfile: 'inventory',
   },
   {
     label: 'finance/payment-run/:id',
@@ -61,6 +93,10 @@ const SMOKE_CASES: SmokeCase[] = [
     testId: 'finance-payment-run',
     title: 'Smoke Zahlungslauf',
     entityId: 'smoke-run',
+    floorplan: 'transaction',
+    density: 'expertDense',
+    contextRail: 'audit',
+    tableProfile: 'financial',
     actions: [
       {
         key: 'freigeben',
@@ -109,7 +145,15 @@ function minimalScreenDefinition(c: SmokeCase) {
     ],
     actions: c.actions ?? [],
     permissions: ['*'],
-    layout: { preferredMode: 'desktopDense', mobileMode: 'mobileStack', touchTargetPx: 44 },
+    layout: {
+      preferredMode: 'desktopDense',
+      mobileMode: 'mobileStack',
+      touchTargetPx: 44,
+      floorplan: c.floorplan,
+      density: c.density,
+      contextRail: c.contextRail,
+      tableProfile: c.tableProfile,
+    },
     performance: {
       initialPayloadBudgetKb: 48,
       requiresLazyTabs: false,
@@ -154,6 +198,11 @@ test.describe('UIX-056 Native route smoke', () => {
       const root = page.getByTestId(c.testId)
       await expect(root).toBeVisible({ timeout: 30_000 })
       await expect(root).toHaveAttribute('data-runtime', 'native')
+      const rendererRoot = page.getByTestId(`screen-${c.screenId}`)
+      await expect(rendererRoot).toHaveAttribute('data-floorplan', c.floorplan)
+      await expect(rendererRoot).toHaveAttribute('data-density', c.density)
+      await expect(rendererRoot).toHaveAttribute('data-context-rail', c.contextRail)
+      await expect(rendererRoot).toHaveAttribute('data-table-profile', c.tableProfile)
       await expect(page.getByRole('heading', { name: c.title })).toBeVisible({ timeout: 30_000 })
       await expect(page.getByRole('tab', { name: /kopf/i })).toBeVisible()
     })

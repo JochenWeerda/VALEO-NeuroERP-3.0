@@ -4,6 +4,7 @@ import type {
   ScreenFieldDefinition,
   ScreenTabDefinition,
   ScreenTableDefinition,
+  ScreenTableProfile,
 } from '../schema'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
@@ -43,6 +44,7 @@ function compileField(
 
 function compileTable(
   table: ScreenTableDefinition,
+  tableProfile: ScreenTableProfile,
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
@@ -65,6 +67,7 @@ function compileTable(
     virtualized: table.virtualized ?? true,
     rowHeight: table.rowHeight ?? 52,
     serverPagination: table.serverPagination ?? true,
+    tableProfile,
   }
 }
 
@@ -88,6 +91,10 @@ function filterActionsByPermission(
       label: action.label,
       kind: action.kind ?? 'secondary',
       disabled: action.disabled ?? false,
+      dangerLevel: action.dangerLevel,
+      requiresConfirmation: action.requiresConfirmation,
+      auditReasonRequired: action.auditReasonRequired,
+      humanApprovalRequired: action.humanApprovalRequired,
     }))
 }
 
@@ -103,6 +110,16 @@ export function compileRenderPlan(
 
   const lookupMinChars =
     schema.performance?.lookupMinChars ?? DEFAULT_LOOKUP_MIN_CHARS
+  const floorplan = schema.layout?.floorplan ?? (
+    schema.mode === 'list' ? 'worklist' :
+    schema.mode === 'cockpit' ? 'cockpit' :
+    schema.mode === 'wizard' ? 'wizard' :
+    schema.mode === 'workflow' ? 'transaction' :
+    'objectPage'
+  )
+  const density = schema.layout?.density ?? 'compact'
+  const contextRail = schema.layout?.contextRail ?? (floorplan === 'worklist' ? 'none' : 'combined')
+  const tableProfile = schema.layout?.tableProfile ?? 'standard'
   const performance = {
     initialPayloadBudgetKb: schema.performance?.initialPayloadBudgetKb ?? 64,
     requiresLazyTabs: schema.performance?.requiresLazyTabs ?? true,
@@ -126,7 +143,7 @@ export function compileRenderPlan(
     fieldsByKey[field.key] = field
   }
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table))
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -149,7 +166,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table
@@ -174,6 +191,10 @@ export function compileRenderPlan(
       layoutMode: schema.layout?.preferredMode ?? 'desktopDense',
       mobileMode: schema.layout?.mobileMode ?? 'mobileStack',
       touchTargetPx: schema.layout?.touchTargetPx ?? 44,
+      floorplan,
+      density,
+      contextRail,
+      tableProfile,
       summaryEndpoint: schema.summaryEndpoint,
     },
     summarySlots: (context.summary?.summaryItems ?? schema.summary ?? []).map((item) => ({

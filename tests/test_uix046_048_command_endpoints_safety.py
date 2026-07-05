@@ -159,6 +159,35 @@ class TestUIX048AgentSafety:
         )
 
     @pytest.mark.parametrize("screen_id", ALL_SCREEN_IDS)
+    def test_meridian_layout_metadata_declared(self, screen_id: str):
+        sd = get_screen_definition(screen_id)
+        layout = sd.get("layout", {})
+        assert layout.get("floorplan") in {"worklist", "objectPage", "transaction", "cockpit", "wizard"}, (
+            f"{screen_id}: layout.floorplan fehlt oder ist ungueltig"
+        )
+        assert layout.get("density") in {"comfortable", "compact", "expertDense"}, (
+            f"{screen_id}: layout.density fehlt oder ist ungueltig"
+        )
+        assert layout.get("contextRail") in {"none", "audit", "copilot", "workflow", "combined"}, (
+            f"{screen_id}: layout.contextRail fehlt oder ist ungueltig"
+        )
+        has_tables = bool(sd.get("tables")) or any(tab.get("tables") for tab in sd.get("tabs", []))
+        if has_tables:
+            assert layout.get("tableProfile") in {"standard", "financial", "inventory", "audit"}, (
+                f"{screen_id}: layout.tableProfile fehlt fuer Tabellenmaske"
+            )
+
+    def test_reference_masks_use_meridian_profiles(self):
+        finance = get_screen_definition("finance/ap-invoice")
+        crm = get_screen_definition("crm/customer-360")
+        inventory = get_screen_definition("lager/article-stock")
+        assert finance["layout"]["tableProfile"] == "financial"
+        assert finance["layout"]["contextRail"] == "audit"
+        assert crm["layout"]["floorplan"] in {"objectPage", "cockpit"}
+        assert crm["layout"]["contextRail"] != "none"
+        assert inventory["layout"]["tableProfile"] == "inventory"
+
+    @pytest.mark.parametrize("screen_id", ALL_SCREEN_IDS)
     def test_readable_and_editable_fields_consistent(self, screen_id: str):
         """editableFields dürfen nur Felder enthalten, die auch in readableFields stehen."""
         sd = get_screen_definition(screen_id)

@@ -2175,6 +2175,55 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
     }
 
 
+def _infer_meridian_floorplan(definition: dict[str, Any]) -> str:
+    screen_id = definition.get("id", "")
+    mode = definition.get("mode")
+    if mode == "list":
+        return "worklist"
+    if mode == "cockpit" or screen_id == "crm/customer-360":
+        return "cockpit"
+    if mode == "wizard":
+        return "wizard"
+    if screen_id in {"finance/payment-run", "lager/stock-movement", "einkauf/anlieferavis"}:
+        return "transaction"
+    return "objectPage"
+
+
+def _infer_meridian_table_profile(definition: dict[str, Any]) -> str:
+    screen_id = definition.get("id", "")
+    domain = definition.get("domain", "")
+    if domain == "finance" or any(token in screen_id for token in ("invoice", "open-item", "payment", "debitor", "kreditor", "bankkonto")):
+        return "financial"
+    if domain in {"lager", "inventory"} or any(token in screen_id for token in ("stock", "article")):
+        return "inventory"
+    if domain in {"compliance", "qualitaet"}:
+        return "audit"
+    return "standard"
+
+
+def _has_tables(definition: dict[str, Any]) -> bool:
+    if definition.get("tables"):
+        return True
+    return any(tab.get("tables") for tab in definition.get("tabs") or [])
+
+
+def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
+    """Adds the Meridian layout contract without changing existing builders."""
+
+    layout = dict(definition.get("layout") or {})
+    floorplan = layout.get("floorplan") or _infer_meridian_floorplan(definition)
+    layout.setdefault("preferredMode", "desktopDense")
+    layout.setdefault("mobileMode", "mobileStack")
+    layout.setdefault("touchTargetPx", 44)
+    layout["floorplan"] = floorplan
+    layout.setdefault("density", "expertDense" if _infer_meridian_table_profile(definition) in {"financial", "inventory"} else "compact")
+    layout.setdefault("contextRail", "none" if floorplan == "worklist" else ("audit" if definition.get("domain") == "finance" else "combined"))
+    if _has_tables(definition):
+        layout.setdefault("tableProfile", _infer_meridian_table_profile(definition))
+    definition["layout"] = layout
+    return definition
+
+
 for _spec in ROLLOUT_WAVES_42_51:
     if _spec.screen_id in _SCREEN_DEFINITIONS:
         continue
@@ -2191,4 +2240,4 @@ def get_screen_definition(mask_id: str) -> dict[str, Any] | None:
     builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is None:
         return None
-    return builder()
+    return _with_meridian_layout(builder())
