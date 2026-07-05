@@ -118,6 +118,31 @@ Empfehlung: DSB entscheidet innerhalb der 72-h-Frist auf Basis dieses Befunds; H
 und GitHub-Support-Ticket beenden die fortlaufende Exposition und sind vorrangig auszuführen.
 Bis dahin bleibt der Punkt `external_gate`, nicht endgültig freigegeben.
 
+## Ausführungsprotokoll History-Purge (2026-07-05)
+
+Der History-Purge wurde am 2026-07-05 **ausgeführt** (auf Weisung des Betreibers):
+
+1. **Backup:** Vollständiger Mirror-Clone des Vorzustands gesichert (`backup.git`, 82 MB) —
+   Wiederherstellung möglich, Zugriff beschränken.
+2. **Filter:** `git-filter-repo --invert-paths` über alle PII-/Lead-Mining-Pfade
+   (5 PII-JSON-Dateien + 15 Lead-Mining-Skripte `ostfriesland*`/`analyze_filtered_*`/
+   `find_plz*`/`find_all_*26xxx*`/`search_ostfriesland*` + Hygiene-Pfade). Zusätzlich
+   `--replace-text`: LinkUp-API-Key (1 Wert, 36 Zeichen) → `REDACTED-LINKUP-KEY-ROTATED`.
+3. **Verifikation:** 0 PII-Blobs in Historie/HEAD; 0 Treffer des LinkUp-Keys in den 12
+   historischen Blobs der 3 betroffenen Skripte (9 nun mit REDACTED-Marker).
+4. **Force-Push:** alle 9 Branches + 2 Tags mit neuer Historie (main
+   `4289859e2`→`38bcd3a76`); lokales Haupt-Repo hart auf bereinigte Historie zurückgesetzt.
+
+**Weiterhin external_gate (nicht automatisiert ausführbar):**
+- **GitHub-Support-Ticket:** gecachte Views / unreferenzierte Objekte entfernen lassen —
+  der Force-Push macht die Blobs unerreichbar, GitHub hält sie bis zur GC/Ticket vor.
+- **LinkUp-Key-Rotation beim Anbieter:** der Schlüssel wurde aus Code+Historie entfernt,
+  muss aber im LinkUp-Konto **neu generiert** und in den Deployments ersetzt werden
+  (kein Repo-/Skript-Zugriff darauf möglich). Bis dahin als kompromittiert behandeln.
+- **DSB-Entscheidung Art. 33:** Meldeentwurf liegt bereit unter
+  `artifacts/art33-dsgvo-meldeentwurf.md` — DSB prüft, stuft final ein, sendet ggf. ab.
+- **Fork-Prüfung** und Klärung der lokalen Rohdatenbasis.
+
 ## Lokale Checks
 
 | Check | Ergebnis |
