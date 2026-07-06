@@ -74,7 +74,7 @@
     "api/v1/endpoints/warehouses.py": 0.95,
     "api/v1/endpoints/webhook_system.py": 0.61,
     "api/v1/endpoints/wf_cockpit_persist.py": 0.44,
-    "domains/agrar/api/psm_proplanta.py": 0.15,
+    "domains/agrar/api/psm_proplanta.py": 0.6,
     "domains/shared/events.py": 0.62,
     "middleware/tenant_enforcement.py": 0.97,
     "services/agri_lot_link_booking_service.py": 0.5,

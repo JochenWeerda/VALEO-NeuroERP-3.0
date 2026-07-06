@@ -158,11 +158,16 @@ def test_agent_contract_gate_on_action_definition():
 
 
 def test_readiness_gates_all_mandatory_green():
-    """Nach UIX-034b/c müssen alle 6 mandatory Gates für crm/customer-360 grün sein."""
-    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
-    from app.core.screen_definitions import build_crm_customer_360_screen_definition
+    """Nach UIX-034b/c müssen alle 6 mandatory Gates für crm/customer-360 grün sein.
 
-    sd = build_crm_customer_360_screen_definition()
+    Geprüft wird die ausgelieferte ScreenDefinition (get_screen_definition inkl.
+    Meridian-Layout-Dekoration) — der rohe Builder ist ein internes Vorprodukt.
+    """
+    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
+    from app.core.screen_definitions import get_screen_definition
+
+    sd = get_screen_definition("crm/customer-360")
+    assert sd is not None
     result = _check_readiness(sd)
 
     assert result["generatorReady"] is True, f"Mandatory gates failed: {result['errors']}"

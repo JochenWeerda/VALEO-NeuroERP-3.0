@@ -107,7 +107,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
     # ── COV-RATCHET-009 (2026-06-26): Welle-13-Endpoints ────────────────────
     "api/v1/endpoints/futtermittel_qs.py": 0.40,       # FEED-QS-001: HACCP/VLOG/QS-Pruefpunkte
-    "domains/agrar/api/psm_proplanta.py": 0.15,        # 15.8% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "domains/agrar/api/psm_proplanta.py": 0.60,        # 84% measured locally 2026-07-06 (A6-Restmodul, Import-Worker-Fix)
 
     # ── COV-RATCHET-008 (2026-06-26): Welle-9-Endpoints ─────────────────────
     "api/v1/endpoints/einkauf_lieferschein.py": 0.45,  # EINKAUF-LS-REPAIR-001: GET/POST/PATCH Lieferschein
