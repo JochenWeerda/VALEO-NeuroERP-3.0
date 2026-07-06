@@ -24,6 +24,15 @@ tests:
   - "Vitest intent-compiler.test.ts (20+5 Faelle)"
   - "pytest Catalog-Endpoint Coverage>=60"
   - "Playwright omnibox-smoke.spec.ts"
+progress: >-
+  2026-07-07 Kern umgesetzt: intent-compiler.ts (Mehrwort-Matching mit
+  Stamm-Heuristik, Datums-/Vergleichs-Filter ueberfaellig/heute/naechste
+  Woche/>N Tage, q-Restfilter, Konfidenz+none-Fallback) + Verstanden-als-
+  Vorschau in der CommandPalette (Evolution, kein Parallel-Overlay);
+  42 Tests gruen (31 Compiler-Fixture inkl. 20 Kern-Intents, Palette-
+  Vorschau-Komponententest), tsc gruen. Offen: Backend omnibox-catalog +
+  agentContract.synonyms-Backfill, Telemetrie-Endpoint, Playwright-Smoke,
+  axe-a11y-Check.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

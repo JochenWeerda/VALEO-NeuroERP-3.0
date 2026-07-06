@@ -22,6 +22,7 @@ import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatc
 import { useFeature } from '@/hooks/useFeature'
 import { fetchMaskRegistry } from '@/lib/api/mask-registry'
 import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
+import { compileIntents } from '@/lib/omnibox/intent-compiler'
 import { buildPaletteCommands, type PaletteCommand } from './command-palette-model'
 
 interface CommandPaletteProps {
@@ -78,6 +79,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
     })
   }, [agrarEnabled, maskRegistryQuery.data?.masks, navigationShortcuts])
 
+  // UIX-060 Omnibox: Mehrwort-Eingaben werden zu Navigations-Plänen mit
+  // Filter-Vorschau kompiliert ("Verstanden als") — Enter navigiert nur.
+  const intentPlans = useMemo(() => {
+    if (search.trim().length < 3) return []
+    return compileIntents(search, commands)
+  }, [commands, search])
+
   const filteredCommands = useMemo(() => {
     const searchLower = search.trim().toLowerCase()
     if (searchLower.length === 0) {
@@ -123,6 +131,42 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
             Tipp: Versuche allgemeinere Begriffe wie &quot;Auftrag&quot; oder &quot;Kunde&quot;
           </div>
         </CommandEmpty>
+
+        {intentPlans.length > 0 && (
+          <>
+            <CommandGroup heading="Verstanden als">
+              {intentPlans.map((plan) => (
+                <CommandItem
+                  key={`intent:${plan.command.id}`}
+                  // value enthält den Suchtext, damit cmdk die Vorschau nie wegfiltert
+                  value={`${search} intent:${plan.command.id}`}
+                  onSelect={() => {
+                    navigate(plan.routePath)
+                    onOpenChange(false)
+                  }}
+                  data-mcp-action={`omnibox-intent:${plan.command.id}`}
+                  data-mcp-intent="navigate"
+                  data-omnibox-confidence={plan.confidence.toFixed(2)}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  <span>{plan.label}</span>
+                  {plan.filters.map((f) => (
+                    <span
+                      key={`${f.key}:${f.value}`}
+                      className="ml-2 rounded border border-border bg-muted px-1.5 text-xs text-muted-foreground"
+                    >
+                      {f.key === 'q' ? `„${f.label}"` : f.label}
+                    </span>
+                  ))}
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {Math.round(plan.confidence * 100)} %
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
 
         {Object.entries(groupedCommands).map(([category, cmds], idx) => (
           <div key={category}>

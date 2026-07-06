@@ -241,7 +241,7 @@ const BASE_COMMANDS: PaletteCommand[] = [
   {
     id: 'nav-mahnwesen',
     label: 'Mahnwesen',
-    keywords: ['mahnung', 'mahnwesen', 'dunning', 'forderung'],
+    keywords: ['mahnung', 'mahnwesen', 'dunning', 'forderung', 'mahnvorschlag', 'mahnlauf'],
     icon: AlertCircle,
     category: 'Finanzen',
     actionId: 'nav-mahnwesen',

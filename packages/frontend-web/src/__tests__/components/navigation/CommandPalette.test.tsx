@@ -36,7 +36,7 @@ describe('CommandPalette', () => {
     dispatchMock.mockReset()
     dispatchMock.mockResolvedValue(true)
     mockedGet.mockReset()
-    mockedGet.mockResolvedValue({
+    const registryResponse = {
       data: {
         schema_version: 1,
         masks: [
@@ -55,6 +55,13 @@ describe('CommandPalette', () => {
           },
         ],
       },
+    }
+    // global-search (/api/v1/search) liefert results[]; alles andere Mask-Registry
+    mockedGet.mockImplementation((url: string) => {
+      if (url.includes('/search')) {
+        return Promise.resolve({ data: { results: [] } })
+      }
+      return Promise.resolve(registryResponse)
     })
   })
 
@@ -83,5 +90,32 @@ describe('CommandPalette', () => {
       })
     })
     expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('zeigt die Omnibox-Intent-Vorschau "Verstanden als" mit Filter-Chips (UIX-060)', async () => {
+    const onOpenChange = vi.fn()
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <CommandPalette open onOpenChange={onOpenChange} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    fireEvent.change(screen.getByPlaceholderText(/Aktion suchen/), {
+      target: { value: 'überfällige rechnungen' },
+    })
+
+    await screen.findByText('Verstanden als')
+    // Bester Plan trägt den overdue-Filter in der Route; kein Dispatch ohne Auswahl
+    await waitFor(() => {
+      const intentItems = document.querySelectorAll('[data-mcp-action^="omnibox-intent:"]')
+      expect(intentItems.length).toBeGreaterThan(0)
+    })
+    const first = document.querySelector('[data-mcp-action="omnibox-intent:nav-rechnungen"]')
+    expect(first).not.toBeNull()
+    expect(dispatchMock).not.toHaveBeenCalled()
   })
 })
