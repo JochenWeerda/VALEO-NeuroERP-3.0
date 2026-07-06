@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-07-06
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -124,7 +124,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `drucken` | Abrechnung drucken | safe | nein | `PDF-Druck commandEndpoint folgt` |
+| `drucken` | Abrechnung drucken | safe | nein | `/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken` |
 
 ---
 
@@ -336,7 +336,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `create_activity` | Aktivitaet anlegen | safe | nein | `commandEndpoint ueber crm_360 bei Bedarf` |
+| `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
 
 ---
 
@@ -805,7 +805,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `freigeben` | Zahlungslauf freigeben | critical | ja | `commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe` |
+| `freigeben` | Zahlungslauf freigeben | critical | ja | `/api/v1/finance/payment-runs/{entity_id}/actions/freigeben` |
 
 ---
 
@@ -1034,7 +1034,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `drucken` | Lieferschein drucken | safe | nein | `PDF-Druck commandEndpoint folgt` |
+| `drucken` | Lieferschein drucken | safe | nein | `/api/v1/sales/delivery-notes/{entity_id}/actions/drucken` |
 
 ---
 

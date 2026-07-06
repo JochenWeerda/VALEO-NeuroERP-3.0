@@ -18,7 +18,7 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -222,17 +222,30 @@ async def get_einkauf_audit_trail(
     }
 
 
-@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=dict, summary="Bestellung anlegen (UIX-046)")
+@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=dict, summary="Bestellung anlegen (SPEC-P1-04)")
 async def action_neue_bestellung(
     entity_id: str,
+    body: dict = Body(default_factory=dict),
+    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Stub: Neue Bestellung für Lieferant anlegen — dryRun-Phase, execute folgt in UIX-046+."""
-    return {
-        "success": True,
-        "actionKey": "neue_bestellung",
-        "entityId": entity_id,
-        "tenantId": tenant_id,
-        "message": "Bestellvorgang wird vorbereitet.",
-        "proposedChanges": {"status": "draft", "lieferant_id": entity_id},
-    }
+    from app.services.mask_action_runtime_service import run_mask_action
+
+    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
+        return {
+            "summary": "Bestellvorgang für Lieferant angelegt.",
+            "affectedIds": [eid],
+            "mutation": {"status": "draft", "lieferant_id": eid, **payload},
+        }
+
+    result = run_mask_action(
+        db,
+        action_key="neue_bestellung",
+        entity_type="supplier",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        execute_fn=execute,
+        outbox_event_type="einkauf.bestellung.created_from_supplier",
+    )
+    return result.model_dump()

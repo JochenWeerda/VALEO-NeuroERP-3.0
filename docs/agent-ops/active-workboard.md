@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-04-08-A8 — commandEndpoints & Chargen/MHD (Production-Readiness Prompt A8)
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** abgeschlossen 2026-07-06 — `MaskActionRuntime` (`app/services/mask_action_runtime_service.py`) mit validate/dryRun/propose/execute, Audit (`crm_action_audit_log`) und Outbox; Mask-Actions in `mask_actions.py` + bestehende Endpoints (AP-Freigabe, Mahnung, neue_bestellung) auf Runtime umgestellt; ScreenDefinitions ohne `stubReason` auf nativen SDs; Inventur `scripts/check_mask_command_endpoint_inventory.py` (26 native SDs, 0 Verstöße). Chargen: Lot-Attribute + FEFO über MHD (`inventory_lot_trace_service.py`); Migration `inv_lot_depth_spec_p1_08`.
+**Ziel:** SPEC-P1-04 + SPEC-P1-08 aus Production-Readiness-Audit 2026-07-02.
+**Dateibesitz:** `app/services/mask_action_runtime_service.py`, `app/api/v1/endpoints/mask_actions.py`, `app/core/screen_definitions.py`, `app/services/inventory_lot_trace_service.py`, `alembic/versions/inv_lot_depth_spec_p1_08.py`, `scripts/check_mask_command_endpoint_inventory.py`, `tests/test_spec_p1_04_mask_commands.py`, `tests/test_spec_p1_08_lot_fefo_pick.py`, `tests/test_uix050_053_advanced_actions.py`.
+**Abnahme:** Inventur Exit 0; 26/26 pytest (SPEC-P1-04/08 + UIX-050..053) grün.
+
 ## SPEC-P0-01/02-CI-GRUEN-RUNTIME-SWEEP — quality-gate Voll-Gruen + Runtime-Sweep-Dauergate
 
 **Von:** Claude

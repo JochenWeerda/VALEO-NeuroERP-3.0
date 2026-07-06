@@ -25,6 +25,10 @@ def create_lot(
     initial_qty: float,
     unit: str = "kg",
     mhd: Optional[date] = None,
+    herkunft: Optional[str] = None,
+    sperrgrund: Optional[str] = None,
+    qs_status: Optional[str] = None,
+    received_at: Optional[date] = None,
 ) -> Dict[str, Any]:
     """Register a new inventory lot."""
     lot_id = str(uuid.uuid4())
@@ -32,9 +36,10 @@ def create_lot(
         text("""
             INSERT INTO domain_inventory.inventory_lots
                 (id, tenant_id, article_id, warehouse_id, lot_number, mhd,
-                 initial_qty, current_qty, unit, status)
+                 initial_qty, current_qty, unit, status, herkunft, sperrgrund, qs_status, received_at)
             VALUES (:id, :tenant_id, :article_id, :warehouse_id, :lot_number,
-                    :mhd, :initial_qty, :initial_qty, :unit, 'AKTIV')
+                    :mhd, :initial_qty, :initial_qty, :unit, 'AKTIV',
+                    :herkunft, :sperrgrund, :qs_status, COALESCE(:received_at, CURRENT_DATE))
         """),
         {
             "id": lot_id,
@@ -45,6 +50,10 @@ def create_lot(
             "mhd": mhd,
             "initial_qty": initial_qty,
             "unit": unit,
+            "herkunft": herkunft,
+            "sperrgrund": sperrgrund,
+            "qs_status": qs_status or "pending",
+            "received_at": received_at,
         },
     )
     # record IN movement
@@ -98,6 +107,47 @@ def list_lots_fefo(
         params,
     ).mappings().all()
     return [dict(r) for r in rows]
+
+
+def pick_lots_fefo(
+    db: Session,
+    tenant_id: str,
+    article_id: str,
+    warehouse_id: str,
+    quantity: float,
+    reference_id: str | None = None,
+    reference_type: str | None = None,
+) -> list[dict[str, Any]]:
+    """Allocate quantity across lots using FEFO (MHD ascending, then created_at)."""
+    if quantity <= 0:
+        raise LotTraceError("Pick-Menge muss > 0 sein")
+
+    lots = list_lots_fefo(db, tenant_id, article_id=article_id, warehouse_id=warehouse_id)
+    allocations: list[dict[str, Any]] = []
+    remaining = float(quantity)
+
+    for lot in lots:
+        if remaining <= 0:
+            break
+        available = float(lot.get("current_qty") or 0)
+        if available <= 0:
+            continue
+        take = min(remaining, available)
+        result = consume_lot(
+            db,
+            str(lot["id"]),
+            tenant_id,
+            take,
+            reference_id=reference_id,
+            reference_type=reference_type,
+        )
+        allocations.append(result)
+        remaining = round(remaining - take, 3)
+
+    if remaining > 0:
+        raise LotTraceError(f"FEFO-Unterdeckung: {remaining} Einheiten fehlen für Artikel {article_id}")
+
+    return allocations
 
 
 def consume_lot(

@@ -515,7 +515,15 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.opportunity.update"},
-            {"key": "create_activity", "label": "Aktivitaet anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.activity.create", "stubReason": "commandEndpoint ueber crm_360 bei Bedarf"},
+            {
+                "key": "create_activity",
+                "label": "Aktivitaet anlegen",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "permission": "crm.activity.create",
+                "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+                "method": "POST",
+            },
         ],
         "noWorkflowReason": "Opportunity-Phasen werden manuell gesteuert — kein automatischer Prozess-Lebenszyklus erforderlich.",
         "agentContract": {
@@ -680,7 +688,15 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "drucken", "label": "Lieferschein drucken", "kind": "primary", "dangerLevel": "safe", "permission": "sales.lieferschein.drucken", "stubReason": "PDF-Druck commandEndpoint folgt"},
+            {
+                "key": "drucken",
+                "label": "Lieferschein drucken",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "permission": "sales.lieferschein.drucken",
+                "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
+                "method": "POST",
+            },
         ],
         "noWorkflowReason": "Lieferschein-Status wird ueber den Verkaufsauftrag gesteuert — kein eigener Workflow-Lebenszyklus.",
         "agentContract": {
@@ -1016,7 +1032,15 @@ def build_agrar_harvest_settlement_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "drucken", "label": "Abrechnung drucken", "kind": "primary", "dangerLevel": "safe", "permission": "agrar.abrechnung.drucken", "stubReason": "PDF-Druck commandEndpoint folgt"},
+            {
+                "key": "drucken",
+                "label": "Abrechnung drucken",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "permission": "agrar.abrechnung.drucken",
+                "commandEndpoint": "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken",
+                "method": "POST",
+            },
         ],
         "noWorkflowReason": "Ernte-Abrechnung wird manuell freigegeben — Auszahlung erfolgt ueber separaten Finance-Zahlungslauf (finance/payment-run).",
         "agentContract": {
@@ -1088,7 +1112,8 @@ def build_finance_payment_run_screen_definition() -> dict[str, Any]:
                 "humanApprovalRequired": True,
                 "auditReasonRequired": True,
                 "forbiddenForAgents": True,
-                "stubReason": "commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe",
+                "commandEndpoint": "/api/v1/finance/payment-runs/{entity_id}/actions/freigeben",
+                "method": "POST",
             },
         ],
         "noWorkflowReason": "Zahlungslauf ist Batch-Vorgang — Freigabe-Gate separat; kein laufender Prozess nach Ausfuehrung.",
@@ -2241,3 +2266,7 @@ def get_screen_definition(mask_id: str) -> dict[str, Any] | None:
     if builder is None:
         return None
     return _with_meridian_layout(builder())
+
+
+# Public alias for inventory / governance scripts (SPEC-P1-04)
+SCREEN_DEFINITION_BUILDERS = _SCREEN_DEFINITIONS

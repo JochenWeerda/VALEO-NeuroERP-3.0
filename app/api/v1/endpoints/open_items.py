@@ -5,7 +5,7 @@ FIBU-AR-05: OP-Verwaltung Ausgleich/Verrechnung
 """
 
 from typing import Optional, List
-from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -952,18 +952,31 @@ async def reverse_settlement(
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
 
 
-@router.post("/{entity_id}/actions/mahnen", response_model=dict, summary="Mahnung erstellen (UIX-046)")
+@router.post("/{entity_id}/actions/mahnen", response_model=dict, summary="Mahnung erstellen (SPEC-P1-04)")
 async def action_mahnen(
     entity_id: str,
+    body: dict = Body(default_factory=dict),
+    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Stub: Mahnung für offenen Posten erstellen — requiresConfirmation, execute folgt."""
-    return {
-        "success": True,
-        "actionKey": "mahnen",
-        "entityId": entity_id,
-        "tenantId": tenant_id,
-        "message": "Mahnung wird erstellt.",
-        "proposedChanges": {"mahnstatus": "erste_mahnung", "op_id": entity_id},
-    }
+    from app.services.mask_action_runtime_service import run_mask_action
+
+    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
+        return {
+            "summary": "Mahnung erstellt.",
+            "affectedIds": [eid],
+            "mutation": {"mahnstatus": payload.get("mahnstufe", "erste_mahnung"), "op_id": eid},
+        }
+
+    result = run_mask_action(
+        db,
+        action_key="mahnen",
+        entity_type="ar_open_item",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        execute_fn=execute,
+        outbox_event_type="finance.ar_open_item.dunning_created",
+    )
+    return result.model_dump()
 

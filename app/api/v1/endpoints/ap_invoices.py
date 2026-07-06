@@ -3,7 +3,7 @@ Accounts Payable (AP) Invoices API
 FIBU-AP-02: Eingangsrechnungen
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional, Any
@@ -494,17 +494,30 @@ async def post_ap_invoice(
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
 
-@router.post("/{entity_id}/actions/freigeben", response_model=dict, summary="Eingangsrechnung freigeben (UIX-047)")
+@router.post("/{entity_id}/actions/freigeben", response_model=dict, summary="Eingangsrechnung freigeben (SPEC-P1-04)")
 async def action_freigeben(
     entity_id: str,
+    body: dict = Body(default_factory=dict),
+    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Stub: Freigabe für Eingangsrechnung — requiresConfirmation, execute folgt."""
-    return {
-        "success": True,
-        "actionKey": "freigeben",
-        "entityId": entity_id,
-        "tenantId": tenant_id,
-        "message": "Freigabe wird verarbeitet.",
-        "proposedChanges": {"approval_status": "approved", "invoice_id": entity_id},
-    }
+    from app.services.mask_action_runtime_service import run_mask_action
+
+    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
+        return {
+            "summary": "Eingangsrechnung freigegeben.",
+            "affectedIds": [eid],
+            "mutation": {"approval_status": "approved", "invoice_id": eid},
+        }
+
+    result = run_mask_action(
+        db,
+        action_key="freigeben",
+        entity_type="ap_invoice",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        execute_fn=execute,
+        outbox_event_type="finance.ap_invoice.approved",
+    )
+    return result.model_dump()

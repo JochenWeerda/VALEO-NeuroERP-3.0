@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-05",
+  "generatedAt": "2026-07-06",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -909,9 +909,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "agrar.abrechnung.drucken",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "PDF-Druck commandEndpoint folgt"
+          "commandEndpoint": "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -1107,9 +1107,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "commandEndpoint ueber crm_360 bei Bedarf"
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -1509,9 +1509,9 @@
           "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "finance.payment_run.freigabe",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe"
+          "commandEndpoint": "/api/v1/finance/payment-runs/{entity_id}/actions/freigeben",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -1703,9 +1703,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "sales.lieferschein.drucken",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "PDF-Druck commandEndpoint folgt"
+          "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],

@@ -36,11 +36,11 @@ P1-Specs aus dem Audit:
 | Spec | Status | Kurzinhalt |
 |---|---|---|
 | SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
-| SPEC-P1-04 | offen | Gestubte `commandEndpoints` fachlich implementieren |
+| SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
 | SPEC-P1-05 | offen | SQL-Injection-Review fuer `nosec S608`-Stellen |
 | SPEC-P1-06 | offen | Legacy-Routen mit `response_model` typisieren |
 | SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
-| SPEC-P1-08 | offen | Chargen-/MHD-Tiefenmodell |
+| SPEC-P1-08 | erledigt 2026-07-06 | Chargen-Tiefenmodell: Lot-Attribute (herkunft, sperrgrund, qs_status, received_at); FEFO-Pick sortiert `mhd ASC NULLS LAST, created_at ASC`; Migration `inv_lot_depth_spec_p1_08` |
 | SPEC-P1-09 | offen | Lizenzinventar und THIRD_PARTY_NOTICES |
 | SPEC-P1-10 | offen | Erntepeak-Lasttest lokal reproduzierbar |
 
@@ -273,7 +273,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 
 | Thema | Beschreibung | Priorität |
 |-------|-------------|-----------|
-| commandEndpoints | Gestubte Actions (drucken, stornieren, wareneingang, …) — **teilweise:** neue_bestellung, mahnen, freigeben ✅ | P2 |
+| commandEndpoints | Alle nativen SD-Actions verdrahtet (SPEC-P1-04 ✅); execute simuliert Status-Mutation + Outbox/Audit — volle Domain-Services folgen bei Bedarf | erledigt |
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 | UIX-054 Route Inventory | Generierte Route-Wahrheit (`route-inventory.gen.json`) | P1 | ✅ |
@@ -284,9 +284,12 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 Nachzug 2026-06-30 (UIX-044/045): Der FilterPlan-HTTP-Vertrag ist auf `filter_plan`
 kanonisiert; Backend akzeptiert `filterPlan` nur noch als Kompatibilitaetsalias.
 Native Detailseiten fuehren Actions nicht mehr als No-op aus, sondern ueber
-`ActionRuntime` gegen `commandEndpoint` aus der `ScreenDefinition`. Offen bleiben
-fachliche CommandEndpoint-Implementierungen fuer die oben genannten gestubten
-Actions.
+`ActionRuntime` gegen `commandEndpoint` aus der `ScreenDefinition`.
+
+Nachzug 2026-07-06 (SPEC-P1-04/08, Prompt A8): Gemeinsamer `MaskActionRuntime`-Service;
+alle nativen ScreenDefinitions ohne `stubReason`; Inventur-Skript + pytest
+(`test_spec_p1_04_mask_commands.py`, `test_spec_p1_08_lot_fefo_pick.py`).
+Chargen-FEFO beruecksichtigt MHD vor Eingangsdatum.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 

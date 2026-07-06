@@ -8,6 +8,7 @@ UIX-053: Alle neuen CommandEndpoints aktiviert + Backend erreichbar.
 from __future__ import annotations
 
 import pytest
+from unittest.mock import MagicMock
 
 from app.core.screen_definitions import get_screen_definition
 
@@ -24,8 +25,9 @@ class TestUIX050AuditReason:
         sd = get_screen_definition("finance/payment-run")
         actions = {a["key"]: a for a in sd.get("actions", [])}
         assert "freigeben" in actions, "finance/payment-run muss freigeben-Action haben"
-        # freigeben hat noch stubReason — auditReasonRequired trotzdem gesetzt
         assert actions["freigeben"].get("auditReasonRequired") is True
+        assert actions["freigeben"].get("commandEndpoint")
+        assert "stubReason" not in actions["freigeben"]
 
     def test_only_critical_actions_require_audit_reason(self):
         """auditReasonRequired sollte nur bei critical/high gesetzt sein."""
@@ -60,11 +62,11 @@ class TestUIX051DryRunFormat:
     async def test_stub_returns_proposed_changes(self, screen_id: str, action_key: str, fn_name: str):
         from app.api.v1.endpoints import mask_actions
         fn = getattr(mask_actions, fn_name)
-        result = await fn("test-id-123", tenant_id="test")
-        assert result["success"] is True
-        assert "proposedChanges" in result, f"{screen_id}/{action_key}: kein proposedChanges"
-        assert isinstance(result["proposedChanges"], dict)
-        assert result["entityId"] == "test-id-123"
+        db = MagicMock()
+        result = await fn("test-id-123", body={"_mode": "dryRun"}, db=db, tenant_id="test")
+        assert result.success is True
+        assert result.proposedChanges is not None
+        assert result.actionKey == action_key
 
 
 # ---------------------------------------------------------------------------

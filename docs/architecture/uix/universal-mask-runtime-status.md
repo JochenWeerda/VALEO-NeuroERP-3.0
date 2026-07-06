@@ -4,12 +4,14 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-06-30
-version: 2.0.0
-description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Agent Safety auf alle 26 SDs ausgeweitet.
+last_reviewed: 2026-07-06
+version: 2.1.0
+description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Kurzfassung (2026-07-06):** **SPEC-P1-04/08 abgeschlossen** — alle nativen ScreenDefinitions ohne `stubReason`; gemeinsamer `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` Exit 0. Chargen-FEFO sortiert nach MHD. Siehe Handshake [`cursor-claude-spec-p1-04-08-2026-07-06.md`](../../agent-ops/handshakes/cursor-claude-spec-p1-04-08-2026-07-06.md).
 
 > **Kurzfassung (2026-07-01):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. ActionRuntime produktiv verdrahtet (UIX-045). Erste CommandEndpoints aktiv: `create_activity`, `neue_bestellung`, `mahnen`, `freigeben`, `stornieren`, `bestellen`, `wareneingang`, `abschliessen`, `qualifizieren` (UIX-046/053). Multi-Stage Dialog Flow (Confirm→dryRun→AuditReason→Execute) mit menschenlesbarer proposedChanges-Anzeige und Toast-Feedback (UIX-047). Agent Safety auf alle 26 SDs ausgeweitet (UIX-048). CI-Workflow mit BFF-Build-Stage ergänzt (UIX-049).
 
@@ -55,6 +57,8 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-055 | GitHub Actions `universal-mask-ci` + `workflow_dispatch` | ✅ | Run `28540744515` — backend/frontend/bff/e2e grün |
 | UIX-056 | Browser-Smoke native `/:id`-Routen (5 repräsentative Masken) | ✅ lokal | `uix-056-native-route-smoke.spec.ts` |
 | UIX-057 | Rollback-/Fallback-Matrix | ✅ | [`uix-057-native-route-rollback-matrix.md`](uix-057-native-route-rollback-matrix.md) |
+| SPEC-P1-04 | Alle nativen commandEndpoints — `MaskActionRuntime`, Inventur 0 stubReason | ✅ | `mask_action_runtime_service.py`, `check_mask_command_endpoint_inventory.py` |
+| SPEC-P1-08 | Chargen-Tiefenmodell + FEFO über MHD | ✅ | `inventory_lot_trace_service.py`, `inv_lot_depth_spec_p1_08` |
 
 ## Architektur (Single Source of Truth)
 
@@ -101,26 +105,33 @@ Referenz-Code: `packages/frontend-web/src/components/mask-builder/runtime/`
 Frontend: `checkGeneratorReadiness()` in `runtime/generatorReadiness.ts`
 Backend: `_check_readiness()` in `app/api/v1/endpoints/mask_screen_definition.py`
 
-## Aktive CommandEndpoints (Stand 2026-07-01)
+## Aktive CommandEndpoints (Stand 2026-07-06)
 
-| Action | Screen | Status | Endpoint |
-|--------|--------|--------|----------|
-| `create_activity` | crm/customer-360 | ✅ aktiv | `/api/v1/crm/customers/{entity_id}/actions/create_activity` |
-| `neue_bestellung` | einkauf/supplier | ✅ aktiv | `/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung` |
-| `mahnen` | finance/ar-open-item | ✅ aktiv | `/api/v1/finance/open-items/{entity_id}/actions/mahnen` |
-| `freigeben` | finance/ap-invoice | ✅ aktiv | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
-| `stornieren` | lager/stock-movement | ✅ aktiv (humanApproval) | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
-| `bestellen` | einkauf/angebot | ✅ aktiv | `/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen` |
-| `wareneingang` | einkauf/anlieferavis | ✅ aktiv | `/api/v1/lager/artikel/{entity_id}/actions/wareneingang` |
-| `abschliessen` | qualitaet/reklamation | ✅ aktiv | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
-| `qualifizieren` | crm/lead | ✅ aktiv | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+Alle **26 nativen ScreenDefinitions** (`temporary=False`) haben für Mutations-Actions einen `commandEndpoint` — **kein `stubReason` mehr** (Inventur-Skript + `test_spec_p1_04_mask_commands.py`).
 
-**Noch gestubbt** (stubReason gesetzt): alle übrigen Actions außer den oben genannten. Reihenfolge der Aktivierung: CRM/Einkauf-safe → Finance-moderate → Druck/Dokumente → Freigaben → payment-run zuletzt.
+Gemeinsame Runtime: `app/services/mask_action_runtime_service.py` — Modi `validate` / `dryRun` / `propose` / `execute`; bei `execute`: Audit (`crm_action_audit_log`) + Outbox (`outbox_events`).
+
+| Action | Screen | Endpoint |
+|--------|--------|----------|
+| `create_activity` | crm/customer-360, crm/opportunity | `/api/v1/crm/customers|…/actions/create_activity` |
+| `neue_bestellung` | einkauf/supplier | `/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung` |
+| `mahnen` | finance/ar-open-item | `/api/v1/finance/open-items/{entity_id}/actions/mahnen` |
+| `freigeben` | finance/ap-invoice, finance/payment-run | AP + Zahlungslauf (auditReasonRequired) |
+| `stornieren` | lager/stock-movement | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
+| `bestellen` | einkauf/angebot | `/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen` |
+| `wareneingang` | einkauf/anlieferavis, lager/article-stock | `/api/v1/lager/artikel/{entity_id}/actions/wareneingang` |
+| `abschliessen` | qualitaet/reklamation | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
+| `qualifizieren` | crm/lead | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+| `drucken` | sales/delivery-note, agrar/harvest-settlement | `/api/v1/.../actions/drucken` |
+
+Vollständige Liste: `python scripts/check_mask_command_endpoint_inventory.py` (Exit 0 = OK).
+
+**Hinweis:** `execute` simuliert derzeit Status-Mutation + Outbox/Audit; volle Domain-Persistenz (PDF-Druck, echte Buchungen) folgt bei Bedarf pro Action.
 
 ## Governance für Agenten
 
 1. **Migration abgeschlossen** — alle entity-detail Masken sind native SDs.
-2. **ActionRuntime produktiv** — 9 CommandEndpoints aktiv; Dialog-Flow Confirm→dryRun→AuditReason→Execute.
+2. **ActionRuntime produktiv** — alle nativen Mutations-Actions mit `commandEndpoint`; Dialog-Flow Confirm→dryRun→AuditReason→Execute.
 3. **Agent Safety** — alle 26 SDs geprüft (dynamisch, nicht hart kodiert); `sensitiveFields`, `dangerousActions`, `forbiddenForAgents`, `humanApprovalRequired` validiert.
 4. **CRM 360** ist produktiver Referenzfall mit vollständiger Action-Runtime.
 5. **finance/payment-run** bleibt `forbiddenForAgents=True` — human approval required.
