@@ -1,0 +1,67 @@
+# Runtime-Sweep-Allowlist (SPEC-P0-02)
+# Jede Ausnahme braucht Begruendung + Ablaufdatum. Abgelaufene Eintraege
+# lassen scripts/api_runtime_sweep.py fehlschlagen (fail-closed).
+# Prod-Entscheidung pro Modul: siehe SPEC-P0-03 (Modul-Aktivierungsmatrix).
+
+allowed_503:
+  - path: /api/v1/analytics
+    reason: "Kategorie B: Analytics-Modul 503-by-design ohne Migration/Config (SPEC-P0-03 offen)"
+    expires: 2026-09-30
+  - path: /api/v1/channels/whatsapp/webhook
+    reason: "Kategorie B: WhatsApp-Kanal erfordert Provider-Config; ohne Config bewusst 503"
+    expires: 2026-09-30
+  - path: /api/v1/compliance/dsgvo/erasure-requests
+    reason: "Kategorie B: DSGVO-Erasure erfordert Compliance-Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/compliance/lksg/annual-report-preview
+    reason: "Kategorie B: LkSG-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/compliance/lksg/supplier-risk-assessments
+    reason: "Kategorie B: LkSG-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/compliance/whistleblower/reports
+    reason: "Kategorie B: Whistleblower-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/contracts
+    reason: "Kategorie B: Contracts-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/finance/asset-accounting/assets
+    reason: "Kategorie B: Anlagenbuchhaltung 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/finance/asset-accounting/depreciation-forecast
+    reason: "Kategorie B: Anlagenbuchhaltung 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/finance/budgets
+    reason: "Kategorie B: Budget-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/finance/budgets/summary
+    reason: "Kategorie B: Budget-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/personal/org-chart
+    reason: "Kategorie B: Org-Chart benoetigt HR-Stammdaten-Konfiguration; ohne Config 503"
+    expires: 2026-09-30
+  - path: /api/v1/rohware/schemata
+    reason: "Kategorie B: Rohware-Schemata benoetigen Tenant-Konfiguration; ohne Config 503"
+    expires: 2026-09-30
+  - path: /api/v1/sales/blanket-orders/
+    reason: "Kategorie B: Blanket-Orders-Modul 503-by-design ohne Migration (SPEC-P0-03)"
+    expires: 2026-09-30
+  - path: /api/v1/agrar/psm/proplanta/list
+    reason: "Externe Abhaengigkeit: Proplanta-PSM-Integration nicht konfiguriert => 503 by design"
+    expires: 2026-09-30
+  - path: /api/v1/agrar/psm/proplanta/stats/overview
+    reason: "Externe Abhaengigkeit: Proplanta-PSM-Integration nicht konfiguriert => 503 by design"
+    expires: 2026-09-30
+  - path: /api/v1/sustainability/nutrients/crop
+    reason: "Externe Abhaengigkeit: FAOSTAT-Upstream; bei Nichtverfuegbarkeit 503 mit Problem-Details"
+    expires: 2026-09-30
+  - path: /api/v1/admin/quality-evidence/
+    reason: "Kategorie B: Quality-Evidence liest artifacts/-Reports; ohne generierte Artefakte bewusst 503"
+    expires: 2026-09-30
+  - path: /api/v1/admin/quality-evidence/drift
+    reason: "Kategorie B: Quality-Evidence liest artifacts/-Reports; ohne generierte Artefakte bewusst 503"
+    expires: 2026-09-30
+
+# Streams/Long-Polling: werden nicht gesweept (Timeout by design)
+skip_paths:
+  - /api/events

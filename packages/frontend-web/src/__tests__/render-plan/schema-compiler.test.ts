@@ -65,6 +65,10 @@ describe('schema-compiler', () => {
     expect(plan.fieldsByTab.basis?.map((field) => field.key)).toEqual(['name', 'hersteller'])
     expect(plan.fieldsByKey.hersteller?.componentKind).toBe('lookup')
     expect(plan.fieldsByKey.hersteller?.minSearchChars).toBe(2)
+    expect(plan.shell.floorplan).toBe('objectPage')
+    expect(plan.shell.density).toBe('compact')
+    expect(plan.shell.contextRail).toBe('combined')
+    expect(plan.shell.tableProfile).toBe('standard')
     expect(plan.performance.lookupResultLimit).toBe(25)
     expect(plan.performance.lookupCacheTtlMs).toBe(900_000)
   })
@@ -113,6 +117,39 @@ describe('schema-compiler', () => {
     expect(table?.virtualized).toBe(true)
     expect(table?.serverPagination).toBe(true)
     expect(table?.pageSize).toBe(50)
+    expect(table?.tableProfile).toBe('standard')
+  })
+
+  it('maps Meridian layout metadata into RenderPlan shell and table profile', () => {
+    const schema = {
+      ...crmSchema(),
+      id: 'finance/ap-invoice',
+      domain: 'finance' as const,
+      layout: {
+        preferredMode: 'desktopDense' as const,
+        mobileMode: 'mobileStack' as const,
+        touchTargetPx: 44,
+        floorplan: 'objectPage' as const,
+        density: 'expertDense' as const,
+        contextRail: 'audit' as const,
+        tableProfile: 'financial' as const,
+      },
+      tables: [
+        {
+          key: 'positionen',
+          label: 'Positionen',
+          columns: [{ key: 'betrag', label: 'Betrag', renderKind: 'currency' as const }],
+        },
+      ],
+    }
+
+    const plan = compileRenderPlanFromScreenDefinition(schema)
+
+    expect(plan.shell.floorplan).toBe('objectPage')
+    expect(plan.shell.density).toBe('expertDense')
+    expect(plan.shell.contextRail).toBe('audit')
+    expect(plan.shell.tableProfile).toBe('financial')
+    expect(plan.tablesByKey.positionen?.tableProfile).toBe('financial')
   })
 
   it('caches compiled plans by cache key and reuses without recompilation', () => {

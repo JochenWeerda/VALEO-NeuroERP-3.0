@@ -28,7 +28,7 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -372,16 +372,17 @@ def update_activity(
 
 
 @router.delete("/activities/{activity_id}", status_code=204, summary="Verarbeitungstätigkeit löschen",
-    response_model=None
+    response_class=Response, response_model=None
 )
 def delete_activity(
     activity_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
-) -> None:
+) -> Response:
     existing = _try_db_get(db, tenant_id, activity_id) or _store.get(_store_key(tenant_id, activity_id))
     if existing is None:
         raise HTTPException(status_code=404, detail=f"Verarbeitungstätigkeit {activity_id} nicht gefunden")
     db_deleted = _try_db_delete(db, tenant_id, activity_id)
     if not db_deleted:
         _store.pop(_store_key(tenant_id, activity_id), None)
+    return Response(status_code=204)

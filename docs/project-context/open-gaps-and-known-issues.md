@@ -11,9 +11,136 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## PROD-READINESS-AUDIT-001 — Production-Readiness-Audit & Agenten-Programm (2026-07-02)
+
+Status: **aktiv**. Der aktuelle Production-Readiness-Nachaudit ist unter
+[`docs/operations/production-readiness-audit-2026-07-02.md`](../operations/production-readiness-audit-2026-07-02.md)
+kanonisch abgelegt. Er ersetzt keine externen Go-Live-Freigaben, sondern
+verdichtet die repo-seitig loesbaren P0/P1-Arbeiten plus Agentenprogramm.
+
+P0-Specs aus dem Audit:
+
+| Spec | Status | Kurzinhalt |
+|---|---|---|
+| SPEC-P0-01 | offen | CI-Voll-Gruen oeffentlich nachweisen |
+| SPEC-P0-02 | offen | Live-API-Sweep als Dauergate |
+| SPEC-P0-03 | offen | Kat.-B/D-Produktionsentscheidung und `/readyz` |
+| SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
+| SPEC-P0-05 | offen | Coverage-Ratchet nur noch steigend, kritische Pfade hochziehen |
+| SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
+| SPEC-P0-07 | offen | SOC-2-Prueferprofil ergaenzen |
+| SPEC-P0-08 | offen/external_gate | Restore-/Backup-Drill reproduzierbar vorbereiten |
+
+P1-Specs aus dem Audit:
+
+| Spec | Status | Kurzinhalt |
+|---|---|---|
+| SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
+| SPEC-P1-04 | offen | Gestubte `commandEndpoints` fachlich implementieren |
+| SPEC-P1-05 | offen | SQL-Injection-Review fuer `nosec S608`-Stellen |
+| SPEC-P1-06 | offen | Legacy-Routen mit `response_model` typisieren |
+| SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
+| SPEC-P1-08 | offen | Chargen-/MHD-Tiefenmodell |
+| SPEC-P1-09 | offen | Lizenzinventar und THIRD_PARTY_NOTICES |
+| SPEC-P1-10 | offen | Erntepeak-Lasttest lokal reproduzierbar |
+
+Priorisierte Sequenz: A0 Verifikation und A2 PII parallel/sofort, danach
+A1 CI-Gruen, SPEC-P0-06 Governance, A3 Runtime-Sweep und A5 Modulaktivierung.
+
+## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug (2026-07-02)
+
+Status: **done**. Fünf zuvor fehlende/fehlerhafte API-Endpoints wurden gegen
+die reale Postgres-Instanz stabilisiert (siehe E2E-Produktionsteststand
+2026-07-02, 73/73 Tests grün) und mit Regressionstests gehärtet
+(`tests/test_api_gap_lager_pricing_scan.py`).
+
+| Endpoint | Status |
+|---|---|
+| `GET /api/v1/lager/bestaende` | done |
+| `POST /api/v1/lager/bewegungen` | done |
+| `POST /api/v1/scan/barcode` | done |
+| `GET /api/v1/pricing/find` | done |
+| `POST /api/v1/pricing/staffelrabatte` | done |
+
+Behobene technische Ursachen:
+- DB-Spaltenfehler `ean_code`/`unit`/`movement_date`/`reference_number` (Code
+  referenzierte alte Spaltennamen, die nicht mehr existieren).
+- `previous_stock`/`new_stock` sind `NOT NULL` in
+  `domain_inventory.inventory_stock_movements` — müssen bei jedem INSERT
+  mitgesetzt werden.
+- psycopg2/SQLAlchemy `text()`: `::jsonb`-Cast-Syntax bricht — auf
+  `CAST(:param AS jsonb)` umgestellt.
+- `domain_pricing.price_list_items` korrekt als eigene Tabelle angebunden
+  (nicht als JSON-Feld auf `price_lists`).
+- Fehlende/optionale Schemas (`domain_contracts`, `domain_pricing.discount_rules`)
+  defensiv mit try/except abgesichert, damit Preisfindung nicht 500et.
+- `localhost:8000` → `127.0.0.1:8000` (Windows-IPv6-Problem, siehe
+  `docs/project-context/...` Infra-Gotchas).
+- `tenant_id=default` → echte Tenant-UUID (`00000000-0000-0000-0000-000000000001`)
+  als Default in `app/core/config.py`.
+- CRM Customer/Interessenten-ID-Split korrigiert (`/crm/customers/` liest aus
+  `domain_crm.interessenten`, Sales-Order-`customer_id` validiert gegen
+  `domain_crm.customers` — unterschiedliche ID-Räume).
+
+**Regressionstests:** `tests/test_api_gap_lager_pricing_scan.py` — 18 Tests,
+je Endpoint Happy Path, negativer Payload, Tenant-Isolation und fehlende
+optionale Felder/Schemas. Benötigen `require_db` (laufende Postgres-Instanz),
+skippen automatisch sonst.
+
+**Nachfolgeblock:** E2E-Domänen-Routen (Wave A–E) sind ein eigener,
+separater Arbeitsblock — siehe `docs/agent-ops/active-workboard.md` →
+„E2E-DOMAIN-ROUTES-WAVES-001".
+
+## UI-AGRAR-WIZARD-001 — Sammelabrechnung Wizard-Step-Badges (2026-07-02)
+
+Status: **erledigt 2026-07-02** (Root-Cause war API-Verdrahtung, kein Rendering-Bug).
+
+- Betroffener Test: `packages/frontend-web/tests/e2e/uat/uat-agrar-kernprozesse.spec.ts`
+  → `TC-AGR-001: Sammelabrechnung — Wizard-Steps sichtbar und navigierbar` — **grün**.
+- Tatsächlicher Root-Cause: das Frontend rief `/api/v1/rohware/sammelabrechnung`
+  (existiert nicht, 404), der Backend-Router liegt auf
+  `/api/v1/agrar/sammelabrechnung`. Zusätzlich passte das Payload-Schema nicht
+  (`ernte_ids/abrechnungsdatum/notiz` vs. `harvest_acceptance_ids (min. 2)/
+  abrechnungsperiode/bezeichnung/sammeldatum`). Der 404 führte zu `isError`
+  → `ErrorState` ersetzte die ganze Seite inkl. Step-Badges — daher das
+  scheinbare „Rendering-Problem".
+- Fix: `src/pages/agrar/sammelabrechnung.tsx` auf den echten Backend-Vertrag
+  verdrahtet (Auswahlliste aus `GET /agrar/harvest-acceptance/`, Anlage +
+  direktes `/berechnen`, min-2-Validierung, Fehler-Feedback im Bestätigungs-Step).
+
+## UI-PERSONAL-BADGES-001 — Bewerbungen Stage-Pipeline-Badges (2026-07-02)
+
+Status: **erledigt 2026-07-02** (Root-Cause war fehlender Endpoint-Pfad + fehlende Tabelle).
+
+- Betroffener Test: `packages/frontend-web/tests/e2e/uat/uat-admin-personal.spec.ts`
+  → `TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar` — **grün**.
+- Tatsächlicher Root-Cause (zweiteilig):
+  1. Frontend rief `/api/v1/personal/bewerbungen` (existiert nicht, 404) statt
+     `/api/v1/personal/applications`; der Fehler ersetzte die Seite durch
+     `ErrorState` — daher das scheinbare Badge-Rendering-Problem.
+  2. Die Tabelle `domain_hr.applications` war nie migriert worden — die
+     Applications-Endpoints liefen seit Wave-104 in den 503-Fallback.
+- Fix: `src/pages/personal/bewerbungen.tsx` auf `/personal/applications` mit
+  Feldmapping (`applicant_name/position_title/status/applied_at`) umgestellt;
+  Migration `alembic/versions/hr_applications_table_20260702.py` ergänzt.
+
 ## UIX-MASK-FRAMEWORK-001 - Universal Mask Generator (2026-06-28)
 
 Status: Skeleton geliefert als Architektur-Slice, kein offener UX-Baukasten-Rollout.
+
+Nachzug 2026-07-05 (`UIX-MERIDIAN-BUILDER-001`): Meridian ist als zentrale
+Builder-Capability verankert. `ScreenDefinition.layout` liefert `floorplan`,
+`density`, `contextRail` und `tableProfile`; `RenderPlan.shell` transportiert
+diese Felder; Frontend- und Backend-Readiness blockieren fehlende
+Layout-Metadaten. Low-Fidelity-/Wireframe-Triage ist im Design-Regelwerk
+[`docs/design/valeo-meridian-experience.md`](../design/valeo-meridian-experience.md)
+festgelegt.
+
+Nachzug 2026-07-05 (`UIX-MERIDIAN-VISUAL-AUDIT-002`): Der offene
+Visual-Audit-Abnahmepunkt ist als fokussierter Playwright-Test umgesetzt.
+`tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-
+Screenshot-Helfer fuer Render-Wait, Content-QC und Capture-Ziel und prueft
+Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080.
 
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
@@ -129,6 +256,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 | UIX-039 | crm/opportunity native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 | UIX-040 | lager/article-stock native SD: generatorReady=true, advisoryScore=1.0 | P1 | ✅ |
 | DOC-UIX-RUNTIME-001 | Doku-Paket Handbuch, Entwickler-API, Agent-Runbook, Parity, In-App-Hilfe | P1 | ✅ |
+| DOC-AGENT-HANDBUCH-001 | Generiertes Agent-Handbuch: Flow Spine, ScreenDefinitions, MCP, Events; CI-Drift + Pre-Commit-Regen | P1 | ✅ |
 | UIX-041 | 7 native SDs Wave 1 (delivery-note, purchase-order, ap-invoice, ar-open-item, stock-movement, harvest-settlement, payment-run) | P1 | ✅ |
 | UIX-042a/b | advisory-Score 1.00 alle SDs + UniversalNativeDetailPage + 7 Frontend-Wrapper | P1 | ✅ |
 | UIX-043 | 13 verbliebene ObjectPage-Masken migriert; 26 native SDs gesamt; Vollständige Inventur | P1 | ✅ |
@@ -145,9 +273,13 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 
 | Thema | Beschreibung | Priorität |
 |-------|-------------|-----------|
-| commandEndpoints | Gestubte Actions (neue_bestellung, freigeben, mahnen, drucken) | P2 |
+| commandEndpoints | Gestubte Actions (drucken, stornieren, wareneingang, …) — **teilweise:** neue_bestellung, mahnen, freigeben ✅ | P2 |
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
+| UIX-054 Route Inventory | Generierte Route-Wahrheit (`route-inventory.gen.json`) | P1 | ✅ |
+| UIX-055 universal-mask-ci | GitHub Actions sichtbar grün | P1 | ✅ Run 28540744515 |
+| UIX-056 Native Route Smoke | Playwright über 5 repräsentative `/:id`-Routen | P1 | ✅ lokal |
+| UIX-057 Rollback-Matrix | Legacy-Fallback je kritischer Maske | P1 | ✅ |
 
 Nachzug 2026-06-30 (UIX-044/045): Der FilterPlan-HTTP-Vertrag ist auf `filter_plan`
 kanonisiert; Backend akzeptiert `filterPlan` nur noch als Kompatibilitaetsalias.

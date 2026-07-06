@@ -547,6 +547,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
       },
       {
+        id: 'annahmen-qualitaet-nachtrag',
+        label: 'Qualitäts-Nachtrag Annahmen',
+        icon: FileText,
+        module: '@/pages/agrar/annahmen-qualitaet-nachtrag',
+        preferredPath: 'agrar/annahmen-qualitaet-nachtrag',
+        keywords: ['qualität', 'nachtrag', 'laborbuch', 'annahme', 'feuchte', 'hektolitergewicht', 'besatz', 'unterbrochen'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
+      },
+      {
         id: 'rohwarengruppen',
         label: 'Rohwarengruppen [RWG]',
         icon: Wheat,

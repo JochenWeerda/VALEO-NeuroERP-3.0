@@ -610,7 +610,7 @@ async def get_neuroassist_plugin_boundary_review(tenant_id: str = "system"):
         raise HTTPException(status_code=500, detail=f"NeuroASSIST plugin boundary review failed: {str(exc)}")
 
 
-@router.get("/agents/low-stock/status", response_model=AgentOut, summary="Low-Stock-Agent Status abrufen")
+@router.get("/low-stock/status", response_model=AgentOut, summary="Low-Stock-Agent Status abrufen")
 async def get_low_stock_agent_status():
     from ....workers.low_stock_agent import AGENT_ENABLED, MAX_ORDER_FACTOR, NATS_URL
 
@@ -624,7 +624,7 @@ async def get_low_stock_agent_status():
     }
 
 
-@router.post("/agents/low-stock/simulate", response_model=AgentOut, summary="Low-Stock-Event simulieren")
+@router.post("/low-stock/simulate", response_model=AgentOut, summary="Low-Stock-Event simulieren")
 async def simulate_low_stock_event(request: LowStockSimulateRequest):
     from ....workers.low_stock_agent import LowStockEvent, handle_low_stock_event
 

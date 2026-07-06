@@ -117,6 +117,7 @@ exclude_docs: |
   /migration/
   /operations/
   !/operations/production-readiness-runbook.md
+  !/operations/production-readiness-audit-2026-07-02.md
   !/operations/dependency-and-compatibility-maintenance.md
   /perf/
   /policies/
@@ -261,6 +262,7 @@ nav:
           - Alert-Handling: runbooks/ALERTS.md
           - Disaster Recovery: runbooks/DISASTER-RECOVERY.md
           - Production-Readiness: operations/production-readiness-runbook.md
+          - Production-Readiness-Audit 2026-07-02: operations/production-readiness-audit-2026-07-02.md
           - Dependency-Pflege: operations/dependency-and-compatibility-maintenance.md
       - Deployment:
           - ArgoCD / GitOps: deployment/gitops/argocd.md
@@ -403,6 +405,7 @@ nav:
           - "ADR-035: Kein interaktiver Workflow-Designer (P2.1 gestrichen)": adr/adr-035-kein-workflow-designer.md
           - ADR-036 — Architektur-Dokumentations-Stack: adr/adr-036-architecture-documentation-stack.md
           - ADR-037 — Structurizr DSL als primäre C4-Quelle: adr/adr-037-structurizr-c4-source-of-truth.md
+          - ADR-038 — Kanonisches Adress-Value-Object: adr/adr-038-address-value-object.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end
@@ -420,6 +423,11 @@ nav:
       - Mask Runtime Agent-Modus: agent-docs/runbooks/mask-runtime-agent-modus.md
       - ai_harness-Verträge: agent-docs/contracts.md
       - External-Mock-Verträge: agent-docs/runbooks/external-mock-vertraege.md
+      - Agent-Handbuch:
+          - Überblick: agent-handbuch/index.md
+          - Prozessketten: agent-handbuch/prozessketten.md
+          - Masken-API-Katalog: agent-handbuch/masken-api-katalog.md
+          - Automatisierung: agent-handbuch/automatisierung.md
       - Agent-Ops:
           - Überblick: agent-ops/README.md
           - Active Workboard: agent-ops/active-workboard.md

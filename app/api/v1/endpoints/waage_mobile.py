@@ -44,7 +44,7 @@ class WaagenQuittungBatch(BaseModel):
     quittungen: list[WaagenQuittungIn]
 
 
-@router.post("/quittung", status_code=201,
+@router.post("/quittung", response_model=dict, status_code=201,
              summary="Fahrer-Quittung für Wiegeticket erfassen (WGE-MOB-001)")
 def create_quittung(
     body: WaagenQuittungIn,
@@ -118,7 +118,7 @@ def create_quittung(
     }
 
 
-@router.post("/sync", status_code=200,
+@router.post("/sync", response_model=dict, status_code=200,
              summary="Offline-Batch-Sync: mehrere Quittungen auf einmal (WGE-MOB-001)")
 def batch_sync(
     body: WaagenQuittungBatch,

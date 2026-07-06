@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import Any
 
 from fastapi import HTTPException
@@ -24,6 +25,10 @@ class MaskRolloutSummaryService:
         self.tenant_id = tenant_id
 
     def build_summary(self, screen_id: str, entity_id: str) -> dict[str, Any]:
+        try:
+            uuid.UUID(entity_id)
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=404, detail=f"Entity '{entity_id}' not found")
         spec = get_rollout_spec(screen_id)
         if spec is None:
             raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")
@@ -58,6 +63,10 @@ class MaskRolloutSummaryService:
         sort_dir: str | None = None,
         filter_plan: dict | None = None,
     ) -> dict[str, Any]:
+        try:
+            uuid.UUID(entity_id)
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=404, detail=f"Entity '{entity_id}' not found")
         spec = get_rollout_spec(screen_id)
         if spec is None:
             raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")

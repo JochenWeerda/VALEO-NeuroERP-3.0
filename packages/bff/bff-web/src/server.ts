@@ -5,6 +5,7 @@ import { listContracts } from './services/contracts';
 import { listPriceItems } from './services/pricing';
 import { listSalesOrders } from './services/sales';
 import { listWeighingTickets } from './services/weighing';
+import { type MaskActionRequest, executeMaskAction } from './services/maskActions';
 
 const httpStatusOk = 200;
 const httpStatusOptions = 200;
@@ -68,6 +69,32 @@ async function collectRequestBody(req: IncomingMessage): Promise<unknown> {
   });
 }
 
+async function handleMaskActionsExecute(req: IncomingMessage, res: ServerResponse, method: string): Promise<{ handled: boolean; data?: unknown }> {
+  const body = method === 'POST' ? await collectRequestBody(req) : undefined;
+  const actionReq = body as MaskActionRequest;
+  const missingField =
+    typeof actionReq.screenId !== 'string' || actionReq.screenId.length === 0 ||
+    typeof actionReq.entityId !== 'string' || actionReq.entityId.length === 0 ||
+    typeof actionReq.actionKey !== 'string' || actionReq.actionKey.length === 0;
+  if (missingField) {
+    sendJson(res, httpStatusBadRequest, { ok: false, error: 'screenId, entityId und actionKey sind erforderlich.' });
+    return { handled: true };
+  }
+  return { handled: false, data: { data: await executeMaskAction(actionReq) } };
+}
+
+type ReadHandler = () => Promise<unknown>;
+
+const readHandlers: Partial<Record<string, ReadHandler>> = {
+  'analytics:kpis': async () => ({ data: await getKpis() }),
+  'analytics:trends': async () => ({ data: await getTrends() }),
+  'inventory:list': async () => ({ data: await listInventory() }),
+  'contracts:list': async () => ({ data: await listContracts() }),
+  'pricing:list': async () => ({ data: await listPriceItems() }),
+  'sales:list': async () => ({ data: await listSalesOrders() }),
+  'weighing:list': async () => ({ data: await listWeighingTickets() }),
+};
+
 async function handleMcpRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const method = (req.method ?? 'GET').toUpperCase();
   if (!['GET', 'POST'].includes(method)) {
@@ -84,6 +111,7 @@ async function handleMcpRequest(req: IncomingMessage, res: ServerResponse): Prom
 
   const service = segments[2];
   const action = segments.slice(actionSegmentIndex).join('/');
+  const routeKey = `${service}:${action}`;
 
   if (method === 'POST') {
     try {
@@ -94,33 +122,21 @@ async function handleMcpRequest(req: IncomingMessage, res: ServerResponse): Prom
   }
 
   try {
-    let responseData: unknown;
-    switch (`${service}:${action}`) {
-      case 'analytics:kpis':
-        responseData = { data: await getKpis() };
-        break;
-      case 'analytics:trends':
-        responseData = { data: await getTrends() };
-        break;
-      case 'inventory:list':
-        responseData = { data: await listInventory() };
-        break;
-      case 'contracts:list':
-        responseData = { data: await listContracts() };
-        break;
-      case 'pricing:list':
-        responseData = { data: await listPriceItems() };
-        break;
-      case 'sales:list':
-        responseData = { data: await listSalesOrders() };
-        break;
-      case 'weighing:list':
-        responseData = { data: await listWeighingTickets() };
-        break;
-      default:
-        responseData = emptyList;
+    const readHandler = readHandlers[routeKey];
+    if (readHandler !== undefined) {
+      const responseData = await readHandler();
+      sendJson(res, httpStatusOk, { ok: true, data: responseData });
+      return;
     }
-    sendJson(res, httpStatusOk, { ok: true, data: responseData });
+
+    if (routeKey === 'mask-actions:execute') {
+      const result = await handleMaskActionsExecute(req, res, method);
+      if (result.handled) { return; }
+      sendJson(res, httpStatusOk, { ok: true, data: result.data });
+      return;
+    }
+
+    sendJson(res, httpStatusOk, { ok: true, data: emptyList });
   } catch (error) {
     logger.error(`Failed to handle MCP request: ${(error as Error).message}`);
     sendJson(res, httpStatusInternalServerError, { ok: false, error: 'Internal server error' });

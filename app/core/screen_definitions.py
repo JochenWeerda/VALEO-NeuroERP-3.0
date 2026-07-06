@@ -824,7 +824,7 @@ def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "freigeben", "label": "Freigeben", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ap.freigabe", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt in UIX-042"},
+            {"key": "freigeben", "label": "Freigeben", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ap.freigabe", "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben", "method": "POST"},
         ],
         "noWorkflowReason": "Freigabe-Workflow ist tabellenbasiert — explizite Workflow-Deklaration nach vollstaendiger AP-Parity.",
         "agentContract": {
@@ -941,7 +941,7 @@ def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "stubReason": "commandEndpoint folgt"},
+            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren", "method": "POST"},
         ],
         "noWorkflowReason": "Lagerbewegungen sind Buchungsbelege ohne eigenstaendigen Workflow — Storno ist die einzige Mutation.",
         "agentContract": {
@@ -1447,7 +1447,7 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                              {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                          ]}]},
         ],
-        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "stubReason": "commandEndpoint folgt"}],
+        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen", "method": "POST"}],
         "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
         "agentContract": {
             "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",
@@ -1492,7 +1492,7 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
                              {"key": "charge", "label": "Charge", "width": 120},
                          ]}]},
         ],
-        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt"}],
+        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "commandEndpoint": "/api/v1/lager/artikel/{entity_id}/actions/wareneingang", "method": "POST"}],
         "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
         "agentContract": {
             "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",
@@ -1594,7 +1594,7 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "qualitaet.reklamation.update"},
-            {"key": "abschliessen", "label": "Abschliessen", "kind": "secondary", "dangerLevel": "moderate", "permission": "qualitaet.reklamation.close", "requiresConfirmation": True, "stubReason": "commandEndpoint folgt"},
+            {"key": "abschliessen", "label": "Abschliessen", "kind": "secondary", "dangerLevel": "moderate", "permission": "qualitaet.reklamation.close", "requiresConfirmation": True, "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen", "method": "POST"},
         ],
         "noWorkflowReason": "Reklamations-Status wird manuell gesetzt — Massnahmentracking ist tabellenbasiert.",
         "agentContract": {
@@ -1758,7 +1758,7 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.lead.update"},
-            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "stubReason": "commandEndpoint + Opportunity-Erzeugungs-Flow folgt"},
+            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren", "method": "POST"},
         ],
         "noWorkflowReason": "Lead-Status wird manuell gesetzt — Qualifizierung erzeugt Opportunity (separate Maske).",
         "agentContract": {
@@ -2175,6 +2175,55 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
     }
 
 
+def _infer_meridian_floorplan(definition: dict[str, Any]) -> str:
+    screen_id = definition.get("id", "")
+    mode = definition.get("mode")
+    if mode == "list":
+        return "worklist"
+    if mode == "cockpit" or screen_id == "crm/customer-360":
+        return "cockpit"
+    if mode == "wizard":
+        return "wizard"
+    if screen_id in {"finance/payment-run", "lager/stock-movement", "einkauf/anlieferavis"}:
+        return "transaction"
+    return "objectPage"
+
+
+def _infer_meridian_table_profile(definition: dict[str, Any]) -> str:
+    screen_id = definition.get("id", "")
+    domain = definition.get("domain", "")
+    if domain == "finance" or any(token in screen_id for token in ("invoice", "open-item", "payment", "debitor", "kreditor", "bankkonto")):
+        return "financial"
+    if domain in {"lager", "inventory"} or any(token in screen_id for token in ("stock", "article")):
+        return "inventory"
+    if domain in {"compliance", "qualitaet"}:
+        return "audit"
+    return "standard"
+
+
+def _has_tables(definition: dict[str, Any]) -> bool:
+    if definition.get("tables"):
+        return True
+    return any(tab.get("tables") for tab in definition.get("tabs") or [])
+
+
+def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
+    """Adds the Meridian layout contract without changing existing builders."""
+
+    layout = dict(definition.get("layout") or {})
+    floorplan = layout.get("floorplan") or _infer_meridian_floorplan(definition)
+    layout.setdefault("preferredMode", "desktopDense")
+    layout.setdefault("mobileMode", "mobileStack")
+    layout.setdefault("touchTargetPx", 44)
+    layout["floorplan"] = floorplan
+    layout.setdefault("density", "expertDense" if _infer_meridian_table_profile(definition) in {"financial", "inventory"} else "compact")
+    layout.setdefault("contextRail", "none" if floorplan == "worklist" else ("audit" if definition.get("domain") == "finance" else "combined"))
+    if _has_tables(definition):
+        layout.setdefault("tableProfile", _infer_meridian_table_profile(definition))
+    definition["layout"] = layout
+    return definition
+
+
 for _spec in ROLLOUT_WAVES_42_51:
     if _spec.screen_id in _SCREEN_DEFINITIONS:
         continue
@@ -2191,4 +2240,4 @@ def get_screen_definition(mask_id: str) -> dict[str, Any] | None:
     builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is None:
         return None
-    return builder()
+    return _with_meridian_layout(builder())

@@ -303,6 +303,7 @@ domains:
       - price_hedge
       - terminologie
       - branches
+      - scan
 
   procurement:
     route_segments:
@@ -464,6 +465,7 @@ domains:
       - gap_pipeline_service
       - compensation_engine
       - article_image_enrichment
+      - mask_rollout_
     endpoint_prefixes:
       - admin_
       - agents
@@ -491,6 +493,11 @@ domains:
       - ki_usability
       - knowledge_
       - mask_registry
+      - mask_actions
+      - mask_rollout_
+      - mask_screen_
+      - beleg_vordrucke
+      - reports_export
       - mcp_
       - modules
       - neuro_

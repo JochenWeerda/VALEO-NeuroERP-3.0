@@ -182,7 +182,7 @@ def _load_invoice(db: Session, invoice_id: str, tenant_id: str) -> tuple[dict, l
     return inv, lines
 
 
-@router.get("/{invoice_id}", summary="XRechnung XML exportieren (INT-XRECHNUNG-001)")
+@router.get("/{invoice_id}", response_class=Response, summary="XRechnung XML exportieren (INT-XRECHNUNG-001)")
 def export_xrechnung(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -202,7 +202,7 @@ def export_xrechnung(
     )
 
 
-@router.get("/{invoice_id}/validate", summary="XRechnung Pflichtfelder prüfen")
+@router.get("/{invoice_id}/validate", response_model=dict, summary="XRechnung Pflichtfelder prüfen")
 def validate_xrechnung(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -239,7 +239,7 @@ def validate_xrechnung(
     }
 
 
-@router.get("/batch/export", summary="Mehrere XRechnungen als ZIP exportieren")
+@router.get("/batch/export", response_class=Response, summary="Mehrere XRechnungen als ZIP exportieren")
 def export_xrechnung_batch(
     periode: str = Query(..., description="Periode YYYY-MM"),
     status: str = Query("VERBUCHT", description="Rechnungsstatus"),

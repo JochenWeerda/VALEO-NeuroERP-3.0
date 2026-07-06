@@ -21,6 +21,7 @@ Code; OpenAPI/AsyncAPI werden generiert und hier eingebettet.
 | Endpoint-Inventar | Markdown (generiert) | [endpoint-inventory.md](endpoint-inventory.md) |
 | Event-Bus | AsyncAPI | NATS/Outbox-Event-Schemas |
 | MCP-Tools | JSON-Schema + Scope/Risiko | `config/mcp_erp_tools.yaml` |
+| Agent-Handbuch | Markdown + JSON-Manifest (generiert) | [agent-handbuch/](../agent-handbuch/index.md) |
 | SSE-Streams | Endpoint-Referenz | `sse_router` |
 | Webhooks | Payload-Verträge | DMS/GS1-Router |
 

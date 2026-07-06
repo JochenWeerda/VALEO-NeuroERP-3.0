@@ -36,6 +36,9 @@ python scripts/generate_mcp_tool_reference.py --check
 echo "== Action-Matrix-Report"
 python scripts/generate_action_matrix_report.py --check
 
+echo "== Agent-Handbuch"
+python scripts/generate_agent_handbuch.py --check
+
 echo "== AI-Datenklassen-Policy"
 python scripts/validate_data_classification.py
 

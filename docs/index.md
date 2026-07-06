@@ -26,7 +26,7 @@ Lernen (Tutorials), Aufgaben (How-to), Nachschlagen (Reference) und Verstehen
 | Mandanten- oder System-Admin | [Administration & Betrieb](admin/index.md) |
 | Entwickler:in | [Entwicklerdokumentation](entwickler/index.md) |
 | Integrator:in / Partner | [Schnittstellen](schnittstellen/index.md) |
-| KI-Agent (Hermes & Co.) | [Agent-Dokumentation](agent-docs/index.md) |
+| KI-Agent (Hermes & Co.) | [Agent-Dokumentation](agent-docs/index.md) · [Agent-Handbuch](agent-handbuch/index.md) (generiert) |
 | Compliance / Audit | [Compliance](compliance/index.md) |
 | Nachschlagen (Masken, Datenmodell, Glossar) | [Referenz](referenz/index.md) |
 

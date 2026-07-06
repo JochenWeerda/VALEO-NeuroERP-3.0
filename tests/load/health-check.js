@@ -11,7 +11,7 @@
 import http from 'k6/http'
 import { check, group } from 'k6'
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8000'
+const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:8000'
 const API_TOKEN = __ENV.API_DEV_TOKEN || 'dev-token'
 const TENANT_ID = __ENV.TENANT_ID || 'tenant-001'
 

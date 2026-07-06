@@ -341,7 +341,7 @@ class CarrierInvoiceIn(BaseModel):
 
 
 @router.post(
-    "/freight-cost/carrier-invoice",
+    "/freight-cost/carrier-invoice", response_model=dict,
     status_code=201,
     summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)",
 )
@@ -450,7 +450,7 @@ def create_carrier_invoice(
 
 
 @router.get(
-    "/freight-cost/carrier-invoices",
+    "/freight-cost/carrier-invoices", response_model=dict,
     summary="Spediteur-Rechnungen auflisten",
 )
 def list_carrier_invoices(

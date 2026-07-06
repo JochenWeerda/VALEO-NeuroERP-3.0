@@ -267,6 +267,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'vordruck-editor',
+        label: 'Beleg-Vordrucke',
+        icon: FileText,
+        module: '@/pages/admin/vordruck-editor',
+        preferredPath: 'admin/vordruck-editor',
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'monitoring',
         label: 'Monitoring',
         icon: AlertCircle,

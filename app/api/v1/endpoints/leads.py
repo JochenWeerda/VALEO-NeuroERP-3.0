@@ -73,6 +73,10 @@ async def list_leads(
 ):
     try:
         leads, total = await crm_core_client.list_leads(status=status_filter, search=search, skip=skip, limit=limit)
+    except (httpx.RequestError, RuntimeError):
+        # crm-core nicht erreichbar (Kategorie D): leere Liste statt 500,
+        # konsistent zu cases/activities.
+        leads, total = [], 0
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list leads: {exc}") from exc
     items = [_adapt_lead(lead) for lead in leads]

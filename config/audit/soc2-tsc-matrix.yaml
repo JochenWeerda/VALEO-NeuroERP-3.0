@@ -1,0 +1,134 @@
+# SOC-2-TSC-Kontrollmatrix (AUDIT-2 / SPEC-P0-07) — Type-I-Readiness
+# Scope: Security (Pflicht) + Availability + Confidentiality + Processing Integrity.
+# Privacy wird ueber das DSGVO-Modul (Profil "privacy") abgedeckt.
+# Status-Modell wie simulate_external_assessors.py:
+#   pass          — Repo-Evidenz vorhanden und geprueft
+#   external_gate — reale Betriebs-/Organisationsevidenz erforderlich
+#   fail          — Kontrolle fehlt
+# Maschinell konsumiert von: scripts/simulate_external_assessors.py (Profil "soc2").
+
+meta:
+  standard: "AICPA Trust Services Criteria (2017, rev. 2022)"
+  readiness_typ: "Type I (Design-Wirksamkeit); Type II erfordert 3-12 Monate lueckenlose Evidenz"
+  evidenz_sammelplan: "artifacts/audit/evidence/<jahr-monat>/ — monatlich: CI-Run-URLs, runtime-sweep-Reports, Restore-Drill-Protokolle, Access-Review-Bestaetigung"
+  beobachtungszeitraum_start: "Startet erst, wenn alle monatlichen Artefakte lueckenlos vorliegen"
+
+controls:
+  - id: CC1.1
+    kriterium: "Control Environment — Integritaet und Verantwortlichkeiten"
+    control_activity: "CODEOWNERS je kritischem Pfad; Workboard-/Slice-Governance mit Claim-Pflicht"
+    owner: Betreiber
+    frequenz: kontinuierlich
+    evidenzquelle: [".github/CODEOWNERS", "docs/agent-ops/active-workboard.md"]
+    automatisierbar: true
+    status: pass
+  - id: CC2.1
+    kriterium: "Information & Communication — interne Qualitaets-/Statuskommunikation"
+    control_activity: "Release-Evidence-Report + Doku-Drift-Gates halten Statusaussagen synchron zum Code"
+    owner: Betreiber
+    frequenz: je Push
+    evidenzquelle: ["scripts/release_evidence_report.py", "scripts/doc_drift_report.py"]
+    automatisierbar: true
+    status: pass
+  - id: CC3.1
+    kriterium: "Risk Assessment"
+    control_activity: "Production-Readiness-Audit mit Findings-Register (ARCH-F1..F9) und Spec-Backlog"
+    owner: Betreiber
+    frequenz: quartalsweise
+    evidenzquelle: ["docs/operations/production-readiness-audit-2026-07-02.md"]
+    automatisierbar: false
+    status: pass
+  - id: CC4.1
+    kriterium: "Monitoring of Controls"
+    control_activity: "Nightly Runtime-Sweep, Assessor-Simulation, only-up-Coverage-Ratchet"
+    owner: Betreiber
+    frequenz: nightly
+    evidenzquelle: [".github/workflows/runtime-sweep.yml", "scripts/simulate_external_assessors.py", "config/coverage_ratchet_baseline.json"]
+    automatisierbar: true
+    status: pass
+  - id: CC5.1
+    kriterium: "Control Activities — Auswahl und Aufbau"
+    control_activity: "Fail-closed CI-Pflichtgates (Secret-Scan, SBOM, Dependency-Scan, Tenant-Isolation)"
+    owner: Betreiber
+    frequenz: je Push
+    evidenzquelle: [".github/workflows/quality-gate.yml", ".github/workflows/security-scan.yml"]
+    automatisierbar: true
+    status: pass
+  - id: CC6.1
+    kriterium: "Logical Access — Identifikation/Authentisierung"
+    control_activity: "OIDC/JWKS RS256, Bearer-Enforcement, Tenant-Isolation-Middleware mit Negativtests"
+    owner: Betreiber
+    frequenz: kontinuierlich
+    evidenzquelle: ["app/middleware/tenant_enforcement.py", "tests/test_tenant_enforcement.py", "app/core/security.py"]
+    automatisierbar: true
+    status: pass
+  - id: CC6.2
+    kriterium: "Logical Access — Provisionierung/Deprovisionierung"
+    control_activity: "Keycloak-Realm-Verwaltung; dokumentierter Offboarding-/Access-Review-Prozess"
+    owner: Betreiber
+    frequenz: monatlich
+    evidenzquelle: []
+    automatisierbar: false
+    status: external_gate
+    external_gate: "Offboarding-Prozess + monatlicher Access-Review-Nachweis des Betreibers"
+  - id: CC7.1
+    kriterium: "System Operations — Erkennung von Anomalien"
+    control_activity: "Prometheus-Metriken inkl. critical_data_path_errors_total, Grafana-Alerting"
+    owner: Betreiber
+    frequenz: kontinuierlich
+    evidenzquelle: ["app/core/metrics.py", "monitoring/"]
+    automatisierbar: true
+    status: pass
+  - id: CC7.2
+    kriterium: "System Operations — Incident Response"
+    control_activity: "Incident-/Rollback-Runbook; beobachteter Drill"
+    owner: Betreiber
+    frequenz: halbjaehrlich
+    evidenzquelle: ["docs/operations/production-readiness-runbook.md"]
+    automatisierbar: false
+    status: external_gate
+    external_gate: "Beobachteter Incident-/Restore-Drill im Zielbetrieb (Protokoll committen)"
+  - id: CC8.1
+    kriterium: "Change Management"
+    control_activity: "CI-Pflichtgates, unveraenderliche SHA-Images, only-up-Ratchet, CODEOWNERS"
+    owner: Betreiber
+    frequenz: je Change
+    evidenzquelle: [".github/workflows/quality-gate.yml", "config/coverage_ratchet_baseline.json", ".github/CODEOWNERS"]
+    automatisierbar: true
+    status: external_gate
+    external_gate: "Branch-Protection auf main (Required Reviews + Status-Checks) — GitHub-Einstellung"
+  - id: CC9.2
+    kriterium: "Vendor / Subservice Organizations"
+    control_activity: "Subprozessor-Verzeichnis inkl. LLM-Provider; AVVs"
+    owner: Betreiber
+    frequenz: jaehrlich
+    evidenzquelle: ["docs/operations/production-readiness-runbook.md"]
+    automatisierbar: false
+    status: external_gate
+    external_gate: "Unterschriebene AVVs: Keycloak-Betrieb, Fiskaly, Paperless, DATEV, LLM-Provider"
+  - id: A1.2
+    kriterium: "Availability — Wiederherstellung"
+    control_activity: "Backup-/Restore-Cronjobs, reproduzierbarer 15-min-RTO-Drill mit Protokollpflicht"
+    owner: Betreiber
+    frequenz: quartalsweise
+    evidenzquelle: ["k8s/helm/valeo-erp/templates/backup-cronjob.yaml", "scripts/run_restore_drill.sh", "scripts/check_restore_drill_evidence.py"]
+    automatisierbar: true
+    status: external_gate
+    external_gate: "Drill-Protokoll in docs/operations/drill-protocols/ + Erntepeak-Lasttest (tests/load/harvest-peak.js) auf Staging"
+  - id: C1.1
+    kriterium: "Confidentiality — Identifikation und Schutz vertraulicher Daten"
+    control_activity: "gitleaks ohne Baseline im CI, PII-Remediation-Prozess, History-Purge-Plan"
+    owner: Betreiber
+    frequenz: je Push
+    evidenzquelle: [".gitleaks.toml", "artifacts/pii-remediation-report.md", "scripts/purge_pii_history.sh"]
+    automatisierbar: true
+    status: external_gate
+    external_gate: "History-Purge-Ausfuehrung, Secret-Rotation (LinkUp-Key), DSB-Entscheidung Art. 33"
+  - id: PI1.1
+    kriterium: "Processing Integrity — Vollstaendigkeit/Richtigkeit der Verarbeitung"
+    control_activity: "3-Wege-Match, GoBD-Nachweisraum, Audit-Hash-Kette, keine stillen Leerantworten auf Finanzpfaden"
+    owner: Betreiber
+    frequenz: kontinuierlich
+    evidenzquelle: ["tests/test_einkauf_3way_match_ers_rfq.py", "tests/test_docflow_gobd.py", "app/middleware/audit_middleware.py", "tests/test_critical_data_path_errors.py"]
+    automatisierbar: true
+    status: pass

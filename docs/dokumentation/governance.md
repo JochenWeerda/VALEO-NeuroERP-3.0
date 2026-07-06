@@ -30,6 +30,7 @@ erfordern Review der jeweils Verantwortlichen.
 | `ai-slice-readiness-check.cjs` | Pflichtschema der Slice-YAMLs. |
 | `doc-drift-report.yml` (woechentlich) | Informativer Drift-Snapshot Code↔Doku; Artifact `doc_drift_report.json`. |
 | `generate_code_inventories.py --check` | Endpoint-/Service-/Migrations-Inventare synchron zu Code (docs.yml). |
+| `generate_agent_handbuch.py --check` | Agent-Handbuch synchron zu Flow Spine, ScreenDefinitions, MCP, Events. |
 
 ## Doku-Code-Drift (informativ)
 

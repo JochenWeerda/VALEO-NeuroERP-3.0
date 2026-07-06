@@ -1,9 +1,13 @@
 import type {
   ScreenDomain,
+  ScreenContextRail,
+  ScreenDensity,
   ScreenFieldType,
+  ScreenFloorplan,
   ScreenLayoutMode,
   ScreenMode,
   ScreenSummaryItem,
+  ScreenTableProfile,
 } from '../schema'
 
 export type RenderComponentKind =
@@ -28,6 +32,10 @@ export interface RenderShellPlan {
   layoutMode: ScreenLayoutMode
   mobileMode: ScreenLayoutMode
   touchTargetPx: number
+  floorplan: ScreenFloorplan
+  density: ScreenDensity
+  contextRail: ScreenContextRail
+  tableProfile: ScreenTableProfile
   summaryEndpoint?: string
 }
 
@@ -99,13 +107,18 @@ export interface RenderTablePlan {
   virtualized: boolean
   rowHeight: number
   serverPagination: boolean
+  tableProfile: ScreenTableProfile
 }
 
 export interface RenderActionPlan {
   key: string
   label: string
-  kind: 'primary' | 'secondary' | 'danger'
+  kind: 'primary' | 'secondary' | 'danger' | 'workflow'
   disabled: boolean
+  dangerLevel?: 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
+  requiresConfirmation?: boolean
+  auditReasonRequired?: boolean
+  humanApprovalRequired?: boolean
 }
 
 export interface RenderWorkflowPlan {

@@ -419,6 +419,11 @@ def dsl_fingerprint() -> str:
     return hashlib.sha256(DSL_PATH.read_bytes()).hexdigest()[:12]
 
 
+def normalize_for_check(content: str) -> str:
+    lines = [line for line in content.splitlines() if not line.startswith("last_reviewed:")]
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Render C4 views from Structurizr DSL")
     parser.add_argument("--check", action="store_true", help="Drift-Check ohne Schreiben")
@@ -436,8 +441,9 @@ def main() -> int:
                 print(f"DRIFT: {path} fehlt (DSL fp={dsl_fingerprint()})", file=sys.stderr)
                 drift = True
                 continue
-            existing = path.read_text(encoding="utf-8")
-            if existing != content:
+            existing = normalize_for_check(path.read_text(encoding="utf-8"))
+            expected = normalize_for_check(content)
+            if existing != expected:
                 print(f"DRIFT: {path} weicht von Generator ab", file=sys.stderr)
                 drift = True
             else:

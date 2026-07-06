@@ -30,6 +30,8 @@ export type ReadinessGate =
   | 'table_data_source_bound'
   | 'table_columns_complete'
   | 'actions_classified'
+  | 'layout_metadata'
+  | 'table_profile'
   // advisory
   | 'sort_whitelist'
   | 'filter_columns'
@@ -67,6 +69,10 @@ function collectAllTables(screen: ScreenDefinition): ScreenTableDefinition[] {
   }
   return tables
 }
+
+const DETAIL_FLOORPLANS = new Set(['objectPage', 'transaction', 'cockpit', 'wizard'])
+const FINANCIAL_SCREEN = /(^finance\/|invoice|open-item|journal|payment|debitor|kreditor|bankkonto)/i
+const INVENTORY_SCREEN = /(^lager\/|stock|inventory|article)/i
 
 const TRIVIAL_COLUMN_KEYS = new Set(['id', 'pk', 'uuid', 'key', 'name', 'bezeichnung'])
 
@@ -143,6 +149,39 @@ export function checkGeneratorReadiness(screen: ScreenDefinition): GeneratorRead
 
   // ── ADVISORY ───────────────────────────────────────────────────────────────
 
+
+  const layout = screen.layout
+  const missingLayout = [
+    !layout?.floorplan ? 'floorplan' : null,
+    !layout?.density ? 'density' : null,
+    !layout?.contextRail ? 'contextRail' : null,
+  ].filter((value): value is string => Boolean(value))
+  const invalidDetailRail = Boolean(layout?.floorplan && DETAIL_FLOORPLANS.has(layout.floorplan) && layout.contextRail === 'none')
+  mand('layout_metadata',
+    missingLayout.length === 0 && !invalidDetailRail,
+    missingLayout.length > 0
+      ? `layout missing Meridian metadata: ${missingLayout.join(', ')}`
+      : invalidDetailRail
+      ? `floorplan=${layout?.floorplan} requires contextRail other than none`
+      : 'OK',
+  )
+
+  const expectedProfile =
+    FINANCIAL_SCREEN.test(screen.id) || screen.domain === 'finance'
+      ? 'financial'
+      : INVENTORY_SCREEN.test(screen.id) || screen.domain === 'inventory' || screen.domain === 'lager'
+      ? 'inventory'
+      : undefined
+  const hasTableProfile = allTables.length === 0 || Boolean(layout?.tableProfile)
+  const profileMatches = !expectedProfile || layout?.tableProfile === expectedProfile
+  mand('table_profile',
+    hasTableProfile && profileMatches,
+    !hasTableProfile
+      ? 'tables exist but layout.tableProfile is missing'
+      : !profileMatches
+      ? `expected layout.tableProfile=${expectedProfile} for ${screen.id}`
+      : (allTables.length === 0 ? 'no tables - gate skipped' : 'OK'),
+  )
   // 7. sort_whitelist — every table with columns has at least one sortable
   const tablesWithoutSort = allTables.filter((t) => (t.columns ?? []).length > 0 && !(t.columns ?? []).some((c) => c.sortable))
   adv('sort_whitelist',

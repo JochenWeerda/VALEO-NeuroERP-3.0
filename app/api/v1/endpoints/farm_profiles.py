@@ -110,6 +110,10 @@ async def list_farm_profiles(
         profiles, total = await crm_core_client.list_farm_profiles(
             search=search, skip=skip, limit=limit
         )
+    except (httpx.RequestError, RuntimeError):
+        # crm-core nicht erreichbar (Kategorie D): leere Liste statt 500,
+        # konsistent zu cases/activities.
+        profiles, total = [], 0
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list farm profiles: {exc}") from exc
     items = [_adapt_farm_profile(profile) for profile in profiles]

@@ -148,11 +148,13 @@ class Settings(BaseSettings):
     OUTBOX_WORKER_INTERVAL_SECONDS: int = 5
 
     # Downstream CRM services
-    CRM_CORE_BASE_URL: str = "http://localhost:5600"
+    # 127.0.0.1 statt localhost: auf Windows löst httpx localhost zuerst nach ::1
+    # auf — kostet ~280 ms pro Cold-Connection (gemessen 328 ms vs. 45 ms).
+    CRM_CORE_BASE_URL: str = "http://127.0.0.1:5600"
     CRM_CORE_HTTP_TIMEOUT_SECONDS: float = 5.0
-    CRM_SALES_BASE_URL: str = "http://localhost:5700"
+    CRM_SALES_BASE_URL: str = "http://127.0.0.1:5700"
     CRM_SALES_HTTP_TIMEOUT_SECONDS: float = 5.0
-    CRM_SERVICE_BASE_URL: str = "http://localhost:5800"
+    CRM_SERVICE_BASE_URL: str = "http://127.0.0.1:5800"
     CRM_SERVICE_HTTP_TIMEOUT_SECONDS: float = 5.0
 
     # Multi-tenancy defaults

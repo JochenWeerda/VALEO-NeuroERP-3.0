@@ -45,16 +45,19 @@ def list_installed_workflow_templates(
     db: Session = Depends(get_db),
 ) -> dict:
     catalog = build_workflow_template_marketplace_catalog(tenant_id=tenant_id, db=db)
-    catalog.templates = [template for template in catalog.templates if template.installed]
-    catalog.template_count = len(catalog.templates)
-    catalog.installable_count = sum(1 for template in catalog.templates if template.installable)
-    catalog.installed_count = len(catalog.templates)
-    catalog.categories = sorted({template.category.value for template in catalog.templates})
-    catalog.scope_summary = {
-        scope: sum(1 for template in catalog.templates if template.governance.scope.value == scope)
-        for scope in {template.governance.scope.value for template in catalog.templates}
+    # Catalog-Dataclass ist frozen — Filterung auf dict-Ebene statt Mutation.
+    installed = [template for template in catalog.templates if template.installed]
+    result = catalog.as_dict()
+    result["templates"] = [template.as_dict() for template in installed]
+    result["template_count"] = len(installed)
+    result["installable_count"] = sum(1 for template in installed if template.installable)
+    result["installed_count"] = len(installed)
+    result["categories"] = sorted({template.category.value for template in installed})
+    result["scope_summary"] = {
+        scope: sum(1 for template in installed if template.governance.scope.value == scope)
+        for scope in {template.governance.scope.value for template in installed}
     }
-    return catalog.as_dict()
+    return result
 
 
 @router.get("/{template_id}", summary="Einzelnes Workflow-Template",

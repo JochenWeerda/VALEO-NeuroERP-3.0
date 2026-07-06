@@ -66,6 +66,10 @@ describe('UniversalMaskRenderer', () => {
       layout: {
         preferredMode: 'mobileStack' as const,
         mobileMode: 'mobileStack' as const,
+        floorplan: 'objectPage' as const,
+        density: 'comfortable' as const,
+        contextRail: 'combined' as const,
+        tableProfile: 'standard' as const,
       },
       fields: [{ key: 'customer.name1', label: 'Name 1', type: 'text' as const }],
       actions: [
@@ -84,6 +88,9 @@ describe('UniversalMaskRenderer', () => {
     )
 
     expect(screen.getByTestId('screen-crm/customer')).toHaveAttribute('data-layout-mode', 'mobileStack')
+    expect(screen.getByTestId('screen-crm/customer')).toHaveAttribute('data-floorplan', 'objectPage')
+    expect(screen.getByTestId('screen-crm/customer')).toHaveAttribute('data-density', 'comfortable')
+    expect(screen.getByTestId('screen-crm/customer')).toHaveAttribute('data-context-rail', 'combined')
     expect(screen.getByDisplayValue('Nested Kunde')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Bearbeiten' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Audit' })).not.toBeInTheDocument()

@@ -9,25 +9,60 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { CheckCircle, ChevronRight, ChevronLeft } from 'lucide-react'
 
-type Ernte = { id: string; partie_nr: string; sorte: string; menge_kg: number; status: string }
+// Backend-Vertrag: app/api/v1/endpoints/rohware_sammelabrechnung.py
+// (Router-Prefix /agrar/sammelabrechnung, Auswahlbasis = harvest_acceptances)
+type HarvestAcceptance = {
+  id: string
+  acceptance_number: string
+  delivery_date: string
+  release_status: string
+  total_net_amount_eur: number | null
+}
+
+type SammelabrechnungOut = {
+  id: string
+  status: string
+  summe_menge_kg: number
+  summe_betrag_eur: number
+}
 
 export default function SammelabrechnungPage(): JSX.Element {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [datum, setDatum] = useState(new Date().toISOString().slice(0, 10))
-  const [notiz, setNotiz] = useState('')
+  const [bezeichnung, setBezeichnung] = useState('')
   const [done, setDone] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const { data: ernten = [], isError, error, refetch } = useQuery<Ernte[]>({
-    queryKey: ['rohware-sammelabrechnung-list'],
-    queryFn: async () => (await apiClient.get<Ernte[]>('/api/v1/rohware/sammelabrechnung')).data,
+  const { data: annahmen = [], isError, error, refetch } = useQuery<HarvestAcceptance[]>({
+    queryKey: ['sammelabrechnung-harvest-acceptances'],
+    queryFn: async () =>
+      (await apiClient.get<HarvestAcceptance[]>('/api/v1/agrar/harvest-acceptance/')).data,
   })
 
   const submitMutation = useMutation({
-    mutationFn: async () =>
-      (await apiClient.post('/api/v1/rohware/sammelabrechnung', { ernte_ids: selectedIds, abrechnungsdatum: datum, notiz })).data,
-    onSuccess: () => setDone(true),
+    mutationFn: async () => {
+      const created = (
+        await apiClient.post<SammelabrechnungOut>('/api/v1/agrar/sammelabrechnung', {
+          bezeichnung: bezeichnung || `Sammelabrechnung ${datum}`,
+          abrechnungsperiode: datum.slice(0, 7),
+          harvest_acceptance_ids: selectedIds,
+          sammeldatum: datum,
+        })
+      ).data
+      // Direkt im Anschluss berechnen, damit die Abrechnung nicht als leerer ENTWURF liegen bleibt
+      await apiClient.post(`/api/v1/agrar/sammelabrechnung/${created.id}/berechnen`, {})
+      return created
+    },
+    onSuccess: () => {
+      setSubmitError(null)
+      setDone(true)
+    },
+    onError: (err: Error & { response?: { data?: { detail?: unknown } } }) => {
+      const detail = err.response?.data?.detail
+      setSubmitError(typeof detail === 'string' ? detail : err.message)
+    },
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -65,19 +100,28 @@ export default function SammelabrechnungPage(): JSX.Element {
             <CardHeader><CardTitle>Ernteerfassungen auswählen</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {ernten.map((e) => (
-                  <label key={e.id} className="flex items-center gap-3 rounded border p-3 cursor-pointer hover:bg-accent">
-                    <input type="checkbox" checked={selectedIds.includes(e.id)} onChange={() => toggleId(e.id)} />
-                    <span className="font-mono text-sm">{e.partie_nr}</span>
-                    <span>{e.sorte}</span>
-                    <span className="ml-auto text-sm text-muted-foreground">{e.menge_kg.toLocaleString('de-DE')} kg</span>
-                    <Badge variant="outline">{e.status}</Badge>
+                {annahmen.map((a) => (
+                  <label key={a.id} className="flex items-center gap-3 rounded border p-3 cursor-pointer hover:bg-accent">
+                    <input type="checkbox" checked={selectedIds.includes(a.id)} onChange={() => toggleId(a.id)} />
+                    <span className="font-mono text-sm">{a.acceptance_number}</span>
+                    <span>{a.delivery_date}</span>
+                    <span className="ml-auto text-sm text-muted-foreground">
+                      {a.total_net_amount_eur != null
+                        ? `${a.total_net_amount_eur.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €`
+                        : '—'}
+                    </span>
+                    <Badge variant="outline">{a.release_status}</Badge>
                   </label>
                 ))}
-                {ernten.length === 0 && <p className="text-muted-foreground text-sm">Keine offenen Ernteerfassungen vorhanden.</p>}
+                {annahmen.length === 0 && <p className="text-muted-foreground text-sm">Keine offenen Ernteerfassungen vorhanden.</p>}
               </div>
-              <div className="mt-4 flex justify-end">
-                <Button onClick={() => setStep(1)} disabled={selectedIds.length === 0} className="gap-2">
+              <div className="mt-4 flex items-center justify-end gap-3">
+                {selectedIds.length === 1 && (
+                  <span className="text-sm text-muted-foreground">
+                    Eine Sammelabrechnung bündelt mindestens 2 Ernteerfassungen.
+                  </span>
+                )}
+                <Button onClick={() => setStep(1)} disabled={selectedIds.length < 2} className="gap-2">
                   Weiter <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -94,8 +138,12 @@ export default function SammelabrechnungPage(): JSX.Element {
                 <Input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} />
               </div>
               <div>
-                <label className="text-sm font-medium">Notiz</label>
-                <Input placeholder="Optionale Notiz..." value={notiz} onChange={(e) => setNotiz(e.target.value)} />
+                <label className="text-sm font-medium">Bezeichnung</label>
+                <Input
+                  placeholder={`Sammelabrechnung ${datum}`}
+                  value={bezeichnung}
+                  onChange={(e) => setBezeichnung(e.target.value)}
+                />
               </div>
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setStep(0)} className="gap-2"><ChevronLeft className="h-4 w-4" />Zurück</Button>
@@ -118,11 +166,20 @@ export default function SammelabrechnungPage(): JSX.Element {
                   <dt>Abrechnungsdatum</dt>
                   <dd className="font-semibold">{datum}</dd>
                 </div>
+                <div className="flex justify-between border-b pb-2">
+                  <dt>Abrechnungsperiode</dt>
+                  <dd className="font-semibold">{datum.slice(0, 7)}</dd>
+                </div>
                 <div className="flex justify-between">
-                  <dt>Notiz</dt>
-                  <dd className="font-semibold">{notiz || '–'}</dd>
+                  <dt>Bezeichnung</dt>
+                  <dd className="font-semibold">{bezeichnung || `Sammelabrechnung ${datum}`}</dd>
                 </div>
               </dl>
+              {submitError && (
+                <p className="text-sm text-destructive" role="alert">
+                  Abrechnung fehlgeschlagen: {submitError}
+                </p>
+              )}
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setStep(1)} className="gap-2"><ChevronLeft className="h-4 w-4" />Zurück</Button>
                 <Button onClick={() => submitMutation.mutate()} disabled={submitMutation.isPending}>

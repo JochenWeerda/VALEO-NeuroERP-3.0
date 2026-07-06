@@ -72,7 +72,12 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Start-Dashboard
 
-**Route:** `/` · **Modul:** `@/pages/start-dashboard`
+**Route:** Startseite · **Modul:** `@/pages/start-dashboard`
+
+**Ziel:** Start-Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Start-Dashboard — Bedienoberfläche](img/start-dashboard.webp)
+
 
 **Schritte:**
 
@@ -95,6 +100,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/copilot` · **Modul:** `@/pages/analytics`
 
+**Ziel:** Copilot in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Copilot — Bedienoberfläche](img/copilot.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Copilot** öffnen (`/copilot`).
@@ -115,6 +125,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Customizable
 
 **Route:** `/dashboard/customizable` · **Modul:** `@/pages/dashboard/customizable`
+
+**Ziel:** Customizable in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Customizable — Bedienoberfläche](img/dashboard__customizable.webp)
+
 
 **Schritte:**
 
@@ -137,6 +152,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/dashboard/einkauf` · **Modul:** `@/pages/dashboard/einkauf-dashboard`
 
+**Ziel:** Einkauf in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einkauf — Bedienoberfläche](img/dashboard__einkauf.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Einkauf** öffnen (`/dashboard/einkauf`).
@@ -157,6 +177,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Einkauf Dashboard
 
 **Route:** `/dashboard/einkauf-dashboard` · **Modul:** `@/pages/dashboard/einkauf-dashboard`
+
+**Ziel:** Einkauf Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einkauf Dashboard — Bedienoberfläche](img/dashboard__einkauf-dashboard.webp)
+
 
 **Schritte:**
 
@@ -179,6 +204,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/dashboard/sales` · **Modul:** `@/pages/dashboard/sales-dashboard`
 
+**Ziel:** Sales in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Sales — Bedienoberfläche](img/dashboard__sales.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Sales** öffnen (`/dashboard/sales`).
@@ -199,6 +229,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Sales Dashboard
 
 **Route:** `/dashboard/sales-dashboard` · **Modul:** `@/pages/dashboard/sales-dashboard`
+
+**Ziel:** Sales Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Sales Dashboard — Bedienoberfläche](img/dashboard__sales-dashboard.webp)
+
 
 **Schritte:**
 
@@ -221,6 +256,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/dashboards/geschaeftsfuehrung` · **Modul:** `@/pages/dashboards/geschaeftsfuehrung`
 
+**Ziel:** Geschaeftsfuehrung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Geschaeftsfuehrung — Bedienoberfläche](img/dashboards__geschaeftsfuehrung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Geschaeftsfuehrung** öffnen (`/dashboards/geschaeftsfuehrung`).
@@ -241,6 +281,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Executive Dashboard
 
 **Route:** `/management/executive-dashboard` · **Modul:** `@/pages/management/executive-dashboard`
+
+**Ziel:** Executive Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Executive Dashboard — Bedienoberfläche](img/management__executive-dashboard.webp)
+
 
 **Schritte:**
 
@@ -263,6 +308,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/monitoring/alerts` · **Modul:** `@/pages/admin/monitoring/alerts`
 
+**Ziel:** Alerts in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Alerts — Bedienoberfläche](img/monitoring__alerts.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Alerts** öffnen (`/monitoring/alerts`).
@@ -283,6 +333,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Regeln
 
 **Route:** `/monitoring/regeln` · **Modul:** `@/pages/admin/monitoring/regeln`
+
+**Ziel:** Regeln in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Regeln — Bedienoberfläche](img/monitoring__regeln.webp)
+
 
 **Schritte:**
 
@@ -305,6 +360,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/policies` · **Modul:** `@/pages/policy-manager`
 
+**Ziel:** Policies in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Policies — Bedienoberfläche](img/policies.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Policies** öffnen (`/policies`).
@@ -325,6 +385,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Policy Manager
 
 **Route:** `/policy-manager` · **Modul:** `@/pages/policy-manager`
+
+**Ziel:** Policy Manager in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Policy Manager — Bedienoberfläche](img/policy-manager.webp)
+
 
 **Schritte:**
 
@@ -347,6 +412,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/system/live-monitor` · **Modul:** `@/pages/system/live-monitor`
 
+**Ziel:** Live Monitor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Live Monitor — Bedienoberfläche](img/system__live-monitor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Live Monitor** öffnen (`/system/live-monitor`).
@@ -367,6 +437,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Flow Spine Complaint To Resolution
 
 **Route:** `/workflow/flow-spine-complaint-to-resolution` · **Modul:** `@/pages/workflow/flow-spine-complaint-to-resolution`
+
+**Ziel:** Flow Spine Complaint To Resolution in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Complaint To Resolution — Bedienoberfläche](img/workflow__flow-spine-complaint-to-resolution.webp)
+
 
 **Schritte:**
 
@@ -389,6 +464,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/flow-spine-compliance-to-report` · **Modul:** `@/pages/workflow/flow-spine-compliance-to-report`
 
+**Ziel:** Flow Spine Compliance To Report in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Compliance To Report — Bedienoberfläche](img/workflow__flow-spine-compliance-to-report.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Flow Spine Compliance To Report** öffnen (`/workflow/flow-spine-compliance-to-report`).
@@ -409,6 +489,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Flow Spine Contract To Settlement
 
 **Route:** `/workflow/flow-spine-contract-to-settlement` · **Modul:** `@/pages/workflow/flow-spine-contract-to-settlement`
+
+**Ziel:** Flow Spine Contract To Settlement in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Contract To Settlement — Bedienoberfläche](img/workflow__flow-spine-contract-to-settlement.webp)
+
 
 **Schritte:**
 
@@ -431,6 +516,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/flow-spine-finance-to-close` · **Modul:** `@/pages/workflow/flow-spine-finance-to-close`
 
+**Ziel:** Flow Spine Finance To Close in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Finance To Close — Bedienoberfläche](img/workflow__flow-spine-finance-to-close.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Flow Spine Finance To Close** öffnen (`/workflow/flow-spine-finance-to-close`).
@@ -451,6 +541,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Flow Spine Harvest To Settlement
 
 **Route:** `/workflow/flow-spine-harvest-to-settlement` · **Modul:** `@/pages/workflow/flow-spine-harvest-to-settlement`
+
+**Ziel:** Flow Spine Harvest To Settlement in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Harvest To Settlement — Bedienoberfläche](img/workflow__flow-spine-harvest-to-settlement.webp)
+
 
 **Schritte:**
 
@@ -473,6 +568,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/flow-spine-inventory-to-settlement` · **Modul:** `@/pages/workflow/flow-spine-inventory-to-settlement`
 
+**Ziel:** Flow Spine Inventory To Settlement in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Inventory To Settlement — Bedienoberfläche](img/workflow__flow-spine-inventory-to-settlement.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Flow Spine Inventory To Settlement** öffnen (`/workflow/flow-spine-inventory-to-settlement`).
@@ -493,6 +593,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Flow Spine Order To Cash
 
 **Route:** `/workflow/flow-spine-order-to-cash` · **Modul:** `@/pages/workflow/flow-spine-order-to-cash`
+
+**Ziel:** Flow Spine Order To Cash in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Order To Cash — Bedienoberfläche](img/workflow__flow-spine-order-to-cash.webp)
+
 
 **Schritte:**
 
@@ -515,6 +620,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/flow-spine-procure-to-pay` · **Modul:** `@/pages/workflow/flow-spine-procure-to-pay`
 
+**Ziel:** Flow Spine Procure To Pay in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Procure To Pay — Bedienoberfläche](img/workflow__flow-spine-procure-to-pay.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Flow Spine Procure To Pay** öffnen (`/workflow/flow-spine-procure-to-pay`).
@@ -535,6 +645,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Flow Spine Service To Customer
 
 **Route:** `/workflow/flow-spine-service-to-customer` · **Modul:** `@/pages/workflow/flow-spine-service-to-customer`
+
+**Ziel:** Flow Spine Service To Customer in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Service To Customer — Bedienoberfläche](img/workflow__flow-spine-service-to-customer.webp)
+
 
 **Schritte:**
 
@@ -557,6 +672,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/flow-spine-studio` · **Modul:** `@/pages/workflow/flow-spine-studio`
 
+**Ziel:** Flow Spine Studio in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Flow Spine Studio — Bedienoberfläche](img/workflow__flow-spine-studio.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Flow Spine Studio** öffnen (`/workflow/flow-spine-studio`).
@@ -577,6 +697,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Leitstand
 
 **Route:** `/workflow/leitstand` · **Modul:** `@/pages/workflow/leitstand`
+
+**Ziel:** Leitstand in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Leitstand — Bedienoberfläche](img/workflow__leitstand.webp)
+
 
 **Schritte:**
 
@@ -599,6 +724,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/process-mining-analytics` · **Modul:** `@/pages/workflow/process-mining-analytics`
 
+**Ziel:** Process Mining Analytics in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Process Mining Analytics — Bedienoberfläche](img/workflow__process-mining-analytics.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Process Mining Analytics** öffnen (`/workflow/process-mining-analytics`).
@@ -619,6 +749,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Workflow Monitoring
 
 **Route:** `/workflow/workflow-monitoring` · **Modul:** `@/pages/workflow/workflow-monitoring`
+
+**Ziel:** Workflow Monitoring in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Workflow Monitoring — Bedienoberfläche](img/workflow__workflow-monitoring.webp)
+
 
 **Schritte:**
 
@@ -641,6 +776,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflow/workflow-regeln` · **Modul:** `@/pages/workflow/workflow-regeln`
 
+**Ziel:** Workflow Regeln in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Workflow Regeln — Bedienoberfläche](img/workflow__workflow-regeln.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Workflow Regeln** öffnen (`/workflow/workflow-regeln`).
@@ -661,6 +801,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Workflow Sandbox
 
 **Route:** `/workflow/workflow-sandbox` · **Modul:** `@/pages/workflow/workflow-sandbox`
+
+**Ziel:** Workflow Sandbox in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Workflow Sandbox — Bedienoberfläche](img/workflow__workflow-sandbox.webp)
+
 
 **Schritte:**
 
@@ -683,6 +828,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflows` · **Modul:** `@/pages/workflow/workflow-monitoring`
 
+**Ziel:** Workflows in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Workflows — Bedienoberfläche](img/workflows.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Workflows** öffnen (`/workflows`).
@@ -703,6 +853,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Approval
 
 **Route:** `/workflows/approval` · **Modul:** `@/pages/workflows/approval`
+
+**Ziel:** Approval in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Approval — Bedienoberfläche](img/workflows__approval.webp)
+
 
 **Schritte:**
 
@@ -725,6 +880,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflows/approval/:workflowId` · **Modul:** `@/pages/workflows/approval`
 
+**Ziel:** :Workflowid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Workflowid — Bedienoberfläche](img/workflows__approval__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Workflowid** öffnen (`/workflows/approval/:workflowId`).
@@ -745,6 +905,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### History
 
 **Route:** `/workflows/history` · **Modul:** `@/pages/workflow/workflow-monitoring`
+
+**Ziel:** History in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![History — Bedienoberfläche](img/workflows__history.webp)
+
 
 **Schritte:**
 
@@ -767,6 +932,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/workflows/supervisor` · **Modul:** `@/pages/workflows/supervisor`
 
+**Ziel:** Supervisor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Supervisor — Bedienoberfläche](img/workflows__supervisor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Supervisor** öffnen (`/workflows/supervisor`).
@@ -787,6 +957,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Trigger
 
 **Route:** `/workflows/trigger` · **Modul:** `@/pages/workflows/trigger`
+
+**Ziel:** Trigger in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Trigger — Bedienoberfläche](img/workflows__trigger.webp)
+
 
 **Schritte:**
 

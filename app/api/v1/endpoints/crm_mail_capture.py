@@ -80,7 +80,7 @@ def _resolve_direction(declared: Optional[str], from_addr: str, own: list[str]) 
     return direction, from_addr
 
 
-@router.post("/mail-capture", summary="E-Mail als Kontakt erfassen (geparst oder roh)")
+@router.post("/mail-capture", response_model=dict, summary="E-Mail als Kontakt erfassen (geparst oder roh)")
 def mail_capture(
     body: MailCaptureIn,
     db: Session = Depends(get_db),

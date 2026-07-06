@@ -9,6 +9,16 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { Plus, Search, UserCog } from 'lucide-react'
 
+// Backend-Vertrag: GET /api/v1/personal/applications (app/api/v1/endpoints/personal.py,
+// domain_hr.applications) — Pipeline-Stage liegt in der Spalte `status`.
+type ApplicationRow = {
+  id: string
+  applicant_name: string
+  position_title: string | null
+  status: string
+  applied_at: string
+}
+
 type Bewerbung = {
   id: string
   bewerber_name: string
@@ -34,7 +44,16 @@ export default function BewerbungenPage(): JSX.Element {
 
   const { data: bewerbungen = [], isError, error, refetch } = useQuery<Bewerbung[]>({
     queryKey: ['bewerbungen'],
-    queryFn: async () => (await apiClient.get<Bewerbung[]>('/api/v1/personal/bewerbungen')).data,
+    queryFn: async () => {
+      const rows = (await apiClient.get<ApplicationRow[]>('/api/v1/personal/applications')).data
+      return rows.map((r) => ({
+        id: r.id,
+        bewerber_name: r.applicant_name,
+        stelle: r.position_title ?? '—',
+        stage: (STAGES.includes(r.status as Bewerbung['stage']) ? r.status : 'EINGANG') as Bewerbung['stage'],
+        eingangsdatum: r.applied_at,
+      }))
+    },
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -57,7 +76,7 @@ export default function BewerbungenPage(): JSX.Element {
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Bewerbermanagement</h1>
+            <h1 className="text-3xl font-bold">Bewerbungen</h1>
             <p className="text-muted-foreground">Bewerbungen und Rekrutierungsprozesse</p>
           </div>
           <Button className="gap-2"><Plus className="h-4 w-4" />Neue Bewerbung</Button>

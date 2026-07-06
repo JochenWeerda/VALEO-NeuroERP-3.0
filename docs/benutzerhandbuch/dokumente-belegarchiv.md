@@ -44,6 +44,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/docflow/artefakt-freigabe` · **Modul:** `@/pages/docflow/artefakt-freigabe`
 
+**Ziel:** Artefakt Freigabe in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Artefakt Freigabe — Bedienoberfläche](img/docflow__artefakt-freigabe.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Artefakt Freigabe** öffnen (`/docflow/artefakt-freigabe`).
@@ -64,6 +69,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Gobd Export
 
 **Route:** `/docflow/gobd-export` · **Modul:** `@/pages/docflow/gobd-export`
+
+**Ziel:** Gobd Export in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gobd Export — Bedienoberfläche](img/docflow__gobd-export.webp)
+
 
 **Schritte:**
 
@@ -86,6 +96,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/docflow/nachweisraum` · **Modul:** `@/pages/docflow/nachweisraum`
 
+**Ziel:** Nachweisraum in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Nachweisraum — Bedienoberfläche](img/docflow__nachweisraum.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Nachweisraum** öffnen (`/docflow/nachweisraum`).
@@ -107,6 +122,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/docflow/wiedervorlagen` · **Modul:** `@/pages/docflow/wiedervorlagen`
 
+**Ziel:** Wiedervorlagen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wiedervorlagen — Bedienoberfläche](img/docflow__wiedervorlagen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Wiedervorlagen** öffnen (`/docflow/wiedervorlagen`).
@@ -127,6 +147,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Ablage
 
 **Route:** `/dokumente/ablage` · **Modul:** `@/pages/dokumente/ablage`
+
+**Ziel:** Ablage in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Ablage — Bedienoberfläche](img/dokumente__ablage.webp)
+
 
 **Schritte:**
 

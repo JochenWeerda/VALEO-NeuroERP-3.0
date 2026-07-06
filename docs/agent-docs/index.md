@@ -16,6 +16,8 @@ sind Leser **und** Autoren der Doku.
 ## Bestandteile
 
 - **AGENTS.md** (Repo-Root) — Einstieg, Pflichtreihenfolge, Parallel-Protokoll.
+- [**Agent-Handbuch**](../agent-handbuch/index.md) — **generiert** aus Code: Prozessketten (Flow Spine),
+  Masken-API-Katalog (ScreenDefinitions), MCP/Events/ActionRuntime (`python scripts/generate_agent_handbuch.py`).
 - [**Capability-Katalog**](capability-catalog.md) — Fähigkeiten je Agent-Rolle.
 - [**Tool-Katalog**](tool-catalog.md) — MCP-Tools (Schema, Scope, Idempotenz, Risiko).
 - [**Guardrails**](guardrails.md) — Human-Approval bei HIGH-Risk, fail-closed, RBAC.

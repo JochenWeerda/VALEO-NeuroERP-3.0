@@ -1,0 +1,79 @@
+slice_id: UIX-MERIDIAN-BUILDER-001
+title: Meridian als Single-Mask-Builder-Vertrag
+owner: Codex
+status: completed
+created_at: 2026-07-05
+coordination: >-
+  Neuer UIX-Slice ohne Ueberschneidung mit aktiven Coverage-, API- oder Audit-Slices.
+  Workboard war vor Claim bereits dirty; Commit darf nur diesen Slice und den
+  zugehoerigen Workboard-Hunk enthalten.
+goal: >-
+  Meridian zentral ueber ScreenDefinition.layout, RenderPlan.shell, UniversalMaskRenderer,
+  Fast-Renderer und Readiness-Gates verankern, ohne einzelne Referenzmasken separat
+  visuell nachzubauen.
+file_ownership:
+  - app/core/screen_definitions.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - tests/test_agent_mask_contract.py
+  - tests/test_uix046_048_command_endpoints_safety.py
+  - packages/frontend-web/src/components/mask-builder/**
+  - packages/frontend-web/src/__tests__/components/mask-builder/**
+  - packages/frontend-web/src/__tests__/render-plan/schema-compiler.test.ts
+  - packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts
+  - docs/design/valeo-meridian-experience.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UIX-MERIDIAN-BUILDER-001.yaml
+acceptance:
+  - ScreenDefinition.layout traegt floorplan, density, contextRail und tableProfile fuer native Masken.
+  - RenderPlan.shell wird zentral aus ScreenDefinition.layout abgeleitet.
+  - Frontend- und Backend-Readiness blockieren generatorReady bei fehlenden Meridian-Metadaten.
+  - Finance-, CRM- und Inventory-Referenzmasken validieren ueber bestehende native ScreenDefinitions.
+  - Doku beschreibt Meridian als Builder-Capability, nicht als manuelle Seiten-Bauanleitung.
+tests:
+  - pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/runtime/generatorReadiness.test.ts src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx src/__tests__/render-plan/schema-compiler.test.ts
+  - pytest tests/test_agent_mask_contract.py tests/test_uix046_048_command_endpoints_safety.py -q --no-cov
+  - python scripts/generate_agent_handbuch.py --check
+risks:
+  - Bestehende 26 native SDs muessen in einem Durchlauf nachgezogen werden, sonst wird generatorReady erwartbar rot.
+  - Parallel geaenderte Workboard- und Coverage-Dateien duerfen nicht versehentlich mitcommittet werden.
+result: >-
+  Code umgesetzt und fokussiert verifiziert: Meridian-Layout-Metadaten werden im
+  Registry-Ausgang angereichert, in RenderPlan.shell kompiliert, als Renderer-
+  Datenattribute/Tabellenprofil genutzt und in Frontend-/Backend-Readiness als
+  mandatory Gates geprueft. Design-Regelwerk inklusive Low-Fidelity-/Wireframe-
+  Triage angelegt.
+evidence:
+  - pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/runtime/generatorReadiness.test.ts src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx src/__tests__/render-plan/schema-compiler.test.ts -> 25 passed
+  - pytest tests/test_agent_mask_contract.py tests/test_uix046_048_command_endpoints_safety.py -q --no-cov -> 270 passed
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> gruen
+  - python scripts/generate_agent_handbuch.py --check -> 5 Artefakte aktuell
+  - pnpm --dir packages/frontend-web exec playwright test tests/e2e/uix-056-native-route-smoke.spec.ts --project=chromium -> 7 passed
+  - VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER=true pnpm --dir packages/frontend-web exec playwright test tests/e2e/mask-render-performance.spec.ts --project=chromium -> 2 passed
+open_items:
+  - Playwright globalTeardown meldet bestehende Visual-Tour-Console-Issues aus dem Repo-weiten Artefakt; die fokussierten Meridian-Smokes sind gruen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Meridian soll ERP-Fachmasken als professionelle Desktop-Arbeitsoberflaechen
+    erzeugen; Referenzen sind Finance, CRM 360 und Lager, aber keine separaten UI-Pfade.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime
+    -> UniversalMaskRenderer. Keine parallelen Seiten-Patterns und keine Referenzmasken-Duplizierung.
+  daten_vertrag: >-
+    Layout-Metadaten sind deklarative Schemafelder ohne DB-Migration; AuditReason und
+    Action-Klassifizierung bleiben im bestehenden ScreenDefinition-/ActionRuntime-Vertrag.
+  test_vertrag: >-
+    Unit- und Contract-Tests pruefen Schema, Compiler, Readiness-Gates und Referenz-SDs.
+    E2E-/Visual-Audit kann als Folgegate dokumentiert werden, falls lokal nicht sinnvoll ausfuehrbar.
+  security_vertrag: >-
+    Keine neuen Secrets, keine PII-Verarbeitung, keine Aenderung an Auth/Tenant-Isolation.
+    Kritische Actions behalten Confirmation, Human Approval und AuditReason-Pflichten.
+  betriebs_vertrag: >-
+    Bestehende Universal-Mask-CI und Performance-Gates bleiben massgeblich; Rollback erfolgt
+    ueber bestehende native Route Rollback-Matrix und Legacy-Fallbacks.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML, Meridian-Designregelwerk, UIX-Status, Open-Gaps und Agent-Handbuch
+    werden nach relevanten Aenderungen synchronisiert.
+external_gates:
+  - not_applicable

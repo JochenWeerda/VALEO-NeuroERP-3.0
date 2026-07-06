@@ -60,6 +60,35 @@ async def readiness_check() -> JSONResponse:
         ready = False
         logger.error(f"Database check failed: {e}")
     
+    # 1b. Kritische Module (SPEC-P0-03): FIBU-Journal und Bestandsfuehrung
+    # muessen migriert sein — eine frische, unmigrierte Installation darf
+    # keinen Traffic annehmen (kein stilles Leer-Liefern auf Finanzpfaden).
+    critical_tables = (
+        "domain_erp.journal_entries",
+        "domain_inventory.inventory_stock_movements",
+        "domain_shared.tenants",
+    )
+    try:
+        from app.core.database import SessionLocal
+        db = SessionLocal()
+        try:
+            missing = [
+                t for t in critical_tables
+                if db.execute(text("SELECT to_regclass(:t)"), {"t": t}).scalar() is None
+            ]
+        finally:
+            db.close()
+        if missing:
+            checks["critical_modules"] = {"status": "unhealthy", "missing_tables": missing}
+            ready = False
+            logger.error(f"Critical module tables missing: {missing}")
+        else:
+            checks["critical_modules"] = {"status": "healthy", "tables_checked": len(critical_tables)}
+    except Exception as e:
+        checks["critical_modules"] = {"status": "unhealthy", "error": str(e)}
+        ready = False
+        logger.error(f"Critical module check failed: {e}")
+
     # 2. Event Bus Check (NATS)
     try:
         from app.infrastructure.eventbus.nats_publisher import nats_publisher

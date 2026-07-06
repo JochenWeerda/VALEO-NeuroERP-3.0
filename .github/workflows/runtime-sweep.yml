@@ -1,0 +1,91 @@
+name: Runtime API Sweep
+
+# SPEC-P0-02 / RUNTIME-API-SWEEP-001: Nightly-Gate — alle parameterlosen
+# GET-Routen gegen frisch migrierte DB; 5xx oder nicht allowgelistete 503 => rot.
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-sweep-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sweep:
+    name: GET-Sweep gegen frische DB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      POSTGRES_DB: valeo_sweep
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_sweep
+      API_DEV_TOKEN: dev-token
+      # CRM-Sidecar-Services existieren im Sweep-Job nicht. Default-URLs zeigen
+      # auf Port 8000 (= Backend selbst) => 404 statt sauberem Connection-Error.
+      # Geschlossener Port erzwingt den definierten Degrade-Pfad (leere Liste).
+      CRM_CORE_BASE_URL: http://127.0.0.1:59990
+      CRM_SALES_BASE_URL: http://127.0.0.1:59991
+      CRM_SERVICE_BASE_URL: http://127.0.0.1:59992
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_sweep
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_sweep"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Migrate empty database (Alembic + ORM create_all)
+        run: python scripts/init_db.py
+
+      - name: Start backend
+        run: |
+          nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning > uvicorn.log 2>&1 &
+          for i in $(seq 1 120); do
+            if curl -sf -o /dev/null http://127.0.0.1:8000/openapi.json; then
+              echo "Backend bereit nach ${i}x5s"; exit 0
+            fi
+            sleep 5
+          done
+          echo "Backend nicht erreichbar"; tail -50 uvicorn.log; exit 1
+
+      - name: Run runtime sweep (0x5xx-Gate)
+        run: python scripts/api_runtime_sweep.py --base-url http://127.0.0.1:8000
+
+      - name: Upload sweep report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-sweep-report
+          path: artifacts/runtime-sweep-*.json
+          retention-days: 30
+
+      - name: Show backend log on failure
+        if: failure()
+        run: tail -100 uvicorn.log || true

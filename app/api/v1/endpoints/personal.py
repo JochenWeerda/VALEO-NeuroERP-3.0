@@ -2761,7 +2761,7 @@ async def get_driver_time_absence_collisions(
         text(f"""
             SELECT e.id as event_id, e.employee_ref, e.event_ts::text, e.absence_ref,
                    CASE WHEN a.id IS NULL THEN 'absence_not_found'
-                        WHEN e.event_ts::date BETWEEN a.start_date AND a.end_date THEN 'driving_during_absence'
+                        WHEN e.event_ts::date = a.entry_date THEN 'driving_during_absence'
                         ELSE 'absence_ref_mismatch' END as collision_type
             FROM domain_hr.driver_time_events e
             LEFT JOIN domain_hr.time_entries a ON a.id::text = e.absence_ref AND a.tenant_id = e.tenant_id

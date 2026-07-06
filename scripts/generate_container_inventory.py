@@ -227,7 +227,11 @@ def render(all_services: dict[str, tuple[Path, list[str], dict[str, list[str]]]]
 
 
 def normalize_for_check(content: str) -> str:
-    lines = [ln for ln in content.splitlines() if not ln.startswith("last_reviewed:")]
+    lines: list[str] = []
+    for line in content.splitlines():
+        if line.startswith("last_reviewed:"):
+            continue
+        lines.append(re.sub(r"^\*\*Stand:\*\* \d{4}-\d{2}-\d{2} ", "**Stand:** <date> ", line))
     return "\n".join(lines)
 
 

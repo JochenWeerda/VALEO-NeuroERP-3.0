@@ -1,0 +1,401 @@
+{
+  "generated_at": "2026-07-02T21:00:40.000705+00:00",
+  "base_url": "http://127.0.0.1:8001",
+  "targets": 832,
+  "summary": {
+    "ok_2xx": 746,
+    "expected_4xx": 39,
+    "allowed_503": 0,
+    "unexpected_503": 14,
+    "server_error_5xx": 32,
+    "transport_error": 1
+  },
+  "expired_allowlist_entries": [],
+  "results": {
+    "expected_4xx": [
+      {
+        "path": "/api/v1/agent/operator/proposals",
+        "status": 403
+      },
+      {
+        "path": "/api/v1/agent/operator/proposals/summary",
+        "status": 403
+      },
+      {
+        "path": "/api/v1/agrar/settlements/drying-rules",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/analytics/customer-analytics",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/analytics/financial-analytics",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/analytics/product-analytics",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/analytics/sales-performance",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/analytics/trend-analytics",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/articles/search",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/api/mcp/documents/customers/search",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/articles/batches",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/articles/selections",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/contracts/expiring",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/crm/cases/sla-dashboard",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/crm/customers/interessenten",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/crm/customers/lookup/resolve",
+        "status": 400
+      },
+      {
+        "path": "/api/v1/dev/external-mocks/dms/search",
+        "status": 400
+      },
+      {
+        "path": "/api/v1/edi/partner",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/kontrakte/amendment-templates",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/kontrakte/positionen",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/neuro/confidence-ledger/entries",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/neuro/confidence-ledger/summary",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/neuro/state-graph/edges",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/neuro/state-graph/nodes",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/portal/contracts",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/portal/orders",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/portal/orders/observability",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/portal/orders/reconciliation",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/portal/pre-purchases",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/portal/products",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/pos/dsfinvk/export",
+        "status": 409
+      },
+      {
+        "path": "/api/v1/price-hedge/hedges",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/process/tenant-limits/overview",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/purchase-orders/statistics",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/reporting/data-products",
+        "status": 422
+      },
+      {
+        "path": "/api/v1/sales/delivery-notes/last",
+        "status": 404
+      },
+      {
+        "path": "/api/v1/users/",
+        "status": 401
+      },
+      {
+        "path": "/api/v1/users/me",
+        "status": 401
+      },
+      {
+        "path": "/api/v1/whatsapp/webhook",
+        "status": 403
+      }
+    ],
+    "allowed_503": [],
+    "unexpected_503": [
+      {
+        "path": "/api/v1/analytics",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/channels/whatsapp/webhook",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/compliance/dsgvo/erasure-requests",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/compliance/lksg/annual-report-preview",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/compliance/lksg/supplier-risk-assessments",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/compliance/whistleblower/reports",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/contracts",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/finance/asset-accounting/assets",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/finance/asset-accounting/depreciation-forecast",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/finance/budgets",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/finance/budgets/summary",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/personal/org-chart",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/rohware/schemata",
+        "status": 503
+      },
+      {
+        "path": "/api/v1/sales/blanket-orders/",
+        "status": 503
+      }
+    ],
+    "server_error_5xx": [
+      {
+        "path": "/api/v1/accounts/",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"Failed to list accounts: No registration found for AccountRepository\",\"instance\":\"/api/v1/accounts/\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/accounts/hierarchy",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"Failed to retrieve account: No registration found for AccountRepository\",\"instance\":\"/api/v1/accounts/hierarchy\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/agrar/inventory/low-stock",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/agrar/nawaro/area-sheets",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/agrar/nawaro/contract-sheets",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/agrar/nawaro/print-notifications",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/agrar/nawaro/raps-profiles",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/agrar/psm/",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/agrar/psm/proplanta/list",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"503: Proplanta PSM integration not configured\",\"instance\":\"/api/v1/agrar/psm/proplanta/list\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/agrar/psm/proplanta/stats/overview",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"503: Proplanta PSM integration not configured\",\"instance\":\"/api/v1/agrar/psm/proplanta/stats/overview\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/agrar/psm/stats/overview",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/blockchain/anchors",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/crm/activities/",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/crm/cases/",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"Internal Server Error\",\"instance\":\"/api/v1/crm/cases/\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/crm/opportunities/",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"Internal Server Error\",\"instance\":\"/api/v1/crm/opportunities/\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/fuhrpark/fahrzeuge",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/geo/map-points",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/inventory/warehouses/",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/mcp/policy/export",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"(psycopg2.errors.UndefinedTable) relation \\\"domain_shared.policy_rules\\\" does not exist\\nLINE 2: FROM domain_shared.policy_rules ORDER BY domain_shared.polic...\\n             ^\\n\\n[SQL: SELECT domain_shared.po"
+      },
+      {
+        "path": "/api/v1/mcp/policy/list",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"(psycopg2.errors.UndefinedTable) relation \\\"domain_shared.policy_rules\\\" does not exist\\nLINE 2: FROM domain_shared.policy_rules ORDER BY domain_shared.polic...\\n             ^\\n\\n[SQL: SELECT domain_shared.po"
+      },
+      {
+        "path": "/api/v1/personal/driver-time/events/absences/collisions",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/process/checkpoints/regeln",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/process/lineage/graph",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/procurement/match/orders",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/sales/credit-check/customers",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/sales/match/orders",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/sales/o2c/orders",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/sustainability/nutrients/crop",
+        "status": 502,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 502\",\"status\":502,\"detail\":\"FAOSTAT error 521: <!DOCTYPE html>\\n<!--[if lt IE 7]> <html class=\\\"no-js ie6 oldie\\\" lang=\\\"en-US\\\"> <![endif]-->\\n<!--[if IE 7]>    <html class=\\\"no-js ie7 oldie\\\" lang=\\\"en-US\\\"> <![endif]-->\\n<!--[if IE 8]"
+      },
+      {
+        "path": "/api/v1/tenants/",
+        "status": 500,
+        "detail": "{\"type\":\"https://valeo-erp.de/errors/http-error\",\"title\":\"HTTP 500\",\"status\":500,\"detail\":\"Failed to list tenants: No registration found for TenantRepository\",\"instance\":\"/api/v1/tenants/\",\"error\":\"HTTP_ERROR\"}"
+      },
+      {
+        "path": "/api/v1/webshop/orders",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/webshop/sync-log",
+        "status": 500,
+        "detail": "Internal Server Error"
+      },
+      {
+        "path": "/api/v1/workflow/templates/marketplace/installed",
+        "status": 500,
+        "detail": "Internal Server Error"
+      }
+    ],
+    "transport_error": [
+      {
+        "path": "/api/events",
+        "error": "timed out"
+      }
+    ]
+  }
+}

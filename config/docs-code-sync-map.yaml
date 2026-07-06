@@ -19,6 +19,31 @@ critical_paths:
       - docs/schnittstellen/openapi.json
       - docs/schnittstellen/endpoint-inventory.md
 
+  - path: app/core/flow_spine_registry.py
+    docs:
+      - docs/agent-handbuch/
+      - docs/workflows/
+    generated_artifacts:
+      - docs/agent-handbuch/index.md
+      - docs/agent-handbuch/prozessketten.md
+      - docs/agent-handbuch/agent-process-manifest.json
+
+  - path: app/core/screen_definitions.py
+    docs:
+      - docs/agent-handbuch/
+      - docs/entwickler/
+    generated_artifacts:
+      - docs/agent-handbuch/masken-api-katalog.md
+      - docs/agent-handbuch/agent-process-manifest.json
+
+  - path: config/mcp_erp_tools.yaml
+    docs:
+      - docs/agent-handbuch/
+      - docs/schnittstellen/
+    generated_artifacts:
+      - docs/agent-handbuch/automatisierung.md
+      - docs/agent-handbuch/agent-process-manifest.json
+
   - path: app/services/
     docs:
       - docs/workflows/
@@ -129,6 +154,11 @@ generated_doc_paths:
   - docs/schnittstellen/events.md
   - docs/admin/migration-inventory.md
   - docs/entwickler/service-inventory.md
+  - docs/agent-handbuch/index.md
+  - docs/agent-handbuch/prozessketten.md
+  - docs/agent-handbuch/masken-api-katalog.md
+  - docs/agent-handbuch/automatisierung.md
+  - docs/agent-handbuch/agent-process-manifest.json
   - packages/frontend-web/src/app/routing/route-inventory.gen.json
   - packages/frontend-web/src/lib/docs-help.ts
 

@@ -10,6 +10,11 @@ on:
       - "scripts/generate_adr_nav.py"
       - "scripts/generate_code_inventories.py"
       - "scripts/generate_container_inventory.py"
+      - "scripts/generate_agent_handbuch.py"
+      - "scripts/agent_handbuch_sources.py"
+      - "app/core/flow_spine_registry.py"
+      - "app/core/screen_definitions.py"
+      - "config/mcp_erp_tools.yaml"
       - "docker-compose.yml"
       - "docker-compose.production.yml"
       - "app/api/v1/endpoints/**"
@@ -27,6 +32,11 @@ on:
       - "scripts/generate_adr_nav.py"
       - "scripts/generate_code_inventories.py"
       - "scripts/generate_container_inventory.py"
+      - "scripts/generate_agent_handbuch.py"
+      - "scripts/agent_handbuch_sources.py"
+      - "app/core/flow_spine_registry.py"
+      - "app/core/screen_definitions.py"
+      - "config/mcp_erp_tools.yaml"
       - "docker-compose.yml"
       - "docker-compose.production.yml"
       - "app/api/v1/endpoints/**"
@@ -68,6 +78,9 @@ jobs:
 
       - name: Container inventory drift check
         run: python scripts/generate_container_inventory.py --check
+
+      - name: Agent-Handbuch drift check
+        run: python scripts/generate_agent_handbuch.py --check
 
       - name: Build documentation site
         run: python -m mkdocs build --site-dir site

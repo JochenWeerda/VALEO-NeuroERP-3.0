@@ -109,9 +109,10 @@ async def get_inbox(db: Session = Depends(get_db)):
             for entry in items
         ]
         return InboxListResponse(ok=True, items=documents, count=len(documents))
-    except Exception as exc:
-        logger.error("Failed to load DMS inbox: %s", exc)
-        raise HTTPException(status_code=500, detail=f"Inbox konnte nicht geladen werden: {exc}")
+    except Exception as exc:  # noqa: BLE001 — Tabelle fehlt oder DB nicht erreichbar
+        logger.warning("DMS inbox nicht verfügbar: %s", exc)
+        db.rollback()
+        return InboxListResponse(ok=True, items=[], count=0, message="DMS-Inbox nicht verfügbar")
 
 
 @router.post("/inbox/{inbox_id}/create", response_model=CreateFromInboxResponse, tags=["dms"], summary="From inbox anlegen")

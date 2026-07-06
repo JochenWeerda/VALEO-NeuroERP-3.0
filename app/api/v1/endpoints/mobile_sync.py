@@ -31,7 +31,7 @@ class SyncBatchIn(BaseModel):
     events: list[MobileEvent] = Field(..., min_length=1, max_length=200)
 
 
-@router.post("/sync-events", summary="MOB-SYNC-001: Offline-Events in Queue hochladen", status_code=202)
+@router.post("/sync-events", response_model=dict, summary="MOB-SYNC-001: Offline-Events in Queue hochladen", status_code=202)
 def sync_events(
     body: SyncBatchIn,
     db: Session = Depends(get_db),
@@ -55,7 +55,7 @@ def sync_events(
     }
 
 
-@router.post("/sync-process", summary="Pending Events verarbeiten")
+@router.post("/sync-process", response_model=dict, summary="Pending Events verarbeiten")
 def process_queue(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -68,7 +68,7 @@ def process_queue(
     return svc.process_pending(limit=limit)
 
 
-@router.get("/sync-queue", summary="Queue-Status abrufen")
+@router.get("/sync-queue", response_model=dict, summary="Queue-Status abrufen")
 def get_queue(
     status: Optional[str] = Query(None, description="pending | processing | done | failed"),
     limit: int = Query(100, ge=1, le=500),

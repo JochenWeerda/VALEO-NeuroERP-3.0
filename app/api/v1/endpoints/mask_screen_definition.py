@@ -126,6 +126,9 @@ async def get_agent_mask_contract(
 
 _TRIVIAL_KEYS = frozenset({"id", "pk", "uuid", "key", "name", "bezeichnung"})
 _GENERIC_KEY_PATTERN = re.compile(r"^(col|column|field|item)\d+$", re.IGNORECASE)
+_DETAIL_FLOORPLANS = frozenset({"objectPage", "transaction", "cockpit", "wizard"})
+_FINANCIAL_SCREEN_PATTERN = re.compile(r"(^finance/|invoice|open-item|journal|payment|debitor|kreditor|bankkonto)", re.IGNORECASE)
+_INVENTORY_SCREEN_PATTERN = re.compile(r"(^lager/|stock|inventory|article)", re.IGNORECASE)
 
 
 def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
@@ -196,31 +199,62 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
       f"actions missing dangerLevel or permission: {', '.join(unclassified)}" if unclassified else
       ("no actions — gate skipped" if not actions else "OK"))
 
-    # ── Advisory ─────────────────────────────────────────────────────────────
+    # Additional mandatory Meridian gates
+    # 7. layout_metadata - Meridian floorplan, density and contextRail are mandatory
+    layout = definition.get("layout") or {}
+    missing_layout = [
+        key
+        for key in ("floorplan", "density", "contextRail")
+        if not layout.get(key)
+    ]
+    invalid_detail_rail = layout.get("floorplan") in _DETAIL_FLOORPLANS and layout.get("contextRail") == "none"
+    m("layout_metadata",
+      not missing_layout and not invalid_detail_rail,
+      f"layout missing Meridian metadata: {', '.join(missing_layout)}" if missing_layout else
+      (f"floorplan={layout.get('floorplan')} requires contextRail other than none" if invalid_detail_rail else "OK"))
 
-    # 7. sort_whitelist — every table with columns has ≥1 sortable
+    screen_id = definition.get("id", "")
+    expected_profile = (
+        "financial"
+        if definition.get("domain") == "finance" or _FINANCIAL_SCREEN_PATTERN.search(screen_id)
+        else "inventory"
+        if definition.get("domain") == "inventory" or _INVENTORY_SCREEN_PATTERN.search(screen_id)
+        else None
+    )
+    has_table_profile = not all_tables or bool(layout.get("tableProfile"))
+    profile_matches = not expected_profile or layout.get("tableProfile") == expected_profile
+    # 8. table_profile - table screens require a Meridian profile
+    m("table_profile",
+      has_table_profile and profile_matches,
+      "tables exist but layout.tableProfile is missing" if not has_table_profile else
+      (f"expected layout.tableProfile={expected_profile} for {screen_id}" if not profile_matches else
+       ("no tables - gate skipped" if not all_tables else "OK")))
+
+    # Advisory gates
+
+    # 9. sort_whitelist — every table with columns has ≥1 sortable
     no_sort = [t["key"] for t in all_tables if (t.get("columns") or []) and not any(c.get("sortable") for c in (t.get("columns") or []))]
     a("sort_whitelist", not all_tables or not no_sort, f"tables with no sortable column: {', '.join(no_sort)}" if no_sort else ("OK" if all_tables else "no tables"))
 
-    # 8. filter_columns — every table with columns has ≥1 filterable
+    # 10. filter_columns — every table with columns has ≥1 filterable
     no_filt = [t["key"] for t in all_tables if (t.get("columns") or []) and not any(c.get("filterable") for c in (t.get("columns") or []))]
     a("filter_columns", not all_tables or not no_filt, f"tables with no filterable column: {', '.join(no_filt)}" if no_filt else ("OK" if all_tables else "no tables"))
 
-    # 9. agent_contract — explicit businessPurpose preferred
+    # 11. agent_contract — explicit businessPurpose preferred
     has_explicit = bool((definition.get("agentContract") or {}).get("businessPurpose"))
     a("agent_contract", has_explicit, "explicit agentContract provided" if has_explicit else "no explicit agentContract — auto-generated only")
 
-    # 10. workflow_declared
+    # 12. workflow_declared
     needs_wf = definition.get("mode") in ("detail", "cockpit")
     has_wf = bool((definition.get("workflow") or {}).get("processKey")) or bool(definition.get("noWorkflowReason"))
     a("workflow_declared", not needs_wf or has_wf,
       "OK" if has_wf else (f"mode={definition.get('mode')} — gate skipped" if not needs_wf else "detail/cockpit screen missing workflow or noWorkflowReason"))
 
-    # 11. stable_test_selectors
+    # 13. stable_test_selectors
     has_sel = bool((definition.get("agentContract") or {}).get("testSelectors", {}).get("screenRoot"))
     a("stable_test_selectors", has_sel, "OK" if has_sel else "no explicit testSelectors.screenRoot (auto-generated only)")
 
-    # 12. table_query_contract — sortable/filterable keys must not be generic
+    # 14. table_query_contract — sortable/filterable keys must not be generic
     generic_cols = [
         f"{t['key']}.{c['key']}"
         for t in all_tables

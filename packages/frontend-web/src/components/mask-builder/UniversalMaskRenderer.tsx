@@ -97,7 +97,7 @@ function RenderFromPlan({
   formState?: UniversalFormState
   workflowState?: WorkflowState
 }): JSX.Element {
-  const classes = layoutClasses(plan.shell.layoutMode)
+  const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
   const effectivePayload = formState ? formState.values : payload
 
   return (
@@ -109,6 +109,10 @@ function RenderFromPlan({
       data-layout-mode={plan.shell.layoutMode}
       data-mobile-layout={plan.shell.mobileMode}
       data-render-plan-cache-key={plan.cacheKey}
+      data-floorplan={plan.shell.floorplan}
+      data-density={plan.shell.density}
+      data-context-rail={plan.shell.contextRail}
+      data-table-profile={plan.shell.tableProfile}
     >
       <ActionBarRenderer
         domain={plan.shell.domain}
@@ -116,6 +120,9 @@ function RenderFromPlan({
         title={plan.shell.title}
         subtitle={plan.shell.subtitle}
         actions={plan.actions}
+        floorplan={plan.shell.floorplan}
+        density={plan.shell.density}
+        contextRail={plan.shell.contextRail}
         headerClassName={classes.header}
         touchTargetClass={classes.touchTarget}
         onAction={onAction}
@@ -233,7 +240,7 @@ function RenderFromScreen({
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
 }): JSX.Element {
-  const classes = layoutClasses(screen.layout?.preferredMode ?? 'desktopDense')
+  const classes = layoutClasses(screen.layout?.preferredMode ?? 'desktopDense', screen.layout?.density ?? 'compact')
   const visibleActions = (screen.actions ?? []).filter(
     (action) => !action.permission || allowedPermissions.includes(action.permission),
   )
@@ -245,6 +252,10 @@ function RenderFromScreen({
       data-testid={`screen-${screen.id}`}
       data-layout-mode={screen.layout?.preferredMode ?? 'desktopDense'}
       data-mobile-layout={screen.layout?.mobileMode ?? 'mobileStack'}
+      data-floorplan={screen.layout?.floorplan ?? 'objectPage'}
+      data-density={screen.layout?.density ?? 'compact'}
+      data-context-rail={screen.layout?.contextRail ?? 'combined'}
+      data-table-profile={screen.layout?.tableProfile ?? 'standard'}
     >
       <ActionBarRenderer
         domain={screen.domain}
@@ -252,6 +263,9 @@ function RenderFromScreen({
         title={screen.title}
         subtitle={screen.subtitle}
         actions={visibleActions}
+        floorplan={screen.layout?.floorplan ?? 'objectPage'}
+        density={screen.layout?.density ?? 'compact'}
+        contextRail={screen.layout?.contextRail ?? 'combined'}
         headerClassName={classes.header}
         touchTargetClass={classes.touchTarget}
         onAction={onAction}
@@ -278,6 +292,7 @@ function RenderFromScreen({
             virtualized: table.virtualized ?? true,
             rowHeight: table.rowHeight ?? 52,
             serverPagination: table.serverPagination ?? true,
+            tableProfile: screen.layout?.tableProfile ?? 'standard',
           }}
           rows={tables[table.key] ?? []}
         />

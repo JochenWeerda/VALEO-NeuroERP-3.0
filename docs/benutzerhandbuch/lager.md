@@ -47,7 +47,7 @@ nachvollziehbar dokumentiert.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **33** App-Routen
+Vollständige Abdeckung: **34** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
@@ -77,6 +77,7 @@ Vollständige Abdeckung: **33** App-Routen
 | Rueckverfolgbarkeit | `/lager/rueckverfolgbarkeit` | `@/pages/lager/rueckverfolgbarkeit` |
 | Silo Mobil | `/lager/silo-mobil` | `@/pages/lager/silo-mobil` |
 | Silo Uebersicht | `/lager/silo-uebersicht` | `@/pages/lager/silo-uebersicht` |
+| :Id | `/lager/stock-movement/:id` | `@/pages/lager/lagerbewegung-native` |
 | Terminal | `/lager/terminal` | `@/pages/lager/terminal` |
 | Umlagerung | `/lager/umlagerung` | `@/pages/lager/lagerbewegungen` |
 | Silo | `/silo` | `@/pages/silo/kapazitaeten` |
@@ -93,6 +94,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Inventory
 
 **Route:** `/inventory` · **Modul:** `@/pages/inventory`
+
+**Ziel:** Inventory in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Inventory — Bedienoberfläche](img/inventory.webp)
+
 
 **Schritte:**
 
@@ -115,6 +121,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/inventory-dashboard` · **Modul:** `@/pages/inventory-dashboard`
 
+**Ziel:** Inventory Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Inventory Dashboard — Bedienoberfläche](img/inventory-dashboard.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Inventory Dashboard** öffnen (`/inventory-dashboard`).
@@ -135,6 +146,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Inventory Reports
 
 **Route:** `/inventory-reports` · **Modul:** `@/pages/inventory-reports`
+
+**Ziel:** Inventory Reports in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Inventory Reports — Bedienoberfläche](img/inventory-reports.webp)
+
 
 **Schritte:**
 
@@ -157,6 +173,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/inventory/adjust` · **Modul:** `@/pages/inventory`
 
+**Ziel:** Adjust in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Adjust — Bedienoberfläche](img/inventory__adjust.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Adjust** öffnen (`/inventory/adjust`).
@@ -177,6 +198,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Epcis
 
 **Route:** `/inventory/epcis` · **Modul:** `@/pages/inventory/epcis/index`
+
+**Ziel:** Epcis in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Epcis — Bedienoberfläche](img/inventory__epcis.webp)
+
 
 **Schritte:**
 
@@ -199,6 +225,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager` · **Modul:** `@/pages/lager/bestandsuebersicht`
 
+**Ziel:** Lager in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lager — Bedienoberfläche](img/lager.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lager** öffnen (`/lager`).
@@ -219,6 +250,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Auslagerung
 
 **Route:** `/lager/auslagerung` · **Modul:** `@/pages/lager/auslagerung`
+
+**Ziel:** Auslagerung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auslagerung — Bedienoberfläche](img/lager__auslagerung.webp)
+
 
 **Schritte:**
 
@@ -241,6 +277,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/bestandsbewertung` · **Modul:** `@/pages/lager/bestandsbewertung`
 
+**Ziel:** Bestandsbewertung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestandsbewertung — Bedienoberfläche](img/lager__bestandsbewertung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestandsbewertung** öffnen (`/lager/bestandsbewertung`).
@@ -261,6 +302,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Bestandskorrektur
 
 **Route:** `/lager/bestandskorrektur` · **Modul:** `@/pages/lager/bestandskorrektur`
+
+**Ziel:** Bestandskorrektur in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestandskorrektur — Bedienoberfläche](img/lager__bestandskorrektur.webp)
+
 
 **Schritte:**
 
@@ -283,6 +329,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/bestandsuebersicht` · **Modul:** `@/pages/lager/bestandsuebersicht`
 
+**Ziel:** Bestandsuebersicht in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestandsuebersicht — Bedienoberfläche](img/lager__bestandsuebersicht.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestandsuebersicht** öffnen (`/lager/bestandsuebersicht`).
@@ -303,6 +354,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Einlagerung
 
 **Route:** `/lager/einlagerung` · **Modul:** `@/pages/lager/einlagerung`
+
+**Ziel:** Einlagerung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einlagerung — Bedienoberfläche](img/lager__einlagerung.webp)
+
 
 **Schritte:**
 
@@ -325,6 +381,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/gs1-scanner` · **Modul:** `@/pages/lager/gs1-scanner`
 
+**Ziel:** Gs1 Scanner in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gs1 Scanner — Bedienoberfläche](img/lager__gs1-scanner.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Gs1 Scanner** öffnen (`/lager/gs1-scanner`).
@@ -345,6 +406,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Inventur
 
 **Route:** `/lager/inventur` · **Modul:** `@/pages/lager/inventur`
+
+**Ziel:** Inventur in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Inventur — Bedienoberfläche](img/lager__inventur.webp)
+
 
 **Schritte:**
 
@@ -367,6 +433,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/kommissionierung` · **Modul:** `@/pages/lager/kommissionierung`
 
+**Ziel:** Kommissionierung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kommissionierung — Bedienoberfläche](img/lager__kommissionierung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kommissionierung** öffnen (`/lager/kommissionierung`).
@@ -387,6 +458,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lagerbewegungen
 
 **Route:** `/lager/lagerbewegungen` · **Modul:** `@/pages/lager/lagerbewegungen`
+
+**Ziel:** Lagerbewegungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lagerbewegungen — Bedienoberfläche](img/lager__lagerbewegungen.webp)
+
 
 **Schritte:**
 
@@ -409,6 +485,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/lagerplaetze` · **Modul:** `@/pages/lager/lagerplaetze`
 
+**Ziel:** Lagerplaetze in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lagerplaetze — Bedienoberfläche](img/lager__lagerplaetze.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lagerplaetze** öffnen (`/lager/lagerplaetze`).
@@ -429,6 +510,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Massebilanz
 
 **Route:** `/lager/massebilanz` · **Modul:** `@/pages/lager/massebilanz`
+
+**Ziel:** Massebilanz in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Massebilanz — Bedienoberfläche](img/lager__massebilanz.webp)
+
 
 **Schritte:**
 
@@ -451,6 +537,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/materialfluss` · **Modul:** `@/pages/lager/materialfluss`
 
+**Ziel:** Materialfluss in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Materialfluss — Bedienoberfläche](img/lager__materialfluss.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Materialfluss** öffnen (`/lager/materialfluss`).
@@ -471,6 +562,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Materialfluss Visualisierung
 
 **Route:** `/lager/materialfluss-visualisierung` · **Modul:** `@/pages/lager/materialfluss-visualisierung`
+
+**Ziel:** Materialfluss Visualisierung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Materialfluss Visualisierung — Bedienoberfläche](img/lager__materialfluss-visualisierung.webp)
+
 
 **Schritte:**
 
@@ -493,6 +589,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/partiestamm` · **Modul:** `@/pages/lager/partiestamm`
 
+**Ziel:** Partiestamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Partiestamm — Bedienoberfläche](img/lager__partiestamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Partiestamm** öffnen (`/lager/partiestamm`).
@@ -513,6 +614,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Permanente Inventur
 
 **Route:** `/lager/permanente-inventur` · **Modul:** `@/pages/lager/permanente-inventur`
+
+**Ziel:** Permanente Inventur in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Permanente Inventur — Bedienoberfläche](img/lager__permanente-inventur.webp)
+
 
 **Schritte:**
 
@@ -535,6 +641,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/qs-leitstand` · **Modul:** `@/pages/lager/qs-leitstand`
 
+**Ziel:** Qs Leitstand in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Qs Leitstand — Bedienoberfläche](img/lager__qs-leitstand.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Qs Leitstand** öffnen (`/lager/qs-leitstand`).
@@ -555,6 +666,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rueckverfolgbarkeit
 
 **Route:** `/lager/rueckverfolgbarkeit` · **Modul:** `@/pages/lager/rueckverfolgbarkeit`
+
+**Ziel:** Rueckverfolgbarkeit in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rueckverfolgbarkeit — Bedienoberfläche](img/lager__rueckverfolgbarkeit.webp)
+
 
 **Schritte:**
 
@@ -577,6 +693,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/silo-mobil` · **Modul:** `@/pages/lager/silo-mobil`
 
+**Ziel:** Silo Mobil in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Silo Mobil — Bedienoberfläche](img/lager__silo-mobil.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Silo Mobil** öffnen (`/lager/silo-mobil`).
@@ -598,6 +719,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/silo-uebersicht` · **Modul:** `@/pages/lager/silo-uebersicht`
 
+**Ziel:** Silo Uebersicht in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Silo Uebersicht — Bedienoberfläche](img/lager__silo-uebersicht.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Silo Uebersicht** öffnen (`/lager/silo-uebersicht`).
@@ -615,9 +741,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### :Id
+
+**Route:** `/lager/stock-movement/:id` · **Modul:** `@/pages/lager/lagerbewegung-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/lager__stock-movement__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/lager/stock-movement/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Terminal
 
 **Route:** `/lager/terminal` · **Modul:** `@/pages/lager/terminal`
+
+**Ziel:** Terminal in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Terminal — Bedienoberfläche](img/lager__terminal.webp)
+
 
 **Schritte:**
 
@@ -640,6 +797,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/lager/umlagerung` · **Modul:** `@/pages/lager/lagerbewegungen`
 
+**Ziel:** Umlagerung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Umlagerung — Bedienoberfläche](img/lager__umlagerung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Umlagerung** öffnen (`/lager/umlagerung`).
@@ -660,6 +822,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Silo
 
 **Route:** `/silo` · **Modul:** `@/pages/silo/kapazitaeten`
+
+**Ziel:** Silo in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Silo — Bedienoberfläche](img/silo.webp)
+
 
 **Schritte:**
 
@@ -682,6 +849,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/silo/kapazitaeten` · **Modul:** `@/pages/silo/kapazitaeten`
 
+**Ziel:** Kapazitaeten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kapazitaeten — Bedienoberfläche](img/silo__kapazitaeten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kapazitaeten** öffnen (`/silo/kapazitaeten`).
@@ -702,6 +874,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Stock Management
 
 **Route:** `/stock-management` · **Modul:** `@/pages/stock-management`
+
+**Ziel:** Stock Management in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stock Management — Bedienoberfläche](img/stock-management.webp)
+
 
 **Schritte:**
 
@@ -724,6 +901,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verladung` · **Modul:** `@/pages/verladung/liste`
 
+**Ziel:** Verladung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Verladung — Bedienoberfläche](img/verladung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Verladung** öffnen (`/verladung`).
@@ -745,6 +927,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/verladung/liste` · **Modul:** `@/pages/verladung/liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/verladung__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/verladung/liste`).
@@ -765,6 +952,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lkw Beladung
 
 **Route:** `/verladung/lkw-beladung` · **Modul:** `@/pages/verladung/lkw-beladung`
+
+**Ziel:** Lkw Beladung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lkw Beladung — Bedienoberfläche](img/verladung__lkw-beladung.webp)
+
 
 **Schritte:**
 

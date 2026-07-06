@@ -1,7 +1,10 @@
 # VALEO NeuroERP 3.0
 
+![Quality Gate](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/quality-gate.yml/badge.svg?branch=main)
+![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg?branch=main)
+![Universal Mask CI](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/universal-mask-ci.yml/badge.svg?branch=main)
+![Runtime Sweep](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/runtime-sweep.yml/badge.svg?branch=main)
 ![Deploy Staging](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml/badge.svg)
-![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Version](https://img.shields.io/badge/version-3.0.0--beta-orange)
 
@@ -22,18 +25,19 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-06-28` |
+| Doku-Stand | `2026-07-05` |
 | Produktreife | **Beta** — Kernprozesse operativ, externe Go-Live-Gates offen |
+| CI (GitHub Actions, `main`) | **quality-gate, security-scan, universal-mask-ci, runtime-sweep grün** — Badges oben, Evidenz: `artifacts/ci-green-evidence.md` |
 | Frontend TypeScript | 0 Fehler (`tsc --noEmit`) |
-| Backend-Tests | > 9 500 gesammelt; reine Service-Logik-Tests Waves 83–101 (+380) |
-| Kritische Coverage-Ratchets | 33 Pfade grün (`scripts/check_critical_backend_coverage.py`) |
-| Backend-Gesamtabdeckung | 64,85 % (Ziel langfristig ≥ 80 %) |
-| OpenAPI-Routen | 3 041 Pfade mit `summary=` (100 %) |
-| Alembic | 1 Head (`final_single_head_merge_20260626`) — 55+ Parallel-Branches geschlossen |
+| Backend-Tests | **11 810 passed** im CI-Volllauf (2026-07-05), 0 Fehler |
+| Kritische Coverage-Ratchets | grün, **only-up-Politik** (`config/coverage_ratchet_baseline.json`, Absenkung = CI-Fehler) |
+| Backend-Gesamtabdeckung | 65,66 % (Ziel langfristig ≥ 80 %) |
+| OpenAPI-Routen | 2 533 Pfade / 3 274 Operationen mit `summary=` (100 %) |
+| Alembic | 1 Head (`runtime_sweep_repair_20260702`), Fresh-DB-Drift geschlossen |
+| Runtime-API-Sweep | **Nightly-Gate 0×5xx** über alle parameterlosen GET-Routen gegen frisch migrierte DB (`scripts/api_runtime_sweep.py`) |
+| Audit-Readiness | ISO-27001 Annex A 93/93 + SOC-2-TSC-Matrix (`config/audit/`), Orchestrator `audit-simulation.yml` |
 | Domänentiefe | DOM-\*-004 abgeschlossen: Kontrakte, O2C, FIBU, P2P, Nachweisraum, Lieferkette |
-| Architektur-Doku | arc42 (12 Kapitel), C4 Context/Container/Components, 036 ADRs |
-| Benutzerhandbuch | DOC-USER-MANUAL-004 Wave 17 — vollständig |
-| Runtime-API-Sweep | 1 059 GET-Endpunkte live getestet; bekannte 5xx repo-seitig geschlossen |
+| Architektur-Doku | arc42 (12 Kapitel), C4 Context/Container/Components, 42 ADRs |
 | Workflow-Cockpit | MVP + Retry/Kompensation + NATS-Projektor + Dead-Letter-Sicht |
 
 ---

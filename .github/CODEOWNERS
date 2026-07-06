@@ -29,3 +29,21 @@
 /scripts/docs-staleness-check.cjs       @JochenWeerda
 /scripts/generate_openapi.py            @JochenWeerda
 /scripts/generate_mcp_tool_reference.py @JochenWeerda
+
+# --- Sicherheits-/finanzkritische Pfade (SPEC-P0-06) ------------------------
+# GoBD-/fiskalrelevante Buchungslogik, Kassen, Migrationen und CI-Definitionen
+# brauchen nachweisbare Aenderungskontrolle (ISO 27001 A.8.32, SOC 2 CC8.1).
+/app/services/finance*                  @JochenWeerda
+/app/services/payment*                  @JochenWeerda
+/app/services/sales_invoice*            @JochenWeerda
+/app/api/v1/endpoints/finance*          @JochenWeerda
+/app/api/v1/endpoints/payment*          @JochenWeerda
+/app/api/v1/endpoints/pos*              @JochenWeerda
+/app/services/pos*                      @JochenWeerda
+/alembic/                               @JochenWeerda
+/.github/                               @JochenWeerda
+/app/core/security*                     @JochenWeerda
+/app/core/tenant*                       @JochenWeerda
+/app/middleware/                        @JochenWeerda
+/scripts/check_production_readiness.py  @JochenWeerda
+/scripts/purge_pii_history.sh           @JochenWeerda

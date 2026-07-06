@@ -25,12 +25,13 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **18** App-Routen
+Vollständige Abdeckung: **19** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
 | Bewerbungen | `/personal/bewerbungen` | `@/pages/personal/bewerbungen` |
+| Hrm Freigaben | `/personal/hrm-freigaben` | `@/pages/personal/hrm-operations-gates` |
 | Hrm Operations Gates | `/personal/hrm-operations-gates` | `@/pages/personal/hrm-operations-gates` |
 | Mitarbeiter | `/personal/mitarbeiter` | `@/pages/personal/mitarbeiter-liste` |
 | Mitarbeiter Liste | `/personal/mitarbeiter-liste` | `@/pages/personal/mitarbeiter-liste` |
@@ -57,6 +58,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/bewerbungen` · **Modul:** `@/pages/personal/bewerbungen`
 
+**Ziel:** Bewerbungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bewerbungen — Bedienoberfläche](img/personal__bewerbungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bewerbungen** öffnen (`/personal/bewerbungen`).
@@ -74,9 +80,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### Hrm Freigaben
+
+**Route:** `/personal/hrm-freigaben` · **Modul:** `@/pages/personal/hrm-operations-gates`
+
+**Ziel:** Hrm Freigaben in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Hrm Freigaben — Bedienoberfläche](img/personal__hrm-freigaben.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Hrm Freigaben** öffnen (`/personal/hrm-freigaben`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Hrm Operations Gates
 
 **Route:** `/personal/hrm-operations-gates` · **Modul:** `@/pages/personal/hrm-operations-gates`
+
+**Ziel:** Hrm Operations Gates in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Hrm Operations Gates — Bedienoberfläche](img/personal__hrm-operations-gates.webp)
+
 
 **Schritte:**
 
@@ -99,6 +136,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/mitarbeiter` · **Modul:** `@/pages/personal/mitarbeiter-liste`
 
+**Ziel:** Mitarbeiter in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mitarbeiter — Bedienoberfläche](img/personal__mitarbeiter.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Mitarbeiter** öffnen (`/personal/mitarbeiter`).
@@ -119,6 +161,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Mitarbeiter Liste
 
 **Route:** `/personal/mitarbeiter-liste` · **Modul:** `@/pages/personal/mitarbeiter-liste`
+
+**Ziel:** Mitarbeiter Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mitarbeiter Liste — Bedienoberfläche](img/personal__mitarbeiter-liste.webp)
+
 
 **Schritte:**
 
@@ -141,6 +188,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/mitarbeiter-stamm` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
 
+**Ziel:** Mitarbeiter Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mitarbeiter Stamm — Bedienoberfläche](img/personal__mitarbeiter-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Mitarbeiter Stamm** öffnen (`/personal/mitarbeiter-stamm`).
@@ -161,6 +213,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/personal/mitarbeiter/:id` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/personal__mitarbeiter__demo-1.webp)
+
 
 **Schritte:**
 
@@ -183,6 +240,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/mitarbeiter/neu` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/personal__mitarbeiter__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/personal/mitarbeiter/neu`).
@@ -203,6 +265,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Onboarding
 
 **Route:** `/personal/onboarding` · **Modul:** `@/pages/personal/onboarding`
+
+**Ziel:** Onboarding in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Onboarding — Bedienoberfläche](img/personal__onboarding.webp)
+
 
 **Schritte:**
 
@@ -225,6 +292,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/organigramm` · **Modul:** `@/pages/personal/organigramm`
 
+**Ziel:** Organigramm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Organigramm — Bedienoberfläche](img/personal__organigramm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Organigramm** öffnen (`/personal/organigramm`).
@@ -245,6 +317,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Qualifikationen
 
 **Route:** `/personal/qualifikationen` · **Modul:** `@/pages/personal/qualifikationen`
+
+**Ziel:** Qualifikationen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Qualifikationen — Bedienoberfläche](img/personal__qualifikationen.webp)
+
 
 **Schritte:**
 
@@ -267,6 +344,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/schulung-neu` · **Modul:** `@/pages/personal/schulung-neu`
 
+**Ziel:** Schulung Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Schulung Neu — Bedienoberfläche](img/personal__schulung-neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Schulung Neu** öffnen (`/personal/schulung-neu`).
@@ -287,6 +369,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Schulungen
 
 **Route:** `/personal/schulungen` · **Modul:** `@/pages/personal/schulungen`
+
+**Ziel:** Schulungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Schulungen — Bedienoberfläche](img/personal__schulungen.webp)
+
 
 **Schritte:**
 
@@ -309,6 +396,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/stundenzettel` · **Modul:** `@/pages/personal/stundenzettel`
 
+**Ziel:** Stundenzettel in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stundenzettel — Bedienoberfläche](img/personal__stundenzettel.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Stundenzettel** öffnen (`/personal/stundenzettel`).
@@ -329,6 +421,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Stundenzettel Liste
 
 **Route:** `/personal/stundenzettel-liste` · **Modul:** `@/pages/personal/stundenzettel-liste`
+
+**Ziel:** Stundenzettel Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stundenzettel Liste — Bedienoberfläche](img/personal__stundenzettel-liste.webp)
+
 
 **Schritte:**
 
@@ -351,6 +448,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/personal/stundenzettel/:id` · **Modul:** `@/pages/personal/stundenzettel`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/personal__stundenzettel__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/personal/stundenzettel/:id`).
@@ -371,6 +473,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Zeiterfassung
 
 **Route:** `/personal/zeiterfassung` · **Modul:** `@/pages/personal/zeiterfassung`
+
+**Ziel:** Zeiterfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zeiterfassung — Bedienoberfläche](img/personal__zeiterfassung.webp)
+
 
 **Schritte:**
 
@@ -393,6 +500,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/schichtplan` · **Modul:** `@/pages/schichtplan/liste`
 
+**Ziel:** Schichtplan in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Schichtplan — Bedienoberfläche](img/schichtplan.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Schichtplan** öffnen (`/schichtplan`).
@@ -413,6 +525,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/schichtplan/liste` · **Modul:** `@/pages/schichtplan/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/schichtplan__liste.webp)
+
 
 **Schritte:**
 

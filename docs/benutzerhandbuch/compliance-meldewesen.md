@@ -74,6 +74,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/bvl-meldungen` · **Modul:** `@/pages/compliance/bvl-umsatzmeldung`
 
+**Ziel:** Bvl Meldungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bvl Meldungen — Bedienoberfläche](img/compliance__bvl-meldungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bvl Meldungen** öffnen (`/compliance/bvl-meldungen`).
@@ -94,6 +99,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Bvl Umsatzmeldung
 
 **Route:** `/compliance/bvl-umsatzmeldung` · **Modul:** `@/pages/compliance/bvl-umsatzmeldung`
+
+**Ziel:** Bvl Umsatzmeldung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bvl Umsatzmeldung — Bedienoberfläche](img/compliance__bvl-umsatzmeldung.webp)
+
 
 **Schritte:**
 
@@ -116,6 +126,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/cross-compliance` · **Modul:** `@/pages/compliance/cross-compliance`
 
+**Ziel:** Cross Compliance in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Cross Compliance — Bedienoberfläche](img/compliance__cross-compliance.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Cross Compliance** öffnen (`/compliance/cross-compliance`).
@@ -136,6 +151,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Datenpannen
 
 **Route:** `/compliance/datenpannen` · **Modul:** `@/pages/compliance/datenpannen`
+
+**Ziel:** Datenpannen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Datenpannen — Bedienoberfläche](img/compliance__datenpannen.webp)
+
 
 **Schritte:**
 
@@ -158,6 +178,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/enni-meldungen` · **Modul:** `@/pages/compliance/enni-meldungen`
 
+**Ziel:** Enni Meldungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Enni Meldungen — Bedienoberfläche](img/compliance__enni-meldungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Enni Meldungen** öffnen (`/compliance/enni-meldungen`).
@@ -178,6 +203,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Enni Neu
 
 **Route:** `/compliance/enni-neu` · **Modul:** `@/pages/compliance/enni-meldungen`
+
+**Ziel:** Enni Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Enni Neu — Bedienoberfläche](img/compliance__enni-neu.webp)
+
 
 **Schritte:**
 
@@ -200,6 +230,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/export-pruefprotokoll` · **Modul:** `@/pages/compliance/export-pruefprotokoll`
 
+**Ziel:** Export Pruefprotokoll in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Export Pruefprotokoll — Bedienoberfläche](img/compliance__export-pruefprotokoll.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Export Pruefprotokoll** öffnen (`/compliance/export-pruefprotokoll`).
@@ -220,6 +255,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Gelangensbestaetigung
 
 **Route:** `/compliance/gelangensbestaetigung` · **Modul:** `@/pages/compliance/gelangensbestaetigung`
+
+**Ziel:** Gelangensbestaetigung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gelangensbestaetigung — Bedienoberfläche](img/compliance__gelangensbestaetigung.webp)
+
 
 **Schritte:**
 
@@ -242,6 +282,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/intrastat` · **Modul:** `@/pages/compliance/intrastat`
 
+**Ziel:** Intrastat in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Intrastat — Bedienoberfläche](img/compliance__intrastat.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Intrastat** öffnen (`/compliance/intrastat`).
@@ -262,6 +307,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lksg
 
 **Route:** `/compliance/lksg` · **Modul:** `@/pages/compliance/lksg`
+
+**Ziel:** Lksg in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lksg — Bedienoberfläche](img/compliance__lksg.webp)
+
 
 **Schritte:**
 
@@ -284,6 +334,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/meldewesen-konsole` · **Modul:** `@/pages/compliance/meldewesen-konsole`
 
+**Ziel:** Meldewesen Konsole in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Meldewesen Konsole — Bedienoberfläche](img/compliance__meldewesen-konsole.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Meldewesen Konsole** öffnen (`/compliance/meldewesen-konsole`).
@@ -304,6 +359,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Pcn Liste
 
 **Route:** `/compliance/pcn-liste` · **Modul:** `@/pages/compliance/pcn-liste`
+
+**Ziel:** Pcn Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Pcn Liste — Bedienoberfläche](img/compliance__pcn-liste.webp)
+
 
 **Schritte:**
 
@@ -326,6 +386,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/pcn-ufi` · **Modul:** `@/pages/compliance/pcn-ufi`
 
+**Ziel:** Pcn Ufi in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Pcn Ufi — Bedienoberfläche](img/compliance__pcn-ufi.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Pcn Ufi** öffnen (`/compliance/pcn-ufi`).
@@ -346,6 +411,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Qs Checkliste
 
 **Route:** `/compliance/qs-checkliste` · **Modul:** `@/pages/compliance/qs-checkliste`
+
+**Ziel:** Qs Checkliste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Qs Checkliste — Bedienoberfläche](img/compliance__qs-checkliste.webp)
+
 
 **Schritte:**
 
@@ -368,6 +438,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/saatgut-nachbau` · **Modul:** `@/pages/compliance/saatgut-nachbau`
 
+**Ziel:** Saatgut Nachbau in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Saatgut Nachbau — Bedienoberfläche](img/compliance__saatgut-nachbau.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Saatgut Nachbau** öffnen (`/compliance/saatgut-nachbau`).
@@ -388,6 +463,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Saatgut Nachbau Neu
 
 **Route:** `/compliance/saatgut-nachbau-neu` · **Modul:** `@/pages/compliance/saatgut-nachbau`
+
+**Ziel:** Saatgut Nachbau Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Saatgut Nachbau Neu — Bedienoberfläche](img/compliance__saatgut-nachbau-neu.webp)
+
 
 **Schritte:**
 
@@ -410,6 +490,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/sachkunde-neu` · **Modul:** `@/pages/compliance/sachkunde-register`
 
+**Ziel:** Sachkunde Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Sachkunde Neu — Bedienoberfläche](img/compliance__sachkunde-neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Sachkunde Neu** öffnen (`/compliance/sachkunde-neu`).
@@ -430,6 +515,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Sachkunde Register
 
 **Route:** `/compliance/sachkunde-register` · **Modul:** `@/pages/compliance/sachkunde-register`
+
+**Ziel:** Sachkunde Register in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Sachkunde Register — Bedienoberfläche](img/compliance__sachkunde-register.webp)
+
 
 **Schritte:**
 
@@ -452,6 +542,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/sanktionspruefung` · **Modul:** `@/pages/compliance/sanktionspruefung`
 
+**Ziel:** Sanktionspruefung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Sanktionspruefung — Bedienoberfläche](img/compliance__sanktionspruefung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Sanktionspruefung** öffnen (`/compliance/sanktionspruefung`).
@@ -472,6 +567,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Verarbeitungsverzeichnis
 
 **Route:** `/compliance/verarbeitungsverzeichnis` · **Modul:** `@/pages/compliance/verarbeitungsverzeichnis`
+
+**Ziel:** Verarbeitungsverzeichnis in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Verarbeitungsverzeichnis — Bedienoberfläche](img/compliance__verarbeitungsverzeichnis.webp)
+
 
 **Schritte:**
 
@@ -494,6 +594,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/compliance/vvvo-register` · **Modul:** `@/pages/compliance/vvvo-register`
 
+**Ziel:** Vvvo Register in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Vvvo Register — Bedienoberfläche](img/compliance__vvvo-register.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Vvvo Register** öffnen (`/compliance/vvvo-register`).
@@ -514,6 +619,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Zulassungen Register
 
 **Route:** `/compliance/zulassungen-register` · **Modul:** `@/pages/compliance/zulassungen-register`
+
+**Ziel:** Zulassungen Register in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zulassungen Register — Bedienoberfläche](img/compliance__zulassungen-register.webp)
+
 
 **Schritte:**
 
@@ -536,6 +646,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/foerderung` · **Modul:** `@/pages/foerderung/liste`
 
+**Ziel:** Foerderung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Foerderung — Bedienoberfläche](img/foerderung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Foerderung** öffnen (`/foerderung`).
@@ -556,6 +671,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Antrag
 
 **Route:** `/foerderung/antrag` · **Modul:** `@/pages/foerderung/antrag`
+
+**Ziel:** Antrag in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Antrag — Bedienoberfläche](img/foerderung__antrag.webp)
+
 
 **Schritte:**
 
@@ -578,6 +698,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/foerderung/antrag/:id` · **Modul:** `@/pages/foerderung/antrag`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/foerderung__antrag__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/foerderung/antrag/:id`).
@@ -598,6 +723,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/foerderung/liste` · **Modul:** `@/pages/foerderung/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/foerderung__liste.webp)
+
 
 **Schritte:**
 
@@ -620,6 +750,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/nachhaltigkeit/biodiversitaet` · **Modul:** `@/pages/nachhaltigkeit/biodiversitaet`
 
+**Ziel:** Biodiversitaet in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Biodiversitaet — Bedienoberfläche](img/nachhaltigkeit__biodiversitaet.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Biodiversitaet** öffnen (`/nachhaltigkeit/biodiversitaet`).
@@ -640,6 +775,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Co2 Bilanz
 
 **Route:** `/nachhaltigkeit/co2-bilanz` · **Modul:** `@/pages/nachhaltigkeit/co2-bilanz`
+
+**Ziel:** Co2 Bilanz in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Co2 Bilanz — Bedienoberfläche](img/nachhaltigkeit__co2-bilanz.webp)
+
 
 **Schritte:**
 
@@ -662,6 +802,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/nachhaltigkeit/esg-report` · **Modul:** `@/pages/nachhaltigkeit/esg-report`
 
+**Ziel:** Esg Report in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Esg Report — Bedienoberfläche](img/nachhaltigkeit__esg-report.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Esg Report** öffnen (`/nachhaltigkeit/esg-report`).
@@ -682,6 +827,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Eudr Compliance
 
 **Route:** `/nachhaltigkeit/eudr-compliance` · **Modul:** `@/pages/nachhaltigkeit/eudr-compliance`
+
+**Ziel:** Eudr Compliance in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Eudr Compliance — Bedienoberfläche](img/nachhaltigkeit__eudr-compliance.webp)
+
 
 **Schritte:**
 
@@ -704,6 +854,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/subventionen/dashboard` · **Modul:** `@/pages/subventionen/dashboard`
 
+**Ziel:** Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Dashboard — Bedienoberfläche](img/subventionen__dashboard.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Dashboard** öffnen (`/subventionen/dashboard`).
@@ -724,6 +879,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Zertifikate
 
 **Route:** `/zertifikate` · **Modul:** `@/pages/zertifikate/liste`
+
+**Ziel:** Zertifikate in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zertifikate — Bedienoberfläche](img/zertifikate.webp)
+
 
 **Schritte:**
 
@@ -746,6 +906,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/zertifikate/:id` · **Modul:** `@/pages/zertifikate/liste`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/zertifikate__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/zertifikate/:id`).
@@ -767,6 +932,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/zertifikate/liste` · **Modul:** `@/pages/zertifikate/liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/zertifikate__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/zertifikate/liste`).
@@ -787,6 +957,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/zertifikate/neu` · **Modul:** `@/pages/zertifikate/liste`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/zertifikate__neu.webp)
+
 
 **Schritte:**
 

@@ -21,6 +21,7 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 | Error-Handling & Mutation-Invarianten | [Konventionen](konventionen.md) |
 | pytest, Vitest, Playwright | [Test-Strategie](test-strategie.md) |
 | Mask Runtime API (ScreenDefinition, Readiness, ActionRuntime) | [Mask Runtime API](mask-runtime-api.md) |
+| Agent-Handbuch (Prozessketten, Masken-API, Automatisierung) | [Agent-Handbuch](../agent-handbuch/index.md) |
 | Backend-Service-Module (Inventar) | [Service-Inventar](service-inventory.md) |
 | Docker-Container (Inventar) | [Container-Inventar](container-inventory.md) |
 

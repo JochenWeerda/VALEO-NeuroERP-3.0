@@ -893,7 +893,7 @@ class PreisabweichungFreigabeIn(_BM):
     grund: _Opt[str] = None
 
 
-@router.post("/orders/{auftrag_id}/ab-transition", summary="Auftragsbestätigung Status wechseln")
+@router.post("/orders/{auftrag_id}/ab-transition", response_model=dict, summary="Auftragsbestätigung Status wechseln")
 def ab_transition_endpoint(
     auftrag_id: str,
     body: ABTransitionIn,
@@ -909,7 +909,7 @@ def ab_transition_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/delivery-notes/{ls_id}/advance", summary="Lieferschein-Status vorwärts")
+@router.post("/delivery-notes/{ls_id}/advance", response_model=dict, summary="Lieferschein-Status vorwärts")
 def ls_advance_endpoint(
     ls_id: str,
     body: LSAdvanceIn,
@@ -925,7 +925,7 @@ def ls_advance_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/orders/{auftrag_id}/preisabweichung", status_code=201, summary="Preisabweichung prüfen")
+@router.post("/orders/{auftrag_id}/preisabweichung", response_model=dict, status_code=201, summary="Preisabweichung prüfen")
 def pruefe_preisabweichung_endpoint(
     auftrag_id: str,
     body: PreisabweichungIn,
@@ -942,7 +942,7 @@ def pruefe_preisabweichung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/preisabweichungen/{abweichung_id}/freigabe", summary="Preisabweichung freigeben/ablehnen")
+@router.post("/preisabweichungen/{abweichung_id}/freigabe", response_model=dict, summary="Preisabweichung freigeben/ablehnen")
 def freigabe_preisabweichung_endpoint(
     abweichung_id: str,
     body: PreisabweichungFreigabeIn,

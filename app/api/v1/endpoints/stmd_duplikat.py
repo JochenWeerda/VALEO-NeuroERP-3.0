@@ -30,7 +30,7 @@ class DuplikatTreffer(BaseModel):
 
 
 @router.get(
-    "/business-partner",
+    "/business-partner", response_model=dict,
     summary="Dubletten-Check Business Partner (UST-ID, Name, Adresse) — STMD-DUP-001",
 )
 def check_bp_dubletten(
@@ -127,7 +127,7 @@ def check_bp_dubletten(
 
 
 @router.get(
-    "/artikel",
+    "/artikel", response_model=dict,
     summary="Dubletten-Check Artikel (EAN, Name+Einheit) — STMD-DUP-001",
 )
 def check_artikel_dubletten(
@@ -185,7 +185,7 @@ def check_artikel_dubletten(
 
 
 @router.post(
-    "/zusammenfuehren",
+    "/zusammenfuehren", response_model=dict,
     summary="Dubletten zusammenführen (Master bleibt, Duplikat wird deaktiviert)",
     status_code=200,
 )

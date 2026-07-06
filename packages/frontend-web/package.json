@@ -45,7 +45,11 @@
     "test:e2e:smoke-report": "node scripts/smoke-report-html.mjs",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "screenshots:readme": "npx tsx scripts/capture-readme-screenshots.ts"
+    "screenshots:readme": "npx tsx scripts/capture-readme-screenshots.ts",
+    "handbuch:screenshots": "playwright test tests/e2e/handbuch-screenshots.spec.ts --project=chromium",
+    "handbuch:screenshots:full": "playwright test tests/e2e/handbuch-screenshots.spec.ts --project=chromium --workers=1",
+    "handbuch:qc": "python ../../scripts/handbuch_screenshot_qc.py process",
+    "handbuch:review": "python ../../scripts/handbuch_screenshot_qc.py review-html"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

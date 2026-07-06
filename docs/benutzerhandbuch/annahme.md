@@ -83,6 +83,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/agrar/wetter/prognose` · **Modul:** `@/pages/agrar/wetter/prognose`
 
+**Ziel:** Prognose in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Prognose — Bedienoberfläche](img/agrar__wetter__prognose.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Prognose** öffnen (`/agrar/wetter/prognose`).
@@ -103,6 +108,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Abrechnung
 
 **Route:** `/annahme/abrechnung` · **Modul:** `@/pages/annahme/abrechnung`
+
+**Ziel:** Abrechnung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Abrechnung — Bedienoberfläche](img/annahme__abrechnung.webp)
+
 
 **Schritte:**
 
@@ -125,6 +135,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/annahme/annahme-qr` · **Modul:** `@/pages/annahme/annahme-qr`
 
+**Ziel:** Annahme Qr in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Annahme Qr — Bedienoberfläche](img/annahme__annahme-qr.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Annahme Qr** öffnen (`/annahme/annahme-qr`).
@@ -145,6 +160,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Klaerung Gesperrt
 
 **Route:** `/annahme/klaerung-gesperrt` · **Modul:** `@/pages/annahme/klaerung-gesperrt`
+
+**Ziel:** Klaerung Gesperrt in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Klaerung Gesperrt — Bedienoberfläche](img/annahme__klaerung-gesperrt.webp)
+
 
 **Schritte:**
 
@@ -167,6 +187,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/annahme/lkw-registrierung` · **Modul:** `@/pages/annahme/lkw-registrierung`
 
+**Ziel:** Lkw Registrierung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lkw Registrierung — Bedienoberfläche](img/annahme__lkw-registrierung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lkw Registrierung** öffnen (`/annahme/lkw-registrierung`).
@@ -187,6 +212,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Qr
 
 **Route:** `/annahme/qr` · **Modul:** `@/pages/annahme/annahme-qr`
+
+**Ziel:** Qr in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Qr — Bedienoberfläche](img/annahme__qr.webp)
+
 
 **Schritte:**
 
@@ -209,6 +239,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/annahme/qr-scanner` · **Modul:** `@/pages/annahme/qr-scanner`
 
+**Ziel:** Qr Scanner in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Qr Scanner — Bedienoberfläche](img/annahme__qr-scanner.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Qr Scanner** öffnen (`/annahme/qr-scanner`).
@@ -229,6 +264,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Qualitaets Check
 
 **Route:** `/annahme/qualitaets-check` · **Modul:** `@/pages/annahme/qualitaets-check`
+
+**Ziel:** Qualitaets Check in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Qualitaets Check — Bedienoberfläche](img/annahme__qualitaets-check.webp)
+
 
 **Schritte:**
 
@@ -251,6 +291,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/annahme/rohware` · **Modul:** `@/pages/annahme/rohware`
 
+**Ziel:** Rohware in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rohware — Bedienoberfläche](img/annahme__rohware.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rohware** öffnen (`/annahme/rohware`).
@@ -271,6 +316,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Warteschlange
 
 **Route:** `/annahme/warteschlange` · **Modul:** `@/pages/annahme/warteschlange`
+
+**Ziel:** Warteschlange in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Warteschlange — Bedienoberfläche](img/annahme__warteschlange.webp)
+
 
 **Schritte:**
 
@@ -293,6 +343,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/waage` · **Modul:** `@/pages/waage/liste`
 
+**Ziel:** Waage in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Waage — Bedienoberfläche](img/waage.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Waage** öffnen (`/waage`).
@@ -313,6 +368,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Hofliste
 
 **Route:** `/waage/hofliste` · **Modul:** `@/pages/waage/hofliste`
+
+**Ziel:** Hofliste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Hofliste — Bedienoberfläche](img/waage__hofliste.webp)
+
 
 **Schritte:**
 
@@ -335,6 +395,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/waage/liste` · **Modul:** `@/pages/waage/liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/waage__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/waage/liste`).
@@ -355,6 +420,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/waage/neu` · **Modul:** `@/pages/waage/liste`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/waage__neu.webp)
+
 
 **Schritte:**
 
@@ -377,6 +447,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/waage/vorlagen` · **Modul:** `@/pages/waage/vorlagen`
 
+**Ziel:** Vorlagen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Vorlagen — Bedienoberfläche](img/waage__vorlagen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Vorlagen** öffnen (`/waage/vorlagen`).
@@ -397,6 +472,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wiegeschein Detail
 
 **Route:** `/waage/wiegeschein-detail` · **Modul:** `@/pages/waage/wiegeschein-detail`
+
+**Ziel:** Wiegeschein Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wiegeschein Detail — Bedienoberfläche](img/waage__wiegeschein-detail.webp)
+
 
 **Schritte:**
 
@@ -419,6 +499,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/waage/wiegeschein/:id` · **Modul:** `@/pages/waage/wiegeschein-detail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/waage__wiegeschein__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/waage/wiegeschein/:id`).
@@ -440,6 +525,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/waage/wiegungen` · **Modul:** `@/pages/waage/wiegungen`
 
+**Ziel:** Wiegungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wiegungen — Bedienoberfläche](img/waage__wiegungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Wiegungen** öffnen (`/waage/wiegungen`).
@@ -460,6 +550,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Weighing
 
 **Route:** `/weighing` · **Modul:** `@/pages/weighing`
+
+**Ziel:** Weighing in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Weighing — Bedienoberfläche](img/weighing.webp)
+
 
 **Schritte:**
 

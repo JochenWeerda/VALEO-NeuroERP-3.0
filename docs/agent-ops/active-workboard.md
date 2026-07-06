@@ -11,6 +11,171 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P0-01/02-CI-GRUEN-RUNTIME-SWEEP — quality-gate Voll-Gruen + Runtime-Sweep-Dauergate
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-07-05 (Runde 11) — quality-gate GRUEN auf main (a4ce0f3c2, run 28732436888); security-scan/universal-mask-ci/runtime-sweep gruen. Evidenz artifacts/ci-green-evidence.md, README-Badges+Statusblock aktualisiert. Runde 11 — pytest-Volllauf in CI GRUEN (11810 passed); letzter roter Schritt Coverage-Ratchet: psm_proplanta.py 14,9%<15,0% durch eigene HTTPException-Passthrough-Zeilen => Test tests/test_psm_proplanta_endpoints.py ergaenzt (deckt status/list/stats/search-Guards), Schwelle NICHT gesenkt (only-up). Runde 10 — pytest-Restfehler (endlich beim eigentlichen Testlauf): journal-entries-Test auf 503-Vertrag gezogen (SPEC-P0-03, war Codex-Kategorie-D-Test), coverage_summary-Test tolerant fuer fehlende coverage.xml, warehouses.address JSONB->varchar in Repair-Migration (001-Divergenz zum ORM-Modell), ownership_type-Insert 'eigen'->'owned' (Endpoint-Code gegen CHECK-Constraint). Runde 9 — OpenAPI-Versions-Default fest 3.0.0 im Generator (DEFAULT_API_VERSION, konvergent mit Codex-Hotfix); AUDIT-1 ISO-27001-Matrix (93/93) + AUDIT-2 SOC-2-Matrix ergaenzt. Runde 8 (Codex-Hotfix, s. u.) — Doc-generator-meta-check + Versions-Ping-Pong. Runde 7 — Mask-Performance-Gate mit gepinnter ts-node-Toolchain (npx-TS-Drift TS5011/5101/5109). Runde 6 — Runtime-Sweep in CI GRUEN (0x5xx/831 Routen, SPEC-P0-02 erfuellt); Runde-5-Restblocker gefixt: erp-domain-Tests (tsconfig.tests.json typecheckt gegen src/ statt nie committetem dist/), ts-node transpile-only im Backend-Job. SPEC-P0-03 umgesetzt: Modul-Aktivierungsmatrix, harte Regel journal-entries/bestaende (503+Metrik statt leerer Liste, Regressionstests), /health/ready prueft kritische Schemaobjekte. SPEC-P0-08: Restore-Drill-Runner + fail-closed Evidenz-Check. Vorher — quality-gate-Blocker behoben (sql_fstrings-nosec, Low-Stock-Doppelprefix, Klasse-A-Explainability, response_model/summary-Gates, Doku-Drift 15→0, Secret-Scan-False-Positives); Runtime-Sweep-Gate gebaut; erster Sweep fand 32×5xx → Repair-Migration `runtime_sweep_repair_20260702`, `init_db.py`+ORM-create_all, 20 Code-Bugfixes (u. a. DI-Container-Registrierung nie importiert, 3× Routen-Reihenfolge hinter Catch-all, CRM-Proxy-Degrade, uuid/text-Casts, FAOSTAT 502→503). Zusaetzlich: only-up-Ratchet (SPEC-P0-05), CODEOWNERS (SPEC-P0-06), SOC-2-Profil (SPEC-P0-07), docker-compose REDACTED_PASSWORD-Regression repariert.
+**Codex-Hotfix:** abgeschlossen 2026-07-03 fuer Runde-8-Doc-generator-meta-check; Dateibesitz `.github/workflows/quality-gate.yml`, `scripts/generate_openapi.py`, `scripts/generate_container_inventory.py`, `scripts/render_c4_views.py`, `scripts/generate_architecture_index.py`, `scripts/generate_action_matrix_report.py` und `docs/agent-ops/active-workboard.md`; Abnahme `python scripts/generate_openapi.py --check`, direkte Doc-Generator-Sequenz, `scripts/generate_architecture_index.py --check --require-complete` unter WSL/Linux und `bash scripts/check_all_doc_generators.sh --check` via LF-Tempkopie gruen. Nachtrag: ADR-Sammlung im Architecture-Index ist case-insensitive; Backend-Job installiert vor `pnpm arch:validate` pnpm.
+**Ziel:** SPEC-P0-01 (drei Ziel-Workflows auf main sichtbar gruen, Evidenz in `artifacts/ci-green-evidence.md`) und SPEC-P0-02 (Nightly-Sweep 0×5xx gegen frisch migrierte DB, Allowlist nur mit Begruendung+Ablaufdatum).
+**Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/runtime-sweep.yml`, `scripts/api_runtime_sweep.py`, `scripts/init_db.py`, `scripts/doc_drift_report.py`, `config/runtime_sweep_allowlist.yaml`, `config/architecture-domain-prefixes.yaml`, `alembic/versions/runtime_sweep_repair_20260702.py`, `app/main.py`, betroffene Endpoint-/Service-Dateien.
+**Abnahme:** quality-gate, security-scan und universal-mask-ci auf main gruen; `python scripts/api_runtime_sweep.py` Exit 0 (0×5xx, keine nicht-allowgelisteten 503, Allowlist nicht abgelaufen); Report in `artifacts/runtime-sweep-<datum>.json`.
+
+## ADDRESS-VALUE-OBJECT — kanonisches Adressmodell (P2-Fundament)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — kanonisches Adress-Value-Object `app/core/address.py` (Alias-Normalisierung country/countryCode/plz/zip/ort/…, Freitext- und JSON-String-Parsing, Geo lat/lon), bidirektionale Adapter (flach↔VO, JSONB↔VO), 21 Unit-Tests; ADR-038; erste Adoption in customer_service.py (Ad-hoc-Alias-Handling ersetzt). Nicht-brechend: Bestandsspeicherformen bleiben, Migration schrittweise ueber Adapter (Plan im ADR).
+**Ziel:** Adressmodell-Vereinheitlichung (vom User angestossen) — eine kanonische Repraesentation statt flach-vs-JSONB-Divergenz.
+**Dateibesitz:** `app/core/address.py`, `tests/test_address_value_object.py`, `docs/adr/adr-038-address-value-object.md`, `app/services/customer_service.py`, `mkdocs.yml`.
+**Abnahme:** VO-Tests + customer-Tests gruen; ADR-Nav aktuell; Doku-Drift 0.
+
+## A6-COVERAGE-OFFENSIVE — Finanz-Report-/Rechnungspfade
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — 3 vom Audit als nicht go-live-faehig markierte Finanzpfade mit Endpoint-Tests gehoben (isoliert gemessen, Vollsuite hoeher): financial_reports 25->53%, rohware_sammelabrechnung 32->61%, sales_invoice_einvoice 30->44%. Ratchets konservativ auf 50/58/42% angehoben (only-up, Baseline mitgezogen). Offen: psm_proplanta/portal_innendienst/hrm_abwesenheit/kaeufergruppe (Audit-Ziel je >=60).
+**Ziel:** SPEC-P0-05 — kritische Beleg-/Report-Pfade aus dem 25-32%-Bereich heben.
+**Dateibesitz:** `tests/test_financial_reports_endpoints.py`, `tests/test_rohware_sammelabrechnung_endpoints.py`, `tests/test_sales_invoice_einvoice_endpoints.py`, `scripts/check_critical_backend_coverage.py`, `config/coverage_ratchet_baseline.json`.
+**Abnahme:** neue Tests gruen; Ratchet mit angehobenen Schwellen gruen in CI.
+
+## A7-RESPONSE-MODEL-TYPING — API-Vertragshaertung + PII-Praevention
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — 55 untypisierte Routen mit response_model versehen (66->14, 99,6%), CI-Schwelle 80->20 gezogen; OpenAPI-Spec regeneriert. PII-Praevention: scripts/check_no_pii_data.py (Muster+Inhalt) in pre-commit + CI-Path-Guard, Art.-33-Meldeentwurf entfernt (Vorfall vom Verantwortlichen als nicht meldepflichtig eingestuft). SQL-S608-Review abgeschlossen (artifacts/appsec-s608-review.md): 121 Stellen musterbelegt sicher (Identifier aus Literalen/festen Listen/Pydantic-Whitelist, Werte gebunden).
+**Ziel:** SPEC-P1-06 (response_model-Gate absenken) + SPEC-P0-04-Praevention (kein erneuter Lead-Daten-Push).
+**Dateibesitz:** `app/api/v1/endpoints/*.py`, `.github/workflows/quality-gate.yml`, `scripts/check_no_pii_data.py`, `scripts/run-staged-checks.cjs`, `.pii-guard-allow.txt`, `docs/schnittstellen/openapi.json`.
+**Abnahme:** `check_response_models.py --threshold 20` gruen; PII-Guard blockiert Muster+Inhalt; OpenAPI-Drift 0.
+## UIX-MERIDIAN-BUILDER-001 - Meridian als Single-Mask-Builder-Vertrag
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-07-05 - Meridian-Layout-Metadaten werden zentral in `ScreenDefinition.layout` ergaenzt, in `RenderPlan.shell` kompiliert, im `UniversalMaskRenderer`/Fast-Renderer sichtbar gemacht und in Frontend-/Backend-Readiness als mandatory Gates geprueft. Low-Fidelity-/Wireframe-Triage im Design-Regelwerk dokumentiert. UIX-056 Browser-Smoke mit Meridian-Assertions und Mask-Performance-Smoke gruen.
+**Ziel:** Den bestehenden Single Mask Builder als verbindliche Meridian-Render-, Layout- und Governance-Capability haerten.
+**Dateibesitz:** `app/core/screen_definitions.py`, `app/api/v1/endpoints/mask_screen_definition.py`, `tests/test_agent_mask_contract.py`, `tests/test_uix046_048_command_endpoints_safety.py`, `packages/frontend-web/src/components/mask-builder/**`, `packages/frontend-web/src/__tests__/components/mask-builder/**`, `packages/frontend-web/src/__tests__/render-plan/schema-compiler.test.ts`, `packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts`, `docs/design/valeo-meridian-experience.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/UIX-MERIDIAN-BUILDER-001.yaml`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Layout-Metadaten fuer alle nativen SDs; RenderPlan.shell aus Layout; Frontend-/Backend-Readiness-Gates blockieren fehlende Meridian-Metadaten; Finance/CRM/Inventory-Referenzen bestehen ueber native SDs; Meridian-Doku als Builder-Regelwerk. Lokal gruen: `pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/runtime/generatorReadiness.test.ts src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx src/__tests__/render-plan/schema-compiler.test.ts` (25), `pytest tests/test_agent_mask_contract.py tests/test_uix046_048_command_endpoints_safety.py -q --no-cov` (270), `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `python scripts/generate_agent_handbuch.py --check`, `pnpm --dir packages/frontend-web exec playwright test tests/e2e/uix-056-native-route-smoke.spec.ts --project=chromium` (7), `VITE_ENABLE_UNIVERSAL_MASK_CUSTOMER=true VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER=true pnpm --dir packages/frontend-web exec playwright test tests/e2e/mask-render-performance.spec.ts --project=chromium` (2). Hinweis: Playwright globalTeardown meldet bestehende Visual-Tour-Console-Issues im Repo-Artefakt, nicht im fokussierten Meridian-Smoke.
+
+## UIX-MERIDIAN-VISUAL-AUDIT-002 - Meridian Visual-Audit fuer Referenzmasken
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-07-05 - Fokussierter Meridian-Visual-Audit nutzt die Benutzerhandbuch-Screenshot-Helfer fuer Render-Wait, Content-QC und Capture-Ziel; Finance, CRM 360 und Lager laufen bei 1366x768, 1440x900 und 1920x1080 gruen.
+**Ziel:** Einen fokussierten Playwright-Visual-Audit fuer Finance, CRM 360 und Lager auf der bestehenden Single-Mask-Builder-Kette ergaenzen.
+**Dateibesitz:** `packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts`, `docs/agent-ops/slices/UIX-MERIDIAN-VISUAL-AUDIT-002.yaml`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Visual-Audit prueft 1366x768, 1440x900 und 1920x1080 auf repraesentativen nativen Masken; keine separate Referenzmasken-UI; Header, ActionBar, Tabs, Tabellenprofil, Context-Rail-Kontrakt und Basis-Overflow sind automatisiert abgesichert. Lokal gruen: `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium` (9 passed). Hinweis: Playwright globalTeardown meldet bestehende Repo-weite Visual-Tour-Console-Issues, nicht den fokussierten Meridian-Audit.
+## AUDIT-1/2/5 — ISO-27001-/SOC-2-Readiness + Audit-Orchestrator
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-05 — `config/audit/iso27001-annex-a-matrix.yaml` (93/93 Controls: 33 conform, 12 minor, 48 external_gate, 0 offener major) und `config/audit/soc2-tsc-matrix.yaml` (CC1-CC9/A1/C1/PI1) angelegt; SOC-2-Profil in `simulate_external_assessors.py`; `scripts/check_audit_matrices.py` (fail-closed Vollstaendigkeits-/Konsistenzcheck) und `scripts/aggregate_audit_dashboard.py` (Ampel je Standard, external_gates nie als bestanden) neu; Orchestrator-Workflow `.github/workflows/audit-simulation.yml` (nightly + Release-Tag).
+**Ziel:** AUDIT-1 (ISO Annex-A-SoA 93/93 mit Verdikt), AUDIT-2 (SOC-2-TSC-Matrix + Profil), AUDIT-5 (maschinenlesbares Dashboard). LLM-/Agenten-Zugriffe als eigenes Risiko erfasst.
+**Dateibesitz:** `config/audit/*.yaml`, `scripts/check_audit_matrices.py`, `scripts/aggregate_audit_dashboard.py`, `scripts/simulate_external_assessors.py`, `.github/workflows/audit-simulation.yml`.
+**Abnahme:** `python scripts/check_audit_matrices.py` Exit 0; Dashboard-Artefakt erzeugt; external_gates gelistet, nie als bestanden gewertet.
+
+## SPEC-P0-04-PII-REMEDIATION — Repo-Hygiene & PII-Bereinigung
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-07-02 — Fortsetzung der bereits begonnenen PII-/Repo-Hygiene-Remediation auf Branch `fix/pii-remediation`.
+**Ziel:** SPEC-P0-04 aus dem Production-Readiness-Audit abschliessen: PII-/Tmp-/Build-Artefakte entfernen, `.gitignore` haerten, gitleaks-Baseline auditieren, History-Purge-Plan und DSB-Bewertung dokumentieren.
+**Dateibesitz:** `.gitignore`, `.gitleaks-baseline.json`, `scripts/purge_pii_history.sh`, `artifacts/pii-remediation-report.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/SPEC-P0-04-PII-REMEDIATION.yaml`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Arbeitsbaum enthaelt keine getrackten PII-/Tmp-/Build-Artefakte aus SPEC-P0-04; Scan-Ergebnisse und DSB-Bewertung liegen in `artifacts/pii-remediation-report.md`; History-Purge-Plan ist dokumentiert; Slice-Verify und relevante Security-/Doku-Checks gruen oder mit external_gate begruendet.
+
+## PROD-READINESS-AUDIT-001 — Production-Readiness-Audit & Agenten-Programm
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-07-02 — Audit-Dokument unter `docs/operations/production-readiness-audit-2026-07-02.md` verankert; Open-Gaps, Runbook, MkDocs und Slice-YAML synchronisiert; Slice-Verify gruen.
+**Ziel:** Den Production-Readiness-Audit vom 2026-07-02 als belastbaren Spec-Backlog und Agentenprogramm im Repo sichtbar machen, ohne bestehende PII-Remediation- oder Vordruck-Arbeit zu vermischen.
+**Dateibesitz:** `docs/operations/production-readiness-audit-2026-07-02.md`, `docs/operations/production-readiness-runbook.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/PROD-READINESS-AUDIT-001.yaml`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Audit-Dokument mit Frontmatter unter `docs/operations/`; P0/P1-Spec-Backlog in Open-Gaps referenziert; Runbook verweist auf Audit und Agentenprogramm; Slice-YAML mit Ziel, Dateibesitz, Akzeptanz und Risiken vorhanden.
+
+## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-07-02 — alle 5 API-Gaps geschlossen und regressionsgehärtet.
+
+| Gap | Status |
+|---|---|
+| Lager API-Gap (`GET /lager/bestaende`, `POST /lager/bewegungen`) | done |
+| Pricing API-Gap (`GET /pricing/find`, `POST /pricing/staffelrabatte`) | done |
+| Barcode API-Gap (`POST /scan/barcode`) | done |
+
+**Ziel:** Fünf produktionsblockierende API-Lücken (DB-Spaltenfehler, NOT-NULL-Verletzungen,
+kaputte jsonb-Casts, fehlende Tenant-Isolation) schließen und dauerhaft mit
+Regressionstests absichern.
+**Dateibesitz:** `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/pricing.py`,
+`app/api/v1/endpoints/scan.py`, `tests/test_api_gap_lager_pricing_scan.py`,
+`docs/project-context/open-gaps-and-known-issues.md`.
+**Abnahme:** `tests/test_api_gap_lager_pricing_scan.py` (18 Tests: Happy Path, negativer
+Payload, Tenant-Isolation, fehlende optionale Felder je Endpoint) grün gegen laufende
+Postgres-Instanz. Siehe auch `open-gaps-and-known-issues.md` → `API-GAP-STABILIZATION-001`.
+**Bekannte UI-Fails (nicht Teil dieses Gaps):** `UI-AGRAR-WIZARD-001` und
+`UI-PERSONAL-BADGES-001` sind isolierte Frontend-Rendering-Bugs, siehe
+`open-gaps-and-known-issues.md`. Nicht als API-Regression zählen.
+
+## E2E-DOMAIN-ROUTES-WAVES-001 — E2E-Domänen-Routen in Waves
+
+**Von:** Claude Code
+**Owner:** offen
+**Stand:** geplant 2026-07-02 — Folgeblock nach `API-GAP-STABILIZATION-001`, in 5 Waves
+aufgeteilt, um Domänen unabhängig freizugeben statt eines Big-Bang-Testlaufs.
+
+| Wave | Domänen | Status |
+|---|---|---|
+| Wave A | Lager, Pricing, Scan | done (Regressionstests in `API-GAP-STABILIZATION-001`) |
+| Wave B | CRM, Einkauf | offen |
+| Wave C | Finance | offen |
+| Wave D | Agrar | offen (blockiert von `UI-AGRAR-WIZARD-001` für Sammelabrechnung-Teilstrecke) |
+| Wave E | Personal, Admin | offen (blockiert von `UI-PERSONAL-BADGES-001` für Bewerbungen-Teilstrecke) |
+
+**Ziel:** Alle E2E-Domänen-Routen wellenweise stabilisieren, ohne dass ein einzelner
+UI-Bug den gesamten Testlauf rot färbt.
+**Dateibesitz:** `packages/frontend-web/tests/e2e/all-domains-e2e.spec.ts`,
+`packages/frontend-web/tests/e2e/workflow-chains.spec.ts`,
+`packages/frontend-web/tests/e2e/uat/`.
+**Abnahme:** je Wave ein eigener grüner Testlauf; Wave D/E dürfen erst als
+abgeschlossen gelten, wenn die zugehörigen UI-Tickets referenziert (nicht
+zwingend gefixt) sind — kein stummer Skip ohne Ticket-Kommentar.
+
+## UIX-054…057 — Route-Verifikation, CI, Browser-Smoke, Rollback (nach UIX-051)
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** abgeschlossen 2026-07-01 — UIX-054 Inventory-Tests, UIX-056 Playwright 6/6, UIX-057 Rollback-Matrix; UIX-055 CI Run `28540744515` grün; route-inventory nach UIX-051 nachgezogen (`5686f2177`).
+**Ziel:** Generierte Route-Wahrheit prüfen, CI sichtbar grün, Browser-Smoke, Rollback dokumentiert — keine weiteren Routen migrieren.
+**Dateibesitz:** `tests/test_uix054_route_inventory_verification.py`, `packages/frontend-web/tests/e2e/uix-056-native-route-smoke.spec.ts`, `docs/architecture/uix/uix-057-native-route-rollback-matrix.md`, `.github/workflows/universal-mask-ci.yml`.
+**Abnahme:** pytest UIX-054 grün; universal-mask-ci Run grün; Playwright UIX-056 grün.
+
+## DOC-AGENT-HANDBUCH-001 — Generiertes Agent-Handbuch (Code → Doku)
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** abgeschlossen 2026-07-01 — `scripts/generate_agent_handbuch.py` erzeugt Prozessketten, Masken-API-Katalog, Automatisierung und JSON-Manifest aus Flow Spine, ScreenDefinitions, MCP und Events. CI: `docs.yml` + `check_all_doc_generators.sh`; Pre-Commit-Regen bei Quell-Aenderungen.
+**Ziel:** Wartbare Agent-Bedienungsanleitung ohne manuelle Doppelpflege.
+**Dateibesitz:** `scripts/generate_agent_handbuch.py`, `scripts/agent_handbuch_sources.py`, `docs/agent-handbuch/`, `tests/test_generate_agent_handbuch.py`, `config/docs-code-sync-map.yaml`, `mkdocs.yml`.
+**Abnahme:** `python scripts/generate_agent_handbuch.py --check` gruen; 9 Unit-Tests; MkDocs-Nav Agent-Handbuch.
+
+## UIX-047 — AP-Freigabe CommandEndpoint + Bestätigungsdialog-Fortsetzung
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** in arbeit 2026-07-01 — `freigeben` für `finance/ap-invoice` mit Stub-Endpoint `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` verdrahtet; folgt auf UIX-046 (neue_bestellung, mahnen, AlertDialog).
+**Ziel:** Weitere gestubte Actions schrittweise auf `commandEndpoint` umstellen — AP-Freigabe als nächster P2-Kandidat mit `requiresConfirmation`.
+**Dateibesitz:** `app/api/v1/endpoints/ap_invoices.py`, `app/core/screen_definitions.py`, `tests/test_uix046_048_command_endpoints_safety.py`.
+**Abnahme:** pytest UIX-046/048-Suite grün inkl. freigeben-Contract-Tests.
+
+## UIX-046 — CommandEndpoints neue_bestellung + mahnen + Bestätigungsdialog
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** abgeschlossen 2026-07-01 — Stub-Endpoints für Lieferanten-Bestellung und OP-Mahnung; `commandEndpoint` in ScreenDefinitions; `AlertDialog` für `requiresConfirmation` in `UniversalNativeDetailPage`; CI-Workflow `universal-mask-ci.yml`.
+**Ziel:** Erste Wave gestubter Actions auf ActionRuntime-Vertrag umstellen.
+**Dateibesitz:** `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/open_items.py`, `app/core/screen_definitions.py`, `packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx`, `tests/test_uix046_048_command_endpoints_safety.py`, `.github/workflows/universal-mask-ci.yml`.
+**Abnahme:** 71/71 pytest grün (`test_uix046_048_command_endpoints_safety.py`).
+
 ## UIX-044 — FilterPlan Query Contract + ActionRuntime Anschluss
 
 **Von:** Codex

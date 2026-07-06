@@ -14,7 +14,7 @@ from app.services.o2c_chain_service import O2CChainService
 router = APIRouter(prefix="/sales", tags=["sales", "o2c"])
 
 
-@router.get("/o2c/orders", summary="Aufträge mit O2C-Vollständigkeit (Picker)")
+@router.get("/o2c/orders", response_model=dict, summary="Aufträge mit O2C-Vollständigkeit (Picker)")
 def list_orders(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -23,7 +23,7 @@ def list_orders(
     return {"items": O2CChainService(db, tenant_id).list_orders(limit=limit)}
 
 
-@router.get("/o2c", summary="O2C-Kette je Auftrag (Angebot→Auftrag→Lieferschein→Rechnung)")
+@router.get("/o2c", response_model=dict, summary="O2C-Kette je Auftrag (Angebot→Auftrag→Lieferschein→Rechnung)")
 def o2c(
     auftrag: str = Query(..., description="Auftragsnummer oder -ID"),
     db: Session = Depends(get_db),

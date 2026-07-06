@@ -17,7 +17,7 @@ from app.documents.router_helpers import get_repository, get_from_store, save_to
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
 
-@router.get("/zahlungseingang/clearings", summary="Auszifferungen je OP")
+@router.get("/zahlungseingang/clearings", response_model=dict, summary="Auszifferungen je OP")
 def clearings(
     rechnungsnr: str = Query(..., description="Rechnungsnummer des OP"),
     db: Session = Depends(get_db),
@@ -35,7 +35,7 @@ class PaymentIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/zahlungseingang", summary="Zahlungseingang erfassen (OP ausziffern)")
+@router.post("/zahlungseingang", response_model=dict, summary="Zahlungseingang erfassen (OP ausziffern)")
 def record_payment(
     body: PaymentIn,
     db: Session = Depends(get_db),

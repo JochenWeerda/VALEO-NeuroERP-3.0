@@ -480,7 +480,7 @@ class NotificationIn(BaseModel):
     channel: Optional[str] = None        # 'internal' | 'email'; None -> Auto (@ => email)
 
 
-@router.post("/notifications", summary="Benachrichtigung senden (intern/extern)")
+@router.post("/notifications", response_model=dict, summary="Benachrichtigung senden (intern/extern)")
 def create_notification(
     body: NotificationIn,
     db: Session = Depends(get_db),
@@ -504,7 +504,7 @@ def create_notification(
     )
 
 
-@router.get("/notifications", summary="Postfach (interne Benachrichtigungen)")
+@router.get("/notifications", response_model=list[dict], summary="Postfach (interne Benachrichtigungen)")
 def list_notifications(
     recipient: str,
     unread: bool = False,
@@ -514,7 +514,7 @@ def list_notifications(
     return CrmNotificationService(db, tenant_id).inbox(recipient, only_unread=unread)
 
 
-@router.post("/notifications/{notification_id}/read", summary="Benachrichtigung als gelesen markieren")
+@router.post("/notifications/{notification_id}/read", response_model=dict, summary="Benachrichtigung als gelesen markieren")
 def read_notification(
     notification_id: str,
     db: Session = Depends(get_db),

@@ -1,0 +1,630 @@
+meta:
+  standard: ISO/IEC 27001:2022 Annex A (93 Controls)
+  zweck: Statement of Applicability + Stage-1-Readiness (AUDIT-1). Simulation ersetzt keine akkreditierte Zertifizierung.
+  verdikt_modell: conform | minor | major | external_gate; anwendbar=false mit Begruendung = SoA-Ausschluss
+  llm_agenten_risiko: 'LLM-/Agenten-Zugriffe (MCP-Tools, LLM-Gateway, agentengetriebene Entwicklung) sind als eigenes Risiko erfasst: A.8.18 (policy-gesteuerte
+    MCP-Tools), A.8.30 (agentische Entwicklung mit Claim-/Review-Governance), A.5.19 (LLM-Provider als Subprozessor mit AVV-Pflicht).'
+  stand: '2026-07-03'
+controls:
+- control_id: A.5.1
+  titel: Informationssicherheitsrichtlinien
+  anwendbar: true
+  begruendung_soa: ISMS-Basis
+  status: external_gate
+  external_gate: ISMS-Politik durch Betreiber verabschieden
+- control_id: A.5.2
+  titel: Rollen und Verantwortlichkeiten
+  anwendbar: true
+  begruendung_soa: Bus-Faktor 1 dokumentiert
+  implementierung: .github/CODEOWNERS
+  evidenz: CODEOWNERS + Workboard
+  status: minor
+- control_id: A.5.3
+  titel: Aufgabentrennung
+  anwendbar: true
+  begruendung_soa: Solo-Betrieb => kompensierende Kontrollen (CI-Gates)
+  implementierung: CI-Pflichtgates
+  evidenz: .github/workflows/quality-gate.yml
+  status: minor
+- control_id: A.5.4
+  titel: Verantwortlichkeiten der Leitung
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.5.5
+  titel: Kontakt mit Behoerden
+  anwendbar: true
+  begruendung_soa: DSGVO Art. 33 (LfD Niedersachsen)
+  implementierung: Breach-Endpoint + Report
+  evidenz: app/api/v1/endpoints/gdpr_art33_breach.py
+  status: external_gate
+  external_gate: Meldeprozess-Kontakte dokumentieren
+- control_id: A.5.6
+  titel: Kontakt mit Interessengruppen
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.5.7
+  titel: Threat Intelligence
+  anwendbar: true
+  begruendung_soa: Dependabot/Trivy/Grype-Feeds
+  implementierung: security-scan.yml
+  evidenz: .github/workflows/security-scan.yml
+  status: conform
+- control_id: A.5.8
+  titel: Informationssicherheit im Projektmanagement
+  anwendbar: true
+  begruendung_soa: Slice-Governance mit Claim/Abnahme
+  implementierung: AI-Harness-Workflow
+  evidenz: docs/agent-ops/active-workboard.md
+  status: conform
+- control_id: A.5.9
+  titel: Inventar der Informationswerte
+  anwendbar: true
+  begruendung_soa: Code-/Service-/Endpoint-Inventare generiert
+  implementierung: generate_code_inventories.py
+  evidenz: docs/schnittstellen/endpoint-inventory.md
+  status: conform
+- control_id: A.5.10
+  titel: Zulaessiger Gebrauch von Werten
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.5.11
+  titel: Rueckgabe von Werten
+  anwendbar: true
+  begruendung_soa: Offboarding
+  status: external_gate
+  external_gate: Offboarding-Prozess
+- control_id: A.5.12
+  titel: Klassifizierung von Information
+  anwendbar: true
+  begruendung_soa: AgentMaskContract kennzeichnet sensible Felder
+  implementierung: app/core/screen_definitions.py
+  evidenz: ScreenDefinition sensitiveFields
+  status: minor
+- control_id: A.5.13
+  titel: Kennzeichnung von Information
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.5.14
+  titel: Informationsuebertragung
+  anwendbar: true
+  begruendung_soa: TLS, AVVs fuer Uebertragungswege
+  implementierung: Helm/Ingress-TLS
+  evidenz: k8s/helm/valeo-erp/
+  status: external_gate
+  external_gate: AVV je Uebertragungsweg
+- control_id: A.5.15
+  titel: Zugriffssteuerung
+  anwendbar: true
+  begruendung_soa: OIDC + Tenant-Isolation + RBAC
+  implementierung: TenantEnforcementMiddleware
+  evidenz: app/middleware/tenant_enforcement.py; tests/test_tenant_enforcement.py
+  status: conform
+- control_id: A.5.16
+  titel: Identitaetsmanagement
+  anwendbar: true
+  begruendung_soa: Keycloak-Realm
+  implementierung: OIDC-Config
+  evidenz: app/core/security.py
+  status: external_gate
+  external_gate: Produktiver Keycloak-Realm + Identity-Lifecycle
+- control_id: A.5.17
+  titel: Authentisierungsinformation
+  anwendbar: true
+  begruendung_soa: Keine Secrets im Repo (gitleaks ohne Baseline)
+  implementierung: .gitleaks.toml
+  evidenz: artifacts/pii-remediation-report.md
+  status: external_gate
+  external_gate: Secret-Rotation (LinkUp-Key) abschliessen
+- control_id: A.5.18
+  titel: Zugangsrechte
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Access-Review-Prozess (monatlich)
+- control_id: A.5.19
+  titel: Informationssicherheit in Lieferantenbeziehungen
+  anwendbar: true
+  begruendung_soa: 'Subprozessoren: Keycloak, Fiskaly, Paperless, DATEV, LLM-Provider'
+  evidenz: config/audit/soc2-tsc-matrix.yaml CC9.2
+  status: external_gate
+  external_gate: AVV-/Vertragsnachweis
+- control_id: A.5.20
+  titel: Behandlung von IS in Lieferantenvereinbarungen
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.5.21
+  titel: IS in der IKT-Lieferkette
+  anwendbar: true
+  begruendung_soa: SBOM + SHA-gepinnte Images
+  implementierung: CycloneDX-SBOM, immutable Tags
+  evidenz: .github/workflows/quality-gate.yml
+  status: conform
+- control_id: A.5.22
+  titel: Ueberwachung von Lieferantendienstleistungen
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.5.23
+  titel: Informationssicherheit fuer Cloud-Dienste
+  anwendbar: true
+  begruendung_soa: K8s/Helm-Deployment, Cluster-Secrets
+  implementierung: values-production.yaml, Preflight-Blocker
+  evidenz: scripts/check_production_readiness.py
+  status: external_gate
+  external_gate: Cluster-Secrets + Environment-Reviewer
+- control_id: A.5.24
+  titel: Planung Incident-Management
+  anwendbar: true
+  begruendung_soa: Runbook Rollback/Notfall
+  implementierung: production-readiness-runbook.md
+  evidenz: docs/operations/production-readiness-runbook.md
+  status: conform
+- control_id: A.5.25
+  titel: Beurteilung von IS-Ereignissen
+  anwendbar: true
+  begruendung_soa: Alerting-Metriken (critical_data_path_errors_total)
+  implementierung: app/core/metrics.py
+  evidenz: monitoring/
+  status: minor
+- control_id: A.5.26
+  titel: Reaktion auf IS-Vorfaelle
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Beobachteter Incident-Drill
+- control_id: A.5.27
+  titel: Lernen aus IS-Vorfaellen
+  anwendbar: true
+  begruendung_soa: PII-Vorfall dokumentiert + remediert
+  implementierung: pii-remediation-report
+  evidenz: artifacts/pii-remediation-report.md
+  status: conform
+- control_id: A.5.28
+  titel: Sammeln von Beweismaterial
+  anwendbar: true
+  begruendung_soa: Audit-Hash-Kette, GoBD-Nachweisraum
+  implementierung: AuditMiddleware
+  evidenz: app/middleware/audit_middleware.py; tests/test_audit_hash_chain.py
+  status: conform
+- control_id: A.5.29
+  titel: IS bei Stoerungen
+  anwendbar: true
+  begruendung_soa: BCM
+  implementierung: Restore-Drill-Werkzeuge
+  evidenz: scripts/run_restore_drill.sh
+  status: external_gate
+  external_gate: Beobachteter Restore-Drill (15-min RTO)
+- control_id: A.5.30
+  titel: IKT-Bereitschaft fuer Business Continuity
+  anwendbar: true
+  begruendung_soa: ''
+  implementierung: Backup-/Restore-Cronjobs
+  evidenz: k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml
+  status: external_gate
+  external_gate: Drill-Protokoll committen
+- control_id: A.5.31
+  titel: Rechtliche und regulatorische Anforderungen
+  anwendbar: true
+  begruendung_soa: GoBD/KassenSichV/DSGVO-Profile
+  implementierung: simulate_external_assessors.py
+  evidenz: Assessor-Reports
+  status: conform
+- control_id: A.5.32
+  titel: Geistige Eigentumsrechte
+  anwendbar: true
+  begruendung_soa: DLG-Datenbank-Vorfall bereinigt; Lizenzinventar offen
+  implementierung: THIRD_PARTY_NOTICES.md
+  evidenz: SPEC-P1-09
+  status: minor
+- control_id: A.5.33
+  titel: Schutz von Aufzeichnungen
+  anwendbar: true
+  begruendung_soa: GoBD-Unveraenderbarkeit
+  implementierung: finance_transaction_service reversal
+  evidenz: tests/compliance/test_gobd.py
+  status: conform
+- control_id: A.5.34
+  titel: Privatsphaere und Schutz von pbD
+  anwendbar: true
+  begruendung_soa: DSGVO-Modul (Art. 30/33)
+  implementierung: gdpr_art30_ropa, gdpr_art33_breach
+  evidenz: tests/test_gdpr_api.py
+  status: external_gate
+  external_gate: DSB-Freigabe + AVV/DSFA
+- control_id: A.5.35
+  titel: Unabhaengige Ueberpruefung der IS
+  anwendbar: true
+  begruendung_soa: Simulierte Prueferprofile (kein Ersatz fuer Audit)
+  implementierung: simulate_external_assessors.py
+  evidenz: artifacts/
+  status: external_gate
+  external_gate: Externes Audit/Stage-1 durch akkreditierte Stelle
+- control_id: A.5.36
+  titel: Einhaltung von Richtlinien und Normen
+  anwendbar: true
+  begruendung_soa: CI-Gates fail-closed
+  implementierung: quality-gate.yml
+  evidenz: 3 Ziel-Workflows
+  status: conform
+- control_id: A.5.37
+  titel: Dokumentierte Betriebsablaeufe
+  anwendbar: true
+  begruendung_soa: Runbook + Standards
+  implementierung: docs/operations/
+  evidenz: arc42 + 42 ADRs
+  status: conform
+- control_id: A.6.1
+  titel: Sicherheitsueberpruefung
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.6.2
+  titel: Beschaeftigungsbedingungen
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.6.3
+  titel: Sensibilisierung und Schulung
+  anwendbar: true
+  begruendung_soa: Trainingsmodul vorhanden (courses/qualifications)
+  implementierung: /training-Endpoints
+  evidenz: app/api/v1/endpoints/
+  status: external_gate
+  external_gate: Schulungsnachweise
+- control_id: A.6.4
+  titel: Massregelungsprozess
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.6.5
+  titel: Verantwortlichkeiten nach Beendigung
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.6.6
+  titel: Vertraulichkeitsvereinbarungen
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.6.7
+  titel: Remote-Arbeit
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.6.8
+  titel: Meldung von IS-Ereignissen
+  anwendbar: true
+  begruendung_soa: Whistleblower-Modul (503-by-design bis Aktivierung)
+  implementierung: compliance/whistleblower
+  evidenz: module-activation-matrix.md
+  status: minor
+- control_id: A.7.1
+  titel: Physische Sicherheitsperimeter
+  anwendbar: true
+  begruendung_soa: Rechenzentrum des Providers
+  status: external_gate
+  external_gate: Provider-Zertifikat (ISO 27001 des RZ)
+- control_id: A.7.2
+  titel: Physischer Zutritt
+  anwendbar: true
+  begruendung_soa: delegiert an Provider
+  status: external_gate
+  external_gate: Provider-Nachweis
+- control_id: A.7.3
+  titel: Sicherung von Bueros/Einrichtungen
+  anwendbar: true
+  begruendung_soa: Betreiber-Standort
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.7.4
+  titel: Physische Sicherheitsueberwachung
+  anwendbar: true
+  begruendung_soa: delegiert an Provider
+  status: external_gate
+  external_gate: Provider-Nachweis
+- control_id: A.7.5
+  titel: Schutz vor physischen/umweltbedingten Bedrohungen
+  anwendbar: true
+  begruendung_soa: delegiert an Provider
+  status: external_gate
+  external_gate: Provider-Nachweis
+- control_id: A.7.6
+  titel: Arbeiten in Sicherheitsbereichen
+  anwendbar: false
+  begruendung_soa: Kein eigener Sicherheitsbereich — Cloud-Betrieb
+  status: conform
+- control_id: A.7.7
+  titel: Aufgeraeumte Arbeitsumgebung
+  anwendbar: true
+  begruendung_soa: ''
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.7.8
+  titel: Platzierung und Schutz von Betriebsmitteln
+  anwendbar: true
+  begruendung_soa: delegiert an Provider
+  status: external_gate
+  external_gate: Provider-Nachweis
+- control_id: A.7.9
+  titel: Sicherheit von Werten ausserhalb der Raeumlichkeiten
+  anwendbar: true
+  begruendung_soa: Geraete des Betreibers
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.7.10
+  titel: Speichermedien
+  anwendbar: true
+  begruendung_soa: Keine Wechselmedien im Serverbetrieb; Backups
+  implementierung: Backup-Cronjobs
+  evidenz: k8s/helm/valeo-erp/templates/backup-cronjob.yaml
+  status: external_gate
+  external_gate: Backup-Verschluesselungsnachweis
+- control_id: A.7.11
+  titel: Versorgungseinrichtungen
+  anwendbar: true
+  begruendung_soa: delegiert an Provider
+  status: external_gate
+  external_gate: Provider-Nachweis
+- control_id: A.7.12
+  titel: Sicherheit der Verkabelung
+  anwendbar: false
+  begruendung_soa: Cloud-Betrieb — keine eigene Verkabelung
+  status: conform
+- control_id: A.7.13
+  titel: Instandhaltung von Betriebsmitteln
+  anwendbar: true
+  begruendung_soa: delegiert an Provider
+  status: external_gate
+  external_gate: Provider-Nachweis
+- control_id: A.7.14
+  titel: Sichere Entsorgung/Wiederverwendung
+  anwendbar: true
+  begruendung_soa: delegiert an Provider + lokale Geraete
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.8.1
+  titel: Endpunktgeraete der Benutzer
+  anwendbar: true
+  begruendung_soa: Betreiber-Geraete
+  status: external_gate
+  external_gate: Organisatorischer Nachweis des Betreibers (Richtlinie/Prozess/Protokoll)
+- control_id: A.8.2
+  titel: Privilegierte Zugangsrechte
+  anwendbar: true
+  begruendung_soa: Admin-RBAC-Scopes; Keycloak-Rollen
+  implementierung: admin-Scopes im Nav-Manifest
+  evidenz: packages/frontend-web/src/app/navigation/
+  status: external_gate
+  external_gate: Priv.-Access-Review
+- control_id: A.8.3
+  titel: Informationszugangsbeschraenkung
+  anwendbar: true
+  begruendung_soa: Tenant-Isolation + RBAC + Sensitivfelder
+  implementierung: TenantEnforcementMiddleware
+  evidenz: tests/test_tenant_enforcement.py
+  status: conform
+- control_id: A.8.4
+  titel: Zugang zu Quellcode
+  anwendbar: true
+  begruendung_soa: Public Repo (bewusst); Schreibzugriff nur Maintainer
+  implementierung: GitHub-Permissions
+  status: external_gate
+  external_gate: Branch-Protection aktivieren
+- control_id: A.8.5
+  titel: Sichere Authentisierung
+  anwendbar: true
+  begruendung_soa: OIDC/JWKS RS256, kein Passwort-Handling im Backend
+  implementierung: app/core/security.py
+  evidenz: JWKS-Validierung
+  status: conform
+- control_id: A.8.6
+  titel: Kapazitaetssteuerung
+  anwendbar: true
+  begruendung_soa: k6-Lasttestprofil lokal reproduzierbar
+  implementierung: tests/load/harvest-peak.js
+  evidenz: tests/load/README.md
+  status: external_gate
+  external_gate: Erntepeak-Lasttest auf Staging
+- control_id: A.8.7
+  titel: Schutz gegen Schadsoftware
+  anwendbar: true
+  begruendung_soa: Container-Scans (Trivy/Grype)
+  implementierung: security-scan.yml
+  evidenz: CI-Runs
+  status: conform
+- control_id: A.8.8
+  titel: Handhabung technischer Schwachstellen
+  anwendbar: true
+  begruendung_soa: Trivy/Grype/pip-audit blockierend; Dependabot
+  implementierung: .github/workflows/security-scan.yml
+  evidenz: gruene security-scan-Runs
+  status: conform
+- control_id: A.8.9
+  titel: Konfigurationsmanagement
+  anwendbar: true
+  begruendung_soa: Preflight-Blocker (API_DEV_TOKEN, DEBUG, Wildcard-Hosts)
+  implementierung: check_production_readiness.py
+  evidenz: 'contract-only: ready'
+  status: conform
+- control_id: A.8.10
+  titel: Loeschung von Information
+  anwendbar: true
+  begruendung_soa: DSGVO-Erasure-Modul (Aktivierung offen), Retention offen
+  implementierung: compliance/dsgvo/erasure-requests
+  evidenz: module-activation-matrix.md
+  status: minor
+- control_id: A.8.11
+  titel: Datenmaskierung
+  anwendbar: true
+  begruendung_soa: Sensible Felder im AgentMaskContract; --redact in Scans
+  implementierung: ScreenDefinition sensitiveFields
+  status: minor
+- control_id: A.8.12
+  titel: Verhinderung von Datenlecks
+  anwendbar: true
+  begruendung_soa: gitleaks ohne Baseline + PII-Prozess
+  implementierung: .gitleaks.toml; Secret-Scan-Gate
+  evidenz: 0-Findings-Scan 2026-07-02
+  status: conform
+- control_id: A.8.13
+  titel: Sicherung von Information (Backup)
+  anwendbar: true
+  begruendung_soa: Backup-/Restore-Cronjobs + Drill-Werkzeuge
+  implementierung: backup-cronjob.yaml
+  evidenz: scripts/run_restore_drill.sh
+  status: external_gate
+  external_gate: Erster beobachteter Drill (Protokoll)
+- control_id: A.8.14
+  titel: Redundanz informationsverarbeitender Einrichtungen
+  anwendbar: true
+  begruendung_soa: Helm-Replicas/Selbstheilung
+  implementierung: values-production.yaml
+  status: external_gate
+  external_gate: Cluster-Ausfalltest
+- control_id: A.8.15
+  titel: Protokollierung
+  anwendbar: true
+  begruendung_soa: Request-Logging, Audit-Middleware, Correlation-IDs
+  implementierung: app/middleware/audit_middleware.py
+  evidenz: tests/test_audit_hash_chain.py
+  status: conform
+- control_id: A.8.16
+  titel: Ueberwachungsaktivitaeten
+  anwendbar: true
+  begruendung_soa: Prometheus + Grafana + nightly Runtime-Sweep
+  implementierung: app/core/metrics.py; runtime-sweep.yml
+  evidenz: gruener Sweep-Run
+  status: conform
+- control_id: A.8.17
+  titel: Uhrensynchronisation
+  anwendbar: true
+  begruendung_soa: Container/K8s-NTP; TZ=UTC in CI
+  status: minor
+- control_id: A.8.18
+  titel: Hilfsprogramme mit privilegierten Faehigkeiten
+  anwendbar: true
+  begruendung_soa: MCP-Tools policy-gesteuert (LLM-/Agenten-Risiko)
+  implementierung: mcp/policy-Endpoints
+  evidenz: domain_shared.policy_rules
+  status: minor
+- control_id: A.8.19
+  titel: Installation von Software auf Betriebssystemen
+  anwendbar: true
+  begruendung_soa: Immutable Container-Images (SHA-gepinnt)
+  implementierung: deploy-Workflows
+  evidenz: sha-gepinnte Tags
+  status: conform
+- control_id: A.8.20
+  titel: Netzwerksicherheit
+  anwendbar: true
+  begruendung_soa: K8s-Ingress-TLS; DB-Ports nicht exponiert (Preflight)
+  implementierung: check_production_readiness.py
+  status: external_gate
+  external_gate: Netzwerk-Policy im Zielcluster
+- control_id: A.8.21
+  titel: Sicherheit von Netzwerkdiensten
+  anwendbar: true
+  begruendung_soa: delegiert an Provider/Cluster
+  status: external_gate
+  external_gate: Provider-/Cluster-Nachweis
+- control_id: A.8.22
+  titel: Trennung von Netzwerken
+  anwendbar: true
+  begruendung_soa: Compose-/K8s-Netztrennung
+  implementierung: docker-compose networks
+  status: minor
+- control_id: A.8.23
+  titel: Webfilterung
+  anwendbar: false
+  begruendung_soa: Serverseitige Anwendung ohne Nutzer-Browsing-Proxy
+  status: conform
+- control_id: A.8.24
+  titel: Verwendung von Kryptografie
+  anwendbar: true
+  begruendung_soa: TLS, RS256/JWKS, Hash-Ketten (Audit)
+  implementierung: app/core/security.py
+  evidenz: tests/test_audit_hash_chain.py
+  status: conform
+- control_id: A.8.25
+  titel: Lebenszyklus einer sicheren Entwicklung
+  anwendbar: true
+  begruendung_soa: CI-Gates, Governance-Slices, Invarianten
+  implementierung: quality-gate.yml
+  evidenz: CLAUDE.md-Invarianten
+  status: conform
+- control_id: A.8.26
+  titel: Anforderungen an Anwendungssicherheit
+  anwendbar: true
+  begruendung_soa: RFC-7807, Tenant-Pflicht, Mutation-Invarianten
+  implementierung: CLAUDE.md
+  status: conform
+- control_id: A.8.27
+  titel: Sichere Systemarchitektur
+  anwendbar: true
+  begruendung_soa: arc42/C4/ADRs, modularer Monolith
+  implementierung: docs/architecture/
+  evidenz: architecture-index.yaml 100% gemappt
+  status: conform
+- control_id: A.8.28
+  titel: Sicheres Coding
+  anwendbar: true
+  begruendung_soa: Bandit/nosec-Review-Pflicht, sql_fstrings-Gate
+  implementierung: scripts/check_sql_fstrings.py
+  evidenz: S608-Reviews
+  status: conform
+- control_id: A.8.29
+  titel: Sicherheitspruefung in Entwicklung und Abnahme
+  anwendbar: true
+  begruendung_soa: ZAP-Scans, pytest-Gates, Runtime-Sweep
+  implementierung: .zap/; runtime-sweep.yml
+  status: conform
+- control_id: A.8.30
+  titel: Ausgegliederte Entwicklung
+  anwendbar: true
+  begruendung_soa: 'Agentengetriebene Entwicklung = eigenes Risiko: Claim-/Review-Governance'
+  implementierung: AI-Harness-Governance
+  evidenz: docs/agent-ops/
+  status: minor
+- control_id: A.8.31
+  titel: Trennung von Entwicklungs-/Test-/Produktionsumgebungen
+  anwendbar: true
+  begruendung_soa: Compose-Dev vs. Helm-Prod, Preflight-Blocker
+  implementierung: check_production_readiness.py
+  status: conform
+- control_id: A.8.32
+  titel: Aenderungssteuerung
+  anwendbar: true
+  begruendung_soa: CI-Pflichtgates + CODEOWNERS; Branch-Protection fehlt
+  implementierung: quality-gate.yml; CODEOWNERS
+  status: external_gate
+  external_gate: Branch-Protection (Review + Required Checks) aktivieren — bis dahin Major-Finding
+- control_id: A.8.33
+  titel: Testinformation
+  anwendbar: true
+  begruendung_soa: Nur synthetische/Demo-Daten; PII-Vorfall bereinigt
+  implementierung: tests/-Konventionen
+  evidenz: artifacts/pii-remediation-report.md
+  status: conform
+- control_id: A.8.34
+  titel: Schutz von Informationssystemen waehrend Audit-Tests
+  anwendbar: true
+  begruendung_soa: Audits gegen Compose-/Staging-Stack, nie Prod
+  implementierung: runbook
+  status: conform

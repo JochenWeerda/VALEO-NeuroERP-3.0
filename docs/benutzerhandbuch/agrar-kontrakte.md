@@ -25,7 +25,7 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **23** App-Routen
+Vollständige Abdeckung: **20** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
@@ -33,16 +33,13 @@ Vollständige Abdeckung: **23** App-Routen
 | Contracts | `/contracts` | `@/pages/contracts-v2` |
 | Contracts V2 | `/contracts-v2` | `@/pages/contracts-v2` |
 | Kontrakte | `/kontrakte` | `@/pages/kontrakte/LstKontraktUebersicht` |
-| :Id | `/kontrakte/:id` | `@/pages/kontrakte/FrmKontraktDetail` |
+| :Id | `/kontrakte/:id` | `@/pages/kontrakte/KontraktDetailRoute` |
 | Frmkontraktdetail | `/kontrakte/FrmKontraktDetail` | `@/pages/kontrakte/FrmKontraktDetail` |
 | Frmkontraktprotokoll | `/kontrakte/FrmKontraktProtokoll` | `@/pages/kontrakte/FrmKontraktProtokoll` |
 | Kontraktalarmdashboard | `/kontrakte/KontraktAlarmDashboard` | `@/pages/kontrakte/KontraktAlarmDashboard` |
 | Kontraktpositionsmonitor | `/kontrakte/KontraktPositionsmonitor` | `@/pages/kontrakte/KontraktPositionsmonitor` |
 | Lstkontraktuebersicht | `/kontrakte/LstKontraktUebersicht` | `@/pages/kontrakte/LstKontraktUebersicht` |
 | Alarme | `/kontrakte/alarme` | `@/pages/kontrakte/KontraktAlarmDashboard` |
-| Dlgauswahlverkaufkontrakte | `/kontrakte/dlgauswahlverkaufkontrakte` | `@/pages/kontrakte/dlgauswahlverkaufkontrakte` |
-| Dlgkontraktumsaetze | `/kontrakte/dlgkontraktumsaetze` | `@/pages/kontrakte/dlgkontraktumsaetze` |
-| Dlgmatifpreisfixierung | `/kontrakte/dlgmatifpreisfixierung` | `@/pages/kontrakte/dlgmatifpreisfixierung` |
 | Kontrakt Alarm Dashboard | `/kontrakte/kontrakt-alarm-dashboard` | `@/pages/kontrakte/KontraktAlarmDashboard` |
 | Kontrakt Positionsmonitor | `/kontrakte/kontrakt-positionsmonitor` | `@/pages/kontrakte/KontraktPositionsmonitor` |
 | Kontrakt Uebersicht | `/kontrakte/kontrakt-uebersicht` | `@/pages/kontrakte/LstKontraktUebersicht` |
@@ -61,6 +58,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Contracts
 
 **Route:** `/contracts` · **Modul:** `@/pages/contracts-v2`
+
+**Ziel:** Contracts in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Contracts — Bedienoberfläche](img/contracts.webp)
+
 
 **Schritte:**
 
@@ -83,6 +85,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/contracts-v2` · **Modul:** `@/pages/contracts-v2`
 
+**Ziel:** Contracts V2 in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Contracts V2 — Bedienoberfläche](img/contracts-v2.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Contracts V2** öffnen (`/contracts-v2`).
@@ -104,6 +111,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte` · **Modul:** `@/pages/kontrakte/LstKontraktUebersicht`
 
+**Ziel:** Kontrakte in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontrakte — Bedienoberfläche](img/kontrakte.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kontrakte** öffnen (`/kontrakte`).
@@ -123,7 +135,12 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/kontrakte/:id` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
+**Route:** `/kontrakte/:id` · **Modul:** `@/pages/kontrakte/KontraktDetailRoute`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/kontrakte__demo-1.webp)
+
 
 **Schritte:**
 
@@ -146,6 +163,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/FrmKontraktDetail` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
 
+**Ziel:** Frmkontraktdetail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frmkontraktdetail — Bedienoberfläche](img/kontrakte__frmkontraktdetail.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Frmkontraktdetail** öffnen (`/kontrakte/FrmKontraktDetail`).
@@ -166,6 +188,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Frmkontraktprotokoll
 
 **Route:** `/kontrakte/FrmKontraktProtokoll` · **Modul:** `@/pages/kontrakte/FrmKontraktProtokoll`
+
+**Ziel:** Frmkontraktprotokoll in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frmkontraktprotokoll — Bedienoberfläche](img/kontrakte__frmkontraktprotokoll.webp)
+
 
 **Schritte:**
 
@@ -188,6 +215,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/KontraktAlarmDashboard` · **Modul:** `@/pages/kontrakte/KontraktAlarmDashboard`
 
+**Ziel:** Kontraktalarmdashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontraktalarmdashboard — Bedienoberfläche](img/kontrakte__kontraktalarmdashboard.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kontraktalarmdashboard** öffnen (`/kontrakte/KontraktAlarmDashboard`).
@@ -208,6 +240,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kontraktpositionsmonitor
 
 **Route:** `/kontrakte/KontraktPositionsmonitor` · **Modul:** `@/pages/kontrakte/KontraktPositionsmonitor`
+
+**Ziel:** Kontraktpositionsmonitor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontraktpositionsmonitor — Bedienoberfläche](img/kontrakte__kontraktpositionsmonitor.webp)
+
 
 **Schritte:**
 
@@ -230,6 +267,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/LstKontraktUebersicht` · **Modul:** `@/pages/kontrakte/LstKontraktUebersicht`
 
+**Ziel:** Lstkontraktuebersicht in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lstkontraktuebersicht — Bedienoberfläche](img/kontrakte__lstkontraktuebersicht.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lstkontraktuebersicht** öffnen (`/kontrakte/LstKontraktUebersicht`).
@@ -251,6 +293,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/alarme` · **Modul:** `@/pages/kontrakte/KontraktAlarmDashboard`
 
+**Ziel:** Alarme in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Alarme — Bedienoberfläche](img/kontrakte__alarme.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Alarme** öffnen (`/kontrakte/alarme`).
@@ -268,72 +315,14 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Dlgauswahlverkaufkontrakte
-
-**Route:** `/kontrakte/dlgauswahlverkaufkontrakte` · **Modul:** `@/pages/kontrakte/dlgauswahlverkaufkontrakte`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Dlgauswahlverkaufkontrakte** öffnen (`/kontrakte/dlgauswahlverkaufkontrakte`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Dlgkontraktumsaetze
-
-**Route:** `/kontrakte/dlgkontraktumsaetze` · **Modul:** `@/pages/kontrakte/dlgkontraktumsaetze`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Dlgkontraktumsaetze** öffnen (`/kontrakte/dlgkontraktumsaetze`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Dlgmatifpreisfixierung
-
-**Route:** `/kontrakte/dlgmatifpreisfixierung` · **Modul:** `@/pages/kontrakte/dlgmatifpreisfixierung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Dlgmatifpreisfixierung** öffnen (`/kontrakte/dlgmatifpreisfixierung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
 ### Kontrakt Alarm Dashboard
 
 **Route:** `/kontrakte/kontrakt-alarm-dashboard` · **Modul:** `@/pages/kontrakte/KontraktAlarmDashboard`
+
+**Ziel:** Kontrakt Alarm Dashboard in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontrakt Alarm Dashboard — Bedienoberfläche](img/kontrakte__kontrakt-alarm-dashboard.webp)
+
 
 **Schritte:**
 
@@ -356,6 +345,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/kontrakt-positionsmonitor` · **Modul:** `@/pages/kontrakte/KontraktPositionsmonitor`
 
+**Ziel:** Kontrakt Positionsmonitor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontrakt Positionsmonitor — Bedienoberfläche](img/kontrakte__kontrakt-positionsmonitor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kontrakt Positionsmonitor** öffnen (`/kontrakte/kontrakt-positionsmonitor`).
@@ -376,6 +370,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Kontrakt Uebersicht
 
 **Route:** `/kontrakte/kontrakt-uebersicht` · **Modul:** `@/pages/kontrakte/LstKontraktUebersicht`
+
+**Ziel:** Kontrakt Uebersicht in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontrakt Uebersicht — Bedienoberfläche](img/kontrakte__kontrakt-uebersicht.webp)
+
 
 **Schritte:**
 
@@ -398,6 +397,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/kontraktklassen` · **Modul:** `@/pages/kontrakte/kontraktklassen`
 
+**Ziel:** Kontraktklassen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Kontraktklassen — Bedienoberfläche](img/kontrakte__kontraktklassen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Kontraktklassen** öffnen (`/kontrakte/kontraktklassen`).
@@ -418,6 +422,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Mengenzeitraeume
 
 **Route:** `/kontrakte/mengenzeitraeume` · **Modul:** `@/pages/kontrakte/mengenzeitraeume`
+
+**Ziel:** Mengenzeitraeume in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mengenzeitraeume — Bedienoberfläche](img/kontrakte__mengenzeitraeume.webp)
+
 
 **Schritte:**
 
@@ -440,6 +449,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/kontrakte/neu` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/kontrakte__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/kontrakte/neu`).
@@ -460,6 +474,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Positionen
 
 **Route:** `/kontrakte/positionen` · **Modul:** `@/pages/kontrakte/KontraktPositionsmonitor`
+
+**Ziel:** Positionen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Positionen — Bedienoberfläche](img/kontrakte__positionen.webp)
+
 
 **Schritte:**
 
@@ -482,6 +501,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/vertrag/:id` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/vertrag__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/vertrag/:id`).
@@ -503,6 +527,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/vertrag/neu` · **Modul:** `@/pages/kontrakte/FrmKontraktDetail`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/vertrag__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/vertrag/neu`).
@@ -523,6 +552,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rahmenvertraege
 
 **Route:** `/vertrag/rahmenvertraege` · **Modul:** `@/pages/vertrag/rahmenvertraege`
+
+**Ziel:** Rahmenvertraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rahmenvertraege — Bedienoberfläche](img/vertrag__rahmenvertraege.webp)
+
 
 **Schritte:**
 

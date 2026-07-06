@@ -53,6 +53,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/fuhrpark/ausgehende-belege-dokumente` · **Modul:** `@/pages/fuhrpark/ausgehende-belege-dokumente`
 
+**Ziel:** Ausgehende Belege Dokumente in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Ausgehende Belege Dokumente — Bedienoberfläche](img/fuhrpark__ausgehende-belege-dokumente.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Ausgehende Belege Dokumente** öffnen (`/fuhrpark/ausgehende-belege-dokumente`).
@@ -73,6 +78,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Fahrzeug Stamm
 
 **Route:** `/fuhrpark/fahrzeug-stamm` · **Modul:** `@/pages/fuhrpark/fahrzeug-stamm`
+
+**Ziel:** Fahrzeug Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fahrzeug Stamm — Bedienoberfläche](img/fuhrpark__fahrzeug-stamm.webp)
+
 
 **Schritte:**
 
@@ -95,6 +105,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/fuhrpark/fahrzeug/:id` · **Modul:** `@/pages/fuhrpark/fahrzeug-stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/fuhrpark__fahrzeug__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/fuhrpark/fahrzeug/:id`).
@@ -115,6 +130,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/fuhrpark/fahrzeug/neu` · **Modul:** `@/pages/fuhrpark/fahrzeug-stamm`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/fuhrpark__fahrzeug__neu.webp)
+
 
 **Schritte:**
 
@@ -137,6 +157,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/fuhrpark/fahrzeuge` · **Modul:** `@/pages/fuhrpark/fahrzeuge`
 
+**Ziel:** Fahrzeuge in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fahrzeuge — Bedienoberfläche](img/fuhrpark__fahrzeuge.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Fahrzeuge** öffnen (`/fuhrpark/fahrzeuge`).
@@ -157,6 +182,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Fuhrpark Auswertung Kosten Pro Fahrzeug
 
 **Route:** `/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug` · **Modul:** `@/pages/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug`
+
+**Ziel:** Fuhrpark Auswertung Kosten Pro Fahrzeug in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fuhrpark Auswertung Kosten Pro Fahrzeug — Bedienoberfläche](img/fuhrpark__fuhrpark-auswertung-kosten-pro-fahrzeug.webp)
+
 
 **Schritte:**
 
@@ -179,6 +209,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/fuhrpark/fuhrpark-auswertungen-menu` · **Modul:** `@/pages/fuhrpark/fuhrpark-auswertungen-menu`
 
+**Ziel:** Fuhrpark Auswertungen Menu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fuhrpark Auswertungen Menu — Bedienoberfläche](img/fuhrpark__fuhrpark-auswertungen-menu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Fuhrpark Auswertungen Menu** öffnen (`/fuhrpark/fuhrpark-auswertungen-menu`).
@@ -199,6 +234,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Fuhrpark Klassisch
 
 **Route:** `/fuhrpark/fuhrpark-klassisch` · **Modul:** `@/pages/fuhrpark/fuhrpark-klassisch`
+
+**Ziel:** Fuhrpark Klassisch in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fuhrpark Klassisch — Bedienoberfläche](img/fuhrpark__fuhrpark-klassisch.webp)
+
 
 **Schritte:**
 
@@ -221,6 +261,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/fuhrpark/fuhrpark-menue` · **Modul:** `@/pages/fuhrpark/fuhrpark-menue`
 
+**Ziel:** Fuhrpark Menue in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fuhrpark Menue — Bedienoberfläche](img/fuhrpark__fuhrpark-menue.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Fuhrpark Menue** öffnen (`/fuhrpark/fuhrpark-menue`).
@@ -241,6 +286,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Fuhrpark Rechnungen
 
 **Route:** `/fuhrpark/fuhrpark-rechnungen` · **Modul:** `@/pages/fuhrpark/fuhrpark-rechnungen`
+
+**Ziel:** Fuhrpark Rechnungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fuhrpark Rechnungen — Bedienoberfläche](img/fuhrpark__fuhrpark-rechnungen.webp)
+
 
 **Schritte:**
 
@@ -263,6 +313,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/fuhrpark/fuhrpark-stammdaten` · **Modul:** `@/pages/fuhrpark/fuhrpark-stammdaten`
 
+**Ziel:** Fuhrpark Stammdaten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Fuhrpark Stammdaten — Bedienoberfläche](img/fuhrpark__fuhrpark-stammdaten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Fuhrpark Stammdaten** öffnen (`/fuhrpark/fuhrpark-stammdaten`).
@@ -283,6 +338,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Uebersicht
 
 **Route:** `/fuhrpark/uebersicht` · **Modul:** `@/pages/fuhrpark/uebersicht`
+
+**Ziel:** Uebersicht in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Uebersicht — Bedienoberfläche](img/fuhrpark__uebersicht.webp)
+
 
 **Schritte:**
 
@@ -305,6 +365,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/tankstelle` · **Modul:** `@/pages/tankstelle/zapfungen`
 
+**Ziel:** Tankstelle in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Tankstelle — Bedienoberfläche](img/tankstelle.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Tankstelle** öffnen (`/tankstelle`).
@@ -325,6 +390,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Zapfungen
 
 **Route:** `/tankstelle/zapfungen` · **Modul:** `@/pages/tankstelle/zapfungen`
+
+**Ziel:** Zapfungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zapfungen — Bedienoberfläche](img/tankstelle__zapfungen.webp)
+
 
 **Schritte:**
 

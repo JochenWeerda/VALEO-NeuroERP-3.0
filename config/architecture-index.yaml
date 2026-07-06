@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-06-27
+# Architecture Index — generiert 2026-07-05
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-06-27T09:53:01Z'
+generated_at: '2026-07-05T10:57:42Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -65,6 +65,7 @@ domains:
     - domain_shared
     frontend_routes:
     - /agrar
+    - /agrar/annahmen-qualitaet-nachtrag
     - /agrar/aussaat
     - /agrar/aussaat/:id
     - /agrar/aussaat/liste
@@ -81,6 +82,7 @@ domains:
     - /agrar/duenger-liste
     - /agrar/duenger-stamm
     - /agrar/duenger-stamm/:id
+    - /agrar/duenger/:id
     - /agrar/duenger/bedarfsrechner
     - /agrar/duenger/liste
     - /agrar/duenger/mischungen
@@ -101,10 +103,13 @@ domains:
     - /agrar/feldbuch/schlag/:id
     - /agrar/feldbuch/schlag/neu
     - /agrar/feldbuch/schlagkartei
+    - /agrar/harvest-settlement/:id
     - /agrar/kontrakt-engagement
     - /agrar/kontrakt-erfuellung
     - /agrar/kontrakt-fixierung
     - /agrar/kontrakt-settlement
+    - /agrar/kontrakt/:id
+    - /agrar/kontrakte/:id
     - /agrar/kulturpflanzen
     - /agrar/kulturpflanzen/:id
     - /agrar/kulturpflanzen/liste
@@ -133,6 +138,7 @@ domains:
     - /agrar/saatgut-liste
     - /agrar/saatgut-stamm
     - /agrar/saatgut-stamm/:id
+    - /agrar/saatgut/:id
     - /agrar/saatgut/bestellung
     - /agrar/saatgut/liste
     - /agrar/saatgut/sorte/:id
@@ -220,9 +226,6 @@ domains:
     - /kontrakte/KontraktPositionsmonitor
     - /kontrakte/LstKontraktUebersicht
     - /kontrakte/alarme
-    - /kontrakte/dlgauswahlverkaufkontrakte
-    - /kontrakte/dlgkontraktumsaetze
-    - /kontrakte/dlgmatifpreisfixierung
     - /kontrakte/kontrakt-alarm-dashboard
     - /kontrakte/kontrakt-positionsmonitor
     - /kontrakte/kontrakt-uebersicht
@@ -319,6 +322,7 @@ domains:
     - agri_qs_workflow
     - agri_silo_material_flow
     - agribusiness
+    - annahme
     - central_contracts
     - charges
     - commodity_positions
@@ -444,18 +448,6 @@ domains:
     - /crm/campaign/new
     - /crm/campaigns
     - /crm/campaigns/new
-    - /crm/charts/campaign-performance/campaigncomparisonbarchart
-    - /crm/charts/campaign-performance/campaignperformancetrendchart
-    - /crm/charts/campaign-performance/campaigntypedistributionchart
-    - /crm/charts/campaigndetailperformancechart
-    - /crm/charts/campaignperformancecharts
-    - /crm/charts/opportunities-forecast/expectedrevenuebarchart
-    - /crm/charts/opportunities-forecast/expectedrevenuelinechart
-    - /crm/charts/opportunities-forecast/opportunitycountbarchart
-    - /crm/charts/opportunities-forecast/stagedistributiondonut
-    - /crm/charts/opportunities-forecast/totalamountbarchart
-    - /crm/charts/opportunities-forecast/totalamountlinechart
-    - /crm/charts/opportunitiesforecastcharts
     - /crm/consent-confirm
     - /crm/consent-detail
     - /crm/consent-management
@@ -464,6 +456,7 @@ domains:
     - /crm/consent/new
     - /crm/consents
     - /crm/crm-dashboard
+    - /crm/customer-360/:id
     - /crm/customers
     - /crm/customers/:id
     - /crm/customers/:id/articles
@@ -489,13 +482,9 @@ domains:
     - /crm/kunden-schnellauswahl
     - /crm/kunden-stamm
     - /crm/kunden-stamm-modern
-    - /crm/kunden-stamm-modern/customermaskeditpage
-    - /crm/kunden-stamm-modern/legacykundenstammmodern
     - /crm/kunden-zuordnung
     - /crm/kunden/:id
     - /crm/lead-detail
-    - /crm/lead-detail/leadmaskdetailpage
-    - /crm/lead-detail/legacyleaddetailpage
     - /crm/lead-generierung
     - /crm/lead/:id
     - /crm/leads
@@ -566,6 +555,7 @@ domains:
     - /sales/delivery
     - /sales/delivery-editor
     - /sales/delivery-editor-new
+    - /sales/delivery-note/:id
     - /sales/invoice
     - /sales/invoice-editor
     - /sales/invoice/:id
@@ -583,6 +573,7 @@ domains:
     - /sales/orders/new
     - /sales/rechnungen
     - /sales/rechnungen-liste
+    - /sales/sales-order/:id
     - /service/abschluss
     - /service/anfrage-detail
     - /service/anfrage-neu
@@ -598,7 +589,6 @@ domains:
     - /verkauf/dauerauftraege
     - /verkauf/kommissions-auftraege
     - /verkauf/kunde-neu
-    - /verkauf/kunde-neu/kundeneumaskbuilderpage
     - /verkauf/kunde/:id
     - /verkauf/kunde/neu
     - /verkauf/kunden-liste
@@ -689,6 +679,7 @@ domains:
     - crm_ownership
     - crm_partner_suche
     - crm_reports
+    - crm_segments
     - customer_extensions
     - customers
     - debtors
@@ -728,9 +719,11 @@ domains:
     - docs/adr/ADR-CRM-001.md
     - docs/adr/adr-002-fibu-frontend-api-layer.md
     - docs/adr/adr-003-canonical-domain-model.md
+    - docs/adr/adr-011-ui-maskenstrategie.md
     - docs/adr/adr-027-process-kernel-event-namenskonvention.md
     - docs/adr/adr-034-tenant-isolation-klassifizierungssystem.md
     - docs/adr/adr-036-architecture-documentation-stack.md
+    - docs/adr/adr-038-address-value-object.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -893,7 +886,6 @@ domains:
     - /export/umsatzsteuervoranmeldung
     - /export/ustva
     - /fibu
-    - /fibu-suite
     - /fibu-suite/$
     - /fibu/abschluss-checklist-detail
     - /fibu/abschluss-checklist-detail/:id
@@ -947,10 +939,12 @@ domains:
     - /finance/abschluss
     - /finance/accounts/:id
     - /finance/ap-invoice-form
+    - /finance/ap-invoice/:id
     - /finance/ap-invoices-list
     - /finance/ap/invoices
     - /finance/ap/invoices/:id
     - /finance/ap/invoices/new
+    - /finance/ar-open-item/:id
     - /finance/audit-trail
     - /finance/bank
     - /finance/bank-abgleich
@@ -958,6 +952,7 @@ domains:
     - /finance/bankkonten
     - /finance/bankkonten-stamm
     - /finance/bankkonten/:id
+    - /finance/bankkonto/:id
     - /finance/bookings/new
     - /finance/buchungen
     - /finance/buchungserfassung
@@ -965,6 +960,7 @@ domains:
     - /finance/buchungsvorlagen
     - /finance/chart-of-accounts
     - /finance/datev-export
+    - /finance/debitor/:id
     - /finance/debitoren
     - /finance/debitoren-liste
     - /finance/debitoren-stamm
@@ -979,6 +975,7 @@ domains:
     - /finance/invoices/new
     - /finance/kasse
     - /finance/kontenplan
+    - /finance/kreditor/:id
     - /finance/kreditoren
     - /finance/kreditoren-stamm
     - /finance/lastschriften-debitoren
@@ -990,14 +987,11 @@ domains:
     - /finance/op-debitoren
     - /finance/op-kreditoren
     - /finance/payment-matching
+    - /finance/payment-run/:id
     - /finance/payments
     - /finance/periodenabschluss
     - /finance/periods
     - /finance/reports
-    - /finance/reports/analyticschartcontent
-    - /finance/reports/charts/analyticsbalancesharechart
-    - /finance/reports/charts/analyticscashflowchart
-    - /finance/reports/financialcardsparkline
     - /finance/skonto-optimizer
     - /finance/steuerschluessel
     - /finance/umsatz
@@ -1032,11 +1026,6 @@ domains:
     - /pricing
     - /reports
     - /reports/ReportsDashboardCharts
-    - /reports/charts/customeranalyticscharts
-    - /reports/charts/financialanalyticscharts
-    - /reports/charts/productanalyticscharts
-    - /reports/charts/salesperformancecharts
-    - /reports/charts/trendanalyticscharts
     - /reports/deckungsbeitrag
     - /reports/lagerbestand
     - /reports/umsatz
@@ -1180,6 +1169,7 @@ domains:
     - domain_shared
     frontend_routes:
     - /personal/bewerbungen
+    - /personal/hrm-freigaben
     - /personal/hrm-operations-gates
     - /personal/mitarbeiter
     - /personal/mitarbeiter-liste
@@ -1249,6 +1239,8 @@ domains:
     - /inventory/adjust
     - /inventory/epcis
     - /lager
+    - /lager/article-stock/:id
+    - /lager/artikel/:id
     - /lager/auslagerung
     - /lager/bestandsbewertung
     - /lager/bestandskorrektur
@@ -1268,6 +1260,7 @@ domains:
     - /lager/rueckverfolgbarkeit
     - /lager/silo-mobil
     - /lager/silo-uebersicht
+    - /lager/stock-movement/:id
     - /lager/terminal
     - /lager/umlagerung
     - /stammdaten/artikel-stoffstrom
@@ -1321,6 +1314,7 @@ domains:
     - price_hedge_api
     - price_lists
     - ruestliste
+    - scan
     - stuecklisten
     - warehouse_transfers
     - warehouse_wms
@@ -1336,6 +1330,7 @@ domains:
     - docs/adr/adr-033-rollback-strategie-get-db.md
     - docs/adr/adr-036-architecture-documentation-stack.md
     - docs/adr/adr-037-structurizr-c4-source-of-truth.md
+    - docs/adr/adr-038-address-value-object.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1480,13 +1475,11 @@ domains:
     - /admin/setup/dms-integration
     - /admin/terminologie
     - /admin/voice-channel
+    - /admin/vordruck-editor
     - /admin/webhooks
     - /admin/webshop
     - /alerts
     - /analytics
-    - /analytics/analyticsdashboardcharts
-    - /analytics/charts/inventorybarchart
-    - /analytics/charts/salestrendlinechart
     - /auth/Callback
     - /auth/Login
     - /auth/callback
@@ -1498,6 +1491,7 @@ domains:
     - /dashboard/sales
     - /dashboard/sales-dashboard
     - /dashboards/geschaeftsfuehrung
+    - /dev/mask-benchmark/:domain/:variant/:id
     - /einstellungen
     - /einstellungen/system
     - /errors/NotFound
@@ -1506,6 +1500,7 @@ domains:
     - /hilfe
     - /login
     - /management/executive-dashboard
+    - /mask-rollout/:screenId/:entityId
     - /mobile/scanner
     - /monitoring/alerts
     - /monitoring/regeln
@@ -1565,6 +1560,7 @@ domains:
     - knowledge_store
     - llm_gateway
     - mail_ingest_service
+    - mask_rollout_summary_service
     - mcp_tool_registry_service
     - mobile_sync_service
     - nats_event_handlers
@@ -1609,6 +1605,7 @@ domains:
     - analytics
     - background_jobs
     - batch
+    - beleg_vordrucke
     - benchmark_api
     - benchmark_cockpit
     - blockchain_runtime
@@ -1633,7 +1630,10 @@ domains:
     - job_runner
     - ki_usability
     - knowledge_api
+    - mask_actions
     - mask_registry
+    - mask_rollout_summaries
+    - mask_screen_definition
     - mcp_tool_registry
     - mobile_sync
     - modules
@@ -1665,6 +1665,7 @@ domains:
     - projekte
     - rag
     - read_model_snapshots
+    - reports_export
     - runtime_operations
     - security_monitoring
     - service_anfragen
@@ -1712,12 +1713,14 @@ domains:
     - /einkauf/anfrage
     - /einkauf/anfrage-erfassung
     - /einkauf/anfrage-stamm
+    - /einkauf/anfrage/:id
     - /einkauf/anfrage/neu
     - /einkauf/anfragen
     - /einkauf/anfragen-liste
     - /einkauf/anfragen/:id
     - /einkauf/angebot
     - /einkauf/angebot-stamm
+    - /einkauf/angebot/:id
     - /einkauf/angebot/neu
     - /einkauf/angebote
     - /einkauf/angebote-liste
@@ -1728,12 +1731,14 @@ domains:
     - /einkauf/anlieferavis/neu
     - /einkauf/audit-drilldown
     - /einkauf/auftragsbestaetigung
+    - /einkauf/auftragsbestaetigung/:id
     - /einkauf/auftragsbestaetigung/neu
     - /einkauf/auftragsbestaetigungen
     - /einkauf/auftragsbestaetigungen-liste
     - /einkauf/auftragsbestaetigungen/:id
     - /einkauf/bestellung-anlegen
     - /einkauf/bestellung-stamm
+    - /einkauf/bestellung/:id
     - /einkauf/bestellungen
     - /einkauf/bestellungen-liste
     - /einkauf/bestellungen/:id
@@ -1772,6 +1777,7 @@ domains:
     - /einkauf/rfq-bids
     - /einkauf/rfq-bids/:rfqId
     - /einkauf/service-entry-sheets
+    - /einkauf/supplier/:id
     - /einkauf/wareneingang
     - /einkauf/wareneingang/:poId
     - /einkauf/wareneingangsabgleich
@@ -1798,12 +1804,12 @@ domains:
     decisions:
     - docs/adr/adr-014-service-layer-pattern.md
 mapping_stats:
-  frontend_routes_total: 895
-  frontend_routes_mapped: 895
-  backend_services_total: 205
-  backend_services_mapped: 205
-  backend_endpoints_total: 391
-  backend_endpoints_mapped: 391
+  frontend_routes_total: 889
+  frontend_routes_mapped: 889
+  backend_services_total: 206
+  backend_services_mapped: 206
+  backend_endpoints_total: 399
+  backend_endpoints_mapped: 399
 unmapped:
   frontend_routes: []
   backend_services: []

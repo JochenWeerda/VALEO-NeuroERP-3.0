@@ -384,47 +384,51 @@ async def escalate_case(case_id: str, reason: str, escalated_by: str) -> dict:
     return await _request_crm_service("POST", f"/api/v1/cases/{case_id}/escalate", params=params)
 
 
+# Wiederverwendete AsyncClients mit Connection-Pooling: ein Client pro
+# Downstream-Service statt Client-Neuaufbau (TCP-Setup) pro Request.
+_clients: dict[str, httpx.AsyncClient] = {}
+
+
+def _pooled_client(base_url: str, timeout: float) -> httpx.AsyncClient:
+    client = _clients.get(base_url)
+    if client is None or client.is_closed:
+        client = httpx.AsyncClient(
+            base_url=base_url,
+            timeout=timeout,
+            follow_redirects=True,
+        )
+        _clients[base_url] = client
+    return client
+
+
+async def _pooled_request(base_url: str, timeout: float, method: str, path: str, **kwargs: Any) -> Any:
+    client = _pooled_client(base_url, timeout)
+    response = await client.request(method, path, **kwargs)
+    response.raise_for_status()
+    if response.content:
+        return response.json()
+    return None
+
+
 async def _request_crm_sales(method: str, path: str, **kwargs: Any) -> Any:
     """Make request to crm-sales service."""
     timeout = getattr(settings, 'CRM_SALES_HTTP_TIMEOUT_SECONDS', 5)
-    base_url = getattr(settings, 'CRM_SALES_BASE_URL', 'http://localhost:5700')
-    async with httpx.AsyncClient(
-        base_url=base_url,
-        timeout=timeout,
-        follow_redirects=True,
-    ) as client:
-        response = await client.request(method, path, **kwargs)
-        response.raise_for_status()
-        if response.content:
-            return response.json()
-        return None
+    base_url = getattr(settings, 'CRM_SALES_BASE_URL', 'http://127.0.0.1:5700')
+    return await _pooled_request(base_url, timeout, method, path, **kwargs)
 
 
 async def _request_crm_service(method: str, path: str, **kwargs: Any) -> Any:
     """Make request to crm-service."""
     timeout = getattr(settings, 'CRM_SERVICE_HTTP_TIMEOUT_SECONDS', 5)
-    base_url = getattr(settings, 'CRM_SERVICE_BASE_URL', 'http://localhost:5800')
-    async with httpx.AsyncClient(
-        base_url=base_url,
-        timeout=timeout,
-        follow_redirects=True,
-    ) as client:
-        response = await client.request(method, path, **kwargs)
-        response.raise_for_status()
-        if response.content:
-            return response.json()
-        return None
+    base_url = getattr(settings, 'CRM_SERVICE_BASE_URL', 'http://127.0.0.1:5800')
+    return await _pooled_request(base_url, timeout, method, path, **kwargs)
 
 
 async def _request(method: str, path: str, **kwargs: Any) -> Any:
-    timeout = settings.CRM_CORE_HTTP_TIMEOUT_SECONDS
-    async with httpx.AsyncClient(
-        base_url=settings.CRM_CORE_BASE_URL,
-        timeout=timeout,
-        follow_redirects=True,
-    ) as client:
-        response = await client.request(method, path, **kwargs)
-        response.raise_for_status()
-        if response.content:
-            return response.json()
-        return None
+    return await _pooled_request(
+        settings.CRM_CORE_BASE_URL,
+        settings.CRM_CORE_HTTP_TIMEOUT_SECONDS,
+        method,
+        path,
+        **kwargs,
+    )

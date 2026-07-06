@@ -39,6 +39,20 @@ function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefine
   }
 }
 
+function isProfileNumeric(table: RenderTablePlan, column: RenderTablePlan['columns'][number]): boolean {
+  if (column.numeric || column.renderKind === 'currency' || column.renderKind === 'number') return true
+  if (table.tableProfile === 'financial') return /betrag|saldo|soll|haben|steuer|skonto|summe|differenz|amount|debit|credit/i.test(column.key)
+  if (table.tableProfile === 'inventory') return /menge|bestand|reserv|verfueg|block|quantity|qty|stock|unit/i.test(column.key)
+  return false
+}
+
+function profileLabel(profile: RenderTablePlan['tableProfile']): string {
+  if (profile === 'financial') return 'Financial Table Profile'
+  if (profile === 'inventory') return 'Inventory Table Profile'
+  if (profile === 'audit') return 'Audit Table Profile'
+  return 'Standard Table Profile'
+}
+
 function FilterChips({
   filterPlan,
   columns,
@@ -125,10 +139,15 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   }
 
   return (
-    <Card>
+    <Card data-table-profile={table.tableProfile} data-testid={`table-${table.key}`}>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-base">{table.label}</CardTitle>
+          <div>
+            <CardTitle className="text-base">{table.label}</CardTitle>
+            <p className="mt-0.5 text-[11px] uppercase tracking-normal text-muted-foreground">
+              {profileLabel(table.tableProfile)}
+            </p>
+          </div>
           {onQueryChange && (
             <input
               type="search"
@@ -204,7 +223,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             key: column.key,
             label: column.label,
             width: column.width,
-            numeric: column.numeric,
+            numeric: isProfileNumeric(table, column),
             sortable: column.sortable,
             render: column.renderKind
               ? (value: unknown) => formatCellValue(value, column.renderKind)

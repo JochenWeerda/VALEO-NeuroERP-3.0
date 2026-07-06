@@ -171,3 +171,15 @@ packages/frontend-web/tests/e2e/__verify__/
 
 # AsyncAPI event extraction intermediate
 events_raw.json
+
+# Repo-Hygiene / PII-Remediation 2026-07-02 (SPEC-P0-04)
+tmp_*/
+.tmp_*
+.tmp_export/
+dist/
+evidence/screenshots/
+*-results.json
+*_leads.json
+playwright-results.json
+playwright-results.json/
+ostfriesland_*.json

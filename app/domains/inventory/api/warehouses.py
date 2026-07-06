@@ -46,6 +46,8 @@ async def list_warehouses(
         page=page,
         pages=pages,
         size=limit,
+        has_next=(skip + limit) < total,
+        has_prev=skip > 0,
     )
 
 

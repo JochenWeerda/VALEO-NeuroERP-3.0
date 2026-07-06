@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-30
+last_reviewed: 2026-07-05
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -26,6 +26,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `2012a7987e7f_add_finance_tables` | add_finance_tables |
 | `31b00be545af_merge_wave106_and_kontrakt_klasse_` | merge_wave106_and_kontrakt_klasse_20260520 |
 | `34a9ed912cd7_add_crm_tables_contacts_leads_` | Add CRM tables - contacts, leads, activities, betriebsprofile |
+| `42e0e183bd0c_merge_heads_feed_qs_wf_cockpit_repair_` | merge heads: feed_qs_wf_cockpit_repair + pricing_staffelrabatt_artikel_m2m |
 | `4601a09c0fc1_add_farmer_declaration_fields_to_psm` | Add farmer declaration fields to PSM |
 | `4b6600ac3926_merge_heads` | merge heads |
 | `4e8447ad429a_merge_gdpr_base` | — |
@@ -103,6 +104,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_master_fields_gap_83_20260215` | Close 8.3 article master-data field gaps. |
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
+| `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
 | `bp_merge_tab23_json_20260330` | Merge heads + domain_crm.business_partners.tab_23 JSONB (Tab-23 Stammdaten) |
 | `business_partner_contacts_instructions_20260214` | Add business partner contacts and instructions tables. |
 | `business_partner_discount_price_tables_20260214` | Add normalized discount and price agreement tables for business partners. |
@@ -202,6 +204,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `gobd_aufbewahrungsfristen_20260301` | GoBD: domain_finance.aufbewahrungsfristen (operative Fristentabelle) |
 | `gobd_journal_hash_chain_trigger_20260303` | GoBD Hash-Chain: Trigger für journal_entries (sequence_number, hash_prev, hash_current) |
 | `grundfutteranalysen_20260419` | Grundfutter-Laboranalysen: LUFA/VDLUFA-Prüfberichts-Schema (GfE-2023) |
+| `hr_applications_table_20260702` | hr: applications-Tabelle für Bewerbungs-Pipeline |
 | `hr_personal_time_tracking_20260215` | hr personal time tracking tables |
 | `hr_planning_tables_20260625` | HR planning tables — employee_time_profiles, calendar_events, payroll_exports, |
 | `hr_training_onboarding_module_20260215` | hr training/qualification/onboarding module |
@@ -273,6 +276,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `performance_indexes_20260526` | Performance indexes for high-frequency query patterns. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
+| `pricing_staffelrabatt_artikel_m2m_20260702` | pricing: staffelrabatte <-> artikel als many-to-many |
+| `pricing_staffelrabatte_20260701` | pricing: staffelrabatte Tabelle anlegen |
 | `proc_bestellung_wareneingang_20260623` | DOM-PROC-004: proc_bestellung_status_log, proc_wareneingaenge, proc_rechnungspruefungen |
 | `proc_ers_credit_20260611` | Procurement ERS credit notes (Gutschriftsverfahren). |
 | `proc_follow_up_20260611` | Procurement match follow-up actions (append-only). |
@@ -288,6 +293,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_contract_columns_20260610` | Repair runtime columns required by current ORM and domain checks. |
 | `repair_runtime_model_alignment_20260610` | Align fresh installations with current CRM and article runtime models. |
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
+| `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |
 | `sales_angebot_auftrag_tables_20260225` | Add sales_offers, sales_offer_items, sales_orders, sales_order_items to domain_crm |
 | `sales_credit_returns_pricing_20260305` | Sales: credit notes, returns, price list items |

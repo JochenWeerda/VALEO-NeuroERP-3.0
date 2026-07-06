@@ -362,6 +362,7 @@ api_router.include_router(
 
 api_router.include_router(
     agents.router,
+    prefix="/agents",
     tags=["neuroassist", "agents"],
 )
 
@@ -501,6 +502,7 @@ api_router.include_router(
 )
 
 from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
+from .endpoints import scan as scan_module
 
 api_router.include_router(
     sales_delivery_notes.router,
@@ -516,6 +518,17 @@ api_router.include_router(
     pricing.router,
     tags=["pricing"]
 )
+
+# Preise-Alias: selber Router, zweiter Prefix für Frontend-Konvention /preise/*
+api_router.include_router(
+    pricing.router,
+    prefix="/preise",
+    tags=["pricing"],
+    include_in_schema=False,
+)
+
+# Mobile-Scan / Barcode
+api_router.include_router(scan_module.router)
 
 api_router.include_router(
     price_lists.router,
@@ -1734,6 +1747,7 @@ from app.api.v1.endpoints import (
     import_pipeline,
     iot_telemetry,
     mask_registry,
+    mask_actions,
     mask_rollout_summaries,
     mask_screen_definition,
     operational_governance,
@@ -1766,6 +1780,7 @@ api_router.include_router(idempotency_monitoring.router)
 api_router.include_router(import_pipeline.router)
 api_router.include_router(iot_telemetry.router)
 api_router.include_router(mask_registry.router)
+api_router.include_router(mask_actions.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(operational_governance.router)
@@ -1957,6 +1972,14 @@ api_router.include_router(
 api_router.include_router(
     waagen_vorlagen.router,
     tags=["agrar", "waage", "vorlagen"],
+)
+
+# Belegformular-Vordruck-Editor (Admin): Druckvorlagen für Papier/PDF-Ausdrucke
+from app.api.v1.endpoints import beleg_vordrucke  # noqa: E402
+
+api_router.include_router(
+    beleg_vordrucke.router,
+    tags=["admin", "vordrucke", "druck"],
 )
 
 # GS1 Barcode Parse Service (service-erp.de analog)

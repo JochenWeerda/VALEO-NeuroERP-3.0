@@ -14,6 +14,20 @@ from app.core.tenant_context import get_current_tenant_id
 # Bearer-Token-Schema
 bearer = HTTPBearer(auto_error=True)
 
+# Dev-Token erhält alle Standard-Domänenrollen (nur aktiv wenn API_DEV_TOKEN gesetzt)
+_DEV_ROLES = [
+    "admin", "manager", "user",
+    "KONTRAKT_LESEN", "KONTRAKT_BEARBEITEN", "KONTRAKT_ADMIN", "KONTRAKT_LOESCHEN",
+    "HARVEST_LESEN", "HARVEST_BEARBEITEN", "HARVEST_ADMIN",
+    "SALES_LESEN", "SALES_BEARBEITEN", "SALES_ADMIN",
+    "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
+    "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
+    "LAGER_LESEN", "LAGER_BEARBEITEN", "LAGER_ADMIN",
+    "CRM_LESEN", "CRM_BEARBEITEN", "CRM_ADMIN",
+    "QUALITAET_LESEN", "QUALITAET_BEARBEITEN", "QUALITAET_ADMIN",
+    "FUTTERMITTEL_LESEN", "FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN",
+]
+
 
 class User(TypedDict, total=False):
     """Authenticated User Object"""
@@ -39,7 +53,7 @@ def get_current_user(
     """
     token = (creds.credentials or "").strip()
     if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
-        return {"sub": "dev", "roles": []}
+        return {"sub": "dev", "roles": _DEV_ROLES}
 
     try:
         claims = decode_token(creds.credentials)

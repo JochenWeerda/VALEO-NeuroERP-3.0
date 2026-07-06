@@ -12,9 +12,16 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
+
+_SCRIPT_DIR = Path(__file__).parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from handbuch_screenshot_slug import route_to_img_slug
 
 REPO = Path(__file__).parent.parent
 HANDBUCH = REPO / "docs" / "benutzerhandbuch"
@@ -121,6 +128,11 @@ CHAPTERS: list[tuple[str, str, list[str], str]] = [
 ADMIN_PREFIXES = ("admin", "admin-suite", "api-docs", "mcp")
 
 PRESERVE_MARKER = "## Maskenregister"
+
+# Kapitel mit manuell gepflegtem Intro: Register wird vor diesem Marker eingefügt.
+MANUAL_INTRO_SPLIT: dict[str, str] = {
+    "masken-plattform.md": "## Weiterführend",
+}
 
 
 @dataclass
@@ -275,16 +287,57 @@ def mask_steps(label: str, path: str) -> list[str]:
     ]
 
 
+def screenshot_markdown(path: str, label: str) -> str:
+    """Embed WebP screenshot only when QC-approved for this route."""
+    img_dir = HANDBUCH / "img"
+    slug = route_to_img_slug(path)
+    manifest_path = HANDBUCH / "screenshot-manifest.json"
+
+    approved_slugs: set[str] | None = None
+    known_slugs: set[str] | None = None
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            entries = manifest.get("entries", [])
+            known_slugs = {e["slug"] for e in entries}
+            approved_slugs = {e["slug"] for e in entries if e.get("approval") == "approved"}
+        except json.JSONDecodeError:
+            approved_slugs = None
+            known_slugs = None
+
+    if approved_slugs is not None and known_slugs is not None:
+        if slug in known_slugs and slug not in approved_slugs:
+            return ""
+
+    candidates = [
+        img_dir / f"{slug}.webp",
+        img_dir / f"{path.replace('/', '-').lower() or 'start-dashboard'}.webp",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return f"![{label} — Bedienoberfläche](img/{candidate.name})\n\n"
+    return ""
+
+
 def render_mask_section(r: RouteEntry) -> str:
     anchor = re.sub(r"[^a-z0-9]+", "-", r.path.lower()).strip("-") or "start"
+    shot = screenshot_markdown(r.path, r.label)
+    route_hint = f"`/{r.path}`" if r.path else "Startseite"
     lines = [
         f"### {r.label}",
         "",
-        f"**Route:** `/{r.path}` · **Modul:** `{r.module}`",
+        f"**Route:** {route_hint} · **Modul:** `{r.module}`",
         "",
-        "**Schritte:**",
+        f"**Ziel:** {r.label} in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das "
+        f"Ergebnis in Liste bzw. Folgebeleg kontrollieren.",
         "",
     ]
+    if shot:
+        lines.append(shot)
+    lines.extend([
+        "**Schritte:**",
+        "",
+    ])
     for i, step in enumerate(mask_steps(r.label, r.path), 1):
         lines.append(f"{i}. {step}")
     lines.extend([
@@ -473,7 +526,16 @@ def main() -> int:
         generated = render_chapter(filename, title, description, chapter_routes, nav_items)
         if out_path.exists():
             existing = out_path.read_text(encoding="utf-8")
-            if PRESERVE_MARKER not in existing and "img/" in existing:
+            if filename in MANUAL_INTRO_SPLIT and PRESERVE_MARKER not in existing:
+                marker = MANUAL_INTRO_SPLIT[filename]
+                if marker in existing:
+                    intro, tail = existing.split(marker, 1)
+                    registry = PRESERVE_MARKER + generated.split(PRESERVE_MARKER, 1)[1]
+                    registry = registry.split("## Quellen und Reverse-Pflege", 1)[0].rstrip()
+                    generated = intro.rstrip() + "\n\n" + registry + "\n\n" + marker + tail
+                else:
+                    generated = merge_preserve_intro(existing, generated)
+            elif PRESERVE_MARKER not in existing and "img/" in existing:
                 # Legacy-Kapitel mit Screenshots: Intro behalten, Register anhängen
                 split_at = existing.find("## Quellen")
                 if split_at == -1:

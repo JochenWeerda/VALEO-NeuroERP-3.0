@@ -110,12 +110,50 @@ Details für Betreiber: [Agent-Runbook Mask Runtime](../agent-docs/runbooks/mask
 | Legacy statt native Maske | Feature-Flag aus oder `temporary=true` | Flag prüfen; Admin kontaktieren |
 | Rollout-Route 404 | Flag `VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS` aus | Flag setzen |
 
-## Weiterführend
+## Maskenregister
 
-- [Release Notes v3.1.0](release-notes.md) — Änderungsprotokoll
-- [In-App-Hilfe](in-app-hilfe.md) — Route → Dokumentation
-- Entwickler-API: [Mask Runtime API](../entwickler/mask-runtime-api.md)
-- Architektur: [Universal Mask Runtime Status](../architecture/uix/universal-mask-runtime-status.md)
+Vollständige Abdeckung: **1** App-Routen
+(0 explizit in der Sidebar-Navigation).
 
-Reverse-Pflege: Bei neuen nativen Masken oder Rollout-Routen
-`scripts/generate_inapp_help_map.py` ausführen und dieses Kapitel ergänzen.
+| Maske | Route | Modul |
+|-------|-------|-------|
+| :Entityid | `/mask-rollout/:screenId/:entityId` | `@/pages/workflow/mask-rollout/MaskRolloutRoute` |
+
+## Masken im Detail
+
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
+
+### :Entityid
+
+**Route:** `/mask-rollout/:screenId/:entityId` · **Modul:** `@/pages/workflow/mask-rollout/MaskRolloutRoute`
+
+**Ziel:** :Entityid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Entityid — Bedienoberfläche](img/mask-rollout__demo-1__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Entityid** öffnen (`/mask-rollout/:screenId/:entityId`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
+
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

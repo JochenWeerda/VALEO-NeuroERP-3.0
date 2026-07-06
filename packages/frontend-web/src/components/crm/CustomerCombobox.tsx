@@ -143,7 +143,10 @@ export function CustomerCombobox({
             aria-expanded={open}
             disabled={disabled}
             autoFocus={autoFocus}
-            className={cn('w-full justify-between font-normal', !value && 'text-muted-foreground')}
+            className={cn(
+              'w-full justify-between font-normal hover:bg-muted hover:text-foreground',
+              value ? 'text-foreground' : 'text-muted-foreground',
+            )}
           >
             <span className="flex min-w-0 items-center gap-2 truncate">
               <Search className="h-4 w-4 shrink-0 opacity-60" />

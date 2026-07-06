@@ -139,6 +139,11 @@ test.describe('UAT TC-PER: Personal-Modul', () => {
 
   // -------------------------------------------------------------------------
   // TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar
+  //
+  // UI-PERSONAL-BADGES-001 erledigt 2026-07-02: Root-Cause war der falsche
+  // API-Pfad (/personal/bewerbungen statt /personal/applications) plus die nie
+  // migrierte Tabelle domain_hr.applications (503-Fallback). Beides behoben —
+  // siehe open-gaps-and-known-issues.md.
   // -------------------------------------------------------------------------
   test('TC-PER-002: Bewerbungen — Stage-Pipeline-Badges sichtbar', async ({ page }) => {
     const collector = attachConsoleErrorListener(page)

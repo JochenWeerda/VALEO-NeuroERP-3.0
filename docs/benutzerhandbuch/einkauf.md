@@ -73,7 +73,7 @@ Bestandsführung und freigegebener Eingangsrechnung.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **78** App-Routen
+Vollständige Abdeckung: **82** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
@@ -90,28 +90,32 @@ Vollständige Abdeckung: **78** App-Routen
 | Anfrage | `/einkauf/anfrage` | `@/pages/einkauf/anfrage-stamm` |
 | Anfrage Erfassung | `/einkauf/anfrage-erfassung` | `@/pages/einkauf/anfrage-erfassung` |
 | Anfrage Stamm | `/einkauf/anfrage-stamm` | `@/pages/einkauf/anfrage-stamm` |
+| :Id | `/einkauf/anfrage/:id` | `@/pages/einkauf/anfrage-native` |
 | Neu | `/einkauf/anfrage/neu` | `@/pages/einkauf/anfrage-stamm` |
 | Anfragen | `/einkauf/anfragen` | `@/pages/einkauf/anfragen-liste` |
 | Anfragen Liste | `/einkauf/anfragen-liste` | `@/pages/einkauf/anfragen-liste` |
 | :Id | `/einkauf/anfragen/:id` | `@/pages/einkauf/anfrage-erfassung` |
 | Angebot | `/einkauf/angebot` | `@/pages/einkauf/angebot-stamm` |
 | Angebot Stamm | `/einkauf/angebot-stamm` | `@/pages/einkauf/angebot-stamm` |
+| :Id | `/einkauf/angebot/:id` | `@/pages/einkauf/angebot-native` |
 | Neu | `/einkauf/angebot/neu` | `@/pages/einkauf/angebot-stamm` |
 | Angebote | `/einkauf/angebote` | `@/pages/einkauf/angebote-liste` |
 | Angebote Liste | `/einkauf/angebote-liste` | `@/pages/einkauf/angebote-liste` |
 | :Id | `/einkauf/angebote/:id` | `@/pages/einkauf/angebot-stamm` |
 | Anlieferavis | `/einkauf/anlieferavis` | `@/pages/einkauf/anlieferavis` |
 | Anlieferavis Liste | `/einkauf/anlieferavis-liste` | `@/pages/einkauf/anlieferavis-liste` |
-| :Id | `/einkauf/anlieferavis/:id` | `@/pages/einkauf/anlieferavis` |
+| :Id | `/einkauf/anlieferavis/:id` | `@/pages/einkauf/anlieferavis-native` |
 | Neu | `/einkauf/anlieferavis/neu` | `@/pages/einkauf/anlieferavis` |
 | Audit Drilldown | `/einkauf/audit-drilldown` | `@/pages/einkauf/audit-drilldown` |
 | Auftragsbestaetigung | `/einkauf/auftragsbestaetigung` | `@/pages/einkauf/auftragsbestaetigung` |
+| :Id | `/einkauf/auftragsbestaetigung/:id` | `@/pages/einkauf/auftragsbestaetigung-native` |
 | Neu | `/einkauf/auftragsbestaetigung/neu` | `@/pages/einkauf/auftragsbestaetigung` |
 | Auftragsbestaetigungen | `/einkauf/auftragsbestaetigungen` | `@/pages/einkauf/auftragsbestaetigungen-liste` |
 | Auftragsbestaetigungen Liste | `/einkauf/auftragsbestaetigungen-liste` | `@/pages/einkauf/auftragsbestaetigungen-liste` |
 | :Id | `/einkauf/auftragsbestaetigungen/:id` | `@/pages/einkauf/auftragsbestaetigung` |
 | Bestellung Anlegen | `/einkauf/bestellung-anlegen` | `@/pages/einkauf/bestellung-anlegen` |
 | Bestellung Stamm | `/einkauf/bestellung-stamm` | `@/pages/einkauf/bestellung-stamm` |
+| :Id | `/einkauf/bestellung/:id` | `@/pages/einkauf/bestellung-native` |
 | Bestellungen | `/einkauf/bestellungen` | `@/pages/einkauf/bestellungen-liste` |
 | Bestellungen Liste | `/einkauf/bestellungen-liste` | `@/pages/einkauf/bestellungen-liste` |
 | :Id | `/einkauf/bestellungen/:id` | `@/pages/einkauf/bestellung-stamm` |
@@ -165,6 +169,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/disposition` · **Modul:** `@/pages/disposition/liste`
 
+**Ziel:** Disposition in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Disposition — Bedienoberfläche](img/disposition.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Disposition** öffnen (`/disposition`).
@@ -185,6 +194,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Frmcoveragemonitor
 
 **Route:** `/disposition/FrmCoverageMonitor` · **Modul:** `@/pages/disposition/FrmCoverageMonitor`
+
+**Ziel:** Frmcoveragemonitor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frmcoveragemonitor — Bedienoberfläche](img/disposition__frmcoveragemonitor.webp)
+
 
 **Schritte:**
 
@@ -207,6 +221,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/disposition/FrmPositionRules` · **Modul:** `@/pages/disposition/FrmPositionRules`
 
+**Ziel:** Frmpositionrules in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frmpositionrules — Bedienoberfläche](img/disposition__frmpositionrules.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Frmpositionrules** öffnen (`/disposition/FrmPositionRules`).
@@ -227,6 +246,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lstcommoditypositionmatrix
 
 **Route:** `/disposition/LstCommodityPositionMatrix` · **Modul:** `@/pages/disposition/LstCommodityPositionMatrix`
+
+**Ziel:** Lstcommoditypositionmatrix in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lstcommoditypositionmatrix — Bedienoberfläche](img/disposition__lstcommoditypositionmatrix.webp)
+
 
 **Schritte:**
 
@@ -249,6 +273,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/disposition/coverage-monitor` · **Modul:** `@/pages/disposition/FrmCoverageMonitor`
 
+**Ziel:** Coverage Monitor in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Coverage Monitor — Bedienoberfläche](img/disposition__coverage-monitor.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Coverage Monitor** öffnen (`/disposition/coverage-monitor`).
@@ -269,6 +298,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/disposition/liste` · **Modul:** `@/pages/disposition/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/disposition__liste.webp)
+
 
 **Schritte:**
 
@@ -291,6 +325,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/disposition/position-matrix` · **Modul:** `@/pages/disposition/LstCommodityPositionMatrix`
 
+**Ziel:** Position Matrix in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Position Matrix — Bedienoberfläche](img/disposition__position-matrix.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Position Matrix** öffnen (`/disposition/position-matrix`).
@@ -311,6 +350,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Regeln
 
 **Route:** `/disposition/regeln` · **Modul:** `@/pages/disposition/FrmPositionRules`
+
+**Ziel:** Regeln in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Regeln — Bedienoberfläche](img/disposition__regeln.webp)
+
 
 **Schritte:**
 
@@ -333,6 +377,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf` · **Modul:** `@/pages/einkauf/bestellungen-liste`
 
+**Ziel:** Einkauf in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Einkauf — Bedienoberfläche](img/einkauf.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Einkauf** öffnen (`/einkauf`).
@@ -353,6 +402,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anfrage
 
 **Route:** `/einkauf/anfrage` · **Modul:** `@/pages/einkauf/anfrage-stamm`
+
+**Ziel:** Anfrage in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfrage — Bedienoberfläche](img/einkauf__anfrage.webp)
+
 
 **Schritte:**
 
@@ -375,6 +429,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/anfrage-erfassung` · **Modul:** `@/pages/einkauf/anfrage-erfassung`
 
+**Ziel:** Anfrage Erfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfrage Erfassung — Bedienoberfläche](img/einkauf__anfrage-erfassung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anfrage Erfassung** öffnen (`/einkauf/anfrage-erfassung`).
@@ -396,6 +455,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/anfrage-stamm` · **Modul:** `@/pages/einkauf/anfrage-stamm`
 
+**Ziel:** Anfrage Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfrage Stamm — Bedienoberfläche](img/einkauf__anfrage-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anfrage Stamm** öffnen (`/einkauf/anfrage-stamm`).
@@ -413,9 +477,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### :Id
+
+**Route:** `/einkauf/anfrage/:id` · **Modul:** `@/pages/einkauf/anfrage-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__anfrage__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/anfrage/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Neu
 
 **Route:** `/einkauf/anfrage/neu` · **Modul:** `@/pages/einkauf/anfrage-stamm`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__anfrage__neu.webp)
+
 
 **Schritte:**
 
@@ -438,6 +533,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/anfragen` · **Modul:** `@/pages/einkauf/anfragen-liste`
 
+**Ziel:** Anfragen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfragen — Bedienoberfläche](img/einkauf__anfragen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anfragen** öffnen (`/einkauf/anfragen`).
@@ -458,6 +558,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anfragen Liste
 
 **Route:** `/einkauf/anfragen-liste` · **Modul:** `@/pages/einkauf/anfragen-liste`
+
+**Ziel:** Anfragen Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfragen Liste — Bedienoberfläche](img/einkauf__anfragen-liste.webp)
+
 
 **Schritte:**
 
@@ -480,6 +585,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/anfragen/:id` · **Modul:** `@/pages/einkauf/anfrage-erfassung`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__anfragen__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/anfragen/:id`).
@@ -500,6 +610,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Angebot
 
 **Route:** `/einkauf/angebot` · **Modul:** `@/pages/einkauf/angebot-stamm`
+
+**Ziel:** Angebot in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebot — Bedienoberfläche](img/einkauf__angebot.webp)
+
 
 **Schritte:**
 
@@ -522,6 +637,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/angebot-stamm` · **Modul:** `@/pages/einkauf/angebot-stamm`
 
+**Ziel:** Angebot Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebot Stamm — Bedienoberfläche](img/einkauf__angebot-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Angebot Stamm** öffnen (`/einkauf/angebot-stamm`).
@@ -539,9 +659,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### :Id
+
+**Route:** `/einkauf/angebot/:id` · **Modul:** `@/pages/einkauf/angebot-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__angebot__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/angebot/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Neu
 
 **Route:** `/einkauf/angebot/neu` · **Modul:** `@/pages/einkauf/angebot-stamm`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__angebot__neu.webp)
+
 
 **Schritte:**
 
@@ -564,6 +715,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/angebote` · **Modul:** `@/pages/einkauf/angebote-liste`
 
+**Ziel:** Angebote in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebote — Bedienoberfläche](img/einkauf__angebote.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Angebote** öffnen (`/einkauf/angebote`).
@@ -584,6 +740,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Angebote Liste
 
 **Route:** `/einkauf/angebote-liste` · **Modul:** `@/pages/einkauf/angebote-liste`
+
+**Ziel:** Angebote Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Angebote Liste — Bedienoberfläche](img/einkauf__angebote-liste.webp)
+
 
 **Schritte:**
 
@@ -606,6 +767,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/angebote/:id` · **Modul:** `@/pages/einkauf/angebot-stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__angebote__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/angebote/:id`).
@@ -626,6 +792,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anlieferavis
 
 **Route:** `/einkauf/anlieferavis` · **Modul:** `@/pages/einkauf/anlieferavis`
+
+**Ziel:** Anlieferavis in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anlieferavis — Bedienoberfläche](img/einkauf__anlieferavis.webp)
+
 
 **Schritte:**
 
@@ -648,6 +819,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/anlieferavis-liste` · **Modul:** `@/pages/einkauf/anlieferavis-liste`
 
+**Ziel:** Anlieferavis Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anlieferavis Liste — Bedienoberfläche](img/einkauf__anlieferavis-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anlieferavis Liste** öffnen (`/einkauf/anlieferavis-liste`).
@@ -667,7 +843,12 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/einkauf/anlieferavis/:id` · **Modul:** `@/pages/einkauf/anlieferavis`
+**Route:** `/einkauf/anlieferavis/:id` · **Modul:** `@/pages/einkauf/anlieferavis-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__anlieferavis__demo-1.webp)
+
 
 **Schritte:**
 
@@ -690,6 +871,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/anlieferavis/neu` · **Modul:** `@/pages/einkauf/anlieferavis`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__anlieferavis__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/einkauf/anlieferavis/neu`).
@@ -710,6 +896,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Audit Drilldown
 
 **Route:** `/einkauf/audit-drilldown` · **Modul:** `@/pages/einkauf/audit-drilldown`
+
+**Ziel:** Audit Drilldown in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Audit Drilldown — Bedienoberfläche](img/einkauf__audit-drilldown.webp)
+
 
 **Schritte:**
 
@@ -732,6 +923,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/auftragsbestaetigung` · **Modul:** `@/pages/einkauf/auftragsbestaetigung`
 
+**Ziel:** Auftragsbestaetigung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftragsbestaetigung — Bedienoberfläche](img/einkauf__auftragsbestaetigung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Auftragsbestaetigung** öffnen (`/einkauf/auftragsbestaetigung`).
@@ -749,9 +945,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### :Id
+
+**Route:** `/einkauf/auftragsbestaetigung/:id` · **Modul:** `@/pages/einkauf/auftragsbestaetigung-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__auftragsbestaetigung__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/auftragsbestaetigung/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Neu
 
 **Route:** `/einkauf/auftragsbestaetigung/neu` · **Modul:** `@/pages/einkauf/auftragsbestaetigung`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__auftragsbestaetigung__neu.webp)
+
 
 **Schritte:**
 
@@ -774,6 +1001,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/auftragsbestaetigungen` · **Modul:** `@/pages/einkauf/auftragsbestaetigungen-liste`
 
+**Ziel:** Auftragsbestaetigungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftragsbestaetigungen — Bedienoberfläche](img/einkauf__auftragsbestaetigungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Auftragsbestaetigungen** öffnen (`/einkauf/auftragsbestaetigungen`).
@@ -794,6 +1026,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Auftragsbestaetigungen Liste
 
 **Route:** `/einkauf/auftragsbestaetigungen-liste` · **Modul:** `@/pages/einkauf/auftragsbestaetigungen-liste`
+
+**Ziel:** Auftragsbestaetigungen Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Auftragsbestaetigungen Liste — Bedienoberfläche](img/einkauf__auftragsbestaetigungen-liste.webp)
+
 
 **Schritte:**
 
@@ -816,6 +1053,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/auftragsbestaetigungen/:id` · **Modul:** `@/pages/einkauf/auftragsbestaetigung`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__auftragsbestaetigungen__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/auftragsbestaetigungen/:id`).
@@ -836,6 +1078,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Bestellung Anlegen
 
 **Route:** `/einkauf/bestellung-anlegen` · **Modul:** `@/pages/einkauf/bestellung-anlegen`
+
+**Ziel:** Bestellung Anlegen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellung Anlegen — Bedienoberfläche](img/einkauf__bestellung-anlegen.webp)
+
 
 **Schritte:**
 
@@ -858,6 +1105,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/bestellung-stamm` · **Modul:** `@/pages/einkauf/bestellung-stamm`
 
+**Ziel:** Bestellung Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellung Stamm — Bedienoberfläche](img/einkauf__bestellung-stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestellung Stamm** öffnen (`/einkauf/bestellung-stamm`).
@@ -875,9 +1127,40 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### :Id
+
+**Route:** `/einkauf/bestellung/:id` · **Modul:** `@/pages/einkauf/bestellung-native`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__bestellung__demo-1.webp)
+
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/bestellung/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Bestellungen
 
 **Route:** `/einkauf/bestellungen` · **Modul:** `@/pages/einkauf/bestellungen-liste`
+
+**Ziel:** Bestellungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellungen — Bedienoberfläche](img/einkauf__bestellungen.webp)
+
 
 **Schritte:**
 
@@ -900,6 +1183,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/bestellungen-liste` · **Modul:** `@/pages/einkauf/bestellungen-liste`
 
+**Ziel:** Bestellungen Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellungen Liste — Bedienoberfläche](img/einkauf__bestellungen-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestellungen Liste** öffnen (`/einkauf/bestellungen-liste`).
@@ -920,6 +1208,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/einkauf/bestellungen/:id` · **Modul:** `@/pages/einkauf/bestellung-stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__bestellungen__demo-1.webp)
+
 
 **Schritte:**
 
@@ -942,6 +1235,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/bestellungen/neu` · **Modul:** `@/pages/einkauf/bestellung-anlegen`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__bestellungen__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/einkauf/bestellungen/neu`).
@@ -962,6 +1260,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Bestellvorschlaege
 
 **Route:** `/einkauf/bestellvorschlaege` · **Modul:** `@/pages/einkauf/bestellvorschlaege`
+
+**Ziel:** Bestellvorschlaege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellvorschlaege — Bedienoberfläche](img/einkauf__bestellvorschlaege.webp)
+
 
 **Schritte:**
 
@@ -984,6 +1287,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/bestellvorschlag-lager` · **Modul:** `@/pages/einkauf/bestellvorschlag-lager`
 
+**Ziel:** Bestellvorschlag Lager in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellvorschlag Lager — Bedienoberfläche](img/einkauf__bestellvorschlag-lager.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestellvorschlag Lager** öffnen (`/einkauf/bestellvorschlag-lager`).
@@ -1004,6 +1312,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Bestellvorschlag Rohware
 
 **Route:** `/einkauf/bestellvorschlag-rohware` · **Modul:** `@/pages/einkauf/bestellvorschlag-rohware`
+
+**Ziel:** Bestellvorschlag Rohware in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellvorschlag Rohware — Bedienoberfläche](img/einkauf__bestellvorschlag-rohware.webp)
+
 
 **Schritte:**
 
@@ -1026,6 +1339,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/bestellvorschlag-verkauf` · **Modul:** `@/pages/einkauf/bestellvorschlag-verkauf`
 
+**Ziel:** Bestellvorschlag Verkauf in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Bestellvorschlag Verkauf — Bedienoberfläche](img/einkauf__bestellvorschlag-verkauf.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Bestellvorschlag Verkauf** öffnen (`/einkauf/bestellvorschlag-verkauf`).
@@ -1046,6 +1364,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Edi Portal
 
 **Route:** `/einkauf/edi-portal` · **Modul:** `@/pages/einkauf/edi-portal`
+
+**Ziel:** Edi Portal in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Edi Portal — Bedienoberfläche](img/einkauf__edi-portal.webp)
+
 
 **Schritte:**
 
@@ -1068,6 +1391,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/frachtauftraege-eingang` · **Modul:** `@/pages/einkauf/frachtauftraege-eingang`
 
+**Ziel:** Frachtauftraege Eingang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Frachtauftraege Eingang — Bedienoberfläche](img/einkauf__frachtauftraege-eingang.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Frachtauftraege Eingang** öffnen (`/einkauf/frachtauftraege-eingang`).
@@ -1088,6 +1416,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/einkauf/frachtauftrag/:id` · **Modul:** `@/pages/einkauf/frachtauftraege-eingang`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__frachtauftrag__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1110,6 +1443,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/gutschriften-belastungen` · **Modul:** `@/pages/einkauf/gutschriften-belastungen`
 
+**Ziel:** Gutschriften Belastungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Gutschriften Belastungen — Bedienoberfläche](img/einkauf__gutschriften-belastungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Gutschriften Belastungen** öffnen (`/einkauf/gutschriften-belastungen`).
@@ -1130,6 +1468,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Type
 
 **Route:** `/einkauf/gutschriften-belastungen/:type` · **Modul:** `@/pages/einkauf/gutschriften-belastungen`
+
+**Ziel:** :Type in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Type — Bedienoberfläche](img/einkauf__gutschriften-belastungen__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1152,6 +1495,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/lieferant/:id` · **Modul:** `@/pages/einkauf/lieferanten-stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__lieferant__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/lieferant/:id`).
@@ -1172,6 +1520,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/einkauf/lieferant/neu` · **Modul:** `@/pages/einkauf/lieferanten-stamm`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__lieferant__neu.webp)
+
 
 **Schritte:**
 
@@ -1194,6 +1547,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/lieferanten` · **Modul:** `@/pages/einkauf/lieferanten-liste`
 
+**Ziel:** Lieferanten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten — Bedienoberfläche](img/einkauf__lieferanten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferanten** öffnen (`/einkauf/lieferanten`).
@@ -1214,6 +1572,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferanten Dokumente
 
 **Route:** `/einkauf/lieferanten-dokumente` · **Modul:** `@/pages/einkauf/lieferanten-dokumente`
+
+**Ziel:** Lieferanten Dokumente in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten Dokumente — Bedienoberfläche](img/einkauf__lieferanten-dokumente.webp)
+
 
 **Schritte:**
 
@@ -1236,6 +1599,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/lieferanten-liste` · **Modul:** `@/pages/einkauf/lieferanten-liste`
 
+**Ziel:** Lieferanten Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten Liste — Bedienoberfläche](img/einkauf__lieferanten-liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferanten Liste** öffnen (`/einkauf/lieferanten-liste`).
@@ -1256,6 +1624,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferanten Stamm
 
 **Route:** `/einkauf/lieferanten-stamm` · **Modul:** `@/pages/einkauf/lieferanten-stamm`
+
+**Ziel:** Lieferanten Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferanten Stamm — Bedienoberfläche](img/einkauf__lieferanten-stamm.webp)
+
 
 **Schritte:**
 
@@ -1278,6 +1651,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/lieferanten/:id` · **Modul:** `@/pages/einkauf/lieferanten-stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__lieferanten__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/lieferanten/:id`).
@@ -1298,6 +1676,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferantenbewertung
 
 **Route:** `/einkauf/lieferantenbewertung` · **Modul:** `@/pages/einkauf/lieferantenbewertung`
+
+**Ziel:** Lieferantenbewertung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferantenbewertung — Bedienoberfläche](img/einkauf__lieferantenbewertung.webp)
+
 
 **Schritte:**
 
@@ -1320,6 +1703,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/lieferschein-erfassung` · **Modul:** `@/pages/einkauf/lieferschein-erfassung`
 
+**Ziel:** Lieferschein Erfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferschein Erfassung — Bedienoberfläche](img/einkauf__lieferschein-erfassung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Lieferschein Erfassung** öffnen (`/einkauf/lieferschein-erfassung`).
@@ -1340,6 +1728,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Lieferschein Frachtauftrag
 
 **Route:** `/einkauf/lieferschein-frachtauftrag` · **Modul:** `@/pages/einkauf/lieferschein-frachtauftrag`
+
+**Ziel:** Lieferschein Frachtauftrag in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Lieferschein Frachtauftrag — Bedienoberfläche](img/einkauf__lieferschein-frachtauftrag.webp)
+
 
 **Schritte:**
 
@@ -1362,6 +1755,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/rechnung-abgleich` · **Modul:** `@/pages/einkauf/rechnung-abgleich`
 
+**Ziel:** Rechnung Abgleich in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnung Abgleich — Bedienoberfläche](img/einkauf__rechnung-abgleich.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rechnung Abgleich** öffnen (`/einkauf/rechnung-abgleich`).
@@ -1382,6 +1780,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Invoiceid
 
 **Route:** `/einkauf/rechnung-abgleich/:invoiceId` · **Modul:** `@/pages/einkauf/rechnung-abgleich`
+
+**Ziel:** :Invoiceid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Invoiceid — Bedienoberfläche](img/einkauf__rechnung-abgleich__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1404,6 +1807,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/rechnung-eingang-erfassung` · **Modul:** `@/pages/einkauf/rechnung-eingang-erfassung`
 
+**Ziel:** Rechnung Eingang Erfassung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnung Eingang Erfassung — Bedienoberfläche](img/einkauf__rechnung-eingang-erfassung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rechnung Eingang Erfassung** öffnen (`/einkauf/rechnung-eingang-erfassung`).
@@ -1424,6 +1832,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/einkauf/rechnungen/:id` · **Modul:** `@/pages/einkauf/rechnung-eingang-erfassung`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__rechnungen__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1446,6 +1859,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/rechnungseingaenge` · **Modul:** `@/pages/einkauf/rechnungseingaenge-liste`
 
+**Ziel:** Rechnungseingaenge in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungseingaenge — Bedienoberfläche](img/einkauf__rechnungseingaenge.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rechnungseingaenge** öffnen (`/einkauf/rechnungseingaenge`).
@@ -1466,6 +1884,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rechnungseingaenge Liste
 
 **Route:** `/einkauf/rechnungseingaenge-liste` · **Modul:** `@/pages/einkauf/rechnungseingaenge-liste`
+
+**Ziel:** Rechnungseingaenge Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungseingaenge Liste — Bedienoberfläche](img/einkauf__rechnungseingaenge-liste.webp)
+
 
 **Schritte:**
 
@@ -1488,6 +1911,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/rechnungseingaenge/:id` · **Modul:** `@/pages/einkauf/rechnungseingang`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/einkauf__rechnungseingaenge__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/einkauf/rechnungseingaenge/:id`).
@@ -1508,6 +1936,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Rechnungseingang
 
 **Route:** `/einkauf/rechnungseingang` · **Modul:** `@/pages/einkauf/rechnungseingang`
+
+**Ziel:** Rechnungseingang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rechnungseingang — Bedienoberfläche](img/einkauf__rechnungseingang.webp)
+
 
 **Schritte:**
 
@@ -1530,6 +1963,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/rechnungseingang/neu` · **Modul:** `@/pages/einkauf/rechnungseingang`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/einkauf__rechnungseingang__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/einkauf/rechnungseingang/neu`).
@@ -1550,6 +1988,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Reports
 
 **Route:** `/einkauf/reports` · **Modul:** `@/pages/einkauf/reports`
+
+**Ziel:** Reports in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Reports — Bedienoberfläche](img/einkauf__reports.webp)
+
 
 **Schritte:**
 
@@ -1572,6 +2015,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/retouren` · **Modul:** `@/pages/einkauf/retouren`
 
+**Ziel:** Retouren in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Retouren — Bedienoberfläche](img/einkauf__retouren.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Retouren** öffnen (`/einkauf/retouren`).
@@ -1592,6 +2040,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Grid
 
 **Route:** `/einkauf/retouren/:grId` · **Modul:** `@/pages/einkauf/retouren`
+
+**Ziel:** :Grid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Grid — Bedienoberfläche](img/einkauf__retouren__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1614,6 +2067,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/rfq-bids` · **Modul:** `@/pages/einkauf/rfq-bids`
 
+**Ziel:** Rfq Bids in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rfq Bids — Bedienoberfläche](img/einkauf__rfq-bids.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rfq Bids** öffnen (`/einkauf/rfq-bids`).
@@ -1634,6 +2092,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Rfqid
 
 **Route:** `/einkauf/rfq-bids/:rfqId` · **Modul:** `@/pages/einkauf/rfq-bids`
+
+**Ziel:** :Rfqid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Rfqid — Bedienoberfläche](img/einkauf__rfq-bids__demo-1.webp)
+
 
 **Schritte:**
 
@@ -1656,6 +2119,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/service-entry-sheets` · **Modul:** `@/pages/einkauf/service-entry-sheets`
 
+**Ziel:** Service Entry Sheets in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Service Entry Sheets — Bedienoberfläche](img/einkauf__service-entry-sheets.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Service Entry Sheets** öffnen (`/einkauf/service-entry-sheets`).
@@ -1676,6 +2144,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wareneingang
 
 **Route:** `/einkauf/wareneingang` · **Modul:** `@/pages/einkauf/wareneingang`
+
+**Ziel:** Wareneingang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wareneingang — Bedienoberfläche](img/einkauf__wareneingang.webp)
+
 
 **Schritte:**
 
@@ -1698,6 +2171,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/wareneingang/:poId` · **Modul:** `@/pages/einkauf/wareneingang`
 
+**Ziel:** :Poid in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Poid — Bedienoberfläche](img/einkauf__wareneingang__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Poid** öffnen (`/einkauf/wareneingang/:poId`).
@@ -1718,6 +2196,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wareneingangsabgleich
 
 **Route:** `/einkauf/wareneingangsabgleich` · **Modul:** `@/pages/einkauf/wareneingangsabgleich`
+
+**Ziel:** Wareneingangsabgleich in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wareneingangsabgleich — Bedienoberfläche](img/einkauf__wareneingangsabgleich.webp)
+
 
 **Schritte:**
 
@@ -1740,6 +2223,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/warengruppen` · **Modul:** `@/pages/einkauf/warengruppen`
 
+**Ziel:** Warengruppen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Warengruppen — Bedienoberfläche](img/einkauf__warengruppen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Warengruppen** öffnen (`/einkauf/warengruppen`).
@@ -1761,6 +2249,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/einkauf/zahlungsbedingungen` · **Modul:** `@/pages/einkauf/zahlungsbedingungen`
 
+**Ziel:** Zahlungsbedingungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Zahlungsbedingungen — Bedienoberfläche](img/einkauf__zahlungsbedingungen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Zahlungsbedingungen** öffnen (`/einkauf/zahlungsbedingungen`).
@@ -1781,6 +2274,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Inbox
 
 **Route:** `/inbox` · **Modul:** `@/pages/inbox/index`
+
+**Ziel:** Inbox in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Inbox — Bedienoberfläche](img/inbox.webp)
+
 
 **Schritte:**
 

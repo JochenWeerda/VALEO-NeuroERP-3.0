@@ -63,6 +63,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/energie` · **Modul:** `@/pages/energie/verbrauch`
 
+**Ziel:** Energie in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Energie — Bedienoberfläche](img/energie.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Energie** öffnen (`/energie`).
@@ -83,6 +88,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Verbrauch
 
 **Route:** `/energie/verbrauch` · **Modul:** `@/pages/energie/verbrauch`
+
+**Ziel:** Verbrauch in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Verbrauch — Bedienoberfläche](img/energie__verbrauch.webp)
+
 
 **Schritte:**
 
@@ -105,6 +115,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/mobile/scanner` · **Modul:** `@/pages/mobile/scanner`
 
+**Ziel:** Scanner in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Scanner — Bedienoberfläche](img/mobile__scanner.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Scanner** öffnen (`/mobile/scanner`).
@@ -125,6 +140,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Projekte
 
 **Route:** `/projekte` · **Modul:** `@/pages/projekte/liste`
+
+**Ziel:** Projekte in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Projekte — Bedienoberfläche](img/projekte.webp)
+
 
 **Schritte:**
 
@@ -147,6 +167,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/projekte/:id` · **Modul:** `@/pages/projekte/liste`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/projekte__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/projekte/:id`).
@@ -167,6 +192,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/projekte/liste` · **Modul:** `@/pages/projekte/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/projekte__liste.webp)
+
 
 **Schritte:**
 
@@ -189,6 +219,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/schaeden` · **Modul:** `@/pages/schaeden/liste`
 
+**Ziel:** Schaeden in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Schaeden — Bedienoberfläche](img/schaeden.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Schaeden** öffnen (`/schaeden`).
@@ -209,6 +244,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/schaeden/:id` · **Modul:** `@/pages/schaeden/meldung`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/schaeden__demo-1.webp)
+
 
 **Schritte:**
 
@@ -231,6 +271,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/schaeden/liste` · **Modul:** `@/pages/schaeden/liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/schaeden__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/schaeden/liste`).
@@ -251,6 +296,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Meldung
 
 **Route:** `/schaeden/meldung` · **Modul:** `@/pages/schaeden/meldung`
+
+**Ziel:** Meldung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Meldung — Bedienoberfläche](img/schaeden__meldung.webp)
+
 
 **Schritte:**
 
@@ -273,6 +323,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/service/abschluss` · **Modul:** `@/pages/service/abschluss`
 
+**Ziel:** Abschluss in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Abschluss — Bedienoberfläche](img/service__abschluss.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Abschluss** öffnen (`/service/abschluss`).
@@ -293,6 +348,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anfrage Detail
 
 **Route:** `/service/anfrage-detail` · **Modul:** `@/pages/service/anfrage-detail`
+
+**Ziel:** Anfrage Detail in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfrage Detail — Bedienoberfläche](img/service__anfrage-detail.webp)
+
 
 **Schritte:**
 
@@ -315,6 +375,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/service/anfrage-neu` · **Modul:** `@/pages/service/anfrage-neu`
 
+**Ziel:** Anfrage Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfrage Neu — Bedienoberfläche](img/service__anfrage-neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anfrage Neu** öffnen (`/service/anfrage-neu`).
@@ -335,6 +400,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/service/anfrage/:id` · **Modul:** `@/pages/service/anfrage-detail`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/service__anfrage__demo-1.webp)
+
 
 **Schritte:**
 
@@ -357,6 +427,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/service/anfrage/neu` · **Modul:** `@/pages/service/anfrage-neu`
 
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/service__anfrage__neu.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Neu** öffnen (`/service/anfrage/neu`).
@@ -377,6 +452,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anfragen
 
 **Route:** `/service/anfragen` · **Modul:** `@/pages/service/anfragen`
+
+**Ziel:** Anfragen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anfragen — Bedienoberfläche](img/service__anfragen.webp)
+
 
 **Schritte:**
 
@@ -399,6 +479,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/service/rueckmeldung` · **Modul:** `@/pages/service/rueckmeldung`
 
+**Ziel:** Rueckmeldung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rueckmeldung — Bedienoberfläche](img/service__rueckmeldung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rueckmeldung** öffnen (`/service/rueckmeldung`).
@@ -419,6 +504,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Versicherungen
 
 **Route:** `/versicherungen` · **Modul:** `@/pages/versicherungen/liste`
+
+**Ziel:** Versicherungen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Versicherungen — Bedienoberfläche](img/versicherungen.webp)
+
 
 **Schritte:**
 
@@ -441,6 +531,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/versicherungen/:id` · **Modul:** `@/pages/versicherungen/liste`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/versicherungen__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/versicherungen/:id`).
@@ -461,6 +556,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/versicherungen/liste` · **Modul:** `@/pages/versicherungen/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/versicherungen__liste.webp)
+
 
 **Schritte:**
 
@@ -483,6 +583,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/wartung/anlage/:id` · **Modul:** `@/pages/wartung/anlagen-liste`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/wartung__anlage__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/wartung/anlage/:id`).
@@ -503,6 +608,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/wartung/anlage/neu` · **Modul:** `@/pages/wartung/anlagen-liste`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/wartung__anlage__neu.webp)
+
 
 **Schritte:**
 
@@ -525,6 +635,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/wartung/anlagen` · **Modul:** `@/pages/wartung/anlagen-liste`
 
+**Ziel:** Anlagen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anlagen — Bedienoberfläche](img/wartung__anlagen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anlagen** öffnen (`/wartung/anlagen`).
@@ -545,6 +660,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Anlagen Liste
 
 **Route:** `/wartung/anlagen-liste` · **Modul:** `@/pages/wartung/anlagen-liste`
+
+**Ziel:** Anlagen Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anlagen Liste — Bedienoberfläche](img/wartung__anlagen-liste.webp)
+
 
 **Schritte:**
 

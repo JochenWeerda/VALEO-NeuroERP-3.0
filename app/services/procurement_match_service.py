@@ -266,7 +266,7 @@ class ProcurementMatchService:
                 "SELECT b.id, b.bestellnummer, b.bestelldatum, b.status, b.netto_summe, "
                 "(SELECT count(*) FROM domain_einkauf.bestellung_positionen p WHERE p.bestellung_id = b.id) AS pos, "
                 "EXISTS(SELECT 1 FROM public.inventory_goods_receipts gr "
-                "       WHERE gr.tenant_id = b.tenant_id AND (gr.po_id = b.id OR gr.po_number = b.bestellnummer)) AS hat_we "
+                "       WHERE gr.tenant_id = b.tenant_id AND (gr.po_id = b.id::text OR gr.po_number = b.bestellnummer)) AS hat_we "
                 "FROM domain_einkauf.bestellungen b WHERE b.tenant_id = :t "
                 "ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC LIMIT :lim"
             ),

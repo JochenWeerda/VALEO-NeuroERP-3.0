@@ -95,6 +95,12 @@ class ArticleBase(BaseSchema):
     max_stock: Optional[Decimal] = Field(None, ge=0, description="Maximum stock level")
     weight: Optional[Decimal] = Field(None, ge=0, description="Weight per unit")
     dimensions: Optional[str] = Field(None, max_length=50, description="Dimensions (LxWxH)")
+    # Extended Einheiten (Preis-Bezugsgroesse, Gebinde)
+    einheit_typ: Optional[str] = Field(None, max_length=20, description="Unit type (weight, volume, etc.)")
+    einheit_faktor: Optional[Decimal] = Field(None, description="Conversion factor to base unit")
+    einheit_preiseinheit: Optional[str] = Field(None, max_length=20, description="Price reference unit, e.g. '100 kg'")
+    gebinde_groesse: Optional[Decimal] = Field(None, ge=0, description="Package/container size")
+    gebinde_einheit: Optional[str] = Field(None, max_length=20, description="Package unit code, e.g. 'Sa' (Sack)")
 
 
 class ArticleCreate(ArticleBase):
@@ -161,6 +167,11 @@ class ArticleUpdate(BaseSchema):
     max_stock: Optional[Decimal] = Field(None, ge=0, description="Maximum stock level")
     weight: Optional[Decimal] = Field(None, ge=0, description="Weight per unit")
     dimensions: Optional[str] = Field(None, max_length=50, description="Dimensions")
+    einheit_typ: Optional[str] = Field(None, max_length=20, description="Unit type (weight, volume, etc.)")
+    einheit_faktor: Optional[Decimal] = Field(None, description="Conversion factor to base unit")
+    einheit_preiseinheit: Optional[str] = Field(None, max_length=20, description="Price reference unit, e.g. '100 kg'")
+    gebinde_groesse: Optional[Decimal] = Field(None, ge=0, description="Package/container size")
+    gebinde_einheit: Optional[str] = Field(None, max_length=20, description="Package unit code, e.g. 'Sa' (Sack)")
     is_active: Optional[bool] = Field(None, description="Whether article is active")
     image_url: Optional[str] = Field(None, max_length=500, description="Product image URL (auto-fetched or manually set)")
 

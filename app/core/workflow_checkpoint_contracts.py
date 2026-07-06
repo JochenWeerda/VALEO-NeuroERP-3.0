@@ -86,6 +86,15 @@ class CheckpointRegel:
         # MANUELL
         return False
 
+    def as_dict(self) -> dict:
+        return {
+            "regel_id": self.regel_id,
+            "workflow_typ": self.workflow_typ,
+            "intervall": self.intervall.value,
+            "max_checkpoints": self.max_checkpoints,
+            "max_alter_minuten": self.max_alter_minuten,
+        }
+
 
 @dataclass
 class CheckpointWiederherstellung:

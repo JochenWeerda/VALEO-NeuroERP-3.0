@@ -373,7 +373,7 @@ async def get_wetter_boden(
     return result
 
 
-@router.get("/kulturen", summary="Agrar-Kulturen-Stammdaten auflisten")
+@router.get("/kulturen", response_model=list[dict], summary="Agrar-Kulturen-Stammdaten auflisten")
 async def list_kulturen(
     search: Optional[str] = Query(None),
 ):

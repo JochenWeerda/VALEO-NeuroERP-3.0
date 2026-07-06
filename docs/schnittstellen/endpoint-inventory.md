@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-30
+last_reviewed: 2026-07-05
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -50,6 +50,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `ai_data_classification` | P2.3 — KI-Datenklassen API. |
 | `ai_engineering_metrics` | P2.2 — AI-Engineering-Metriken API. |
 | `analytics` | Analytics API v1 |
+| `annahme` | Annahme — Eingangs-Warteschlange (Ernte-Annahme / Wareneingang) |
 | `ap_approval_workflow` | AP Approval Workflow API |
 | `ap_invoices` | Accounts Payable (AP) Invoices API |
 | `article_extensions` | Article extension endpoints (l3c-artikel extras) |
@@ -73,6 +74,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
+| `beleg_vordrucke` | Belegformular-Vordruck-Editor (Admin) — Druckvorlagen für Papier/PDF-Ausdrucke. |
 | `benchmark_api` | — |
 | `benchmark_cockpit` | — |
 | `betriebsstaetten` | Betriebsstätten/Filialen — Filialsystem-Stammdaten. |
@@ -128,6 +130,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_ownership` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung/Übergabe Außendienst/Innendienst. |
 | `crm_partner_suche` | Einheitliche Partner-Suche über Kunden, Lieferanten und Leads (Multi-Rolle). |
 | `crm_reports` | CRM Reports and Analytics endpoints. |
+| `crm_segments` | CRM Kundensegmente — CRUD-Stub |
 | `customer_extensions` | Customer extension endpoints (l3c-kunde extras) |
 | `customers` | CRM Customer endpoints backed by the crm-core service. |
 | `daily_prices` | Daily Price API endpoints. |
@@ -237,6 +240,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `logistik_frachttabellen` | Frachttabellen — Frachtkosten-Stammdaten und Zuordnungen. |
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `marketing` | Marketing API - DB-backed endpoints. |
+| `mask_actions` | UIX-053: Mask Action Stubs — CommandEndpoints für alle verbliebenen native ScreenDefinitions. |
 | `mask_registry` | Mask Registry API — Wave 3 AP1 |
 | `mask_rollout_summaries` | Central screen-summary routes for batch mask rollouts (Waves 42–51). |
 | `mask_screen_definition` | Mask ScreenDefinition API — native generator payloads. |
@@ -327,6 +331,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `reklamation_api` | — |
 | `report_print` | Report and print endpoints for traceability, weighing PDFs and labels. |
 | `reporting_api` | — |
+| `reports_export` | Reports Export — generischer Berichts-Download-Endpunkt |
 | `rfq` | Einkauf — RFQ (Request for Quotation) — Anfrageprozess |
 | `rohware_sammelabrechnung` | Rohware-Sammelabrechnung — gebündelte Abrechnung mehrerer Belege (Agrar-Spezialsoftware Feature). |
 | `rohware_schema` | — |
@@ -346,6 +351,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_shipping_ext` | Sales shipping extension endpoints (l3c-verkaufslieferschein extras) |
 | `sales_storno` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4). |
 | `sanctions_compliance` | Sanctions Compliance API — Verbotsliste / Sanktionsprüfung |
+| `scan` | Mobile-Scan / Barcode-Dispatch API. |
 | `schaeden` | Schaeden (Damage Reports) API |
 | `security_monitoring` | Security monitoring surfacing for violation and block events. |
 | `self_billing` | Self-Billing API endpoints. |

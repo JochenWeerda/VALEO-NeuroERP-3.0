@@ -86,11 +86,19 @@ export function adaptMaskConfigToScreenDefinition(
     summaryEndpoint?: string
   },
 ): ScreenDefinition {
+  const mode = toScreenMode(config.type)
+  const floorplan =
+    mode === 'list' ? 'worklist' :
+    mode === 'cockpit' ? 'cockpit' :
+    mode === 'wizard' ? 'wizard' :
+    mode === 'workflow' ? 'transaction' :
+    'objectPage'
+
   return {
     schemaVersion: 1,
     id: options.id,
     domain: options.domain ?? 'platform',
-    mode: toScreenMode(config.type),
+    mode,
     title: config.title,
     subtitle: config.subtitle,
     permissions: config.permissions,
@@ -115,6 +123,10 @@ export function adaptMaskConfigToScreenDefinition(
       preferredMode: 'desktopDense',
       mobileMode: 'mobileStack',
       touchTargetPx: 44,
+      floorplan,
+      density: 'compact',
+      contextRail: mode === 'list' ? 'none' : 'combined',
+      tableProfile: 'standard',
     },
     performance: {
       initialPayloadBudgetKb: 64,

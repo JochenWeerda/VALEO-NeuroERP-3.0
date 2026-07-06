@@ -41,6 +41,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/genossenschaft` · **Modul:** `@/pages/genossenschaft/mitglieder`
 
+**Ziel:** Genossenschaft in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Genossenschaft — Bedienoberfläche](img/genossenschaft.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Genossenschaft** öffnen (`/genossenschaft`).
@@ -61,6 +66,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Mitglieder
 
 **Route:** `/genossenschaft/mitglieder` · **Modul:** `@/pages/genossenschaft/mitglieder`
+
+**Ziel:** Mitglieder in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mitglieder — Bedienoberfläche](img/genossenschaft__mitglieder.webp)
+
 
 **Schritte:**
 

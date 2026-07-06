@@ -6,6 +6,10 @@ export type ScreenDomain =
   | 'inventory'
   | 'finance'
   | 'agrar'
+  | 'einkauf'
+  | 'lager'
+  | 'qualitaet'
+  | 'futtermittel'
   | 'procurement'
   | 'logistics'
   | 'hr'
@@ -13,6 +17,10 @@ export type ScreenDomain =
 
 export type ScreenMode = 'list' | 'detail' | 'cockpit' | 'workflow' | 'wizard'
 export type ScreenLayoutMode = 'desktopDense' | 'tabletTouch' | 'mobileStack'
+export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
+export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
+export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
+export type ScreenTableProfile = 'standard' | 'financial' | 'inventory' | 'audit'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 export type ScreenFieldType =
   | 'text'
@@ -85,22 +93,24 @@ export interface ScreenTableDefinition {
   serverPagination?: boolean
 }
 
-export type ActionDangerLevel = 'safe' | 'moderate' | 'destructive'
+export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
 
 export interface ScreenActionDefinition {
   key: string
   label: string
-  kind?: 'primary' | 'secondary' | 'danger'
+  kind?: 'primary' | 'secondary' | 'danger' | 'workflow'
   permission?: string
   disabled?: boolean
   // Action Runtime (Phase 026)
   commandEndpoint?: string
+  stubReason?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel
   idempotencyKey?: string
   auditReasonRequired?: boolean
   humanApprovalRequired?: boolean
+  forbiddenForAgents?: boolean
 }
 
 /** Agent-readable contract for a single screen.
@@ -196,6 +206,10 @@ export interface ScreenDefinition {
     preferredMode?: ScreenLayoutMode
     mobileMode?: ScreenLayoutMode
     touchTargetPx?: number
+    floorplan?: ScreenFloorplan
+    density?: ScreenDensity
+    contextRail?: ScreenContextRail
+    tableProfile?: ScreenTableProfile
   }
   performance?: {
     initialPayloadBudgetKb?: number
@@ -215,6 +229,19 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (!screen.domain) errors.push('domain is required')
   if (!screen.mode) errors.push('mode is required')
   if (!screen.title) errors.push('title is required')
+
+  if (screen.layout?.floorplan && !['worklist', 'objectPage', 'transaction', 'cockpit', 'wizard'].includes(screen.layout.floorplan)) {
+    errors.push(`layout.floorplan is invalid: ${screen.layout.floorplan}`)
+  }
+  if (screen.layout?.density && !['comfortable', 'compact', 'expertDense'].includes(screen.layout.density)) {
+    errors.push(`layout.density is invalid: ${screen.layout.density}`)
+  }
+  if (screen.layout?.contextRail && !['none', 'audit', 'copilot', 'workflow', 'combined'].includes(screen.layout.contextRail)) {
+    errors.push(`layout.contextRail is invalid: ${screen.layout.contextRail}`)
+  }
+  if (screen.layout?.tableProfile && !['standard', 'financial', 'inventory', 'audit'].includes(screen.layout.tableProfile)) {
+    errors.push(`layout.tableProfile is invalid: ${screen.layout.tableProfile}`)
+  }
 
   for (const tab of screen.tabs ?? []) {
     if (!tab.key) errors.push('tab.key is required')

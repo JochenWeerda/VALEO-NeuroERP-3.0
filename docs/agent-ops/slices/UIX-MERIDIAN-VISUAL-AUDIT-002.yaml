@@ -1,0 +1,58 @@
+slice_id: UIX-MERIDIAN-VISUAL-AUDIT-002
+title: Meridian Visual-Audit fuer Referenzmasken
+owner: Codex
+status: completed
+created_at: 2026-07-05
+coordination: >-
+  Folge-Slice zu UIX-MERIDIAN-BUILDER-001. Keine Ueberschneidung mit aktiven
+  Coverage-/A6-Dateien; Workboard ist durch parallele A6-Aenderungen dirty und
+  darf nur mit dem eigenen Slice-Hunk gestaged werden.
+goal: >-
+  Den Meridian-Abnahmepunkt Visual-Audit fuer 1366x768, 1440x900 und 1920x1080
+  auf repraesentativen nativen Masken automatisiert absichern.
+file_ownership:
+  - packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UIX-MERIDIAN-VISUAL-AUDIT-002.yaml
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance:
+  - Visual-Audit laeuft fuer Finance, CRM 360 und Lager in 1366x768, 1440x900 und 1920x1080.
+  - Audit prueft zentrale Meridian-Datenattribute statt manuelle Referenzmasken-UI.
+  - Audit prueft sichtbaren Header, ActionBar, Tabs, Tabellenprofil und Context-Rail-Kontrakt.
+  - Ergebnis wird in Workboard, Slice-YAML und UIX-Doku dokumentiert.
+tests:
+  - pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium
+risks:
+  - Playwright globalTeardown kann bestehende Visual-Tour-Artefakte melden; das darf nicht mit dem fokussierten Meridian-Audit vermischt werden.
+  - Dev-Server-Start kann lokal Zeit benoetigen; Timeout-Budget muss ausreichend bleiben.
+result: >-
+  Fokussierter Playwright-Visual-Audit angelegt. Der Test nutzt die
+  Benutzerhandbuch-Screenshot-Helfer fuer Render-Wait, Content-QC und
+  Capture-Ziel, mockt synthetische native ScreenDefinitions fuer Finance,
+  CRM 360 und Lager und prueft die drei Desktop-Viewports 1366x768,
+  1440x900 und 1920x1080.
+evidence:
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> gruen
+  - pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium -> 9 passed
+open_items:
+  - Playwright globalTeardown meldet weiterhin bestehende 489 Visual-Tour-Console-Issues aus packages/frontend-web/visual-tour-results/issues.json; der fokussierte Meridian-Visual-Audit selbst ist gruen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Der Audit belegt, dass die Referenzmasken als Builder-Ergebnis bei typischen
+    Desktop-Groessen nutzbar bleiben und keine separaten UI-Implementierungen erfordern.
+  architektur_vertrag: >-
+    Geprueft wird die ScreenDefinition/RenderPlan/UniversalMaskRenderer-Kette ueber
+    native Routen und Renderer-Datenattribute.
+  daten_vertrag: >-
+    Testdaten werden im Playwright-Test gemockt; keine produktiven Daten, keine DB-Migration.
+  test_vertrag: >-
+    Playwright prueft Sichtbarkeit, Attribute, Overflow-Basics und klickbare Kernpfade.
+  security_vertrag: >-
+    Keine Secrets oder PII; API-Mocks enthalten nur synthetische Smoke-Daten.
+  betriebs_vertrag: >-
+    Der Test bleibt fokussiert und performancevertraeglich; er ersetzt nicht die breite Visual-Tour.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML, UIX-Status und Open-Gaps werden nach Verifikation aktualisiert.
+external_gates:
+  - not_applicable

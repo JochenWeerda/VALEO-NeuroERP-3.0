@@ -107,3 +107,4 @@ pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/mask-b
 - [RenderPlan Architecture](../architecture/uix/render-plan-architecture.md)
 - [ADR-011 UI-Maskenstrategie](../adr/adr-011-ui-maskenstrategie.md)
 - [Agent-Runbook](../agent-docs/runbooks/mask-runtime-agent-modus.md)
+- [Agent-Handbuch](../agent-handbuch/index.md) — generierte Prozessketten, Masken-API-Katalog, MCP/Events

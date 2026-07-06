@@ -3,8 +3,9 @@ API schemas for shared domain (tenants, users)
 Pydantic models for request/response validation
 """
 
+import json as _json
 from typing import Optional
-from pydantic import Field, EmailStr, ConfigDict
+from pydantic import Field, EmailStr, ConfigDict, field_validator
 from datetime import datetime
 
 from .base import BaseSchema
@@ -22,6 +23,14 @@ class Tenant(BaseSchema):
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime]
+
+    @field_validator("settings", mode="before")
+    @classmethod
+    def _settings_as_json_string(cls, v):
+        # DB liefert JSONB (dict) — API-Vertrag ist JSON-String
+        if isinstance(v, (dict, list)):
+            return _json.dumps(v, ensure_ascii=False)
+        return v
 
 
 class TenantCreate(BaseSchema):

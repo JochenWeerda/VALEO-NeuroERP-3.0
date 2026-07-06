@@ -14,9 +14,14 @@ def test_coverage_summary_structure() -> None:
     from app.services.ai_engineering_metrics_service import AiEngineeringMetricsService
     svc = AiEngineeringMetricsService()
     s = svc.coverage_summary()
-    assert "total_files" in s
-    assert "avg_coverage_pct" in s
-    assert isinstance(s["total_files"], int)
+    # Vertrag haengt davon ab, ob coverage.xml vorliegt: im reinen `pytest -q`-Lauf
+    # (ohne --cov) liefert der Service bewusst einen Status-Hinweis statt Kennzahlen.
+    if "status" in s:
+        assert "coverage.xml" in s["status"]
+    else:
+        assert "total_files" in s
+        assert "avg_coverage_pct" in s
+        assert isinstance(s["total_files"], int)
 
 
 @pytest.mark.unit

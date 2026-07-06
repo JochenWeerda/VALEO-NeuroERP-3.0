@@ -247,8 +247,10 @@ async def get_crop_nutrients(
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             resp = await client.get(url, params=params)
             if resp.status_code >= 400:
+                # Externe Abhaengigkeit nicht verfuegbar => 503-by-design
+                # (Allowlist config/runtime_sweep_allowlist.yaml), kein Serverfehler.
                 raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail=f"FAOSTAT error {resp.status_code}: {resp.text}",
                 )
             data = resp.json()
@@ -256,7 +258,7 @@ async def get_crop_nutrients(
         raise
     except Exception as exc:
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"FAOSTAT API not reachable: {exc}",
         ) from exc
 

@@ -75,3 +75,12 @@ tenant_auth_errors_total = Counter(
     'Tenant authentication and authorization errors by route and error type',
     ['route', 'error_type'],  # error_type: missing_tenant | forbidden_tenant | unauthorized
 )
+
+# Kritische Datenpfade (SPEC-P0-03): DB-Fehler auf Finance-/Bestands-/Beleg-
+# Endpoints duerfen nie still leere Daten liefern — sie erzeugen RFC-7807-Fehler
+# UND diesen Zaehler (Alerting-Regel: > 0 in 5 min => Page).
+critical_data_path_errors_total = Counter(
+    'critical_data_path_errors_total',
+    'DB-/Schemafehler auf kritischen Daten-Endpoints (Finance/Bestand/Beleg)',
+    ['endpoint', 'error_type'],
+)

@@ -57,6 +57,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/artikel` · **Modul:** `@/pages/artikel/liste`
 
+**Ziel:** Artikel in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Artikel — Bedienoberfläche](img/artikel.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Artikel** öffnen (`/artikel`).
@@ -77,6 +82,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### :Id
 
 **Route:** `/artikel/:id` · **Modul:** `@/pages/artikel/stamm`
+
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/artikel__demo-1.webp)
+
 
 **Schritte:**
 
@@ -99,6 +109,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/artikel/liste` · **Modul:** `@/pages/artikel/liste`
 
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/artikel__liste.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Liste** öffnen (`/artikel/liste`).
@@ -119,6 +134,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Neu
 
 **Route:** `/artikel/neu` · **Modul:** `@/pages/artikel/stamm`
+
+**Ziel:** Neu in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Neu — Bedienoberfläche](img/artikel__neu.webp)
+
 
 **Schritte:**
 
@@ -141,6 +161,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/artikel/stamm` · **Modul:** `@/pages/artikel/stamm`
 
+**Ziel:** Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stamm — Bedienoberfläche](img/artikel__stamm.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Stamm** öffnen (`/artikel/stamm`).
@@ -161,6 +186,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Liste
 
 **Route:** `/charge/liste` · **Modul:** `@/pages/charge/liste`
+
+**Ziel:** Liste in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Liste — Bedienoberfläche](img/charge__liste.webp)
+
 
 **Schritte:**
 
@@ -183,6 +213,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/charge/rueckverfolgung` · **Modul:** `@/pages/charge/rueckverfolgung`
 
+**Ziel:** Rueckverfolgung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Rueckverfolgung — Bedienoberfläche](img/charge__rueckverfolgung.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Rueckverfolgung** öffnen (`/charge/rueckverfolgung`).
@@ -203,6 +238,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Stamm
 
 **Route:** `/charge/stamm` · **Modul:** `@/pages/charge/stamm`
+
+**Ziel:** Stamm in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Stamm — Bedienoberfläche](img/charge__stamm.webp)
+
 
 **Schritte:**
 
@@ -225,6 +265,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/charge/stamm/:id` · **Modul:** `@/pages/charge/stamm`
 
+**Ziel:** :Id in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![:Id — Bedienoberfläche](img/charge__stamm__demo-1.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **:Id** öffnen (`/charge/stamm/:id`).
@@ -245,6 +290,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Wareneingang
 
 **Route:** `/charge/wareneingang` · **Modul:** `@/pages/charge/wareneingang`
+
+**Ziel:** Wareneingang in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Wareneingang — Bedienoberfläche](img/charge__wareneingang.webp)
+
 
 **Schritte:**
 
@@ -267,6 +317,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/etiketten/drucken` · **Modul:** `@/pages/etiketten/drucken`
 
+**Ziel:** Drucken in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Drucken — Bedienoberfläche](img/etiketten__drucken.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Drucken** öffnen (`/etiketten/drucken`).
@@ -287,6 +342,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Artikel Stoffstrom
 
 **Route:** `/stammdaten/artikel-stoffstrom` · **Modul:** `@/pages/stammdaten/artikel-stoffstrom`
+
+**Ziel:** Artikel Stoffstrom in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Artikel Stoffstrom — Bedienoberfläche](img/stammdaten__artikel-stoffstrom.webp)
+
 
 **Schritte:**
 
@@ -309,6 +369,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/stammdaten/artikelbestandteile` · **Modul:** `@/pages/stammdaten/artikelbestandteile`
 
+**Ziel:** Artikelbestandteile in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Artikelbestandteile — Bedienoberfläche](img/stammdaten__artikelbestandteile.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Artikelbestandteile** öffnen (`/stammdaten/artikelbestandteile`).
@@ -329,6 +394,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Artikelverpackung
 
 **Route:** `/stammdaten/artikelverpackung` · **Modul:** `@/pages/stammdaten/artikelverpackung`
+
+**Ziel:** Artikelverpackung in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Artikelverpackung — Bedienoberfläche](img/stammdaten__artikelverpackung.webp)
+
 
 **Schritte:**
 
@@ -351,6 +421,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/stammdaten/betriebsstaetten` · **Modul:** `@/pages/stammdaten/betriebsstaetten`
 
+**Ziel:** Betriebsstaetten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Betriebsstaetten — Bedienoberfläche](img/stammdaten__betriebsstaetten.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Betriebsstaetten** öffnen (`/stammdaten/betriebsstaetten`).
@@ -371,6 +446,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Hausbanken
 
 **Route:** `/stammdaten/hausbanken` · **Modul:** `@/pages/stammdaten/hausbanken`
+
+**Ziel:** Hausbanken in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Hausbanken — Bedienoberfläche](img/stammdaten__hausbanken.webp)
+
 
 **Schritte:**
 
@@ -393,6 +473,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/stammdaten/individuelle-artikelnummern` · **Modul:** `@/pages/stammdaten/individuelle-artikelnummern`
 
+**Ziel:** Individuelle Artikelnummern in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Individuelle Artikelnummern — Bedienoberfläche](img/stammdaten__individuelle-artikelnummern.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Individuelle Artikelnummern** öffnen (`/stammdaten/individuelle-artikelnummern`).
@@ -413,6 +498,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Mengeneinheiten
 
 **Route:** `/stammdaten/mengeneinheiten` · **Modul:** `@/pages/stammdaten/mengeneinheiten`
+
+**Ziel:** Mengeneinheiten in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mengeneinheiten — Bedienoberfläche](img/stammdaten__mengeneinheiten.webp)
+
 
 **Schritte:**
 

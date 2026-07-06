@@ -14,7 +14,7 @@
   "dependencies": {
     "csv-parse": "^6.1.0",
     "node-schedule": "^2.1.1",
-    "playwright": "^1.48.0",
+    "playwright": "^1.55.1",
     "sharp": "^0.33.5",
     "tesseract.js": "^5.1.1"
   },

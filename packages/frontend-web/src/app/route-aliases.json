@@ -133,6 +133,10 @@
       "path": "agrar/ernte-annahme-erfassung/:id"
     },
     {
+      "module": "@/pages/agrar/annahmen-qualitaet-nachtrag",
+      "path": "agrar/annahmen-qualitaet-nachtrag"
+    },
+    {
       "module": "@/pages/agrar/kulturpflanzen/liste",
       "path": "agrar/kulturpflanzen"
     },
@@ -2495,6 +2499,50 @@
     {
       "module": "@/pages/crm/lead-native",
       "path": "crm/lead/:id"
+    },
+    {
+      "module": "@/pages/crm/customer-360-native",
+      "path": "crm/customer-360/:id"
+    },
+    {
+      "module": "@/pages/crm/customer-360-native",
+      "path": "crm/kunden/:id"
+    },
+    {
+      "module": "@/pages/einkauf/supplier-native",
+      "path": "einkauf/supplier/:id"
+    },
+    {
+      "module": "@/pages/einkauf/supplier-native",
+      "path": "einkauf/lieferanten/:id"
+    },
+    {
+      "module": "@/pages/crm/opportunity-native",
+      "path": "crm/opportunity/:id"
+    },
+    {
+      "module": "@/pages/lager/article-stock-native",
+      "path": "lager/article-stock/:id"
+    },
+    {
+      "module": "@/pages/lager/article-stock-native",
+      "path": "lager/artikel/:id"
+    },
+    {
+      "module": "@/pages/sales/sales-order-native",
+      "path": "sales/sales-order/:id"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-native",
+      "path": "agrar/kontrakt/:id"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-native",
+      "path": "agrar/kontrakte/:id"
+    },
+    {
+      "module": "@/pages/admin/vordruck-editor",
+      "path": "admin/vordruck-editor"
     }
   ]
 }

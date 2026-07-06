@@ -272,7 +272,8 @@ def collect_adrs() -> dict[str, list[str]]:
         "hr": ["hrm", "personal", "lohn", "zeiterfassung"],
         "architecture": ["architecture", "structurizr", "c4", "arc42", "multiten"],
     }
-    for adr_path in sorted(ADR_DIR.glob("adr-*.md")):
+    adr_paths = (path for path in ADR_DIR.glob("*.md") if path.stem.lower().startswith("adr-"))
+    for adr_path in sorted(adr_paths, key=lambda path: path.name.lower()):
         name = adr_path.stem
         text = adr_path.read_text(encoding="utf-8").lower()
         for domain, keywords in adr_keywords.items():
@@ -440,6 +441,7 @@ def main() -> int:
         existing = OUTPUT.read_text(encoding="utf-8")
 
         def normalize(s: str) -> str:
+            s = re.sub(r"^# Architecture Index .*generiert \d{4}-\d{2}-\d{2}$", "# Architecture Index -- generiert X", s, flags=re.MULTILINE)
             return re.sub(r"^generated_at:.*$", "generated_at: X", s, flags=re.MULTILINE)
 
         if normalize(existing) != normalize(content):

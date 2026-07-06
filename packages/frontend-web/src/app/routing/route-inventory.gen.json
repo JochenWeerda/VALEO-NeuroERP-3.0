@@ -216,6 +216,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/vordruck-editor",
+      "path": "admin/vordruck-editor",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/webhooks",
       "path": "admin/webhooks",
       "source": "auto"
@@ -229,6 +234,11 @@
       "module": "@/pages/agrar/aussaat/liste",
       "path": "agrar",
       "source": "navigation"
+    },
+    {
+      "module": "@/pages/agrar/annahmen-qualitaet-nachtrag",
+      "path": "agrar/annahmen-qualitaet-nachtrag",
+      "source": "alias"
     },
     {
       "module": "@/pages/agrar/aussaat/liste",
@@ -438,6 +448,16 @@
     {
       "module": "@/pages/agrar/kontrakt-settlement",
       "path": "agrar/kontrakt-settlement",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-native",
+      "path": "agrar/kontrakt/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-native",
+      "path": "agrar/kontrakte/:id",
       "source": "alias"
     },
     {
@@ -1161,6 +1181,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/crm/customer-360-native",
+      "path": "crm/customer-360/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/kunden-liste",
       "path": "crm/customers",
       "source": "alias"
@@ -1291,7 +1316,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/crm/kunden-stamm",
+      "module": "@/pages/crm/customer-360-native",
       "path": "crm/kunden/:id",
       "source": "alias"
     },
@@ -1381,7 +1406,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/crm/opportunity-detail",
+      "module": "@/pages/crm/opportunity-native",
       "path": "crm/opportunity/:id",
       "source": "alias"
     },
@@ -1781,7 +1806,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/einkauf/lieferanten-stamm",
+      "module": "@/pages/einkauf/supplier-native",
       "path": "einkauf/lieferanten/:id",
       "source": "alias"
     },
@@ -1874,6 +1899,11 @@
       "module": "@/pages/einkauf/service-entry-sheets",
       "path": "einkauf/service-entry-sheets",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/supplier-native",
+      "path": "einkauf/supplier/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/wareneingang",
@@ -2936,6 +2966,16 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/lager/article-stock-native",
+      "path": "lager/article-stock/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/lager/article-stock-native",
+      "path": "lager/artikel/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/lager/auslagerung",
       "path": "lager/auslagerung",
       "source": "auto"
@@ -3789,6 +3829,11 @@
       "module": "@/pages/sales/rechnungen-liste",
       "path": "sales/rechnungen-liste",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/sales/sales-order-native",
+      "path": "sales/sales-order/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/schaeden/liste",

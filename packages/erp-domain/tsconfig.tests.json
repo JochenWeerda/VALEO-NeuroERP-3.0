@@ -2,8 +2,50 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/core/*": [
+        "./core/*"
+      ],
+      "@/application/*": [
+        "./application/*"
+      ],
+      "@/infrastructure/*": [
+        "./infrastructure/*"
+      ],
+      "@/presentation/*": [
+        "./presentation/*"
+      ],
+      "@valero-neuroerp/utilities": [
+        "../../utilities/src/index.ts"
+      ],
+      "@valero-neuroerp/utilities/*": [
+        "../../utilities/src/*"
+      ],
+      "@valero-neuroerp/data-models": [
+        "../../data-models/src/index.ts"
+      ],
+      "@valero-neuroerp/data-models/*": [
+        "../../data-models/src/*"
+      ],
+      "@valero-neuroerp/erp-domain": [
+        "./index.ts"
+      ],
+      "@valero-neuroerp/erp-domain/*": [
+        "./*"
+      ]
+    }
   },
-  "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "_kommentar": "Tests typechecken gegen src/ der Workspace-Pakete (kein dist/-Build noetig — CI-Parity, konsistent zum jest moduleNameMapper)."
 }

@@ -43,6 +43,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/nawaro/anbauflaechen` · **Modul:** `@/pages/nawaro/anbauflaechen`
 
+**Ziel:** Anbauflaechen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Anbauflaechen — Bedienoberfläche](img/nawaro__anbauflaechen.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Anbauflaechen** öffnen (`/nawaro/anbauflaechen`).
@@ -63,6 +68,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Mitteilung Drucken
 
 **Route:** `/nawaro/mitteilung-drucken` · **Modul:** `@/pages/nawaro/mitteilung-drucken`
+
+**Ziel:** Mitteilung Drucken in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Mitteilung Drucken — Bedienoberfläche](img/nawaro__mitteilung-drucken.webp)
+
 
 **Schritte:**
 
@@ -85,6 +95,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 **Route:** `/nawaro/raps-profil` · **Modul:** `@/pages/nawaro/raps-profil`
 
+**Ziel:** Raps Profil in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Raps Profil — Bedienoberfläche](img/nawaro__raps-profil.webp)
+
+
 **Schritte:**
 
 1. Sidebar oder Suche: **Raps Profil** öffnen (`/nawaro/raps-profil`).
@@ -105,6 +120,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 ### Vertraege
 
 **Route:** `/nawaro/vertraege` · **Modul:** `@/pages/nawaro/vertraege`
+
+**Ziel:** Vertraege in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+![Vertraege — Bedienoberfläche](img/nawaro__vertraege.webp)
+
 
 **Schritte:**
 
