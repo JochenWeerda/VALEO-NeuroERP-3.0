@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## E2E-SMOKE-REPAIR-001 — E2E-Smoke-Workflow reparieren (Claim)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** geclaimt 2026-07-06 — Triage abgeschlossen: "E2E Smoke Tests" seit UIX-Rollout-Commit 3c86a31d7 (2026-06-30) dauerhaft rot; alle 5 Matrix-Domains scheitern identisch mit waitForLoadState('networkidle')-Timeout (Universal-Mask-Seiten halten SSE/Polling offen). Dazu drei strukturelle Schwaechen: totes PLAYWRIGHT_BASE_URL (wird von nichts gelesen), VALEO_BASE_URL landet nur in nicht geladener .env, doppelter Preview-Start (Workflow Port 3000 + global-setup Port 4173), vite preview ohne /api-Proxy. Umsetzung noch offen — Details im Slice-YAML.
+**Ziel:** Smoke-Suite wieder gruen und deterministisch (networkidle-Abloesung + Env-Verdrahtung vereinheitlichen), ohne Testaussage zu verwaessern.
+**Dateibesitz:** `.github/workflows/e2e-smoke.yml`, `playwright.config.ts`, `playwright.global-setup.mjs`, `playwright-tests/**`, `docs/agent-ops/slices/E2E-SMOKE-REPAIR-001.yaml`.
+**Abnahme:** Workflow "E2E Smoke Tests" auf main gruen (alle 5 Matrix-Domains); e2e-critical bleibt gruen.
+
+## CI-TRIAGE-2026-07-06 — Rote main-Workflows: pytest-Pin-Konflikt + toter Lint-Workflow
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** umgesetzt 2026-07-06 — Triage der drei dauerroten main-Workflows. (1) "CI/CD Pipeline": Dependabot-Commit 377d87d36 (2026-06-28) pinnte pytest==9.0.3 in vier Service-Requirements, waehrend pytest-asyncio==0.23.5/0.24.0 pytest<9 verlangt → pip ResolutionImpossible im Install-Step (Finance GoBD, Zoll, Inventory EPCIS; crm-gdpr latent). Fix: pytest==8.4.2 in services/{finance,inventory,compliance/zoll,crm-gdpr}/requirements.txt; alle vier per pip --dry-run verifiziert (finance aus working-directory wegen -e ../../packages/finance-shared). (2) "Comprehensive Lint Check": noch nie gruen — setup-node cache 'npm' verlangt package-lock.json im Root, Repo ist pnpm-basiert; Job stirbt im Setup vor jedem Lint; Duplikat zum Quality-Gate-Lint → Workflow geloescht (einzige Referenz war archivierte Doku). (3) "E2E Smoke Tests": als Slice E2E-SMOKE-REPAIR-001 geclaimt (siehe oben).
+**Ziel:** main-CI-Signal entrauschen — nur noch aussagekraeftige Workflows, Dependency-Konflikt beseitigt.
+**Dateibesitz:** `services/finance/requirements.txt`, `services/inventory/requirements.txt`, `services/compliance/zoll/requirements.txt`, `services/crm-gdpr/requirements.txt`, `.github/workflows/lint-check-all.yml` (geloescht).
+**Abnahme:** "CI/CD Pipeline" auf main gruen (Install-Steps laufen durch); "Comprehensive Lint Check" erscheint nicht mehr in der Run-Liste.
+
 ## A9-STRUKTUR-KONSOLIDIERUNG — Repo-Layout (ARCH-F1, SPEC-P1-07)
 
 **Von:** Claude

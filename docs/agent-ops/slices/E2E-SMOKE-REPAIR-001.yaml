@@ -1,0 +1,60 @@
+slice_id: E2E-SMOKE-REPAIR-001
+title: E2E-Smoke-Workflow reparieren (networkidle-Abloesung + Env-Verdrahtung)
+owner: Claude
+status: geplant
+created_at: 2026-07-06
+goal: >-
+  Der Workflow "E2E Smoke Tests" ist seit dem UIX-Rollout-Commit 3c86a31d7 (2026-06-30)
+  auf main dauerhaft rot: alle 5 Domain-Matrix-Jobs (sales/crm/agrar/finance/inventory)
+  scheitern identisch mit waitForLoadState('networkidle')-Timeout, weil die Universal-
+  Mask-Seiten dauerhafte Netzwerkaktivitaet (SSE-Reconnects/Polling) halten. Ziel:
+  Smoke-Suite wieder gruen und deterministisch, ohne die Testaussage zu verwaessern.
+file_ownership:
+  - .github/workflows/e2e-smoke.yml
+  - playwright.config.ts
+  - playwright.global-setup.mjs
+  - playwright-tests/specs/**
+  - playwright-tests/fixtures/testSetup.ts
+  - playwright-tests/helpers/api.ts
+  - docs/agent-ops/slices/E2E-SMOKE-REPAIR-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Alle waitForLoadState('networkidle')-Aufrufe in Smoke-Specs durch deterministische
+    Waits ersetzt ('load' bzw. 'domcontentloaded' + sichtbarer Locator)
+  - baseURL-Verdrahtung vereinheitlicht — eine Quelle (echte Env-Variable VALEO_BASE_URL
+    im Workflow-Step), totes PLAYWRIGHT_BASE_URL entfernt, Fixture-Defaults konsistent
+    zur playwright.config.ts
+  - Doppelter Preview-Start beseitigt (Workflow-Step Port 3000 vs. global-setup Port
+    4173 — nur noch ein Server, global-setup-Reuse greift)
+  - Entscheidung dokumentiert, wie /api/v1-Calls in CI bedient werden (vite preview hat
+    keinen Proxy) — Proxy nachruesten, Backend als Static-Host oder bewusstes 404-Design
+  - Workflow "E2E Smoke Tests" auf main gruen (alle 5 Matrix-Domains)
+tests:
+  - pnpm exec playwright test --grep "@smoke" --project=smoke (lokal gegen Dev-Stack)
+  - GitHub Actions Run "E2E Smoke Tests" auf dem Slice-Branch
+risks:
+  - networkidle-Abloesung kann latente Rendering-Fehler sichtbar machen, die bisher
+    hinter dem Timeout versteckt waren (dann echte Bugfixes noetig, Scope waechst)
+  - Fixture-/Helper-Aenderungen betreffen auch e2e-full und e2e-critical — deren
+    Gruen-Stand darf nicht kippen
+external_gates:
+  - GitHub Actions "E2E Smoke Tests" + "E2E @critical" gruen auf main nach Merge
+ai_harness:
+  fachlicher_vertrag: >-
+    CI-Triage 2026-07-06 — Smoke-Suite ist das breiteste UI-Regressionsnetz und seit
+    3c86a31d7 ohne Aussagekraft; rote Dauerlaeufe verwaessern das main-Signal.
+  architektur_vertrag: >-
+    Keine Aenderung an App-Code oder Universal-Mask-Runtime; nur Test-Infrastruktur
+    (Playwright-Config, Specs, Workflow). SSE-/Polling-Verhalten der Masken bleibt.
+  daten_vertrag: >-
+    Keine Schema- oder API-Aenderung; Testdaten unveraendert ueber scripts/init_db.py.
+  test_vertrag: >-
+    Smoke-Specs behalten Pruefaussage (Seite laedt, Kernelemente sichtbar); nur die
+    Wartestrategie wechselt von networkidle auf deterministische Signale.
+  security_vertrag: >-
+    Keine Auth-/Tenant-Aenderung; API_DEV_TOKEN-Nutzung im CI unveraendert.
+  betriebs_vertrag: >-
+    Workflow-Laufzeit sinkt (kein 3x-Retry gegen 30s-Timeouts); Artefakt-Uploads bleiben.
+  dokumentations_vertrag: >-
+    Workboard-Eintrag, dieses Slice-YAML, Entscheidung zur /api-Bedienung in CI als
+    Kommentar im Workflow oder ADR-Notiz.
