@@ -1,0 +1,46 @@
+slice_id: UIX-081
+title: Twin-Panel v1 (Hofplan/Silo im Leitstand)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m3-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  SVG-Twin-Primitive aus deklarativer Geometrie (config/twin_plans) mit Metrik-Layern und Klick-Durchstich; Leitstand-SD nach W-04.
+file_ownership:
+  - "config/twin_plans/**"
+  - "app/api/v1/endpoints/silo_cells_readmodel.py"
+  - "packages/frontend-web/src/components/mask-builder/renderers/TwinPanelRenderer.tsx"
+  - "app/core/screen_definitions.py"
+acceptance:
+  - "Jede Zelle hat Klick-Durchstich zu Objekt/Maske (Abnahmekriterium: Twin ist Werkzeug, nicht Deko)."
+  - "cells-Read-Model 0x5xx, Cache 30s, Stand-Anzeige sichtbar."
+  - "<=300 Zellen performant in einem SVG; Keyboard-Navigation."
+  - "Visual-Audit 1366/1440/1920 erweitert."
+tests:
+  - "pytest cells-Read-Model Coverage>=60"
+  - "Vitest Geometrie-Parser+Layer"
+  - "Playwright Leitstand->Zelle->Maske"
+  - "Performance-Gate cockpit"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Der Leitstand zeigt die physische Lage (Fuellstand/Feuchte/Sperren) und fuehrt in einem Klick zur Aktion.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    twin-Block additiv in SD; Geometrie als versioniertes YAML (Studio-Export als Folge); reine Lese-Projektion.
+  test_vertrag: >-
+    Parser-, Layer- und Durchstich-Tests plus Visual-Audit sichern das Panel.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

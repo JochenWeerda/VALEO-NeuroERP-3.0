@@ -1,0 +1,46 @@
+slice_id: UIX-090
+title: ScreenDefinition-Studio (No-Code fuer Fach-Admins)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Baukasten-Editor (Feld-/Tab-/Action-/Datenquellen-Kataloge) mit Live-Vorschau ueber den echten Renderer; Publish nur durch bestehende Gates (Vier-Augen, advisoryScore, Meridian).
+file_ownership:
+  - "alembic/versions/*screen_definition_drafts*"
+  - "app/api/v1/endpoints/studio_drafts.py"
+  - "config/studio_data_sources.yaml"
+  - "config/screen_definition.schema.json"
+  - "packages/frontend-web/src/features/screen-studio/**"
+acceptance:
+  - "Fach-Admin baut Lieferanten-Bewertung ohne Code; Gate-Panel gruen; Vier-Augen-Review; published_temp."
+  - "Studio kann keine Gate-Verletzung publishen (Server erzwingt; 10 boese Fixtures)."
+  - "Namensraum tenant/<slug>; native SDs nicht beschattbar."
+  - "dangerLevel im Studio nur erhoehbar; commandEndpoints nur aus Katalog."
+tests:
+  - "pytest Draft-CRUD+Schema-Validierung+Vier-Augen Coverage>=60"
+  - "Vitest Editor-Reducer+Gate-Panel"
+  - "Playwright Abnahme-Szenario end-to-end"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Fachbereiche bauen Masken selbst — Updatefaehigkeit und Sicherheit bleiben, weil dieselben Gates gelten.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Drafts als jsonb in domain_shared.screen_definition_drafts; JSON-Schema der SD aus schema.ts abgeleitet und CI-driftgeprueft.
+  test_vertrag: >-
+    Boese-Fixture-Suite + End-to-End-Szenario sind die Abnahme.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

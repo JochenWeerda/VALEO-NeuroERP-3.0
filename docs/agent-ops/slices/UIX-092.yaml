@@ -1,0 +1,45 @@
+slice_id: UIX-092
+title: Ambient-Agent-Worklists
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Rahmenwerk fuer beobachtende Agenten (deterministische Regeln v1): erklaerte Worklist-Eintraege (reason/source_ref/confidence) mit Dedupe, Auto-Resolve und Kill-Switch je Tenant.
+file_ownership:
+  - "alembic/versions/*ambient_worklist*"
+  - "app/services/ambient_agents/**"
+  - "app/api/v1/endpoints/ambient_worklist.py"
+  - "app/core/screen_definitions.py"
+acceptance:
+  - "4 Agenten v1 (kontrakt_untererfuellung, preisabweichung_einkauf, op_eskalation, qs_fristen) laufen nightly."
+  - "Dedupe je Sachverhalt; entfallene Sachverhalte auto-resolved; dismissed bleibt."
+  - "Agenten mutieren nie Fachdaten; Abarbeitung nur ueber Ziel-Masken."
+  - "Kill-Switch je Agent+Tenant wirksam (Test)."
+tests:
+  - "pytest je Agent Positiv/Grenz/Kein-Treffer + Dedupe + Kill-Switch Coverage>=60"
+  - "Vitest P10-Karte"
+  - "Runtime-Sweep neue GETs"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Das System meldet Ausnahmen von selbst — erklaert, dedupliziert, abschaltbar; der Mensch entscheidet.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Neue Tabelle domain_shared.ambient_worklist_items mit UNIQUE(tenant,agent,dedupe_key); Proposals idempotent.
+  test_vertrag: >-
+    Grenzwert- und Lebenszyklus-Tests je Agent sind die Abnahme.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

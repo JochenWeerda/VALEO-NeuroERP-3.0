@@ -1,0 +1,44 @@
+slice_id: UIX-071
+title: Nutzer-Overlays v1 (Personalisierung ohne Fork)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m2-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Deklarative Nutzer-Diffs (Spalten, Varianten, Dichte, Kachel-Reihenfolge) ueber dem RenderPlan mit strikter Allowlist und Drift-Erkennung.
+file_ownership:
+  - "alembic/versions/*user_screen_overlays*"
+  - "app/api/v1/endpoints/ux_overlays.py"
+  - "packages/frontend-web/src/components/mask-builder/render-plan/**"
+acceptance:
+  - "Overlay ueberlebt Reload und SD-Minor-Update; schemaVersion-Mismatch degradiert sanft."
+  - "Sicherheitsfelder (actions/permissions/dangerLevel/confirmation/fields/tableProfile/floorplan) nicht overlaybar — Server und Compiler verwerfen."
+  - "Drift erzeugt Hinweis + Bereinigung beim naechsten Speichern."
+  - "Zuruecksetzen auf Standard je Maske."
+tests:
+  - "Vitest applyOverlay (Merge/Allowlist/Drift/Cache-Key)"
+  - "pytest PUT-Validierung + Isolation Coverage>=60"
+  - "Playwright Spalten->Reload->Reset"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Persoenliche Sichten ohne Masken-Fork; Updates brechen nie still.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Neue Tabelle domain_shared.user_screen_overlays (PK tenant/user/screen, schema_version, jsonb-Diff).
+  test_vertrag: >-
+    Boese Overlays (actions-Injection) sind Pflicht-Negativtests.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

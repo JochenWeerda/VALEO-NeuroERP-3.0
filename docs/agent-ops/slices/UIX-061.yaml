@@ -1,0 +1,45 @@
+slice_id: UIX-061
+title: Rollen-Workspaces (kontextabhaengige Startseiten)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m1-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Fuenf native cockpit-SDs (einkauf/verkauf/lager/fibu/leitung) mit KPI-Summary und Worklist-Kacheln als Login-Startseiten je Rolle.
+file_ownership:
+  - "app/core/screen_definitions.py"
+  - "config/workspace_roles.yaml"
+  - "packages/frontend-web/src/components/mask-builder/renderers/TileGridRenderer.tsx"
+  - "packages/frontend-web/src/components/mask-builder/render-plan/**"
+acceptance:
+  - "5 SDs generatorReady mit Meridian-Metadaten, advisoryScore>=0.8."
+  - "Login leitet rollenbasiert auf Workspace (Fallback bisherige Startseite)."
+  - "tiles-Block additiv im Schema, Compiler erzeugt RenderPlan.tiles."
+  - "Saison-Profil sortiert Kacheln um, ohne Inhalte zu wechseln."
+tests:
+  - "pytest SD-Readiness + tiles-Endpoints"
+  - "Vitest TileGridRenderer"
+  - "Playwright Route-Smoke der 5 Workspaces"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Rolle sieht beim Start ihre Arbeit (Worklists, KPIs) statt eines generischen Menues.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    tiles/seasonProfile als additive SD-Bloecke; Rollen-Mapping in config, tenant-ueberschreibbar; keine DB-Migration.
+  test_vertrag: >-
+    Readiness + Route-Smoke + advisoryScore sichern die 5 SDs.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

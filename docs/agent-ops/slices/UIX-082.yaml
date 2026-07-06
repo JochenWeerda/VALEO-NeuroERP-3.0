@@ -1,0 +1,47 @@
+slice_id: UIX-082
+title: ESG-Kacheln v1 (CO2e je Charge, audit-tauglich)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m3-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Versionierte Emissionsfaktoren + esg_charge_footprint-Read-Model mit Komponenten-Herleitung (source_ref je Beleg) und P13-Kacheln.
+file_ownership:
+  - "config/esg_factors.yaml"
+  - "alembic/versions/*esg_charge_footprint*"
+  - "app/services/esg_footprint_service.py"
+  - "app/api/v1/endpoints/esg_footprint.py"
+  - "app/core/screen_definitions.py"
+  - ".github/CODEOWNERS"
+acceptance:
+  - "Gleiche Inputs + gleiche Faktorversion => identisches Ergebnis (Snapshot-Test)."
+  - "Fehlender Input => Komponente fehlt (keine 0-Schaetzung)."
+  - "Jede Komponente traegt source_ref; Popover verlinkt Belege."
+  - "Faktor-Aenderung nur per PR mit Quellenangabe; Historie bleibt unter alter Version."
+tests:
+  - "pytest Service-Units+API Coverage>=60"
+  - "Vitest Kachel+Popover"
+  - "Snapshot-Reproduzierbarkeit"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    CO2e je Charge wird sichtbar und belegbar — Grundlage fuer ESG-Reporting ohne Wunschwerte.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Neue Tabelle domain_agrar.esg_charge_footprint mit UNIQUE(tenant,charge,factor_version); Faktoren versioniert in config.
+  test_vertrag: >-
+    Determinismus- und Herleitungs-Tests machen die Zahl audit-tauglich.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

@@ -37,6 +37,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Ziel:** 10-Jahres-faehiges UIX-Zielbild, das heute realisierbar bleibt — ausschliesslich als Builder-Evolution (ScreenDefinition/RenderPlan/Renderer/Gates), kein Parallelsystem.
 **Dateibesitz:** `docs/design/uix-zukunft-masterplan.md`, `docs/design/uix-zukunft-roadmap.md`, `docs/agent-ops/active-workboard.md`.
 **Abnahme:** Masterplan + Roadmap committet; Wireframes fuer alle 5 Floorplans + Conversational-Shell; jede Roadmap-Aufgabe mit agent-faehigem Prompt; Meridian-Regeln (kein Bypass, Referenzmasken = Abnahme) durchgaengig eingehalten.
+**Spec-Nachtrag 2026-07-07:** 4 Milestone-Spezifikationen (docs/design/specs/uix-m1..m4-spec.md — Datenmodelle, API-Vertraege, Schema-Diffs, Gates, Testplaene) + 14 claimbare Slice-YAMLs (UIX-060..092, status geplant, ai_harness-Vertraege). Umsetzung startet mit UIX-060.
 
 ## A9-STRUKTUR-KONSOLIDIERUNG — Repo-Layout (ARCH-F1, SPEC-P1-07)
 

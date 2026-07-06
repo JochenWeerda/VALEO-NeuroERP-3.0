@@ -1,0 +1,46 @@
+slice_id: UIX-062
+title: Collab-Rail v1 (Notizen & Mentions am Datensatz)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m1-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Datensatzgebundene Notizen mit @-Mentions in der ContextRail; Mentions erzeugen Inbox-Benachrichtigungen; alles auditierbar.
+file_ownership:
+  - "alembic/versions/*entity_notes*"
+  - "app/api/v1/endpoints/collab_notes.py"
+  - "app/infrastructure/models/**"
+  - "packages/frontend-web/src/components/mask-builder/renderers/WorkflowPanelRenderer.tsx"
+  - "packages/frontend-web/src/lib/api/collab.ts"
+acceptance:
+  - "Notiz an Kunde/Beleg aus der Rail; Mention erzeugt Inbox-Eintrag."
+  - "Tenant-Isolation testbewehrt (Cross-Tenant 404); Soft-Delete; Audit-Event collab.note.created."
+  - "contextRailSections additiv; combined bleibt kompatibel."
+  - "Mutation-Lifecycle-Invariante im Composer eingehalten."
+tests:
+  - "pytest collab_notes CRUD+Isolation Coverage>=60"
+  - "Vitest Rail-Sektion"
+  - "Playwright Notiz->Mention->Badge->Inbox"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Kommunikation klebt am Datensatz statt in Schatten-Kanaelen; exportierbar und auditierbar.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Neue Tabelle domain_shared.entity_notes (uuid7, tenant_id, entity_type/id, body<=4000, mentions jsonb, soft delete); Alembic Single Head.
+  test_vertrag: >-
+    CRUD-, Isolations-, Notification- und Renderer-Tests decken den Pfad ab.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

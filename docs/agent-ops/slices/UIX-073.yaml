@@ -1,0 +1,43 @@
+slice_id: UIX-073
+title: Termin-Extraktion aus E-Mails (Kalender x Capture-Inbox)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m2-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  crm_capture extrahiert Termine (deterministisch + optionaler LLM-Fallback) als editierbare Kalender-Vorschlaege mit Quellen-Nachweis und Konflikt-Hinweis.
+file_ownership:
+  - "app/services/crm_capture/**"
+  - "app/services/calendar_projection_service.py"
+  - "tests/fixtures/mails/**"
+acceptance:
+  - "Vorschlag nie Auto-Confirm (auch bei confidence 1.0)."
+  - "Re-Ingest derselben Mail erzeugt keine Dubletten (source_key mail_id:n)."
+  - "Konflikt-Hinweis bei Slot-Ueberschneidung (+-2h je Lieferant/Rampe)."
+  - "Bestaetigen verlinkt Objekt + Audit; Verwerfen bleibt fuer Telemetrie."
+tests:
+  - "pytest 10 Mail-Fixtures + Idempotenz + Safety"
+  - "Playwright Mail->Vorschlag->Bestaetigen"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Lieferantentermine wandern ohne Abtippen aus dem Postfach in den Logistik-Layer.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    calendar_items status=proposed, source=email_capture, payload mit mail_id/extracted_text/matched_object/conflicts.
+  test_vertrag: >-
+    LLM-Fallback wird gegen deterministische Kandidaten validiert (kein erfundenes Datum).
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

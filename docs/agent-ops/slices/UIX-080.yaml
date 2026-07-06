@@ -1,0 +1,47 @@
+slice_id: UIX-080
+title: Voice-Aktionen V3 + Freisprechmodus Waage (V4-Pilot)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m3-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  voiceEnabled-Whitelist je Action mit Echo+Gross-Bestaetigung; Freisprech-Session (Geraet, PIN, Vollprotokoll); Pilot Annahme-Wiegung freihaendig.
+file_ownership:
+  - "app/core/screen_definitions.py"
+  - "app/api/v1/endpoints/voice_sessions.py"
+  - "packages/frontend-web/src/lib/voice/command-router.ts"
+  - "packages/frontend-web/src/components/mask-builder/runtime/generatorReadiness.ts"
+  - "app/api/v1/endpoints/mask_screen_definition.py"
+acceptance:
+  - "Gate: voiceEnabled bei high/critical oder forbiddenForAgents => Readiness-Error (beidseitig)."
+  - "Kein Voice-Pfad ohne Echo-Overlay; Timeout 8s verworfen."
+  - "Session: Geraetebindung, PIN, 10min-Timeout, Vollprotokoll voice.command."
+  - "Feldtest-Protokoll: 20 Wiegungen, Erkennung>=90%, 0 Fehlausfuehrungen."
+tests:
+  - "Vitest Router+Echo-Pflicht"
+  - "pytest Gates+Sessions+Audit Coverage>=60"
+  - "Safety-Suite ueber alle SDs"
+  - "Playwright W-03 mit STT-Stub"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Waage/Lager arbeiten freihaendig; Gefahr bleibt ritualisiert und stimm-unerreichbar.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Action-Felder voiceEnabled/voiceSynonyms additiv; neue Tabelle voice_devices/sessions; Audit-Events mit transcript_hash.
+  test_vertrag: >-
+    Die Safety-Suite beweist: keine high/critical-Action ist voice-erreichbar.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

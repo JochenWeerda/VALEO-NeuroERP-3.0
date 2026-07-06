@@ -1,0 +1,48 @@
+slice_id: UIX-063
+title: Planungskalender v1 (Zeit als Projektion)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m1-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  calendar_items-Read-Model + 5 idempotente Projektoren (periodische Buchungen, OP-Faelligkeiten, Kontrakt-/Rabattfristen, CRM-Wiedervorlagen, Sachkunde) und Kalender-Cockpit mit Layern, Fristenband und ICS-Feed.
+file_ownership:
+  - "alembic/versions/*calendar_items*"
+  - "app/services/calendar_projection_service.py"
+  - "app/api/v1/endpoints/planung_kalender.py"
+  - "app/core/screen_definitions.py"
+  - "packages/frontend-web/src/components/mask-builder/renderers/CalendarRenderer.tsx"
+  - "config/saison_kalender.yaml"
+acceptance:
+  - "5 Quellen projizieren automatisch; Doppellauf idempotent; proposed/confirmed/dismissed ueberleben Reprojektion."
+  - "Jeder Eintrag verlinkt sein Objekt (object_route); manuelle lose Termine in v1 nicht angeboten."
+  - "ICS-Feed tokenbasiert read-only, Token rotierbar."
+  - "Fristenband 14 Tage; Layer-Toggles; Klick-Durchstich zur ObjectPage."
+tests:
+  - "pytest Projektoren-Units + API Coverage>=60"
+  - "Vitest CalendarRenderer"
+  - "Playwright Kalender->Layer->Durchstich"
+  - "Runtime-Sweep 0x5xx"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Alles Zeitbezogene (wiederkehrende Umsaetze, Fristen wie Ende Fruehbezugsrabatt, Reminder, Schulungen) visualisiert sich ohne Doppelpflege.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Neue Tabelle domain_shared.calendar_items mit UNIQUE(tenant,source,source_key) fuer Upsert-Idempotenz; Status-Lebenszyklus projected|proposed|confirmed|dismissed.
+  test_vertrag: >-
+    Idempotenz-, Horizont- und Status-Tests je Projektor sind die Abnahme.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

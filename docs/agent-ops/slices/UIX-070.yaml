@@ -1,0 +1,44 @@
+slice_id: UIX-070
+title: Command-Ausfuehrung aus der Omnibox (mit Ritual)
+owner: unclaimed
+status: geplant
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m2-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  NL wird zu vorbereiteten Commands (safe/moderate, nie forbiddenForAgents) mit vollem Confirmation-Ritual; high/critical nur Navigation.
+file_ownership:
+  - "packages/frontend-web/src/lib/omnibox/**"
+  - "tests/test_uix070_conversational_safety.py"
+  - "packages/frontend-web/src/components/mask-builder/runtime/ActionRuntime.ts"
+acceptance:
+  - "Sicherheitsmatrix testbewehrt: kein NL-Pfad an Confirmation vorbei; forbiddenForAgents im NL-Pfad unsichtbar."
+  - "confidence<0.75 degradiert auf Formular-Prefill."
+  - "Spiegel-Testsuite parametrisiert ueber ALL_SCREEN_IDS."
+  - "Audit-Events tragen trigger_source=omnibox."
+tests:
+  - "pytest test_uix070_conversational_safety.py"
+  - "Vitest Sicherheitsmatrix-Tabelle"
+  - "Playwright create_activity-Prefill+Ritual"
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Sagen statt Suchen: vorbefuellte Aktionen mit identischem Ritual wie in der Maske.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Kein neuer Endpoint; Payload-Drafts nur aus Schema-Feldern; Lookup-Resolution nur bei eindeutigem Treffer.
+  test_vertrag: >-
+    Die Spiegel-Suite ist das Gate: identische Entscheidungen wie der Maskenpfad.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable
