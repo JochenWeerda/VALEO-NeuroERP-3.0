@@ -20,9 +20,11 @@ test.describe('CRM - Leads @smoke', () => {
 
     await expect(adminPage).toHaveURL(/\/crm\/lead\/(new|neu)$/);
     await expect(adminPage.locator('h1').first()).toContainText(/Lead/i, { timeout: 15000 });
-    await expect(adminPage.getByLabel(/Firma/i)).toBeVisible();
-    await expect(adminPage.getByLabel(/Ansprechpartner/i)).toBeVisible();
-    await expect(adminPage.getByLabel(/Quelle/i)).toBeVisible();
+    // Feldlabels der nativen Lead-Maske (ScreenDefinition crm/lead, UIX-Rollout):
+    // "Firma" aus dem Alt-Formular heisst dort "Unternehmen".
+    await expect(adminPage.getByLabel(/Unternehmen/i).first()).toBeVisible();
+    await expect(adminPage.getByLabel(/Ansprechpartner/i).first()).toBeVisible();
+    await expect(adminPage.getByLabel(/Quelle/i).first()).toBeVisible();
   });
 });
 
