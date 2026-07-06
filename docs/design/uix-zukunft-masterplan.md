@@ -145,6 +145,7 @@ Jedes Muster ist eine Builder-/Renderer-Fähigkeit, **keine** Seiten-Kopiervorla
 | P13 | **ESG-KPI-Kachel** | Summary/Cockpit | CO₂e je Charge/Prozess, Trend, Datenquelle sichtbar |
 | P14 | **Offline-Badge + Queue** | Statusleiste | anstehende Offline-Buchungen sichtbar, Konfliktlösung als Worklist |
 | P15 | **EmptyState/ProblemDetails** | vorhanden | nie stille Leere bei Datenfehlern (financial-Profil erzwingt das schon) |
+| P16 | **Planungskalender** | neu: calendar-Primitive + `calendarProjection` | Termine sind automatische Projektionen aus Belegen/Feldern (keine Doppelpflege); Layer je Quelle; Klick = ObjectPage; ICS-Abo |
 
 ## 6. Wireframes je Floorplan
 
@@ -254,6 +255,52 @@ whitelisted Kommandos (`voiceEnabled: true` je Action), niemals Danger-Aktionen.
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
+### W-07 Planungskalender — Zeit als Projektion (P16)
+
+**Konzept:** Niemand pflegt Termine doppelt. Jede Entität mit Zeitbezug deklariert
+eine `calendarProjection` (Feld → Termin-Typ), der Builder projiziert sie in ein
+kanonisches `calendar_items`-Read-Model. Der Kalender ist ein `cockpit`-Floorplan
+mit Kalender-Primitive — dieselben Gates, derselbe Klick-Durchstich.
+
+Automatische Quellen (Layer, je Rolle vorbelegt, einzeln schaltbar):
+
+| Layer | Quelle (existiert heute) | Beispiele |
+|---|---|---|
+| 💶 Finanzen | periodische Buchungen, OP-Fälligkeiten, Zahlungsläufe | wiederkehrende Umsätze, Skonto-/Zahlungsziele |
+| 📆 Fristen | Kontrakte, Rabattstaffeln, Zertifikate | Ende Frühbezugsrabatt, Andienungsfristen, QS-/Sachkunde-Ablauf |
+| 👥 CRM | Wiedervorlagen, Reminder, Besuchsplanung | Kunden-Reminder, Saisongespräch vor Aussaat |
+| 🚚 Logistik | Avis, Liefer-/Abholtermine, **E-Mail-Extraktion (P8)** | Lieferantentermin aus Mail → Vorschlag, editierbar |
+| 🎓 Personal | Schulungen, Unterweisungen, Sachkunde | Pflichtschulung, Erste-Hilfe-Auffrischung |
+| 🌾 Saison | Kulturkalender, Kampagnenfenster | Erntepeak-Vorbereitung, Düngefenster |
+
+```text
+┌ PLANUNGSKALENDER · Juli 2026 ──────── [Monat|Woche|Agenda] [＋Layer ▾] [ICS ⤓] ┐
+│ Layer: 💶 Finanzen ✓  📆 Fristen ✓  👥 CRM ✓  🚚 Logistik ✓  🎓 ○  🌾 ○        │
+├── FRISTENBAND (nächste 14 Tage, immer sichtbar) ────────────────────────────── │
+│ ⚠ 15.07. Ende Frühbezugsrabatt DüKa │ 18.07. QS-Audit │ 31.07. UStVA          │
+├────────┬────────┬────────┬────────┬────────┬─────────────────────────────────┤
+│ Mo 13  │ Di 14  │ Mi 15  │ Do 16  │ Fr 17  │ ◀ DETAIL (Klick auf Eintrag)    │
+│ 💶 Abo-│ 🚚 Avis│ 📆 FRIST│ 👥 Fol-│ 💶 Zah-│ 🚚 Lieferung Baywa 60 t KAS     │
+│ RE Lauf│ Raps   │ Frühbe-│ kerts  │ lungs- │ Quelle: E-Mail 12.07. 09:14 ✉   │
+│ (12)   │ 60 t   │ zug ⚠  │ Rückruf│ lauf 🔒│ [→ Bestellung 7712] [Bestätigen]│
+│        │ ✉ Vor- │        │ 9:00   │        │ [Termin verschieben]            │
+│        │ schlag │        │        │        │ Extraktion editierbar (P8)      │
+├────────┴────────┴────────┴────────┴────────┴─────────────────────────────────┤
+│ Agent-Zeile 💡: „3 Kontrakte laufen im August aus — Verlängerung planen?"     │
+└────────────────────────────────────────────────────────────────────────────── ┘
+```
+
+Regeln:
+- **Kein Eintrag ohne Objekt.** Jeder Termin verlinkt auf Beleg/Kunde/Kontrakt
+  (ObjectPage); manuelle „lose" Termine sind erlaubt, aber markiert.
+- **E-Mail-Termine sind Vorschläge** (P8-Muster): editierbar, bestätigbar,
+  mit Quellen-Nachweis — nie stillschweigend fest.
+- **Aktionen aus dem Kalender** (bestätigen, verschieben, Rechnung auslösen)
+  sind normale Commands mit Ritual; der Zahlungslauf bleibt auch hier 🔒.
+- **Erinnerungen** laufen über die Benachrichtigungs-Inbox der Shell (W-00),
+  optional ICS-Abo für Outlook/Handy (read-only).
+- Omnibox versteht Zeit: „was steht nächste Woche an?" → Agenda-Ansicht gefiltert.
+
 ## 7. Prozessketten end-to-end (Doc-Chain bleibt Gesetz)
 
 Jede Kette definiert: Floorplan-Abfolge, Medienbruch-Killer, Voice-Punkte,
@@ -355,7 +402,8 @@ Figma-File (`Ohne Namen`, node 0-1):
 📁 03 Conversational→ W-06 Overlay + Confirmation-Ritual (P7)
 📁 04 Twin & ESG    → W-04-Detail: Silo-Zellen-Zustände, ESG-Kacheln
 📁 05 Prozessketten → K1–K4 als Flow-Diagramme (Floorplan-Abfolge)
-📁 06 Komponenten   → P1–P15 als Komponenten-Sheet
+📁 06 Kalender      → W-07 Monat/Woche/Agenda + Fristenband + Layer-Zustände
+📁 07 Komponenten   → P1–P16 als Komponenten-Sheet
 ```
 
 ## 13. Nächste Schritte

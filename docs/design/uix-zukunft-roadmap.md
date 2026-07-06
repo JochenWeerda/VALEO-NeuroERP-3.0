@@ -40,7 +40,8 @@ Promotion-Pfad temp→native. **Alles Weitere baut hierauf.**
 ## M1 — „Ein Eingabefeld" (Ziel: Q3/2026)
 
 **Ergebnis:** Omnibox als zentraler Einstieg (⌘K), Rollen-Workspaces als
-Startseiten, Kollaborations-Rail v1. Nutzer navigieren per Intent statt Menü.
+Startseiten, Kollaborations-Rail v1, Planungskalender v1. Nutzer navigieren
+per Intent statt Menü; Zeitbezogenes visualisiert sich selbst.
 
 ### Slices
 
@@ -103,6 +104,33 @@ Sektion im WorkflowPanelRenderer (kein neues Panel-System), Mention-Autocomplete
 über bestehende User-API, Inbox-Badge in der Shell-Statuszeile. Mutation-Lifecycle-
 Invariante (Guard/disabled/finally/Toast) einhalten. Tests: Endpoint-Coverage>=60,
 Renderer-Unit-Test, 1 Playwright-Flow (Notiz anlegen → Mention → Inbox).
+```
+
+**UIX-063 Planungskalender v1 (Zeit als Projektion)**
+- [ ] `calendar_items`-Read-Model + `calendarProjection`-Deklaration (Feld → Termin-Typ)
+      für die ersten Quellen: periodische Buchungen (wiederkehrende Umsätze),
+      OP-Fälligkeiten, Kontrakt-/Rabattfristen (Ende Frühbezugsrabatt),
+      CRM-Wiedervorlagen, Sachkunde-/Schulungsabläufe
+- [ ] Kalender-Renderer-Primitive (Monat/Woche/Agenda + Fristenband, Layer je Quelle)
+      als `cockpit`-SD — Klick-Durchstich zur ObjectPage, kein eigener Seitenbaum
+- [ ] Erinnerungen über Benachrichtigungs-Inbox; ICS-Export (read-only)
+- Akzeptanz: 5 Quellen projizieren automatisch (0 manuelle Doppelpflege);
+  jeder Eintrag verlinkt sein Objekt; W-07-Visual-Audit; Omnibox-Intent
+  „was steht nächste Woche an?" öffnet gefilterte Agenda.
+
+```text
+PROMPT UIX-063
+Rolle: Fullstack-Slice-Agent. Lies Masterplan W-07/P16. Claim UIX-063.
+Backend: calendar_items-Read-Model (Tenant-isoliert, Alembic Single Head) +
+Projektions-Registrierung calendarProjection je Quelle (periodische_buchungen,
+open_items-Fälligkeiten, Kontrakt-/Staffel-Fristen, CRM-Wiedervorlagen,
+agrar_sachkunde-Abläufe) — Projektion idempotent, Quell-Feld dokumentiert.
+Frontend: Kalender-Primitive im Renderer-Baukasten (Bibliothek nur als internes
+Primitive hinter dem RenderPlan, kein Parallel-UI), planung/kalender als native
+cockpit-SD mit Layern + Fristenband.
+Verboten: manueller Termin-CRUD als Hauptweg, Einträge ohne Objekt-Link.
+Tests: Projektions-Units je Quelle, Endpoint-Coverage>=60, Playwright:
+Layer-Toggle + Klick-Durchstich. Gates: generatorReady, Visual-Audit, Perf.
 ```
 
 ---
@@ -173,6 +201,26 @@ Streaming-Transkript in fokussiertes Feld bzw. Omnibox, Editierbarkeit vor
 verallgemeinern, Provider konfigurierbar je Tenant). Nur Read-Intents (V2) —
 keine Action-Ausführung (das ist UIX-080). A11y: Tastatur-Alternative überall.
 Tests: Adapter-Unit mit Fake-STT, Playwright mit Transkript-Stub.
+```
+
+**UIX-073 Termin-Extraktion aus E-Mails (Kalender ⨯ Capture-Inbox)**
+- [ ] Capture-Inbox-Erweiterung: Datums-/Termin-Extraktion aus Mails
+      (Lieferantentermine, Abholslots) → Kalender-**Vorschlag** (P8: editierbar,
+      Quellen-Nachweis; Bestätigung erzeugt calendar_item + Objekt-Verknüpfung)
+- [ ] Konflikt-Hinweis (Slot kollidiert mit Avis/Frist) im Vorschlag
+- Akzeptanz: Mail „Anlieferung Do 14 Uhr" wird als Vorschlag im Logistik-Layer
+  sichtbar, Bestätigung verlinkt die Bestellung; Falsch-Extraktion in 1 Klick
+  verwerfbar; kein Vorschlag wird still zum Termin.
+
+```text
+PROMPT UIX-073
+Rolle: Fullstack-Slice-Agent. Lies Masterplan W-07 (E-Mail-Zeile) + P8.
+Claim UIX-073. Erweitere die bestehende crm_capture-Pipeline um Termin-
+Extraktion (Datum/Zeit/Slot + Bezugsobjekt-Heuristik Bestellnr/Lieferant).
+Ausgabe ist IMMER ein Vorschlag (status=vorgeschlagen) im calendar_items-
+Read-Model; Bestätigen/Verwerfen sind normale Commands mit Audit.
+Tests: Extraktions-Units (10 Mail-Fixtures dt./ambig), Safety: Vorschlag
+mutiert nichts; Playwright: Mail-Fixture → Vorschlag → Bestätigen → Termin.
 ```
 
 ---
@@ -270,6 +318,7 @@ Worklists flächendeckend; Prozessband überall.
 | Zeit Annahme-Wiegung (Ankunft→gebucht) | M3-Pilot | — | −40 % |
 | SDs generatorReady mit Voll-AgentContract | heute 13 | 25 | 60 |
 | Nutzer-Overlays aktiv ohne Support-Ticket | M2 | >0 | Standard |
+| Automatisch projizierte Kalendereinträge (Quellen aktiv) | M1 | 5 Quellen | 10 Quellen inkl. E-Mail |
 
 ## Risiken & Gegenmittel
 
