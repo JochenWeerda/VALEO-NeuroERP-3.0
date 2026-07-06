@@ -29,6 +29,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `services/finance/requirements.txt`, `services/inventory/requirements.txt`, `services/compliance/zoll/requirements.txt`, `services/crm-gdpr/requirements.txt`, `.github/workflows/lint-check-all.yml` (geloescht).
 **Abnahme:** "CI/CD Pipeline" auf main gruen (Install-Steps laufen durch); "Comprehensive Lint Check" erscheint nicht mehr in der Run-Liste.
 
+## UIX-ZUKUNFT-VISION-001 — Zukunfts-UIX: Masterplan, Wireframes, Roadmap
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-07-06 — Design-/Planungs-Slice (docs-only): Zukunfts-UIX auf der Meridian-Kette (Conversational/Voice/Agentic/Twin/ESG/No-Code) als Masterplan mit Wireframes, Pattern-Bibliothek, Prozessketten-Designs und Roadmap mit Slice-Prompts.
+**Ziel:** 10-Jahres-faehiges UIX-Zielbild, das heute realisierbar bleibt — ausschliesslich als Builder-Evolution (ScreenDefinition/RenderPlan/Renderer/Gates), kein Parallelsystem.
+**Dateibesitz:** `docs/design/uix-zukunft-masterplan.md`, `docs/design/uix-zukunft-roadmap.md`, `docs/agent-ops/active-workboard.md`.
+**Abnahme:** Masterplan + Roadmap committet; Wireframes fuer alle 5 Floorplans + Conversational-Shell; jede Roadmap-Aufgabe mit agent-faehigem Prompt; Meridian-Regeln (kein Bypass, Referenzmasken = Abnahme) durchgaengig eingehalten.
+
 ## A9-STRUKTUR-KONSOLIDIERUNG — Repo-Layout (ARCH-F1, SPEC-P1-07)
 
 **Von:** Claude
