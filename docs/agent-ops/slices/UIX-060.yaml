@@ -1,7 +1,7 @@
 slice_id: UIX-060
 title: Omnibox-Shell + Intent-Vorschau (read-only)
-owner: unclaimed
-status: geplant
+owner: Claude
+status: in_arbeit
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m1-spec.md
 coordination: >-
