@@ -35,10 +35,12 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Gesamtstatus
 
-- Stand: `2026-05-16` (Service-Layer-Refaktorierung abgeschlossen, Gap-Closure-Welle, Test-Fixes)
+- Stand: `2026-07-06` (SPEC-P1-04/08 Mask-ActionRuntime + FEFO; A10 Evidenzkette Teilstand)
 - Status: `Waves 1 bis 100 sowie Waves 102–104 abgeschlossen; Service-Layer + Gap-Closure 2026-05-16`
-- Gesamtsuite: `8564 Tests gruen, 0 Fehler, 68 skipped, 1 xfailed` (Stand 2026-05-16; +2633 gegenueber Wave 104)
-- Gesamtabdeckung: `64,85%` (ueber 60%-Ratchet; 18/18 kritische Ratchet-Pfade gruen)
+- Gesamtsuite: `11 810 Tests passed` im CI-Volllauf (2026-07-05, quality-gate Run 28732436888 auf `main`)
+- Doku-Code-Drift: `0 Items` (2026-07-06, `doc_drift_report.py --fail-over 0`)
+- Release-Evidence: `WARN` — 4 PASS / 2 WARN / 0 FAIL (`release_evidence_report.py`, SHA `1772798e0`, Branch `fix/pii-remediation`)
+- Gesamtabdeckung: `65,66%` (CI quality-gate 2026-07-05; only-up-Ratchet aktiv)
 - Bereinigter Gap-Abgleich: `docs/project-context/open-gaps-and-known-issues.md`
 - Flow-Spine-Systemanalyse: `docs/workflows/` (Card-/Workflow-Audit)
 - Wave-104-Nachlieferung (GAP-G/H/I + Repo-Hygiene): in diesem STATUS dokumentiert
@@ -55,6 +57,9 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - DOM-*-004-Tiefenwelle (2026-06-11/12): CON/SALES/FIN/DOC (Claude) + PROC/SUPPLY je auf voller Tiefe `.2`–`.5`; Detail [docs/dom-004-spine-buildout-2026-06-12.md](../../dom-004-spine-buildout-2026-06-12.md).
   - Governance-Vertragstests (lokal verifiziert): `test_release_compatibility_governance.py` (5) + `test_inventory_stock_movements_canonical.py` (3) gruen.
   - Gesamtsuite (collect-only, 2026-06-11): `9527` Tests erfasst; Pass-/Coverage-Nachweis massgeblich naechster gruener `quality-gate`-Lauf.
+- Querschnittslieferung (2026-07-06, ausserhalb der Kernel-Waves):
+  - `SPEC-P1-04/08` (Prompt A8): `MaskActionRuntime` fuer alle nativen Mask-Actions; Inventur 0 stubReason; FEFO ueber MHD; Alembic-Head `inv_lot_depth_spec_p1_08`.
+  - `A10` (Teilstand): Doku-Drift 0; OpenAPI regeneriert; `release_evidence` WARN (kein FAIL); README/STATUS/Open-Gaps auf gemessene Werte.
 - Letzte abgeschlossene Waves (2026-03):
   - `Wave 104`: Flow Spine DB-Persistenz, PCN DB, Tenant-Isolation, Outbox-Events, Agent-Action+RAG, Voice-Kanal
   - `Wave 103`: Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85%)

@@ -5,7 +5,7 @@ type: reference
 audience: [entwickler, lead]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-29
+last_reviewed: 2026-07-06
 version: 3.0.0
 ---
 
@@ -18,9 +18,9 @@ version: 3.0.0
 
 | Metrik | Wert |
 |---|---|
-| Gesamter Drift | **6** |
-| Status | **ROT** |
-| Stand | 2026-06-29 09:25 UTC |
+| Gesamter Drift | **0** |
+| Status | **GRUEN** |
+| Stand | 2026-07-06 06:51 UTC |
 | Gate | `--fail-over 0` (DOC-DRIFT-GATE-002) |
 
 ## Dimensionen
@@ -30,18 +30,11 @@ version: 3.0.0
 | Endpoints ohne Doku | 0 | GRUEN |
 | Migrationen ohne Runbook | 0 | GRUEN |
 | Services ohne Doku | 0 | GRUEN |
-| Frontend-Seiten ohne Route/Nav | 6 | ROT |
+| Frontend-Seiten ohne Route/Nav | 0 | GRUEN |
 
 ## Offene Punkte
 
-| Typ | Datei/Stem |
-|---|---|
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage.tsx` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/kontrakte/UniversalKontraktPilotPage.tsx` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/sales/OrderEditorLegacyPage.tsx` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/sales/UniversalSalesOrderPilotPage.tsx` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/workflow/mask-rollout/MaskRolloutRoute.tsx` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/workflow/mask-rollout/UniversalMaskRolloutPilotPage.tsx` |
+Kein Drift erkannt — Gate ist grün.
 
 ## Gate-Verhalten
 
@@ -62,4 +55,4 @@ Bei neuem Drift sofort beheben:
 > Historische Drift-Reports werden als CI-Artefakte unter `.github/workflows/doc-drift-report.yml`
 > für 90 Tage aufbewahrt (retention-days: 90).
 
-*Stand: 2026-06-29 09:25 UTC · 6 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
+*Stand: 2026-07-06 06:51 UTC · 0 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*

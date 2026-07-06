@@ -310,6 +310,8 @@ doc_drift_report.py --fail-over 0 grün.
 Akzeptanz: Drift 0; artifacts/release_evidence.{json,md} aktuell (<24 h).
 ```
 
+**Stand 2026-07-06:** ⚠️ Teilstand — Drift 0 ✅; `release_evidence` regeneriert (overall **WARN**, kein FAIL); OpenAPI/Open-Gaps/README/Process-Kernel nachgezogen. Vollständig nach A9 + CI-Assessment-Artefakt.
+
 ---
 
 ## 7. Agentisch simulierte TÜV-/ISO-/SOC-2-Prüfungen

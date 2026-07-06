@@ -179,7 +179,7 @@ def build_markdown(report: dict) -> str:
         "",
         "# Release-Evidence-Report",
         "",
-        f"> Stand: {ts} · SHA: `{report['git_sha']}`  ",
+        f"> Stand: {ts} · SHA: `{report['git_sha']}`",
         f"> Slice: RELEASE-EVIDENCE-GATE-001",
         "",
         f"## Gesamtstatus: {overall}",

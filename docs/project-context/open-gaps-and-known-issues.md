@@ -4,8 +4,8 @@ type: reference
 audience: [entwickler, agent]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-30
-version: 3.3.0
+last_reviewed: 2026-07-06
+version: 3.4.0
 description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
 ---
 
@@ -22,8 +22,8 @@ P0-Specs aus dem Audit:
 
 | Spec | Status | Kurzinhalt |
 |---|---|---|
-| SPEC-P0-01 | offen | CI-Voll-Gruen oeffentlich nachweisen |
-| SPEC-P0-02 | offen | Live-API-Sweep als Dauergate |
+| SPEC-P0-01 | erledigt 2026-07-05 (main) | quality-gate, security-scan, universal-mask-ci grün — Evidenz `artifacts/ci-green-evidence.md`, Run 28732436888 |
+| SPEC-P0-02 | erledigt 2026-07-05 | Runtime-Sweep Nightly-Gate 0×5xx (`scripts/api_runtime_sweep.py`, Repair-Migration `runtime_sweep_repair_20260702`) |
 | SPEC-P0-03 | offen | Kat.-B/D-Produktionsentscheidung und `/readyz` |
 | SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
 | SPEC-P0-05 | offen | Coverage-Ratchet nur noch steigend, kritische Pfade hochziehen |
@@ -46,6 +46,21 @@ P1-Specs aus dem Audit:
 
 Priorisierte Sequenz: A0 Verifikation und A2 PII parallel/sofort, danach
 A1 CI-Gruen, SPEC-P0-06 Governance, A3 Runtime-Sweep und A5 Modulaktivierung.
+
+## A10-DOKU-EVIDENZ-001 — Doku-Drift & Evidenzkette (Prompt A10, Teilstand 2026-07-06)
+
+Status: **teilweise**. Nach A8 umsetzbar ohne A9-Abschluss:
+
+| Check | Stand 2026-07-06 |
+|---|---|
+| `doc_drift_report.py --fail-over 0` | grün — 0 Drift-Items |
+| `docs/entwickler/drift-dashboard.md` | regeneriert (0 Items) |
+| `generate_openapi.py` | openapi.json aktualisiert (2537 Pfade) |
+| `release_evidence_report.py --fail-on-red` | **WARN** (4 PASS, 2 WARN, 0 FAIL) — coverage-Ratchet lokal ohne Vollsuite; `production-readiness-assessment.json` nur in CI |
+| README / Process-Kernel / Open-Gaps | auf gemessene Werte nachgezogen |
+| `artifacts/release_evidence.{json,md}` | lokal regeneriert, versionierbar via `.gitignore`-Ausnahme |
+
+Offen für Voll-A10: externe Assessment-Artefakte aus CI committen oder Gate anpassen; README-CI-Stand nach Merge `fix/pii-remediation` → `main` erneut verifizieren.
 
 ## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug (2026-07-02)
 

@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## A10-DOKU-EVIDENZ-001 — Doku-Drift & Evidenzkette (Prompt A10, Teilstand)
+
+**Von:** Cursor Agent
+**Owner:** Cursor Agent
+**Stand:** in arbeit 2026-07-06 — Drift 0; OpenAPI regeneriert; `release_evidence` WARN (4 PASS/2 WARN/0 FAIL); README, Process-Kernel-STATUS, Open-Gaps, drift-dashboard auf gemessene Werte; `release_evidence.{json,md}` versionierbar. Offen: Voll-A10 nach A9-Archiv; external-Assessment aus CI.
+**Ziel:** Production-Readiness Prompt A10 — keine Wunschwerte in Statusdoku; Evidenzkette maschinenlesbar.
+**Dateibesitz:** `README.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/architecture/process-kernel/STATUS.md`, `docs/entwickler/drift-dashboard.md`, `docs/schnittstellen/openapi.json`, `artifacts/release_evidence.{json,md}`, `.gitignore`.
+**Abnahme:** `doc_drift_report.py --fail-over 0` Exit 0; `release_evidence_report.py --fail-on-red` Exit 0 (overall ≠ fail).
+
 ## SPEC-P1-04-08-A8 — commandEndpoints & Chargen/MHD (Production-Readiness Prompt A8)
 
 **Von:** Cursor Agent

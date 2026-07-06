@@ -149,6 +149,8 @@ nul
 # CI-generated release evidence (regenerate via quality-gate / release-gates)
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/release_evidence.json
+!artifacts/release_evidence.md
 
 # Local analysis artifacts
 service_erp_endpoints.txt

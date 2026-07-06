@@ -68003,25 +68003,70 @@
         "type": "object"
       },
       "MaskActionResult": {
-        "description": "Einheitliches Ergebnis eines Mask-Action-Stubs (UIX-053).",
         "properties": {
           "actionKey": {
             "title": "Actionkey",
             "type": "string"
           },
-          "entityId": {
-            "title": "Entityid",
+          "affectedIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affectedids"
+          },
+          "auditEntryId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditentryid"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "mode": {
+            "title": "Mode",
             "type": "string"
           },
-          "message": {
-            "title": "Message",
-            "type": "string"
+          "outboxEventId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outboxeventid"
           },
           "proposedChanges": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
@@ -68033,17 +68078,37 @@
             "title": "Success",
             "type": "boolean"
           },
-          "tenantId": {
-            "title": "Tenantid",
-            "type": "string"
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "validationErrors": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validationerrors"
           }
         },
         "required": [
-          "success",
           "actionKey",
-          "entityId",
-          "tenantId",
-          "message"
+          "mode",
+          "success"
         ],
         "title": "MaskActionResult",
         "type": "object"
@@ -143071,6 +143136,80 @@
         ]
       }
     },
+    "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": {
+      "post": {
+        "operationId": "action_harvest_settlement_drucken_api_v1_agrar_harvest_settlements__entity_id__actions_drucken_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ernte-Abrechnung drucken (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/agrar/inventory/low-stock": {
       "get": {
         "description": "AGR-INV-04: Artikel mit Bestand unter/am Schwellwert (Saatgut, Dünger, PSM).",
@@ -190928,7 +191067,6 @@
     },
     "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": {
       "post": {
-        "description": "Stub: Lead als Opportunity qualifizieren — Opportunity-Erzeugungsflow folgt.",
         "operationId": "action_crm_qualifizieren_api_v1_crm_leads__entity_id__actions_qualifizieren_post",
         "parameters": [
           {
@@ -190957,6 +191095,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -190984,7 +191133,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Lead als Opportunity qualifizieren (UIX-053)",
+        "summary": "Lead als Opportunity qualifizieren (SPEC-P1-04)",
         "tags": [
           "mask-actions"
         ]
@@ -191521,6 +191670,80 @@
         "tags": [
           "crm",
           "opportunities"
+        ]
+      }
+    },
+    "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": {
+      "post": {
+        "operationId": "action_opportunity_create_activity_api_v1_crm_opportunities__entity_id__actions_create_activity_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "CRM-Aktivität für Opportunity anlegen (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -200469,7 +200692,6 @@
     },
     "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen": {
       "post": {
-        "description": "Stub: Bestellung aus Angebot erzeugen — dryRun zeigt proposedChanges.",
         "operationId": "action_einkauf_bestellen_api_v1_einkauf_bestellungen__entity_id__actions_bestellen_post",
         "parameters": [
           {
@@ -200498,6 +200720,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -200525,7 +200758,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Bestellung erteilen (UIX-053)",
+        "summary": "Bestellung aus Angebot erteilen (SPEC-P1-04)",
         "tags": [
           "mask-actions"
         ]
@@ -204341,7 +204574,6 @@
     },
     "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung": {
       "post": {
-        "description": "Stub: Neue Bestellung für Lieferant anlegen — dryRun-Phase, execute folgt in UIX-046+.",
         "operationId": "action_neue_bestellung_api_v1_einkauf_lieferanten__entity_id__actions_neue_bestellung_post",
         "parameters": [
           {
@@ -204370,6 +204602,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -204399,7 +204642,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Bestellung anlegen (UIX-046)",
+        "summary": "Bestellung anlegen (SPEC-P1-04)",
         "tags": [
           "einkauf",
           "kpi",
@@ -211917,7 +212160,6 @@
     },
     "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben": {
       "post": {
-        "description": "Stub: Freigabe für Eingangsrechnung — requiresConfirmation, execute folgt.",
         "operationId": "action_freigeben_api_v1_finance_ap_invoices__entity_id__actions_freigeben_post",
         "parameters": [
           {
@@ -211946,6 +212188,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -211975,7 +212228,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Eingangsrechnung freigeben (UIX-047)",
+        "summary": "Eingangsrechnung freigeben (SPEC-P1-04)",
         "tags": [
           "finance",
           "ap",
@@ -223863,7 +224116,6 @@
     },
     "/api/v1/finance/open-items/{entity_id}/actions/mahnen": {
       "post": {
-        "description": "Stub: Mahnung für offenen Posten erstellen — requiresConfirmation, execute folgt.",
         "operationId": "action_mahnen_api_v1_finance_open_items__entity_id__actions_mahnen_post",
         "parameters": [
           {
@@ -223892,6 +224144,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -223921,7 +224184,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Mahnung erstellen (UIX-046)",
+        "summary": "Mahnung erstellen (SPEC-P1-04)",
         "tags": [
           "finance",
           "open-items",
@@ -224620,6 +224883,80 @@
           "finance",
           "ap",
           "sepa"
+        ]
+      }
+    },
+    "/api/v1/finance/payment-runs/{entity_id}/actions/freigeben": {
+      "post": {
+        "operationId": "action_payment_run_freigeben_api_v1_finance_payment_runs__entity_id__actions_freigeben_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zahlungslauf freigeben (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -252895,7 +253232,6 @@
     },
     "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": {
       "post": {
-        "description": "Stub: Wareneingang für Artikel buchen — requiresConfirmation.",
         "operationId": "action_lager_wareneingang_api_v1_lager_artikel__entity_id__actions_wareneingang_post",
         "parameters": [
           {
@@ -252924,6 +253260,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -252951,7 +253298,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Wareneingang buchen (UIX-053)",
+        "summary": "Wareneingang buchen (SPEC-P1-04)",
         "tags": [
           "mask-actions"
         ]
@@ -255123,7 +255470,6 @@
     },
     "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren": {
       "post": {
-        "description": "Stub: Lagerbewegung stornieren — humanApprovalRequired, dryRun-Phase.",
         "operationId": "action_lager_stornieren_api_v1_lager_stock_movements__entity_id__actions_stornieren_post",
         "parameters": [
           {
@@ -255152,6 +255498,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -255179,7 +255536,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Lagerbewegung stornieren (UIX-053)",
+        "summary": "Lagerbewegung stornieren (SPEC-P1-04)",
         "tags": [
           "mask-actions"
         ]
@@ -303562,7 +303919,6 @@
     },
     "/api/v1/reklamationen/{entity_id}/actions/abschliessen": {
       "post": {
-        "description": "Stub: Reklamation abschliessen — requiresConfirmation.",
         "operationId": "action_reklamation_abschliessen_api_v1_reklamationen__entity_id__actions_abschliessen_post",
         "parameters": [
           {
@@ -303591,6 +303947,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -303618,7 +303985,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Reklamation abschliessen (UIX-053)",
+        "summary": "Reklamation abschliessen (SPEC-P1-04)",
         "tags": [
           "mask-actions"
         ]
@@ -309852,6 +310219,80 @@
           "delivery-notes",
           "sales",
           "delivery-notes"
+        ]
+      }
+    },
+    "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken": {
+      "post": {
+        "operationId": "action_delivery_note_drucken_api_v1_sales_delivery_notes__entity_id__actions_drucken_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferschein drucken (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },

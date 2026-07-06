@@ -25,15 +25,18 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-07-05` |
+| Doku-Stand | `2026-07-06` |
 | Produktreife | **Beta** — Kernprozesse operativ, externe Go-Live-Gates offen |
-| CI (GitHub Actions, `main`) | **quality-gate, security-scan, universal-mask-ci, runtime-sweep grün** — Badges oben, Evidenz: `artifacts/ci-green-evidence.md` |
+| CI (GitHub Actions, `main`) | **quality-gate, security-scan, universal-mask-ci, runtime-sweep grün** (2026-07-05, Run 28732436888) — Evidenz: `artifacts/ci-green-evidence.md` |
+| Doku-Code-Drift | **0 Items** (`python scripts/doc_drift_report.py --fail-over 0`, 2026-07-06) |
+| Release-Evidence | **WARN** — 4 PASS / 2 WARN / 0 FAIL (`artifacts/release_evidence.json`, SHA `1772798e0`) |
+| Mask-CommandEndpoints | **26 native SDs, 0 stubReason** (SPEC-P1-04, Inventur-Skript) |
 | Frontend TypeScript | 0 Fehler (`tsc --noEmit`) |
 | Backend-Tests | **11 810 passed** im CI-Volllauf (2026-07-05), 0 Fehler |
 | Kritische Coverage-Ratchets | grün, **only-up-Politik** (`config/coverage_ratchet_baseline.json`, Absenkung = CI-Fehler) |
 | Backend-Gesamtabdeckung | 65,66 % (Ziel langfristig ≥ 80 %) |
-| OpenAPI-Routen | 2 533 Pfade / 3 274 Operationen mit `summary=` (100 %) |
-| Alembic | 1 Head (`runtime_sweep_repair_20260702`), Fresh-DB-Drift geschlossen |
+| OpenAPI-Routen | **2 537 Pfade** / 3 274 Operationen mit `summary=` (100 %) |
+| Alembic | 1 Head (`inv_lot_depth_spec_p1_08`), Fresh-DB-Drift geschlossen |
 | Runtime-API-Sweep | **Nightly-Gate 0×5xx** über alle parameterlosen GET-Routen gegen frisch migrierte DB (`scripts/api_runtime_sweep.py`) |
 | Audit-Readiness | ISO-27001 Annex A 93/93 + SOC-2-TSC-Matrix (`config/audit/`), Orchestrator `audit-simulation.yml` |
 | Domänentiefe | DOM-\*-004 abgeschlossen: Kontrakte, O2C, FIBU, P2P, Nachweisraum, Lieferkette |
@@ -234,14 +237,17 @@ VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives an
 
 | Metric | As of |
 |--------|-------|
-| Docs date | `2026-06-28` |
+| Docs date | `2026-07-06` |
 | Maturity | **Beta** — core processes operational, external go-live gates open |
+| Doc-code drift | **0 items** (`doc_drift_report.py --fail-over 0`, 2026-07-06) |
+| Release evidence | **WARN** — 4 PASS / 2 WARN / 0 FAIL (`artifacts/release_evidence.json`) |
+| Mask commandEndpoints | **26 native SDs, 0 stubReason** (SPEC-P1-04 inventory script) |
 | Frontend TypeScript | 0 errors (`tsc --noEmit`) |
-| Backend tests | > 9,500 collected; pure service-logic tests Waves 83–101 (+380) |
-| Critical coverage ratchets | 33 paths green (`scripts/check_critical_backend_coverage.py`) |
-| Backend overall coverage | 64.85 % (long-term target ≥ 80 %) |
-| OpenAPI routes | 3,041 paths with `summary=` (100 %) |
-| Alembic | 1 head (`final_single_head_merge_20260626`) — 55+ parallel branches closed |
+| Backend tests | **11,810 passed** in CI full run (2026-07-05) |
+| Critical coverage ratchets | only-up policy green in CI |
+| Backend overall coverage | 65.66 % (long-term target ≥ 80 %) |
+| OpenAPI routes | **2,537 paths** with `summary=` (100 %) |
+| Alembic | 1 head (`inv_lot_depth_spec_p1_08`) |
 | Domain depth | DOM-\*-004 completed: contracts, O2C, accounting, P2P, evidence room, supply chain |
 | Architecture docs | arc42 (12 chapters), C4 Context/Container/Components, 036 ADRs |
 | User manual | DOC-USER-MANUAL-004 Wave 17 — complete (German) |
