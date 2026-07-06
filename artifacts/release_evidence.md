@@ -11,7 +11,7 @@ version: 3.0.0
 
 # Release-Evidence-Report
 
-> Stand: 2026-07-06 07:02:02 UTC · SHA: `1772798e0eb31e1b00222a64c9f3b77a91238b93`
+> Stand: 2026-07-06 12:14:57 UTC · SHA: `c2df41595`
 > Slice: RELEASE-EVIDENCE-GATE-001
 
 ## Gesamtstatus: WARN
@@ -23,7 +23,7 @@ version: 3.0.0
 | inventories | **PASS** | 4/4 Inventar-Dateien vorhanden |
 | coverage | **WARN** | 63 Dateien unter Ratchet-Schwellwert |
 | slice_harness | **PASS** | 30 Slice-YAMLs vorhanden |
-| external | **WARN** | Kein Assessment vorhanden (artifacts/production-readiness-assessment.json fehlt — via release-gates.yml erzeugen) |
+| external | **WARN** | External assessment (2026-07-06): 6 Profile — 6x conditional |
 
 **Zusammenfassung:** 4 PASS · 2 WARN · 0 FAIL
 
@@ -37,4 +37,4 @@ WARN-Dimensionen erzeugen eine Warnung, blockieren aber nicht.
 python scripts/release_evidence_report.py --fail-on-red
 ```
 
-*Generiert via `scripts/release_evidence_report.py` · 2026-07-06 07:02:02 UTC*
+*Generiert via `scripts/release_evidence_report.py` · 2026-07-06 12:14:57 UTC*

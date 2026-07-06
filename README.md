@@ -27,12 +27,12 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 |----------|-------|
 | Doku-Stand | `2026-07-06` |
 | Produktreife | **Beta** — Kernprozesse operativ, externe Go-Live-Gates offen |
-| CI (GitHub Actions, `main`) | **quality-gate, security-scan, universal-mask-ci, runtime-sweep grün** (2026-07-05, Run 28732436888) — Evidenz: `artifacts/ci-green-evidence.md` |
+| CI (GitHub Actions, `main`) | **quality-gate, security-scan, universal-mask-ci, runtime-sweep grün** (2026-07-06, Run 28788983957 auf `c2df41595`) — Evidenz: `artifacts/ci-green-evidence.md` |
 | Doku-Code-Drift | **0 Items** (`python scripts/doc_drift_report.py --fail-over 0`, 2026-07-06) |
 | Release-Evidence | **WARN** — 4 PASS / 2 WARN / 0 FAIL (`artifacts/release_evidence.json`, SHA `1772798e0`) |
 | Mask-CommandEndpoints | **26 native SDs, 0 stubReason** (SPEC-P1-04, Inventur-Skript) |
 | Frontend TypeScript | 0 Fehler (`tsc --noEmit`) |
-| Backend-Tests | **11 810 passed** im CI-Volllauf (2026-07-05), 0 Fehler |
+| Backend-Tests | **11 943 passed** im CI-Volllauf (2026-07-06), 0 Fehler |
 | Kritische Coverage-Ratchets | grün, **only-up-Politik** (`config/coverage_ratchet_baseline.json`, Absenkung = CI-Fehler) |
 | Backend-Gesamtabdeckung | 65,66 % (Ziel langfristig ≥ 80 %) |
 | OpenAPI-Routen | **2 537 Pfade** / 3 274 Operationen mit `summary=` (100 %) |

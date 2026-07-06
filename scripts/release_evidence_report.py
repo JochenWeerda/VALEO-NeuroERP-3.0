@@ -122,7 +122,31 @@ def check_external() -> dict:
             "exit_code": 1,
         }
     try:
-        data = json.loads(assessment.read_text())
+        data = json.loads(assessment.read_text(encoding="utf-8"))
+
+        # simulate_external_assessors.py-Format: {date, profiles: [{id, status, ...}]}
+        profiles = data.get("profiles")
+        if isinstance(profiles, list) and profiles:
+            by_status: dict[str, int] = {}
+            for p in profiles:
+                s = str(p.get("status", "unknown")).lower()
+                by_status[s] = by_status.get(s, 0) + 1
+            date = data.get("date", "?")
+            summary = ", ".join(f"{n}x {s}" for s, n in sorted(by_status.items()))
+            if any(s in by_status for s in ("fail", "red", "nonconformity")):
+                status = "fail"
+            elif set(by_status) <= {"pass", "green"}:
+                status = "pass"
+            else:
+                status = "warn"  # conditional o. ae. — Auflagen offen, kein Blocker
+            return {
+                "dimension": "external",
+                "status": status,
+                "detail": f"External assessment ({date}): {len(profiles)} Profile — {summary}",
+                "exit_code": 0,
+            }
+
+        # Legacy-/Fremdformat: {passed|overall_status, score|total_score}
         passed = data.get("passed", data.get("overall_status", "unknown"))
         score = data.get("score", data.get("total_score", "?"))
         return {

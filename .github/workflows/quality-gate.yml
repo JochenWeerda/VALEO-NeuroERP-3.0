@@ -254,6 +254,13 @@ jobs:
       - name: Check critical backend coverage
         run: python scripts/check_critical_backend_coverage.py
 
+      - name: Upload full-suite coverage (release evidence)
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-xml
+          path: coverage.xml
+          retention-days: 30
+
       - name: Generate release compatibility matrix
         run: python scripts/generate_release_compatibility_matrix.py
 
