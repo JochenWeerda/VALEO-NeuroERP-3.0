@@ -11,7 +11,7 @@ version: 3.0.0
 
 # Release-Evidence-Report
 
-> Stand: 2026-07-06 12:14:57 UTC · SHA: `c2df41595`
+> Stand: 2026-07-06 12:30:48 UTC · SHA: `ab7ab82e5`
 > Slice: RELEASE-EVIDENCE-GATE-001
 
 ## Gesamtstatus: WARN
@@ -21,11 +21,11 @@ version: 3.0.0
 | drift | **PASS** | total_drift_items=0 |
 | openapi | **PASS** | openapi.json aktuell |
 | inventories | **PASS** | 4/4 Inventar-Dateien vorhanden |
-| coverage | **WARN** | 63 Dateien unter Ratchet-Schwellwert |
+| coverage | **PASS** | Alle Schwellwerte eingehalten |
 | slice_harness | **PASS** | 30 Slice-YAMLs vorhanden |
 | external | **WARN** | External assessment (2026-07-06): 6 Profile — 6x conditional |
 
-**Zusammenfassung:** 4 PASS · 2 WARN · 0 FAIL
+**Zusammenfassung:** 5 PASS · 1 WARN · 0 FAIL
 
 ## Gate-Verhalten
 
@@ -37,4 +37,4 @@ WARN-Dimensionen erzeugen eine Warnung, blockieren aber nicht.
 python scripts/release_evidence_report.py --fail-on-red
 ```
 
-*Generiert via `scripts/release_evidence_report.py` · 2026-07-06 12:14:57 UTC*
+*Generiert via `scripts/release_evidence_report.py` · 2026-07-06 12:30:48 UTC*

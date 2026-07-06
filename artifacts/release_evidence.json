@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-06T12:14:57.514524+00:00",
-  "git_sha": "c2df41595",
+  "generated_at": "2026-07-06T12:30:48.993321+00:00",
+  "git_sha": "ab7ab82e5",
   "overall_status": "warn",
   "dimensions": [
     {
@@ -23,9 +23,9 @@
     },
     {
       "dimension": "coverage",
-      "status": "warn",
-      "detail": "63 Dateien unter Ratchet-Schwellwert",
-      "exit_code": 1
+      "status": "pass",
+      "detail": "Alle Schwellwerte eingehalten",
+      "exit_code": 0
     },
     {
       "dimension": "slice_harness",
@@ -41,8 +41,8 @@
     }
   ],
   "summary": {
-    "pass": 4,
-    "warn": 2,
+    "pass": 5,
+    "warn": 1,
     "fail": 0
   }
 }
