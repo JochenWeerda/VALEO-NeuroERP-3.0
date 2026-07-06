@@ -1123,6 +1123,12 @@ def build_finance_payment_run_screen_definition() -> dict[str, Any]:
                 "Was ist der Status von Zahlungslauf {entity_id} und wie hoch ist der Gesamtbetrag?",
                 "Zeige alle Einzelzahlungen von Zahlungslauf {entity_id} mit Status 'fehler'.",
             ],
+            "dangerousActions": [
+                {
+                    "key": "freigeben",
+                    "reason": "Geldausgang: Zahlungslauf-Freigabe ist forbiddenForAgents — nur Mensch mit finance.payment_run.freigabe, Vier-Augen-Bestaetigung und Audit-Grund.",
+                },
+            ],
             "sensitiveFields": ["gesamtbetrag", "bank"],
             "testSelectors": {"screenRoot": "[data-testid='finance-payment-run']", "primaryAction": "[data-testid='action-freigeben']", "summaryArea": "[data-testid='mask-summary']"},
         },

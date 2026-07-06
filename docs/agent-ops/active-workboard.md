@@ -19,6 +19,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Ziel:** Audit Prompt A9 — Root <=20 Verzeichnisse, deterministische Code-Zuordnung, CI-Gates gruen.
 **Dateibesitz:** `docs/_internal/archive/**`, `docs/adr/adr-039-repo-layout.md`, `.github/workflows/ci.yml`, `.github/workflows/inventory-domain-ci.yml` (geloescht), `.github/workflows/finance-domain-ci.yml` (geloescht), `package.json`, `docker-compose.eventbus.yml`, `docker-compose.production.yml`, `infra/database/**`, `config/architecture-index.yaml`, `mkdocs.yml`.
 **Abnahme:** Root <=20 getrackte Verzeichnisse (erfuellt: 20); architecture-index 889/206/399; quality-gate gruen in CI.
+**Nachtrag CI-Stabilisierung:** events_raw.json-Cache-Drift (Agent-Handbuch regeneriert) + payment-run `dangerousActions`-Deklaration nachgezogen (UIX-048-Gate, latent aus 1772798e0 commandEndpoint-Aktivierung).
 
 ## A10-DOKU-EVIDENZ-001 — Doku-Drift & Evidenzkette (Prompt A10, Teilstand)
 
