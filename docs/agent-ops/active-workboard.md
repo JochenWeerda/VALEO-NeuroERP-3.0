@@ -36,8 +36,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Owner:** Claude
 **Stand:** in Arbeit 2026-07-05 — 3 vom Audit als nicht go-live-faehig markierte Finanzpfade mit Endpoint-Tests gehoben (isoliert gemessen, Vollsuite hoeher): financial_reports 25->53%, rohware_sammelabrechnung 32->61%, sales_invoice_einvoice 30->44%. Ratchets konservativ auf 50/58/42% angehoben (only-up, Baseline mitgezogen). Offen: psm_proplanta/portal_innendienst/hrm_abwesenheit/kaeufergruppe (Audit-Ziel je >=60).
 **Ziel:** SPEC-P0-05 — kritische Beleg-/Report-Pfade aus dem 25-32%-Bereich heben.
-**Dateibesitz:** `tests/test_financial_reports_endpoints.py`, `tests/test_rohware_sammelabrechnung_endpoints.py`, `tests/test_sales_invoice_einvoice_endpoints.py`, `scripts/check_critical_backend_coverage.py`, `config/coverage_ratchet_baseline.json`.
+**Dateibesitz:** `tests/test_financial_reports_endpoints.py`, `tests/test_rohware_sammelabrechnung_endpoints.py`, `tests/test_sales_invoice_einvoice_endpoints.py`, `tests/test_portal_innendienst.py`, `tests/test_hrm_abwesenheit.py`, `tests/test_kaeufergruppe.py`, `scripts/check_critical_backend_coverage.py`, `config/coverage_ratchet_baseline.json`.
 **Abnahme:** neue Tests gruen; Ratchet mit angehobenen Schwellen gruen in CI.
+**Codex-Abnahme A6-Restmodule:** lokal 2026-07-05 `tests/test_portal_innendienst.py`, `tests/test_hrm_abwesenheit.py`, `tests/test_kaeufergruppe.py` gruen (82 passed). Zielmodul-Coverage aus `coverage.xml`: portal_innendienst 100.0%, hrm_abwesenheit 97.7%, kaeufergruppe 98.8%; Ratchets fuer alle drei konservativ auf 60% angehoben. Globaler `check_critical_backend_coverage.py` benoetigt Vollsuite-XML; A6-Teillauf-XML laesst erwartbar unbeteiligte kritische Pfade unter Schwelle erscheinen.
 
 ## A7-RESPONSE-MODEL-TYPING — API-Vertragshaertung + PII-Praevention
 
@@ -47,6 +48,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Ziel:** SPEC-P1-06 (response_model-Gate absenken) + SPEC-P0-04-Praevention (kein erneuter Lead-Daten-Push).
 **Dateibesitz:** `app/api/v1/endpoints/*.py`, `.github/workflows/quality-gate.yml`, `scripts/check_no_pii_data.py`, `scripts/run-staged-checks.cjs`, `.pii-guard-allow.txt`, `docs/schnittstellen/openapi.json`.
 **Abnahme:** `check_response_models.py --threshold 20` gruen; PII-Guard blockiert Muster+Inhalt; OpenAPI-Drift 0.
+
 ## UIX-MERIDIAN-BUILDER-001 - Meridian als Single-Mask-Builder-Vertrag
 
 **Von:** Codex
@@ -64,6 +66,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Ziel:** Einen fokussierten Playwright-Visual-Audit fuer Finance, CRM 360 und Lager auf der bestehenden Single-Mask-Builder-Kette ergaenzen.
 **Dateibesitz:** `packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts`, `docs/agent-ops/slices/UIX-MERIDIAN-VISUAL-AUDIT-002.yaml`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`.
 **Abnahme:** Visual-Audit prueft 1366x768, 1440x900 und 1920x1080 auf repraesentativen nativen Masken; keine separate Referenzmasken-UI; Header, ActionBar, Tabs, Tabellenprofil, Context-Rail-Kontrakt und Basis-Overflow sind automatisiert abgesichert. Lokal gruen: `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium` (9 passed). Hinweis: Playwright globalTeardown meldet bestehende Repo-weite Visual-Tour-Console-Issues, nicht den fokussierten Meridian-Audit.
+
 ## AUDIT-1/2/5 — ISO-27001-/SOC-2-Readiness + Audit-Orchestrator
 
 **Von:** Claude

@@ -116,7 +116,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/logistik_frachtbriefe.py": 0.60,  # LOG-FRACHTBRIEF-001: GET/POST/PATCH + Enum-Check
     "api/v1/endpoints/silo_target_cell.py": 0.50,       # WM-AGRI-MAP-001: Zielzellen-Vorschlag
     "api/v1/endpoints/policies.py": 0.40,               # RUNTIME-KAT-C-002: policy/list (success-Key-Fix)
-    "api/v1/endpoints/kaeufergruppe.py": 0.41,          # 41.5% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/kaeufergruppe.py": 0.60,          # 99% measured locally 2026-07-05 (A6-Restmodule)
     "api/v1/endpoints/messages.py": 0.35,               # RUNTIME-KAT-C-002: health dict[str,str]-Fix
 
     # ── MCP-ERP-TOOLS-001 (2026-06-25) ────────────────────────────────────────
@@ -151,7 +151,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "services/agri_lot_link_booking_service.py": 0.50,     #  ~52% estimated (Regelengine-Fallback)
 
     # ── HRM-ABWESENHEIT-ANTRAG-001 (2026-06-25) ──────────────────────────────
-    "api/v1/endpoints/hrm_abwesenheit.py": 0.43,           #  43.7% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/hrm_abwesenheit.py": 0.60,           #  98% measured locally 2026-07-05 (A6-Restmodule)
 
     # ── WF-COCKPIT-PERSIST-001 (2026-06-25) ──────────────────────────────────
     "services/wf_cockpit_persist_service.py": 0.70,        #  70.9% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
@@ -175,7 +175,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/portal_interessent.py": 0.50,
 
     # ── PORTAL-INNENDIENST-001 (2026-06-25) ──────────────────────────────────
-    "api/v1/endpoints/portal_innendienst.py": 0.30,        #  30.2% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/portal_innendienst.py": 0.60,        # 100% measured locally 2026-07-05 (A6-Restmodule)
 
     # ── OPERATOR-AGENT Execute-Erweiterung + Externe Gates (2026-06-26) ───────
     "api/v1/endpoints/external_gates.py": 0.70,           # Gate-Dashboard Produktiv-API
@@ -184,7 +184,10 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
 
 def _normalise(filename: str) -> str:
-    return filename.replace("\\", "/").lstrip("./")
+    normalised = filename.replace("\\", "/").lstrip("./")
+    if normalised.startswith("app/"):
+        return normalised[len("app/"):]
+    return normalised
 
 
 def main() -> None:
