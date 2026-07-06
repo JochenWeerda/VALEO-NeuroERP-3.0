@@ -5,11 +5,12 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Agrar - PSM @smoke', () => {
   test.beforeEach(async ({ adminPage }) => {
     await adminPage.goto('/agrar/psm');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
   });
 
   test('PSM-Liste lädt ohne Fehler', async ({ adminPage }) => {
@@ -48,14 +49,14 @@ test.describe('Agrar - PSM @smoke', () => {
 
   test('Navigation zu PSM-Stamm', async ({ adminPage }) => {
     await adminPage.goto('/agrar/psm/stamm');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Sachkunde-Register erreichbar', async ({ adminPage }) => {
     await adminPage.goto('/agrar/psm/sachkunde-register');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });

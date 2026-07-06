@@ -4,25 +4,26 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Inventory - Lager @smoke', () => {
   test('Lagerbewegungen lädt', async ({ adminPage }) => {
     await adminPage.goto('/lager/bewegungen');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Lagerbestand lädt', async ({ adminPage }) => {
     await adminPage.goto('/lager/bestand');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Inventory Route lädt', async ({ adminPage }) => {
     await adminPage.goto('/inventory');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });

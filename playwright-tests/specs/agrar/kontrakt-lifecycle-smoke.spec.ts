@@ -8,23 +8,24 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Agrar - Kontrakt-Lebenszyklus @smoke', () => {
   test('Fixierungs-Arbeitsraum lädt', async ({ adminPage }) => {
     await adminPage.goto('/agrar/kontrakt-fixierung');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Kontrakt-Fixierung' })).toBeVisible({ timeout: 15000 });
   });
 
   test('Engagement-Sicht lädt', async ({ adminPage }) => {
     await adminPage.goto('/agrar/kontrakt-engagement');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Kontrakt-Engagement' })).toBeVisible({ timeout: 15000 });
   });
 
   test('Settlement-Arbeitsraum lädt', async ({ adminPage }) => {
     await adminPage.goto('/agrar/kontrakt-settlement');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Kontrakt-Settlement' })).toBeVisible({ timeout: 15000 });
   });
 });

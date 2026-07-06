@@ -17,6 +17,11 @@ jobs:
       EVENT_BUS_ENABLED: "false"
       EVENT_BUS_PROVIDER: memory
       OUTBOX_WORKER_ENABLED: "false"
+      # Einzige baseURL-Quelle fuer playwright.config.ts, global-setup UND Fixtures
+      # (E2E-SMOKE-REPAIR-001). /api-Calls bedient `vite preview` ueber den geerbten
+      # server.proxy aus vite.config.ts (Vite-Default: preview.proxy ?? server.proxy)
+      # und reicht sie an das Backend auf :8000 durch.
+      VALEO_BASE_URL: http://127.0.0.1:4173
 
     services:
       postgres:
@@ -86,8 +91,9 @@ jobs:
           else
             touch .env
           fi
-          echo "VALEO_TENANT=QA-UAT-01" >> .env
-          echo "VALEO_BASE_URL=http://localhost:3000" >> .env
+          # Kein VALEO_TENANT/VALEO_BASE_URL in .env: Playwright liest keine .env-Datei,
+          # die Werte hier waeren tote Konfiguration (baseURL kommt als Job-Env,
+          # Tenant-Default ist die UUID-Fixture in testSetup.ts).
 
       - name: Migrate Test Database
         run: python scripts/init_db.py
@@ -101,16 +107,16 @@ jobs:
           python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
           timeout 75 bash -c 'until curl -fsS http://127.0.0.1:8000/healthz; do sleep 2; done'
       
-      - name: Start Frontend (Background)
+      - name: Start Frontend Preview (Background)
+        # Ein Server auf 4173 (= VALEO_BASE_URL); das Playwright-global-setup erkennt
+        # ihn als erreichbar und verwendet ihn wieder statt einen zweiten zu starten.
         run: |
-          cd packages/frontend-web
-          pnpm preview --port 3000 &
-          sleep 5
-      
+          pnpm --filter @valero-neuroerp/frontend-web preview -- --host 127.0.0.1 --port 4173 &
+          timeout 60 bash -c 'until curl -fsS http://127.0.0.1:4173 >/dev/null; do sleep 2; done'
+
       - name: Run Smoke Tests - ${{ matrix.domain }}
         run: pnpm exec playwright test --grep "@smoke" --project=smoke specs/${{ matrix.domain }}/
         env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
           PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-${{ matrix.domain }}
           BUILD_ID: ${{ github.sha }}
       

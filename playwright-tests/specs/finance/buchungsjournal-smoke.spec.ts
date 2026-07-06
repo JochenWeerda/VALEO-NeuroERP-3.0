@@ -4,18 +4,19 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Finance - Buchungsjournal @smoke', () => {
   test('Buchungsjournal lädt', async ({ adminPage }) => {
     await adminPage.goto('/finance/bookings/new');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('DATEV-Export vorhanden (Mock)', async ({ adminPage }) => {
     await adminPage.goto('/finance/bookings/new');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     // Suche DATEV-Export-Button (kann auch in anderem Menü sein)
     const datevButton = adminPage.locator('button:has-text("DATEV"), a:has-text("DATEV")').first();

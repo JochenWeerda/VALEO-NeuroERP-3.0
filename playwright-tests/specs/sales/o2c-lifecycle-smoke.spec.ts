@@ -7,23 +7,24 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Sales - O2C-Lebenszyklus @smoke', () => {
   test('Auftrag-Lieferschein-Abgleich lädt', async ({ adminPage }) => {
     await adminPage.goto('/sales/auftrag-lieferschein-abgleich');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Auftrag-Lieferschein-Abgleich' })).toBeVisible({ timeout: 15000 });
   });
 
   test('Kreditlimit-Prüfung lädt', async ({ adminPage }) => {
     await adminPage.goto('/sales/kreditlimit-pruefung');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Kreditlimit-Prüfung' })).toBeVisible({ timeout: 15000 });
   });
 
   test('Lieferung-Storno lädt', async ({ adminPage }) => {
     await adminPage.goto('/sales/lieferung-storno');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Lieferung-Storno / Gutschrift' })).toBeVisible({ timeout: 15000 });
   });
 });

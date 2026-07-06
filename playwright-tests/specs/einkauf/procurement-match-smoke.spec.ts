@@ -7,11 +7,12 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Einkauf - Beschaffungs-Match @smoke', () => {
   test('Wareneingangs-Abgleich lädt', async ({ adminPage }) => {
     await adminPage.goto('/einkauf/wareneingangsabgleich');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Wareneingangs-Abgleich' })).toBeVisible({ timeout: 15000 });
   });
 });

@@ -11,11 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## E2E-SMOKE-REPAIR-001 — E2E-Smoke-Workflow reparieren (Claim)
+## E2E-SMOKE-REPAIR-001 — E2E-Smoke-Workflow reparieren
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** geclaimt 2026-07-06 — Triage abgeschlossen: "E2E Smoke Tests" seit UIX-Rollout-Commit 3c86a31d7 (2026-06-30) dauerhaft rot; alle 5 Matrix-Domains scheitern identisch mit waitForLoadState('networkidle')-Timeout (Universal-Mask-Seiten halten SSE/Polling offen). Dazu drei strukturelle Schwaechen: totes PLAYWRIGHT_BASE_URL (wird von nichts gelesen), VALEO_BASE_URL landet nur in nicht geladener .env, doppelter Preview-Start (Workflow Port 3000 + global-setup Port 4173), vite preview ohne /api-Proxy. Umsetzung noch offen — Details im Slice-YAML.
+**Stand:** umgesetzt 2026-07-06, CI-Verifikation ausstehend — Triage: "E2E Smoke Tests" seit UIX-Rollout-Commit 3c86a31d7 (2026-06-30) dauerhaft rot; alle 5 Matrix-Domains scheitern identisch mit waitForLoadState('networkidle')-Timeout (Universal-Mask-Seiten halten SSE/Polling offen). Fix: alle 48 networkidle-Waits in 21 Spec-Dateien + loginToPage durch deterministisches `waitForAppReady()` ersetzt (helpers/ui.ts: domcontentloaded + sichtbare App-Shell); Fixtures nutzen Playwrights eingebaute baseURL-Fixture statt eigener Env-Defaults (Drift 3000 vs. 4173 beseitigt); Workflow setzt VALEO_BASE_URL als echte Job-Env (totes PLAYWRIGHT_BASE_URL + ungenutzte .env-Eintraege entfernt), Preview-Start auf 4173 vereinheitlicht (global-setup-Reuse greift, kein Doppelstart mehr). Befund-Korrektur: vite preview ERBT server.proxy per Default — /api-Proxy war immer aktiv; gerade der durchgeproxte offene SSE-Stream verhindert networkidle.
 **Ziel:** Smoke-Suite wieder gruen und deterministisch (networkidle-Abloesung + Env-Verdrahtung vereinheitlichen), ohne Testaussage zu verwaessern.
 **Dateibesitz:** `.github/workflows/e2e-smoke.yml`, `playwright.config.ts`, `playwright.global-setup.mjs`, `playwright-tests/**`, `docs/agent-ops/slices/E2E-SMOKE-REPAIR-001.yaml`.
 **Abnahme:** Workflow "E2E Smoke Tests" auf main gruen (alle 5 Matrix-Domains); e2e-critical bleibt gruen.

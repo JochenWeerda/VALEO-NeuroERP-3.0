@@ -29,25 +29,26 @@ export const test = base.extend<UATFixtures>({
   },
 
   // API-Helper
-  apiHelper: async ({ request }, use) => {
-    const baseURL = process.env.VALEO_BASE_URL || 'http://localhost:3000';
-    const helper = new ApiHelper(request, baseURL);
+  // baseURL kommt aus der eingebauten Playwright-Fixture und damit aus einer einzigen
+  // Quelle (playwright.config.ts: VALEO_BASE_URL ?? FRONTEND_URL ?? 127.0.0.1:4173) —
+  // vorher drifteten Fixture-Default (localhost:3000) und Config-Default (4173) auseinander
+  // (E2E-SMOKE-REPAIR-001).
+  apiHelper: async ({ request, baseURL }, use) => {
+    const helper = new ApiHelper(request, baseURL ?? 'http://127.0.0.1:4173');
     await use(helper);
   },
 
   // Admin Page (automatisch eingeloggt)
-  adminPage: async ({ browser, tenant }, use) => {
+  adminPage: async ({ browser, tenant, baseURL }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: {
         'X-Tenant-ID': tenant,
       },
     });
     const page = await context.newPage();
-    
-    const baseURL = process.env.VALEO_BASE_URL || 'http://localhost:3000';
-    
+
     try {
-      await loginToPage(page, TEST_USERS.admin, baseURL);
+      await loginToPage(page, TEST_USERS.admin, baseURL ?? 'http://127.0.0.1:4173');
     } catch (error) {
       console.warn('Admin login failed, continuing without auth:', error);
     }
@@ -57,18 +58,16 @@ export const test = base.extend<UATFixtures>({
   },
 
   // Power-User Page (automatisch eingeloggt)
-  powerUserPage: async ({ browser, tenant }, use) => {
+  powerUserPage: async ({ browser, tenant, baseURL }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: {
         'X-Tenant-ID': tenant,
       },
     });
     const page = await context.newPage();
-    
-    const baseURL = process.env.VALEO_BASE_URL || 'http://localhost:3000';
-    
+
     try {
-      await loginToPage(page, TEST_USERS.powerUser, baseURL);
+      await loginToPage(page, TEST_USERS.powerUser, baseURL ?? 'http://127.0.0.1:4173');
     } catch (error) {
       console.warn('Power-User login failed, continuing without auth:', error);
     }
@@ -78,18 +77,16 @@ export const test = base.extend<UATFixtures>({
   },
 
   // Readonly Page (automatisch eingeloggt)
-  readonlyPage: async ({ browser, tenant }, use) => {
+  readonlyPage: async ({ browser, tenant, baseURL }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: {
         'X-Tenant-ID': tenant,
       },
     });
     const page = await context.newPage();
-    
-    const baseURL = process.env.VALEO_BASE_URL || 'http://localhost:3000';
-    
+
     try {
-      await loginToPage(page, TEST_USERS.readonly, baseURL);
+      await loginToPage(page, TEST_USERS.readonly, baseURL ?? 'http://127.0.0.1:4173');
     } catch (error) {
       console.warn('Readonly login failed, continuing without auth:', error);
     }

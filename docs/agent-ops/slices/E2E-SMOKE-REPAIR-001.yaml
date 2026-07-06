@@ -1,7 +1,7 @@
 slice_id: E2E-SMOKE-REPAIR-001
 title: E2E-Smoke-Workflow reparieren (networkidle-Abloesung + Env-Verdrahtung)
 owner: Claude
-status: geplant
+status: in_arbeit
 created_at: 2026-07-06
 goal: >-
   Der Workflow "E2E Smoke Tests" ist seit dem UIX-Rollout-Commit 3c86a31d7 (2026-06-30)
@@ -26,8 +26,12 @@ acceptance:
     zur playwright.config.ts
   - Doppelter Preview-Start beseitigt (Workflow-Step Port 3000 vs. global-setup Port
     4173 — nur noch ein Server, global-setup-Reuse greift)
-  - Entscheidung dokumentiert, wie /api/v1-Calls in CI bedient werden (vite preview hat
-    keinen Proxy) — Proxy nachruesten, Backend als Static-Host oder bewusstes 404-Design
+  - Entscheidung dokumentiert, wie /api/v1-Calls in CI bedient werden — Befund bei der
+    Umsetzung: vite preview ERBT server.proxy per Default (Vite-Quelle
+    resolvePreviewOptions, "preview?.proxy ?? server.proxy"); der /api-Proxy war also
+    immer aktiv, der Triage-Verdacht "kein Proxy im Preview" war falsch. Gerade der
+    durchgeproxte, dauerhaft offene SSE-Stream (/api/events) ist der Grund, warum
+    networkidle nie eintritt. Kein Code-Change noetig, Kommentar im Workflow.
   - Workflow "E2E Smoke Tests" auf main gruen (alle 5 Matrix-Domains)
 tests:
   - pnpm exec playwright test --grep "@smoke" --project=smoke (lokal gegen Dev-Stack)
