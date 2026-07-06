@@ -17,12 +17,82 @@ from ....core.mask_classification import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.mask_registry_schemas import MaskRegistryOut
+from app.api.v1.schemas.mask_registry_schemas import (
+    MaskRegistryOut,
+    OmniboxCatalogEntryOut,
+)
 
 
 router = APIRouter(prefix="/ui/mask-registry", tags=["ui", "masks"])
 
 _REGISTRY: MaskRegistry = build_mask_registry()
+
+
+# ── Omnibox-Katalog (UIX-060) ────────────────────────────────────────────────
+
+_FILTER_TYPE_BY_RENDER_KIND = {
+    "status": "enum",
+    "date": "date",
+    "datetime": "date",
+    "currency": "number",
+    "number": "number",
+    "percentage": "number",
+}
+
+
+def _collect_filterable_fields(sd: dict) -> list[dict]:
+    """Sammelt filterbare Tabellenspalten (top-level und je Tab) einer SD."""
+    fields: dict[str, dict] = {}
+    tables = list(sd.get("tables") or [])
+    for tab in sd.get("tabs") or []:
+        tables.extend(tab.get("tables") or [])
+    for table in tables:
+        for col in table.get("columns") or []:
+            if not col.get("filterable"):
+                continue
+            key = col.get("key", "")
+            if not key or key in fields:
+                continue
+            render_kind = col.get("renderKind", "")
+            col_type = _FILTER_TYPE_BY_RENDER_KIND.get(render_kind)
+            if col_type is None:
+                col_type = "number" if col.get("numeric") else "text"
+            fields[key] = {"key": key, "label": col.get("label", key), "type": col_type}
+    return list(fields.values())
+
+
+def _build_omnibox_catalog() -> list[dict]:
+    from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
+
+    entries: list[dict] = []
+    for screen_id in sorted(_SCREEN_DEFINITIONS.keys()):
+        sd = get_screen_definition(screen_id)
+        if not sd:
+            continue
+        contract = sd.get("agentContract") or {}
+        layout = sd.get("layout") or {}
+        entries.append({
+            "screen_id": screen_id,
+            "title": sd.get("title", screen_id),
+            "domain": sd.get("domain", ""),
+            "floorplan": layout.get("floorplan", ""),
+            "synonyms": list(contract.get("synonyms") or []),
+            "example_prompts": list(contract.get("examplePrompts") or []),
+            "filterable_fields": _collect_filterable_fields(sd),
+        })
+    return entries
+
+
+@router.get(
+    "/omnibox-catalog",
+    response_model=list[OmniboxCatalogEntryOut],
+    summary="Omnibox catalog abrufen",
+)
+async def get_omnibox_catalog(tenant_id: str = Depends(get_tenant_id)):
+    """Kompakter Masken-Katalog fuer den Omnibox-Intent-Compiler (UIX-060):
+    Titel, Synonyme, Beispiel-Prompts und filterbare Felder je ScreenDefinition."""
+    _ = tenant_id
+    return _build_omnibox_catalog()
 
 
 @router.get("", response_model=MaskRegistryOut, summary="Mask registry abrufen")

@@ -37,7 +37,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Ziel:** 10-Jahres-faehiges UIX-Zielbild, das heute realisierbar bleibt — ausschliesslich als Builder-Evolution (ScreenDefinition/RenderPlan/Renderer/Gates), kein Parallelsystem.
 **Dateibesitz:** `docs/design/uix-zukunft-masterplan.md`, `docs/design/uix-zukunft-roadmap.md`, `docs/agent-ops/active-workboard.md`.
 **Abnahme:** Masterplan + Roadmap committet; Wireframes fuer alle 5 Floorplans + Conversational-Shell; jede Roadmap-Aufgabe mit agent-faehigem Prompt; Meridian-Regeln (kein Bypass, Referenzmasken = Abnahme) durchgaengig eingehalten.
-**Umsetzungsstart 2026-07-07:** UIX-060 geclaimt (Owner Claude) — Omnibox als Evolution der bestehenden CommandPalette (Intent-Compiler mit Mehrwort-Matching, Filter-Extraktion, Verstanden-als-Vorschau); Backend-Katalog-Endpoint folgt im selben Slice.
+**Umsetzungsstart 2026-07-07:** UIX-060 in Arbeit — Kern (Intent-Compiler + Verstanden-als-Vorschau, 42 Tests, CI gruen b8885951b) und Backend (omnibox-catalog-Endpoint + _AGENT_SYNONYMS fuer alle 26 SDs, 5 Tests) geliefert — Omnibox als Evolution der bestehenden CommandPalette (Intent-Compiler mit Mehrwort-Matching, Filter-Extraktion, Verstanden-als-Vorschau); Backend-Katalog-Endpoint folgt im selben Slice.
 **Spec-Nachtrag 2026-07-07:** 4 Milestone-Spezifikationen (docs/design/specs/uix-m1..m4-spec.md — Datenmodelle, API-Vertraege, Schema-Diffs, Gates, Testplaene) + 14 claimbare Slice-YAMLs (UIX-060..092, status geplant, ai_harness-Vertraege). Umsetzung startet mit UIX-060.
 
 ## A9-STRUKTUR-KONSOLIDIERUNG — Repo-Layout (ARCH-F1, SPEC-P1-07)

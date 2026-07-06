@@ -73573,6 +73573,83 @@
         "title": "ObligationUpdate",
         "type": "object"
       },
+      "OmniboxCatalogEntryOut": {
+        "description": "Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition.",
+        "properties": {
+          "domain": {
+            "title": "Domain",
+            "type": "string"
+          },
+          "example_prompts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Example Prompts",
+            "type": "array"
+          },
+          "filterable_fields": {
+            "items": {
+              "$ref": "#/components/schemas/OmniboxFilterFieldOut"
+            },
+            "title": "Filterable Fields",
+            "type": "array"
+          },
+          "floorplan": {
+            "title": "Floorplan",
+            "type": "string"
+          },
+          "screen_id": {
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "synonyms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Synonyms",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen_id",
+          "title",
+          "domain",
+          "floorplan",
+          "synonyms",
+          "example_prompts",
+          "filterable_fields"
+        ],
+        "title": "OmniboxCatalogEntryOut",
+        "type": "object"
+      },
+      "OmniboxFilterFieldOut": {
+        "description": "Filterbares Feld einer Maske fuer den Omnibox-Intent-Compiler (UIX-060).",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type"
+        ],
+        "title": "OmniboxFilterFieldOut",
+        "type": "object"
+      },
       "OnboardingWorkspaceRequest": {
         "properties": {
           "capability_key": {
@@ -325291,6 +325368,66 @@
           }
         ],
         "summary": "Class a gap report abrufen",
+        "tags": [
+          "ui",
+          "masks"
+        ]
+      }
+    },
+    "/api/v1/ui/mask-registry/omnibox-catalog": {
+      "get": {
+        "description": "Kompakter Masken-Katalog fuer den Omnibox-Intent-Compiler (UIX-060):\nTitel, Synonyme, Beispiel-Prompts und filterbare Felder je ScreenDefinition.",
+        "operationId": "get_omnibox_catalog_api_v1_ui_mask_registry_omnibox_catalog_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OmniboxCatalogEntryOut"
+                  },
+                  "title": "Response Get Omnibox Catalog Api V1 Ui Mask Registry Omnibox Catalog Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Omnibox catalog abrufen",
         "tags": [
           "ui",
           "masks"

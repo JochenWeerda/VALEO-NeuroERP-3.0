@@ -13,3 +13,21 @@ from pydantic import ConfigDict
 class MaskRegistryOut(BaseSchema):
     """Response schema for mask registry endpoints."""
     model_config = ConfigDict(extra="allow")
+
+
+class OmniboxFilterFieldOut(BaseSchema):
+    """Filterbares Feld einer Maske fuer den Omnibox-Intent-Compiler (UIX-060)."""
+    key: str
+    label: str
+    type: str  # 'enum' | 'date' | 'number' | 'text'
+
+
+class OmniboxCatalogEntryOut(BaseSchema):
+    """Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition."""
+    screen_id: str
+    title: str
+    domain: str
+    floorplan: str
+    synonyms: list[str]
+    example_prompts: list[str]
+    filterable_fields: list[OmniboxFilterFieldOut]

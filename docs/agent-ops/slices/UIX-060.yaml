@@ -33,6 +33,12 @@ progress: >-
   Vorschau-Komponententest), tsc gruen. Offen: Backend omnibox-catalog +
   agentContract.synonyms-Backfill, Telemetrie-Endpoint, Playwright-Smoke,
   axe-a11y-Check.
+  2026-07-07 Backend geliefert: GET /ui/mask-registry/omnibox-catalog
+  (typisiert, 26 Eintraege) + zentrales _AGENT_SYNONYMS-Mapping in
+  screen_definitions (alle 26 SDs kuratiert, Test erzwingt Vollstaendigkeit)
+  + filterable_fields aus Tabellen-Spalten. 5 neue Endpoint-Tests;
+  Safety-Suite 246 gruen; OpenAPI 2538 Pfade. Offen: Frontend-Konsum des
+  Katalogs (braucht screenId->Route-Mapping), Telemetrie, Playwright, axe.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

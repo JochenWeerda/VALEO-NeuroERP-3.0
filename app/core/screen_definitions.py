@@ -2267,11 +2267,48 @@ for _spec in ROLLOUT_WAVES_42_51:
     _SCREEN_DEFINITIONS[_spec.screen_id] = _make_builder()
 
 
+# ── Omnibox-Synonyme (UIX-060) ───────────────────────────────────────────────
+# Kuratierte deutsche Suchbegriffe je Maske — Matching-Basis fuer den
+# Intent-Compiler. Zentral gepflegt statt je SD, damit der Katalog
+# (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
+_AGENT_SYNONYMS: dict[str, list[str]] = {
+    "agrar/duenger": ["duenger", "duengemittel", "kas", "npk"],
+    "agrar/harvest-settlement": ["ernteabrechnung", "sammelabrechnung", "gutschrift ernte"],
+    "agrar/kontrakte": ["kontrakt", "vorkontrakt", "liefervertrag", "andienung"],
+    "agrar/saatgut": ["saatgut", "sorte", "z-saatgut"],
+    "crm/customer-360": ["kunde", "kundenakte", "kunden-360", "kundenstamm"],
+    "crm/lead": ["lead", "interessent", "verkaufschance"],
+    "crm/opportunity": ["opportunity", "chance", "verkaufschance"],
+    "einkauf/anfrage": ["anfrage", "rfq", "preisanfrage"],
+    "einkauf/angebot": ["lieferantenangebot", "einkaufsangebot"],
+    "einkauf/anlieferavis": ["avis", "anlieferavis", "anlieferung"],
+    "einkauf/auftragsbestaetigung": ["auftragsbestaetigung", "ab", "bestellbestaetigung"],
+    "einkauf/purchase-order": ["bestellung", "einkaufsauftrag", "po"],
+    "einkauf/supplier": ["lieferant", "kreditor-stamm", "lieferantenstamm"],
+    "finance/ap-invoice": ["eingangsrechnung", "kreditorenrechnung", "rechnungseingang"],
+    "finance/ar-open-item": ["offene posten", "op", "debitoren-op", "forderungen"],
+    "finance/bankkonto": ["bankkonto", "bank", "kontoauszug"],
+    "finance/debitor": ["debitor", "debitorenstamm", "kundenkonto"],
+    "finance/kreditor": ["kreditor", "kreditorenstamm", "lieferantenkonto"],
+    "finance/payment-run": ["zahlungslauf", "zahllauf", "sepa-lauf", "zahlungsvorschlag"],
+    "futtermittel/einzelfuttermittel": ["einzelfuttermittel", "futtermittel", "efm"],
+    "futtermittel/mischfuttermittel": ["mischfutter", "mischfuttermittel", "mfm"],
+    "lager/article-stock": ["artikelbestand", "lagerbestand", "bestand"],
+    "lager/stock-movement": ["lagerbewegung", "warenbewegung", "umbuchung"],
+    "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
+    "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
+    "sales/sales-order": ["verkaufsauftrag", "auftrag", "kundenauftrag"],
+}
+
+
 def get_screen_definition(mask_id: str) -> dict[str, Any] | None:
     builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is None:
         return None
-    return _with_meridian_layout(builder())
+    definition = _with_meridian_layout(builder())
+    contract = definition.setdefault("agentContract", {})
+    contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
+    return definition
 
 
 # Public alias for inventory / governance scripts (SPEC-P1-04)
