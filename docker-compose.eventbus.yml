@@ -78,7 +78,7 @@ services:
       - "5433:5432"  # Different port to avoid conflicts
     volumes:
       - postgres_events_data:/var/lib/postgresql/data
-      - ./database/init-eventbus.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./infra/database/init-eventbus.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - eventbus
     restart: unless-stopped

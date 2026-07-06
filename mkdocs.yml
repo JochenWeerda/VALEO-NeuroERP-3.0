@@ -406,6 +406,7 @@ nav:
           - ADR-036 — Architektur-Dokumentations-Stack: adr/adr-036-architecture-documentation-stack.md
           - ADR-037 — Structurizr DSL als primäre C4-Quelle: adr/adr-037-structurizr-c4-source-of-truth.md
           - ADR-038 — Kanonisches Adress-Value-Object: adr/adr-038-address-value-object.md
+          - ADR-039 — Repo-Layout und Root-Konsolidierung: adr/adr-039-repo-layout.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

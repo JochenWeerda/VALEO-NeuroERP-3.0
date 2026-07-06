@@ -1,0 +1,3 @@
+Method,Name,Error,Occurrences
+GET,[Finance] /finance/open-items?typ=debitor,CatchResponseError('HTTP 500'),2
+GET,[Finance] /finance/open-items?typ=kreditor,CatchResponseError('HTTP 500'),3

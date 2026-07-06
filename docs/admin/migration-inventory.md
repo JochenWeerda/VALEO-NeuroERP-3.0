@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-07-06
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -210,6 +210,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `hr_training_onboarding_module_20260215` | hr training/qualification/onboarding module |
 | `hrm_operations_gates_20260513` | HRM operations gates persistence and evidence workflow. |
 | `hrm_zeiterfassung_abwesenheit_20260623` | DOM-HRM-004 — HRM Zeiterfassung, Abwesenheit, Arbeitszeitkonto |
+| `inv_lot_depth_spec_p1_08` | SPEC-P1-08: Chargen-Tiefenmodell — Herkunft, Sperrgrund, QS-Status, received_at. |
 | `inv_lot_trace_20260623` | DOM-INV-004.2/.4: inventory_lots + inventory_lot_movements + storno_ref column |
 | `inventory_charge_lineage_20260215` | inventory charge lineage links |
 | `inventory_operations_20260409` | Add source_document fields to stock_movements |

@@ -104,7 +104,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./infra/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - valeo-network
     restart: unless-stopped

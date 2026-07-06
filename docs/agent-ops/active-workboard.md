@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## A9-STRUKTUR-KONSOLIDIERUNG — Repo-Layout (ARCH-F1, SPEC-P1-07)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** umgesetzt 2026-07-06 — Root 39 -> 20 getrackte Verzeichnisse. `domains/` (paralleles TS-Backend, nie produktiv verdrahtet) nach `docs/_internal/archive/domains-ts-backend/` archiviert; Workflows `inventory-domain-ci.yml`/`finance-domain-ci.yml` geloescht, `audit-e2e`-Job aus `ci.yml` entfernt. 17 weitere Verzeichnisse archiviert (ols, gap, swarm+compose, memory, mains, l3-migration-toolkit, guacamole-l3-migration, knowledge-base, observability, contract-tests, qa, specs, planning, reports, extensions, load-tests, src->root-src-mcp-policy-server; `mcp:dev`-Script aus package.json entfernt). `database/` -> `infra/database/` konsolidiert (Compose-Pfade eventbus/production angepasst). Aktiv belassen: deploy (Dockerfile.frontend), ops (Superglue), monitoring, rationsoptimierung, services (je referenziert). ADR-039 + architecture-index regeneriert.
+**Ziel:** Audit Prompt A9 — Root <=20 Verzeichnisse, deterministische Code-Zuordnung, CI-Gates gruen.
+**Dateibesitz:** `docs/_internal/archive/**`, `docs/adr/adr-039-repo-layout.md`, `.github/workflows/ci.yml`, `.github/workflows/inventory-domain-ci.yml` (geloescht), `.github/workflows/finance-domain-ci.yml` (geloescht), `package.json`, `docker-compose.eventbus.yml`, `docker-compose.production.yml`, `infra/database/**`, `config/architecture-index.yaml`, `mkdocs.yml`.
+**Abnahme:** Root <=20 getrackte Verzeichnisse (erfuellt: 20); architecture-index 889/206/399; quality-gate gruen in CI.
+
 ## A10-DOKU-EVIDENZ-001 — Doku-Drift & Evidenzkette (Prompt A10, Teilstand)
 
 **Von:** Cursor Agent

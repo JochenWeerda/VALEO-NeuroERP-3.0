@@ -433,19 +433,6 @@ jobs:
         run: |
           pytest services/inventory/tests/test_nats_integration.py -q || true
 
-  audit-e2e:
-    name: Audit-Domain E2E
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install ts-node
-        run: npm i -g ts-node typescript
-      - name: Run Audit E2E smoke
-        run: ts-node domains/finance/tests/e2e/audit-e2e.ts
   staging-dry-run:
     name: Staging Dry-Run (Helm Lint & Template)
     runs-on: ubuntu-latest

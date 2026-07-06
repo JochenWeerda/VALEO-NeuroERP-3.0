@@ -89,7 +89,6 @@
     "guard:paths:range": "node scripts/guard-forbidden-paths.cjs --range",
     "ts:check": "tsc -b tsconfig.build.json",
     "dev": "pnpm -r run dev",
-    "mcp:dev": "ts-node src/mcp-server.ts",
     "policy:seed": "ts-node scripts/seed-policies.ts",
     "policy:init": "pnpm run policy:seed && echo Policy-Datenbank bereit!",
     "migrate:erp-finanz": "npx ts-node tools/migration/run_sql_migration.ts --file migrations/sql/erp/001_finance_core.sql --file migrations/sql/erp/003_finanz_tenant_id.sql",

@@ -466,6 +466,7 @@ domains:
       - compensation_engine
       - article_image_enrichment
       - mask_rollout_
+      - mask_action_
     endpoint_prefixes:
       - admin_
       - agents

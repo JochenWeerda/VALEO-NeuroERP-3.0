@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-07-06
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -240,7 +240,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `logistik_frachttabellen` | Frachttabellen — Frachtkosten-Stammdaten und Zuordnungen. |
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `marketing` | Marketing API - DB-backed endpoints. |
-| `mask_actions` | UIX-053: Mask Action Stubs — CommandEndpoints für alle verbliebenen native ScreenDefinitions. |
+| `mask_actions` | SPEC-P1-04 / UIX-053+: Mask Action CommandEndpoints mit ActionRuntime. |
 | `mask_registry` | Mask Registry API — Wave 3 AP1 |
 | `mask_rollout_summaries` | Central screen-summary routes for batch mask rollouts (Waves 42–51). |
 | `mask_screen_definition` | Mask ScreenDefinition API — native generator payloads. |
