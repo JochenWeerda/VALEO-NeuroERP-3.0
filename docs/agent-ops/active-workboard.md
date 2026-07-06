@@ -33,7 +33,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** in Arbeit 2026-07-06 — Design-/Planungs-Slice (docs-only): Zukunfts-UIX auf der Meridian-Kette (Conversational/Voice/Agentic/Twin/ESG/No-Code) als Masterplan mit Wireframes, Pattern-Bibliothek, Prozessketten-Designs und Roadmap mit Slice-Prompts.
+**Stand:** abgeschlossen 2026-07-06 — Masterplan (13 Kapitel: 3-Ebenen-Modell, 10 Prinzipien, Trend-Mapping, AppShell/Omnibox, 15 Patterns, 6 Wireframes, 4 Prozessketten, Voice-Stufenmodell V1-V4, Overlay-Schichtenmodell, Contract-Evolution, Figma-Frame-Struktur) + Roadmap (M0-M5, 12 Slices UIX-060..092 mit Akzeptanz + agent-faehigen Prompts, Metriken, Risiken). Visuelle Wireframe-Galerie als Claude-Artifact publiziert.
 **Ziel:** 10-Jahres-faehiges UIX-Zielbild, das heute realisierbar bleibt — ausschliesslich als Builder-Evolution (ScreenDefinition/RenderPlan/Renderer/Gates), kein Parallelsystem.
 **Dateibesitz:** `docs/design/uix-zukunft-masterplan.md`, `docs/design/uix-zukunft-roadmap.md`, `docs/agent-ops/active-workboard.md`.
 **Abnahme:** Masterplan + Roadmap committet; Wireframes fuer alle 5 Floorplans + Conversational-Shell; jede Roadmap-Aufgabe mit agent-faehigem Prompt; Meridian-Regeln (kein Bypass, Referenzmasken = Abnahme) durchgaengig eingehalten.
