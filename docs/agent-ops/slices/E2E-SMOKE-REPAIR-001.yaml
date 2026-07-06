@@ -1,7 +1,7 @@
 slice_id: E2E-SMOKE-REPAIR-001
 title: E2E-Smoke-Workflow reparieren (networkidle-Abloesung + Env-Verdrahtung)
 owner: Claude
-status: in_arbeit
+status: completed
 created_at: 2026-07-06
 goal: >-
   Der Workflow "E2E Smoke Tests" ist seit dem UIX-Rollout-Commit 3c86a31d7 (2026-06-30)
