@@ -1,7 +1,7 @@
 slice_id: UIX-072
 title: Diktat & Sprach-Eingabe V1/V2 (VoiceBar)
-owner: unclaimed
-status: geplant
+owner: Claude
+status: in_arbeit
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m2-spec.md
 coordination: >-
