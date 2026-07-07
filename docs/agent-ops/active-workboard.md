@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-071 Codex-Fortsetzung 2026-07-07
+
+Backend + Runtime/UX im geteilten Tree ergaenzt: Alembic `user_screen_overlays_uix071`, tenant-/user-isolierte `/api/v1/ux/overlays/{screen_id}` GET/PUT/DELETE mit serverseitiger Allowlist/400, Runtime-Cache-Key `schemaVersion+hashOverlay`, shared FastTableRenderer-Spaltenpicker + Reset, Playwright Spalten->Reload->Reset. Gates lokal: Vitest Overlay/Renderer 14 passed, tsc 0, ESLint Source sauber, Playwright uix-071 1 passed; Backend py_compile + collect-only + direkte Testfunktionen ok, normaler pytest runner haengt lokal (siehe UIX-071.yaml). Offen: Commit/Push nach Tree-Koordination; VoiceBar/Voice-Playwright bleibt UIX-072.
+
 ## E2E-SMOKE-REPAIR-001 — E2E-Smoke-Workflow reparieren
 
 **Von:** Claude

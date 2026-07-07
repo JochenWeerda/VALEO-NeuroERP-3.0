@@ -61,6 +61,7 @@ describe('applyOverlay — Tabellen-Merge', () => {
   it('reihenfolge + sichtbarkeit ueber visibleColumns', () => {
     const result = applyOverlay(plan(), { tables: { op: { visibleColumns: ['kunde', 'nr'] } } })
     expect(result.plan.tablesByKey.op.columns.map((c) => c.key)).toEqual(['kunde', 'nr'])
+    expect(result.plan.tablesByKey.op.availableColumns?.map((c) => c.key)).toEqual(['nr', 'kunde', 'betrag', 'faellig'])
     expect(result.violations).toEqual([])
   })
 

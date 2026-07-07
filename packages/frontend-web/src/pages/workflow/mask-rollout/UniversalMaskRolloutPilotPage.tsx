@@ -41,6 +41,9 @@ export default function UniversalMaskRolloutPilotPage({ screenId, entityId }: Pr
     tableTotals,
     tableQueryStates,
     setTableQuery,
+    userOverlay,
+    updateUserOverlay,
+    resetUserOverlay,
     lookupBindings,
     isEntityLoading,
     entityError,
@@ -91,6 +94,9 @@ export default function UniversalMaskRolloutPilotPage({ screenId, entityId }: Pr
           tableTotals={tableTotals}
           tableQueryStates={tableQueryStates}
           onTableQueryChange={setTableQuery}
+          overlay={userOverlay}
+          onOverlayChange={updateUserOverlay}
+          onOverlayReset={resetUserOverlay}
           lookupBindings={lookupBindings}
           onAction={() => undefined}
         />

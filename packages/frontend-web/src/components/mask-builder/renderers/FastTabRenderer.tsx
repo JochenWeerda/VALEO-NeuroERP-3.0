@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { RenderPlan } from '../render-plan/types'
+import type { ScreenOverlay } from '../render-plan/overlay'
 import type { TableQueryState } from '../runtime/types'
 import { FastFormRenderer } from './FastFormRenderer'
 import { FastTableRenderer } from './FastTableRenderer'
@@ -13,6 +14,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   tableQueryStates,
   tableTotals,
   onQueryChange,
+  onVisibleColumnsChange,
+  onResetOverlay,
 }: {
   plan: RenderPlan
   tabKey: string
@@ -21,6 +24,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   tableQueryStates?: Record<string, TableQueryState>
   tableTotals?: Record<string, number>
   onQueryChange?: (tableKey: string, patch: Partial<TableQueryState>) => void
+  onVisibleColumnsChange?: (patch: ScreenOverlay) => void | Promise<void>
+  onResetOverlay?: () => void | Promise<void>
 }): JSX.Element {
   const content = plan.tabContent[tabKey]
   const classes = layoutClasses(plan.shell.layoutMode)
@@ -49,6 +54,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
             filterPlan={tableQueryStates?.[tableKey]?.filterPlan}
             total={tableTotals?.[tableKey]}
             onQueryChange={onQueryChange ? (patch) => onQueryChange(tableKey, patch) : undefined}
+            onVisibleColumnsChange={onVisibleColumnsChange ? (visibleColumns) => onVisibleColumnsChange({ tables: { [tableKey]: { visibleColumns } } }) : undefined}
+            onResetOverlay={onResetOverlay}
           />
         )
       })}

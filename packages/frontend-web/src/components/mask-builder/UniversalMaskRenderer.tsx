@@ -1,6 +1,7 @@
 import { LazyTabs } from '@/components/ui/LazyTabs'
 import { resolveContextRailSections, type ScreenDefinition, type ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
+import type { ScreenOverlay } from './render-plan/overlay'
 import type { LookupBinding, TableQueryState } from './runtime/types'
 import type { UniversalFormState } from './runtime/FormState'
 import type { WorkflowState } from './runtime/WorkflowRuntime'
@@ -34,6 +35,9 @@ interface UniversalMaskRendererProps {
   tableQueryStates?: Record<string, TableQueryState>
   tableTotals?: Record<string, number>
   onTableQueryChange?: (_tableKey: string, _patch: Partial<TableQueryState>) => void
+  overlay?: ScreenOverlay
+  onOverlayChange?: (_patch: ScreenOverlay) => void | Promise<void>
+  onOverlayReset?: () => void | Promise<void>
   lookupBindings?: Record<string, LookupBinding>
   /** Optional edit-mode form state (from useUniversalFormState) */
   formState?: UniversalFormState
@@ -84,6 +88,8 @@ function RenderFromPlan({
   tableQueryStates,
   tableTotals,
   onTableQueryChange,
+  onOverlayChange,
+  onOverlayReset,
   onTabChange,
   onAction,
   formState,
@@ -97,6 +103,8 @@ function RenderFromPlan({
   tableQueryStates?: Record<string, TableQueryState>
   tableTotals?: Record<string, number>
   onTableQueryChange?: (_tableKey: string, _patch: Partial<TableQueryState>) => void
+  onOverlayChange?: (_patch: ScreenOverlay) => void | Promise<void>
+  onOverlayReset?: () => void | Promise<void>
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
   formState?: UniversalFormState
@@ -170,6 +178,8 @@ function RenderFromPlan({
             filterPlan={tableQueryStates?.[tableKey]?.filterPlan}
             total={tableTotals?.[tableKey]}
             onQueryChange={onTableQueryChange ? (patch) => onTableQueryChange(tableKey, patch) : undefined}
+            onVisibleColumnsChange={onOverlayChange ? (visibleColumns) => onOverlayChange({ tables: { [tableKey]: { visibleColumns } } }) : undefined}
+            onResetOverlay={onOverlayReset}
           />
         )
       })}
@@ -191,6 +201,8 @@ function RenderFromPlan({
                 tableQueryStates={tableQueryStates}
                 tableTotals={tableTotals}
                 onQueryChange={onTableQueryChange}
+                onVisibleColumnsChange={onOverlayChange}
+                onResetOverlay={onOverlayReset}
               />
             ),
           }))}
@@ -359,6 +371,8 @@ export function UniversalMaskRenderer({
   tableQueryStates,
   tableTotals,
   onTableQueryChange,
+  onOverlayChange,
+  onOverlayReset,
   lookupBindings,
   formState,
   workflowState,
@@ -376,6 +390,8 @@ export function UniversalMaskRenderer({
           tableQueryStates={tableQueryStates}
           tableTotals={tableTotals}
           onTableQueryChange={onTableQueryChange}
+          onOverlayChange={onOverlayChange}
+          onOverlayReset={onOverlayReset}
           onTabChange={onTabChange}
           onAction={onAction}
           formState={formState}

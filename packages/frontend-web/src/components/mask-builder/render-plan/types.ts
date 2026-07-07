@@ -137,6 +137,8 @@ export interface RenderTablePlan {
   label: string
   tabKey?: string
   columns: RenderTableColumnPlan[]
+  /** Vollstaendige Spaltenbasis fuer Nutzer-Overlays; `columns` kann gefiltert sein. */
+  availableColumns?: RenderTableColumnPlan[]
   dataSourceKey?: string
   pageSize: number
   virtualized: boolean

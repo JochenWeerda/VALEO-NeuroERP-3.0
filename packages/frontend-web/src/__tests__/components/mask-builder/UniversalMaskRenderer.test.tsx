@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { UniversalMaskRenderer, adaptMaskConfigToScreenDefinition, validateScreenDefinition } from '@/components/mask-builder'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import type { MaskConfig } from '@/components/mask-builder/types'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
 
 const legacyMask: MaskConfig = {
   title: 'Kundenstamm',
@@ -94,5 +97,56 @@ describe('UniversalMaskRenderer', () => {
     expect(screen.getByDisplayValue('Nested Kunde')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Bearbeiten' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Audit' })).not.toBeInTheDocument()
+  })
+
+  it('emits user overlay patches from the shared table column picker', () => {
+    const definition: ScreenDefinition = {
+      schemaVersion: 1,
+      id: 'finance/ar-open-item',
+      domain: 'finance',
+      mode: 'list',
+      title: 'Offene Posten',
+      layout: {
+        preferredMode: 'desktopDense',
+        mobileMode: 'mobileStack',
+        floorplan: 'worklist',
+        density: 'compact',
+        contextRail: 'none',
+        tableProfile: 'financial',
+      },
+      tables: [
+        {
+          key: 'op',
+          label: 'Offene Posten',
+          columns: [
+            { key: 'nr', label: 'Nr' },
+            { key: 'kunde', label: 'Kunde' },
+            { key: 'betrag', label: 'Betrag', numeric: true },
+          ],
+        },
+      ],
+    }
+    const onOverlayChange = vi.fn()
+    const onOverlayReset = vi.fn()
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+    render(
+      <QueryClientProvider client={queryClient}>
+      <UniversalMaskRenderer
+        plan={compileRenderPlanFromScreenDefinition(definition)}
+        tables={{ op: [{ nr: 'OP-1', kunde: 'Musterkunde', betrag: 42 }] }}
+        onOverlayChange={onOverlayChange}
+        onOverlayReset={onOverlayReset}
+      />
+      </QueryClientProvider>,
+    )
+
+    fireEvent.click(screen.getByTestId('column-picker-toggle-op'))
+    fireEvent.click(screen.getByTestId('column-toggle-op-betrag'))
+    fireEvent.click(screen.getByTestId('reset-overlay-op'))
+
+    expect(onOverlayChange).toHaveBeenCalledWith({ tables: { op: { visibleColumns: ['nr', 'kunde'] } } })
+    expect(onOverlayReset).toHaveBeenCalledTimes(1)
   })
 })

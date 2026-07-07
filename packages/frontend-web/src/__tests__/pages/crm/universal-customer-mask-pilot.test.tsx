@@ -38,9 +38,15 @@ vi.mock('@/components/mask-builder', async (importOriginal) => {
       tableTotals: {},
       tableQueryStates: {},
       setTableQuery: vi.fn(),
+      userOverlay: {},
+      overlayInvalidPaths: [],
+      updateUserOverlay: vi.fn(),
+      resetUserOverlay: vi.fn(),
       lookupBindings: {},
       isEntityLoading: false,
+      isOverlayLoading: false,
       entityError: null,
+      refetch: vi.fn(),
     })),
   }
 })

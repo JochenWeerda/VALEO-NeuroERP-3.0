@@ -313,6 +313,9 @@ export function UniversalNativeDetailPage({
           lookupBindings={runtime.lookupBindings}
           onTabChange={onTabChange}
           onTableQueryChange={runtime.setTableQuery}
+          overlay={runtime.userOverlay}
+          onOverlayChange={runtime.updateUserOverlay}
+          onOverlayReset={runtime.resetUserOverlay}
           onAction={handleAction}
         />
       </div>

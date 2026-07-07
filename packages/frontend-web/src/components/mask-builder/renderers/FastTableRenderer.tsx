@@ -1,4 +1,5 @@
 import { memo, useState, type ReactNode } from 'react'
+import { Columns3, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
@@ -15,6 +16,8 @@ interface FastTableRendererProps {
   q?: string
   filterPlan?: FilterPlan
   onQueryChange?: (patch: Partial<TableQueryState>) => void
+  onVisibleColumnsChange?: (visibleColumns: string[]) => void | Promise<void>
+  onResetOverlay?: () => void | Promise<void>
 }
 
 function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
@@ -110,6 +113,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   q,
   filterPlan,
   onQueryChange,
+  onVisibleColumnsChange,
+  onResetOverlay,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
@@ -118,6 +123,9 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   const filterableColumns = table.columns.filter((column) => column.filterable)
   const [filterColumn, setFilterColumn] = useState<string>(filterableColumns[0]?.key ?? '')
   const [filterValue, setFilterValue] = useState('')
+  const [columnPickerOpen, setColumnPickerOpen] = useState(false)
+  const availableColumns = table.availableColumns ?? table.columns
+  const visibleColumnKeys = new Set(table.columns.map((column) => column.key))
 
   function handleRemoveFilter(colKey: string) {
     if (!onQueryChange || !filterPlan) return
@@ -136,6 +144,19 @@ export const FastTableRenderer = memo(function FastTableRenderer({
       },
       page: 1,
     })
+  }
+
+  function handleToggleColumn(columnKey: string): void {
+    if (!onVisibleColumnsChange) return
+    const next = new Set(visibleColumnKeys)
+    if (next.has(columnKey)) {
+      if (next.size <= 1) return
+      next.delete(columnKey)
+    } else {
+      next.add(columnKey)
+    }
+    const ordered = availableColumns.map((column) => column.key).filter((key) => next.has(key))
+    void onVisibleColumnsChange(ordered)
   }
 
   return (
@@ -159,7 +180,63 @@ export const FastTableRenderer = memo(function FastTableRenderer({
               data-testid={`search-${table.key}`}
             />
           )}
+          {(onVisibleColumnsChange || onResetOverlay) && (
+            <div className="flex items-center gap-1">
+              {onVisibleColumnsChange && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setColumnPickerOpen((open) => !open)}
+                  aria-expanded={columnPickerOpen}
+                  aria-controls={`column-picker-${table.key}`}
+                  data-testid={`column-picker-toggle-${table.key}`}
+                >
+                  <Columns3 className="mr-1 h-3.5 w-3.5" />
+                  Spalten
+                </Button>
+              )}
+              {onResetOverlay && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => { void onResetOverlay() }}
+                  data-testid={`reset-overlay-${table.key}`}
+                  aria-label={`Ansicht ${table.label} zuruecksetzen`}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
+        {columnPickerOpen && onVisibleColumnsChange ? (
+          <div
+            id={`column-picker-${table.key}`}
+            className="flex flex-wrap gap-2 pt-2"
+            data-testid={`column-picker-${table.key}`}
+          >
+            {availableColumns.map((column) => (
+              <label
+                key={column.key}
+                className="inline-flex h-7 items-center gap-1.5 rounded border border-input bg-background px-2 text-xs"
+              >
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5"
+                  checked={visibleColumnKeys.has(column.key)}
+                  disabled={visibleColumnKeys.has(column.key) && visibleColumnKeys.size <= 1}
+                  onChange={() => handleToggleColumn(column.key)}
+                  data-testid={`column-toggle-${table.key}-${column.key}`}
+                />
+                <span>{column.label}</span>
+              </label>
+            ))}
+          </div>
+        ) : null}
         {onQueryChange && filterableColumns.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2 pt-2">
             <select

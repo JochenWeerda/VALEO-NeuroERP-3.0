@@ -165,6 +165,9 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
           lookupBindings={nativeRuntime.lookupBindings}
           onTabChange={onTabChange}
           onTableQueryChange={nativeRuntime.setTableQuery}
+          overlay={nativeRuntime.userOverlay}
+          onOverlayChange={nativeRuntime.updateUserOverlay}
+          onOverlayReset={nativeRuntime.resetUserOverlay}
           onAction={() => undefined}
         />
       </div>

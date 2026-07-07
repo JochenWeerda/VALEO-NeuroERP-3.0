@@ -103,8 +103,9 @@ export function applyOverlay(plan: RenderPlan, overlay: ScreenOverlay | null | u
         if (!OVERLAYABLE_TABLE_KEYS.has(k)) violations.push(`tables.${tableKey}.${k}`)
       }
       let columns: RenderTableColumnPlan[] = base.columns
+      const availableColumns = base.availableColumns ?? base.columns
       if (tableOverlay.visibleColumns) {
-        const byKey = new Map(base.columns.map((c) => [c.key, c]))
+        const byKey = new Map(availableColumns.map((c) => [c.key, c]))
         const picked: RenderTableColumnPlan[] = []
         for (const colKey of tableOverlay.visibleColumns) {
           const col = byKey.get(colKey)
@@ -121,7 +122,7 @@ export function applyOverlay(plan: RenderPlan, overlay: ScreenOverlay | null | u
             : c,
         )
         for (const widthKey of Object.keys(tableOverlay.columnWidths)) {
-          if (!base.columns.some((c) => c.key === widthKey)) {
+          if (!availableColumns.some((c) => c.key === widthKey)) {
             invalidPaths.push(`tables.${tableKey}.columnWidths.${widthKey}`)
           }
         }
@@ -129,6 +130,7 @@ export function applyOverlay(plan: RenderPlan, overlay: ScreenOverlay | null | u
       next.tablesByKey[tableKey] = {
         ...base,
         columns,
+        availableColumns,
         activeVariant: tableOverlay.activeVariant ?? base.activeVariant,
         customVariants: tableOverlay.customVariants ?? base.customVariants,
       }

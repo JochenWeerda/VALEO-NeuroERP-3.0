@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueries, useQueryClient } from '@tanstack/react-query'
 import type { ScreenDefinition, ScreenSummaryItem } from '../schema'
 import type { RenderPlan } from '../render-plan/types'
 import { compileRenderPlan } from '../render-plan/schema-compiler'
+import { applyOverlay, hashOverlay, type ScreenOverlay } from '../render-plan/overlay'
 import type { DataBindingPlan, LookupBinding, TableQueryState } from './types'
 import { compileDataBindingPlan } from './compile-data-binding-plan'
 import { defaultTableQueryState, toQueryParams } from './table-query-state'
 import { apiClient } from '@/lib/api-client'
+import { deleteUserOverlay, overlayKeys, saveUserOverlay, useUserScreenOverlay } from '@/lib/api/ux-overlays'
 
 export interface UseUniversalMaskRuntimeOptions {
   screenId: string
@@ -30,14 +32,38 @@ export interface UseUniversalMaskRuntimeResult {
   tableTotals: Record<string, number>
   tableQueryStates: Record<string, TableQueryState>
   setTableQuery: (tableKey: string, patch: Partial<TableQueryState>) => void
+  userOverlay: ScreenOverlay
+  overlayInvalidPaths: string[]
+  updateUserOverlay: (patch: ScreenOverlay) => Promise<void>
+  resetUserOverlay: () => Promise<void>
   lookupBindings: Record<string, LookupBinding>
   isEntityLoading: boolean
+  isOverlayLoading: boolean
   entityError: unknown
   refetch: () => Promise<void>
 }
 
 function hasContentChange(patch: Partial<TableQueryState>): boolean {
   return patch.sort !== undefined || patch.q !== undefined || patch.filterPlan !== undefined
+}
+
+function mergeOverlay(current: ScreenOverlay, patch: ScreenOverlay): ScreenOverlay {
+  return {
+    ...current,
+    ...patch,
+    tables: patch.tables
+      ? Object.entries(patch.tables).reduce<Record<string, NonNullable<ScreenOverlay['tables']>[string]>>(
+        (acc, [tableKey, tablePatch]) => {
+          acc[tableKey] = {
+            ...(current.tables?.[tableKey] ?? {}),
+            ...tablePatch,
+          }
+          return acc
+        },
+        { ...(current.tables ?? {}) },
+      )
+      : current.tables,
+  }
 }
 
 export function useUniversalMaskRuntime({
@@ -53,9 +79,13 @@ export function useUniversalMaskRuntime({
   tenantId,
   enabled = true,
 }: UseUniversalMaskRuntimeOptions): UseUniversalMaskRuntimeResult {
+  const queryClient = useQueryClient()
+  const overlayQuery = useUserScreenOverlay(screenId, { enabled: enabled && Boolean(schema) })
+  const activeOverlay = overlayQuery.data?.overlay ?? {}
+
   const plan = useMemo<RenderPlan | undefined>(() => {
     if (!schema || !enabled) return undefined
-    return compileRenderPlan(schema, {
+    const compiled = compileRenderPlan(schema, {
       screenId,
       schemaVersion: schema.schemaVersion ?? 1,
       summary: {
@@ -67,7 +97,43 @@ export function useUniversalMaskRuntime({
       },
       auth: { permissions },
     })
-  }, [schema, screenId, enabled, summaryTitle, summarySubtitle, availableTabs, summaryItems, tabEndpoints, permissions])
+    const applied = applyOverlay(compiled, activeOverlay)
+    return {
+      ...applied.plan,
+      cacheKey: `${compiled.cacheKey}:overlay:${overlayQuery.data?.schema_version ?? schema.schemaVersion ?? 1}:${hashOverlay(activeOverlay)}`,
+      overlayInvalidPaths: applied.invalidPaths.length > 0 ? applied.invalidPaths : applied.plan.overlayInvalidPaths,
+    }
+  }, [schema, screenId, enabled, summaryTitle, summarySubtitle, availableTabs, summaryItems, tabEndpoints, permissions, activeOverlay, overlayQuery.data?.schema_version])
+
+  const saveOverlayMutation = useMutation({
+    mutationFn: (overlay: ScreenOverlay) => saveUserOverlay(screenId, {
+      schema_version: schema?.schemaVersion ?? 1,
+      overlay,
+    }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(overlayKeys.screen(screenId), data)
+    },
+  })
+
+  const resetOverlayMutation = useMutation({
+    mutationFn: () => deleteUserOverlay(screenId),
+    onSuccess: () => {
+      queryClient.setQueryData(overlayKeys.screen(screenId), {
+        screen_id: screenId,
+        schema_version: schema?.schemaVersion ?? 1,
+        overlay: {},
+        updated_at: null,
+      })
+    },
+  })
+
+  async function updateUserOverlay(patch: ScreenOverlay): Promise<void> {
+    await saveOverlayMutation.mutateAsync(mergeOverlay(activeOverlay, patch))
+  }
+
+  async function resetUserOverlay(): Promise<void> {
+    await resetOverlayMutation.mutateAsync()
+  }
 
   const binding = useMemo<DataBindingPlan | undefined>(() => {
     if (!plan) return undefined
@@ -171,12 +237,18 @@ export function useUniversalMaskRuntime({
     tableTotals,
     tableQueryStates: resolvedTableQueryStates,
     setTableQuery,
+    userOverlay: activeOverlay,
+    overlayInvalidPaths: plan?.overlayInvalidPaths ?? [],
+    updateUserOverlay,
+    resetUserOverlay,
     lookupBindings: binding?.lookupBindings ?? {},
     isEntityLoading: entityQuery.isLoading,
+    isOverlayLoading: overlayQuery.isLoading,
     entityError: entityQuery.error,
     refetch: async () => {
       await Promise.all([
         entityQuery.refetch(),
+        overlayQuery.refetch(),
         ...tableResults.map((result) => result.refetch()),
       ])
     },

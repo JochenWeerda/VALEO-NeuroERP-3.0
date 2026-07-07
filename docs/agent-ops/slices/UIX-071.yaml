@@ -44,6 +44,19 @@ progress: >-
   Aenderungen NICHT anfassen. Meine Duplikat-Testdatei entfernt. Gelernt:
   bei geteiltem Tree vor Backend-Bau pruefen, ob der Parallel-Agent denselben
   Slice-Teil schon baut (hier: 8 wedged pytest-Prozesse durch Doppelarbeit).
+  2026-07-07 Codex-Fortsetzung: Backend-Teil geliefert (Alembic
+  user_screen_overlays_uix071, GET/PUT/DELETE /api/v1/ux/overlays/{screen_id},
+  Router-Registrierung, serverseitige Allowlist mit 400 bei Sicherheitsfeldern,
+  Tenant-/User-Isolationstest). Frontend Runtime wendet Overlay nach Compile an
+  und haengt schemaVersion+hashOverlay an den RenderPlan-cacheKey. Shared
+  FastTableRenderer hat Spalten-Picker + Masken-Reset; UniversalNativeDetailPage,
+  CRM Native Pilot und Rollout Pilot geben Overlay-Callbacks zentral weiter.
+  Playwright-Spalten->Reload->Reset geliefert. Gates: Vitest Overlay/Renderer
+  14 passed, tsc 0, ESLint Source sauber, Playwright uix-071-overlays-smoke 1
+  passed (Visual-Tour-Teardown meldet bekannte Alt-Artefakte). Backend:
+  py_compile ok, pytest --collect-only sammelt 3 Tests, direkte Testfunktionen
+  ok; normaler pytest runner haengt in lokaler Repo-/Plugin-Umgebung nach
+  Collection/Ausfuehrung und wurde nicht als gruen gewertet.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
