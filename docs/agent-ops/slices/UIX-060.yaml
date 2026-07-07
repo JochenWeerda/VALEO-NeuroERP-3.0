@@ -39,6 +39,16 @@ progress: >-
   + filterable_fields aus Tabellen-Spalten. 5 neue Endpoint-Tests;
   Safety-Suite 246 gruen; OpenAPI 2538 Pfade. Offen: Frontend-Konsum des
   Katalogs (braucht screenId->Route-Mapping), Telemetrie, Playwright, axe.
+  2026-07-07 Routen-Bruecke geklaert+geliefert: Join-Analyse zeigte, dass die
+  MaskRegistry als Routenquelle untauglich ist (nur 7/26 mask_ids joinen, davon
+  4 nur Detail-:id). Loesung: kuratiertes _SCREEN_LIST_ROUTE (screen_id ->
+  reale Listen-Route) in screen_definitions als eine Wartungsstelle; Katalog
+  emittiert jetzt route je Eintrag (OmniboxCatalogEntryOut.route). Alle 26
+  Routen gegen die Frontend-Routen-Registry validiert (bestand->
+  bestandsuebersicht korrigiert). 2 neue Gate-Tests (Route-Vollstaendigkeit +
+  ar-open-item->op-debitoren); OpenAPI regeneriert. Offen: Frontend-Consumer
+  (Katalog-Fetch + Synonym/Route-Merge in den Compiler), Telemetrie, Playwright,
+  axe.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

@@ -62,7 +62,11 @@ def _collect_filterable_fields(sd: dict) -> list[dict]:
 
 
 def _build_omnibox_catalog() -> list[dict]:
-    from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
+    from app.core.screen_definitions import (
+        _SCREEN_DEFINITIONS,
+        get_screen_definition,
+        get_screen_list_route,
+    )
 
     entries: list[dict] = []
     for screen_id in sorted(_SCREEN_DEFINITIONS.keys()):
@@ -76,6 +80,7 @@ def _build_omnibox_catalog() -> list[dict]:
             "title": sd.get("title", screen_id),
             "domain": sd.get("domain", ""),
             "floorplan": layout.get("floorplan", ""),
+            "route": get_screen_list_route(screen_id) or "",
             "synonyms": list(contract.get("synonyms") or []),
             "example_prompts": list(contract.get("examplePrompts") or []),
             "filterable_fields": _collect_filterable_fields(sd),

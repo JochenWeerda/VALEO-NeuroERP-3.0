@@ -53,6 +53,26 @@ def test_catalog_synonyms_curated_for_all_native_screens():
     assert missing == [], f"Ohne Synonyme: {missing}"
 
 
+def test_catalog_list_route_curated_for_all_native_screens():
+    """Jede Maske ist an eine Listen-Route gebunden (Wartungsstelle _SCREEN_LIST_ROUTE).
+
+    Ohne Route kann die Omnibox das Ergebnis nicht navigieren — dieses Gate
+    verhindert, dass eine neue SD ungebunden in den Katalog rutscht (UIX-060).
+    """
+    resp = client.get(BASE, headers=HEADERS)
+    body = resp.json()
+    missing = [e["screen_id"] for e in body if not e["route"]]
+    assert missing == [], f"Ohne Listen-Route: {missing}"
+    # Routen sind absolute Frontend-Pfade
+    assert all(e["route"].startswith("/") for e in body)
+
+
+def test_catalog_ar_open_item_routes_to_debitoren_op():
+    resp = client.get(BASE, headers=HEADERS)
+    by_id = {e["screen_id"]: e for e in resp.json()}
+    assert by_id["finance/ar-open-item"]["route"] == "/finance/op-debitoren"
+
+
 def test_catalog_filterable_fields_present_for_table_masks():
     resp = client.get(BASE, headers=HEADERS)
     by_id = {e["screen_id"]: e for e in resp.json()}

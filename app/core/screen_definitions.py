@@ -2301,6 +2301,49 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 }
 
 
+# ── Omnibox-Listen-Routen (UIX-060) ──────────────────────────────────────────
+# Kuratiertes screen_id → Frontend-Listen-Route Mapping. Die nativen SD-Routen
+# sind Detail-Ansichten (screen_id/:id); fuer die Omnibox-Landung ("offene
+# posten folkerts") braucht der Compiler eine *filterbare Liste*. Diese Map ist
+# die eine Wartungsstelle, die jede Maske an ihre real existierende Listen-Seite
+# bindet — der Katalog (/ui/mask-registry/omnibox-catalog) emittiert die Route
+# direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
+# (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
+_SCREEN_LIST_ROUTE: dict[str, str] = {
+    "agrar/duenger": "/agrar/duenger",
+    "agrar/harvest-settlement": "/agrar/kontrakt-settlement",
+    "agrar/kontrakte": "/kontrakte",
+    "agrar/saatgut": "/agrar/saatgut",
+    "crm/customer-360": "/verkauf/kunden-liste",
+    "crm/lead": "/crm/leads",
+    "crm/opportunity": "/crm/opportunities",
+    "einkauf/anfrage": "/einkauf/anfragen",
+    "einkauf/angebot": "/einkauf/angebote",
+    "einkauf/anlieferavis": "/einkauf/anlieferavis",
+    "einkauf/auftragsbestaetigung": "/einkauf/auftragsbestaetigungen",
+    "einkauf/purchase-order": "/einkauf/bestellungen",
+    "einkauf/supplier": "/einkauf/lieferanten",
+    "finance/ap-invoice": "/einkauf/rechnungseingang",
+    "finance/ar-open-item": "/finance/op-debitoren",
+    "finance/bankkonto": "/finance/bankkonten",
+    "finance/debitor": "/finance/debitoren-liste",
+    "finance/kreditor": "/finance/kreditoren",
+    "finance/payment-run": "/fibu/zahlungslaeufe",
+    "futtermittel/einzelfuttermittel": "/futtermittel/einzelfuttermittel-liste",
+    "futtermittel/mischfuttermittel": "/futtermittel/mischfuttermittel-liste",
+    "lager/article-stock": "/lager/bestandsuebersicht",
+    "lager/stock-movement": "/lager/lagerbewegungen",
+    "qualitaet/reklamation": "/qualitaet/reklamationen",
+    "sales/delivery-note": "/verkauf/lieferschein-erfassung",
+    "sales/sales-order": "/verkauf/auftraege",
+}
+
+
+def get_screen_list_route(mask_id: str) -> str | None:
+    """Kuratierte Listen-Route einer Maske fuer die Omnibox-Navigation (UIX-060)."""
+    return _SCREEN_LIST_ROUTE.get(mask_id)
+
+
 def get_screen_definition(mask_id: str) -> dict[str, Any] | None:
     builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is None:

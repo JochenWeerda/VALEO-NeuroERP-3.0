@@ -73598,6 +73598,10 @@
             "title": "Floorplan",
             "type": "string"
           },
+          "route": {
+            "title": "Route",
+            "type": "string"
+          },
           "screen_id": {
             "title": "Screen Id",
             "type": "string"
@@ -73619,6 +73623,7 @@
           "title",
           "domain",
           "floorplan",
+          "route",
           "synonyms",
           "example_prompts",
           "filterable_fields"

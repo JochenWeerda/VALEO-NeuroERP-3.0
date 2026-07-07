@@ -28,6 +28,7 @@ class OmniboxCatalogEntryOut(BaseSchema):
     title: str
     domain: str
     floorplan: str
+    route: str  # kuratierte Frontend-Listen-Route (UIX-060), leer wenn ungebunden
     synonyms: list[str]
     example_prompts: list[str]
     filterable_fields: list[OmniboxFilterFieldOut]
