@@ -29,6 +29,25 @@ class WorkspaceStartpageOut(BaseSchema):
     route: str | None
 
 
+class OmniboxActionFieldOut(BaseSchema):
+    """Formularfeld einer draftbaren Aktion (Slot-Filling, UIX-070)."""
+    key: str
+    type: str
+    required: bool
+
+
+class OmniboxActionOut(BaseSchema):
+    """Draftbare Command-Aktion je Maske (UIX-070). Sicherheit entscheidet der
+    Frontend-Klassifikator classifyOmniboxAction."""
+    key: str
+    label: str
+    dangerLevel: str
+    requiresConfirmation: bool
+    forbiddenForAgents: bool
+    verbs: list[str]
+    fields: list[OmniboxActionFieldOut]
+
+
 class OmniboxCatalogEntryOut(BaseSchema):
     """Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition."""
     screen_id: str
@@ -39,3 +58,4 @@ class OmniboxCatalogEntryOut(BaseSchema):
     synonyms: list[str]
     example_prompts: list[str]
     filterable_fields: list[OmniboxFilterFieldOut]
+    actions: list[OmniboxActionOut] = []

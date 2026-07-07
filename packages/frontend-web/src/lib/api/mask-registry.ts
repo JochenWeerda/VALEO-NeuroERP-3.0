@@ -37,6 +37,17 @@ export interface OmniboxFilterField {
   type: 'enum' | 'date' | 'number' | 'text'
 }
 
+/** Draftbare Command-Aktion je Maske (UIX-070). */
+export interface OmniboxAction {
+  key: string
+  label: string
+  dangerLevel: 'safe' | 'moderate' | 'high' | 'critical'
+  requiresConfirmation: boolean
+  forbiddenForAgents: boolean
+  verbs: string[]
+  fields: { key: string; type: string; required: boolean }[]
+}
+
 export interface OmniboxCatalogEntry {
   screen_id: string
   title: string
@@ -47,6 +58,8 @@ export interface OmniboxCatalogEntry {
   synonyms: string[]
   example_prompts: string[]
   filterable_fields: OmniboxFilterField[]
+  /** Draftbare Aktionen fuer den NL-Command-Pfad (UIX-070). */
+  actions?: OmniboxAction[]
 }
 
 export async function fetchOmniboxCatalog(): Promise<OmniboxCatalogEntry[]> {

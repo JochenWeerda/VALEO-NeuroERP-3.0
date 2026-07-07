@@ -63,6 +63,38 @@ def _collect_filterable_fields(sd: dict) -> list[dict]:
     return list(fields.values())
 
 
+def _normalize_verb(text: str) -> str:
+    return text.lower().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
+
+
+def _collect_command_actions(sd: dict) -> list[dict]:
+    """Draftbare Aktionen (mit commandEndpoint) fuer den NL-Command-Pfad (UIX-070).
+
+    Nur die Sicherheits-relevanten Felder + Suchbegriffe + Formularfelder —
+    die Sicherheitsmatrix entscheidet frontend-seitig (classifyOmniboxAction)."""
+    actions: list[dict] = []
+    for action in sd.get("actions") or []:
+        if not action.get("commandEndpoint"):
+            continue  # nur echte Mutations-Commands sind draftbar
+        key = action.get("key", "")
+        label = action.get("label", key)
+        verbs = sorted({_normalize_verb(t) for t in (key.replace("_", " ") + " " + label).split() if len(t) > 2})
+        actions.append({
+            "key": key,
+            "label": label,
+            "dangerLevel": action.get("dangerLevel", "safe"),
+            "requiresConfirmation": bool(action.get("requiresConfirmation")),
+            "forbiddenForAgents": bool(action.get("forbiddenForAgents")),
+            "verbs": verbs,
+            "fields": [
+                {"key": f.get("key"), "type": f.get("type", "text"), "required": bool(f.get("required"))}
+                for f in (action.get("fields") or [])
+                if f.get("key")
+            ],
+        })
+    return actions
+
+
 def _build_omnibox_catalog() -> list[dict]:
     from app.core.screen_definitions import (
         _SCREEN_DEFINITIONS,
@@ -86,6 +118,7 @@ def _build_omnibox_catalog() -> list[dict]:
             "synonyms": list(contract.get("synonyms") or []),
             "example_prompts": list(contract.get("examplePrompts") or []),
             "filterable_fields": _collect_filterable_fields(sd),
+            "actions": _collect_command_actions(sd),
         })
     return entries
 

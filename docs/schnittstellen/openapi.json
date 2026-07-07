@@ -73875,6 +73875,80 @@
         "title": "ObligationUpdate",
         "type": "object"
       },
+      "OmniboxActionFieldOut": {
+        "description": "Formularfeld einer draftbaren Aktion (Slot-Filling, UIX-070).",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "type",
+          "required"
+        ],
+        "title": "OmniboxActionFieldOut",
+        "type": "object"
+      },
+      "OmniboxActionOut": {
+        "description": "Draftbare Command-Aktion je Maske (UIX-070). Sicherheit entscheidet der\nFrontend-Klassifikator classifyOmniboxAction.",
+        "properties": {
+          "dangerLevel": {
+            "title": "Dangerlevel",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/OmniboxActionFieldOut"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "forbiddenForAgents": {
+            "title": "Forbiddenforagents",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "requiresConfirmation": {
+            "title": "Requiresconfirmation",
+            "type": "boolean"
+          },
+          "verbs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Verbs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "dangerLevel",
+          "requiresConfirmation",
+          "forbiddenForAgents",
+          "verbs",
+          "fields"
+        ],
+        "title": "OmniboxActionOut",
+        "type": "object"
+      },
       "OmniboxAggregateEntry": {
         "properties": {
           "accepted": {
@@ -73929,6 +74003,14 @@
       "OmniboxCatalogEntryOut": {
         "description": "Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition.",
         "properties": {
+          "actions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/OmniboxActionOut"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
           "domain": {
             "title": "Domain",
             "type": "string"
