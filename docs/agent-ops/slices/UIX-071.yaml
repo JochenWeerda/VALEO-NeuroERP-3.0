@@ -1,7 +1,7 @@
 slice_id: UIX-071
 title: Nutzer-Overlays v1 (Personalisierung ohne Fork)
-owner: unclaimed
-status: geplant
+owner: Claude
+status: in_arbeit
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m2-spec.md
 coordination: >-
