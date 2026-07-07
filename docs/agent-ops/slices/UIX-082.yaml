@@ -25,6 +25,18 @@ tests:
   - "pytest Service-Units+API Coverage>=60"
   - "Vitest Kachel+Popover"
   - "Snapshot-Reproduzierbarkeit"
+progress: >-
+  2026-07-07 Berechnungskern geliefert (isoliert, kollisionsfrei):
+  config/esg_factors.yaml (versioniert 2026-07, je Faktor co2e_kg + unit +
+  source) + app/services/esg_footprint_service.py compute_footprint — reine,
+  deterministische Berechnung (Decimal, 3 Dezimalen; gleiche Inputs+Version →
+  identisch), jede Komponente mit source_ref (Beleg) + Faktor-Quelle
+  (Auditierbarkeit), fehlender/unbekannter Input → Komponente fehlt statt
+  0-Schaetzung, stabile Komponenten-Reihenfolge. 9 pytest (--noconftest, 0.3s;
+  Root-conftest-Hang). OFFEN: Alembic esg_charge_footprint + GET
+  /esg/charges/{id}/footprint + Inputs-Adapter (Trocknung/Touren/Strom aus
+  Bestand) + ESG-Summary-Kachel (screen_definitions, shared → koordinieren) +
+  Vitest Kachel/Popover + Nightly-Job.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
