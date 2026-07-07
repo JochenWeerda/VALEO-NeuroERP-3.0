@@ -21,6 +21,19 @@ acceptance:
 tests:
   - "pytest 10 Mail-Fixtures + Idempotenz + Safety"
   - "Playwright Mail->Vorschlag->Bestaetigen"
+progress: >-
+  2026-07-07 Deterministischer Extraktor-Kern geliefert (isoliert, kollisionsfrei):
+  app/services/crm_capture/termin_extraction.py — deutsche Datums-/Zeitmuster
+  (12.07., Montag 14 Uhr, KW 29, morgen frueh, zwischen 8 und 10, HH:MM),
+  Anker=received_at (relative Angaben), Zeitzone Europe/Berlin fix, Jahr-Rollover
+  bei Vergangenheit; Bezugsobjekt-Heuristik (Bestell-/Kontrakt-/Lieferschein-Nr
+  per Regex, Absender-Domain→supplier, confidence 0.86); Slot-Dedup je Mail;
+  build_source_key(mail_id, n) fuer Idempotenz. Reine Funktionen, KEIN Auto-
+  Confirm (Kandidaten sind Datenstrukturen ohne status). 15 pytest + 2 Mail-
+  Fixtures. OFFEN (braucht Koordination mit Codex' calendar_projection_service
+  aus 063): Pipeline-Stufe termin_extraction -> calendar_items(status=proposed,
+  source=email_capture, layer=logistik) + Konflikt-Check (±2h gleiche Ressource)
+  + confirm/dismiss-API + LLM-Fallback-Flag + Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
