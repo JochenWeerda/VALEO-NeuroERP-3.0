@@ -20,6 +20,7 @@ export type ScreenLayoutMode = 'desktopDense' | 'tabletTouch' | 'mobileStack'
 export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
 export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
 export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
+export type ScreenContextRailSection = 'audit' | 'workflow' | 'copilot' | 'collab'
 export type ScreenTableProfile = 'standard' | 'financial' | 'inventory' | 'audit'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 export type ScreenFieldType =
@@ -220,6 +221,27 @@ export interface ScreenCalendarDefinition {
   layers: ScreenCalendarLayerDefinition[]
 }
 
+const CONTEXT_RAIL_SECTIONS: ScreenContextRailSection[] = ['audit', 'workflow', 'copilot', 'collab']
+
+export function resolveContextRailSections(
+  contextRail: ScreenContextRail = 'combined',
+  explicitSections?: ScreenContextRailSection[],
+): ScreenContextRailSection[] {
+  if (explicitSections && explicitSections.length > 0) {
+    const seen = new Set<ScreenContextRailSection>()
+    return explicitSections.filter((section) => {
+      if (!CONTEXT_RAIL_SECTIONS.includes(section) || seen.has(section)) return false
+      seen.add(section)
+      return true
+    })
+  }
+  if (contextRail === 'none') return []
+  if (contextRail === 'audit') return ['audit']
+  if (contextRail === 'workflow') return ['workflow']
+  if (contextRail === 'copilot') return ['copilot']
+  return ['workflow', 'audit', 'copilot']
+}
+
 export interface ScreenDefinition {
   schemaVersion: 1
   id: string
@@ -252,6 +274,7 @@ export interface ScreenDefinition {
     floorplan?: ScreenFloorplan
     density?: ScreenDensity
     contextRail?: ScreenContextRail
+    contextRailSections?: ScreenContextRailSection[]
     tableProfile?: ScreenTableProfile
   }
   performance?: {
@@ -281,6 +304,11 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   }
   if (screen.layout?.contextRail && !['none', 'audit', 'copilot', 'workflow', 'combined'].includes(screen.layout.contextRail)) {
     errors.push(`layout.contextRail is invalid: ${screen.layout.contextRail}`)
+  }
+  for (const section of screen.layout?.contextRailSections ?? []) {
+    if (!CONTEXT_RAIL_SECTIONS.includes(section)) {
+      errors.push(`layout.contextRailSections contains invalid section: ${section}`)
+    }
   }
   if (screen.layout?.tableProfile && !['standard', 'financial', 'inventory', 'audit'].includes(screen.layout.tableProfile)) {
     errors.push(`layout.tableProfile is invalid: ${screen.layout.tableProfile}`)

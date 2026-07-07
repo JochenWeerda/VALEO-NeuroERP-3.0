@@ -137,6 +137,8 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
             "touchTargetPx": 44,
+            "contextRail": "combined",
+            "contextRailSections": ["workflow", "audit", "copilot", "collab"],
         },
         "performance": {
             "initialPayloadBudgetKb": 48,

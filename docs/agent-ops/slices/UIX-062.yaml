@@ -1,8 +1,9 @@
 slice_id: UIX-062
 title: Collab-Rail v1 (Notizen & Mentions am Datensatz)
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-07
+completed_at: 2026-07-07
 spec: docs/design/specs/uix-m1-spec.md
 coordination: >-
   Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
@@ -27,6 +28,15 @@ tests:
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+verification:
+  - "pytest tests/test_uix062_collab_notes.py -q --no-cov -> 4 passed"
+  - "pnpm vitest run src/__tests__/render-plan/schema-compiler.test.ts src/__tests__/components/mask-builder/WorkflowPanelRenderer.test.tsx -> 7 passed"
+  - "pnpm exec playwright test tests/e2e/collab-rail-smoke.spec.ts --project=chromium -> 1 passed"
+  - "pnpm exec tsc --noEmit -> 0"
+  - "pnpm exec eslint <UIX-062 files> -> 0 errors; Testdateien sind im Repo-Ignore"
+known_notes:
+  - "Playwright-Global-Teardown meldet bestehende Visual-Tour-Console-Issues ausserhalb des fokussierten Collab-Smokes."
+  - "Pytest-Default-Coverage ist fuer isolierte UIX-Slice-Laeufe langsam; verifizierter Lauf nutzt --no-cov."
 ai_harness:
   fachlicher_vertrag: >-
     Kommunikation klebt am Datensatz statt in Schatten-Kanaelen; exportierbar und auditierbar.

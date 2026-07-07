@@ -1,11 +1,12 @@
-import type {
-  ScreenActionDefinition,
-  ScreenDefinition,
-  ScreenFieldDefinition,
-  ScreenTabDefinition,
-  ScreenTableDefinition,
-  ScreenTableProfile,
-  ScreenTileDefinition,
+import {
+  resolveContextRailSections,
+  type ScreenActionDefinition,
+  type ScreenDefinition,
+  type ScreenFieldDefinition,
+  type ScreenTabDefinition,
+  type ScreenTableDefinition,
+  type ScreenTableProfile,
+  type ScreenTileDefinition,
 } from '../schema'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
@@ -162,6 +163,7 @@ export function compileRenderPlan(
   )
   const density = schema.layout?.density ?? 'compact'
   const contextRail = schema.layout?.contextRail ?? (floorplan === 'worklist' ? 'none' : 'combined')
+  const contextRailSections = resolveContextRailSections(contextRail, schema.layout?.contextRailSections)
   const tableProfile = schema.layout?.tableProfile ?? 'standard'
   const performance = {
     initialPayloadBudgetKb: schema.performance?.initialPayloadBudgetKb ?? 64,
@@ -237,6 +239,7 @@ export function compileRenderPlan(
       floorplan,
       density,
       contextRail,
+      contextRailSections,
       tableProfile,
       summaryEndpoint: schema.summaryEndpoint,
     },

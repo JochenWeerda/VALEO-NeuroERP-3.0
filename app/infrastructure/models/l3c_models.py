@@ -1179,6 +1179,23 @@ class InternalMessage(Base):
 
 # ── Master Data Entries ──────────────────────────────────────────
 
+class EntityNote(Base):
+    """Datensatzgebundene Notiz fuer den UIX-062 Collab-Rail."""
+    __tablename__ = "entity_notes"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    entity_type = Column(String(64), nullable=False)
+    entity_id = Column(String(64), nullable=False)
+    body = Column(String(4000), nullable=False)
+    mentions = Column(JSONB, nullable=False, default=list)
+    created_by = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+
 class MasterDataEntry(Base):
     """Generic lookup / master-data table."""
     __tablename__ = "master_data_entries"

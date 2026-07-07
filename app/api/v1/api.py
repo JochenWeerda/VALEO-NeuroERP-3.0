@@ -1741,6 +1741,7 @@ from app.api.v1.endpoints import (
     benchmark_cockpit,
     blockchain_runtime,
     command_catalog,
+    collab_notes,
     e2e_chain,
     external_agent_integrations,
     idempotency_monitoring,
@@ -1776,6 +1777,7 @@ api_router.include_router(benchmark_api.router)
 api_router.include_router(benchmark_cockpit.router)
 api_router.include_router(blockchain_runtime.router)
 api_router.include_router(command_catalog.router)
+api_router.include_router(collab_notes.router)
 api_router.include_router(e2e_chain.router)
 api_router.include_router(external_agent_integrations.router)
 api_router.include_router(idempotency_monitoring.router)

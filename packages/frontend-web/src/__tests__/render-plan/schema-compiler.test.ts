@@ -68,6 +68,7 @@ describe('schema-compiler', () => {
     expect(plan.shell.floorplan).toBe('objectPage')
     expect(plan.shell.density).toBe('compact')
     expect(plan.shell.contextRail).toBe('combined')
+    expect(plan.shell.contextRailSections).toEqual(['workflow', 'audit', 'copilot'])
     expect(plan.shell.tableProfile).toBe('standard')
     expect(plan.performance.lookupResultLimit).toBe(25)
     expect(plan.performance.lookupCacheTtlMs).toBe(900_000)
@@ -148,8 +149,24 @@ describe('schema-compiler', () => {
     expect(plan.shell.floorplan).toBe('objectPage')
     expect(plan.shell.density).toBe('expertDense')
     expect(plan.shell.contextRail).toBe('audit')
+    expect(plan.shell.contextRailSections).toEqual(['audit'])
     expect(plan.shell.tableProfile).toBe('financial')
     expect(plan.tablesByKey.positionen?.tableProfile).toBe('financial')
+  })
+
+  it('preserves explicit context rail sections and enables collab opt-in', () => {
+    const schema = {
+      ...crmSchema(),
+      layout: {
+        contextRail: 'combined' as const,
+        contextRailSections: ['workflow', 'collab', 'audit', 'collab'] as const,
+      },
+    }
+
+    const plan = compileRenderPlanFromScreenDefinition(schema)
+
+    expect(plan.shell.contextRail).toBe('combined')
+    expect(plan.shell.contextRailSections).toEqual(['workflow', 'collab', 'audit'])
   })
 
   it('caches compiled plans by cache key and reuses without recompilation', () => {

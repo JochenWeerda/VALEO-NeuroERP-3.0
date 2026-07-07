@@ -1,5 +1,5 @@
 import { LazyTabs } from '@/components/ui/LazyTabs'
-import type { ScreenDefinition, ScreenFieldDefinition } from './schema'
+import { resolveContextRailSections, type ScreenDefinition, type ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
 import type { LookupBinding, TableQueryState } from './runtime/types'
 import type { UniversalFormState } from './runtime/FormState'
@@ -25,6 +25,7 @@ interface UniversalMaskRendererProps {
   /** Legacy: raw screen definition (compiled internally once per reference) */
   screen?: ScreenDefinition
   data?: Record<string, unknown>
+  entityId?: string
   tables?: Record<string, Record<string, unknown>[]>
   allowedPermissions?: string[]
   onTabChange?: (_tabKey: string) => void
@@ -87,9 +88,11 @@ function RenderFromPlan({
   onAction,
   formState,
   workflowState,
+  entityId,
 }: {
   plan: RenderPlan
   payload: Record<string, unknown>
+  entityId?: string
   tables: Record<string, Record<string, unknown>[]>
   tableQueryStates?: Record<string, TableQueryState>
   tableTotals?: Record<string, number>
@@ -101,6 +104,7 @@ function RenderFromPlan({
 }): JSX.Element {
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
   const effectivePayload = formState ? formState.values : payload
+  const effectiveEntityId = entityId ?? String(effectivePayload.id ?? effectivePayload.entity_id ?? '')
 
   return (
     <FormStateContext.Provider value={formState}>
@@ -114,6 +118,7 @@ function RenderFromPlan({
       data-floorplan={plan.shell.floorplan}
       data-density={plan.shell.density}
       data-context-rail={plan.shell.contextRail}
+      data-context-rail-sections={plan.shell.contextRailSections.join(',')}
       data-table-profile={plan.shell.tableProfile}
     >
       <ActionBarRenderer
@@ -131,7 +136,13 @@ function RenderFromPlan({
         payload={effectivePayload}
       />
 
-      <WorkflowPanelRenderer workflow={plan.workflow} workflowState={workflowState} />
+      <WorkflowPanelRenderer
+        workflow={plan.workflow}
+        workflowState={workflowState}
+        contextRailSections={plan.shell.contextRailSections}
+        entityType={plan.screenId}
+        entityId={effectiveEntityId}
+      />
       <FastSummaryRenderer items={plan.summaryItems} />
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
@@ -236,9 +247,11 @@ function RenderFromScreen({
   allowedPermissions,
   onTabChange,
   onAction,
+  entityId,
 }: {
   screen: ScreenDefinition
   payload: Record<string, unknown>
+  entityId?: string
   tables: Record<string, Record<string, unknown>[]>
   allowedPermissions: string[]
   onTabChange?: (_tabKey: string) => void
@@ -248,6 +261,9 @@ function RenderFromScreen({
   const visibleActions = (screen.actions ?? []).filter(
     (action) => !action.permission || allowedPermissions.includes(action.permission),
   )
+  const contextRail = screen.layout?.contextRail ?? 'combined'
+  const contextRailSections = resolveContextRailSections(contextRail, screen.layout?.contextRailSections)
+  const effectiveEntityId = entityId ?? String(payload.id ?? payload.entity_id ?? '')
 
   return (
     <div
@@ -258,7 +274,8 @@ function RenderFromScreen({
       data-mobile-layout={screen.layout?.mobileMode ?? 'mobileStack'}
       data-floorplan={screen.layout?.floorplan ?? 'objectPage'}
       data-density={screen.layout?.density ?? 'compact'}
-      data-context-rail={screen.layout?.contextRail ?? 'combined'}
+      data-context-rail={contextRail}
+      data-context-rail-sections={contextRailSections.join(',')}
       data-table-profile={screen.layout?.tableProfile ?? 'standard'}
     >
       <ActionBarRenderer
@@ -269,14 +286,19 @@ function RenderFromScreen({
         actions={visibleActions}
         floorplan={screen.layout?.floorplan ?? 'objectPage'}
         density={screen.layout?.density ?? 'compact'}
-        contextRail={screen.layout?.contextRail ?? 'combined'}
+        contextRail={contextRail}
         headerClassName={classes.header}
         touchTargetClass={classes.touchTarget}
         onAction={onAction}
         payload={payload}
       />
 
-      <WorkflowPanelRenderer workflow={screen.workflow} />
+      <WorkflowPanelRenderer
+        workflow={screen.workflow}
+        contextRailSections={contextRailSections}
+        entityType={screen.id}
+        entityId={effectiveEntityId}
+      />
       <FastSummaryRenderer items={screen.summary ?? []} />
       {renderLegacyFields(screen.fields, payload, classes.fields)}
 
@@ -340,6 +362,7 @@ export function UniversalMaskRenderer({
   lookupBindings,
   formState,
   workflowState,
+  entityId,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
@@ -357,6 +380,7 @@ export function UniversalMaskRenderer({
           onAction={onAction}
           formState={formState}
           workflowState={workflowState}
+          entityId={entityId}
         />
       </LookupBindingContext.Provider>
     )
@@ -371,6 +395,7 @@ export function UniversalMaskRenderer({
         allowedPermissions={allowedPermissions}
         onTabChange={onTabChange}
         onAction={onAction}
+        entityId={entityId}
       />
     )
   }

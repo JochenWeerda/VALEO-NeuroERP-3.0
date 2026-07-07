@@ -306,6 +306,7 @@ export function UniversalNativeDetailPage({
         <UniversalMaskRenderer
           plan={runtime.plan}
           data={runtime.entityData}
+          entityId={entityId}
           tables={runtime.tableRows}
           tableQueryStates={runtime.tableQueryStates}
           tableTotals={runtime.tableTotals}

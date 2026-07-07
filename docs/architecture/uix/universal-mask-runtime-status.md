@@ -61,6 +61,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | SPEC-P1-08 | Chargen-Tiefenmodell + FEFO über MHD | ✅ | `inventory_lot_trace_service.py`, `inv_lot_depth_spec_p1_08` |
 | UIX-060 | Omnibox-Shell + Backend-Katalog/Telemetry | ✅ | Workboard 2026-07-07 |
 | UIX-061 | Rollen-Workspaces + Tiles-Primitive + Rollen-Redirect | ✅ | 27 pytest, 6 Vitest, Workspace Playwright grün |
+| UIX-062 | Collab-Rail v1: `contextRailSections`, datensatzgebundene Notizen, Mentions, Inbox/Outbox | ✅ lokal | 4 pytest, 7 Vitest, TypeScript 0, Playwright 1/1 |
 | UIX-063 | Planungskalender v1: `calendar`-Contract, Projektionsservice, ICS-Feed, CalendarRenderer | ✅ lokal | 33 pytest, 3 Vitest, TypeScript 0, Playwright 1/1 |
 
 ## Architektur (Single Source of Truth)
@@ -202,6 +203,10 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | pytest UIX-054 Route Inventory | 2026-07-01 | ✅ 46/46 | `route-inventory.gen.json` + native Priorität |
 | UIX-056 Native Route Playwright | 2026-07-01 | ✅ 6/6 lokal | `uix-056-native-route-smoke.spec.ts` |
 | GitHub Actions universal-mask-ci | 2026-07-01 | ✅ | Run `28540744515` — UIX-051/054 + routes:generate-Drift + E2E-Smoke |
+| UIX-062 Collab-Rail Backend | 2026-07-07 | ✅ 4/4 | `pytest tests/test_uix062_collab_notes.py -q --no-cov` |
+| UIX-062 Collab-Rail Vitest | 2026-07-07 | ✅ 7/7 | `schema-compiler.test.ts`, `WorkflowPanelRenderer.test.tsx` |
+| UIX-062 Frontend type-check | 2026-07-07 | ✅ | `pnpm exec tsc --noEmit` |
+| UIX-062 Playwright Collab-Smoke | 2026-07-07 | ✅ 1/1 | `collab-rail-smoke.spec.ts`; globaler Visual-Tour-Teardown meldet bestehende Fremdseiten-Console-Issues |
 | UIX-063 Planungskalender Backend | 2026-07-07 | ✅ 33/33 | `pytest tests/test_uix063_planning_calendar.py tests/test_workspace_cockpits_uix061.py -q --no-cov` |
 | UIX-063 CalendarRenderer Vitest | 2026-07-07 | ✅ 3/3 | `calendar-renderer.test.tsx` |
 | UIX-063 Frontend type-check | 2026-07-07 | ✅ | `pnpm --dir packages/frontend-web type-check` |

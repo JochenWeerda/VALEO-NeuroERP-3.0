@@ -2,6 +2,7 @@ import type {
   ScreenDomain,
   ScreenCalendarView,
   ScreenContextRail,
+  ScreenContextRailSection,
   ScreenDensity,
   ScreenFieldType,
   ScreenFloorplan,
@@ -36,6 +37,7 @@ export interface RenderShellPlan {
   floorplan: ScreenFloorplan
   density: ScreenDensity
   contextRail: ScreenContextRail
+  contextRailSections: ScreenContextRailSection[]
   tableProfile: ScreenTableProfile
   summaryEndpoint?: string
 }
