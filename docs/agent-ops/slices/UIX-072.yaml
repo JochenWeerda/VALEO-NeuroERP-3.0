@@ -35,6 +35,14 @@ progress: >-
   sauber. OFFEN: VoiceBar-Renderer (Push-to-talk, Live-Transkript editierbar,
   prefers-reduced-motion), shell.voice-Capability, WebSpeech-Provider-Impl,
   optional Server-Provider /voice/transcribe, Playwright Provider-Stub.
+  2026-07-07 VoiceBar-UI geliefert: useVoiceDictation-Hook (Aufnahme, live-
+  Transkript, editierbar, Uebernahme erst bei Bestaetigung, Telemetrie ohne
+  Inhalt, kein Audio-Persist) + VoiceBar-Renderer (Push-to-talk, Alt+V-Toggle,
+  prefers-reduced-motion → kein pulsierendes Mikro, Verwerfen/Uebernehmen).
+  6 Komponenten-Vitest (inkl. "Telemetrie ohne Transkript-Inhalt"). tsc 0.
+  OFFEN: Einbindung in CommandPalette/Feld-Diktat (shared file — bewusst
+  zurueckgestellt solange Parallel-Agent am UIX-071-Frontend arbeitet) +
+  WebSpeech-Provider-Impl + Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
