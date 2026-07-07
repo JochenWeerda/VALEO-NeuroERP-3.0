@@ -35,7 +35,7 @@ import {
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
 import { AI_SHORTCUTS } from '@/app/navigation/ai-shortcuts'
 import type { NavigationShortcut } from '@/app/navigation/types'
-import type { MaskRegistryEntry } from '@/lib/api/mask-registry'
+import type { MaskRegistryEntry, OmniboxCatalogEntry } from '@/lib/api/mask-registry'
 
 export interface PaletteCommand {
   id: string
@@ -698,6 +698,91 @@ function buildMaskCommands(maskRegistry: MaskRegistryEntry[] | undefined, agrarE
         businessDomain: mask.domain,
       },
     }))
+}
+
+// ── Omnibox-Katalog-Anreicherung (UIX-060) ───────────────────────────────────
+// Der Backend-Katalog liefert kuratierte Synonyme + reale Listen-Route je
+// ScreenDefinition. Wir mergen ihn ueber die Route (== actionParams.path) in
+// den bestehenden Command-Katalog: vorhandene Commands bekommen die Synonyme
+// als zusaetzliche keywords; Katalog-Eintraege ohne passenden Command werden
+// synthetisiert, damit auch bisher nur per Menue erreichbare Masken ueber die
+// Omnibox findbar werden. Reine Funktion — im Compiler/Tests wiederverwendbar.
+
+const OMNIBOX_DOMAIN_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  agrar: Sprout,
+  finance: Calculator,
+  sales: ShoppingCart,
+  einkauf: Truck,
+  lager: Warehouse,
+  crm: Users,
+  futtermittel: Leaf,
+  qualitaet: ShieldCheck,
+}
+
+function normalizePath(path: string): string {
+  const trimmed = path.split('?')[0].replace(/\/+$/, '')
+  return trimmed.toLowerCase()
+}
+
+function mergeKeywords(existing: string[], incoming: string[]): string[] {
+  const seen = new Set(existing.map((k) => k.toLowerCase()))
+  const merged = [...existing]
+  for (const keyword of incoming) {
+    const key = keyword.trim()
+    if (key.length === 0 || seen.has(key.toLowerCase())) continue
+    merged.push(key)
+    seen.add(key.toLowerCase())
+  }
+  return merged
+}
+
+export function enrichCommandsWithOmniboxCatalog(
+  commands: PaletteCommand[],
+  catalog: OmniboxCatalogEntry[] | undefined,
+  agrarEnabled: boolean,
+): PaletteCommand[] {
+  if (!catalog || catalog.length === 0) return commands
+
+  const byPath = new Map<string, PaletteCommand>()
+  for (const command of commands) {
+    const path = command.actionParams?.path
+    if (typeof path === 'string') byPath.set(normalizePath(path), command)
+  }
+
+  const enriched = commands.map((command) => ({ ...command }))
+  const enrichedByPath = new Map<string, PaletteCommand>()
+  for (const command of enriched) {
+    const path = command.actionParams?.path
+    if (typeof path === 'string') enrichedByPath.set(normalizePath(path), command)
+  }
+
+  const synthesized: PaletteCommand[] = []
+  for (const entry of catalog) {
+    if (!entry.route) continue
+    if (!agrarEnabled && (entry.domain === 'agrar' || entry.route.startsWith('/agrar'))) continue
+
+    const synonyms = [...entry.synonyms, ...entry.example_prompts]
+    const target = enrichedByPath.get(normalizePath(entry.route))
+    if (target) {
+      target.keywords = mergeKeywords(target.keywords, synonyms)
+      continue
+    }
+    // Kein passender Command → synthetisieren, damit die Maske findbar wird.
+    synthesized.push({
+      id: `omnibox:${entry.screen_id}`,
+      label: entry.title,
+      keywords: mergeKeywords([entry.screen_id, entry.domain], synonyms),
+      icon: OMNIBOX_DOMAIN_ICONS[entry.domain] ?? FileText,
+      category: 'Masken',
+      actionId: `omnibox:${entry.screen_id}`,
+      actionParams: { path: entry.route, screenId: entry.screen_id },
+      hint: entry.domain,
+      mcp: { intent: 'navigate', businessDomain: entry.domain || 'core' },
+    })
+  }
+
+  appendUniqueCommands(enriched, synthesized)
+  return enriched
 }
 
 export function buildPaletteCommands({

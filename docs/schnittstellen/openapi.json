@@ -73573,6 +73573,57 @@
         "title": "ObligationUpdate",
         "type": "object"
       },
+      "OmniboxAggregateEntry": {
+        "properties": {
+          "accepted": {
+            "title": "Accepted",
+            "type": "integer"
+          },
+          "avg_confidence": {
+            "title": "Avg Confidence",
+            "type": "number"
+          },
+          "matched_screen_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Screen Id"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "matched_screen_id",
+          "total",
+          "accepted",
+          "avg_confidence"
+        ],
+        "title": "OmniboxAggregateEntry",
+        "type": "object"
+      },
+      "OmniboxAggregateOut": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/OmniboxAggregateEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "title": "OmniboxAggregateOut",
+        "type": "object"
+      },
       "OmniboxCatalogEntryOut": {
         "description": "Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition.",
         "properties": {
@@ -73653,6 +73704,46 @@
           "type"
         ],
         "title": "OmniboxFilterFieldOut",
+        "type": "object"
+      },
+      "OmniboxTelemetryIn": {
+        "description": "Ein Omnibox-Intent-Signal. intent_hash ist SHA-256(normalisierter Text).",
+        "properties": {
+          "accepted": {
+            "description": "Wurde der Vorschlag via Enter/Klick angenommen?",
+            "title": "Accepted",
+            "type": "boolean"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "intent_hash": {
+            "description": "SHA-256-Hex des normalisierten Eingabetexts",
+            "title": "Intent Hash",
+            "type": "string"
+          },
+          "matched_screen_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Getroffene SD oder null",
+            "title": "Matched Screen Id"
+          }
+        },
+        "required": [
+          "intent_hash",
+          "confidence",
+          "accepted"
+        ],
+        "title": "OmniboxTelemetryIn",
         "type": "object"
       },
       "OnboardingWorkspaceRequest": {
@@ -325837,6 +325928,121 @@
         "tags": [
           "users",
           "users"
+        ]
+      }
+    },
+    "/api/v1/ux-telemetry/omnibox": {
+      "post": {
+        "description": "Erfasst ein anonymisiertes Omnibox-Signal (kein Klartext) fuer M2-Tuning.",
+        "operationId": "record_omnibox_signal_api_v1_ux_telemetry_omnibox_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OmniboxTelemetryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Omnibox-Intent-Signal erfassen",
+        "tags": [
+          "ui",
+          "telemetry"
+        ]
+      }
+    },
+    "/api/v1/ux-telemetry/omnibox/aggregate": {
+      "get": {
+        "description": "Aggregat je getroffener Maske (Basis fuer Synonym-/Schwellwert-Tuning).",
+        "operationId": "get_omnibox_aggregate_api_v1_ux_telemetry_omnibox_aggregate_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmniboxAggregateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aggregierte Omnibox-Signale abrufen",
+        "tags": [
+          "ui",
+          "telemetry"
         ]
       }
     },

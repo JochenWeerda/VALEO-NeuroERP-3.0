@@ -3,7 +3,7 @@
  * Ersetzt Ribbon-Overload durch beschreibbare Aktionen.
  */
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Command as CommandIcon, HelpCircle, Search, Zap } from 'lucide-react'
@@ -20,10 +20,20 @@ import {
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
 import { useFeature } from '@/hooks/useFeature'
-import { fetchMaskRegistry } from '@/lib/api/mask-registry'
+import {
+  fetchMaskRegistry,
+  fetchOmniboxCatalog,
+  recordOmniboxSignal,
+  sha256Hex,
+} from '@/lib/api/mask-registry'
 import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
-import { compileIntents } from '@/lib/omnibox/intent-compiler'
-import { buildPaletteCommands, type PaletteCommand } from './command-palette-model'
+import { compileIntents, normalize } from '@/lib/omnibox/intent-compiler'
+import type { NavigateIntent } from '@/lib/omnibox/types'
+import {
+  buildPaletteCommands,
+  enrichCommandsWithOmniboxCatalog,
+  type PaletteCommand,
+} from './command-palette-model'
 
 interface CommandPaletteProps {
   open: boolean
@@ -71,13 +81,24 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
     staleTime: 5 * 60 * 1000,
   })
 
+  // UIX-060: Omnibox-Katalog liefert kuratierte Synonyme + reale Listen-Routen
+  // je Maske — angereichert in den Command-Katalog fuer besseres Matching und
+  // um bisher nur per Menue erreichbare Masken ueber die Omnibox findbar zu machen.
+  const omniboxCatalogQuery = useQuery({
+    queryKey: ['ui', 'mask-registry', 'omnibox-catalog'],
+    queryFn: fetchOmniboxCatalog,
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  })
+
   const commands = useMemo<PaletteCommand[]>(() => {
-    return buildPaletteCommands({
+    const base = buildPaletteCommands({
       agrarEnabled,
       navigationShortcuts,
       maskRegistry: maskRegistryQuery.data?.masks,
     })
-  }, [agrarEnabled, maskRegistryQuery.data?.masks, navigationShortcuts])
+    return enrichCommandsWithOmniboxCatalog(base, omniboxCatalogQuery.data, agrarEnabled)
+  }, [agrarEnabled, maskRegistryQuery.data?.masks, navigationShortcuts, omniboxCatalogQuery.data])
 
   // UIX-060 Omnibox: Mehrwort-Eingaben werden zu Navigations-Plänen mit
   // Filter-Vorschau kompiliert ("Verstanden als") — Enter navigiert nur.
@@ -85,6 +106,31 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
     if (search.trim().length < 3) return []
     return compileIntents(search, commands)
   }, [commands, search])
+
+  // UIX-060: Vorschlag annehmen → anonymes Telemetrie-Signal (SHA-256, kein
+  // Klartext) fire-and-forget, dann navigieren. Telemetrie darf die Navigation
+  // nie blockieren, daher best-effort ohne await im UI-Pfad.
+  const acceptIntent = useCallback(
+    (plan: NavigateIntent) => {
+      const rawScreenId = plan.command.actionParams?.screenId ?? plan.command.actionParams?.maskId
+      const matchedScreenId = typeof rawScreenId === 'string' ? rawScreenId : null
+      void sha256Hex(normalize(search))
+        .then((intentHash) => {
+          if (!intentHash) return
+          return recordOmniboxSignal({
+            intent_hash: intentHash,
+            matched_screen_id: matchedScreenId,
+            confidence: plan.confidence,
+            accepted: true,
+          })
+        })
+        // Telemetrie ist Sekundaerdatum — Fehler duerfen den Nutzerfluss nicht stoeren.
+        .catch(() => undefined)
+      navigate(plan.routePath)
+      onOpenChange(false)
+    },
+    [navigate, onOpenChange, search],
+  )
 
   const filteredCommands = useMemo(() => {
     const searchLower = search.trim().toLowerCase()
@@ -140,10 +186,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                   key={`intent:${plan.command.id}`}
                   // value enthält den Suchtext, damit cmdk die Vorschau nie wegfiltert
                   value={`${search} intent:${plan.command.id}`}
-                  onSelect={() => {
-                    navigate(plan.routePath)
-                    onOpenChange(false)
-                  }}
+                  onSelect={() => acceptIntent(plan)}
                   data-mcp-action={`omnibox-intent:${plan.command.id}`}
                   data-mcp-intent="navigate"
                   data-omnibox-confidence={plan.confidence.toFixed(2)}
@@ -153,12 +196,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                   {plan.filters.map((f) => (
                     <span
                       key={`${f.key}:${f.value}`}
-                      className="ml-2 rounded border border-border bg-muted px-1.5 text-xs text-muted-foreground"
+                      className="ml-2 rounded border border-border bg-muted px-1.5 text-xs text-muted-foreground group-data-[selected=true]:text-accent-foreground"
                     >
                       {f.key === 'q' ? `„${f.label}"` : f.label}
                     </span>
                   ))}
-                  <span className="ml-auto text-xs text-muted-foreground">
+                  {/* Konfidenz-Badge: gedaempft, aber auf der Selected-Row (bernstein) */}
+                  {/* lesbar — sonst faellt der Kontrast unter WCAG AA (axe-Gate). */}
+                  <span className="ml-auto text-xs text-muted-foreground group-data-[selected=true]:text-accent-foreground">
                     {Math.round(plan.confidence * 100)} %
                   </span>
                 </CommandItem>

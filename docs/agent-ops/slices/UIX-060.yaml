@@ -49,6 +49,16 @@ progress: >-
   ar-open-item->op-debitoren); OpenAPI regeneriert. Offen: Frontend-Consumer
   (Katalog-Fetch + Synonym/Route-Merge in den Compiler), Telemetrie, Playwright,
   axe.
+  2026-07-07 Rest abgeschlossen: (a) Frontend-Consumer — fetchOmniboxCatalog +
+  enrichCommandsWithOmniboxCatalog (Merge ueber route==actionParams.path:
+  Synonyme->keywords; Katalog-Routen ohne Command werden synthetisiert, damit
+  bisher nur per Menue erreichbare Masken findbar werden); in CommandPalette
+  verdrahtet; 8 neue Vitest (Model). (b) Telemetrie — POST /ux-telemetry/omnibox
+  (SHA-256-Hash, kein Klartext; 422 bei Klartext) + GET .../aggregate
+  (tenant-isoliert, in-memory); Client feuert fire-and-forget beim Annehmen;
+  6 pytest. (c) Playwright omnibox-smoke.spec.ts: Ctrl+K -> tippen -> Verstanden-
+  als -> Enter -> URL /finance/op-debitoren?q=folkerts; + axe-Check auf das
+  Overlay (keine serious/critical). tsc 0 Fehler; OpenAPI 2540 Pfade.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
