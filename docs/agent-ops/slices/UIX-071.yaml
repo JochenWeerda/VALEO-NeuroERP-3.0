@@ -36,6 +36,14 @@ progress: >-
   /api/v1/ux/overlays/{screen_id} (serverseitige Allowlist = Zweitverteidigung,
   Tenant-/User-Isolation) + Cache-Key-Verdrahtung + Frontend-UX (Spalten-Picker,
   Kachel-Drag, Zuruecksetzen) + Playwright.
+  2026-07-07 KOORDINATION: Frontend-Compiler-Kern (applyOverlay, 3e2ddfa81) =
+  Claude. Backend (Alembic user_screen_overlays + app/api/v1/endpoints/
+  ux_overlays.py mit serverseitiger Allowlist/400 + Tenant-/User-Isolation +
+  Router-Registrierung + tests/test_uix071_ux_overlays.py) wird vom Parallel-
+  Agenten (Codex) im geteilten Working Tree geliefert — dessen uncommitete
+  Aenderungen NICHT anfassen. Meine Duplikat-Testdatei entfernt. Gelernt:
+  bei geteiltem Tree vor Backend-Bau pruefen, ob der Parallel-Agent denselben
+  Slice-Teil schon baut (hier: 8 wedged pytest-Prozesse durch Doppelarbeit).
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
