@@ -222,7 +222,9 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
         else None
     )
     has_table_profile = not all_tables or bool(layout.get("tableProfile"))
-    profile_matches = not expected_profile or layout.get("tableProfile") == expected_profile
+    # Tabellenlose Screens (z.B. cockpit-Workspaces, UIX-061) brauchen kein
+    # Tabellen-Profil — die Domain-Erwartung gilt nur fuer echte Tabellen-Screens.
+    profile_matches = not all_tables or not expected_profile or layout.get("tableProfile") == expected_profile
     # 8. table_profile - table screens require a Meridian profile
     m("table_profile",
       has_table_profile and profile_matches,
@@ -262,6 +264,14 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
         if (c.get("sortable") or c.get("filterable")) and _GENERIC_KEY_PATTERN.match(c.get("key", ""))
     ]
     a("table_query_contract", not generic_cols, f"generic unstable column keys: {', '.join(generic_cols)}" if generic_cols else "OK")
+
+    # 15. cockpit_content (UIX-061) — cockpit-Workspaces brauchen Inhalt:
+    # entweder Kacheln (tiles) oder Tabellen. Advisory, damit leere Cockpits
+    # als Warnung auffallen statt still generatorReady zu sein.
+    is_cockpit = definition.get("mode") == "cockpit" or layout.get("floorplan") == "cockpit"
+    has_cockpit_content = bool(definition.get("tiles")) or bool(all_tables)
+    a("cockpit_content", not is_cockpit or has_cockpit_content,
+      "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
 
     # ── Summary ───────────────────────────────────────────────────────────────
     all_gates = mandatory + advisory

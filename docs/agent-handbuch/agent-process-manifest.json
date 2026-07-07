@@ -1317,6 +1317,22 @@
       ]
     },
     {
+      "mask_id": "workspace/einkauf",
+      "title": "Einkauf-Cockpit",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__einkauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/einkauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/einkauf/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/einkauf/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
       "mask_id": "finance/ap-invoice",
       "title": "Eingangsrechnung",
       "domain": "finance",
@@ -1524,6 +1540,23 @@
       ]
     },
     {
+      "mask_id": "workspace/fibu",
+      "title": "FIBU-Cockpit",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__fibu/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/fibu/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/fibu/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/fibu/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "futtermittel/einzelfuttermittel",
       "title": "Einzelfuttermittel",
       "domain": "futtermittel",
@@ -1645,6 +1678,37 @@
       ]
     },
     {
+      "mask_id": "workspace/lager",
+      "title": "Lager-Cockpit",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__lager/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/lager/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/lager/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/lager/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status"
+      ]
+    },
+    {
+      "mask_id": "workspace/leitung",
+      "title": "Leitungs-Cockpit",
+      "domain": "management",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__leitung/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/leitung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/leitung/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/leitung/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "qualitaet/reklamation",
       "title": "Reklamation",
       "domain": "qualitaet",
@@ -1743,6 +1807,23 @@
         "einzelpreis",
         "betrag"
       ],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "workspace/verkauf",
+      "title": "Verkauf-Cockpit",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__verkauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/verkauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/verkauf/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/verkauf/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.invoice.propose"

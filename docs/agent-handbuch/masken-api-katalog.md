@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (26 Masken).
+> Generiert aus `app/core/screen_definitions.py` (31 Masken).
 
 ## Übersicht
 
@@ -43,6 +43,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
+| `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
+| `workspace/fibu` | FIBU-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
+| `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
+| `workspace/leitung` | Leitungs-Cockpit | management | niedrig | — | `GET /api/v1/masks/workspace/leitung/agent-contract` |
+| `workspace/verkauf` | Verkauf-Cockpit | sales | niedrig | — | `GET /api/v1/masks/workspace/verkauf/agent-contract` |
 
 ---
 
@@ -570,6 +575,29 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `workspace/einkauf` — Einkauf-Cockpit
+
+**Zweck:** Rollen-Startseite Einkauf — offene Bestellungen, Avis und Preisabweichungen mit direktem Sprung in die Prozessmasken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/einkauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/einkauf/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__einkauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Einkauf-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
 ## Domäne: finance
 
 ### `finance/ap-invoice` — Eingangsrechnung
@@ -809,6 +837,30 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `workspace/fibu` — FIBU-Cockpit
+
+**Zweck:** Rollen-Startseite FIBU — offene Posten, faellige Zahlungen und Mahnstufen mit Sprung in Zahlungslauf und OP-Masken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/fibu/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/fibu/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/fibu/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__fibu/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was steht heute in FIBU-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
 ## Domäne: futtermittel
 
 ### `futtermittel/einzelfuttermittel` — Einzelfuttermittel
@@ -961,6 +1013,51 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `workspace/lager` — Lager-Cockpit
+
+**Zweck:** Rollen-Startseite Lager — Annahmen, Wartezeiten und Trocknerauslastung mit Sprung in Bestands- und Qualitaetsmasken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/lager/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/lager/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/lager/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__lager/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Lager-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: management
+
+### `workspace/leitung` — Leitungs-Cockpit
+
+**Zweck:** Rollen-Startseite Leitung — Umsatz, Rohertrag und Top-Ausnahmen mit Sprung in Eskalations- und Audit-Ansichten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/leitung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/leitung/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/leitung/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__leitung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Leitungs-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
 ## Domäne: qualitaet
 
 ### `qualitaet/reklamation` — Reklamation
@@ -1077,5 +1174,29 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `workspace/verkauf` — Verkauf-Cockpit
+
+**Zweck:** Rollen-Startseite Verkauf — Auftragsbestand, Ueberfaellige und Kreditlimit-Warnungen mit Sprung in Auftrags- und CRM-Masken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/verkauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/verkauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/verkauf/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__verkauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Verkauf-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
 
 ---

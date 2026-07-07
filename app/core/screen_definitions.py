@@ -1803,8 +1803,156 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
     }
 
 
+# ── Rollen-Workspaces (UIX-061) ──────────────────────────────────────────────
+# Native cockpit-SDs als rollenbasierte Startseiten. Inhalt aus Bestand:
+# KPI-Summary-Slots + Worklist-Kacheln, die in vorhandene Prozessmasken
+# navigieren (targetScreenId -> reale Listen-Route via _SCREEN_LIST_ROUTE).
+# Kacheln tragen einen Ton (neutral|warning|danger); Live-Zaehler (countEndpoint)
+# folgen als Nachtrag, sobald count_only-Worklist-GETs existieren.
+
+def _build_workspace_screen_definition(
+    *,
+    screen_id: str,
+    domain: str,
+    title: str,
+    subtitle: str,
+    purpose: str,
+    summary: list[dict[str, Any]],
+    tiles: list[dict[str, Any]],
+) -> dict[str, Any]:
+    slug = screen_id.replace("/", "-")
+    return {
+        "schemaVersion": 1,
+        "id": screen_id,
+        "domain": domain,
+        "mode": "cockpit",
+        "title": title,
+        "subtitle": subtitle,
+        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
+        "summary": summary,
+        "tiles": tiles,
+        "noWorkflowReason": (
+            "Workspace ist eine rollenbasierte Aggregations-Startseite ohne eigenen "
+            "Objekt-Lebenszyklus — Aktionen fuehren in die jeweiligen Prozessmasken."
+        ),
+        "agentContract": {
+            "businessPurpose": purpose,
+            "examplePrompts": [
+                f"Was steht heute in {title} an?",
+                "Zeige die dringendsten Worklists fuer meine Rolle.",
+            ],
+            "testSelectors": {"screenRoot": f"[data-testid='{slug}']"},
+        },
+    }
+
+
+def build_workspace_einkauf_screen_definition() -> dict[str, Any]:
+    return _build_workspace_screen_definition(
+        screen_id="workspace/einkauf",
+        domain="einkauf",
+        title="Einkauf-Cockpit",
+        subtitle="Startseite Einkauf",
+        purpose="Rollen-Startseite Einkauf — offene Bestellungen, Avis und Preisabweichungen mit direktem Sprung in die Prozessmasken.",
+        summary=[
+            {"key": "offene_bestellungen", "label": "Offene Bestellungen", "tone": "neutral"},
+            {"key": "avis_heute", "label": "Avis heute", "tone": "neutral"},
+            {"key": "preisabweichung", "label": "Preisabweichungen", "tone": "warning"},
+        ],
+        tiles=[
+            {"key": "rechnungspruefung", "label": "Rechnungspruefung-Abweichungen", "targetScreenId": "finance/ap-invoice", "targetFilters": {"status": "abweichung"}, "tone": "warning"},
+            {"key": "offene_avis", "label": "Offene Avis", "targetScreenId": "einkauf/anlieferavis", "targetFilters": {}, "tone": "neutral"},
+            {"key": "rfq", "label": "RFQ / Anfragen", "targetScreenId": "einkauf/anfrage", "targetFilters": {}, "tone": "neutral"},
+        ],
+    )
+
+
+def build_workspace_verkauf_screen_definition() -> dict[str, Any]:
+    return _build_workspace_screen_definition(
+        screen_id="workspace/verkauf",
+        domain="sales",
+        title="Verkauf-Cockpit",
+        subtitle="Startseite Verkauf",
+        purpose="Rollen-Startseite Verkauf — Auftragsbestand, Ueberfaellige und Kreditlimit-Warnungen mit Sprung in Auftrags- und CRM-Masken.",
+        summary=[
+            {"key": "auftragsbestand", "label": "Auftragsbestand", "tone": "neutral"},
+            {"key": "ueberfaellig", "label": "Ueberfaellige Auftraege", "tone": "warning"},
+            {"key": "kreditlimit", "label": "Kreditlimit-Warnungen", "tone": "danger"},
+        ],
+        tiles=[
+            {"key": "offene_auftraege", "label": "Offene Auftraege", "targetScreenId": "sales/sales-order", "targetFilters": {"status": "offen"}, "tone": "neutral"},
+            {"key": "lieferscheine", "label": "Offene Lieferscheine", "targetScreenId": "sales/delivery-note", "targetFilters": {}, "tone": "neutral"},
+            {"key": "wiedervorlagen", "label": "Angebots-Wiedervorlagen", "targetScreenId": "crm/lead", "targetFilters": {}, "tone": "warning"},
+        ],
+    )
+
+
+def build_workspace_lager_screen_definition() -> dict[str, Any]:
+    return _build_workspace_screen_definition(
+        screen_id="workspace/lager",
+        domain="lager",
+        title="Lager-Cockpit",
+        subtitle="Startseite Lager & Annahme",
+        purpose="Rollen-Startseite Lager — Annahmen, Wartezeiten und Trocknerauslastung mit Sprung in Bestands- und Qualitaetsmasken.",
+        summary=[
+            {"key": "annahmen_heute", "label": "Annahmen heute", "tone": "neutral"},
+            {"key": "wartezeit", "label": "Durchschn. Wartezeit", "tone": "neutral"},
+            {"key": "trockner", "label": "Trocknerauslastung", "tone": "warning"},
+        ],
+        tiles=[
+            {"key": "qualitaet_nachtrag", "label": "Qualitaets-Nachtrag", "targetScreenId": "qualitaet/reklamation", "targetFilters": {"typ": "nachtrag"}, "tone": "warning"},
+            {"key": "lagerbewegungen", "label": "Lagerbewegungen", "targetScreenId": "lager/stock-movement", "targetFilters": {}, "tone": "neutral"},
+            {"key": "bestand", "label": "Bestandsuebersicht", "targetScreenId": "lager/article-stock", "targetFilters": {}, "tone": "neutral"},
+        ],
+    )
+
+
+def build_workspace_fibu_screen_definition() -> dict[str, Any]:
+    return _build_workspace_screen_definition(
+        screen_id="workspace/fibu",
+        domain="finance",
+        title="FIBU-Cockpit",
+        subtitle="Startseite Finanzbuchhaltung",
+        purpose="Rollen-Startseite FIBU — offene Posten, faellige Zahlungen und Mahnstufen mit Sprung in Zahlungslauf und OP-Masken.",
+        summary=[
+            {"key": "op_debitoren", "label": "OP Debitoren", "tone": "neutral"},
+            {"key": "op_kreditoren", "label": "OP Kreditoren", "tone": "neutral"},
+            {"key": "faellige_zahlungen", "label": "Faellige Zahlungen", "tone": "warning"},
+        ],
+        tiles=[
+            {"key": "zahlungslauf", "label": "Zahlungslauf-Vorschlag", "targetScreenId": "finance/payment-run", "targetFilters": {}, "tone": "warning"},
+            {"key": "op_debitoren", "label": "Offene Posten Debitoren", "targetScreenId": "finance/ar-open-item", "targetFilters": {"overdue": "1"}, "tone": "neutral"},
+            {"key": "eingangsrechnungen", "label": "Eingangsrechnungen", "targetScreenId": "finance/ap-invoice", "targetFilters": {}, "tone": "neutral"},
+        ],
+    )
+
+
+def build_workspace_leitung_screen_definition() -> dict[str, Any]:
+    return _build_workspace_screen_definition(
+        screen_id="workspace/leitung",
+        domain="management",
+        title="Leitungs-Cockpit",
+        subtitle="Startseite Geschaeftsleitung",
+        purpose="Rollen-Startseite Leitung — Umsatz, Rohertrag und Top-Ausnahmen mit Sprung in Eskalations- und Audit-Ansichten.",
+        summary=[
+            {"key": "umsatz_ytd", "label": "Umsatz YTD", "tone": "neutral"},
+            {"key": "rohertrag", "label": "Rohertrag", "tone": "neutral"},
+            {"key": "top_ausnahmen", "label": "Top-Ausnahmen", "tone": "warning"},
+        ],
+        tiles=[
+            {"key": "eskalationen", "label": "Eskalationen", "targetScreenId": "qualitaet/reklamation", "targetFilters": {"prioritaet": "hoch"}, "tone": "danger"},
+            {"key": "op_gesamt", "label": "Offene Posten (Ueberfaellig)", "targetScreenId": "finance/ar-open-item", "targetFilters": {"overdue": "1"}, "tone": "warning"},
+            {"key": "kontrakte", "label": "Kontrakt-Fristen", "targetScreenId": "agrar/kontrakte", "targetFilters": {}, "tone": "neutral"},
+        ],
+    )
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
+    "workspace/einkauf": build_workspace_einkauf_screen_definition,
+    "workspace/verkauf": build_workspace_verkauf_screen_definition,
+    "workspace/lager": build_workspace_lager_screen_definition,
+    "workspace/fibu": build_workspace_fibu_screen_definition,
+    "workspace/leitung": build_workspace_leitung_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
     "einkauf/supplier": build_supplier_screen_definition,
@@ -2298,6 +2446,11 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
     "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
     "sales/sales-order": ["verkaufsauftrag", "auftrag", "kundenauftrag"],
+    "workspace/einkauf": ["einkauf cockpit", "einkauf startseite", "beschaffung workspace"],
+    "workspace/verkauf": ["verkauf cockpit", "vertrieb startseite", "sales workspace"],
+    "workspace/lager": ["lager cockpit", "annahme startseite", "lager workspace"],
+    "workspace/fibu": ["fibu cockpit", "finanzbuchhaltung startseite", "finance workspace"],
+    "workspace/leitung": ["leitung cockpit", "geschaeftsleitung", "management workspace"],
 }
 
 
@@ -2336,6 +2489,11 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "qualitaet/reklamation": "/qualitaet/reklamationen",
     "sales/delivery-note": "/verkauf/lieferschein-erfassung",
     "sales/sales-order": "/verkauf/auftraege",
+    "workspace/einkauf": "/workspace/einkauf",
+    "workspace/verkauf": "/workspace/verkauf",
+    "workspace/lager": "/workspace/lager",
+    "workspace/fibu": "/workspace/fibu",
+    "workspace/leitung": "/workspace/leitung",
 }
 
 
@@ -2344,13 +2502,51 @@ def get_screen_list_route(mask_id: str) -> str | None:
     return _SCREEN_LIST_ROUTE.get(mask_id)
 
 
-def get_screen_definition(mask_id: str) -> dict[str, Any] | None:
+def _resolve_tile_routes(definition: dict[str, Any]) -> None:
+    """Reichert cockpit-Kacheln (UIX-061) um die aufgeloeste targetRoute an —
+    Wiederverwendung der Omnibox-Routen-Bruecke, damit das Frontend keinen
+    eigenen screenId->Route-Join braucht."""
+    for tile in definition.get("tiles") or []:
+        target = tile.get("targetScreenId")
+        if target and "targetRoute" not in tile:
+            route = get_screen_list_route(target)
+            if route:
+                tile["targetRoute"] = route
+
+
+def _apply_season_profile(definition: dict[str, Any], today: str | None) -> None:
+    """Sortiert Kacheln gemaess seasonProfile.tileOrderOverride um, wenn das
+    heutige Datum (MM-TT) im aktiven Fenster liegt. Reine Umsortierung — kein
+    Inhaltswechsel (UIX-061)."""
+    profile = definition.get("seasonProfile")
+    tiles = definition.get("tiles")
+    if not profile or not tiles:
+        return
+    order = profile.get("tileOrderOverride")
+    if not order:
+        return
+    from datetime import date as _date
+
+    md = (today or _date.today().isoformat())[5:10]  # MM-TT
+    active_from = profile.get("activeFrom", "01-01")
+    active_to = profile.get("activeTo", "12-31")
+    # Fenster kann das Jahresende ueberspannen (z.B. 11-01..02-15)
+    in_window = (active_from <= md <= active_to) if active_from <= active_to else (md >= active_from or md <= active_to)
+    if not in_window:
+        return
+    rank = {key: idx for idx, key in enumerate(order)}
+    definition["tiles"] = sorted(tiles, key=lambda t: rank.get(t.get("key"), len(order)))
+
+
+def get_screen_definition(mask_id: str, *, today: str | None = None) -> dict[str, Any] | None:
     builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is None:
         return None
     definition = _with_meridian_layout(builder())
     contract = definition.setdefault("agentContract", {})
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
+    _resolve_tile_routes(definition)
+    _apply_season_profile(definition, today)
     return definition
 
 
