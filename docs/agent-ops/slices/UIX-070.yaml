@@ -22,6 +22,20 @@ tests:
   - "pytest test_uix070_conversational_safety.py"
   - "Vitest Sicherheitsmatrix-Tabelle"
   - "Playwright create_activity-Prefill+Ritual"
+progress: >-
+  2026-07-07 Sicherheits-Kern geliefert (25e58c705): harte NL-Matrix
+  classifyOmniboxAction (ActionRuntime.ts) als Single Source of Truth —
+  forbiddenForAgents->unsichtbar, high/critical->navigateOnly, moderate->ritual,
+  safe->ritual nur mit Confirmation sonst formPrefill; confidence<0.75 degradiert
+  auf formPrefill. IntentPlan um commandDraft/formPrefill erweitert;
+  command-safety.ts (buildCommandIntent + type-aware Slot-Filling, missingFields);
+  ActionRequest.triggerSource fuers Audit. Spiegel-Testsuite
+  test_uix070_conversational_safety.py (Python-Mirror ueber ALL_SCREEN_IDS,
+  162 pytest: kein NL-Pfad umgeht Masken-Confirmation) + Vitest-Matrix (22).
+  tsc 0, ESLint sauber. OFFEN (naechster Schritt): CommandPalette-UI-Verdrahtung
+  (Omnibox-Katalog um actions je Screen erweitern -> Compiler erzeugt
+  commandDraft -> ActionRuntime.prepare/ConfirmationDialog mit trigger_source)
+  + Playwright create_activity-Prefill+Ritual.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
