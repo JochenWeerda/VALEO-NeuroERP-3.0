@@ -22,6 +22,20 @@ tests:
   - "Vitest applyOverlay (Merge/Allowlist/Drift/Cache-Key)"
   - "pytest PUT-Validierung + Isolation Coverage>=60"
   - "Playwright Spalten->Reload->Reset"
+progress: >-
+  2026-07-07 Compiler-Kern (Sicherheit) geliefert: render-plan/overlay.ts
+  applyOverlay(plan, overlay) mit harter Allowlist — OVERLAYABLE (tables:
+  visibleColumns/columnWidths/activeVariant/customVariants, density, tileOrder,
+  collapsedSections) vs. NON_OVERLAYABLE (actions/permissions/dangerLevel/
+  confirmation/contextRailSections/fields/tableProfile/floorplan → violations,
+  nie angewendet). Drift (Overlay-Keys ohne Plan-Entsprechung) → invalidPaths,
+  nie Fehler; immutabel; hashOverlay fuer Cache-Key. RenderTablePlan um
+  activeVariant/customVariants, RenderPlan um collapsedSections/overlayInvalidPaths
+  erweitert. 10 Vitest (Allowlist, Merge, Drift, Hash, Immutabilitaet). tsc 0,
+  ESLint sauber. OFFEN: Alembic user_screen_overlays + GET/PUT/DELETE
+  /api/v1/ux/overlays/{screen_id} (serverseitige Allowlist = Zweitverteidigung,
+  Tenant-/User-Isolation) + Cache-Key-Verdrahtung + Frontend-UX (Spalten-Picker,
+  Kachel-Drag, Zuruecksetzen) + Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

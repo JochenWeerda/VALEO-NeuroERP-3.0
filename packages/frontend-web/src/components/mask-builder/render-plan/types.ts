@@ -126,6 +126,12 @@ export interface RenderTableColumnPlan {
   defaultSort?: 'asc' | 'desc'
 }
 
+export interface RenderTableVariant {
+  key: string
+  label: string
+  filters?: Record<string, string>
+}
+
 export interface RenderTablePlan {
   key: string
   label: string
@@ -137,6 +143,10 @@ export interface RenderTablePlan {
   rowHeight: number
   serverPagination: boolean
   tableProfile: ScreenTableProfile
+  /** Aktive Nutzer-Variante (UIX-071 Overlay) */
+  activeVariant?: string
+  /** Nutzer-definierte Varianten (UIX-071 Overlay) */
+  customVariants?: RenderTableVariant[]
 }
 
 export interface RenderActionPlan {
@@ -188,6 +198,10 @@ export interface RenderPlan {
   actions: RenderActionPlan[]
   workflow?: RenderWorkflowPlan
   performance: RenderPerformancePlan
+  /** Vom Nutzer eingeklappte Sektionen (UIX-071 Overlay) */
+  collapsedSections?: string[]
+  /** Overlay-Keys ohne Entsprechung im Plan → Rail-Hinweis "Anpassung pruefen" (UIX-071) */
+  overlayInvalidPaths?: string[]
 }
 
 export function fieldTypeToComponentKind(type: ScreenFieldType): RenderComponentKind {
