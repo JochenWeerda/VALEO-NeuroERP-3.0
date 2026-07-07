@@ -20,7 +20,9 @@ from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.mask_registry_schemas import (
     MaskRegistryOut,
     OmniboxCatalogEntryOut,
+    WorkspaceStartpageOut,
 )
+from ....core.workspace_roles import resolve_workspace_startpage
 
 
 router = APIRouter(prefix="/ui/mask-registry", tags=["ui", "masks"])
@@ -98,6 +100,20 @@ async def get_omnibox_catalog(tenant_id: str = Depends(get_tenant_id)):
     Titel, Synonyme, Beispiel-Prompts und filterbare Felder je ScreenDefinition."""
     _ = tenant_id
     return _build_omnibox_catalog()
+
+
+@router.get(
+    "/workspace-startpage",
+    response_model=WorkspaceStartpageOut,
+    summary="Rollen-Startseite (Workspace) aufloesen",
+)
+async def get_workspace_startpage(
+    role: str | None = None,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Loest die rollenbasierte cockpit-Startseite auf (UIX-061). Ohne Zuordnung
+    bleiben screenId/route null → Frontend faellt auf die bisherige Startseite zurueck."""
+    return resolve_workspace_startpage(role, tenant_id)
 
 
 @router.get("", response_model=MaskRegistryOut, summary="Mask registry abrufen")

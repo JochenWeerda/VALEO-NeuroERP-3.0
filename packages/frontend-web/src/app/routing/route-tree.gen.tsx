@@ -6154,26 +6154,61 @@ const appRoute0860 = createRoute({
 
 const appRoute0861 = createRoute({
   getParentRoute: () => appLayoutRoute,
+  path: "workspace/einkauf",
+  component: () => renderPage("@/pages/workspace/einkauf"),
+  staticData: {"breadcrumb":"Einkauf","module":"@/pages/workspace/einkauf","legacyPath":"/workspace/einkauf"},
+})
+
+const appRoute0862 = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "workspace/fibu",
+  component: () => renderPage("@/pages/workspace/fibu"),
+  staticData: {"breadcrumb":"Fibu","module":"@/pages/workspace/fibu","legacyPath":"/workspace/fibu"},
+})
+
+const appRoute0863 = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "workspace/lager",
+  component: () => renderPage("@/pages/workspace/lager"),
+  staticData: {"breadcrumb":"Lager","module":"@/pages/workspace/lager","legacyPath":"/workspace/lager"},
+})
+
+const appRoute0864 = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "workspace/leitung",
+  component: () => renderPage("@/pages/workspace/leitung"),
+  staticData: {"breadcrumb":"Leitung","module":"@/pages/workspace/leitung","legacyPath":"/workspace/leitung"},
+})
+
+const appRoute0865 = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "workspace/verkauf",
+  component: () => renderPage("@/pages/workspace/verkauf"),
+  staticData: {"breadcrumb":"Verkauf","module":"@/pages/workspace/verkauf","legacyPath":"/workspace/verkauf"},
+})
+
+const appRoute0866 = createRoute({
+  getParentRoute: () => appLayoutRoute,
   path: "zertifikate",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Zertifikate","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate"},
 })
 
-const appRoute0862 = createRoute({
+const appRoute0867 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/$id",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/:id"},
 })
 
-const appRoute0863 = createRoute({
+const appRoute0868 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/liste",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/liste"},
 })
 
-const appRoute0864 = createRoute({
+const appRoute0869 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/neu",
   component: () => renderPage("@/pages/zertifikate/liste"),
@@ -7214,7 +7249,12 @@ export const routeTree = rootRoute.addChildren([
     appRoute0861,
     appRoute0862,
     appRoute0863,
-    appRoute0864
+    appRoute0864,
+    appRoute0865,
+    appRoute0866,
+    appRoute0867,
+    appRoute0868,
+    appRoute0869
   ]),
   portalLayoutRoute.addChildren([
     portalRoute0000,
@@ -11669,6 +11709,31 @@ export const generatedRouteInventory = [
     "module": "@/pages/workflows/trigger",
     "path": "workflows/trigger",
     "source": "auto"
+  },
+  {
+    "module": "@/pages/workspace/einkauf",
+    "path": "workspace/einkauf",
+    "source": "alias"
+  },
+  {
+    "module": "@/pages/workspace/fibu",
+    "path": "workspace/fibu",
+    "source": "alias"
+  },
+  {
+    "module": "@/pages/workspace/lager",
+    "path": "workspace/lager",
+    "source": "alias"
+  },
+  {
+    "module": "@/pages/workspace/leitung",
+    "path": "workspace/leitung",
+    "source": "alias"
+  },
+  {
+    "module": "@/pages/workspace/verkauf",
+    "path": "workspace/verkauf",
+    "source": "alias"
   },
   {
     "module": "@/pages/zertifikate/liste",

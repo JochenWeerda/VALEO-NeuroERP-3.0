@@ -116890,6 +116890,51 @@
         "title": "WorkflowTemplateOut",
         "type": "object"
       },
+      "WorkspaceStartpageOut": {
+        "description": "Rollen-Startseite (UIX-061): screenId/route null wenn keine Zuordnung.",
+        "properties": {
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route"
+          },
+          "screenId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screenid"
+          }
+        },
+        "required": [
+          "role",
+          "screenId",
+          "route"
+        ],
+        "title": "WorkspaceStartpageOut",
+        "type": "object"
+      },
       "ZaStaffelCreate": {
         "properties": {
           "abrechnung_typ": {
@@ -325524,6 +325569,78 @@
           }
         ],
         "summary": "Omnibox catalog abrufen",
+        "tags": [
+          "ui",
+          "masks"
+        ]
+      }
+    },
+    "/api/v1/ui/mask-registry/workspace-startpage": {
+      "get": {
+        "description": "Loest die rollenbasierte cockpit-Startseite auf (UIX-061). Ohne Zuordnung\nbleiben screenId/route null → Frontend faellt auf die bisherige Startseite zurueck.",
+        "operationId": "get_workspace_startpage_api_v1_ui_mask_registry_workspace_startpage_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "role",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceStartpageOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollen-Startseite (Workspace) aufloesen",
         "tags": [
           "ui",
           "masks"

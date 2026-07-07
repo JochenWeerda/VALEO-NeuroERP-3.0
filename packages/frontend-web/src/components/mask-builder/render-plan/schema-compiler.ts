@@ -5,10 +5,11 @@ import type {
   ScreenTabDefinition,
   ScreenTableDefinition,
   ScreenTableProfile,
+  ScreenTileDefinition,
 } from '../schema'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
-import { fieldTypeToComponentKind, type RenderActionPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan } from './types'
+import { fieldTypeToComponentKind, type RenderActionPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
 const DEFAULT_LOOKUP_RESULT_LIMIT = 25
@@ -96,6 +97,31 @@ function filterActionsByPermission(
       auditReasonRequired: action.auditReasonRequired,
       humanApprovalRequired: action.humanApprovalRequired,
     }))
+}
+
+/**
+ * Kompiliert cockpit-Kacheln (UIX-061): baut die Ziel-Route inkl. Filter-Query.
+ * Die Reihenfolge kommt bereits saisonal sortiert vom Backend; Kacheln ohne
+ * aufgeloeste targetRoute werden verworfen (kein toter Link).
+ */
+export function compileTiles(schema: ScreenDefinition): RenderTilePlan[] {
+  const tiles: ScreenTileDefinition[] = schema.tiles ?? []
+  const plans: RenderTilePlan[] = []
+  for (const tile of tiles) {
+    const base = tile.targetRoute ?? ''
+    if (!base) continue
+    const filters = tile.targetFilters ?? {}
+    const query = new URLSearchParams(filters).toString()
+    plans.push({
+      key: tile.key,
+      label: tile.label,
+      targetScreenId: tile.targetScreenId,
+      targetPath: query ? `${base}${base.includes('?') ? '&' : '?'}${query}` : base,
+      countEndpoint: tile.countEndpoint,
+      tone: tile.tone ?? 'neutral',
+    })
+  }
+  return plans
 }
 
 export function compileRenderPlan(
@@ -203,6 +229,7 @@ export function compileRenderPlan(
       tone: item.tone,
     })),
     summaryItems: context.summary?.summaryItems ?? schema.summary ?? [],
+    tiles: compileTiles(schema),
     visibleTabs,
     tabContent,
     rootFieldKeys: rootFields.map((field) => field.key),

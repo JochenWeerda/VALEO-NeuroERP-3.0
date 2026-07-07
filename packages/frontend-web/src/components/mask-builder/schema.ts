@@ -180,6 +180,28 @@ export interface ScreenWorkflowDefinition {
   evidenceRequired?: boolean
 }
 
+/** Worklist-Kachel eines cockpit-Workspaces (UIX-061). */
+export interface ScreenTileDefinition {
+  key: string
+  label: string
+  /** Ziel-Maske; das Backend loest targetRoute daraus auf. */
+  targetScreenId: string
+  /** Vom Backend aufgeloeste Listen-Route (Omnibox-Routen-Bruecke). */
+  targetRoute?: string
+  /** Query-Filter, die beim Navigieren angehaengt werden. */
+  targetFilters?: Record<string, string>
+  /** Optionaler Zaehler-Endpoint (count_only); fehlt → reine Navigations-Kachel. */
+  countEndpoint?: string
+  tone?: 'neutral' | 'warning' | 'danger'
+}
+
+/** Saison-Profil: sortiert Kacheln im aktiven Fenster um (kein Inhaltswechsel). */
+export interface ScreenSeasonProfile {
+  activeFrom?: string
+  activeTo?: string
+  tileOrderOverride?: string[]
+}
+
 export interface ScreenDefinition {
   schemaVersion: 1
   id: string
@@ -200,6 +222,8 @@ export interface ScreenDefinition {
   fields?: ScreenFieldDefinition[]
   tabs?: ScreenTabDefinition[]
   tables?: ScreenTableDefinition[]
+  tiles?: ScreenTileDefinition[]
+  seasonProfile?: ScreenSeasonProfile
   actions?: ScreenActionDefinition[]
   workflow?: ScreenWorkflowDefinition
   layout?: {

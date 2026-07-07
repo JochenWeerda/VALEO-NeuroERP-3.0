@@ -5,6 +5,7 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/marketing/**/*.tsx',
   '../../pages/sales/**/*.tsx',
   '../../pages/verkauf/**/*.tsx',
+  '../../pages/workspace/**/*.tsx',
   '../../pages/vertrieb/**/*.tsx',
   '../../pages/kontrakte/**/*.tsx',
   '../../pages/preise/**/*.tsx',

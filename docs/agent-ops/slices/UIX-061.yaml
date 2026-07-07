@@ -1,7 +1,7 @@
 slice_id: UIX-061
 title: Rollen-Workspaces (kontextabhaengige Startseiten)
 owner: Claude
-status: in_arbeit
+status: fertig
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m1-spec.md
 coordination: >-
@@ -23,6 +23,24 @@ tests:
   - "pytest SD-Readiness + tiles-Endpoints"
   - "Vitest TileGridRenderer"
   - "Playwright Route-Smoke der 5 Workspaces"
+progress: >-
+  2026-07-07 umgesetzt: (a) Backend (662bb1fe2) — 5 native cockpit-SDs
+  (workspace/einkauf|verkauf|lager|fibu|leitung), alle generatorReady +
+  advisoryScore 1.0; additiver tiles-Block; get_screen_definition loest
+  targetRoute via _SCREEN_LIST_ROUTE auf; _apply_season_profile (MM-TT-Fenster,
+  auch jahresuebergreifend); Readiness-Advisory cockpit_content + table_profile-
+  Relaxierung fuer tabellenlose Screens; Workspaces in _AGENT_SYNONYMS +
+  _SCREEN_LIST_ROUTE. (b) Frontend — ScreenTileDefinition/seasonProfile +
+  RenderTilePlan; compileTiles (Route+Filter-Query); TileGridRenderer (Ton
+  neutral|warning|danger, optionaler Live-Zaehler); in UniversalMaskRenderer
+  nach dem Summary; UniversalNativeCockpitPage + 5 Seiten + route-aliases
+  (route-tree regeneriert). (c) Rollen-Redirect — config/workspace_roles.yaml
+  (tenant-ueberschreibbar), app/core/workspace_roles.py, GET /ui/mask-registry/
+  workspace-startpage, useWorkspaceRedirect (Flag roleWorkspaces default off,
+  einmalig je Session) in start-dashboard. Tests: 27 pytest + 6 Vitest +
+  Playwright Route-Smoke (5 Workspaces + Kachel-Navigation). tsc 0, ESLint
+  sauber, OpenAPI 2541 Pfade. Offen (v1.1): Live-Zaehler brauchen count_only-
+  Worklist-GETs (existieren noch nicht).
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

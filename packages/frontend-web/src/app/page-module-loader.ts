@@ -94,6 +94,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   termine: 'commercial',
   transporte: 'operations',
   verkauf: 'commercial',
+  workspace: 'commercial',
   verladung: 'operations',
   versand: 'operations',
   versicherungen: 'operations',

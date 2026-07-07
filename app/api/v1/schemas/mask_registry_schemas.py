@@ -22,6 +22,13 @@ class OmniboxFilterFieldOut(BaseSchema):
     type: str  # 'enum' | 'date' | 'number' | 'text'
 
 
+class WorkspaceStartpageOut(BaseSchema):
+    """Rollen-Startseite (UIX-061): screenId/route null wenn keine Zuordnung."""
+    role: str | None
+    screenId: str | None
+    route: str | None
+
+
 class OmniboxCatalogEntryOut(BaseSchema):
     """Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition."""
     screen_id: str

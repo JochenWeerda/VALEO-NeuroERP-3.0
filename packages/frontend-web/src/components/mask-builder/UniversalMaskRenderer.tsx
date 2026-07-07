@@ -13,6 +13,7 @@ import {
   FastTabRenderer,
   FastTableRenderer,
   TabContentRenderer,
+  TileGridRenderer,
   WorkflowPanelRenderer,
   layoutClasses,
 } from './renderers'
@@ -131,6 +132,7 @@ function RenderFromPlan({
 
       <WorkflowPanelRenderer workflow={plan.workflow} workflowState={workflowState} />
       <FastSummaryRenderer items={plan.summaryItems} />
+      <TileGridRenderer tiles={plan.tiles} />
 
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}

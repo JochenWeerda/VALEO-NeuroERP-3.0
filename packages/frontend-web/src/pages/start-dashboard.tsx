@@ -16,6 +16,7 @@ import {
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
 import { getDomainPresentation, getSectionPresentation } from '@/app/navigation/dashboard-catalog'
 import { useNavSections } from '@/app/navigation/nav-runtime'
+import { useWorkspaceRedirect } from '@/hooks/useWorkspaceRedirect'
 import type { NavItem } from '@/app/navigation/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -153,6 +154,8 @@ const DOMAIN_COLOR: Record<string, string> = {
 
 export default function StartDashboardPage(): JSX.Element {
   const { i18n } = useTranslation()
+  // UIX-061: rollenbasierter Redirect auf cockpit-Workspace (flag-geschuetzt).
+  useWorkspaceRedirect()
   const agrarEnabled = useFeature('agrar')
   const navSections = useNavSections()
   const navigate = useNavigate()

@@ -2543,6 +2543,26 @@
     {
       "module": "@/pages/admin/vordruck-editor",
       "path": "admin/vordruck-editor"
+    },
+    {
+      "module": "@/pages/workspace/einkauf",
+      "path": "workspace/einkauf"
+    },
+    {
+      "module": "@/pages/workspace/verkauf",
+      "path": "workspace/verkauf"
+    },
+    {
+      "module": "@/pages/workspace/lager",
+      "path": "workspace/lager"
+    },
+    {
+      "module": "@/pages/workspace/fibu",
+      "path": "workspace/fibu"
+    },
+    {
+      "module": "@/pages/workspace/leitung",
+      "path": "workspace/leitung"
     }
   ]
 }

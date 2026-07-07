@@ -6,12 +6,18 @@ tiles-Struktur, die aufgeloesten Kachel-Routen und das Saison-Ordering.
 from __future__ import annotations
 
 import pytest
+from fastapi.testclient import TestClient
 
 from app.core.screen_definitions import (
     _SCREEN_DEFINITIONS,
     get_screen_definition,
 )
+from app.core.workspace_roles import resolve_workspace_screen
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness
+from app.main import app
+
+_client = TestClient(app, raise_server_exceptions=False)
+_HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-Id": "00000000-0000-0000-0000-000000000001"}
 
 WORKSPACES = [
     "workspace/einkauf",
@@ -93,3 +99,35 @@ def test_season_profile_reorders_tiles_within_window():
     }
     _apply_season_profile(definition2, today="2026-01-15")
     assert [t["key"] for t in definition2["tiles"]] == ["a", "b", "c"]
+
+
+@pytest.mark.parametrize(
+    "role,expected",
+    [
+        ("einkauf", "workspace/einkauf"),
+        ("vertrieb", "workspace/verkauf"),
+        ("Lagerist", "workspace/lager"),
+        ("BUCHHALTUNG", "workspace/fibu"),
+        ("geschaeftsleitung", "workspace/leitung"),
+        ("unbekannt", None),
+        (None, None),
+    ],
+)
+def test_resolve_workspace_screen(role, expected):
+    assert resolve_workspace_screen(role) == expected
+
+
+def test_workspace_startpage_endpoint_resolves_route():
+    resp = _client.get("/api/v1/ui/mask-registry/workspace-startpage?role=fibu", headers=_HEADERS)
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["screenId"] == "workspace/fibu"
+    assert body["route"] == "/workspace/fibu"
+
+
+def test_workspace_startpage_unknown_role_is_null():
+    resp = _client.get("/api/v1/ui/mask-registry/workspace-startpage?role=xyz", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["screenId"] is None
+    assert body["route"] is None

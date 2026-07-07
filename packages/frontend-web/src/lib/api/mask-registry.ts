@@ -81,3 +81,18 @@ export async function sha256Hex(text: string): Promise<string | null> {
 export async function recordOmniboxSignal(signal: OmniboxTelemetrySignal): Promise<void> {
   await apiClient.post('/api/v1/ux-telemetry/omnibox', signal)
 }
+
+// ── Rollen-Workspaces (UIX-061) ──────────────────────────────────────────────
+
+export interface WorkspaceStartpage {
+  role: string | null
+  screenId: string | null
+  route: string | null
+}
+
+export async function fetchWorkspaceStartpage(role: string): Promise<WorkspaceStartpage> {
+  const response = await apiClient.get<WorkspaceStartpage>(
+    `/api/v1/ui/mask-registry/workspace-startpage?role=${encodeURIComponent(role)}`,
+  )
+  return response.data
+}

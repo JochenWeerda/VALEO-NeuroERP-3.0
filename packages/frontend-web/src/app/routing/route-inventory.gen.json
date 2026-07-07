@@ -4426,6 +4426,31 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/workspace/einkauf",
+      "path": "workspace/einkauf",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/fibu",
+      "path": "workspace/fibu",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/lager",
+      "path": "workspace/lager",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/leitung",
+      "path": "workspace/leitung",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/verkauf",
+      "path": "workspace/verkauf",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/zertifikate/liste",
       "path": "zertifikate",
       "source": "alias"

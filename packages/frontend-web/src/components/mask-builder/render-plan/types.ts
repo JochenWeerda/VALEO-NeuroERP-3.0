@@ -53,6 +53,17 @@ export interface RenderTabPlan {
   order: number
 }
 
+/** Kompilierte cockpit-Kachel (UIX-061) — navigierbar, optional mit Zaehler. */
+export interface RenderTilePlan {
+  key: string
+  label: string
+  /** Aufgeloeste Ziel-Route inkl. angehaengter Filter-Query. */
+  targetPath: string
+  targetScreenId: string
+  countEndpoint?: string
+  tone: 'neutral' | 'warning' | 'danger'
+}
+
 export interface RenderTabContentPlan {
   tabKey: string
   fieldKeys: string[]
@@ -146,6 +157,7 @@ export interface RenderPlan {
   shell: RenderShellPlan
   summarySlots: RenderSummarySlot[]
   summaryItems: ScreenSummaryItem[]
+  tiles: RenderTilePlan[]
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>
   rootFieldKeys: string[]
