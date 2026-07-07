@@ -48,7 +48,7 @@ export function useVoiceDictation(
   }, [provider])
 
   const start = useCallback(() => {
-    if (!provider || !provider.isAvailable()) return
+    if (!provider?.isAvailable()) return
     setError(null)
     setTranscript('')
     startedAt.current = Date.now()
