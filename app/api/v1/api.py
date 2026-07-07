@@ -1751,6 +1751,7 @@ from app.api.v1.endpoints import (
     mask_rollout_summaries,
     mask_screen_definition,
     operational_governance,
+    planung_kalender,
     pricing_governance,
     process_mining_api,
     process_mining_observation,
@@ -1785,6 +1786,7 @@ api_router.include_router(mask_actions.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(operational_governance.router)
+api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)
 api_router.include_router(process_mining_api.router)
 api_router.include_router(process_mining_observation.router)

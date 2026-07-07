@@ -2563,6 +2563,10 @@
     {
       "module": "@/pages/workspace/leitung",
       "path": "workspace/leitung"
+    },
+    {
+      "module": "@/pages/planung/kalender",
+      "path": "planung/kalender"
     }
   ]
 }

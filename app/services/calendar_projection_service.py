@@ -1,0 +1,526 @@
+"""UIX-063 planning calendar projections.
+
+The service projects time-bearing business objects into one canonical
+``domain_shared.calendar_items`` read model. Missing source tables are treated as
+empty projections so a fresh or partially migrated tenant never turns the
+planning cockpit into a 5xx surface.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import secrets
+from dataclasses import dataclass, field
+from datetime import UTC, date, datetime, time, timedelta
+from pathlib import Path
+from typing import Any, Protocol
+
+import yaml
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+from app.core.uuid7 import uuid7
+
+
+CALENDAR_LAYERS = {"finanzen", "fristen", "crm", "logistik", "personal", "saison"}
+CALENDAR_STATUSES = {"projected", "proposed", "confirmed", "dismissed"}
+
+
+@dataclass(frozen=True)
+class CalendarItemDraft:
+    source: str
+    source_key: str
+    layer: str
+    item_type: str
+    title: str
+    starts_at: datetime
+    ends_at: datetime | None = None
+    all_day: bool = False
+    status: str = "projected"
+    object_type: str | None = None
+    object_id: str | None = None
+    object_screen_id: str | None = None
+    object_route: str | None = None
+    payload: dict[str, Any] = field(default_factory=dict)
+
+
+class CalendarProjector(Protocol):
+    source: str
+    layer: str
+
+    def project(
+        self,
+        db: Session,
+        tenant_id: str,
+        horizon_days: int = 120,
+        now: datetime | None = None,
+    ) -> list[CalendarItemDraft]: ...
+
+
+def _as_mapping(row: Any) -> dict[str, Any]:
+    if isinstance(row, dict):
+        return row
+    mapping = getattr(row, "_mapping", None)
+    if mapping is not None:
+        return dict(mapping)
+    return dict(row)
+
+
+def _safe_mappings(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]:
+    try:
+        result = db.execute(text(sql), params)
+        return [_as_mapping(row) for row in result.mappings().all()]
+    except (SQLAlchemyError, RuntimeError, AttributeError):
+        return []
+
+
+def _to_datetime(value: Any, fallback: datetime) -> datetime:
+    if isinstance(value, datetime):
+        return value if value.tzinfo else value.replace(tzinfo=UTC)
+    if isinstance(value, date):
+        return datetime.combine(value, time.min, tzinfo=UTC)
+    if isinstance(value, str):
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+        except ValueError:
+            return fallback
+    return fallback
+
+
+def _iso_date_key(value: datetime) -> str:
+    return value.date().isoformat()
+
+
+def _route(path: str, object_id: Any) -> str:
+    return f"{path}/{object_id}" if object_id else path
+
+
+def _month_day_to_datetime(month_day: str, year: int, fallback: datetime) -> datetime:
+    try:
+        month, day = month_day.split("-", 1)
+        return datetime(year, int(month), int(day), tzinfo=UTC)
+    except (ValueError, TypeError):
+        return fallback
+
+
+class PeriodischeBuchungenProjector:
+    source = "periodische_buchungen"
+    layer = "finanzen"
+
+    def project(self, db: Session, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> list[CalendarItemDraft]:
+        base = now or datetime.now(UTC)
+        rows = _safe_mappings(db, """
+            SELECT id, buchung_nr, bezeichnung, naechste_ausfuehrung, betrag, rhythmus
+            FROM domain_erp.periodische_buchungen
+            WHERE tenant_id = :tenant_id
+              AND naechste_ausfuehrung >= :from_ts
+              AND naechste_ausfuehrung < :to_ts
+        """, {"tenant_id": tenant_id, "from_ts": base, "to_ts": base + timedelta(days=horizon_days)})
+        drafts: list[CalendarItemDraft] = []
+        for row in rows:
+            starts = _to_datetime(row.get("naechste_ausfuehrung"), base)
+            object_id = str(row.get("id") or "")
+            drafts.append(CalendarItemDraft(
+                source=self.source,
+                source_key=f"{object_id}:{_iso_date_key(starts)}",
+                layer=self.layer,
+                item_type="lauf",
+                title=str(row.get("bezeichnung") or row.get("buchung_nr") or "Periodische Buchung"),
+                starts_at=starts,
+                all_day=True,
+                object_type="periodische_buchung",
+                object_id=object_id,
+                object_screen_id="finance/journal-entry",
+                object_route=_route("/finance/buchungserfassung", object_id),
+                payload={"betrag": row.get("betrag"), "rhythmus": row.get("rhythmus")},
+            ))
+        return drafts
+
+
+class OpenItemsProjector:
+    source = "open_items"
+    layer = "finanzen"
+
+    def project(self, db: Session, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> list[CalendarItemDraft]:
+        base = now or datetime.now(UTC)
+        rows = _safe_mappings(db, """
+            SELECT id, beleg_nr, partner_name, faellig_am, offen, status
+            FROM domain_erp.open_items
+            WHERE tenant_id = :tenant_id
+              AND faellig_am >= :from_ts
+              AND faellig_am < :to_ts
+              AND COALESCE(status, 'open') NOT IN ('paid', 'settled', 'closed')
+        """, {"tenant_id": tenant_id, "from_ts": base.date(), "to_ts": (base + timedelta(days=horizon_days)).date()})
+        return [
+            CalendarItemDraft(
+                source=self.source,
+                source_key=str(row.get("id")),
+                layer=self.layer,
+                item_type="frist",
+                title=f"OP faellig: {row.get('beleg_nr') or row.get('partner_name') or row.get('id')}",
+                starts_at=_to_datetime(row.get("faellig_am"), base),
+                all_day=True,
+                object_type="open_item",
+                object_id=str(row.get("id") or ""),
+                object_screen_id="finance/ar-open-item",
+                object_route=_route("/finance/op-debitoren", row.get("id")),
+                payload={"offen": row.get("offen"), "partner": row.get("partner_name")},
+            )
+            for row in rows
+        ]
+
+
+class KontraktFristenProjector:
+    source = "kontrakt_fristen"
+    layer = "fristen"
+
+    def project(self, db: Session, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> list[CalendarItemDraft]:
+        base = now or datetime.now(UTC)
+        rows = _safe_mappings(db, """
+            SELECT id, kontrakt_nr, partner_name, andienung_bis, fruehbezugsrabatt_bis
+            FROM domain_agrar.kontrakte
+            WHERE tenant_id = :tenant_id
+        """, {"tenant_id": tenant_id})
+        until = base + timedelta(days=horizon_days)
+        drafts: list[CalendarItemDraft] = []
+        for row in rows:
+            object_id = str(row.get("id") or "")
+            for field_name, label in (("andienung_bis", "Andienungsfrist"), ("fruehbezugsrabatt_bis", "Ende Fruehbezugsrabatt")):
+                raw = row.get(field_name)
+                if not raw:
+                    continue
+                starts = _to_datetime(raw, base)
+                if not (base <= starts < until):
+                    continue
+                drafts.append(CalendarItemDraft(
+                    source=self.source,
+                    source_key=f"{object_id}:{field_name}",
+                    layer=self.layer,
+                    item_type="frist",
+                    title=f"{label}: {row.get('kontrakt_nr') or object_id}",
+                    starts_at=starts,
+                    all_day=True,
+                    object_type="kontrakt",
+                    object_id=object_id,
+                    object_screen_id="agrar/kontrakte",
+                    object_route=_route("/kontrakte", object_id),
+                    payload={"field": field_name, "partner": row.get("partner_name")},
+                ))
+        return drafts
+
+
+class CrmWiedervorlagenProjector:
+    source = "crm_wiedervorlagen"
+    layer = "crm"
+
+    def project(self, db: Session, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> list[CalendarItemDraft]:
+        base = now or datetime.now(UTC)
+        rows = _safe_mappings(db, """
+            SELECT id, customer_id, customer_name, subject, due_date
+            FROM domain_crm.activities
+            WHERE tenant_id = :tenant_id
+              AND due_date >= :from_ts
+              AND due_date < :to_ts
+              AND COALESCE(status, 'open') NOT IN ('done', 'closed')
+        """, {"tenant_id": tenant_id, "from_ts": base, "to_ts": base + timedelta(days=horizon_days)})
+        return [
+            CalendarItemDraft(
+                source=self.source,
+                source_key=str(row.get("id")),
+                layer=self.layer,
+                item_type="reminder",
+                title=f"Wiedervorlage: {row.get('subject') or row.get('customer_name') or row.get('id')}",
+                starts_at=_to_datetime(row.get("due_date"), base),
+                object_type="crm_activity",
+                object_id=str(row.get("id") or ""),
+                object_screen_id="crm/customer-360",
+                object_route=_route("/verkauf/kunden-liste", row.get("customer_id")),
+                payload={"customerId": row.get("customer_id"), "customer": row.get("customer_name")},
+            )
+            for row in rows
+        ]
+
+
+class AgrarSachkundeProjector:
+    source = "agrar_sachkunde"
+    layer = "personal"
+
+    def project(self, db: Session, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> list[CalendarItemDraft]:
+        base = now or datetime.now(UTC)
+        rows = _safe_mappings(db, """
+            SELECT id, person_ref, display_name, gueltig_bis, sachkunde_art
+            FROM domain_compliance.agrar_sachkunde
+            WHERE tenant_id = :tenant_id
+              AND gueltig_bis >= :from_date
+              AND gueltig_bis < :to_date
+        """, {"tenant_id": tenant_id, "from_date": base.date(), "to_date": (base + timedelta(days=horizon_days)).date()})
+        return [
+            CalendarItemDraft(
+                source=self.source,
+                source_key=str(row.get("id")),
+                layer=self.layer,
+                item_type="frist",
+                title=f"Sachkunde laeuft ab: {row.get('display_name') or row.get('person_ref') or row.get('id')}",
+                starts_at=_to_datetime(row.get("gueltig_bis"), base),
+                all_day=True,
+                object_type="agrar_sachkunde",
+                object_id=str(row.get("id") or ""),
+                object_screen_id="compliance/sachkunde",
+                object_route=_route("/compliance/sachkunde", row.get("id")),
+                payload={"personRef": row.get("person_ref"), "art": row.get("sachkunde_art")},
+            )
+            for row in rows
+        ]
+
+
+class SaisonKalenderProjector:
+    source = "saison_kalender"
+    layer = "saison"
+
+    def __init__(self, config_path: Path | None = None) -> None:
+        self.config_path = config_path or Path("config/saison_kalender.yaml")
+
+    def project(self, db: Session, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> list[CalendarItemDraft]:
+        base = now or datetime.now(UTC)
+        until = base + timedelta(days=horizon_days)
+        if not self.config_path.exists():
+            return []
+
+        data = yaml.safe_load(self.config_path.read_text(encoding="utf-8")) or {}
+        entries = data.get("entries") if isinstance(data, dict) else []
+        if not isinstance(entries, list):
+            return []
+
+        drafts: list[CalendarItemDraft] = []
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            key = str(entry.get("key") or "").strip()
+            title = str(entry.get("title") or "").strip()
+            starts_raw = str(entry.get("starts_on") or "").strip()
+            if not key or not title or not starts_raw:
+                continue
+            starts = _month_day_to_datetime(starts_raw, base.year, base)
+            if starts < base:
+                starts = _month_day_to_datetime(starts_raw, base.year + 1, base)
+            if not (base <= starts < until):
+                continue
+            ends = None
+            ends_raw = str(entry.get("ends_on") or "").strip()
+            if ends_raw:
+                ends = _month_day_to_datetime(ends_raw, starts.year, starts)
+                if ends < starts:
+                    ends = _month_day_to_datetime(ends_raw, starts.year + 1, starts)
+            drafts.append(CalendarItemDraft(
+                source=self.source,
+                source_key=f"{key}:{starts.year}",
+                layer=self.layer,
+                item_type=str(entry.get("item_type") or "termin"),
+                title=title,
+                starts_at=starts,
+                ends_at=ends,
+                all_day=True,
+                object_type="saison_kalender",
+                object_id=key,
+                object_screen_id=str(entry.get("object_screen_id") or "planung/kalender"),
+                object_route=str(entry.get("object_route") or "/planung/kalender"),
+                payload={
+                    "region": data.get("region"),
+                    "crop": entry.get("crop"),
+                    "priority": entry.get("priority"),
+                },
+            ))
+        return drafts
+
+
+DEFAULT_PROJECTORS: list[CalendarProjector] = [
+    PeriodischeBuchungenProjector(),
+    OpenItemsProjector(),
+    KontraktFristenProjector(),
+    CrmWiedervorlagenProjector(),
+    AgrarSachkundeProjector(),
+    SaisonKalenderProjector(),
+]
+
+
+def token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+class CalendarProjectionService:
+    def __init__(self, db: Session, projectors: list[CalendarProjector] | None = None) -> None:
+        self.db = db
+        self.projectors = projectors or DEFAULT_PROJECTORS
+
+    def reproject(self, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> dict[str, Any]:
+        base = now or datetime.now(UTC)
+        by_source: dict[str, list[CalendarItemDraft]] = {}
+        for projector in self.projectors:
+            drafts = projector.project(self.db, tenant_id, horizon_days=horizon_days, now=base)
+            by_source[projector.source] = drafts
+            for draft in drafts:
+                self.upsert_draft(tenant_id, draft)
+            self.delete_stale_projected(tenant_id, projector.source, [d.source_key for d in drafts], base, horizon_days)
+        self.db.commit()
+        return {
+            "tenantId": tenant_id,
+            "horizonDays": horizon_days,
+            "projected": sum(len(items) for items in by_source.values()),
+            "sources": {source: len(items) for source, items in by_source.items()},
+        }
+
+    def upsert_draft(self, tenant_id: str, draft: CalendarItemDraft) -> None:
+        if draft.layer not in CALENDAR_LAYERS:
+            raise ValueError(f"Invalid calendar layer: {draft.layer}")
+        if draft.status not in CALENDAR_STATUSES:
+            raise ValueError(f"Invalid calendar status: {draft.status}")
+        self.db.execute(text("""
+            INSERT INTO domain_shared.calendar_items (
+                id, tenant_id, source, source_key, layer, item_type, title,
+                starts_at, ends_at, all_day, status, object_type, object_id,
+                object_screen_id, object_route, payload, created_at, updated_at
+            ) VALUES (
+                :id, :tenant_id, :source, :source_key, :layer, :item_type, :title,
+                :starts_at, :ends_at, :all_day, :status, :object_type, :object_id,
+                :object_screen_id, :object_route, CAST(:payload AS jsonb), NOW(), NOW()
+            )
+            ON CONFLICT (tenant_id, source, source_key) DO UPDATE SET
+                layer = EXCLUDED.layer,
+                item_type = EXCLUDED.item_type,
+                title = EXCLUDED.title,
+                starts_at = EXCLUDED.starts_at,
+                ends_at = EXCLUDED.ends_at,
+                all_day = EXCLUDED.all_day,
+                object_type = EXCLUDED.object_type,
+                object_id = EXCLUDED.object_id,
+                object_screen_id = EXCLUDED.object_screen_id,
+                object_route = EXCLUDED.object_route,
+                payload = EXCLUDED.payload,
+                updated_at = NOW()
+            WHERE domain_shared.calendar_items.status = 'projected'
+        """), {
+            "id": uuid7(),
+            "tenant_id": tenant_id,
+            "source": draft.source,
+            "source_key": draft.source_key,
+            "layer": draft.layer,
+            "item_type": draft.item_type,
+            "title": draft.title[:200],
+            "starts_at": draft.starts_at,
+            "ends_at": draft.ends_at,
+            "all_day": draft.all_day,
+            "status": draft.status,
+            "object_type": draft.object_type,
+            "object_id": draft.object_id,
+            "object_screen_id": draft.object_screen_id,
+            "object_route": draft.object_route,
+            "payload": json.dumps(draft.payload, default=str),
+        })
+
+    def delete_stale_projected(self, tenant_id: str, source: str, source_keys: list[str], now: datetime, horizon_days: int) -> None:
+        self.db.execute(text("""
+            DELETE FROM domain_shared.calendar_items
+            WHERE tenant_id = :tenant_id
+              AND source = :source
+              AND status = 'projected'
+              AND starts_at >= :from_ts
+              AND starts_at < :to_ts
+              AND NOT (source_key = ANY(:source_keys))
+        """), {
+            "tenant_id": tenant_id,
+            "source": source,
+            "from_ts": now,
+            "to_ts": now + timedelta(days=horizon_days),
+            "source_keys": source_keys,
+        })
+
+    def list_items(self, tenant_id: str, from_ts: datetime, to_ts: datetime, layers: list[str] | None = None) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {"tenant_id": tenant_id, "from_ts": from_ts, "to_ts": to_ts}
+        layer_sql = ""
+        if layers:
+            params["layers"] = layers
+            layer_sql = "AND layer = ANY(:layers)"
+        rows = self.db.execute(text(f"""
+            SELECT id, tenant_id, source, source_key, layer, item_type, title,
+                   starts_at, ends_at, all_day, status, object_type, object_id,
+                   object_screen_id, object_route, payload, created_at, updated_at
+            FROM domain_shared.calendar_items
+            WHERE tenant_id = :tenant_id
+              AND starts_at >= :from_ts
+              AND starts_at < :to_ts
+              {layer_sql}
+            ORDER BY starts_at ASC, layer ASC, title ASC
+        """), params).mappings().all()
+        return [_as_mapping(row) for row in rows]
+
+    def transition_proposed(self, tenant_id: str, item_id: str, status: str) -> dict[str, Any] | None:
+        row = self.db.execute(text("""
+            UPDATE domain_shared.calendar_items
+            SET status = :status, updated_at = NOW()
+            WHERE tenant_id = :tenant_id AND id = :id AND status = 'proposed'
+            RETURNING id, tenant_id, source, source_key, layer, item_type, title,
+                      starts_at, ends_at, all_day, status, object_type, object_id,
+                      object_screen_id, object_route, payload, created_at, updated_at
+        """), {"tenant_id": tenant_id, "id": item_id, "status": status}).mappings().first()
+        self.db.commit()
+        return _as_mapping(row) if row else None
+
+    def issue_ics_token(self, tenant_id: str, user_ref: str = "default") -> str:
+        token = secrets.token_urlsafe(32)
+        self.db.execute(text("""
+            UPDATE domain_shared.calendar_ics_tokens
+            SET active = false, rotated_at = NOW()
+            WHERE tenant_id = :tenant_id AND user_ref = :user_ref AND active = true
+        """), {"tenant_id": tenant_id, "user_ref": user_ref})
+        self.db.execute(text("""
+            INSERT INTO domain_shared.calendar_ics_tokens (id, tenant_id, user_ref, token_hash, active, created_at)
+            VALUES (:id, :tenant_id, :user_ref, :token_hash, true, NOW())
+        """), {"id": uuid7(), "tenant_id": tenant_id, "user_ref": user_ref, "token_hash": token_hash(token)})
+        self.db.commit()
+        return token
+
+    def tenant_for_ics_token(self, token: str) -> str | None:
+        row = self.db.execute(text("""
+            SELECT tenant_id
+            FROM domain_shared.calendar_ics_tokens
+            WHERE token_hash = :token_hash AND active = true
+        """), {"token_hash": token_hash(token)}).mappings().first()
+        if not row:
+            return None
+        return str(_as_mapping(row).get("tenant_id"))
+
+    def ics_content(self, tenant_id: str, from_ts: datetime, to_ts: datetime) -> str:
+        items = self.list_items(tenant_id, from_ts, to_ts)
+        visible = [item for item in items if item.get("status") in {"projected", "confirmed"}]
+        lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VALEO NeuroERP//Planning Calendar//DE"]
+        for item in visible:
+            starts = _to_datetime(item.get("starts_at"), from_ts)
+            ends = _to_datetime(item.get("ends_at"), starts + timedelta(hours=1))
+            if item.get("all_day"):
+                lines.extend([
+                    "BEGIN:VEVENT",
+                    f"UID:{item.get('id')}@valeo-neuroerp",
+                    f"DTSTART;VALUE=DATE:{starts.strftime('%Y%m%d')}",
+                    f"DTEND;VALUE=DATE:{(starts + timedelta(days=1)).strftime('%Y%m%d')}",
+                    f"SUMMARY:{_ics_escape(str(item.get('title') or 'Termin'))}",
+                    f"URL:{_ics_escape(str(item.get('object_route') or ''))}",
+                    "END:VEVENT",
+                ])
+            else:
+                lines.extend([
+                    "BEGIN:VEVENT",
+                    f"UID:{item.get('id')}@valeo-neuroerp",
+                    f"DTSTART:{starts.astimezone(UTC).strftime('%Y%m%dT%H%M%SZ')}",
+                    f"DTEND:{ends.astimezone(UTC).strftime('%Y%m%dT%H%M%SZ')}",
+                    f"SUMMARY:{_ics_escape(str(item.get('title') or 'Termin'))}",
+                    f"URL:{_ics_escape(str(item.get('object_route') or ''))}",
+                    "END:VEVENT",
+                ])
+        lines.append("END:VCALENDAR")
+        return "\r\n".join(lines) + "\r\n"
+
+
+def _ics_escape(value: str) -> str:
+    return value.replace("\\", "\\\\").replace(",", "\\,").replace(";", "\\;").replace("\n", "\\n")

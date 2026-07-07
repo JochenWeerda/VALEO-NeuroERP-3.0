@@ -18834,6 +18834,124 @@
         "title": "CalendarEventOut",
         "type": "object"
       },
+      "CalendarItemOut": {
+        "properties": {
+          "all_day": {
+            "title": "All Day",
+            "type": "boolean"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "item_type": {
+            "title": "Item Type",
+            "type": "string"
+          },
+          "layer": {
+            "title": "Layer",
+            "type": "string"
+          },
+          "object_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Id"
+          },
+          "object_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Route"
+          },
+          "object_screen_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Screen Id"
+          },
+          "object_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Type"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "source_key": {
+            "title": "Source Key",
+            "type": "string"
+          },
+          "starts_at": {
+            "title": "Starts At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "source",
+          "source_key",
+          "layer",
+          "item_type",
+          "title",
+          "starts_at",
+          "all_day",
+          "status"
+        ],
+        "title": "CalendarItemOut",
+        "type": "object"
+      },
       "CallTranscriptIn": {
         "properties": {
           "audioBase64": {
@@ -53118,6 +53236,24 @@
           "id"
         ],
         "title": "IDResponse",
+        "type": "object"
+      },
+      "IcsTokenOut": {
+        "properties": {
+          "feedUrl": {
+            "title": "Feedurl",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "feedUrl"
+        ],
+        "title": "IcsTokenOut",
         "type": "object"
       },
       "IdempotencyMonitoringOut": {
@@ -92359,6 +92495,37 @@
           }
         },
         "title": "ReportingUnitUpdateIn",
+        "type": "object"
+      },
+      "ReprojectOut": {
+        "properties": {
+          "horizonDays": {
+            "title": "Horizondays",
+            "type": "integer"
+          },
+          "projected": {
+            "title": "Projected",
+            "type": "integer"
+          },
+          "sources": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Sources",
+            "type": "object"
+          },
+          "tenantId": {
+            "title": "Tenantid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenantId",
+          "horizonDays",
+          "projected",
+          "sources"
+        ],
+        "title": "ReprojectOut",
         "type": "object"
       },
       "RestoreRequest": {
@@ -276790,6 +276957,487 @@
         "tags": [
           "logistics",
           "picking"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender": {
+      "get": {
+        "operationId": "list_calendar_items_api_v1_planung_kalender_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "in": "query",
+            "name": "layers",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Layers"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarItemOut"
+                  },
+                  "title": "Response List Calendar Items Api V1 Planung Kalender Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Planungskalender auflisten",
+        "tags": [
+          "planung",
+          "kalender"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender/ics": {
+      "get": {
+        "operationId": "get_ics_feed_api_v1_planung_kalender_ics_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "minLength": 16,
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "ICS Feed abrufen",
+        "tags": [
+          "planung",
+          "kalender"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender/ics-token": {
+      "get": {
+        "operationId": "issue_ics_token_api_v1_planung_kalender_ics_token_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user_ref",
+            "required": false,
+            "schema": {
+              "default": "default",
+              "maxLength": 128,
+              "title": "User Ref",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IcsTokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "ICS Feed Token ausstellen",
+        "tags": [
+          "planung",
+          "kalender"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender/ics-token/rotate": {
+      "post": {
+        "operationId": "rotate_ics_token_api_v1_planung_kalender_ics_token_rotate_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user_ref",
+            "required": false,
+            "schema": {
+              "default": "default",
+              "maxLength": 128,
+              "title": "User Ref",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IcsTokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "ICS Feed Token rotieren",
+        "tags": [
+          "planung",
+          "kalender"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender/items/{item_id}/confirm": {
+      "post": {
+        "operationId": "confirm_calendar_item_api_v1_planung_kalender_items__item_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kalender-Vorschlag bestaetigen",
+        "tags": [
+          "planung",
+          "kalender"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender/items/{item_id}/dismiss": {
+      "post": {
+        "operationId": "dismiss_calendar_item_api_v1_planung_kalender_items__item_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kalender-Vorschlag verwerfen",
+        "tags": [
+          "planung",
+          "kalender"
+        ]
+      }
+    },
+    "/api/v1/planung/kalender/reproject": {
+      "post": {
+        "operationId": "reproject_calendar_api_v1_planung_kalender_reproject_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "horizon_days",
+            "required": false,
+            "schema": {
+              "default": 120,
+              "maximum": 366,
+              "minimum": 1,
+              "title": "Horizon Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReprojectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Planungskalender neu projizieren",
+        "tags": [
+          "planung",
+          "kalender"
         ]
       }
     },

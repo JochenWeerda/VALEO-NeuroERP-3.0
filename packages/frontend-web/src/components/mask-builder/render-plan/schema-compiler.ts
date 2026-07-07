@@ -9,7 +9,7 @@ import type {
 } from '../schema'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
-import { fieldTypeToComponentKind, type RenderActionPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan } from './types'
+import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
 const DEFAULT_LOOKUP_RESULT_LIMIT = 25
@@ -124,6 +124,23 @@ export function compileTiles(schema: ScreenDefinition): RenderTilePlan[] {
   return plans
 }
 
+export function compileCalendar(schema: ScreenDefinition): RenderCalendarPlan | undefined {
+  const calendar = schema.calendar
+  if (!calendar?.endpoint || calendar.layers.length === 0) return undefined
+  return {
+    endpoint: calendar.endpoint,
+    reprojectEndpoint: calendar.reprojectEndpoint,
+    icsTokenEndpoint: calendar.icsTokenEndpoint,
+    defaultView: calendar.defaultView ?? 'agenda',
+    deadlineBandDays: calendar.deadlineBandDays ?? 14,
+    layers: calendar.layers.map((layer) => ({
+      key: layer.key,
+      label: layer.label,
+      defaultVisible: layer.defaultVisible ?? true,
+    })),
+  }
+}
+
 export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
@@ -230,6 +247,7 @@ export function compileRenderPlan(
     })),
     summaryItems: context.summary?.summaryItems ?? schema.summary ?? [],
     tiles: compileTiles(schema),
+    calendar: compileCalendar(schema),
     visibleTabs,
     tabContent,
     rootFieldKeys: rootFields.map((field) => field.key),

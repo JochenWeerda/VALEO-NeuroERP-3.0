@@ -3301,6 +3301,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/planung/kalender",
+      "path": "planung/kalender",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/policy-manager",
       "path": "policies",
       "source": "alias"

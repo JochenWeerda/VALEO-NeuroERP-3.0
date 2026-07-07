@@ -269,7 +269,7 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     # entweder Kacheln (tiles) oder Tabellen. Advisory, damit leere Cockpits
     # als Warnung auffallen statt still generatorReady zu sein.
     is_cockpit = definition.get("mode") == "cockpit" or layout.get("floorplan") == "cockpit"
-    has_cockpit_content = bool(definition.get("tiles")) or bool(all_tables)
+    has_cockpit_content = bool(definition.get("tiles")) or bool(definition.get("calendar")) or bool(all_tables)
     a("cockpit_content", not is_cockpit or has_cockpit_content,
       "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
 

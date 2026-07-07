@@ -1,5 +1,6 @@
 import type {
   ScreenDomain,
+  ScreenCalendarView,
   ScreenContextRail,
   ScreenDensity,
   ScreenFieldType,
@@ -62,6 +63,21 @@ export interface RenderTilePlan {
   targetScreenId: string
   countEndpoint?: string
   tone: 'neutral' | 'warning' | 'danger'
+}
+
+export interface RenderCalendarLayerPlan {
+  key: string
+  label: string
+  defaultVisible: boolean
+}
+
+export interface RenderCalendarPlan {
+  endpoint: string
+  reprojectEndpoint?: string
+  icsTokenEndpoint?: string
+  defaultView: ScreenCalendarView
+  deadlineBandDays: number
+  layers: RenderCalendarLayerPlan[]
 }
 
 export interface RenderTabContentPlan {
@@ -158,6 +174,7 @@ export interface RenderPlan {
   summarySlots: RenderSummarySlot[]
   summaryItems: ScreenSummaryItem[]
   tiles: RenderTilePlan[]
+  calendar?: RenderCalendarPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>
   rootFieldKeys: string[]

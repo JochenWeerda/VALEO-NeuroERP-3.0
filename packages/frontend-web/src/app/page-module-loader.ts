@@ -65,6 +65,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   nachhaltigkeit: 'operations',
   nawaro: 'operations',
   personal: 'core',
+  planung: 'core',
   portal: 'portal',
   'policy-manager': 'core',
   pos: 'finance',

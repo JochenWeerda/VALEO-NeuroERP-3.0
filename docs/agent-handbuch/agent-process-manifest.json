@@ -1709,6 +1709,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "planung/kalender",
+      "title": "Planungskalender",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/planung__kalender/:entityId",
+      "agent_contract_url": "/api/v1/masks/planung/kalender/agent-contract",
+      "screen_definition_url": "/api/v1/masks/planung/kalender/screen-definition",
+      "readiness_url": "/api/v1/masks/planung/kalender/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "reproject",
+          "label": "Neu projizieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "planung.calendar.reproject",
+          "commandEndpoint": "/api/v1/planung/kalender/reproject",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "qualitaet/reklamation",
       "title": "Reklamation",
       "domain": "qualitaet",

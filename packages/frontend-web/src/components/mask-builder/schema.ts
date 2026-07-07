@@ -202,6 +202,24 @@ export interface ScreenSeasonProfile {
   tileOrderOverride?: string[]
 }
 
+export type ScreenCalendarView = 'month' | 'week' | 'agenda'
+
+export interface ScreenCalendarLayerDefinition {
+  key: 'finanzen' | 'fristen' | 'crm' | 'logistik' | 'personal' | 'saison'
+  label: string
+  defaultVisible?: boolean
+}
+
+/** Planungskalender-Primitive (UIX-063): Zeitprojektion aus Read-Models. */
+export interface ScreenCalendarDefinition {
+  endpoint: string
+  reprojectEndpoint?: string
+  icsTokenEndpoint?: string
+  defaultView?: ScreenCalendarView
+  deadlineBandDays?: number
+  layers: ScreenCalendarLayerDefinition[]
+}
+
 export interface ScreenDefinition {
   schemaVersion: 1
   id: string
@@ -223,6 +241,7 @@ export interface ScreenDefinition {
   tabs?: ScreenTabDefinition[]
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
+  calendar?: ScreenCalendarDefinition
   seasonProfile?: ScreenSeasonProfile
   actions?: ScreenActionDefinition[]
   workflow?: ScreenWorkflowDefinition

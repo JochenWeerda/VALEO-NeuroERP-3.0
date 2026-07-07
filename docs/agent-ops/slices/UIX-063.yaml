@@ -1,7 +1,7 @@
 slice_id: UIX-063
 title: Planungskalender v1 (Zeit als Projektion)
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m1-spec.md
 coordination: >-
@@ -46,3 +46,15 @@ ai_harness:
     Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
 external_gates:
   - not_applicable
+delivered:
+  - "calendar_items + calendar_ics_tokens Alembic-Read-Model."
+  - "6 Projektoren: 5 Fachquellen plus statischer Saison-Layer aus config/saison_kalender.yaml."
+  - "Tenant-isolierte Kalender-API, idempotente Reprojektion, proposed/confirmed/dismissed-Schutz."
+  - "Tokenbasierter read-only ICS-Feed mit rotierbarem Token und Auth-Exemption fuer /ics."
+  - "Native Cockpit-ScreenDefinition planung/kalender + CalendarRenderer-Primitive im UniversalMaskRenderer."
+  - "Route /planung/kalender inkl. TanStack-Route-Artefakte und Playwright Layer/Click-through-Smoke."
+verified:
+  - "pytest tests/test_uix063_planning_calendar.py tests/test_workspace_cockpits_uix061.py -q --no-cov -> 33 passed"
+  - "pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/calendar-renderer.test.tsx -> 3 passed"
+  - "pnpm --dir packages/frontend-web type-check -> tsc 0"
+  - "pnpm --dir packages/frontend-web exec playwright test tests/e2e/planung-kalender-smoke.spec.ts --project=chromium -> 1 passed"

@@ -59,6 +59,9 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-057 | Rollback-/Fallback-Matrix | ✅ | [`uix-057-native-route-rollback-matrix.md`](uix-057-native-route-rollback-matrix.md) |
 | SPEC-P1-04 | Alle nativen commandEndpoints — `MaskActionRuntime`, Inventur 0 stubReason | ✅ | `mask_action_runtime_service.py`, `check_mask_command_endpoint_inventory.py` |
 | SPEC-P1-08 | Chargen-Tiefenmodell + FEFO über MHD | ✅ | `inventory_lot_trace_service.py`, `inv_lot_depth_spec_p1_08` |
+| UIX-060 | Omnibox-Shell + Backend-Katalog/Telemetry | ✅ | Workboard 2026-07-07 |
+| UIX-061 | Rollen-Workspaces + Tiles-Primitive + Rollen-Redirect | ✅ | 27 pytest, 6 Vitest, Workspace Playwright grün |
+| UIX-063 | Planungskalender v1: `calendar`-Contract, Projektionsservice, ICS-Feed, CalendarRenderer | ✅ lokal | 33 pytest, 3 Vitest, TypeScript 0, Playwright 1/1 |
 
 ## Architektur (Single Source of Truth)
 
@@ -199,6 +202,10 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | pytest UIX-054 Route Inventory | 2026-07-01 | ✅ 46/46 | `route-inventory.gen.json` + native Priorität |
 | UIX-056 Native Route Playwright | 2026-07-01 | ✅ 6/6 lokal | `uix-056-native-route-smoke.spec.ts` |
 | GitHub Actions universal-mask-ci | 2026-07-01 | ✅ | Run `28540744515` — UIX-051/054 + routes:generate-Drift + E2E-Smoke |
+| UIX-063 Planungskalender Backend | 2026-07-07 | ✅ 33/33 | `pytest tests/test_uix063_planning_calendar.py tests/test_workspace_cockpits_uix061.py -q --no-cov` |
+| UIX-063 CalendarRenderer Vitest | 2026-07-07 | ✅ 3/3 | `calendar-renderer.test.tsx` |
+| UIX-063 Frontend type-check | 2026-07-07 | ✅ | `pnpm --dir packages/frontend-web type-check` |
+| UIX-063 Playwright Kalender-Smoke | 2026-07-07 | ✅ 1/1 | `planung-kalender-smoke.spec.ts`; globaler Visual-Tour-Teardown meldet bestehende Fremdseiten-Console-Issues |
 
 ## Bewertung (Stakeholder-Audit 2026-06-29)
 

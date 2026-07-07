@@ -264,6 +264,7 @@ class Settings(BaseSettings):
         "/api/v1/channels/slack/events",
         "/api/v1/channels/teams/events",
         "/api/v1/gap/pipeline/status",  # GAP Pipeline Status (für Admin-UI)
+        "/api/v1/planung/kalender/ics",  # UIX-063 ICS feed validates token query parameter.
     ]
 
     model_config = SettingsConfigDict(

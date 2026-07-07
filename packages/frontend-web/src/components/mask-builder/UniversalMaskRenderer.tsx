@@ -12,6 +12,7 @@ import {
   FastSummaryRenderer,
   FastTabRenderer,
   FastTableRenderer,
+  CalendarRenderer,
   TabContentRenderer,
   TileGridRenderer,
   WorkflowPanelRenderer,
@@ -133,6 +134,7 @@ function RenderFromPlan({
       <WorkflowPanelRenderer workflow={plan.workflow} workflowState={workflowState} />
       <FastSummaryRenderer items={plan.summaryItems} />
       <TileGridRenderer tiles={plan.tiles} />
+      <CalendarRenderer calendar={plan.calendar} />
 
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}

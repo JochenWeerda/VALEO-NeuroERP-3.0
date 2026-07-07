@@ -107,13 +107,14 @@ Renderer-Unit-Test, 1 Playwright-Flow (Notiz anlegen → Mention → Inbox).
 ```
 
 **UIX-063 Planungskalender v1 (Zeit als Projektion)**
-- [ ] `calendar_items`-Read-Model + `calendarProjection`-Deklaration (Feld → Termin-Typ)
+- [x] `calendar_items`-Read-Model + `calendarProjection`-Deklaration (Feld → Termin-Typ)
       für die ersten Quellen: periodische Buchungen (wiederkehrende Umsätze),
       OP-Fälligkeiten, Kontrakt-/Rabattfristen (Ende Frühbezugsrabatt),
       CRM-Wiedervorlagen, Sachkunde-/Schulungsabläufe
-- [ ] Kalender-Renderer-Primitive (Monat/Woche/Agenda + Fristenband, Layer je Quelle)
+- [x] Kalender-Renderer-Primitive (Monat/Woche/Agenda + Fristenband, Layer je Quelle)
       als `cockpit`-SD — Klick-Durchstich zur ObjectPage, kein eigener Seitenbaum
-- [ ] Erinnerungen über Benachrichtigungs-Inbox; ICS-Export (read-only)
+- [ ] Erinnerungen über Benachrichtigungs-Inbox
+- [x] ICS-Export (read-only)
 - Akzeptanz: 5 Quellen projizieren automatisch (0 manuelle Doppelpflege);
   jeder Eintrag verlinkt sein Objekt; W-07-Visual-Audit; Omnibox-Intent
   „was steht nächste Woche an?" öffnet gefilterte Agenda.

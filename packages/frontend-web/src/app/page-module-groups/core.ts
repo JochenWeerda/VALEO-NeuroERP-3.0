@@ -14,6 +14,7 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/workflow/**/*.tsx',
   '../../pages/workflows/**/*.tsx',
   '../../pages/personal/**/*.tsx',
+  '../../pages/planung/**/*.tsx',
   '../../pages/benachrichtigungen/**/*.tsx',
   '../../pages/stammdaten/**/*.tsx',
 ]) as PageModuleGlob

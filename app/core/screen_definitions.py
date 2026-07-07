@@ -1946,8 +1946,76 @@ def build_workspace_leitung_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_planung_kalender_screen_definition() -> dict[str, Any]:
+    """Native cockpit ScreenDefinition fuer UIX-063 Planungskalender."""
+
+    return {
+        "schemaVersion": 1,
+        "id": "planung/kalender",
+        "domain": "platform",
+        "mode": "cockpit",
+        "title": "Planungskalender",
+        "subtitle": "Zeitprojektionen aus Belegen, Fristen, CRM und Sachkunde",
+        "adapter": {"type": "native", "sourceId": "planung/kalender", "temporary": False},
+        "summary": [
+            {"key": "naechste_14_tage", "label": "Fristenband 14 Tage", "tone": "warning"},
+            {"key": "aktive_layer", "label": "Layer", "tone": "neutral"},
+            {"key": "ics_feed", "label": "ICS read-only", "tone": "neutral"},
+        ],
+        "calendar": {
+            "endpoint": "/api/v1/planung/kalender",
+            "reprojectEndpoint": "/api/v1/planung/kalender/reproject",
+            "icsTokenEndpoint": "/api/v1/planung/kalender/ics-token",
+            "defaultView": "agenda",
+            "deadlineBandDays": 14,
+            "layers": [
+                {"key": "finanzen", "label": "Finanzen", "defaultVisible": True},
+                {"key": "fristen", "label": "Fristen", "defaultVisible": True},
+                {"key": "crm", "label": "CRM", "defaultVisible": True},
+                {"key": "logistik", "label": "Logistik", "defaultVisible": True},
+                {"key": "personal", "label": "Personal", "defaultVisible": False},
+                {"key": "saison", "label": "Saison", "defaultVisible": False},
+            ],
+        },
+        "layout": {
+            "floorplan": "cockpit",
+            "density": "compact",
+            "contextRail": "combined",
+        },
+        "workflow": {
+            "processKey": "planung-kalender",
+            "status": "projected",
+            "nextActionKey": "reproject",
+            "auditRequired": True,
+        },
+        "actions": [
+            {
+                "key": "reproject",
+                "label": "Neu projizieren",
+                "kind": "secondary",
+                "permission": "planung.calendar.reproject",
+                "commandEndpoint": "/api/v1/planung/kalender/reproject",
+                "method": "POST",
+                "dangerLevel": "moderate",
+                "requiresConfirmation": True,
+            }
+        ],
+        "noWorkflowReason": "Kalender ist ein Read-Model-Cockpit; Statuswechsel erfolgen an vorgeschlagenen Eintraegen ueber normale Commands.",
+        "agentContract": {
+            "businessPurpose": "Zeitbezogene Fristen, Wiedervorlagen und Laeufe ohne Doppelpflege als Planungscockpit sichtbar machen.",
+            "examplePrompts": [
+                "Was steht naechste Woche an?",
+                "Zeige Fristen der naechsten 14 Tage.",
+                "Welche OP-Faelligkeiten kommen diese Woche?",
+            ],
+            "testSelectors": {"screenRoot": "[data-testid='planung-kalender']"},
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
+    "planung/kalender": build_planung_kalender_screen_definition,
     "workspace/einkauf": build_workspace_einkauf_screen_definition,
     "workspace/verkauf": build_workspace_verkauf_screen_definition,
     "workspace/lager": build_workspace_lager_screen_definition,
@@ -2451,6 +2519,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "workspace/lager": ["lager cockpit", "annahme startseite", "lager workspace"],
     "workspace/fibu": ["fibu cockpit", "finanzbuchhaltung startseite", "finance workspace"],
     "workspace/leitung": ["leitung cockpit", "geschaeftsleitung", "management workspace"],
+    "planung/kalender": ["planungskalender", "kalender", "fristenkalender", "was steht naechste woche an"],
 }
 
 
@@ -2494,6 +2563,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "workspace/lager": "/workspace/lager",
     "workspace/fibu": "/workspace/fibu",
     "workspace/leitung": "/workspace/leitung",
+    "planung/kalender": "/planung/kalender",
 }
 
 

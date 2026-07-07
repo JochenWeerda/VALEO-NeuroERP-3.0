@@ -1,0 +1,28 @@
+version: 1
+region: DE-Nord
+description: Static display layer for UIX-063 planning calendar v1.
+entries:
+  - key: winterweizen-erntefenster
+    title: Erntefenster Winterweizen
+    crop: winterweizen
+    item_type: termin
+    starts_on: "07-20"
+    ends_on: "08-10"
+    priority: medium
+    object_route: /planung/kalender
+  - key: winterraps-aussaat
+    title: Aussaatfenster Winterraps
+    crop: winterraps
+    item_type: termin
+    starts_on: "08-15"
+    ends_on: "09-10"
+    priority: medium
+    object_route: /planung/kalender
+  - key: maisernte
+    title: Erntefenster Mais
+    crop: mais
+    item_type: termin
+    starts_on: "09-20"
+    ends_on: "10-20"
+    priority: low
+    object_route: /planung/kalender

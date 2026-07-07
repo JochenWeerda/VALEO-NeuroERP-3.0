@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (31 Masken).
+> Generiert aus `app/core/screen_definitions.py` (32 Masken).
 
 ## Übersicht
 
@@ -40,6 +40,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
 | `lager/stock-movement` | Lagerbewegung | lager | hoch | `inventory-to-settlement` | `GET /api/v1/masks/lager/stock-movement/agent-contract` |
+| `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
@@ -1055,6 +1056,34 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Was steht heute in Leitungs-Cockpit an?
 - Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: platform
+
+### `planung/kalender` — Planungskalender
+
+**Zweck:** Zeitbezogene Fristen, Wiedervorlagen und Laeufe ohne Doppelpflege als Planungscockpit sichtbar machen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/planung/kalender/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/planung/kalender/agent-contract` |
+| Readiness | `GET /api/v1/masks/planung/kalender/readiness` |
+| Rollout-Route | `/mask-rollout/planung__kalender/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Was steht naechste Woche an?
+- Zeige Fristen der naechsten 14 Tage.
+- Welche OP-Faelligkeiten kommen diese Woche?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `reproject` | Neu projizieren | moderate | nein | `/api/v1/planung/kalender/reproject` |
 
 ---
 
