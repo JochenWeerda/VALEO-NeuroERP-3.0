@@ -28,7 +28,8 @@ import {
 } from '@/lib/api/mask-registry'
 import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
 import { compileIntents, normalize } from '@/lib/omnibox/intent-compiler'
-import type { NavigateIntent } from '@/lib/omnibox/types'
+import { detectCommandIntent } from '@/lib/omnibox/command-compiler'
+import type { CommandDraftIntent, FormPrefillIntent, NavigateIntent } from '@/lib/omnibox/types'
 import {
   buildPaletteCommands,
   enrichCommandsWithOmniboxCatalog,
@@ -132,6 +133,57 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
     [navigate, onOpenChange, search],
   )
 
+  // UIX-070: erkennt in der Eingabe ein Aktions-Verb fuer die benannte Maske und
+  // erzeugt — streng nach der Sicherheitsmatrix — einen Command-/Prefill-Plan.
+  const commandIntent = useMemo(() => {
+    if (search.trim().length < 3 || intentPlans.length === 0) return null
+    const catalog = omniboxCatalogQuery.data ?? []
+    const tokens = new Set(normalize(search).split(' ').filter(Boolean))
+    const navCommand = intentPlans[0].command
+    // Command-Erkennung ist unabhaengig vom Navigations-Ranking: der Screen muss
+    // per Synonym/Titel benannt sein UND ein Aktions-Verb getroffen werden
+    // (Verb + Sicherheitsmatrix entscheidet detectCommandIntent).
+    for (const entry of catalog) {
+      if (!entry.route || !entry.actions?.length) continue
+      const named = [...entry.synonyms, entry.title].some((s) =>
+        normalize(s).split(' ').some((w) => w.length >= 3 && tokens.has(w)),
+      )
+      if (!named) continue
+      const detected = detectCommandIntent(search, {
+        screenId: entry.screen_id,
+        route: entry.route,
+        actions: entry.actions,
+        navigateCommand: navCommand,
+      })
+      if (detected && (detected.kind === 'commandDraft' || detected.kind === 'formPrefill')) {
+        return detected
+      }
+    }
+    return null
+  }, [intentPlans, omniboxCatalogQuery.data, search])
+
+  const acceptCommandIntent = useCallback(
+    (plan: CommandDraftIntent | FormPrefillIntent) => {
+      void sha256Hex(normalize(search))
+        .then((intentHash) => {
+          if (!intentHash) return
+          return recordOmniboxSignal({
+            intent_hash: intentHash,
+            matched_screen_id: plan.screenId,
+            confidence: plan.confidence,
+            accepted: true,
+          })
+        })
+        .catch(() => undefined)
+      // v1: in die Ziel-Maske navigieren; die Aktion wird dort per bestehendem
+      // Ritual/Prefill ausgeloest (kein Auto-Submit, kein Gate-Bypass).
+      const sep = plan.routePath.includes('?') ? '&' : '?'
+      navigate(`${plan.routePath}${sep}omniboxAction=${encodeURIComponent(plan.actionKey ?? '')}`)
+      onOpenChange(false)
+    },
+    [navigate, onOpenChange, search],
+  )
+
   const filteredCommands = useMemo(() => {
     const searchLower = search.trim().toLowerCase()
     if (searchLower.length === 0) {
@@ -177,6 +229,31 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
             Tipp: Versuche allgemeinere Begriffe wie &quot;Auftrag&quot; oder &quot;Kunde&quot;
           </div>
         </CommandEmpty>
+
+        {commandIntent && (commandIntent.kind === 'commandDraft' || commandIntent.kind === 'formPrefill') && (
+          <CommandGroup heading="Aktion vorbereiten">
+            <CommandItem
+              key={`command:${commandIntent.screenId}:${commandIntent.actionKey}`}
+              value={`${search} command:${commandIntent.actionKey}`}
+              onSelect={() => acceptCommandIntent(commandIntent)}
+              data-mcp-action={`omnibox-command:${commandIntent.actionKey}`}
+              data-mcp-intent={commandIntent.kind}
+              data-omnibox-command-kind={commandIntent.kind}
+              data-omnibox-confidence={commandIntent.confidence.toFixed(2)}
+            >
+              <Zap className="mr-2 h-4 w-4 text-amber-500" />
+              <span>{commandIntent.label}</span>
+              <span className="ml-2 rounded border border-border bg-muted px-1.5 text-xs text-muted-foreground group-data-[selected=true]:text-accent-foreground">
+                {commandIntent.kind === 'commandDraft' ? 'bestätigen' : 'vorfüllen'}
+              </span>
+              {commandIntent.kind === 'commandDraft' && commandIntent.missingFields.length > 0 && (
+                <span className="ml-2 text-xs text-muted-foreground group-data-[selected=true]:text-accent-foreground">
+                  {commandIntent.missingFields.length} Feld(er) offen
+                </span>
+              )}
+            </CommandItem>
+          </CommandGroup>
+        )}
 
         {intentPlans.length > 0 && (
           <>

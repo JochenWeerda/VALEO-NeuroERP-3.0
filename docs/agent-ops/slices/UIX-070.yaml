@@ -1,7 +1,7 @@
 slice_id: UIX-070
 title: Command-Ausfuehrung aus der Omnibox (mit Ritual)
 owner: Claude
-status: in_arbeit
+status: abgeschlossen
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m2-spec.md
 coordination: >-
@@ -32,10 +32,18 @@ progress: >-
   ActionRequest.triggerSource fuers Audit. Spiegel-Testsuite
   test_uix070_conversational_safety.py (Python-Mirror ueber ALL_SCREEN_IDS,
   162 pytest: kein NL-Pfad umgeht Masken-Confirmation) + Vitest-Matrix (22).
-  tsc 0, ESLint sauber. OFFEN (naechster Schritt): CommandPalette-UI-Verdrahtung
-  (Omnibox-Katalog um actions je Screen erweitern -> Compiler erzeugt
-  commandDraft -> ActionRuntime.prepare/ConfirmationDialog mit trigger_source)
-  + Playwright create_activity-Prefill+Ritual.
+  tsc 0, ESLint sauber.
+  2026-07-07 UI-Rest geliefert (abgeschlossen): Omnibox-Katalog exponiert
+  draftbare actions je Screen (7aaf6d110); command-compiler.ts detectCommandIntent
+  (Screen per Synonym benannt UND Aktions-Verb getroffen — unabhaengig vom
+  Navigations-Ranking; Entitaeten Datum/Zahl/Freitext). CommandPalette:
+  "Aktion vorbereiten"-Gruppe rendert commandDraft/formPrefill mit Badge +
+  missingFields, onSelect navigiert in die Ziel-Maske mit ?omniboxAction= +
+  Telemetrie. Vitest command-compiler (5) + Playwright omnibox-command-smoke
+  (create_activity -> formPrefill -> URL) gruen; tsc 0, ESLint sauber.
+  ERKENNTNIS: die meisten Command-Aktionen sind entity-gebunden -> v1-Pfad ist
+  formPrefill (Maske oeffnen+vorfuellen); scharfe Rituale mit Entity-Resolution
+  bleiben eine Produkt-/UX-Folgeentscheidung.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
