@@ -18,8 +18,9 @@ acceptance:
   - /artikel/neu wird im Breadcrumb unter Artikel-Stammdaten statt Verkauf eingeordnet.
   - /artikel bleibt unter Artikel-Stammdaten auffindbar.
   - Bestehende Routen ohne Manifest-Treffer fallen weiter auf URL-Segmente zurueck.
+  - Suite-weiter Guard prueft alle ERP-Navigationseintraege gegen falsche Prefix-Treffer.
 evidence:
-  - pnpm --dir packages/frontend-web test:run src/__tests__/components/navigation/Breadcrumbs.test.ts src/__tests__/navigation-wiring.test.ts -> 7 passed
+  - pnpm --dir packages/frontend-web test:run src/__tests__/components/navigation/Breadcrumbs.test.ts src/__tests__/navigation-wiring.test.ts -> 8 passed
   - pnpm --dir packages/frontend-web exec eslint src/components/navigation/Breadcrumbs.tsx -> 0
   - Browser-Smoke http://127.0.0.1:5177/artikel/neu -> h1 Neuer Artikel, Breadcrumb Artikel-Stammdaten Neu, keine Console-Fehler
 risks:
