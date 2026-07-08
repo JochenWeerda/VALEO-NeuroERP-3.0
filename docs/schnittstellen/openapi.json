@@ -101056,6 +101056,59 @@
         "title": "SiloCellPatch",
         "type": "object"
       },
+      "SiloCellsTwinOut": {
+        "properties": {
+          "cacheTtlSeconds": {
+            "title": "Cachettlseconds",
+            "type": "integer"
+          },
+          "cellData": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Celldata",
+            "type": "object"
+          },
+          "cellLinks": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Celllinks",
+            "type": "object"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/TwinMetricOut"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/TwinPlanOut"
+          },
+          "updatedAt": {
+            "title": "Updatedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan",
+          "metrics",
+          "updatedAt",
+          "cacheTtlSeconds",
+          "count"
+        ],
+        "title": "SiloCellsTwinOut",
+        "type": "object"
+      },
       "SiloCreate": {
         "properties": {
           "article_id": {
@@ -108876,6 +108929,165 @@
           "amount_cents"
         ],
         "title": "TseTransactionRequest",
+        "type": "object"
+      },
+      "TwinCellOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "shape": {
+            "$ref": "#/components/schemas/TwinShapeOut"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "shape"
+        ],
+        "title": "TwinCellOut",
+        "type": "object"
+      },
+      "TwinMetricOut": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "warnAbove": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warnabove"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "kind"
+        ],
+        "title": "TwinMetricOut",
+        "type": "object"
+      },
+      "TwinPlanOut": {
+        "properties": {
+          "canvas": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Canvas",
+            "type": "object"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/TwinCellOut"
+            },
+            "title": "Cells",
+            "type": "array"
+          },
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id",
+          "canvas",
+          "cells"
+        ],
+        "title": "TwinPlanOut",
+        "type": "object"
+      },
+      "TwinShapeOut": {
+        "properties": {
+          "h": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "H"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points"
+          },
+          "w": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "W"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "TwinShapeOut",
         "type": "object"
       },
       "UATSchritt": {
@@ -256440,6 +256652,96 @@
           "lager",
           "inventory",
           "lager"
+        ]
+      }
+    },
+    "/api/v1/lager/silo/cells": {
+      "get": {
+        "operationId": "list_silo_cells_twin_api_v1_lager_silo_cells_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "warehouse_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Warehouse Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "silo_system_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Silo System Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiloCellsTwinOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Twin-Read-Model fuer Silozellen",
+        "tags": [
+          "lager",
+          "silo",
+          "twin"
         ]
       }
     },
