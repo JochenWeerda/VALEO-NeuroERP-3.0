@@ -1,0 +1,28 @@
+slice_id: ERP-SEED-ARTICLES-001
+title: Buchungstaugliche Artikel-Seeds fuer lokale Tests
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: Lokaler Dev-/Testdaten-Seed fuer ERP-Buchungspfade
+coordination: >-
+  Kleiner Infrastruktur-/Daten-Slice. Ziel ist ein idempotenter Seed fuer
+  fachliche Artikel im Default-Tenant, damit lokale Buchungs-, Waage-,
+  Lager- und Verkaufs-/Einkaufspfade ohne manuelle Artikelanlage testbar sind.
+goal: >-
+  Bestehenden Bootstrap-Seed um buchungstaugliche Artikel mit Preisen,
+  Warengruppen, Einheiten, Bestand und stabilen Artikelnummern erweitern.
+file_ownership:
+  - "app/seeds/inventory_seed.py"
+  - "tests/test_inventory_seed.py"
+  - "docs/agent-ops/slices/ERP-SEED-ARTICLES-001.yaml"
+  - "docs/agent-ops/active-workboard.md"
+acceptance:
+  - "Seed ist idempotent und aktualisiert bestehende Seed-Artikel ohne Dubletten."
+  - "Artikel liegen im DEFAULT_TENANT_ID und sind via Artikel-/Buchungspfade nutzbar."
+  - "Mindestens Getreide, Saatgut, Duengemittel, Pflanzenschutz und Futtermittel enthalten Preise/Bestand."
+tests:
+  - "pytest tests/test_inventory_seed.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+risks:
+  - "Bestehende lokale Daten duerfen nicht geloescht oder ueberschrieben werden, ausser fuer Seed-eigene Artikelnummern."
+external_gates:
+  - not_applicable
