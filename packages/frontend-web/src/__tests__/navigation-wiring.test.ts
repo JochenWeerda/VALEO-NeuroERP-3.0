@@ -10,6 +10,7 @@ import {
   AI_SHORTCUTS,
   type NavItem,
 } from '@/app/navigation/manifest'
+import { getDocumentEntryPolicy } from '@/lib/workflow/document-entry-policy'
 
 type AliasInfo = { paths: Set<string>; hasIndex: boolean }
 
@@ -68,8 +69,40 @@ describe('navigation wiring', () => {
     expect(articleMaster?.path).toBe('/artikel')
     expect(articleMaster?.module).toBe('@/pages/artikel/liste')
 
+    const newArticle = findNavItemById(masterDataSection?.children ?? [], 'artikel-neu')
+    expect(newArticle?.path).toBe('/artikel/neu')
+    expect(aliasMap.get('@/pages/artikel/stamm')?.paths.has('artikel/:id')).toBe(true)
+    expect(aliasMap.get('@/pages/artikel/stamm')?.paths.has('artikel/neu')).toBe(true)
+
     const salesArticle = findNavItemById(NAV_SECTIONS, 'artikel')
     expect(salesArticle?.path).toBe('/artikel')
+  })
+
+  it('exposes document entry shortcuts with workflow policy routes', () => {
+    const outgoingDocuments = findNavItemById(NAV_SECTIONS, 'ausgehende-belege')
+    const incomingDocuments = findNavItemById(NAV_SECTIONS, 'eingehende-belege')
+    expect(outgoingDocuments, 'Ausgehende Belege section missing').toBeTruthy()
+    expect(incomingDocuments, 'Eingehende Belege section missing').toBeTruthy()
+
+    expect(findNavItemById(NAV_SECTIONS, 'ausgehend-lieferschein')?.path).toBe(
+      getDocumentEntryPolicy('outgoing-delivery-note').targetRoute,
+    )
+    expect(findNavItemById(NAV_SECTIONS, 'eingehend-lieferschein')?.path).toBe(
+      getDocumentEntryPolicy('incoming-delivery-note').targetRoute,
+    )
+    expect(findNavItemById(NAV_SECTIONS, 'eingehend-wareneingang')?.path).toBe(
+      getDocumentEntryPolicy('incoming-goods-receipt').targetRoute,
+    )
+    expect(findNavItemById(NAV_SECTIONS, 'eingehend-rechnung')?.path).toBe(
+      getDocumentEntryPolicy('incoming-supplier-invoice').targetRoute,
+    )
+
+    const immediateDeliveryShortcut = ACTION_SHORTCUTS.find((shortcut) => shortcut.id === 'action-outgoing-delivery-note')
+    expect(immediateDeliveryShortcut?.path).toBe('/verkauf/lieferschein-erfassung')
+    expect(immediateDeliveryShortcut?.keywords).toContain('sofort-lieferschein')
+
+    const incomingShortcut = ACTION_SHORTCUTS.find((shortcut) => shortcut.id === 'action-incoming-documents')
+    expect(incomingShortcut?.keywords).toContain('rechnungseingang')
   })
 })
 

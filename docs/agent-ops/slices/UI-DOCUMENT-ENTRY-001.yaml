@@ -1,0 +1,31 @@
+id: UI-DOCUMENT-ENTRY-001
+title: Schnellzugriff Belegerfassung und Workflow-Policy
+status: abgeschlossen
+owner: Codex
+priority: P0
+claimed_at: 2026-07-08
+completed_at: 2026-07-08
+goal: >-
+  Eingehende und ausgehende Belege fuer Anwender direkt auffindbar machen und
+  den fachlichen Vertrag fuer Workflow-Zuordnung zentral im Frontend modellieren.
+file_ownership:
+  - packages/frontend-web/src/lib/workflow/document-entry-policy.ts
+  - packages/frontend-web/src/app/navigation/action-shortcuts.tsx
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - packages/frontend-web/src/__tests__/navigation-wiring.test.ts
+  - packages/frontend-web/src/__tests__/document-entry-policy.test.ts
+  - docs/agent-ops/slices/UI-DOCUMENT-ENTRY-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Sofort-Lieferschein, Lieferschein-Erfassung und ausgehender Lieferschein fuehren auf /verkauf/lieferschein-erfassung.
+  - Eingehende Belege sind ueber Wareneingang, Rechnungseingang, Lieferschein Eingang und Anlieferavis auffindbar.
+  - Ausgehende Belege sind ueber Angebot, Auftrag, Lieferschein, Rechnung und Gutschrift auffindbar.
+  - Beleg-Einstiege haben einen zentralen Vertrag fuer direction, documentType, partyRole, targetRoute, workflowPolicy und matchKeys.
+  - Sofort-LS bleibt standalone; Workflow-Case entsteht nur fuer attach-or-start-Policies.
+evidence:
+  - pnpm --dir packages/frontend-web test:run src/__tests__/navigation-wiring.test.ts src/__tests__/document-entry-policy.test.ts -> 9 passed
+  - pnpm --dir packages/frontend-web exec eslint src/app/navigation/action-shortcuts.tsx src/app/navigation/domains/commercial.tsx src/lib/workflow/document-entry-policy.ts -> 0
+  - pnpm --dir packages/frontend-web exec eslint src/app/navigation/action-shortcuts.tsx src/app/navigation/domains/commercial.tsx src/lib/workflow/document-entry-policy.ts src/__tests__/navigation-wiring.test.ts src/__tests__/document-entry-policy.test.ts -> 0 errors, 2 warnings fuer testdateien via ESLint-ignore
+risks:
+  - Alternative Produkte im Artikelstamm haben aktuell keinen bestaetigten Backend-/Formvertrag; nicht als API-Fantasie umgesetzt.
+  - Der Frontend-Vertrag modelliert Erkennung und Zielrouten, startet aber noch keinen Backend-Flow-Spine-Case.
