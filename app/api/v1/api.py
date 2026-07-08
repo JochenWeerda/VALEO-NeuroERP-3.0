@@ -1754,6 +1754,7 @@ from app.api.v1.endpoints import (
     operational_governance,
     planung_kalender,
     pricing_governance,
+    esg_footprint,
     process_mining_api,
     process_mining_observation,
     process_sla,
@@ -1792,6 +1793,7 @@ api_router.include_router(mask_screen_definition.router)
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)
+api_router.include_router(esg_footprint.router)
 api_router.include_router(process_mining_api.router)
 api_router.include_router(process_mining_observation.router)
 api_router.include_router(process_sla.router)

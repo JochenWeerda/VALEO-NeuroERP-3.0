@@ -1,7 +1,7 @@
 slice_id: UIX-082-PIPELINE
 title: ESG-Footprint Read-Model und Masken-Kachel
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: docs/design/specs/uix-m3-spec.md
 coordination: >-
@@ -26,8 +26,16 @@ acceptance:
   - "Recompute ist idempotent fuer gleiche charge_id+factor_version."
   - "Masken-Contract zeigt ESG-Summary ohne Parallelseite."
 tests:
-  - "pytest tests/test_uix082_esg_footprint_api.py --no-cov"
-  - "pytest tests/test_uix082_esg_footprint_service.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+  - "pytest tests/test_uix082_esg_footprint_api.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+  - "pytest tests/test_uix082_esg_footprint.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+progress: >-
+  2026-07-08 abgeschlossen: Alembic esg_charge_footprint_uix082 legt
+  domain_agrar.esg_charge_footprint mit UNIQUE(tenant_id,charge_id,
+  factor_version) an. GET /api/v1/esg/charges/{charge_id}/footprint liest
+  tenant-isoliert bestehende Footprints oder berechnet per Query-Input-Adapter
+  drying_kwh/electricity_kwh/transport_tkm neu und persistiert idempotent mit
+  Komponenten-source_ref. lager/article-stock hat einen additiven Summary-Slot
+  esg_co2e. Lokal verifiziert: 2 API-pytest, 9 Kern-pytest, py_compile.
 risks:
   - "Geteilter Working Tree; UIX-082-Kern bleibt Owner Claude."
   - "Inputs-Adapter nutzt v1-Fallbacks, wenn keine echten Trocknungs-/Touren-/Strombelege vorliegen."

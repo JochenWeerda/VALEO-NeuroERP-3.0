@@ -37,6 +37,13 @@ progress: >-
   /esg/charges/{id}/footprint + Inputs-Adapter (Trocknung/Touren/Strom aus
   Bestand) + ESG-Summary-Kachel (screen_definitions, shared → koordinieren) +
   Vitest Kachel/Popover + Nightly-Job.
+  2026-07-08 Codex-Tail UIX-082-PIPELINE: Persistenz/API/Masken-Summary
+  geliefert. Alembic legt domain_agrar.esg_charge_footprint mit UNIQUE(tenant_id,
+  charge_id,factor_version) an; GET /api/v1/esg/charges/{charge_id}/footprint
+  liest tenant-isoliert oder persistiert idempotent per Query-Input-Adapter
+  drying_kwh/electricity_kwh/transport_tkm; jede berechnete Komponente behaelt
+  source_ref. lager/article-stock besitzt additiven Summary-Slot esg_co2e.
+  OFFEN danach: echter Bestand-Adapter/Nightly-Job und UI-Popover/Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

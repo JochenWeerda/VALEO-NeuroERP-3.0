@@ -568,6 +568,11 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
         "subtitle": "Lager / Bestandsfuehrung",
         "adapter": {"type": "native", "sourceId": "lager/article-stock", "temporary": False},
         "summaryEndpoint": "/api/v1/articles/{entity_id}/screen-summary",
+        "summary": [
+            {"key": "bestand", "label": "Bestand", "tone": "neutral"},
+            {"key": "mindestbestand", "label": "Meldebestand", "tone": "warning"},
+            {"key": "esg_co2e", "label": "CO2e Charge", "tone": "neutral"},
+        ],
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/articles/{entity_id}"},
             {"key": "bestand", "endpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bestand", "pageSize": 25},
