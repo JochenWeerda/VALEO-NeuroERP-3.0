@@ -1,0 +1,39 @@
+slice_id: UIX-081-PIPELINE
+title: Twin-Panel Read-Model und Renderer-Pipeline
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: docs/design/specs/uix-m3-spec.md
+coordination: >-
+  Tail-Slice zu UIX-081: Claude lieferte Renderer-Primitive und Geometrie-Kern.
+  Codex verdrahtet Read-Model, ScreenDefinition, RenderPlan und UniversalMaskRenderer
+  zentral. Kein Studio-Export und keine manuelle Parallelseite in diesem Tail.
+goal: >-
+  lager/leitstand rendert Twin-Daten ueber die bestehende
+  ScreenDefinition -> RenderPlan -> UniversalMaskRenderer-Kette mit tenant-isoliertem
+  GET /lager/silo/cells Read-Model, 30s-Cache-Vertrag und Klick-Durchstich.
+file_ownership:
+  - "docs/agent-ops/slices/UIX-081-PIPELINE.yaml"
+  - "docs/agent-ops/active-workboard.md"
+  - "app/api/v1/endpoints/silo_cells_readmodel.py"
+  - "app/api/v1/api.py"
+  - "app/core/screen_definitions.py"
+  - "packages/frontend-web/src/components/mask-builder/schema.ts"
+  - "packages/frontend-web/src/components/mask-builder/render-plan/**"
+  - "packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx"
+  - "packages/frontend-web/src/components/mask-builder/renderers/TwinPanelRenderer.tsx"
+  - "tests/test_uix081_silo_cells_readmodel.py"
+acceptance:
+  - "GET /lager/silo/cells ist tenant-isoliert, liefert max-age/Stand und 0x5xx fuer leere Daten."
+  - "twin-Block ist additiv in ScreenDefinition und RenderPlan kompiliert."
+  - "UniversalMaskRenderer rendert TwinPanelRenderer nur ueber den zentralen Contract."
+  - "Klick-Durchstich bleibt route/screen_id-basiert; kein dekoratives Parallelpanel."
+tests:
+  - "pytest tests/test_uix081_silo_cells_readmodel.py --no-cov"
+  - "Vitest RenderPlan+TwinPanel"
+  - "tsc 0"
+risks:
+  - "Geteilter Working Tree; UIX-081-Kern bleibt Owner Claude."
+  - "Visual-Audit und Studio-Export bleiben Folge, falls keine stabile Leitstand-Datenbasis vorhanden ist."
+external_gates:
+  - not_applicable
