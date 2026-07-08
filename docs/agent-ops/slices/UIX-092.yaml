@@ -23,6 +23,18 @@ tests:
   - "pytest je Agent Positiv/Grenz/Kein-Treffer + Dedupe + Kill-Switch Coverage>=60"
   - "Vitest P10-Karte"
   - "Runtime-Sweep neue GETs"
+progress: >-
+  2026-07-07 Framework + 4 Agenten-Kern geliefert (isoliert, neues Dir):
+  ambient_agents/base.py (WorklistProposal + AmbientAgent-Protocol + reconcile
+  fuer Dedupe/Auto-Resolve), agents.py (4 deterministische Regeln
+  kontrakt_untererfuellung <80%&<21d / preisabweichung_einkauf >Bestellpreis+Tol
+  / op_eskalation >30d ueberfaellig & keine Mahnung <14d / qs_fristen <30d),
+  registry.py (ALL_AGENTS + active_agents Kill-Switch je Tenant + Wildcard).
+  Agenten mutieren NIE, confidence 1.0, jeder Proposal mit reason+source_ref+
+  dedupe_key. 11 pytest (je Agent Positiv/Grenzwert/kein-Treffer, Dedupe,
+  Auto-Resolve, Kill-Switch, Tenant-Isolation; --noconftest 0.5s). OFFEN: Alembic
+  ambient_worklist_items + watch()-DB-Wrapper (Read-Model-Queries) + Scheduler-
+  Anbindung + GET/dismiss-API + 061-Tile-Counts + P10-Karten-Vitest + Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
