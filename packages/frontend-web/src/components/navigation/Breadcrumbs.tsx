@@ -23,37 +23,61 @@ function humanise(segment: string): string {
     .join(' ')
 }
 
-/** Walk the manifest tree and find the label for a given path. */
-function findLabelInManifest(
+type ManifestPathMatch = {
+  sectionId?: string
+  sectionLabel?: string
+  itemId: string
+  itemLabel: string
+  path: string
+  exact: boolean
+  sectionMatchesRoot: boolean
+}
+
+/** Walk the manifest tree and find the best label for a given path. */
+export function findLabelInManifest(
   items: NavItem[],
   targetPath: string,
 ): { sectionLabel?: string; itemLabel?: string } {
-  for (const section of items) {
-    // Check children first
-    if (section.children) {
-      for (const child of section.children) {
-        const childPath = child.path?.replace(/^\//, '') ?? ''
-        if (childPath && targetPath.startsWith(childPath)) {
-          // Nested children
-          if (child.children) {
-            for (const grandchild of child.children) {
-              const gcPath = grandchild.path?.replace(/^\//, '') ?? ''
-              if (gcPath && targetPath === gcPath) {
-                return { sectionLabel: section.label, itemLabel: grandchild.label }
-              }
-            }
-          }
-          return { sectionLabel: section.label, itemLabel: child.label }
-        }
+  const normalizedTarget = targetPath.replace(/^\/+|\/+$/g, '')
+  const rootSegment = normalizedTarget.split('/')[0] ?? ''
+  const candidates: ManifestPathMatch[] = []
+
+  function visit(item: NavItem, section: NavItem): void {
+    const itemPath = item.path?.replace(/^\/+|\/+$/g, '') ?? ''
+    if (itemPath) {
+      const exact = normalizedTarget === itemPath
+      const isParentPath = normalizedTarget.startsWith(`${itemPath}/`)
+      if (exact || isParentPath) {
+        const isTopLevelMatch = item.id === section.id
+        candidates.push({
+          sectionId: isTopLevelMatch ? undefined : section.id,
+          sectionLabel: isTopLevelMatch ? undefined : section.label,
+          itemId: item.id,
+          itemLabel: item.label,
+          path: itemPath,
+          exact,
+          sectionMatchesRoot: section.id === rootSegment || section.id.startsWith(rootSegment),
+        })
       }
     }
-    // Check section itself
-    const sectionPath = section.path?.replace(/^\//, '') ?? ''
-    if (sectionPath && targetPath === sectionPath) {
-      return { itemLabel: section.label }
+
+    for (const child of item.children ?? []) {
+      visit(child, section)
     }
   }
-  return {}
+
+  for (const section of items) {
+    visit(section, section)
+  }
+
+  const best = candidates.sort((a, b) => {
+    if (a.exact !== b.exact) return a.exact ? -1 : 1
+    if (a.path.length !== b.path.length) return b.path.length - a.path.length
+    if (a.sectionMatchesRoot !== b.sectionMatchesRoot) return a.sectionMatchesRoot ? -1 : 1
+    return 0
+  })[0]
+
+  return best ? { sectionLabel: best.sectionLabel, itemLabel: best.itemLabel } : {}
 }
 
 export function Breadcrumbs() {
