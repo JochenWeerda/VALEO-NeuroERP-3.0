@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-074 VoiceBar Integration Tail — reserviert 2026-07-08
+
+**Owner:** Codex. **Ziel:** UIX-072-VoiceBar in echte Builder-Felder und Omnibox-Navigation verdrahten, ohne UIX-080 Voice-Actions vorwegzunehmen. **Dateibesitz:** `docs/agent-ops/slices/UIX-074.yaml`, `packages/frontend-web/src/lib/voice/**`, `UniversalMaskRenderer.tsx`, `FastFormRenderer.tsx`, `VoiceBar.tsx`, `components/command-palette/**`, `tests/e2e/uix-074-voicebar-smoke.spec.ts`. **Koordination:** UIX-081 Twin-Panel liegt bei Claude; untracked TwinPanel-Dateien werden nicht beruehrt.
+
 ## UIX-071 Codex-Fortsetzung 2026-07-07
 
 Backend + Runtime/UX im geteilten Tree ergaenzt: Alembic `user_screen_overlays_uix071`, tenant-/user-isolierte `/api/v1/ux/overlays/{screen_id}` GET/PUT/DELETE mit serverseitiger Allowlist/400, Runtime-Cache-Key `schemaVersion+hashOverlay`, shared FastTableRenderer-Spaltenpicker + Reset, Playwright Spalten->Reload->Reset. Gates lokal: Vitest Overlay/Renderer 14 passed, tsc 0, ESLint Source sauber, Playwright uix-071 1 passed; Backend py_compile + collect-only + direkte Testfunktionen ok, normaler pytest runner haengt lokal (siehe UIX-071.yaml). Offen: Commit/Push nach Tree-Koordination; VoiceBar/Voice-Playwright bleibt UIX-072.

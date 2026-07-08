@@ -1,0 +1,52 @@
+slice_id: UIX-074
+title: VoiceBar Integration Tail (Feld-Diktat + Omnibox-Navigation)
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: docs/design/specs/uix-m2-spec.md
+coordination: >-
+  M2-Zwischenslice fuer die nach UIX-072 bewusst zurueckgestellte UI-Verdrahtung.
+  UIX-081 Twin-Panel liegt parallel bei Claude; dessen untracked Dateien unter
+  config/twin_plans und TwinPanelRenderer werden nicht beruehrt.
+goal: >-
+  VoiceBar aus dem isolierten UIX-072-Kern in echte Builder-Felder und die Omnibox
+  verdrahten: Transkript bleibt sichtbar/editierbar, Commit erfolgt nur explizit,
+  V2-Navigation nutzt weiter nur den sicheren navigate|none-Compiler.
+file_ownership:
+  - "docs/agent-ops/slices/UIX-074.yaml"
+  - "docs/agent-ops/active-workboard.md"
+  - "packages/frontend-web/src/lib/voice/**"
+  - "packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx"
+  - "packages/frontend-web/src/components/mask-builder/renderers/FastFormRenderer.tsx"
+  - "packages/frontend-web/src/components/mask-builder/renderers/VoiceBar.tsx"
+  - "packages/frontend-web/src/components/command-palette/**"
+  - "packages/frontend-web/tests/e2e/uix-074-voicebar-smoke.spec.ts"
+acceptance:
+  - "Feld-Diktat fuegt Text erst nach expliziter Uebernahme in das fokussierte Feld ein."
+  - "Omnibox-Voice nutzt ausschliesslich compileVoiceNavigation und kann keine Commands ausloesen."
+  - "Transkript ist vor Uebernahme editierbar; Verwerfen veraendert weder Feld noch Route."
+  - "Tastaturpfad bleibt erhalten; Alt+V/Buttons sind testbar."
+tests:
+  - "Vitest VoiceBar-Integration Feld + Omnibox"
+  - "Playwright Diktat in Feld + 'zeige offene posten' Navigation mit Provider-Stub"
+  - "tsc 0 + ESLint Source sauber"
+risks:
+  - "Geteilter Working Tree mit Claude UIX-081 — TwinPanel-Dateien nicht anfassen."
+  - "Scope-Kriechen: keine Voice-Actions; UIX-080 bleibt eigener Sicherheits-Slice."
+ai_harness:
+  fachlicher_vertrag: >-
+    Diktat wird als sichere Eingabehilfe nutzbar; Navigation per Stimme bleibt read-only.
+  architektur_vertrag: >-
+    VoiceBar wird als Builder-/Shell-Primitive verdrahtet, nicht als Seiten-Sonderlogik.
+  daten_vertrag: >-
+    Kein Audio-Persist; Telemetrie enthaelt keine Transkript-Inhalte.
+  test_vertrag: >-
+    Provider-Fakes/Stub machen Feld-Commit und Navigation deterministisch.
+  security_vertrag: >-
+    Keine Action-Ausfuehrung per Voice in diesem Slice; Danger bleibt unerreichbar.
+  betriebs_vertrag: >-
+    Bestehende UIX-072-Tests bleiben gruen; Playwright isoliert API/Provider.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML im selben Push aktualisieren.
+external_gates:
+  - not_applicable
