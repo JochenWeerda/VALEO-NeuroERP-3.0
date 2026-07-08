@@ -45053,6 +45053,95 @@
         "title": "FollowupIn",
         "type": "object"
       },
+      "FootprintComponentOut": {
+        "properties": {
+          "co2e_kg": {
+            "title": "Co2E Kg",
+            "type": "number"
+          },
+          "factor_version": {
+            "title": "Factor Version",
+            "type": "string"
+          },
+          "input": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Input",
+            "type": "object"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "source_ref": {
+            "title": "Source Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "input",
+          "factor_version",
+          "co2e_kg",
+          "source_ref",
+          "source"
+        ],
+        "title": "FootprintComponentOut",
+        "type": "object"
+      },
+      "FootprintOut": {
+        "properties": {
+          "charge_id": {
+            "title": "Charge Id",
+            "type": "string"
+          },
+          "co2e_kg": {
+            "title": "Co2E Kg",
+            "type": "number"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/FootprintComponentOut"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "factor_version": {
+            "title": "Factor Version",
+            "type": "string"
+          },
+          "inputs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "persisted": {
+            "title": "Persisted",
+            "type": "boolean"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "charge_id",
+          "tenant_id",
+          "factor_version",
+          "co2e_kg",
+          "persisted"
+        ],
+        "title": "FootprintOut",
+        "type": "object"
+      },
       "ForderungsgruppeCreate": {
         "properties": {
           "bezeichnung": {
@@ -209119,6 +209208,131 @@
         "summary": "Kampagne starten",
         "tags": [
           "ernte-kampagnen"
+        ]
+      }
+    },
+    "/api/v1/esg/charges/{charge_id}/footprint": {
+      "get": {
+        "operationId": "get_charge_footprint_api_v1_esg_charges__charge_id__footprint_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "charge_id",
+            "required": true,
+            "schema": {
+              "title": "Charge Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recompute",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Recompute",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "drying_kwh",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Drying Kwh"
+            }
+          },
+          {
+            "in": "query",
+            "name": "electricity_kwh",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Electricity Kwh"
+            }
+          },
+          {
+            "in": "query",
+            "name": "transport_tkm",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Transport Tkm"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FootprintOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "ESG-Footprint je Charge",
+        "tags": [
+          "esg",
+          "footprint"
         ]
       }
     },
