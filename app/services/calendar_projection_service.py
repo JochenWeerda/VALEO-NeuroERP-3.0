@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import secrets
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any, Protocol
@@ -21,6 +21,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.uuid7 import uuid7
+from app.services.crm_capture.termin_extraction import build_source_key, extract_termine
 
 
 CALENDAR_LAYERS = {"finanzen", "fristen", "crm", "logistik", "personal", "saison"}
@@ -345,6 +346,32 @@ DEFAULT_PROJECTORS: list[CalendarProjector] = [
 ]
 
 
+_EMAIL_OBJECT_ROUTES: dict[str, tuple[str, str]] = {
+    "purchase_order": ("einkauf/purchase-order", "/einkauf/bestellungen"),
+    "contract": ("agrar/kontrakte", "/kontrakte"),
+    "delivery_note": ("sales/delivery-note", "/verkauf/lieferschein-erfassung"),
+    "supplier": ("einkauf/supplier", "/einkauf/lieferanten"),
+}
+
+
+def _resource_key(object_type: str | None, object_id: str | None) -> str | None:
+    if not object_type or not object_id:
+        return None
+    return f"{object_type}:{object_id}"
+
+
+def _payload_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, dict) else {}
+        except ValueError:
+            return {}
+    return {}
+
+
 def token_hash(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
@@ -353,6 +380,124 @@ class CalendarProjectionService:
     def __init__(self, db: Session, projectors: list[CalendarProjector] | None = None) -> None:
         self.db = db
         self.projectors = projectors or DEFAULT_PROJECTORS
+
+    def _email_conflicts(
+        self,
+        tenant_id: str,
+        *,
+        source_key: str,
+        starts_at: datetime,
+        ends_at: datetime | None,
+        resource_key: str | None,
+    ) -> list[dict[str, Any]]:
+        if not resource_key:
+            return []
+        window_start = starts_at - timedelta(hours=2)
+        window_end = (ends_at or starts_at) + timedelta(hours=2)
+        rows = self.db.execute(text("""
+            SELECT id, title, starts_at, ends_at, object_type, object_id, payload
+            FROM domain_shared.calendar_items
+            WHERE tenant_id = :tenant_id
+              AND layer = 'logistik'
+              AND status IN ('projected', 'proposed', 'confirmed')
+              AND NOT (source = 'email_capture' AND source_key = :source_key)
+              AND starts_at <= :window_end
+              AND COALESCE(ends_at, starts_at) >= :window_start
+        """), {
+            "tenant_id": tenant_id,
+            "source_key": source_key,
+            "window_start": window_start,
+            "window_end": window_end,
+        }).mappings().all()
+
+        conflicts: list[dict[str, Any]] = []
+        for row in rows:
+            item = _as_mapping(row)
+            row_resource = _resource_key(item.get("object_type"), item.get("object_id"))
+            if row_resource is None:
+                matched = _payload_dict(item.get("payload")).get("matched_object")
+                if isinstance(matched, dict):
+                    row_resource = _resource_key(matched.get("type"), matched.get("id"))
+            if row_resource != resource_key:
+                continue
+            conflicts.append({
+                "item_id": str(item.get("id")),
+                "reason": "Slot ueberschneidet bestehenden Logistik-Termin",
+                "title": item.get("title"),
+                "starts_at": item.get("starts_at").isoformat() if hasattr(item.get("starts_at"), "isoformat") else str(item.get("starts_at")),
+            })
+        return conflicts
+
+    def propose_email_terms(
+        self,
+        tenant_id: str,
+        *,
+        mail_id: str,
+        subject: str | None,
+        body: str,
+        received_at: datetime,
+        sender_domain: str | None = None,
+    ) -> dict[str, Any]:
+        """Extrahiert Mail-Termine und schreibt sie als Kalender-Vorschlaege.
+
+        Safety-Vertrag UIX-073: niemals Auto-Confirm. Re-Ingest ist ueber
+        source_key=mail_id:n idempotent; bestehende proposed/confirmed Items
+        werden durch das Upsert nicht ueberschrieben.
+        """
+        text_in = "\n".join(part for part in (subject or "", body or "") if part.strip())
+        candidates = extract_termine(text_in, received_at=received_at, sender_domain=sender_domain)
+        source_keys: list[str] = []
+        for index, candidate in enumerate(candidates):
+            source_key = build_source_key(mail_id, index)
+            source_keys.append(source_key)
+            starts_at = _to_datetime(candidate.start, received_at)
+            ends_at = _to_datetime(candidate.end, starts_at + timedelta(hours=1)) if candidate.end else None
+            matched = asdict(candidate.matched_object) if candidate.matched_object else None
+            object_type = matched.get("type") if matched else "email_capture"
+            object_id = matched.get("id") if matched else mail_id
+            route_info = _EMAIL_OBJECT_ROUTES.get(str(object_type))
+            object_screen_id = route_info[0] if route_info else None
+            object_route = _route(route_info[1], object_id) if route_info else None
+            resource = _resource_key(str(object_type) if object_type else None, str(object_id) if object_id else None)
+            conflicts = self._email_conflicts(
+                tenant_id,
+                source_key=source_key,
+                starts_at=starts_at,
+                ends_at=ends_at,
+                resource_key=resource,
+            )
+            self.upsert_draft(tenant_id, CalendarItemDraft(
+                source="email_capture",
+                source_key=source_key,
+                layer="logistik",
+                item_type="terminvorschlag",
+                title=f"Mail-Termin: {(subject or candidate.extracted_text or mail_id)[:160]}",
+                starts_at=starts_at,
+                ends_at=ends_at,
+                all_day=candidate.all_day,
+                status="proposed",
+                object_type=str(object_type) if object_type else None,
+                object_id=str(object_id) if object_id else None,
+                object_screen_id=object_screen_id,
+                object_route=object_route,
+                payload={
+                    "mail_id": mail_id,
+                    "mail_subject": subject,
+                    "mail_received_at": received_at.isoformat(),
+                    "sender_domain": sender_domain,
+                    "extracted_text": candidate.extracted_text,
+                    "matched_object": matched,
+                    "confidence": candidate.confidence,
+                    "conflicts": conflicts,
+                },
+            ))
+        self.db.commit()
+        return {
+            "mailId": mail_id,
+            "candidates": len(candidates),
+            "proposed": len(source_keys),
+            "sourceKeys": source_keys,
+        }
 
     def reproject(self, tenant_id: str, horizon_days: int = 120, now: datetime | None = None) -> dict[str, Any]:
         base = now or datetime.now(UTC)

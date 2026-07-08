@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-073-PIPELINE E-Mail-Terminextraktion in Kalender-Pipeline — reserviert 2026-07-08
+## UIX-073-PIPELINE E-Mail-Terminextraktion in Kalender-Pipeline — abgeschlossen 2026-07-08
 
-**Owner:** Codex. **Ziel:** UIX-073-Extraktor-Kern in die bestehende UIX-063-Kalender-Pipeline verdrahten: `calendar_items(source=email_capture,status=proposed,layer=logistik)`, idempotente `source_key=mail_id:n`, Quellen-Payload und Konflikt-Hinweise. **Dateibesitz:** `docs/agent-ops/slices/UIX-073-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `app/services/calendar_projection_service.py`, `app/services/crm_auto_capture_service.py`, `tests/test_uix073_calendar_pipeline.py`. **Koordination:** UIX-073-Kern bleibt Owner Claude; kein LLM-Fallback und kein Auto-Confirm in diesem Tail.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — UIX-073-Extraktor-Kern in die bestehende UIX-063-Kalender-Pipeline verdrahtet. `CalendarProjectionService.propose_email_terms` schreibt Kandidaten idempotent als `calendar_items(source=email_capture,status=proposed,layer=logistik,source_key=mail_id:n)` mit Mail-Quellen-Payload, `matched_object`, `confidence` und `conflicts[]`; `CrmAutoCaptureService.capture(channel=email)` ruft die Pipeline defensiv auf und liefert `calendar_proposals` zurueck. **Dateibesitz:** `docs/agent-ops/slices/UIX-073-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `app/services/calendar_projection_service.py`, `app/services/crm_auto_capture_service.py`, `tests/test_uix073_calendar_pipeline.py`. **Abnahme:** `pytest tests/test_uix073_calendar_pipeline.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""` -> 3 passed; `pytest tests/test_uix073_termin_extraction.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""` -> 15 passed; `python -m py_compile app/services/calendar_projection_service.py app/services/crm_auto_capture_service.py` -> 0. **Hinweis:** normaler Root-conftest-pytest haengt lokal weiterhin; isolierter Lauf ist der dokumentierte UIX-073-Gotcha. **Koordination:** UIX-073-Kern bleibt Owner Claude; offen bleiben LLM-Fallback-Flag und Playwright Mail->Vorschlag->Bestaetigen.
 
 ## UIX-091-PIPELINE Prozessband UI-Pipeline-Verdrahtung — reserviert 2026-07-08
 

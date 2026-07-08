@@ -34,6 +34,13 @@ progress: >-
   aus 063): Pipeline-Stufe termin_extraction -> calendar_items(status=proposed,
   source=email_capture, layer=logistik) + Konflikt-Check (±2h gleiche Ressource)
   + confirm/dismiss-API + LLM-Fallback-Flag + Playwright.
+  2026-07-08 Codex-Tail UIX-073-PIPELINE: Pipeline-Stufe geliefert.
+  CalendarProjectionService.propose_email_terms schreibt Kandidaten idempotent als
+  calendar_items(source=email_capture,status=proposed,layer=logistik,
+  source_key=mail_id:n) mit Quellen-Payload und conflicts[]; CrmAutoCaptureService
+  ruft die Pipeline fuer channel=email defensiv auf. Confirm/Dismiss nutzt die
+  bestehende UIX-063-Kalender-API. OFFEN danach: LLM-Fallback-Flag und
+  Playwright Mail->Vorschlag->Bestaetigen.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

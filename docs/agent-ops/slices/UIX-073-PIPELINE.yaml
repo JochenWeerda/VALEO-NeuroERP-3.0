@@ -1,7 +1,7 @@
 slice_id: UIX-073-PIPELINE
 title: E-Mail-Terminextraktion in Kalender-Pipeline
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: docs/design/specs/uix-m2-spec.md
 coordination: >-
@@ -25,6 +25,17 @@ acceptance:
 tests:
   - "pytest tests/test_uix073_calendar_pipeline.py --no-cov"
   - "pytest tests/test_uix073_termin_extraction.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+progress: >-
+  2026-07-08 abgeschlossen: CalendarProjectionService.propose_email_terms
+  extrahiert UIX-073-Kandidaten und schreibt sie idempotent als
+  calendar_items(source=email_capture,status=proposed,layer=logistik,
+  source_key=mail_id:n). Payload enthaelt Mail-Quelle, extrahierten Satz,
+  matched_object, confidence und conflicts[]. CrmAutoCaptureService.capture
+  ruft die Pipeline fuer channel=email defensiv auf; Fehler rollen nur den
+  Kalender-Tail zurueck und zerstoeren nicht die Capture-Antwort. Confirm/Dismiss
+  bleibt die bestehende UIX-063-Kalender-API. Lokal verifiziert isoliert wegen
+  bekanntem Root-conftest-Hang: 3 Pipeline-pytest, 15 Extraktor-pytest,
+  py_compile fuer beide Services.
 risks:
   - "Geteilter Working Tree; UIX-073-Kern bleibt Owner Claude."
   - "Playwright Mail->Kalender bleibt Folge, wenn kein echter Mail-Ingest-UI vorhanden ist."
