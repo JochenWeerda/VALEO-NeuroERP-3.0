@@ -1,7 +1,7 @@
 slice_id: ERP-SEED-ARTICLES-001
 title: Buchungstaugliche Artikel-Seeds fuer lokale Tests
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: Lokaler Dev-/Testdaten-Seed fuer ERP-Buchungspfade
 coordination: >-
@@ -21,7 +21,17 @@ acceptance:
   - "Artikel liegen im DEFAULT_TENANT_ID und sind via Artikel-/Buchungspfade nutzbar."
   - "Mindestens Getreide, Saatgut, Duengemittel, Pflanzenschutz und Futtermittel enthalten Preise/Bestand."
 tests:
-  - "pytest tests/test_inventory_seed.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+  - "pytest tests/test_inventory_seed.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\" -> 3 passed"
+  - "python -m py_compile app/seeds/inventory_seed.py tests/test_inventory_seed.py -> 0"
+progress: >-
+  2026-07-08 Seed-Code geliefert: app.seeds.inventory_seed nutzt den
+  DEFAULT_TENANT_ID, legt/aktualisiert MAIN-Hauptlager und acht fachliche,
+  buchungstaugliche Artikel mit stabilen Nummern, Preisen, Bestand,
+  Warengruppe, Chargen-/QS-Flags und lagerorte-Payload. Der Seed ist
+  idempotent: bestehende Seed-Artikelnummern werden aktualisiert statt
+  dupliziert. Lokaler Live-Seed-Lauf gegen .env-Postgres ist blockiert, weil
+  127.0.0.1:5432 zwar TCP annimmt, aber der PostgreSQL-Handshake mit
+  connect_timeout=3 ablaeuft.
 risks:
   - "Bestehende lokale Daten duerfen nicht geloescht oder ueberschrieben werden, ausser fuer Seed-eigene Artikelnummern."
 external_gates:

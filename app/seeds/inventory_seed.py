@@ -1,20 +1,24 @@
 """
 Inventory seed data for local development.
-Inserts a default tenant, warehouse, and a handful of articles if they do not exist.
+
+The bootstrap path calls this module via ``python -m app.seeds.inventory_seed``.
+Keep the seed deterministic and idempotent: local booking and weighing tests need
+stable article numbers, prices, stock and tenant ownership.
 """
 
 from __future__ import annotations
 
 import json
 from decimal import Decimal
-from uuid import uuid4
 
 from sqlalchemy import text
 
+from app.core.config import settings
 from app.core.database import engine
 
-TENANT_DOMAIN = "demo.local"
-TENANT_NAME = "Demo Tenant"
+TENANT_ID = settings.DEFAULT_TENANT_ID
+TENANT_DOMAIN = "default.local"
+TENANT_NAME = "Default Dev Tenant"
 
 WAREHOUSES = [
     {
@@ -31,36 +35,148 @@ WAREHOUSES = [
 
 ARTICLES = [
     {
-        "article_number": "A-001",
-        "name": "Blumenerde Premium 20L",
-        "category": "Erde",
-        "unit": "BAG",
-        "sales_price": Decimal("12.99"),
-        "current_stock": 45,
+        "id": "seed-art-get-wei-b",
+        "article_number": "GET-WEI-B",
+        "name": "Weizen B-Qualitaet",
+        "description": "Buchungstest: lagerfaehiger Getreideartikel",
+        "category": "Getreide",
+        "subcategory": "Weizen",
+        "warengruppe": "Getreide",
+        "unit": "kg",
+        "purchase_price": Decimal("0.19"),
+        "sales_price": Decimal("0.24"),
+        "current_stock": Decimal("25000.00"),
+        "min_stock": Decimal("5000.00"),
+        "max_stock": Decimal("100000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": True,
+        "lager_silo": True,
     },
     {
-        "article_number": "A-002",
-        "name": "Tomatensamen BIO",
+        "id": "seed-art-get-ger-f",
+        "article_number": "GET-GER-F",
+        "name": "Futtergerste",
+        "description": "Buchungstest: Gerste fuer Einkauf, Lager und Verkauf",
+        "category": "Getreide",
+        "subcategory": "Gerste",
+        "warengruppe": "Getreide",
+        "unit": "kg",
+        "purchase_price": Decimal("0.16"),
+        "sales_price": Decimal("0.21"),
+        "current_stock": Decimal("18000.00"),
+        "min_stock": Decimal("4000.00"),
+        "max_stock": Decimal("80000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": True,
+        "lager_silo": True,
+    },
+    {
+        "id": "seed-art-oel-raps",
+        "article_number": "OEL-RAPS",
+        "name": "Raps Rohware",
+        "description": "Buchungstest: Oelsaat mit Chargenpflicht",
+        "category": "Oelsaaten",
+        "subcategory": "Raps",
+        "warengruppe": "Oelsaaten",
+        "unit": "kg",
+        "purchase_price": Decimal("0.39"),
+        "sales_price": Decimal("0.48"),
+        "current_stock": Decimal("12000.00"),
+        "min_stock": Decimal("3000.00"),
+        "max_stock": Decimal("60000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": True,
+        "lager_silo": True,
+    },
+    {
+        "id": "seed-art-saa-ww-z",
+        "article_number": "SAA-WW-Z",
+        "name": "Winterweizen Z-Saatgut",
+        "description": "Buchungstest: Saatgut Sackware",
         "category": "Saatgut",
-        "unit": "PKG",
-        "sales_price": Decimal("2.99"),
-        "current_stock": 120,
+        "subcategory": "Getreide",
+        "warengruppe": "Saatgut",
+        "unit": "kg",
+        "purchase_price": Decimal("0.62"),
+        "sales_price": Decimal("0.79"),
+        "current_stock": Decimal("6500.00"),
+        "min_stock": Decimal("1000.00"),
+        "max_stock": Decimal("25000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": False,
+        "lager_silo": False,
     },
     {
-        "article_number": "A-003",
-        "name": "Universaldünger 5kg",
-        "category": "Dünger",
-        "unit": "BAG",
-        "sales_price": Decimal("24.99"),
-        "current_stock": 28,
+        "id": "seed-art-due-kas-27",
+        "article_number": "DUE-KAS-27",
+        "name": "KAS 27 Prozent N",
+        "description": "Buchungstest: Duengemittel mit Preis und Bestand",
+        "category": "Duengemittel",
+        "subcategory": "Stickstoff",
+        "warengruppe": "Duengemittel",
+        "unit": "kg",
+        "purchase_price": Decimal("0.31"),
+        "sales_price": Decimal("0.39"),
+        "current_stock": Decimal("42000.00"),
+        "min_stock": Decimal("8000.00"),
+        "max_stock": Decimal("120000.00"),
+        "chargenpflicht": False,
+        "qs_pruefung_erforderlich": False,
+        "lager_silo": False,
     },
     {
-        "article_number": "A-004",
-        "name": "Gartenschere Professional",
-        "category": "Werkzeug",
-        "unit": "PCS",
-        "sales_price": Decimal("19.99"),
-        "current_stock": 15,
+        "id": "seed-art-psm-herb-get",
+        "article_number": "PSM-HERB-GET",
+        "name": "Herbizid Getreide",
+        "description": "Buchungstest: Pflanzenschutzmittel",
+        "category": "Pflanzenschutz",
+        "subcategory": "Herbizid",
+        "warengruppe": "Pflanzenschutz",
+        "unit": "l",
+        "purchase_price": Decimal("42.50"),
+        "sales_price": Decimal("56.90"),
+        "current_stock": Decimal("320.00"),
+        "min_stock": Decimal("50.00"),
+        "max_stock": Decimal("1500.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": False,
+        "lager_silo": False,
+    },
+    {
+        "id": "seed-art-fut-milch-18",
+        "article_number": "FUT-MILCH-18",
+        "name": "Milchleistungsfutter 18/3",
+        "description": "Buchungstest: Futtermittel lose",
+        "category": "Futtermittel",
+        "subcategory": "Rind",
+        "warengruppe": "Futtermittel",
+        "unit": "kg",
+        "purchase_price": Decimal("0.29"),
+        "sales_price": Decimal("0.36"),
+        "current_stock": Decimal("15000.00"),
+        "min_stock": Decimal("2500.00"),
+        "max_stock": Decimal("70000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": True,
+        "lager_silo": False,
+    },
+    {
+        "id": "seed-art-mmx-standard",
+        "article_number": "MMX-STANDARD",
+        "name": "Mehlmischung Standard",
+        "description": "Buchungstest: Mischware fuer Produktion/Verkauf",
+        "category": "Futtermittel",
+        "subcategory": "Mischfutter",
+        "warengruppe": "MMX Mehlmischung",
+        "unit": "kg",
+        "purchase_price": Decimal("0.24"),
+        "sales_price": Decimal("0.33"),
+        "current_stock": Decimal("9000.00"),
+        "min_stock": Decimal("2000.00"),
+        "max_stock": Decimal("50000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": True,
+        "lager_silo": False,
     },
 ]
 
@@ -78,16 +194,15 @@ def ensure_tenant(conn) -> str:
     result = conn.execute(
         text(
             """
-            SELECT id FROM domain_shared.tenants WHERE domain = :domain
+            SELECT id FROM domain_shared.tenants WHERE id = :id
             """
         ),
-        {"domain": TENANT_DOMAIN},
+        {"id": TENANT_ID},
     ).scalar()
 
     if result:
         return str(result)
 
-    tenant_id = str(uuid4())
     conn.execute(
         text(
             """
@@ -96,13 +211,13 @@ def ensure_tenant(conn) -> str:
             """
         ),
         {
-            "id": tenant_id,
+            "id": TENANT_ID,
             "name": TENANT_NAME,
             "domain": TENANT_DOMAIN,
             "settings": json.dumps({"locale": "de-DE"}),
         },
     )
-    return tenant_id
+    return TENANT_ID
 
 
 def ensure_warehouses(conn, tenant_id: str) -> None:
@@ -117,7 +232,28 @@ def ensure_warehouses(conn, tenant_id: str) -> None:
             {"code": wh["warehouse_code"]},
         ).scalar()
 
+        params = {
+            "id": f"seed-warehouse-{wh['warehouse_code'].lower()}",
+            "tenant_id": tenant_id,
+            "code": wh["warehouse_code"],
+            "name": wh["name"],
+            "address": json.dumps(wh["address"]),
+        }
+
         if exists:
+            conn.execute(
+                text(
+                    """
+                    UPDATE domain_inventory.warehouses
+                    SET tenant_id = :tenant_id,
+                        name = :name,
+                        address = :address,
+                        is_active = true
+                    WHERE warehouse_code = :code
+                    """
+                ),
+                params,
+            )
             continue
 
         conn.execute(
@@ -128,13 +264,7 @@ def ensure_warehouses(conn, tenant_id: str) -> None:
                 VALUES (:id, :tenant_id, :code, :name, :address, true)
                 """
             ),
-            {
-                "id": str(uuid4()),
-                "tenant_id": tenant_id,
-                "code": wh["warehouse_code"],
-                "name": wh["name"],
-                "address": json.dumps(wh["address"]),
-            },
+            params,
         )
 
 
@@ -150,32 +280,87 @@ def ensure_articles(conn, tenant_id: str) -> None:
             {"number": article["article_number"]},
         ).scalar()
 
+        params = _article_params(article, tenant_id)
+
         if exists:
+            conn.execute(
+                text(
+                    """
+                    UPDATE domain_inventory.articles
+                    SET tenant_id = :tenant_id,
+                        name = :name,
+                        description = :description,
+                        category = :category,
+                        subcategory = :subcategory,
+                        warengruppe = :warengruppe,
+                        unit = :unit,
+                        purchase_price = :purchase_price,
+                        sales_price = :sales_price,
+                        current_stock = :current_stock,
+                        reserved_stock = 0,
+                        available_stock = :current_stock,
+                        min_stock = :min_stock,
+                        max_stock = :max_stock,
+                        currency = 'EUR',
+                        lagerartikel = true,
+                        chargenpflicht = :chargenpflicht,
+                        qs_pruefung_erforderlich = :qs_pruefung_erforderlich,
+                        mehrwertsteuer_prozent = 19.00,
+                        lagerorte = :lagerorte,
+                        lager_silo = :lager_silo,
+                        is_active = true,
+                        deleted_at = NULL
+                    WHERE article_number = :article_number
+                    """
+                ),
+                params,
+            )
             continue
 
         conn.execute(
             text(
                 """
                 INSERT INTO domain_inventory.articles
-                (id, tenant_id, article_number, name, category, unit,
-                 sales_price, current_stock, is_active, description)
+                (id, tenant_id, article_number, name, description, category,
+                 subcategory, warengruppe, unit, purchase_price, sales_price,
+                 current_stock, reserved_stock, available_stock, min_stock,
+                 max_stock, currency, lagerartikel, chargenpflicht,
+                 qs_pruefung_erforderlich, mehrwertsteuer_prozent, lagerorte,
+                 lager_silo, is_active)
                 VALUES
-                (:id, :tenant_id, :article_number, :name, :category, :unit,
-                 :sales_price, :current_stock, true, :description)
+                (:id, :tenant_id, :article_number, :name, :description,
+                 :category, :subcategory, :warengruppe, :unit, :purchase_price,
+                 :sales_price, :current_stock, 0, :current_stock, :min_stock,
+                 :max_stock, 'EUR', true, :chargenpflicht,
+                 :qs_pruefung_erforderlich, 19.00, :lagerorte, :lager_silo, true)
                 """
             ),
-            {
-                "id": str(uuid4()),
-                "tenant_id": tenant_id,
-                "article_number": article["article_number"],
-                "name": article["name"],
-                "category": article["category"],
-                "unit": article["unit"],
-                "sales_price": str(article["sales_price"]),
-                "current_stock": article["current_stock"],
-                "description": article["name"],
-            },
+            params,
         )
+
+
+def _article_params(article: dict[str, object], tenant_id: str) -> dict[str, object]:
+    current_stock = article["current_stock"]
+    return {
+        "id": article["id"],
+        "tenant_id": tenant_id,
+        "article_number": article["article_number"],
+        "name": article["name"],
+        "description": article["description"],
+        "category": article["category"],
+        "subcategory": article["subcategory"],
+        "warengruppe": article["warengruppe"],
+        "unit": article["unit"],
+        "purchase_price": str(article["purchase_price"]),
+        "sales_price": str(article["sales_price"]),
+        "current_stock": str(current_stock),
+        "min_stock": str(article["min_stock"]),
+        "max_stock": str(article["max_stock"]),
+        "chargenpflicht": bool(article["chargenpflicht"]),
+        "qs_pruefung_erforderlich": bool(article["qs_pruefung_erforderlich"]),
+        "lagerorte": json.dumps([{"warehouse_code": "MAIN", "quantity": str(current_stock)}]),
+        "lager_silo": bool(article["lager_silo"]),
+    }
 
 
 if __name__ == "__main__":

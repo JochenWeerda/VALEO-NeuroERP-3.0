@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ERP-SEED-ARTICLES-001 Buchungstaugliche Artikel-Seeds fuer lokale Tests — reserviert 2026-07-08
+## ERP-SEED-ARTICLES-001 Buchungstaugliche Artikel-Seeds fuer lokale Tests — abgeschlossen 2026-07-08
 
-**Owner:** Codex. **Ziel:** Bestehenden Bootstrap-Seed um idempotente fachliche Artikel im `DEFAULT_TENANT_ID` erweitern, damit lokale Buchungs-, Waage-, Lager- und Verkaufs-/Einkaufspfade ohne manuelle Artikelanlage testbar sind. **Dateibesitz:** `app/seeds/inventory_seed.py`, `tests/test_inventory_seed.py`, `docs/agent-ops/slices/ERP-SEED-ARTICLES-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Seed-Test + py_compile.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — Bootstrap-Seed erweitert: `app.seeds.inventory_seed` nutzt den `DEFAULT_TENANT_ID`, legt/aktualisiert `MAIN` und acht fachliche Artikel (`GET-WEI-B`, `GET-GER-F`, `OEL-RAPS`, `SAA-WW-Z`, `DUE-KAS-27`, `PSM-HERB-GET`, `FUT-MILCH-18`, `MMX-STANDARD`) mit Preisen, Bestand, Warengruppe und Buchungs-/Waage-Flags. **Dateibesitz:** `app/seeds/inventory_seed.py`, `tests/test_inventory_seed.py`, `docs/agent-ops/slices/ERP-SEED-ARTICLES-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** `pytest tests/test_inventory_seed.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""` -> 3 passed; `python -m py_compile app/seeds/inventory_seed.py tests/test_inventory_seed.py` -> 0. **Hinweis:** Live-Befuellung der lokalen DB blockiert aktuell, weil `.env`-Postgres `127.0.0.1:5432` zwar TCP annimmt, aber der PostgreSQL-Handshake mit `connect_timeout=3` ablaeuft.
 
 ## UIX-07X-08X-CLOSEOUT Restpunkte UIX-073/081/082 soweit lokal schliessbar — abgeschlossen 2026-07-08
 
