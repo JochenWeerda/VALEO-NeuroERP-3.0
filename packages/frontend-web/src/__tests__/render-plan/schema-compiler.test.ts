@@ -154,6 +154,15 @@ describe('schema-compiler', () => {
     expect(plan.tablesByKey.positionen?.tableProfile).toBe('financial')
   })
 
+  it('compiles voice capability into the RenderPlan shell', () => {
+    const plan = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      voice: { enabled: true, provider: 'webspeech' },
+    })
+
+    expect(plan.shell.voice).toEqual({ enabled: true, provider: 'webspeech' })
+  })
+
   it('preserves explicit context rail sections and enables collab opt-in', () => {
     const schema = {
       ...crmSchema(),

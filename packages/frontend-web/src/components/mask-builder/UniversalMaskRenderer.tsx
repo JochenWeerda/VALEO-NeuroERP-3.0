@@ -161,6 +161,7 @@ function RenderFromPlan({
         payload={effectivePayload}
         className={classes.fields}
         performance={plan.performance}
+        voiceEnabled={plan.shell.voice?.enabled}
       />
 
       {plan.rootTableKeys.map((tableKey) => {

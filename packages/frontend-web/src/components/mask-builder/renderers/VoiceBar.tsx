@@ -27,12 +27,14 @@ export function VoiceBar({
   onCommit,
   onTelemetry,
   label = 'Diktat',
+  enableGlobalShortcut = true,
 }: {
   provider: SttProvider | null
   target: VoiceTelemetry['target']
   onCommit: (text: string) => void
   onTelemetry?: (t: VoiceTelemetry) => void
   label?: string
+  enableGlobalShortcut?: boolean
 }): JSX.Element | null {
   const reducedMotion = usePrefersReducedMotion()
   const { available, listening, transcript, error, start, commit, cancel, setTranscript } = useVoiceDictation(provider, {
@@ -44,6 +46,7 @@ export function VoiceBar({
 
   // Alt+V toggelt die Aufnahme (Tastatur-Bedienbarkeit).
   useEffect(() => {
+    if (!enableGlobalShortcut) return
     const handler = (e: KeyboardEvent) => {
       if (e.altKey && e.key.toLowerCase() === 'v') {
         e.preventDefault()
@@ -53,7 +56,7 @@ export function VoiceBar({
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [listening, start, commit])
+  }, [enableGlobalShortcut, listening, start, commit])
 
   if (!available) return null
 

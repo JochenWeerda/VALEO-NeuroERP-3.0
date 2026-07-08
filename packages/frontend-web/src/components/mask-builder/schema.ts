@@ -22,6 +22,7 @@ export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
 export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
 export type ScreenContextRailSection = 'audit' | 'workflow' | 'copilot' | 'collab'
 export type ScreenTableProfile = 'standard' | 'financial' | 'inventory' | 'audit'
+export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 export type ScreenFieldType =
   | 'text'
@@ -264,6 +265,10 @@ export interface ScreenDefinition {
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
   calendar?: ScreenCalendarDefinition
+  voice?: {
+    enabled?: boolean
+    provider?: ScreenVoiceProvider
+  }
   seasonProfile?: ScreenSeasonProfile
   actions?: ScreenActionDefinition[]
   workflow?: ScreenWorkflowDefinition

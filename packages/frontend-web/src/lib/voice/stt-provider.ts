@@ -8,6 +8,12 @@
 
 export type SttProviderId = 'webspeech' | 'server'
 
+declare global {
+  interface Window {
+    __VALEO_STT_PROVIDER__?: SttProvider
+  }
+}
+
 export interface SttStartOptions {
   lang: 'de-DE'
   interim: boolean
@@ -96,6 +102,78 @@ export class FakeSttProvider implements SttProvider {
   }
 }
 
+export class WebSpeechSttProvider implements SttProvider {
+  readonly id: SttProviderId = 'webspeech'
+  private recognition: {
+    lang: string
+    interimResults: boolean
+    start: () => void
+    stop: () => void
+    onresult: ((event: unknown) => void) | null
+    onerror: ((event: { error?: string; message?: string }) => void) | null
+  } | null = null
+  private partialCbs: Array<(t: string) => void> = []
+  private finalCbs: Array<(t: string, c?: number) => void> = []
+  private errorCbs: Array<(e: SttError) => void> = []
+
+  constructor() {
+    if (typeof window === 'undefined') return
+    const speechWindow = window as unknown as {
+      SpeechRecognition?: new () => WebSpeechSttProvider['recognition']
+      webkitSpeechRecognition?: new () => WebSpeechSttProvider['recognition']
+    }
+    const Ctor = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition
+    this.recognition = Ctor ? new Ctor() : null
+    if (!this.recognition) return
+    this.recognition.onresult = (event: unknown) => {
+      const resultEvent = event as {
+        results?: ArrayLike<{ isFinal?: boolean; 0?: { transcript?: string; confidence?: number } }>
+      }
+      const results = resultEvent.results
+      if (!results) return
+      const latest = results[results.length - 1]
+      const text = latest?.[0]?.transcript?.trim() ?? ''
+      if (!text) return
+      if (latest.isFinal) {
+        for (const cb of this.finalCbs) cb(text, latest[0]?.confidence)
+      } else {
+        for (const cb of this.partialCbs) cb(text)
+      }
+    }
+    this.recognition.onerror = (event) => {
+      const code = event.error ?? 'webspeech_error'
+      for (const cb of this.errorCbs) cb({ code, message: event.message ?? code })
+    }
+  }
+
+  isAvailable(): boolean {
+    return this.recognition !== null
+  }
+
+  start(opts: SttStartOptions): void {
+    if (!this.recognition) return
+    this.recognition.lang = opts.lang
+    this.recognition.interimResults = opts.interim
+    this.recognition.start()
+  }
+
+  stop(): void {
+    this.recognition?.stop()
+  }
+
+  onPartial(cb: (text: string) => void): void {
+    this.partialCbs.push(cb)
+  }
+
+  onFinal(cb: (text: string, confidence?: number) => void): void {
+    this.finalCbs.push(cb)
+  }
+
+  onError(cb: (err: SttError) => void): void {
+    this.errorCbs.push(cb)
+  }
+}
+
 export interface VoiceConfig {
   enabled: boolean
   provider: SttProviderId
@@ -118,4 +196,15 @@ export function selectSttProvider(
     if (provider.isAvailable()) return provider
   }
   return null
+}
+
+export function createDefaultSttProvider(config: VoiceConfig = { enabled: true, provider: 'webspeech' }): SttProvider | null {
+  const injectedProvider = typeof window === 'undefined' ? undefined : window.__VALEO_STT_PROVIDER__
+  if (injectedProvider) {
+    return injectedProvider
+  }
+  return selectSttProvider(config, {
+    webspeech: () => new WebSpeechSttProvider(),
+    server: () => new FakeSttProvider({ id: 'server', available: false }),
+  })
 }

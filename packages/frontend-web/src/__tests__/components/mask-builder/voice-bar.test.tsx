@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { VoiceBar } from '@/components/mask-builder/renderers/VoiceBar'
+import { FieldRenderer } from '@/components/mask-builder/renderers/FieldRenderer'
 import { FakeSttProvider, type VoiceTelemetry } from '@/lib/voice/stt-provider'
 
 function mockMatchMedia(reduced: boolean) {
@@ -87,5 +88,27 @@ describe('VoiceBar', () => {
     render(<VoiceBar provider={provider} target="field" onCommit={vi.fn()} />)
     fireEvent.click(screen.getByTestId('voice-ptt'))
     expect(screen.getByTestId('voice-ptt').className).not.toContain('animate-pulse')
+  })
+
+  it('integriert Diktat in editierbare Builder-Felder an der Cursorposition', () => {
+    const provider = new FakeSttProvider()
+    const onChange = vi.fn()
+    render(
+      <FieldRenderer
+        field={{ key: 'notiz', label: 'Notiz', type: 'text' }}
+        value="Hallo "
+        onChange={onChange}
+        voiceProvider={provider}
+      />,
+    )
+    const input = screen.getByLabelText('Notiz') as HTMLInputElement
+    input.focus()
+    input.setSelectionRange(6, 6)
+
+    fireEvent.click(screen.getByTestId('voice-ptt'))
+    act(() => provider.emitFinal('Welt'))
+    fireEvent.click(screen.getByTestId('voice-commit'))
+
+    expect(onChange).toHaveBeenCalledWith('Hallo Welt')
   })
 })

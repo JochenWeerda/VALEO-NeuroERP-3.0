@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-074 VoiceBar Integration Tail — reserviert 2026-07-08
+## UIX-074 VoiceBar Integration Tail — abgeschlossen 2026-07-08
 
-**Owner:** Codex. **Ziel:** UIX-072-VoiceBar in echte Builder-Felder und Omnibox-Navigation verdrahten, ohne UIX-080 Voice-Actions vorwegzunehmen. **Dateibesitz:** `docs/agent-ops/slices/UIX-074.yaml`, `packages/frontend-web/src/lib/voice/**`, `UniversalMaskRenderer.tsx`, `FastFormRenderer.tsx`, `VoiceBar.tsx`, `components/command-palette/**`, `tests/e2e/uix-074-voicebar-smoke.spec.ts`. **Koordination:** UIX-081 Twin-Panel liegt bei Claude; untracked TwinPanel-Dateien werden nicht beruehrt.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — UIX-072-VoiceBar in echte Builder-Felder und Omnibox-Navigation verdrahtet, ohne UIX-080 Voice-Actions vorwegzunehmen. Feld-Diktat schreibt erst nach expliziter Uebernahme an der Cursorposition; Omnibox-Voice nutzt ausschliesslich `compileVoiceNavigation`, nicht-navigierbare Voice-Texte bleiben Suchtext und erzeugen keine Command-Drafts. RenderPlan.shell.voice ist als zentrale Builder-Shell-Option kompiliert. **Dateibesitz:** `docs/agent-ops/slices/UIX-074.yaml`, `packages/frontend-web/src/lib/voice/**`, `UniversalMaskRenderer.tsx`, `FastFormRenderer.tsx`, `VoiceBar.tsx`, `FieldRenderer.tsx`, `FastTabRenderer.tsx`, `packages/frontend-web/src/components/navigation/CommandPalette.tsx`, `tests/e2e/uix-074-voicebar-smoke.spec.ts`. **Abnahme:** fokussierte Vitest Voice/Compiler/CommandPalette, tsc 0, ESLint Source sauber, Playwright uix-074 Smoke gruen. **Koordination:** UIX-081 Twin-Panel liegt bei Claude; untracked TwinPanel-Dateien wurden nicht beruehrt.
 
 ## UIX-071 Codex-Fortsetzung 2026-07-07
 

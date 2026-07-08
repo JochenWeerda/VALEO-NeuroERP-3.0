@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Command as CommandIcon, HelpCircle, Search, Zap } from 'lucide-react'
+import { VoiceBar } from '@/components/mask-builder/renderers/VoiceBar'
 import { globalSearch, QUICK_ACTIONS } from '@/lib/api/global-search'
 import {
   CommandDialog,
@@ -30,6 +31,8 @@ import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
 import { compileIntents, normalize } from '@/lib/omnibox/intent-compiler'
 import { detectCommandIntent } from '@/lib/omnibox/command-compiler'
 import type { CommandDraftIntent, FormPrefillIntent, NavigateIntent } from '@/lib/omnibox/types'
+import { createDefaultSttProvider } from '@/lib/voice/stt-provider'
+import { compileVoiceNavigation } from '@/lib/voice/voice-navigation'
 import {
   buildPaletteCommands,
   enrichCommandsWithOmniboxCatalog,
@@ -67,6 +70,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
   const { dispatch } = useActionDispatch()
   const navigate = useNavigate()
   const [search, setSearch] = useState<string>('')
+  const [lastVoiceQuery, setLastVoiceQuery] = useState<string | null>(null)
+  const voiceProvider = useMemo(() => createDefaultSttProvider(), [])
 
   const dataSearchQuery = useQuery({
     queryKey: ['global-search', search],
@@ -133,10 +138,26 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
     [navigate, onOpenChange, search],
   )
 
+  const acceptVoiceText = useCallback(
+    (text: string) => {
+      const normalized = normalize(text)
+      setLastVoiceQuery(normalized)
+      const plan = compileVoiceNavigation(text, commands)
+      if (plan.kind === 'navigate') {
+        navigate(plan.routePath)
+        onOpenChange(false)
+        return
+      }
+      setSearch(text)
+    },
+    [commands, navigate, onOpenChange],
+  )
+
   // UIX-070: erkennt in der Eingabe ein Aktions-Verb fuer die benannte Maske und
   // erzeugt — streng nach der Sicherheitsmatrix — einen Command-/Prefill-Plan.
   const commandIntent = useMemo(() => {
     if (search.trim().length < 3 || intentPlans.length === 0) return null
+    if (lastVoiceQuery && normalize(search) === lastVoiceQuery) return null
     const catalog = omniboxCatalogQuery.data ?? []
     const tokens = new Set(normalize(search).split(' ').filter(Boolean))
     const navCommand = intentPlans[0].command
@@ -160,7 +181,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
       }
     }
     return null
-  }, [intentPlans, omniboxCatalogQuery.data, search])
+  }, [intentPlans, lastVoiceQuery, omniboxCatalogQuery.data, search])
 
   const acceptCommandIntent = useCallback(
     (plan: CommandDraftIntent | FormPrefillIntent) => {
@@ -220,6 +241,16 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
         onValueChange={setSearch}
         autoFocus
       />
+      {voiceProvider ? (
+        <div className="border-b px-3 py-2">
+          <VoiceBar
+            provider={voiceProvider}
+            target="omnibox"
+            onCommit={acceptVoiceText}
+            label="Omnibox-Diktat"
+          />
+        </div>
+      ) : null}
       <CommandList className="max-h-[400px]">
         <CommandEmpty>
           {search.trim().length > 0

@@ -1,7 +1,7 @@
 slice_id: UIX-074
 title: VoiceBar Integration Tail (Feld-Diktat + Omnibox-Navigation)
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: docs/design/specs/uix-m2-spec.md
 coordination: >-
@@ -19,8 +19,16 @@ file_ownership:
   - "packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx"
   - "packages/frontend-web/src/components/mask-builder/renderers/FastFormRenderer.tsx"
   - "packages/frontend-web/src/components/mask-builder/renderers/VoiceBar.tsx"
-  - "packages/frontend-web/src/components/command-palette/**"
+  - "packages/frontend-web/src/components/navigation/CommandPalette.tsx"
   - "packages/frontend-web/tests/e2e/uix-074-voicebar-smoke.spec.ts"
+progress: >-
+  2026-07-08 geliefert: Default-STT-Provider (Browser WebSpeech + Test-Injection
+  via window.__VALEO_STT_PROVIDER__), VoiceBar in editierbare Builder-Felder
+  verdrahtet (nur expliziter Commit schreibt an Cursorposition), VoiceBar in
+  CommandPalette verdrahtet. Omnibox-Voice nutzt ausschliesslich
+  compileVoiceNavigation; nicht-navigierbare Voice-Texte bleiben Suchtext und
+  erzeugen keine Command-Drafts. RenderPlan.shell.voice kompiliert als zentrale
+  Builder-Shell-Option. Vitest + tsc + ESLint + Playwright fokussiert gruen.
 acceptance:
   - "Feld-Diktat fuegt Text erst nach expliziter Uebernahme in das fokussierte Feld ein."
   - "Omnibox-Voice nutzt ausschliesslich compileVoiceNavigation und kann keine Commands ausloesen."

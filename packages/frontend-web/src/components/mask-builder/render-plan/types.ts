@@ -10,6 +10,7 @@ import type {
   ScreenMode,
   ScreenSummaryItem,
   ScreenTableProfile,
+  ScreenVoiceProvider,
 } from '../schema'
 
 export type RenderComponentKind =
@@ -40,6 +41,10 @@ export interface RenderShellPlan {
   contextRailSections: ScreenContextRailSection[]
   tableProfile: ScreenTableProfile
   summaryEndpoint?: string
+  voice?: {
+    enabled: boolean
+    provider: ScreenVoiceProvider
+  }
 }
 
 export interface RenderSummarySlot {

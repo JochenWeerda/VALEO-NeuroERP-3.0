@@ -38,6 +38,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
         payload={payload}
         className={classes.fields}
         performance={plan.performance}
+        voiceEnabled={plan.shell.voice?.enabled}
       />
       {(content?.tableKeys ?? []).map((tableKey) => {
         const tablePlan = plan.tablesByKey[tableKey]

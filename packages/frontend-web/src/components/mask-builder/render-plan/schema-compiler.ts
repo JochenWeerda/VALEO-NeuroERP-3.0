@@ -242,6 +242,10 @@ export function compileRenderPlan(
       contextRailSections,
       tableProfile,
       summaryEndpoint: schema.summaryEndpoint,
+      voice: {
+        enabled: schema.voice?.enabled ?? true,
+        provider: schema.voice?.provider ?? 'webspeech',
+      },
     },
     summarySlots: (context.summary?.summaryItems ?? schema.summary ?? []).map((item) => ({
       key: item.key,
