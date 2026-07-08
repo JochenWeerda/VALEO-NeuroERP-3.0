@@ -1,7 +1,7 @@
 slice_id: UI-SIDEBAR-SCROLL-001
 title: Linke Seitenleiste bis zum Ende scrollbar
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: Globaler AppShell-/Sidebar-UX-Fix
 coordination: >-
@@ -20,7 +20,17 @@ acceptance:
   - "Kein horizontales Layout-Wackeln beim Scrollen."
   - "Collapsed Sidebar bleibt unveraendert nutzbar."
 tests:
-  - "pnpm --dir packages/frontend-web exec playwright test tests/e2e/sidebar-scroll.spec.ts --project=chromium"
+  - "pnpm --dir packages/frontend-web exec playwright test tests/e2e/sidebar-scroll.spec.ts --project=chromium -> 1 passed"
+  - "pnpm --dir packages/frontend-web exec eslint src/components/navigation/Sidebar.tsx -> 0"
+  - "pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> 0"
+progress: >-
+  2026-07-08 abgeschlossen: Sidebar-Aside ist jetzt hoehenbegrenzt
+  (h-full/max-h-screen/min-h-0), Header/Footer sind shrink-0, der Nav-Bereich
+  ist der einzige vertikale Scroller (min-h-0/flex-1/overflow-y-auto). Der
+  Playwright-Smoke wartet auf das lazy Nav-Manifest, oeffnet Gruppen und
+  verifiziert bei 1366x768, dass bis zum unteren Nav-Ende gescrollt werden kann.
+  Hinweis: Playwright-Global-Teardown meldet bestehende Visual-Tour-Console-
+  Issues ausserhalb des fokussierten Sidebar-Smokes.
 risks:
   - "Bestehende AppShell nutzt h-screen/overflow-hidden; Scroll muss innerhalb der Sidebar liegen."
 external_gates:

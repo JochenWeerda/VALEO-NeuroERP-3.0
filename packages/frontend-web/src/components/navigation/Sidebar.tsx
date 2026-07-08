@@ -238,7 +238,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
   return (
     <aside
       className={clsx(
-        'relative flex flex-col border-r transition-all',
+        'relative flex h-full max-h-screen min-h-0 flex-col border-r transition-all',
         'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
         'border-[var(--sidebar-border)]',
         collapsed ? 'w-[var(--sidebar-width-collapsed,64px)]' : 'w-[var(--sidebar-width-expanded,240px)]',
@@ -249,7 +249,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-component="sidebar"
       data-mcp-collapsed={collapsed}
     >
-      <div className="flex h-16 items-center justify-between border-b border-[var(--sidebar-border)] px-4">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--sidebar-border)] px-4">
         <Link
           to="/"
           className="flex min-h-11 min-w-11 items-center rounded focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -281,11 +281,11 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
         </Button>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden overscroll-contain p-2">
         {filteredNavItems.map((item) => renderNavItem(item, 0))}
       </nav>
 
-      <div className="border-t border-[var(--sidebar-border)] p-2">
+      <div className="shrink-0 border-t border-[var(--sidebar-border)] p-2">
         {!collapsed ? (
           <Suspense fallback={null}>
             <SidebarFavorites favorites={favoriteLinks} onNavigate={onNavigate} />

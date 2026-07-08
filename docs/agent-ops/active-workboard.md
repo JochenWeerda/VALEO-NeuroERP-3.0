@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UI-SIDEBAR-SCROLL-001 Linke Seitenleiste bis zum Ende scrollbar — reserviert 2026-07-08
+## UI-SIDEBAR-SCROLL-001 Linke Seitenleiste bis zum Ende scrollbar — abgeschlossen 2026-07-08
 
-**Owner:** Codex. **Ziel:** Desktop-Sidebar so fixen, dass sie mit ausgeklappten Bereichen per Maus/Rad bis zum letzten Eintrag scrollbar bleibt. **Dateibesitz:** `packages/frontend-web/src/components/navigation/Sidebar.tsx`, `packages/frontend-web/tests/e2e/sidebar-scroll.spec.ts`, `docs/agent-ops/slices/UI-SIDEBAR-SCROLL-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Playwright-Scroll-Smoke bei 1366x768.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — Desktop-Sidebar scrollt jetzt innerhalb des Nav-Bereichs: `aside` ist auf Viewport-Hoehe begrenzt, Header/Footer schrumpfen nicht, `nav` ist `min-h-0 flex-1 overflow-y-auto`. **Dateibesitz:** `packages/frontend-web/src/components/navigation/Sidebar.tsx`, `packages/frontend-web/tests/e2e/sidebar-scroll.spec.ts`, `docs/agent-ops/slices/UI-SIDEBAR-SCROLL-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** `pnpm --dir packages/frontend-web exec playwright test tests/e2e/sidebar-scroll.spec.ts --project=chromium` -> 1 passed; `pnpm --dir packages/frontend-web exec eslint src/components/navigation/Sidebar.tsx` -> 0; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` -> 0. **Hinweis:** Playwright-Global-Teardown meldet bestehende Visual-Tour-Console-Issues ausserhalb des fokussierten Sidebar-Smokes.
 
 ## ERP-SEED-ARTICLES-001 Buchungstaugliche Artikel-Seeds fuer lokale Tests — abgeschlossen 2026-07-08
 
