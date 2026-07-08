@@ -1,0 +1,21 @@
+id: UI-ARTICLE-BREADCRUMB-001
+title: Artikel-Neuanlage nicht als Verkauf ausweisen
+status: reserviert
+owner: Codex
+priority: P1
+claimed_at: 2026-07-08
+goal: >-
+  /artikel/neu rendert fachlich korrekt die Artikelmaske, wurde im Breadcrumb
+  aber als Verkauf/Neu angezeigt. Der Breadcrumb-Matcher soll exakte und
+  spezifischere Navigationstreffer bevorzugen.
+file_ownership:
+  - packages/frontend-web/src/components/navigation/Breadcrumbs.tsx
+  - packages/frontend-web/src/__tests__/components/navigation/Breadcrumbs.test.ts
+  - docs/agent-ops/slices/UI-ARTICLE-BREADCRUMB-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - /artikel/neu wird im Breadcrumb unter Artikel-Stammdaten statt Verkauf eingeordnet.
+  - /artikel bleibt unter Artikel-Stammdaten auffindbar.
+  - Bestehende Routen ohne Manifest-Treffer fallen weiter auf URL-Segmente zurueck.
+risks:
+  - Doppelte Navigationspfade bleiben moeglich; der Matcher muss deterministisch priorisieren.

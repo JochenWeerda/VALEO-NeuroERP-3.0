@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UI-ARTICLE-BREADCRUMB-001 Artikel-Neuanlage nicht als Verkauf ausweisen - reserviert 2026-07-08
+
+**Owner:** Codex. **Ziel:** Den Breadcrumb-/Kontextfehler beheben, bei dem `/artikel/neu` trotz korrekter Artikelmaske als `Verkauf / Neu` angezeigt wird. **Dateibesitz:** `packages/frontend-web/src/components/navigation/Breadcrumbs.tsx`, `packages/frontend-web/src/__tests__/components/navigation/Breadcrumbs.test.ts`, `docs/agent-ops/slices/UI-ARTICLE-BREADCRUMB-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Breadcrumb-Test plus `/artikel/neu` Browser-Smoke.
+
 ## UI-VISUAL-TOUR-RUNTIME-001 Visual-Tour auf Playwright-Frontend-Port ausrichten - reserviert 2026-07-08
 
 **Owner:** Codex. **Ziel:** `visual-tour.spec.ts` an die bestehende `packages/frontend-web/playwright.config.ts` angleichen: Default-Port `5177`/`PLAYWRIGHT_FRONTEND_PORT`, robuste lokale BASE_URL und tolerierte API-5xx nur fuer Backend-offline-Visual-Audits. **Dateibesitz:** `packages/frontend-web/tests/e2e/visual-tour.spec.ts`, `docs/agent-ops/slices/UI-VISUAL-TOUR-RUNTIME-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Parse-/Lint-Check fuer die Spec.
