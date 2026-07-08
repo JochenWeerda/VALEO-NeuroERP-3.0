@@ -24,6 +24,19 @@ tests:
   - "Vitest Compiler+Renderer"
   - "pytest YAML-Validierung + Readiness-Warnfall"
   - "Playwright Band-Navigation ueber 2 Ketten"
+progress: >-
+  2026-07-07 Compiler-Kern + Config + Gate-Script geliefert (isoliert): config/
+  process_chains.yaml (4 Ketten k1_ernte/k2_verkauf/k3_einkauf/k4_crm, nur real
+  existierende screenIds); scripts/check_process_chains.py (Quality-Gate:
+  Struktur + jede screenId in Registry, exit 1 bei Fehler; validate() testbar);
+  renderers/process-ribbon.ts compileProcessRibbon (chainId/stepKey → Ribbon,
+  v1-state current vs neutral, unbekannte chain/step/route → Warnung nie Fehler);
+  ProcessRibbonRenderer (nav mit Chips, current gold, Klick-Navigation,
+  deaktiviert ohne Route). 5 pytest (check-script) + 7 Vitest (Compiler+Renderer).
+  tsc 0, ESLint sauber. OFFEN: processChain-SD-Feld + Compiler-Einbindung in
+  RenderShellPlan (render-plan shared) + Registry-Katalog-Feld processChains +
+  Readiness-Advisory missing_process_chain + check-script in quality-gate-CI +
+  Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

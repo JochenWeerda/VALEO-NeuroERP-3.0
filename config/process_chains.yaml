@@ -1,0 +1,34 @@
+# Prozessketten (UIX-091) — deklarativ, tenant-ueberschreibbar. Nur Sichtbar-
+# machung bestehender Ketten; keine Workflow-Engine-Aenderung. Jede screenId
+# MUSS in der ScreenDefinition-Registry existieren (scripts/check_process_chains.py).
+chains:
+  k1_ernte:
+    label: "Ernte"
+    steps:
+      - { key: kontrakt,    label: "Kontrakt",    screenId: "agrar/kontrakte" }
+      - { key: avis,        label: "Avis",        screenId: "einkauf/anlieferavis" }
+      - { key: qualitaet,   label: "Qualitaet",   screenId: "qualitaet/reklamation" }
+      - { key: einlagerung, label: "Einlagerung", screenId: "lager/article-stock" }
+      - { key: abrechnung,  label: "Abrechnung",  screenId: "agrar/harvest-settlement" }
+  k2_verkauf:
+    label: "Verkauf"
+    steps:
+      - { key: auftrag,     label: "Auftrag",     screenId: "sales/sales-order" }
+      - { key: lieferschein, label: "Lieferschein", screenId: "sales/delivery-note" }
+      - { key: offene_posten, label: "Offene Posten", screenId: "finance/ar-open-item" }
+      - { key: zahlung,     label: "Zahlung",     screenId: "finance/payment-run" }
+  k3_einkauf:
+    label: "Einkauf"
+    steps:
+      - { key: anfrage,     label: "Anfrage",     screenId: "einkauf/anfrage" }
+      - { key: angebot,     label: "Angebot",     screenId: "einkauf/angebot" }
+      - { key: bestellung,  label: "Bestellung",  screenId: "einkauf/purchase-order" }
+      - { key: avis,        label: "Avis",        screenId: "einkauf/anlieferavis" }
+      - { key: rechnung,    label: "Rechnung",    screenId: "finance/ap-invoice" }
+      - { key: zahlung,     label: "Zahlung",     screenId: "finance/payment-run" }
+  k4_crm:
+    label: "CRM"
+    steps:
+      - { key: lead,        label: "Lead",        screenId: "crm/lead" }
+      - { key: opportunity, label: "Opportunity", screenId: "crm/opportunity" }
+      - { key: kunde,       label: "Kunde",       screenId: "crm/customer-360" }
