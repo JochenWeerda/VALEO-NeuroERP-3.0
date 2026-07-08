@@ -222,6 +222,25 @@ export interface ScreenCalendarDefinition {
   layers: ScreenCalendarLayerDefinition[]
 }
 
+export type ScreenTwinMetricKind = 'percent' | 'number' | 'flag' | 'status'
+
+export interface ScreenTwinMetricDefinition {
+  key: string
+  label: string
+  kind: ScreenTwinMetricKind
+  warnAbove?: number
+}
+
+/** Twin-Panel-Primitive (UIX-081): physische Belegungsansicht aus Read-Model. */
+export interface ScreenTwinDefinition {
+  endpoint: string
+  planId?: string
+  cacheTtlSeconds?: number
+  activateRouteTemplate?: string
+  activateScreenId?: string
+  metrics?: ScreenTwinMetricDefinition[]
+}
+
 const CONTEXT_RAIL_SECTIONS: ScreenContextRailSection[] = ['audit', 'workflow', 'copilot', 'collab']
 
 export function resolveContextRailSections(
@@ -265,6 +284,7 @@ export interface ScreenDefinition {
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
   calendar?: ScreenCalendarDefinition
+  twin?: ScreenTwinDefinition
   voice?: {
     enabled?: boolean
     provider?: ScreenVoiceProvider
@@ -317,6 +337,16 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   }
   if (screen.layout?.tableProfile && !['standard', 'financial', 'inventory', 'audit'].includes(screen.layout.tableProfile)) {
     errors.push(`layout.tableProfile is invalid: ${screen.layout.tableProfile}`)
+  }
+  if (screen.twin && !screen.twin.endpoint) {
+    errors.push('twin.endpoint is required')
+  }
+  for (const metric of screen.twin?.metrics ?? []) {
+    if (!metric.key) errors.push('twin.metrics.key is required')
+    if (!metric.label) errors.push(`twin metric ${metric.key || '<unknown>'} requires label`)
+    if (!['percent', 'number', 'flag', 'status'].includes(metric.kind)) {
+      errors.push(`twin metric ${metric.key || '<unknown>'} has invalid kind: ${metric.kind}`)
+    }
   }
 
   for (const tab of screen.tabs ?? []) {

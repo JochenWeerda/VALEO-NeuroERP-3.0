@@ -10,6 +10,7 @@ import type {
   ScreenMode,
   ScreenSummaryItem,
   ScreenTableProfile,
+  ScreenTwinMetricKind,
   ScreenVoiceProvider,
 } from '../schema'
 
@@ -85,6 +86,22 @@ export interface RenderCalendarPlan {
   defaultView: ScreenCalendarView
   deadlineBandDays: number
   layers: RenderCalendarLayerPlan[]
+}
+
+export interface RenderTwinMetricPlan {
+  key: string
+  label: string
+  kind: ScreenTwinMetricKind
+  warnAbove?: number
+}
+
+export interface RenderTwinPlan {
+  endpoint: string
+  planId: string
+  cacheTtlSeconds: number
+  activateRouteTemplate: string
+  activateScreenId?: string
+  metrics: RenderTwinMetricPlan[]
 }
 
 export interface RenderTabContentPlan {
@@ -194,6 +211,7 @@ export interface RenderPlan {
   summaryItems: ScreenSummaryItem[]
   tiles: RenderTilePlan[]
   calendar?: RenderCalendarPlan
+  twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>
   rootFieldKeys: string[]

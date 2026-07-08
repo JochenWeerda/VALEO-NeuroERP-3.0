@@ -1948,6 +1948,77 @@ def build_workspace_leitung_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_lager_leitstand_screen_definition() -> dict[str, Any]:
+    """Native cockpit ScreenDefinition fuer UIX-081 Twin-Panel Leitstand."""
+
+    return {
+        "schemaVersion": 1,
+        "id": "lager/leitstand",
+        "domain": "lager",
+        "mode": "cockpit",
+        "title": "Lager-Leitstand",
+        "subtitle": "Twin-Panel fuer Silozellen, Fuellstand und QS-Sperren",
+        "adapter": {"type": "native", "sourceId": "lager/leitstand", "temporary": False},
+        "summary": [
+            {"key": "silozellen", "label": "Silozellen", "tone": "neutral"},
+            {"key": "qs_sperren", "label": "QS-Sperren", "tone": "warning"},
+            {"key": "cache", "label": "Read-Model 30s", "tone": "neutral"},
+        ],
+        "twin": {
+            "endpoint": "/api/v1/lager/silo/cells",
+            "planId": "lager-leitstand",
+            "cacheTtlSeconds": 30,
+            "activateRouteTemplate": "/lager/silo-zellen/{cellId}",
+            "activateScreenId": "lager/silo-cell",
+            "metrics": [
+                {"key": "fill_pct", "label": "Fuellstand", "kind": "percent", "warnAbove": 90},
+                {"key": "stock_kg", "label": "Bestand kg", "kind": "number"},
+                {"key": "capacity_kg", "label": "Kapazitaet kg", "kind": "number"},
+                {"key": "locked", "label": "Gesperrt", "kind": "flag"},
+                {"key": "qs_status", "label": "QS", "kind": "status"},
+            ],
+        },
+        "layout": {
+            "floorplan": "cockpit",
+            "density": "expertDense",
+            "contextRail": "combined",
+            "tableProfile": "inventory",
+        },
+        "workflow": {
+            "processKey": "lager-leitstand",
+            "status": "read-model",
+            "nextActionKey": "refresh",
+            "auditRequired": False,
+        },
+        "actions": [
+            {
+                "key": "refresh",
+                "label": "Aktualisieren",
+                "kind": "secondary",
+                "permission": "lager.silo.read",
+                "dangerLevel": "safe",
+            }
+        ],
+        "noWorkflowReason": "Leitstand ist ein Read-Model-Cockpit; Statuswechsel erfolgen in den Silozellen-/Materialfluss-Prozessmasken.",
+        "agentContract": {
+            "businessPurpose": "Physische Silozellen-Belegung, Fuellstand und QS-Sperren als klickbares Werkzeug im Lager-Leitstand anzeigen.",
+            "examplePrompts": [
+                "Welche Silozellen sind gesperrt?",
+                "Zeige den Fuellstand im Lager-Leitstand.",
+                "Welche Zelle ist ueber 90 Prozent belegt?",
+            ],
+            "testSelectors": {"screenRoot": "[data-testid='lager-leitstand']"},
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 48,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "lager",
+        },
+    }
+
+
 def build_planung_kalender_screen_definition() -> dict[str, Any]:
     """Native cockpit ScreenDefinition fuer UIX-063 Planungskalender."""
 
@@ -2018,6 +2089,7 @@ def build_planung_kalender_screen_definition() -> dict[str, Any]:
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "planung/kalender": build_planung_kalender_screen_definition,
+    "lager/leitstand": build_lager_leitstand_screen_definition,
     "workspace/einkauf": build_workspace_einkauf_screen_definition,
     "workspace/verkauf": build_workspace_verkauf_screen_definition,
     "workspace/lager": build_workspace_lager_screen_definition,
@@ -2512,6 +2584,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "futtermittel/einzelfuttermittel": ["einzelfuttermittel", "futtermittel", "efm"],
     "futtermittel/mischfuttermittel": ["mischfutter", "mischfuttermittel", "mfm"],
     "lager/article-stock": ["artikelbestand", "lagerbestand", "bestand"],
+    "lager/leitstand": ["lager leitstand", "silo twin", "silozellen", "hofplan", "silo belegung"],
     "lager/stock-movement": ["lagerbewegung", "warenbewegung", "umbuchung"],
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
     "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
@@ -2556,6 +2629,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "futtermittel/einzelfuttermittel": "/futtermittel/einzelfuttermittel-liste",
     "futtermittel/mischfuttermittel": "/futtermittel/mischfuttermittel-liste",
     "lager/article-stock": "/lager/bestandsuebersicht",
+    "lager/leitstand": "/lager/materialfluss-visualisierung",
     "lager/stock-movement": "/lager/lagerbewegungen",
     "qualitaet/reklamation": "/qualitaet/reklamationen",
     "sales/delivery-note": "/verkauf/lieferschein-erfassung",

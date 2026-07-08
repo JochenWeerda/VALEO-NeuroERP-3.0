@@ -163,6 +163,35 @@ describe('schema-compiler', () => {
     expect(plan.shell.voice).toEqual({ enabled: true, provider: 'webspeech' })
   })
 
+  it('compiles twin read-model capability into the RenderPlan', () => {
+    const plan = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'lager/leitstand',
+      domain: 'lager',
+      mode: 'cockpit',
+      twin: {
+        endpoint: '/api/v1/lager/silo/cells',
+        planId: 'lager-leitstand',
+        cacheTtlSeconds: 30,
+        activateRouteTemplate: '/lager/silo-zellen/{cellId}',
+        activateScreenId: 'lager/silo-cell',
+        metrics: [
+          { key: 'fill_pct', label: 'Fuellstand', kind: 'percent', warnAbove: 90 },
+          { key: 'locked', label: 'Gesperrt', kind: 'flag' },
+        ],
+      },
+    })
+
+    expect(plan.twin).toMatchObject({
+      endpoint: '/api/v1/lager/silo/cells',
+      planId: 'lager-leitstand',
+      cacheTtlSeconds: 30,
+      activateRouteTemplate: '/lager/silo-zellen/{cellId}',
+      activateScreenId: 'lager/silo-cell',
+    })
+    expect(plan.twin?.metrics.map((metric) => metric.key)).toEqual(['fill_pct', 'locked'])
+  })
+
   it('preserves explicit context rail sections and enables collab opt-in', () => {
     const schema = {
       ...crmSchema(),

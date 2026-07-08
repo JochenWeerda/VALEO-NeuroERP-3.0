@@ -16,6 +16,7 @@ import {
   CalendarRenderer,
   TabContentRenderer,
   TileGridRenderer,
+  TwinReadModelRenderer,
   WorkflowPanelRenderer,
   layoutClasses,
 } from './renderers'
@@ -154,6 +155,7 @@ function RenderFromPlan({
       <FastSummaryRenderer items={plan.summaryItems} />
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
+      <TwinReadModelRenderer twin={plan.twin} />
 
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}

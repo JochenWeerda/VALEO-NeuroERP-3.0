@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-07",
+  "generatedAt": "2026-07-08",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1641,6 +1641,35 @@
         "mindestbestand",
         "meldebestand"
       ],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status"
+      ]
+    },
+    {
+      "mask_id": "lager/leitstand",
+      "title": "Lager-Leitstand",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__leitstand/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/leitstand/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/leitstand/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/leitstand/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "lager.silo.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "lager.bestand.get",
         "lager.inventur.status"

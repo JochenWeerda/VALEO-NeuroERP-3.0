@@ -37,6 +37,13 @@ progress: >-
   (Aggregation, 30s-Cache), Leitstand-SD lager/leitstand (screen_definitions
   shared), Einbindung in UniversalMaskRenderer (twin-Block), Playwright, Visual-
   Audit 1366/1440/1920.
+  2026-07-08 Codex-Tail UIX-081-PIPELINE: Pipeline-Stufe geliefert. GET
+  /api/v1/lager/silo/cells ist tenant-isoliertes Twin-Read-Model mit
+  Cache-Control max-age=30, updatedAt, metrics, cellData und route/screen_id-
+  Durchstich; lager/leitstand-SD besitzt additiven twin-Block; RenderPlan
+  kompiliert RenderTwinPlan; UniversalMaskRenderer bindet TwinReadModelRenderer
+  zentral ein. OFFEN danach: Playwright Leitstand->Zelle->Maske und Visual-Audit
+  1366/1440/1920; Studio-Export bleibt Folge.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

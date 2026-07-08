@@ -10,7 +10,7 @@ import {
 } from '../schema'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
-import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan } from './types'
+import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
 const DEFAULT_LOOKUP_RESULT_LIMIT = 25
@@ -142,6 +142,23 @@ export function compileCalendar(schema: ScreenDefinition): RenderCalendarPlan | 
   }
 }
 
+export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefined {
+  const twin = schema.twin
+  if (!twin?.endpoint) return undefined
+  return {
+    endpoint: twin.endpoint,
+    planId: twin.planId ?? schema.id,
+    cacheTtlSeconds: twin.cacheTtlSeconds ?? 30,
+    activateRouteTemplate: twin.activateRouteTemplate ?? '/lager/silo-zellen/{cellId}',
+    activateScreenId: twin.activateScreenId,
+    metrics: twin.metrics ?? [
+      { key: 'fill_pct', label: 'Fuellstand', kind: 'percent', warnAbove: 90 },
+      { key: 'locked', label: 'Gesperrt', kind: 'flag' },
+      { key: 'qs_status', label: 'QS', kind: 'status' },
+    ],
+  }
+}
+
 export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
@@ -255,6 +272,7 @@ export function compileRenderPlan(
     summaryItems: context.summary?.summaryItems ?? schema.summary ?? [],
     tiles: compileTiles(schema),
     calendar: compileCalendar(schema),
+    twin: compileTwin(schema),
     visibleTabs,
     tabContent,
     rootFieldKeys: rootFields.map((field) => field.key),

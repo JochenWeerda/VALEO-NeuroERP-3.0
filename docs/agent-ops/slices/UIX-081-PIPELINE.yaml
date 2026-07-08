@@ -1,7 +1,7 @@
 slice_id: UIX-081-PIPELINE
 title: Twin-Panel Read-Model und Renderer-Pipeline
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: docs/design/specs/uix-m3-spec.md
 coordination: >-
@@ -29,9 +29,17 @@ acceptance:
   - "UniversalMaskRenderer rendert TwinPanelRenderer nur ueber den zentralen Contract."
   - "Klick-Durchstich bleibt route/screen_id-basiert; kein dekoratives Parallelpanel."
 tests:
-  - "pytest tests/test_uix081_silo_cells_readmodel.py --no-cov"
-  - "Vitest RenderPlan+TwinPanel"
-  - "tsc 0"
+  - "pytest tests/test_uix081_silo_cells_readmodel.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+  - "pnpm --dir packages/frontend-web test:run src/__tests__/render-plan/schema-compiler.test.ts src/__tests__/components/mask-builder/twin-panel.test.tsx"
+  - "pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false"
+progress: >-
+  2026-07-08 abgeschlossen: tenant-isoliertes GET /api/v1/lager/silo/cells
+  liefert Silozellen als Twin-Read-Model mit Cache-Control private,max-age=30,
+  updatedAt, metrics, cellData und route/screen_id-Durchstich. ScreenDefinition
+  lager/leitstand besitzt additiven twin-Block; RenderPlan kompiliert RenderTwinPlan;
+  UniversalMaskRenderer rendert TwinReadModelRenderer zentral nach Summary/Kacheln/
+  Kalender und nutzt die vorhandene TwinPanelRenderer-SVG-Primitive. Lokal
+  verifiziert: 2 pytest, 20 Vitest, tsc 0, fokussiertes ESLint 0 errors.
 risks:
   - "Geteilter Working Tree; UIX-081-Kern bleibt Owner Claude."
   - "Visual-Audit und Studio-Export bleiben Folge, falls keine stabile Leitstand-Datenbasis vorhanden ist."

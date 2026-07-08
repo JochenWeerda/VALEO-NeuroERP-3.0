@@ -1760,6 +1760,7 @@ from app.api.v1.endpoints import (
     projection_consumer,
     quality_lot_binding,
     runtime_operations,
+    silo_cells_readmodel,
     sla_escalation_api,
     tenant_governance,
     tenant_limits,
@@ -1797,6 +1798,7 @@ api_router.include_router(process_sla.router)
 api_router.include_router(projection_consumer.router)
 api_router.include_router(quality_lot_binding.router)
 api_router.include_router(runtime_operations.router)
+api_router.include_router(silo_cells_readmodel.router)
 api_router.include_router(sla_escalation_api.router)
 api_router.include_router(tenant_governance.router)
 api_router.include_router(tenant_limits.router)
