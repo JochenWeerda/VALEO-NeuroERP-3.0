@@ -1,0 +1,23 @@
+id: UI-DOCUMENT-WORKFLOW-RESOLVE-001
+title: Beleg-Schnellstart nachtraeglich Flow-Spline zuordnen
+status: reserviert
+owner: Codex
+priority: P1
+claimed_at: 2026-07-08
+goal: >-
+  Direkte Belegerfassung bleibt als Schnellstart moeglich, darf aber nicht
+  dauerhaft ausserhalb der Prozesskette bleiben. Nach dem Speichern entscheidet
+  ein generischer Vertrag, ob der Beleg an einen bestehenden Flow-Spline
+  angehaengt, als neuer Flow-Spline gestartet oder zur Klaerung markiert wird.
+file_ownership:
+  - packages/frontend-web/src/lib/workflow/document-entry-policy.ts
+  - packages/frontend-web/src/__tests__/document-entry-policy.test.ts
+  - docs/agent-ops/slices/UI-DOCUMENT-WORKFLOW-RESOLVE-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - outgoing-delivery-note nutzt capture-then-resolve statt standalone.
+  - Der Vertrag ist generisch fuer andere Belegarten verwendbar.
+  - Resolver-Ergebnis unterscheidet attach, start und manual-review.
+  - Unsichere Mehrfachtreffer fuehren nicht zu stiller Auto-Zuordnung.
+risks:
+  - Backend-Persistenz der Workflow-Aufloesung bleibt Folgearbeit, falls kein bestehender Endpoint direkt passt.
