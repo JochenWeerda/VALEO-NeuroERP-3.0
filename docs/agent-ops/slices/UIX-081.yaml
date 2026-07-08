@@ -44,6 +44,9 @@ progress: >-
   kompiliert RenderTwinPlan; UniversalMaskRenderer bindet TwinReadModelRenderer
   zentral ein. OFFEN danach: Playwright Leitstand->Zelle->Maske und Visual-Audit
   1366/1440/1920; Studio-Export bleibt Folge.
+  2026-07-08 Codex-Closeout: TwinReadModelRenderer-Smoke deckt den zentralen
+  Adapterpfad ReadModel->TwinPanelRenderer->Zellenklick->typed Route ab. Voller
+  Playwright Leitstand->Zelle->Maske und Visual-Audit bleiben Browser-/Daten-Gates.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

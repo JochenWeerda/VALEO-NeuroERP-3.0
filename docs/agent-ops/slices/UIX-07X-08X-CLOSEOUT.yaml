@@ -1,7 +1,7 @@
 slice_id: UIX-07X-08X-CLOSEOUT
 title: Restpunkte UIX-073/081/082 soweit lokal schliessbar
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: 2026-07-08
 spec: docs/design/specs/uix-m2-spec.md + docs/design/specs/uix-m3-spec.md
 coordination: >-
@@ -24,7 +24,18 @@ acceptance:
   - "UIX-082 hat sichtbaren Komponenten-/source_ref-Popover im zentralen Renderer-Contract."
   - "UIX-073 hat Mail->Vorschlag->Bestaetigen mindestens als API-/Service-Smoke; LLM bleibt Feature-Flag-offen falls kein Provider vorhanden."
 tests:
-  - "fokussierte Vitest/pytest/Playwright je geschlossenem Punkt"
+  - "pytest tests/test_uix073_calendar_pipeline.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\" -> 4 passed"
+  - "pnpm --dir packages/frontend-web test:run src/__tests__/components/mask-builder/summary-grid.test.tsx src/__tests__/components/mask-builder/twin-panel.test.tsx -> 14 passed"
+  - "pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> 0"
+  - "pnpm --dir packages/frontend-web exec eslint src/components/mask-builder/schema.ts src/components/mask-builder/renderers/ScreenSummaryGrid.tsx -> 0"
+progress: >-
+  2026-07-08 abgeschlossen: UIX-073 hat einen Service-Smoke
+  Mail->Vorschlag->Bestaetigen ohne Auto-Confirm; UIX-081 hat einen zentralen
+  TwinReadModelRenderer-Smoke fuer ReadModel->Zelle->Route; UIX-082 hat einen
+  generischen Summary-Details-Popover fuer Komponenten inkl. source_ref im
+  zentralen ScreenSummaryGrid-Contract. Nicht lokal geschlossen: LLM-Fallback
+  ohne vorhandenen Provider-/Flag-Vertrag, echter Bestand-Adapter/Nightly-Job
+  und vollstaendige Browser-Visual-Audits.
 risks:
   - "Kein externer STT/LLM/Nightly-Provider in lokaler Umgebung."
   - "Geteilter Working Tree; keine fremden Claude-Dateien revertieren."

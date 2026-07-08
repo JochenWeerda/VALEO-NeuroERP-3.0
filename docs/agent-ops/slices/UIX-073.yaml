@@ -41,6 +41,10 @@ progress: >-
   ruft die Pipeline fuer channel=email defensiv auf. Confirm/Dismiss nutzt die
   bestehende UIX-063-Kalender-API. OFFEN danach: LLM-Fallback-Flag und
   Playwright Mail->Vorschlag->Bestaetigen.
+  2026-07-08 Codex-Closeout: Service-Smoke Mail->Vorschlag->Bestaetigen
+  geliefert; propose_email_terms erzeugt status=proposed und transition_proposed
+  bestaetigt den Vorschlag ohne Auto-Confirm. LLM-Fallback bleibt extern offen,
+  da im Repo kein lokaler Provider-/Feature-Flag-Vertrag vorhanden ist.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

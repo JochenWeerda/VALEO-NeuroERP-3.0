@@ -24,6 +24,9 @@ class _Result:
     def all(self) -> list[dict[str, Any]]:
         return self.rows
 
+    def first(self) -> dict[str, Any] | None:
+        return self.rows[0] if self.rows else None
+
 
 class _CalendarDb:
     def __init__(self) -> None:
@@ -55,6 +58,16 @@ class _CalendarDb:
                     "created_at": NOW,
                     "updated_at": NOW,
                 }
+            return _Result([])
+        if "UPDATE domain_shared.calendar_items" in sql and "status = 'proposed'" in sql:
+            for item in self.items.values():
+                if (
+                    item["tenant_id"] == params["tenant_id"]
+                    and item["id"] == params["id"]
+                    and item["status"] == "proposed"
+                ):
+                    item["status"] = params["status"]
+                    return _Result([item])
             return _Result([])
         return _Result([])
 
@@ -151,3 +164,26 @@ def test_email_terms_without_date_do_not_create_calendar_items() -> None:
 
     assert result["candidates"] == 0
     assert db.items == {}
+
+
+def test_mail_to_calendar_proposal_can_be_confirmed_without_autoconfirm() -> None:
+    db = _CalendarDb()
+    service = CalendarProjectionService(db)
+
+    service.propose_email_terms(
+        "tenant-uix073",
+        mail_id="mail-confirm",
+        subject="Anlieferung Bestellung 8811",
+        body="Bitte avisieren: Lieferung am 12.07. um 14 Uhr.",
+        received_at=NOW,
+        sender_domain="spedition-meyer.de",
+    )
+    item = db.items[("tenant-uix073", "email_capture", "mail-confirm:0")]
+
+    assert item["status"] == "proposed"
+
+    confirmed = service.transition_proposed("tenant-uix073", item["id"], "confirmed")
+
+    assert confirmed is not None
+    assert confirmed["status"] == "confirmed"
+    assert db.items[("tenant-uix073", "email_capture", "mail-confirm:0")]["status"] == "confirmed"

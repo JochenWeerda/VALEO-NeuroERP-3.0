@@ -3,6 +3,8 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from '@/app/routing/test-router'
 import {
   parseTwinPlan,
   shapeToPath,
@@ -12,6 +14,15 @@ import {
   type TwinPlan,
 } from '@/components/mask-builder/renderers/twin-geometry'
 import { TwinPanelRenderer } from '@/components/mask-builder/renderers/TwinPanelRenderer'
+import { TwinReadModelRenderer } from '@/components/mask-builder/renderers/TwinReadModelRenderer'
+import type { RenderTwinPlan } from '@/components/mask-builder/render-plan/types'
+
+const mockNavigate = vi.fn()
+
+vi.mock('@/app/routing/typed-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/app/routing/typed-router')>()
+  return { ...actual, useNavigate: () => mockNavigate }
+})
 
 const METRICS: TwinMetricDef[] = [
   { key: 'fill_pct', label: 'Fuellstand', kind: 'percent' },
@@ -119,5 +130,46 @@ describe('TwinPanelRenderer', () => {
   it('gesperrte Zelle erhaelt Schraffur-Markierung', () => {
     render(<TwinPanelRenderer plan={plan} metrics={METRICS} cellData={{ 'S1-Z01': { locked: true } }} onCellActivate={vi.fn()} />)
     expect(screen.getByTestId('twin-cell-S1-Z01')).toHaveAttribute('data-hatched', 'true')
+  })
+})
+
+describe('TwinReadModelRenderer', () => {
+  it('rendert Read-Model-Daten und navigiert beim Zell-Durchstich', () => {
+    mockNavigate.mockClear()
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const twin: RenderTwinPlan = {
+      endpoint: '/api/v1/lager/silo/cells',
+      planId: 'lager-leitstand',
+      cacheTtlSeconds: 30,
+      activateRouteTemplate: '/lager/silo-zellen/{cellId}',
+      activateScreenId: 'lager/silo-cell',
+      metrics: METRICS,
+    }
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <TwinReadModelRenderer
+            twin={twin}
+            initialModel={{
+              plan: {
+                plan_id: 'lager-leitstand',
+                canvas: { width: 400, height: 300 },
+                cells: [{ id: 'cell-1', label: 'Silo 1', shape: { kind: 'rect', x: 10, y: 10, w: 40, h: 60 } }],
+              },
+              metrics: METRICS,
+              cellData: { 'cell-1': { fill_pct: 80, locked: false } },
+              cellLinks: { 'cell-1': { route: '/lager/silo-zellen/cell-1', screen_id: 'lager/silo-cell' } },
+              updatedAt: '2026-07-08T10:41:20Z',
+              cacheTtlSeconds: 30,
+            }}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByTestId('twin-read-model')).toHaveAttribute('data-twin-plan', 'lager-leitstand')
+    fireEvent.click(screen.getByTestId('twin-cell-cell-1'))
+    expect(mockNavigate).toHaveBeenCalledWith('/lager/silo-zellen/cell-1')
   })
 })

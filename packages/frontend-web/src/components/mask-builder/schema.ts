@@ -172,6 +172,16 @@ export interface ScreenSummaryItem {
   label: string
   value: string | number | boolean | null
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
+  details?: {
+    components?: Array<{
+      key: string
+      label?: string
+      value?: string | number | boolean | null
+      co2e_kg?: number
+      source_ref?: string
+      source?: string
+    }>
+  }
 }
 
 export interface ScreenWorkflowDefinition {

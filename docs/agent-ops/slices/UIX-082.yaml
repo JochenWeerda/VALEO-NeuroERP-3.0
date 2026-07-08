@@ -44,6 +44,10 @@ progress: >-
   drying_kwh/electricity_kwh/transport_tkm; jede berechnete Komponente behaelt
   source_ref. lager/article-stock besitzt additiven Summary-Slot esg_co2e.
   OFFEN danach: echter Bestand-Adapter/Nightly-Job und UI-Popover/Playwright.
+  2026-07-08 Codex-Closeout: zentraler ScreenSummaryGrid-Contract kann
+  Komponenten-Details inkl. source_ref als Popover anzeigen; Vitest deckt die
+  ESG-Summary-Komponente ab. Echter Bestand-Adapter, Nightly-Job und voller
+  Playwright bleiben externe Folge-Gates.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
