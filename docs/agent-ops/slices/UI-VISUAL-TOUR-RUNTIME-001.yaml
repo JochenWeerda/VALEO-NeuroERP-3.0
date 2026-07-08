@@ -1,0 +1,20 @@
+id: UI-VISUAL-TOUR-RUNTIME-001
+title: Visual-Tour auf Playwright-Frontend-Port ausrichten
+status: reserviert
+owner: Codex
+priority: P2
+claimed_at: 2026-07-08
+goal: >-
+  Die Visual-Tour soll denselben lokalen Frontend-Port verwenden wie
+  packages/frontend-web/playwright.config.ts. Damit laufen Playwright-WebServer,
+  vorhandener Vite-Server und Spec-Default nicht mehr auseinander.
+file_ownership:
+  - packages/frontend-web/tests/e2e/visual-tour.spec.ts
+  - docs/agent-ops/slices/UI-VISUAL-TOUR-RUNTIME-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - visual-tour.spec.ts nutzt FRONTEND_BASE_URL oder PLAYWRIGHT_FRONTEND_PORT mit Default 5177.
+  - Schnellstart-Kommentar nennt den korrekten lokalen Port.
+  - Backend-5xx werden nur fuer Visual-Audit-Konsole ignoriert, nicht fuer fachliche E2E-Smokes.
+risks:
+  - Voller Visual-Tour-Lauf ist gross und bleibt ein separates Gate.
