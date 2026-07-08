@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UI-SIDEBAR-SCROLL-001 Linke Seitenleiste bis zum Ende scrollbar — reserviert 2026-07-08
+
+**Owner:** Codex. **Ziel:** Desktop-Sidebar so fixen, dass sie mit ausgeklappten Bereichen per Maus/Rad bis zum letzten Eintrag scrollbar bleibt. **Dateibesitz:** `packages/frontend-web/src/components/navigation/Sidebar.tsx`, `packages/frontend-web/tests/e2e/sidebar-scroll.spec.ts`, `docs/agent-ops/slices/UI-SIDEBAR-SCROLL-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Playwright-Scroll-Smoke bei 1366x768.
+
 ## ERP-SEED-ARTICLES-001 Buchungstaugliche Artikel-Seeds fuer lokale Tests — abgeschlossen 2026-07-08
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — Bootstrap-Seed erweitert: `app.seeds.inventory_seed` nutzt den `DEFAULT_TENANT_ID`, legt/aktualisiert `MAIN` und acht fachliche Artikel (`GET-WEI-B`, `GET-GER-F`, `OEL-RAPS`, `SAA-WW-Z`, `DUE-KAS-27`, `PSM-HERB-GET`, `FUT-MILCH-18`, `MMX-STANDARD`) mit Preisen, Bestand, Warengruppe und Buchungs-/Waage-Flags. **Dateibesitz:** `app/seeds/inventory_seed.py`, `tests/test_inventory_seed.py`, `docs/agent-ops/slices/ERP-SEED-ARTICLES-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** `pytest tests/test_inventory_seed.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""` -> 3 passed; `python -m py_compile app/seeds/inventory_seed.py tests/test_inventory_seed.py` -> 0. **Hinweis:** Live-Befuellung der lokalen DB blockiert aktuell, weil `.env`-Postgres `127.0.0.1:5432` zwar TCP annimmt, aber der PostgreSQL-Handshake mit `connect_timeout=3` ablaeuft.
