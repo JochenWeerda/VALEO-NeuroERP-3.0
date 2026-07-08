@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-073-PIPELINE E-Mail-Terminextraktion in Kalender-Pipeline — reserviert 2026-07-08
+
+**Owner:** Codex. **Ziel:** UIX-073-Extraktor-Kern in die bestehende UIX-063-Kalender-Pipeline verdrahten: `calendar_items(source=email_capture,status=proposed,layer=logistik)`, idempotente `source_key=mail_id:n`, Quellen-Payload und Konflikt-Hinweise. **Dateibesitz:** `docs/agent-ops/slices/UIX-073-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `app/services/calendar_projection_service.py`, `app/services/crm_auto_capture_service.py`, `tests/test_uix073_calendar_pipeline.py`. **Koordination:** UIX-073-Kern bleibt Owner Claude; kein LLM-Fallback und kein Auto-Confirm in diesem Tail.
+
 ## UIX-091-PIPELINE Prozessband UI-Pipeline-Verdrahtung — reserviert 2026-07-08
 
 **Owner:** Codex. **Ziel:** UIX-091-Kern in die zentrale `ScreenDefinition -> RenderPlan -> UniversalMaskRenderer`-Pipeline verdrahten: `processChain`-Contract, `RenderShellPlan.processRibbon`, zentraler Renderer-Einbau. **Dateibesitz:** `docs/agent-ops/slices/UIX-091-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/components/mask-builder/schema.ts`, `packages/frontend-web/src/components/mask-builder/render-plan/**`, `packages/frontend-web/src/components/mask-builder/renderers/index.ts`, `packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx`, betroffene Vitest-Dateien. **Koordination:** UIX-091 bleibt Owner Claude; keine Aenderung an `config/process_chains.yaml` oder Backend-Gate-Script in diesem Tail.

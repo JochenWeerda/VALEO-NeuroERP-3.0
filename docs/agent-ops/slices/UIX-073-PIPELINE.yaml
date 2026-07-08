@@ -1,0 +1,32 @@
+slice_id: UIX-073-PIPELINE
+title: E-Mail-Terminextraktion in Kalender-Pipeline
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: docs/design/specs/uix-m2-spec.md
+coordination: >-
+  Tail-Slice zu UIX-073: Claude lieferte den deterministischen Extraktor-Kern.
+  Codex verdrahtet ihn in die bestehende UIX-063-Kalender-Pipeline. Kein LLM-
+  Fallback und kein Auto-Confirm in diesem Tail.
+goal: >-
+  E-Mail-Ingest erzeugt idempotente Kalender-Vorschlaege mit source=email_capture,
+  status=proposed, layer=logistik, Quellen-Nachweis und Konflikt-Hinweisen.
+file_ownership:
+  - "docs/agent-ops/slices/UIX-073-PIPELINE.yaml"
+  - "docs/agent-ops/active-workboard.md"
+  - "app/services/calendar_projection_service.py"
+  - "app/services/crm_auto_capture_service.py"
+  - "tests/test_uix073_calendar_pipeline.py"
+acceptance:
+  - "Re-Ingest derselben Mail erzeugt keine Dubletten (source_key mail_id:n)."
+  - "Vorschlaege bleiben immer status=proposed; Confirm/Dismiss laeuft ueber bestehende Kalender-API."
+  - "Payload enthaelt Mail-Quelle, extrahierten Satz, matched_object und conflicts[]."
+  - "Konflikt-Hinweis bei ueberschneidenden Logistik-Terminen gleicher Ressource im +/-2h-Fenster."
+tests:
+  - "pytest tests/test_uix073_calendar_pipeline.py --no-cov"
+  - "pytest tests/test_uix073_termin_extraction.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+risks:
+  - "Geteilter Working Tree; UIX-073-Kern bleibt Owner Claude."
+  - "Playwright Mail->Kalender bleibt Folge, wenn kein echter Mail-Ingest-UI vorhanden ist."
+external_gates:
+  - not_applicable
