@@ -30,6 +30,11 @@ import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBan
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
 import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
+import {
+  getDocumentEntryPolicy,
+  resolveCapturedDocumentWorkflow,
+  type DocumentWorkflowCandidate,
+} from '@/lib/workflow/document-entry-policy'
 import { NativeSelect } from '@/components/ui/native-select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search } from 'lucide-react'
 
@@ -179,6 +184,21 @@ type DeliveryNoteResponse = {
     created_at: string
     updated_at: string
   }>
+}
+
+type FlowSpineInstanceSummary = {
+  id?: string
+  instance_id?: string
+  process_key?: string
+  label?: string
+  subject?: string
+  customer_name?: string
+  linked_document_id?: string
+  linked_document_type?: string
+}
+
+type FlowSpineInstanceListResponse = {
+  instances?: FlowSpineInstanceSummary[]
 }
 
 export type Position = {
@@ -337,6 +357,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const salesHandover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
   const sourceOrderId = salesHandover.sourceOrderId
+  const deliveryNoteWorkflowPolicy = useMemo(() => getDocumentEntryPolicy('outgoing-delivery-note'), [])
 
   const generateLieferscheinNr = (): string => {
     const year = new Date().getFullYear()
@@ -707,6 +728,104 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     if (!value) return '—'
     const parsed = new Date(value)
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString('de-DE')
+  }
+
+  const fetchDeliveryNoteWorkflowCandidates = async (saved: DeliveryNoteResponse): Promise<DocumentWorkflowCandidate[] | null> => {
+    const flowSpine = deliveryNoteWorkflowPolicy.flowSpine
+    if (!flowSpine) return []
+
+    const terms = [
+      saved.delivery_note_number,
+      sourceOrderId,
+      state.customer?.name,
+      state.customer?.customerNumber,
+    ].filter((term): term is string => Boolean(term?.trim()))
+
+    const byInstanceId = new Map<string, DocumentWorkflowCandidate>()
+    for (const term of terms.slice(0, 3)) {
+      try {
+        const response = await apiClient.get<FlowSpineInstanceListResponse>(
+          `/api/v1/process/flow-spines/${flowSpine.processKey}/instances`,
+          { params: { search: term, limit: 5 } },
+        )
+        for (const instance of response.instances ?? []) {
+          const instanceId = apiString(instance.instance_id ?? instance.id)
+          if (!instanceId || byInstanceId.has(instanceId)) continue
+          const searchable = [instance.label, instance.subject, instance.customer_name].join(' ')
+          const documentNumberHit = Boolean(saved.delivery_note_number && searchable.includes(saved.delivery_note_number))
+          const sourceOrderHit = Boolean(sourceOrderId && searchable.includes(sourceOrderId))
+          const linkedDocumentHit = instance.linked_document_id === saved.id
+          byInstanceId.set(instanceId, {
+            instanceId,
+            processKey: apiOptionalString(instance.process_key) ?? flowSpine.processKey,
+            label: apiOptionalString(instance.label),
+            confidence: linkedDocumentHit || documentNumberHit || sourceOrderHit ? 'strong' : 'weak',
+            matchedKeys: sourceOrderId
+              ? ['customerId', 'customerNumber', 'orderId', 'deliveryNoteId']
+              : ['customerId', 'customerNumber', 'deliveryNoteId'],
+          })
+        }
+      } catch {
+        return null
+      }
+    }
+    return [...byInstanceId.values()]
+  }
+
+  const resolveSavedDeliveryNoteWorkflow = async (saved: DeliveryNoteResponse): Promise<void> => {
+    const flowSpine = deliveryNoteWorkflowPolicy.flowSpine
+    if (!flowSpine) return
+
+    const candidates = await fetchDeliveryNoteWorkflowCandidates(saved)
+    if (candidates === null) {
+      push('Lieferschein gespeichert, Workflow-Zuordnung offen: Flow-Spine-Suche nicht erreichbar.')
+      return
+    }
+    const resolution = resolveCapturedDocumentWorkflow(deliveryNoteWorkflowPolicy, {
+      documentId: saved.id,
+      documentNumber: saved.delivery_note_number,
+      partnerName: state.customer?.name,
+      matchValues: {
+        customerId: state.customer?.id ?? saved.customer_id,
+        customerNumber: state.customer?.customerNumber ?? state.customer?.debitorAccount,
+        orderId: sourceOrderId ?? saved.sales_order_id,
+        deliveryNoteId: saved.id,
+      },
+      candidates,
+    })
+
+    if (resolution.mode === 'manual-review') {
+      push('Workflow-Zuordnung unklar: Bitte vorhandenen Flow-Spline manuell auswaehlen.')
+      return
+    }
+
+    try {
+      if (resolution.mode === 'attach' && resolution.instanceId && resolution.savePayload) {
+        await apiClient.post(
+          `/api/v1/process/flow-spines/${flowSpine.processKey}/instances/${resolution.instanceId}/save`,
+          resolution.savePayload,
+        )
+        push('Lieferschein dem vorhandenen Workflow-Spline zugeordnet')
+        return
+      }
+
+      if (resolution.mode === 'start' && resolution.createPayload) {
+        const created = await apiClient.post<FlowSpineInstanceSummary>(
+          `/api/v1/process/flow-spines/${flowSpine.processKey}/instances`,
+          resolution.createPayload,
+        )
+        const createdId = apiString(created.instance_id ?? created.id)
+        if (createdId && resolution.savePayload) {
+          await apiClient.post(
+            `/api/v1/process/flow-spines/${flowSpine.processKey}/instances/${createdId}/save`,
+            resolution.savePayload,
+          )
+        }
+        push('Neuer Workflow-Spline fuer den Lieferschein gestartet')
+      }
+    } catch (_rawErr: unknown) {
+      push(`Lieferschein gespeichert, Workflow-Zuordnung offen: ${getAxiosErrorMessage(_rawErr)}`)
+    }
   }
 
   // Berechne Summen
@@ -1135,6 +1254,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         fakturiertRechnNr: response.invoice_number || '', // Vom Backend gesetzt nach Fakturierung
       }))
       push('Lieferschein erfolgreich gespeichert')
+      void resolveSavedDeliveryNoteWorkflow(response)
       return response.id
     } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }

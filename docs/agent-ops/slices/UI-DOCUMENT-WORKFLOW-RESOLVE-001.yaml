@@ -1,9 +1,10 @@
 id: UI-DOCUMENT-WORKFLOW-RESOLVE-001
 title: Beleg-Schnellstart nachtraeglich Flow-Spline zuordnen
-status: reserviert
+status: abgeschlossen
 owner: Codex
 priority: P1
 claimed_at: 2026-07-08
+completed_at: 2026-07-08
 goal: >-
   Direkte Belegerfassung bleibt als Schnellstart moeglich, darf aber nicht
   dauerhaft ausserhalb der Prozesskette bleiben. Nach dem Speichern entscheidet
@@ -11,13 +12,19 @@ goal: >-
   angehaengt, als neuer Flow-Spline gestartet oder zur Klaerung markiert wird.
 file_ownership:
   - packages/frontend-web/src/lib/workflow/document-entry-policy.ts
+  - packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx
   - packages/frontend-web/src/__tests__/document-entry-policy.test.ts
   - docs/agent-ops/slices/UI-DOCUMENT-WORKFLOW-RESOLVE-001.yaml
+  - docs/agent-ops/slices/UI-DOCUMENT-ENTRY-001.yaml
   - docs/agent-ops/active-workboard.md
 acceptance:
   - outgoing-delivery-note nutzt capture-then-resolve statt standalone.
   - Der Vertrag ist generisch fuer andere Belegarten verwendbar.
   - Resolver-Ergebnis unterscheidet attach, start und manual-review.
   - Unsichere Mehrfachtreffer fuehren nicht zu stiller Auto-Zuordnung.
+evidence:
+  - pnpm --dir packages/frontend-web test:run src/__tests__/navigation-wiring.test.ts src/__tests__/document-entry-policy.test.ts -> 13 passed
+  - pnpm --dir packages/frontend-web exec eslint src/lib/workflow/document-entry-policy.ts src/pages/verkauf/lieferschein-erfassung.tsx -> 0
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> lokaler Timeout nach 244s ohne Fehlerausgabe
 risks:
-  - Backend-Persistenz der Workflow-Aufloesung bleibt Folgearbeit, falls kein bestehender Endpoint direkt passt.
+  - Backend-Persistenz der Workflow-Aufloesung nutzt aktuell bestehende Flow-Spine-Create/Save-Endpoints; ein dedizierter Resolve-Endpoint waere ein Folgeausbau fuer serverseitiges Matching.

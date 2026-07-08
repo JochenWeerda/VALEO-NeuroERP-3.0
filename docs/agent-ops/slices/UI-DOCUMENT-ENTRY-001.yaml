@@ -21,11 +21,12 @@ acceptance:
   - Eingehende Belege sind ueber Wareneingang, Rechnungseingang, Lieferschein Eingang und Anlieferavis auffindbar.
   - Ausgehende Belege sind ueber Angebot, Auftrag, Lieferschein, Rechnung und Gutschrift auffindbar.
   - Beleg-Einstiege haben einen zentralen Vertrag fuer direction, documentType, partyRole, targetRoute, workflowPolicy und matchKeys.
-  - Sofort-LS bleibt standalone; Workflow-Case entsteht nur fuer attach-or-start-Policies.
+  - Nachtrag UI-DOCUMENT-WORKFLOW-RESOLVE-001: Sofort-LS bleibt als Schnellstart erhalten, ist aber nicht mehr dauerhaft standalone; nach dem Speichern gilt capture-then-resolve.
 evidence:
   - pnpm --dir packages/frontend-web test:run src/__tests__/navigation-wiring.test.ts src/__tests__/document-entry-policy.test.ts -> 9 passed
+  - UI-DOCUMENT-WORKFLOW-RESOLVE-001 Nachtrag -> pnpm --dir packages/frontend-web test:run src/__tests__/navigation-wiring.test.ts src/__tests__/document-entry-policy.test.ts -> 13 passed
   - pnpm --dir packages/frontend-web exec eslint src/app/navigation/action-shortcuts.tsx src/app/navigation/domains/commercial.tsx src/lib/workflow/document-entry-policy.ts -> 0
   - pnpm --dir packages/frontend-web exec eslint src/app/navigation/action-shortcuts.tsx src/app/navigation/domains/commercial.tsx src/lib/workflow/document-entry-policy.ts src/__tests__/navigation-wiring.test.ts src/__tests__/document-entry-policy.test.ts -> 0 errors, 2 warnings fuer testdateien via ESLint-ignore
 risks:
   - Alternative Produkte im Artikelstamm haben aktuell keinen bestaetigten Backend-/Formvertrag; nicht als API-Fantasie umgesetzt.
-  - Der Frontend-Vertrag modelliert Erkennung und Zielrouten, startet aber noch keinen Backend-Flow-Spine-Case.
+  - Dedizierter Backend-Resolve-Endpoint fuer serverseitiges Matching bleibt Folgeausbau; der Nachtrag nutzt bestehende Flow-Spine-Create/Save-Endpoints.
