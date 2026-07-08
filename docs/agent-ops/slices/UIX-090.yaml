@@ -24,6 +24,19 @@ tests:
   - "pytest Draft-CRUD+Schema-Validierung+Vier-Augen Coverage>=60"
   - "Vitest Editor-Reducer+Gate-Panel"
   - "Playwright Abnahme-Szenario end-to-end"
+progress: >-
+  2026-07-07 Sicherheits-Validierungskern geliefert (isoliert, kollisionsfrei):
+  config/studio_data_sources.yaml (kuratierte Allowlist: Datenquellen-Endpoints
+  + Command-Actions mit Basis-dangerLevel/forbiddenForAgents) +
+  app/services/studio_validation.py validate_studio_draft — harte Regeln, LEHNT
+  ab (nicht bereinigt): Namensraum tenant/<slug> Pflicht + keine native-Kollision,
+  adapter.temporary!=False, Actions nur aus Katalog, kein fremder commandEndpoint,
+  dangerLevel darf ERHOEHT nie gesenkt werden, forbiddenForAgents nie aufgehoben;
+  Pflichtfeld-/schemaVersion-Check; alle Verletzungen werden gesammelt gemeldet.
+  13 pytest (12 boese Faelle + valider Draft, --noconftest 0.6s). OFFEN: Alembic
+  screen_definition_drafts + studio_drafts.py CRUD/publish (Vier-Augen) +
+  screen_definition.schema.json (CI-Drift) + features/screen-studio/ Editor +
+  Live-Vorschau (UniversalMaskRenderer Mock-Mode) + Playwright.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

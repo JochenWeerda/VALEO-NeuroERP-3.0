@@ -1,0 +1,43 @@
+# SD-Studio Katalog (UIX-090) — kuratierte Allowlist fuer No-Code-Admins.
+# Nur hier gelistete Read-Models/Endpoints und Command-Actions duerfen in einer
+# Studio-SD verwendet werden. KEIN freies URL-Feld, KEINE eigenen Endpoints.
+version: "2026-07"
+
+# Zulaessige Read-Model-/Listen-Endpoints je Datenquelle.
+data_sources:
+  - key: suppliers
+    label: Lieferanten
+    endpoint: /api/v1/einkauf/lieferanten
+  - key: customers
+    label: Kunden
+    endpoint: /api/v1/crm/customers
+  - key: articles
+    label: Artikel
+    endpoint: /api/v1/articles
+  - key: open_items
+    label: Offene Posten
+    endpoint: /api/v1/finance/open-items
+
+# Zulaessige Command-Actions mit vorgegebenem dangerLevel (Studio darf ERHOEHEN,
+# nie senken) und forbiddenForAgents-Basis (darf nicht aufgehoben werden).
+command_actions:
+  - key: create_activity
+    label: Aktivitaet anlegen
+    commandEndpoint: /api/v1/crm/customers/{entity_id}/actions/create_activity
+    dangerLevel: safe
+    forbiddenForAgents: false
+  - key: mahnen
+    label: Mahnen
+    commandEndpoint: /api/v1/finance/open-items/{entity_id}/actions/mahnen
+    dangerLevel: moderate
+    forbiddenForAgents: false
+  - key: freigeben
+    label: Freigeben
+    commandEndpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
+    dangerLevel: moderate
+    forbiddenForAgents: false
+  - key: stornieren
+    label: Stornieren
+    commandEndpoint: /api/v1/sales/orders/{entity_id}/actions/stornieren
+    dangerLevel: high
+    forbiddenForAgents: true
