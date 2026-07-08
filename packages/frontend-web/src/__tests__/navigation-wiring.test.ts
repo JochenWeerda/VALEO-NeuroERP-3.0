@@ -59,6 +59,18 @@ describe('navigation wiring', () => {
       }
     }
   })
+
+  it('exposes article master data where users expect to maintain articles', () => {
+    const masterDataSection = findNavItemById(NAV_SECTIONS, 'artikel-stammdaten')
+    expect(masterDataSection, 'Artikel-Stammdaten section missing').toBeTruthy()
+
+    const articleMaster = findNavItemById(masterDataSection?.children ?? [], 'artikelstamm')
+    expect(articleMaster?.path).toBe('/artikel')
+    expect(articleMaster?.module).toBe('@/pages/artikel/liste')
+
+    const salesArticle = findNavItemById(NAV_SECTIONS, 'artikel')
+    expect(salesArticle?.path).toBe('/artikel')
+  })
 })
 
 function collectNavItems(items: NavItem[]): NavItem[] {
@@ -73,6 +85,10 @@ function collectNavItems(items: NavItem[]): NavItem[] {
     }
   }
   return result
+}
+
+function findNavItemById(items: NavItem[], id: string): NavItem | undefined {
+  return collectNavItems(items).find((item) => item.id === id)
 }
 
 function resolveModuleToFile(moduleSpecifier: string): string | undefined {

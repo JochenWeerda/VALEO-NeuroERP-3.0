@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UI-ARTICLE-NAV-001 Artikelstamm in Stammdaten-Navigation sichtbar machen - reserviert 2026-07-08
+## UI-ARTICLE-NAV-001 Artikelstamm in Stammdaten-Navigation sichtbar machen - abgeschlossen 2026-07-08
 
-**Owner:** Codex. **Ziel:** Die vorhandene Artikel-Liste und Artikel-Neuanlage auffindbar machen: Haupt-Artikelstamm unter `Artikel-Stammdaten` verlinken und den bestehenden Verkaufs-Eintrag eindeutig auf `/artikel` routen. **Dateibesitz:** `packages/frontend-web/src/app/navigation/domains/commercial.tsx`, `docs/agent-ops/slices/UI-ARTICLE-NAV-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Navigationstest/Typecheck nach Umsetzung.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 - die vorhandene Artikel-Liste und Artikel-Neuanlage sind jetzt auffindbar: `Artikel-Stammdaten` enthaelt den Hauptpunkt `Artikelstamm` mit Route `/artikel`; der bestehende Verkaufs-Eintrag `Artikel` routet ebenfalls eindeutig auf `/artikel`. **Dateibesitz:** `packages/frontend-web/src/app/navigation/domains/commercial.tsx`, `packages/frontend-web/src/__tests__/navigation-wiring.test.ts`, `docs/agent-ops/slices/UI-ARTICLE-NAV-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** `pnpm --dir packages/frontend-web test:run src/__tests__/navigation-wiring.test.ts` -> 4 passed; `pnpm --dir packages/frontend-web exec eslint src/app/navigation/domains/commercial.tsx` -> 0. **Hinweis:** voller Frontend-`tsc --noEmit` terminierte lokal zweimal nicht innerhalb 120s/240s.
 
 ## UI-SIDEBAR-SCROLL-001 Linke Seitenleiste bis zum Ende scrollbar — abgeschlossen 2026-07-08
 

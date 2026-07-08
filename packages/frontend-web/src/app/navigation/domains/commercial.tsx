@@ -561,7 +561,8 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         label: 'Artikel',
         icon: Package,
         module: '@/pages/artikel/liste',
-        keywords: ['artikel', 'products', 'lager'],
+        preferredPath: 'artikel',
+        keywords: ['artikel', 'artikelstamm', 'products', 'lager'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
@@ -929,6 +930,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     icon: Package,
     mcp: { businessDomain: 'admin', scope: 'admin:read' },
     children: [
+      {
+        id: 'artikelstamm',
+        label: 'Artikelstamm',
+        icon: Package,
+        module: '@/pages/artikel/liste',
+        preferredPath: 'artikel',
+        keywords: ['artikel', 'artikelstamm', 'artikel anlegen', 'artikel pflegen', 'stammdaten'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
       {
         id: 'artikel-bestandteile',
         label: 'Artikel-Bestandteile',
