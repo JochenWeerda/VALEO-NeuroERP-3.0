@@ -69,6 +69,8 @@ erkannten Felder vor — **ausgefuehrt wird nichts automatisch**:
 Rollen-Workspaces sind cockpitartige Startseiten je Aufgabengebiet:
 `Einkauf`, `Verkauf`, `Lager`, `FIBU`, `Leitung`.
 
+![FIBU-Workspace mit Kennzahlen und Worklist-Kacheln](img/workspace__fibu.webp)
+
 - Jeder Workspace zeigt **Kennzahlen** und **Kacheln** zu den wichtigsten
   Arbeitsvorraeten (z. B. „Zahlungslauf-Vorschlag", „Offene Posten (ueberfaellig)",
   „Qualitaets-Nachtrag"). Ein Klick auf eine Kachel fuehrt direkt in die
@@ -151,6 +153,8 @@ Der Planungskalender zeigt Termine als **Projektion** aus dem System —
 Faelligkeiten offener Posten, Kontrakt-/Rabattfristen, CRM-Wiedervorlagen,
 Sachkunde-/Zertifikatstermine und periodische Buchungen — jeweils mit
 Durchstich zum Objekt.
+
+![Planungskalender mit Layer-Auswahl und Fristenband](img/planung__kalender.webp)
 
 - **Termine aus E-Mails:** Aus Lieferanten-Mails erkannte Termine erscheinen als
   **Vorschlag** (gestrichelt, mit ✉-Kennzeichen) im Logistik-Layer. Sie

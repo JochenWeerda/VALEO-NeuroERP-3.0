@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-01T09:33:35.583Z",
-  "routeCount": 832,
+  "generatedAt": "2026-07-08T07:36:36.413Z",
+  "routeCount": 846,
   "policy": {
     "crop": "main-content-element",
     "approvalRequired": "approved-only in handbook",
@@ -27467,7 +27467,156 @@
         "bgRatio": 0.839,
         "detailRatio": 0.066
       }
+    },
+    {
+      "path": "planung/kalender",
+      "slug": "planung__kalender",
+      "module": "@/pages/planung/kalender",
+      "status": "ok",
+      "approval": "pending",
+      "qc": {
+        "renderState": "ready",
+        "approval": "pending",
+        "autoPass": false,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main > div",
+          "width": 1216,
+          "height": 656,
+          "textLength": 47,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-08T07:32:21.671Z"
+    },
+    {
+      "path": "workspace/einkauf",
+      "slug": "workspace__einkauf",
+      "module": "@/pages/workspace/einkauf",
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main > div",
+          "width": 1040,
+          "height": 656,
+          "textLength": 55,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-08T07:32:23.040Z"
+    },
+    {
+      "path": "workspace/fibu",
+      "slug": "workspace__fibu",
+      "module": "@/pages/workspace/fibu",
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main > div",
+          "width": 1040,
+          "height": 664,
+          "textLength": 230,
+          "headingCount": 1,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 10
+        }
+      },
+      "capturedAt": "2026-07-08T07:32:24.195Z"
+    },
+    {
+      "path": "workspace/leitung",
+      "slug": "workspace__leitung",
+      "module": "@/pages/workspace/leitung",
+      "status": "ok",
+      "approval": "approved",
+      "qc": {
+        "renderState": "ready",
+        "approval": "approved",
+        "autoPass": true,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main > div",
+          "width": 1040,
+          "height": 664,
+          "textLength": 55,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-08T07:32:26.764Z"
+    },
+    {
+      "path": "workspace/verkauf",
+      "slug": "workspace__verkauf",
+      "module": "@/pages/workspace/verkauf",
+      "status": "ok",
+      "approval": "pending",
+      "qc": {
+        "renderState": "ready",
+        "approval": "pending",
+        "autoPass": false,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main > div",
+          "width": 1216,
+          "height": 656,
+          "textLength": 37,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-08T07:32:27.935Z"
+    },
+    {
+      "path": "workspace/lager",
+      "slug": "workspace__lager",
+      "module": "@/pages/workspace/lager",
+      "status": "ok",
+      "approval": "pending",
+      "qc": {
+        "renderState": "ready",
+        "approval": "pending",
+        "autoPass": false,
+        "reviewRequired": false,
+        "issues": [],
+        "metrics": {
+          "captureSelector": "main > div",
+          "width": 1216,
+          "height": 656,
+          "textLength": 37,
+          "headingCount": 0,
+          "spinnerCount": 0,
+          "clippedCount": 0,
+          "substantiveCount": 0
+        }
+      },
+      "capturedAt": "2026-07-08T07:36:36.410Z"
     }
-  ],
-  "updatedAt": "2026-07-01T09:33:50.359443+00:00"
+  ]
 }
