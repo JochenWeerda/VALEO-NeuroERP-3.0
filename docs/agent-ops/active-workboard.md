@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UI-ARTICLE-NAV-001 Artikelstamm in Stammdaten-Navigation sichtbar machen - reserviert 2026-07-08
+
+**Owner:** Codex. **Ziel:** Die vorhandene Artikel-Liste und Artikel-Neuanlage auffindbar machen: Haupt-Artikelstamm unter `Artikel-Stammdaten` verlinken und den bestehenden Verkaufs-Eintrag eindeutig auf `/artikel` routen. **Dateibesitz:** `packages/frontend-web/src/app/navigation/domains/commercial.tsx`, `docs/agent-ops/slices/UI-ARTICLE-NAV-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** fokussierter Navigationstest/Typecheck nach Umsetzung.
+
 ## UI-SIDEBAR-SCROLL-001 Linke Seitenleiste bis zum Ende scrollbar — abgeschlossen 2026-07-08
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — Desktop-Sidebar scrollt jetzt innerhalb des Nav-Bereichs: `aside` ist auf Viewport-Hoehe begrenzt, Header/Footer schrumpfen nicht, `nav` ist `min-h-0 flex-1 overflow-y-auto`. **Dateibesitz:** `packages/frontend-web/src/components/navigation/Sidebar.tsx`, `packages/frontend-web/tests/e2e/sidebar-scroll.spec.ts`, `docs/agent-ops/slices/UI-SIDEBAR-SCROLL-001.yaml`, `docs/agent-ops/active-workboard.md`. **Abnahme:** `pnpm --dir packages/frontend-web exec playwright test tests/e2e/sidebar-scroll.spec.ts --project=chromium` -> 1 passed; `pnpm --dir packages/frontend-web exec eslint src/components/navigation/Sidebar.tsx` -> 0; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` -> 0. **Hinweis:** Playwright-Global-Teardown meldet bestehende Visual-Tour-Console-Issues ausserhalb des fokussierten Sidebar-Smokes.
