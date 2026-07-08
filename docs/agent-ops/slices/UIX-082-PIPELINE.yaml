@@ -1,0 +1,35 @@
+slice_id: UIX-082-PIPELINE
+title: ESG-Footprint Read-Model und Masken-Kachel
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: docs/design/specs/uix-m3-spec.md
+coordination: >-
+  Tail-Slice zu UIX-082: Claude lieferte den deterministischen Berechnungskern.
+  Codex verdrahtet Persistenz, GET-API und zentrale Masken-Kachel. Kein Nightly-
+  Scheduler und kein Faktor-Katalog-Umbau in diesem Tail.
+goal: >-
+  CO2e je Charge ist ueber /api/v1/esg/charges/{id}/footprint tenant-isoliert
+  abrufbar, auditierbar persistiert und als additiver Summary-/Tile-Contract in
+  einer bestehenden nativen Maske sichtbar.
+file_ownership:
+  - "docs/agent-ops/slices/UIX-082-PIPELINE.yaml"
+  - "docs/agent-ops/active-workboard.md"
+  - "alembic/versions/*esg_charge_footprint*"
+  - "app/api/v1/endpoints/esg_footprint.py"
+  - "app/api/v1/api.py"
+  - "app/core/screen_definitions.py"
+  - "tests/test_uix082_esg_footprint_api.py"
+acceptance:
+  - "Alembic legt domain_agrar.esg_charge_footprint mit UNIQUE(tenant_id,charge_id,factor_version) an."
+  - "GET /api/v1/esg/charges/{id}/footprint ist tenant-isoliert und liefert jede Komponente mit source_ref."
+  - "Recompute ist idempotent fuer gleiche charge_id+factor_version."
+  - "Masken-Contract zeigt ESG-Summary ohne Parallelseite."
+tests:
+  - "pytest tests/test_uix082_esg_footprint_api.py --no-cov"
+  - "pytest tests/test_uix082_esg_footprint_service.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=\"\""
+risks:
+  - "Geteilter Working Tree; UIX-082-Kern bleibt Owner Claude."
+  - "Inputs-Adapter nutzt v1-Fallbacks, wenn keine echten Trocknungs-/Touren-/Strombelege vorliegen."
+external_gates:
+  - not_applicable
