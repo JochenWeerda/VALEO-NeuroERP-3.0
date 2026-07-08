@@ -1,7 +1,7 @@
 slice_id: UIX-081
 title: Twin-Panel v1 (Hofplan/Silo im Leitstand)
-owner: unclaimed
-status: geplant
+owner: Claude
+status: in_arbeit
 created_at: 2026-07-07
 spec: docs/design/specs/uix-m3-spec.md
 coordination: >-
