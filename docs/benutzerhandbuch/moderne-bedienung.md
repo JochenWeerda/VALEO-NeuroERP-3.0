@@ -76,6 +76,9 @@ Rollen-Workspaces sind cockpitartige Startseiten je Aufgabengebiet:
   „Qualitaets-Nachtrag"). Ein Klick auf eine Kachel fuehrt direkt in die
   zugehoerige Maske.
 - Die Kachel-Farbe zeigt die Dringlichkeit (neutral / Warnung / kritisch).
+
+![Einkauf-Workspace: Kennzahlen und Kacheln mit Ton-Markierung](img/workspace__einkauf.webp)
+
 - Ist der rollenbasierte Start aktiviert, landen Sie nach der Anmeldung
   automatisch auf dem Workspace Ihrer Rolle; andernfalls erreichen Sie ihn ueber
   die Navigation oder die Omnibox (z. B. `fibu cockpit`).

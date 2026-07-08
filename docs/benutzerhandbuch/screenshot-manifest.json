@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-08T07:36:36.413Z",
+  "generatedAt": "2026-07-08T08:18:16.785Z",
   "routeCount": 846,
   "policy": {
     "crop": "main-content-element",
@@ -27573,25 +27573,25 @@
       "slug": "workspace__verkauf",
       "module": "@/pages/workspace/verkauf",
       "status": "ok",
-      "approval": "pending",
+      "approval": "approved",
       "qc": {
         "renderState": "ready",
-        "approval": "pending",
-        "autoPass": false,
+        "approval": "approved",
+        "autoPass": true,
         "reviewRequired": false,
         "issues": [],
         "metrics": {
           "captureSelector": "main > div",
-          "width": 1216,
+          "width": 1040,
           "height": 656,
-          "textLength": 37,
+          "textLength": 55,
           "headingCount": 0,
           "spinnerCount": 0,
           "clippedCount": 0,
           "substantiveCount": 0
         }
       },
-      "capturedAt": "2026-07-08T07:32:27.935Z"
+      "capturedAt": "2026-07-08T08:16:26.888Z"
     },
     {
       "path": "workspace/lager",
@@ -27616,7 +27616,7 @@
           "substantiveCount": 0
         }
       },
-      "capturedAt": "2026-07-08T07:36:36.410Z"
+      "capturedAt": "2026-07-08T08:18:16.782Z"
     }
   ]
 }
