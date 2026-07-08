@@ -11,7 +11,48 @@ version: 3.1.0
 
 # Release Notes — VALEO NeuroERP 3.0
 
-> Manuell gepflegt · Stand: 2026-06-29
+> Manuell gepflegt · Stand: 2026-07-08
+
+## Version 3.2.0 — 2026-07-08 — Moderne Bedienung (Omnibox, Sprache, Workspaces)
+
+Ausfuehrliche Anleitung: [Moderne Bedienung](moderne-bedienung.md).
+
+### Added — Benutzeroberfläche
+
+- **Omnibox / Kommandoleiste (Strg+K):** natuerlichsprachige Eingabe fuehrt in
+  einem Schritt zur Maske/gefilterten Liste; „Verstanden als"-Vorschau mit
+  Filter-Chips und Konfidenz. Filter u. a. `ueberfaellig`, `heute`,
+  `naechste Woche`, `> N Tage`, Freitextsuche.
+- **Aktion vorbereiten:** ein Aktions-Verb in der Omnibox bereitet eine Aktion
+  vor und fuellt Felder vor — **ohne Auto-Ausfuehrung**. Bestaetigungspflichtige
+  Aktionen laufen in das bestehende Ritual; hochriskante Aktionen sind ueber die
+  Omnibox nicht ausloesbar (nur Navigation zur Maske).
+- **Rollen-Workspaces:** cockpitartige Startseiten (Einkauf/Verkauf/Lager/FIBU/
+  Leitung) mit Kennzahlen und Worklist-Kacheln (Durchstich in die Maske);
+  optionaler rollenbasierter Start nach der Anmeldung.
+- **Sprach-Eingabe & Diktat (VoiceBar):** Push-to-talk/Alt+V, editierbares
+  Transkript, Uebernahme erst bei Bestaetigung. Per Stimme nur Navigation/
+  Vorbefuellen — nie eine gefaehrliche Aktion. Kein Audio-Persist.
+- **Persoenliche Ansichten:** Spalten/Varianten/Dichte/Kachel-Reihenfolge je
+  Nutzer ohne Masken-Kopie; Sicherheitsfelder bleiben unveraenderbar.
+- **Prozessband:** Prozesskette als navigierbares Band unter dem Maskenkopf.
+- **Notizen & @-Erwaehnungen** am Datensatz (Kontext-Leiste).
+- **Planungskalender:** Termine als Projektion aus dem System; E-Mail-Termine
+  erscheinen als Vorschlag (nie Auto-Bestaetigung).
+- **Leitstand-Belegungsplan (Twin-Panel):** interaktive Silo-/Hofbelegung mit
+  Klick-Durchstich zur Zelle.
+- **ESG-Kachel:** auditierbarer CO₂e-Fussabdruck je Charge mit Faktor-Quellen und
+  Beleg-Verweisen; sichtbarer Faktorstand.
+- **Hinweis-Agenten (Ambient-Worklists):** naechtliche, erklaerte Hinweise
+  (Kontrakt-Untererfuellung, Preisabweichung, OP-Eskalation, ablaufende
+  Zertifikate) — Agenten schlagen nur vor und buchen nie.
+
+### Sicherheit
+
+- Grundsatz durchgehend: **kein Auto-Submit**. Sprach-, Vorschlags- und
+  Agenten-Pfade koennen navigieren/vorbefuellen, aber Aktionen mit Wirkung
+  durchlaufen immer das Bestaetigungs-Ritual der Maske; Gefahrenstufen,
+  Confirmation und Freigaben bleiben unveraendert.
 
 ## Version 3.1.0 — 2026-06-29 — Universal Mask Runtime & AgentMaskContract
 

@@ -19,6 +19,7 @@ Muster: Ziel, Voraussetzungen, Schritte, Ergebnis und haeufige Fehler.
 - [**Einstieg**](einstieg.md) - Anmeldung, Mandantenwahl, Navigation.
 - [**Dashboard und Workflows**](dashboard-workflows.md) - Leitstand, Flow Spine, Freigaben, Prozessüberwachung, KI-Copilot. (35 Masken).
 - [**Masken-Plattform (Universal Mask Runtime)**](masken-plattform.md) - Einheitliche Detailmasken, Sort/Filter, Rollout-Piloten, Agenten-Modus. (1 Masken).
+- [**Moderne Bedienung**](moderne-bedienung.md) - Omnibox/Kommandoleiste (Strg+K), Rollen-Workspaces, Sprach-Eingabe/Diktat, persoenliche Ansichten, Prozessband, Notizen, Planungskalender, Leitstand-Belegungsplan, ESG-Kachel.
 - [**Wissensbasis und Kundenportal**](wissensbasis-kundenportal.md) - Interne Wissensdatenbank und externes Kundenportal. (20 Masken).
 - [**Ernteannahme und Waage**](annahme.md) - LKW, Waage, Qualität, Hofliste, Wiegung. (19 Masken).
 - [**Agrar-Kontrakte**](agrar-kontrakte.md) - Kontrakt, Fixierung, Erfüllung, Settlement. (20 Masken).
