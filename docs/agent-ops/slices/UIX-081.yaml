@@ -24,6 +24,19 @@ tests:
   - "Vitest Geometrie-Parser+Layer"
   - "Playwright Leitstand->Zelle->Maske"
   - "Performance-Gate cockpit"
+progress: >-
+  2026-07-07 Renderer-Primitive + Geometrie-Kern geliefert (isoliert): renderers/
+  twin-geometry.ts (reiner Parser rect/polygon mit Validierung+Fehlerliste,
+  shapeToPath SVG, cellStyle Metrik-Farblogik: Fuellstand→Gold-Verlauf,
+  warnAbove→danger-Kontur, locked→Schraffur; keyboardOrder) + TwinPanelRenderer
+  (EIN SVG, Zellen als Pfade, Klick-Durchstich onCellActivate, Tastatur Tab+Enter,
+  Tooltip, "Stand HH:MM:SS", Lock-Schraffur-Pattern; ≤300 Zellen ohne
+  Virtualisierung). config/twin_plans/emden-hofplan-v1.yaml (rect+polygon). 12
+  Vitest (Parser inkl. fehlerhafte Zellen/Duplikate, Farblogik, Klick+Keyboard-
+  Durchstich). tsc 0, ESLint sauber. OFFEN: Read-Model GET /lager/silo/cells
+  (Aggregation, 30s-Cache), Leitstand-SD lager/leitstand (screen_definitions
+  shared), Einbindung in UniversalMaskRenderer (twin-Block), Playwright, Visual-
+  Audit 1366/1440/1920.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
