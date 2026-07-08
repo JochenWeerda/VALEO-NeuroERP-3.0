@@ -1,0 +1,38 @@
+slice_id: UIX-091-PIPELINE
+title: Prozessband UI-Pipeline-Verdrahtung
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Tail-Slice zu UIX-091: Claude lieferte Prozessketten-Config, Gate-Script,
+  reinen Compiler und Renderer-Kern. Codex verdrahtet nur die zentrale
+  ScreenDefinition -> RenderPlan -> UniversalMaskRenderer Pipeline. Keine
+  Aenderung an Prozessketten-Config oder Backend-Gate-Script.
+goal: >-
+  processChain als additiven ScreenDefinition-Contract kompilieren, als
+  RenderShellPlan.processRibbon bereitstellen und zentral im UniversalMaskRenderer
+  anzeigen; keine Spezialseiten, kein paralleles UI-System.
+file_ownership:
+  - "docs/agent-ops/slices/UIX-091-PIPELINE.yaml"
+  - "docs/agent-ops/active-workboard.md"
+  - "packages/frontend-web/src/components/mask-builder/schema.ts"
+  - "packages/frontend-web/src/components/mask-builder/render-plan/**"
+  - "packages/frontend-web/src/components/mask-builder/renderers/index.ts"
+  - "packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx"
+  - "packages/frontend-web/src/__tests__/render-plan/schema-compiler.test.ts"
+  - "packages/frontend-web/src/__tests__/components/mask-builder/process-ribbon.test.tsx"
+acceptance:
+  - "ScreenDefinition.processChain wird validiert und in RenderPlan.shell.processRibbon kompiliert."
+  - "ProcessRibbonRenderer wird zentral im UniversalMaskRenderer gerendert."
+  - "Unbekannte Chains/Steps/Routen degradieren zu Warnungen, nicht zu Renderfehlern."
+  - "Bestehende UIX-091-Compiler/Renderer-Tests bleiben gruen; Pipeline-Test ergaenzt."
+tests:
+  - "Vitest schema-compiler + process-ribbon"
+  - "tsc 0"
+  - "ESLint Source sauber"
+risks:
+  - "UIX-091 bleibt Owner Claude; dieser Tail ist bewusst nur Frontend-Pipeline."
+  - "Kein Rollout auf alle ScreenDefinitions in diesem Tail; SD-Massenpflege bleibt eigener Schritt."
+external_gates:
+  - not_applicable
