@@ -1,0 +1,32 @@
+slice_id: UIX-07X-08X-CLOSEOUT
+title: Restpunkte UIX-073/081/082 soweit lokal schliessbar
+owner: Codex
+status: reserviert
+created_at: 2026-07-08
+spec: docs/design/specs/uix-m2-spec.md + docs/design/specs/uix-m3-spec.md
+coordination: >-
+  Closeout-Slice fuer dokumentierte Restpunkte aus UIX-073, UIX-081 und UIX-082.
+  Ziel ist nur, lokal testbar schliessbare Punkte abzuarbeiten. Externe
+  Feldtest-/Nightly-/echte Datenadapter-Abhaengigkeiten bleiben explizit offen.
+goal: >-
+  Playwright-/Renderer-/UI-Restpunkte fuer Mail-Kalender, Twin-Panel und ESG-
+  Footprint soweit ohne externe Systeme moeglich schliessen.
+file_ownership:
+  - "docs/agent-ops/slices/UIX-07X-08X-CLOSEOUT.yaml"
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/UIX-073.yaml"
+  - "docs/agent-ops/slices/UIX-081.yaml"
+  - "docs/agent-ops/slices/UIX-082.yaml"
+  - "packages/frontend-web/tests/e2e/**"
+  - "packages/frontend-web/src/components/mask-builder/**"
+acceptance:
+  - "UIX-081 hat Playwright-Leitstand->Zelle->Maske oder gleichwertigen Renderer-Smoke."
+  - "UIX-082 hat sichtbaren Komponenten-/source_ref-Popover im zentralen Renderer-Contract."
+  - "UIX-073 hat Mail->Vorschlag->Bestaetigen mindestens als API-/Service-Smoke; LLM bleibt Feature-Flag-offen falls kein Provider vorhanden."
+tests:
+  - "fokussierte Vitest/pytest/Playwright je geschlossenem Punkt"
+risks:
+  - "Kein externer STT/LLM/Nightly-Provider in lokaler Umgebung."
+  - "Geteilter Working Tree; keine fremden Claude-Dateien revertieren."
+external_gates:
+  - not_applicable
