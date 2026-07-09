@@ -107,6 +107,42 @@ ARTICLES = [
         "lager_silo": False,
     },
     {
+        "id": "seed-art-seed-00123",
+        "article_number": "SEED-00123",
+        "name": "Saatgut Mais FAO 220",
+        "description": "Buchungstest: Saatgut-Schnellstart fuer Erfassungsmasken",
+        "category": "Saatgut",
+        "subcategory": "Mais",
+        "warengruppe": "Saatgut",
+        "unit": "kg",
+        "purchase_price": Decimal("1.85"),
+        "sales_price": Decimal("2.35"),
+        "current_stock": Decimal("2400.00"),
+        "min_stock": Decimal("300.00"),
+        "max_stock": Decimal("12000.00"),
+        "chargenpflicht": True,
+        "qs_pruefung_erforderlich": False,
+        "lager_silo": False,
+    },
+    {
+        "id": "seed-art-fert-2007",
+        "article_number": "FERT-2007",
+        "name": "NPK Duenger 15-15-15",
+        "description": "Buchungstest: Duenger-Schnellstart fuer Belegerfassung",
+        "category": "Duengemittel",
+        "subcategory": "NPK",
+        "warengruppe": "Duengemittel",
+        "unit": "kg",
+        "purchase_price": Decimal("0.44"),
+        "sales_price": Decimal("0.57"),
+        "current_stock": Decimal("18500.00"),
+        "min_stock": Decimal("2500.00"),
+        "max_stock": Decimal("75000.00"),
+        "chargenpflicht": False,
+        "qs_pruefung_erforderlich": False,
+        "lager_silo": False,
+    },
+    {
         "id": "seed-art-due-kas-27",
         "article_number": "DUE-KAS-27",
         "name": "KAS 27 Prozent N",
@@ -237,7 +273,10 @@ def ensure_warehouses(conn, tenant_id: str) -> None:
             "tenant_id": tenant_id,
             "code": wh["warehouse_code"],
             "name": wh["name"],
-            "address": json.dumps(wh["address"]),
+            "address": wh["address"]["street"],
+            "city": wh["address"]["city"],
+            "postal_code": wh["address"]["postal_code"],
+            "country": wh["address"]["country"],
         }
 
         if exists:
@@ -248,6 +287,9 @@ def ensure_warehouses(conn, tenant_id: str) -> None:
                     SET tenant_id = :tenant_id,
                         name = :name,
                         address = :address,
+                        city = :city,
+                        postal_code = :postal_code,
+                        country = :country,
                         is_active = true
                     WHERE warehouse_code = :code
                     """
@@ -260,8 +302,8 @@ def ensure_warehouses(conn, tenant_id: str) -> None:
             text(
                 """
                 INSERT INTO domain_inventory.warehouses
-                (id, tenant_id, warehouse_code, name, address, is_active)
-                VALUES (:id, :tenant_id, :code, :name, :address, true)
+                (id, tenant_id, warehouse_code, name, address, city, postal_code, country, is_active)
+                VALUES (:id, :tenant_id, :code, :name, :address, :city, :postal_code, :country, true)
                 """
             ),
             params,
@@ -302,9 +344,12 @@ def ensure_articles(conn, tenant_id: str) -> None:
                         min_stock = :min_stock,
                         max_stock = :max_stock,
                         currency = 'EUR',
+                        mhd_erforderlich = false,
                         lagerartikel = true,
                         chargenpflicht = :chargenpflicht,
                         qs_pruefung_erforderlich = :qs_pruefung_erforderlich,
+                        bio_kennzeichnung = false,
+                        gmp_plus_relevanz = false,
                         mehrwertsteuer_prozent = 19.00,
                         lagerorte = :lagerorte,
                         lager_silo = :lager_silo,
@@ -324,15 +369,17 @@ def ensure_articles(conn, tenant_id: str) -> None:
                 (id, tenant_id, article_number, name, description, category,
                  subcategory, warengruppe, unit, purchase_price, sales_price,
                  current_stock, reserved_stock, available_stock, min_stock,
-                 max_stock, currency, lagerartikel, chargenpflicht,
-                 qs_pruefung_erforderlich, mehrwertsteuer_prozent, lagerorte,
+                 max_stock, currency, mhd_erforderlich, lagerartikel,
+                 chargenpflicht, qs_pruefung_erforderlich, bio_kennzeichnung,
+                 gmp_plus_relevanz, mehrwertsteuer_prozent, lagerorte,
                  lager_silo, is_active)
                 VALUES
                 (:id, :tenant_id, :article_number, :name, :description,
                  :category, :subcategory, :warengruppe, :unit, :purchase_price,
                  :sales_price, :current_stock, 0, :current_stock, :min_stock,
-                 :max_stock, 'EUR', true, :chargenpflicht,
-                 :qs_pruefung_erforderlich, 19.00, :lagerorte, :lager_silo, true)
+                 :max_stock, 'EUR', false, true, :chargenpflicht,
+                 :qs_pruefung_erforderlich, false, false, 19.00, :lagerorte,
+                 :lager_silo, true)
                 """
             ),
             params,
@@ -358,7 +405,7 @@ def _article_params(article: dict[str, object], tenant_id: str) -> dict[str, obj
         "max_stock": str(article["max_stock"]),
         "chargenpflicht": bool(article["chargenpflicht"]),
         "qs_pruefung_erforderlich": bool(article["qs_pruefung_erforderlich"]),
-        "lagerorte": json.dumps([{"warehouse_code": "MAIN", "quantity": str(current_stock)}]),
+        "lagerorte": json.dumps(["MAIN"]),
         "lager_silo": bool(article["lager_silo"]),
     }
 

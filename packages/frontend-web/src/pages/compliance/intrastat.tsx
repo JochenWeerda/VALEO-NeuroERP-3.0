@@ -11,12 +11,11 @@ import { Plus, Search, Download } from 'lucide-react'
 
 type IntrastatMeldung = {
   id: string
-  meldungs_nr: string
-  meldungstyp: 'E' | 'V'
-  periode_monat: number
-  periode_jahr: number
+  meldenummer: string
+  meldungsart: 'EINGANG' | 'VERSAND'
+  meldezeitraum: string
   status: 'ENTWURF' | 'GEMELDET' | 'KORREKTUR'
-  gesamtwert_eur: number
+  statistischer_wert_eur: number
 }
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
@@ -30,45 +29,42 @@ export default function IntrastatPage(): JSX.Element {
 
   const { data: meldungen = [], isError, error, refetch } = useQuery<IntrastatMeldung[]>({
     queryKey: ['intrastat'],
-    queryFn: async () => (await apiClient.get<IntrastatMeldung[]>('/api/v1/intrastat')).data,
+    queryFn: async () => (await apiClient.get<IntrastatMeldung[]>('/api/v1/intrastat/meldungen')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
 
-  const filtered = meldungen.filter(
-    (m) =>
-      m.meldungs_nr.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = meldungen.filter((m) => m.meldenummer.toLowerCase().includes(search.toLowerCase()))
 
-  const handleExport = async (id: string) => {
-    const response = await apiClient.get(`/api/v1/intrastat/${id}/export-csv`, { responseType: 'blob' })
+  const handleExport = async (meldezeitraum: string) => {
+    const response = await apiClient.post(`/api/v1/intrastat/meldungen/${meldezeitraum}/export-csv`, undefined, { responseType: 'blob' })
     const url = URL.createObjectURL(response.data as Blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `intrastat-${id}.csv`
+    a.download = `intrastat-${meldezeitraum}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
 
   const columns = [
-    { key: 'meldungs_nr' as const, label: 'Meldungs-Nr', render: (m: IntrastatMeldung) => <span className="font-mono">{m.meldungs_nr}</span> },
+    { key: 'meldenummer' as const, label: 'Meldungs-Nr', render: (m: IntrastatMeldung) => <span className="font-mono">{m.meldenummer}</span> },
     {
-      key: 'meldungstyp' as const,
+      key: 'meldungsart' as const,
       label: 'Typ',
       render: (m: IntrastatMeldung) => (
-        <Badge variant={m.meldungstyp === 'E' ? 'default' : 'secondary'}>
-          {m.meldungstyp === 'E' ? 'Eingang' : 'Versand'}
+        <Badge variant={m.meldungsart === 'EINGANG' ? 'default' : 'secondary'}>
+          {m.meldungsart === 'EINGANG' ? 'Eingang' : 'Versand'}
         </Badge>
       ),
     },
-    { key: 'periode_monat' as const, label: 'Periode', render: (m: IntrastatMeldung) => `${String(m.periode_monat).padStart(2, '0')}/${m.periode_jahr}` },
+    { key: 'meldezeitraum' as const, label: 'Periode' },
     { key: 'status' as const, label: 'Status', render: (m: IntrastatMeldung) => <Badge variant={STATUS_VARIANT[m.status] ?? 'outline'}>{m.status}</Badge> },
-    { key: 'gesamtwert_eur' as const, label: 'Gesamtwert', render: (m: IntrastatMeldung) => `${m.gesamtwert_eur.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €` },
+    { key: 'statistischer_wert_eur' as const, label: 'Gesamtwert', render: (m: IntrastatMeldung) => `${m.statistischer_wert_eur.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` },
     {
       key: 'id' as const,
       label: 'Aktionen',
       render: (m: IntrastatMeldung) => (
-        <Button size="sm" variant="outline" className="gap-1" onClick={() => { void handleExport(m.id) }}>
+        <Button size="sm" variant="outline" className="gap-1" onClick={() => { void handleExport(m.meldezeitraum) }}>
           <Download className="h-3 w-3" />CSV
         </Button>
       ),
@@ -88,8 +84,8 @@ export default function IntrastatPage(): JSX.Element {
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{meldungen.length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Eingang</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{meldungen.filter((m) => m.meldungstyp === 'E').length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Versand</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{meldungen.filter((m) => m.meldungstyp === 'V').length}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Eingang</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{meldungen.filter((m) => m.meldungsart === 'EINGANG').length}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Versand</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{meldungen.filter((m) => m.meldungsart === 'VERSAND').length}</span></CardContent></Card>
         </div>
 
         <Card>

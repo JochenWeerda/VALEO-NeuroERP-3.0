@@ -1,0 +1,42 @@
+id: SEC-DEPENDABOT-API-001
+title: Dependabot-Vulnerabilities und fachliche API-Blocker schliessen
+owner: Codex
+status: abgeschlossen
+completed_at: "2026-07-09"
+scope:
+  - Dependabot Default-Branch Alerts fuer python-multipart, pytest und elliptic-Pfad bearbeiten.
+  - Artikel-/Seed-/Compliance-/Kontrakt-/GAP-API-Blocker aus lokalem Echtbetrieb schliessen.
+dateibesitz:
+  - requirements.txt
+  - services/*/requirements.txt
+  - package.json
+  - pnpm-lock.yaml
+  - packages/shared/auth/**
+  - app/api/v1/endpoints/articles.py
+  - app/services/articles_service.py
+  - app/seeds/inventory_seed.py
+  - app/services/kontrakte_adapters.py
+  - app/services/gap_pipeline_service.py
+  - app/api/v1/endpoints/compliance_whistleblower_lksg.py
+  - packages/frontend-web/src/pages/compliance/intrastat.tsx
+  - packages/frontend-web/src/pages/compliance/sanktionspruefung.tsx
+  - tests/test_inventory_seed.py
+progress: >-
+  2026-07-09 Abgeschlossen: python-multipart 0.0.31 bestaetigt, vier Service-pytest-Pins
+  auf 9.0.3 gehoben, jwk-to-pem entfernt und JWKS-Konvertierung auf Node crypto.createPublicKey
+  umgestellt, wodurch der elliptic-Pfad aus pnpm-lock verschwindet. Artikel-API akzeptiert
+  Artikelnummern im Detailabruf, filtert Listen nach category/warengruppe/name und normalisiert
+  nullable Booleans, negative Altbestaende sowie lagerorte. Inventory-Seed schreibt aktuelles
+  Warehouse-Schema und ergaenzt SEED-00123/FERT-2007 idempotent. Kontrakte, GAP-Status,
+  LkSG, Intrastat und Sanktionslisten wurden gegen lokale Schema-/Route-Drift gehaertet.
+abnahme:
+  - "python -m py_compile app/services/articles_service.py app/api/v1/endpoints/articles.py app/seeds/inventory_seed.py app/services/kontrakte_adapters.py app/services/gap_pipeline_service.py app/api/v1/endpoints/compliance_whistleblower_lksg.py"
+  - "pytest tests/test_inventory_seed.py -q --noconftest --no-cov -> 3 passed"
+  - "pnpm --filter @valero-neuroerp/auth build"
+  - "pnpm --filter frontend-web exec tsc --noEmit"
+  - "docker compose build backend && docker compose restart backend -> backend healthy"
+  - "docker compose exec -T backend python -m app.seeds.inventory_seed -> idempotent"
+  - "localhost:3000 API-Matrix: articles, category Saatgut, SEED-00123, kontrakte, gap, lksg, intrastat, sanctions -> 200"
+risks:
+  - "GitHub Dependabot-Alerts koennen bis zum naechsten Default-Branch-Scan weiter als offen angezeigt werden."
+  - "pnpm audit meldet ggf. weitere nicht zu diesen sechs Alerts gehoerende Altlasten; elliptic/jwk-to-pem sind entfernt."

@@ -5,6 +5,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel as PydanticBaseModel
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
@@ -37,6 +38,7 @@ DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 async def list_articles(
     tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, number or barcode"),
+    category: Optional[str] = Query(None, description="Filter by category, product group or name"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(25, ge=1, le=200, description="Maximum number of records"),
     db: Session = Depends(get_db),
@@ -48,6 +50,16 @@ async def list_articles(
     rank = None
     if search:
         query, rank = _fulltext_filter(query, search)
+
+    if category:
+        category_like = f"%{category}%"
+        query = query.filter(
+            or_(
+                ArticleModel.category.ilike(category_like),
+                ArticleModel.warengruppe.ilike(category_like),
+                ArticleModel.name.ilike(category_like),
+            )
+        )
 
     total = query.count()
     if rank is not None:

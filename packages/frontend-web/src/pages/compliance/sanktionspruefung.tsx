@@ -14,6 +14,11 @@ type SanktionResult = {
 }
 
 type SanktionListeItem = { id: string; name: string; kategorie: string }
+type SanktionApiResult = {
+  status: SanktionResult['ergebnis']
+  treffer: unknown[]
+  empfehlung: string
+}
 
 export default function SanktionspruefungPage(): JSX.Element {
   const [name, setName] = useState('')
@@ -21,11 +26,18 @@ export default function SanktionspruefungPage(): JSX.Element {
 
   const { data: liste = [] } = useQuery<SanktionListeItem[]>({
     queryKey: ['sanctions-liste'],
-    queryFn: async () => (await apiClient.get<SanktionListeItem[]>('/api/v1/sanctions/liste')).data,
+    queryFn: async () => (await apiClient.get<SanktionListeItem[]>('/api/v1/compliance/sanctions/eintraege')).data,
   })
 
   const checkMutation = useMutation({
-    mutationFn: async () => (await apiClient.post<SanktionResult>('/api/v1/sanctions/check', { name })).data,
+    mutationFn: async () => {
+      const data = (await apiClient.post<SanktionApiResult>('/api/v1/compliance/sanctions/pruefen', { name })).data
+      return {
+        ergebnis: data.status,
+        treffer_count: data.treffer.length,
+        details: data.empfehlung,
+      }
+    },
     onSuccess: (data) => setResult(data),
   })
 

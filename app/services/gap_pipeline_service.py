@@ -269,15 +269,9 @@ class GapPipelineService:
     def pipeline_status(self, year: int) -> dict[str, Any]:
         """Liefert Roh-Zählerstände der Pipeline-Tabellen für ein Jahr."""
         assert self.db is not None, "pipeline_status benötigt eine DB-Session"
-        gap_count = self.db.execute(
-            text("SELECT COUNT(*) FROM gap_payments WHERE ref_year = :year"), {"year": year}
-        ).scalar()
-        snapshot_count = self.db.execute(
-            text("SELECT COUNT(*) FROM customer_potential_snapshot WHERE ref_year = :year"), {"year": year}
-        ).scalar()
-        customer_count = self.db.execute(
-            text("SELECT COUNT(*) FROM customers WHERE analytics_gap_ref_year = :year"), {"year": year}
-        ).scalar()
+        gap_count = self._safe_count("gap_payments", "ref_year = :year", {"year": year})
+        snapshot_count = self._safe_count("customer_potential_snapshot", "ref_year = :year", {"year": year})
+        customer_count = self._safe_count("customers", "analytics_gap_ref_year = :year", {"year": year})
 
         return {
             "year": year,
@@ -286,6 +280,20 @@ class GapPipelineService:
             "customers_with_analytics_count": customer_count or 0,
             "pipeline_complete": bool(gap_count and snapshot_count and customer_count),
         }
+
+    def _safe_count(self, table: str, where_sql: str, params: dict[str, Any]) -> int:
+        try:
+            return int(
+                self.db.execute(
+                    text(f"SELECT COUNT(*) FROM {table} WHERE {where_sql}"),  # noqa: S608 - table names are code-controlled.
+                    params,
+                ).scalar()
+                or 0
+            )
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            logger.info("[GAP STATUS] Tabelle nicht verfuegbar: %s", table)
+            return 0
 
     @staticmethod
     def pipeline_progress(job_id: str) -> Optional[dict[str, Any]]:

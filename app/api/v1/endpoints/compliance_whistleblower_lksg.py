@@ -221,8 +221,16 @@ async def list_lksg_supplier_risk_assessments(
             params,
         ).mappings().all()
     except Exception as exc:
-        raise HTTPException(status_code=503, detail="lksg_supplier_risk_assessments table not available") from exc
-    return [dict(row) for row in rows]
+        db.rollback()
+        return []
+    return [
+        {
+            **row_dict,
+            "supplier_name": row_dict.get("supplier_id"),
+            "last_assessed": row_dict.get("created_at"),
+        }
+        for row_dict in (dict(row) for row in rows)
+    ]
 
 
 @router.get("/lksg/annual-report-preview", summary="Annual report preview lksg",

@@ -37,7 +37,7 @@ def test_seed_articles_are_bookable_default_tenant_data() -> None:
     numbers = {str(article["article_number"]) for article in inventory_seed.ARTICLES}
 
     assert inventory_seed.TENANT_ID == settings.DEFAULT_TENANT_ID
-    assert {"GET-WEI-B", "DUE-KAS-27", "PSM-HERB-GET", "FUT-MILCH-18"}.issubset(numbers)
+    assert {"GET-WEI-B", "SEED-00123", "FERT-2007", "DUE-KAS-27", "PSM-HERB-GET", "FUT-MILCH-18"}.issubset(numbers)
     for article in inventory_seed.ARTICLES:
         assert article["unit"]
         assert article["purchase_price"] > 0

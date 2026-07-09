@@ -23,7 +23,7 @@ def get_article_or_404(db: Session, article_id: str, tenant_id: str) -> ArticleM
     article = (
         db.query(ArticleModel)
         .filter(
-            ArticleModel.id == article_id,
+            or_(ArticleModel.id == article_id, ArticleModel.article_number == article_id),
             ArticleModel.tenant_id == tenant_id,
             ArticleModel.is_active == True,  # noqa: E712
             ArticleModel.deleted_at.is_(None),
@@ -76,6 +76,34 @@ def fulltext_filter(query, search_term: str):
     return filtered, rank
 
 
+def _bool_attr(row: ArticleModel, name: str, default: bool = False) -> bool:
+    value = getattr(row, name, default)
+    return default if value is None else bool(value)
+
+
+def _non_negative_attr(row: ArticleModel, name: str):
+    value = getattr(row, name, 0) or 0
+    return value if value >= 0 else 0
+
+
+def _storage_locations(row: ArticleModel) -> list[str]:
+    locations = getattr(row, "lagerorte", None) or []
+    if not isinstance(locations, list):
+        return [str(locations)]
+
+    normalized: list[str] = []
+    for location in locations:
+        if isinstance(location, str):
+            normalized.append(location)
+        elif isinstance(location, dict):
+            value = location.get("warehouse_code") or location.get("code") or location.get("name")
+            if value:
+                normalized.append(str(value))
+        elif location is not None:
+            normalized.append(str(location))
+    return normalized
+
+
 def to_article_schema(row: ArticleModel) -> Article:
     return Article.model_validate(
         {
@@ -99,7 +127,7 @@ def to_article_schema(row: ArticleModel) -> Article:
             "gefahrgut_un_nummer": getattr(row, "gefahrgut_un_nummer", None),
             "gefahrgut_verpackungsgruppe": getattr(row, "gefahrgut_verpackungsgruppe", None),
             "gefahrgut_anhaenge": getattr(row, "gefahrgut_anhaenge", None),
-            "lagerorte": row.lagerorte or [],
+            "lagerorte": _storage_locations(row),
             "chargenpflicht": bool(row.chargenpflicht),
             "qs_pruefung_erforderlich": bool(row.qs_pruefung_erforderlich),
             "zolltarifnummer": row.zolltarifnummer,
@@ -113,8 +141,8 @@ def to_article_schema(row: ArticleModel) -> Article:
             "lager_min_temperatur": getattr(row, "lager_min_temperatur", None),
             "lager_max_temperatur": getattr(row, "lager_max_temperatur", None),
             "lager_lagerdauer_tage": getattr(row, "lager_lagerdauer_tage", None),
-            "lager_zentral": getattr(row, "lager_zentral", False),
-            "lager_silo": getattr(row, "lager_silo", False),
+            "lager_zentral": _bool_attr(row, "lager_zentral"),
+            "lager_silo": _bool_attr(row, "lager_silo"),
             "analyse_protein": getattr(row, "analyse_protein", None),
             "analyse_feuchtigkeit": getattr(row, "analyse_feuchtigkeit", None),
             "analyse_schadex": getattr(row, "analyse_schadex", None),
@@ -125,8 +153,8 @@ def to_article_schema(row: ArticleModel) -> Article:
             "lieferanten_artikelnummer": getattr(row, "lieferanten_artikelnummer", None),
             "kunden_artikelnummer": getattr(row, "kunden_artikelnummer", None),
             "verwendungszweck": getattr(row, "verwendungszweck", None),
-            "nachhaltige_biomasse": getattr(row, "nachhaltige_biomasse", False),
-            "pool_artikel": getattr(row, "pool_artikel", False),
+            "nachhaltige_biomasse": _bool_attr(row, "nachhaltige_biomasse"),
+            "pool_artikel": _bool_attr(row, "pool_artikel"),
             "rabatt_auftrag_rechnung": getattr(row, "rabatt_auftrag_rechnung", None),
             "rabatt_lose": getattr(row, "rabatt_lose", None),
             "rabatt_selbstabholer": getattr(row, "rabatt_selbstabholer", None),
@@ -134,12 +162,12 @@ def to_article_schema(row: ArticleModel) -> Article:
             "zu_abschlag_1_prozent": getattr(row, "zu_abschlag_1_prozent", None),
             "zu_abschlag_2_code": getattr(row, "zu_abschlag_2_code", None),
             "zu_abschlag_2_prozent": getattr(row, "zu_abschlag_2_prozent", None),
-            "berechne_zu_abschlag_auf_netto": getattr(row, "berechne_zu_abschlag_auf_netto", False),
-            "einfuegen_summe_nach_zu_abschlag": getattr(row, "einfuegen_summe_nach_zu_abschlag", False),
-            "skontofaehig": getattr(row, "skontofaehig", True),
-            "warenrueckverguetung": getattr(row, "warenrueckverguetung", False),
-            "bonus_faehig": getattr(row, "bonus_faehig", False),
-            "rabattfaehig": getattr(row, "rabattfaehig", True),
+            "berechne_zu_abschlag_auf_netto": _bool_attr(row, "berechne_zu_abschlag_auf_netto"),
+            "einfuegen_summe_nach_zu_abschlag": _bool_attr(row, "einfuegen_summe_nach_zu_abschlag"),
+            "skontofaehig": _bool_attr(row, "skontofaehig", True),
+            "warenrueckverguetung": _bool_attr(row, "warenrueckverguetung"),
+            "bonus_faehig": _bool_attr(row, "bonus_faehig"),
+            "rabattfaehig": _bool_attr(row, "rabattfaehig", True),
             "lieferantennummer": row.lieferantennummer,
             "unit": row.unit,
             "category": row.category,
@@ -159,9 +187,9 @@ def to_article_schema(row: ArticleModel) -> Article:
             "einheit_preiseinheit": getattr(row, "einheit_preiseinheit", None),
             "gebinde_groesse": getattr(row, "gebinde_groesse", None),
             "gebinde_einheit": getattr(row, "gebinde_einheit", None),
-            "current_stock": row.current_stock or 0,
-            "reserved_stock": row.reserved_stock or 0,
-            "available_stock": row.available_stock or 0,
+            "current_stock": _non_negative_attr(row, "current_stock"),
+            "reserved_stock": _non_negative_attr(row, "reserved_stock"),
+            "available_stock": _non_negative_attr(row, "available_stock"),
             "is_active": row.is_active,
             "image_url": getattr(row, "image_url", None),
             "created_at": row.created_at,
