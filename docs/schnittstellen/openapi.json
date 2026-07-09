@@ -159502,6 +159502,24 @@
             }
           },
           {
+            "description": "Filter by category, product group or name",
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by category, product group or name",
+              "title": "Category"
+            }
+          },
+          {
             "description": "Number of records to skip",
             "in": "query",
             "name": "skip",
@@ -243290,6 +243308,24 @@
               ],
               "description": "Search in name, number or barcode",
               "title": "Search"
+            }
+          },
+          {
+            "description": "Filter by category, product group or name",
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by category, product group or name",
+              "title": "Category"
             }
           },
           {
