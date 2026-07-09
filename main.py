@@ -283,6 +283,22 @@ def _apply_cors_headers(response: JSONResponse, request: Request) -> None:
 class BearerAuthMiddleware:
     """Erzwingt Bearer-Token-Auth und setzt den Tenant-Kontext (pure ASGI)."""
 
+    PUBLIC_PATHS = {
+        "/",
+        "/health",
+        "/health/live",
+        "/health/startup",
+        "/healthz",
+        "/readyz",
+        "/docs",
+        "/redoc",
+        "/openapi.json",
+        f"{settings.API_V1_STR}/health",
+        f"{settings.API_V1_STR}/health/live",
+        f"{settings.API_V1_STR}/health/startup",
+        f"{settings.API_V1_STR}/openapi.json",
+    }
+
     def __init__(self, app):
         self.app = app
 
@@ -292,6 +308,10 @@ class BearerAuthMiddleware:
             return
 
         request = Request(scope, receive)
+
+        if self._is_public_path(scope.get("path", "")):
+            await self.app(scope, receive, send)
+            return
 
         # OPTIONS (CORS-Preflight) ohne Auth beantworten
         if request.method == "OPTIONS":
@@ -325,6 +345,9 @@ class BearerAuthMiddleware:
             await self.app(scope, receive, send_wrapper)
         finally:
             reset_current_tenant_id(token)
+
+    def _is_public_path(self, path: str) -> bool:
+        return path in self.PUBLIC_PATHS or path.startswith("/docs/") or path.startswith("/metrics")
 
 
 class RequestLoggingMiddleware:
@@ -429,7 +452,7 @@ async def root():
         "message": "VALEO-NeuroERP API",
         "version": "3.0.0",
         "docs": "/docs",
-        "health": "/health",
+        "health": "/healthz",
         "api_v1": settings.API_V1_STR
     }
 

@@ -24,7 +24,7 @@ EXPOSE 5700
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:6400/health')"
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:6400/health', timeout=5)"
 
 # Run the application
 CMD ["python", "main.py"]
