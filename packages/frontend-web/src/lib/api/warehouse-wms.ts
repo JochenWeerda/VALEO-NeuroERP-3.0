@@ -264,8 +264,11 @@ export const stockValuationKeys = {
 
 export async function fetchStockValuation(warehouseId?: string): Promise<StockValuationRow[]> {
   const params = warehouseId ? `?warehouse_id=${encodeURIComponent(warehouseId)}` : ''
-  const res = await apiClient.get<StockValuationRow[]>(`/lager/wms/stock-valuation${params}`)
-  return res.data
+  const res = await apiClient.get<StockValuationRow[] | { items?: StockValuationRow[] }>(`/api/v1/lager/wms/stock-valuation${params}`)
+  const payload = res.data
+  if (Array.isArray(payload)) return payload
+  if (payload && Array.isArray(payload.items)) return payload.items
+  return []
 }
 
 export function useStockValuation(warehouseId?: string) {

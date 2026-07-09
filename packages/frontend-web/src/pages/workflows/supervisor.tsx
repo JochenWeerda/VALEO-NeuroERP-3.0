@@ -83,7 +83,7 @@ export default function SupervisorPage(): JSX.Element {
               },
               {
                 label: 'Idempotency-Store',
-                href: '/api/v1/admin/idempotency-overview',
+                href: '/api/v1/process/actions/idempotency/overview',
                 description: 'Replay-Schutz und Command-Abdeckung',
               },
             ]}

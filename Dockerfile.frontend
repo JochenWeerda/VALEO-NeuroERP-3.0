@@ -10,7 +10,7 @@ RUN pnpm install --filter @valero-neuroerp/frontend-web --frozen-lockfile
 
 COPY packages/frontend-web/ packages/frontend-web/
 WORKDIR /app/packages/frontend-web
-RUN pnpm run build:prod
+RUN pnpm run routes:generate && pnpm exec vite build --mode docker
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine3.23
 

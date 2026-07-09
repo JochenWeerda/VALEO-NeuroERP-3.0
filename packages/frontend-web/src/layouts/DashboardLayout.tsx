@@ -26,6 +26,7 @@ export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
   const voiceControlEnabled = useFeature('voiceControl')
   const realtimeEnabled = useFeature('sse')
+  const telephonyEnabled = useFeature('telephony')
 
   const [lastEvent, setLastEvent] = useState<string>(realtimeEnabled ? "idle" : "disabled")
   const connectionState = useMcpConnectionState({ enabled: realtimeEnabled })
@@ -92,9 +93,11 @@ export default function AppLayout(): JSX.Element {
         <GlobalButtonHandler />
       </Suspense>
       <AdvisorDock />
-      <Suspense fallback={null}>
-        <CallWidget />
-      </Suspense>
+      {telephonyEnabled ? (
+        <Suspense fallback={null}>
+          <CallWidget />
+        </Suspense>
+      ) : null}
       <Suspense fallback={null}>
         <AskVALEO />
       </Suspense>

@@ -77,7 +77,7 @@ export function useProcessMiningDrilldown(projectionKey: string) {
 export function useIdempotencyOverview() {
   return useQuery({
     queryKey: ['admin', 'idempotency-overview'],
-    queryFn: () => apiClient.get<import('@/components/agent/IdempotencyMonitoringPanel').IdempotencyOverview>('/api/v1/admin/idempotency-overview'),
+    queryFn: () => apiClient.get<import('@/components/agent/IdempotencyMonitoringPanel').IdempotencyOverview>('/api/v1/process/actions/idempotency/overview'),
     staleTime: 30_000,
   })
 }

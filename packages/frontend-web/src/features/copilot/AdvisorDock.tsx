@@ -5,10 +5,10 @@ import { useCopilotChat } from './useCopilotChat'
 import { useVoiceCopilotSummary } from './useVoiceCopilotSummary'
 
 export function AdvisorDock(): JSX.Element {
-  const { messages, sendMessage, loading, connected, sessionId } = useCopilotChat()
   const { summary, playSummary, playing, clearSummary } = useVoiceCopilotSummary()
   const [open, setOpen] = useState<boolean>(false)
   const [text, setText] = useState<string>('')
+  const { messages, sendMessage, loading, connected, sessionId } = useCopilotChat({ enabled: open })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()

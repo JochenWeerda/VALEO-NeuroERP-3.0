@@ -37,6 +37,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   const isOnline = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true)
   const actionDispatch = useActionDispatch()
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
+  const telephonyEnabled = useFeature('telephony')
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
   const [commandOpen, setCommandOpen] = useState<boolean>(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
@@ -231,9 +232,11 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
         </Suspense>
       ) : null}
 
-      <Suspense fallback={null}>
-        <IncomingCallPopup />
-      </Suspense>
+      {telephonyEnabled ? (
+        <Suspense fallback={null}>
+          <IncomingCallPopup />
+        </Suspense>
+      ) : null}
     </div>
   )
 

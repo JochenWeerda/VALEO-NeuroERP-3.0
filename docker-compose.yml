@@ -188,29 +188,15 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: valeo-neuro-erp-frontend
     restart: unless-stopped
-    working_dir: /app
-    command: >
-      sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
-    environment:
-      NODE_ENV: development
-      VITE_MCP_EVENTS_URL: /api/events?stream=mcp
-      VITE_BFF_PROXY: http://bff-web:4001
-      VITE_SSE_PROXY: http://dev-sse:5174
-      VITE_BACKEND_PROXY: http://backend:8000
-      VITE_ENABLE_PROSPECTING_UI: "true"
-      VITE_API_BASE_URL: ""
-      CHOKIDAR_USEPOLLING: "1"
     ports:
-      - "3000:3000"
+      - "3000:8080"
     depends_on:
+      backend:
+        condition: service_healthy
       bff-web:
         condition: service_healthy
       dev-sse:
         condition: service_healthy
-    volumes:
-      - ./packages/frontend-web:/app
-      - frontend_node_modules:/app/node_modules
-      - vite_cache:/app/node_modules/.vite
     networks:
       - valeo-network
 
@@ -294,7 +280,7 @@ services:
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
-    command: sh -c "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --limit-max-requests 250 --timeout-keep-alive 5"
 
   inventory-service:
     build:

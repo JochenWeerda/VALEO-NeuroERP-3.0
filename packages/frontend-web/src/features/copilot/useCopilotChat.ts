@@ -12,7 +12,11 @@ export type ChatMessage = {
   state?: 'streaming' | 'complete' | 'error'
 }
 
-export function useCopilotChat(): {
+export interface UseCopilotChatOptions {
+  enabled?: boolean
+}
+
+export function useCopilotChat({ enabled = false }: UseCopilotChatOptions = {}): {
   messages: ChatMessage[]
   sendMessage: (_text: string) => Promise<void>
   loading: boolean
@@ -71,11 +75,15 @@ export function useCopilotChat(): {
   })
 
   useEffect(() => {
+    if (!enabled) {
+      disconnect()
+      return undefined
+    }
     connect()
     return () => {
       disconnect()
     }
-  }, [connect, disconnect])
+  }, [connect, disconnect, enabled])
 
   async function sendMessage(text: string): Promise<void> {
     const trimmedText = text.trim()

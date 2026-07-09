@@ -7,6 +7,7 @@ const flagEnvMap: Record<FeatureKey, string> = {
   commandPalette: `${FLAG_ENV_PREFIX}COMMAND_PALETTE`,
   agrar: `${FLAG_ENV_PREFIX}AGRAR`,
   voiceControl: `${FLAG_ENV_PREFIX}VOICE_CONTROL`,
+  telephony: `${FLAG_ENV_PREFIX}TELEPHONY`,
   roleWorkspaces: `${FLAG_ENV_PREFIX}ROLE_WORKSPACES`,
 }
 
@@ -17,6 +18,7 @@ export const defaultFlags: FeatureFlags = {
   commandPalette: true,
   agrar: true,
   voiceControl: true,
+  telephony: false,
   // UIX-061: rollenbasierter Login-Redirect auf cockpit-Workspaces (Rollout via Flag).
   roleWorkspaces: false,
 }

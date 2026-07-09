@@ -95,7 +95,11 @@ export default function FieldServiceTasksPage(): JSX.Element {
   // Fetch tasks
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: listQueryKey,
-    queryFn: async () => (await apiClient.get<FieldServiceTask[]>('/api/v1/agribusiness/field-service-tasks')).data,
+    queryFn: async () => {
+      const response = await apiClient.get<FieldServiceTask[] | { items?: FieldServiceTask[] }>('/api/v1/agribusiness/field-service-tasks')
+      const payload = response.data
+      return Array.isArray(payload) ? payload : Array.isArray(payload?.items) ? payload.items : []
+    },
   });
 
   const deleteMutation = useMutation({
@@ -178,20 +182,20 @@ export default function FieldServiceTasksPage(): JSX.Element {
     const q = query.toLowerCase();
     return tasks.filter(
       t =>
-        t.title.toLowerCase().includes(q) ||
-        t.taskNumber.includes(q) ||
-        t.assignedToName.toLowerCase().includes(q)
+        String(t.title ?? '').toLowerCase().includes(q) ||
+        String(t.taskNumber ?? '').includes(q) ||
+        String(t.assignedToName ?? '').toLowerCase().includes(q)
     );
   }, [tasks, query]);
 
-  const activeTasks = tasks.filter((task) => !['COMPLETED', 'CANCELLED'].includes(task.status)).length;
-  const urgentTasks = tasks.filter((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status)).length;
+  const activeTasks = tasks.filter((task) => !['COMPLETED', 'CANCELLED'].includes(task.status ?? '')).length;
+  const urgentTasks = tasks.filter((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status ?? '')).length;
   const inProgressTasks = tasks.filter((task) => task.status === 'IN_PROGRESS').length;
   const completedTasks = tasks.filter((task) => task.status === 'COMPLETED').length;
   const averageCompletion = tasks.length > 0
     ? Math.round(tasks.reduce((sum, task) => sum + (task.completionPercentage || 0), 0) / tasks.length)
     : 0;
-  const focusTask = filtered.find((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status)) ?? filtered[0];
+  const focusTask = filtered.find((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status ?? '')) ?? filtered[0];
   const fieldServiceReady = urgentTasks === 0 && activeTasks === 0;
   const nextFieldServiceAction = focusTask
     ? focusTask.status === 'SCHEDULED'
@@ -391,21 +395,21 @@ export default function FieldServiceTasksPage(): JSX.Element {
             <TableBody>
               {filtered.map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell className="font-mono">{task.taskNumber}</TableCell>
-                  <TableCell>{task.title}</TableCell>
-                  <TableCell>{task.taskType}</TableCell>
+                  <TableCell className="font-mono">{task.taskNumber || '-'}</TableCell>
+                  <TableCell>{task.title || '-'}</TableCell>
+                  <TableCell>{task.taskType || '-'}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(task.status)}>
-                      {getStatusLabel(t, task.status, task.status)}
+                    <Badge className={getStatusColor(task.status ?? '')}>
+                      {getStatusLabel(t, task.status ?? 'UNKNOWN', task.status ?? '-')}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getPriorityColor(task.priority)}>
-                      {task.priority}
+                    <Badge className={getPriorityColor(task.priority ?? '')}>
+                      {task.priority || '-'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{task.assignedToName}</TableCell>
-                  <TableCell>{task.completionPercentage}%</TableCell>
+                  <TableCell>{task.assignedToName || '-'}</TableCell>
+                  <TableCell>{task.completionPercentage ?? 0}%</TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
                       <Button

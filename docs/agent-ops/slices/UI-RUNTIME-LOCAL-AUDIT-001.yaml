@@ -1,0 +1,62 @@
+slice_id: UI-RUNTIME-LOCAL-AUDIT-001
+title: Lokalen Docker-Frontendlauf und Browser-Runtime-Audit stabilisieren
+owner: Codex
+status: abgeschlossen
+created_at: 2026-07-09
+spec: Lokaler Echtbetrieb auf localhost:3000 mit Browser-Audit, F12-Logs und Container-Health
+coordination: >-
+  Querschnittlicher Runtime-Fix nach Nutzerbefund "localhost 3000/3001 zeigt
+  nichts" und langen Ladezeiten. Bestehende Sidebar-, Seed-, Breadcrumb- und
+  Artikel-Slices bleiben unveraendert; dieser Slice fokussiert Docker/nginx,
+  globale Frontend-Nebenwirkungen, API-Proxying und Audit-Evidenz.
+goal: >-
+  Lokaler Docker-Betrieb muss das produktive Frontend auf localhost:3000
+  stabil ausliefern, API-Aufrufe ueber denselben Origin proxien, globale
+  Polling-/WebSocket-Last beim reinen Seitenbesuch vermeiden und den
+  Backend-Healthcheck nach Browser-Stresslaeufen funktionsfaehig halten.
+file_ownership:
+  - "Dockerfile.frontend"
+  - "docker-compose.yml"
+  - "deploy/nginx/frontend.conf"
+  - "packages/frontend-web/public/flags.json"
+  - "packages/frontend-web/scripts/runtime-browser-audit.mjs"
+  - "packages/frontend-web/src/shared/config/featureFlags.*"
+  - "packages/frontend-web/src/components/navigation/AppShell.tsx"
+  - "packages/frontend-web/src/layouts/DashboardLayout.tsx"
+  - "packages/frontend-web/src/features/copilot/*"
+  - "packages/frontend-web/src/lib/api-client.ts"
+  - "packages/frontend-web/src/lib/axios.ts"
+  - "packages/frontend-web/src/pages/**"
+  - "docs/agent-ops/slices/UI-RUNTIME-LOCAL-AUDIT-001.yaml"
+  - "docs/agent-ops/active-workboard.md"
+acceptance:
+  - "localhost:3000 liefert das gebaute Frontend per nginx; kein Vite-Dev-Server im Docker-Frontend."
+  - "Browser-Stichprobe zeigt keine Console-Fehler, failed requests, Copilot-Autowebsocket-, TAPI-Polling- oder portlosen Backend-Redirects."
+  - "Suiteweiter Runtime-Audit protokolliert Kategorien, Ladezeiten, F12-Fehler und Docker-CPU."
+  - "Backend, Frontend, BFF, SSE, CRM-Security und Inventory bleiben nach Stresslauf healthy."
+tests:
+  - "pnpm --dir packages/frontend-web exec eslint <gepruefte Runtime-Dateien> -> 0"
+  - "pnpm --dir packages/frontend-web exec tsc --noEmit -> 0"
+  - "docker compose build frontend-web -> 0"
+  - "Browser-Stichprobe /, /agrar/saatgut-liste, /inventory/epcis, /crm/opportunities-forecast, /finance/ap/invoices, /verkauf/kunde-neu -> 0 Console/failed/bad/watched requests"
+  - "Vollaudit 774 Routen -> 668 OK, 86 HTTP_4XX, 20 HTTP_5XX, 0 Timeout/RenderError/PageError/ConsoleError; CPU max Backend 20.25%, BFF 9.44%, Frontend 2.59%"
+  - "Nach Worker-Haertung: 200-Routen-Stress -> Backend bleibt healthy; /healthz 222 ms; CPU max Backend 11.51%, BFF 8.14%, Frontend 0.17%"
+progress: >-
+  2026-07-09 abgeschlossen: Docker-Frontend laeuft produktionsnah via
+  nginx-unprivileged auf 3000:8080 und wird mit Vite mode docker gebaut.
+  nginx proxyt /api, /api/events, /api/mcp, /api/ki-usability und EPCIS
+  intern zu Backend/BFF/SSE/Inventory; Host-Header nutzen $http_host, damit
+  FastAPI-Trailing-Slash-Redirects den Browser-Port behalten. Google-Font-
+  Fremdrequests entfernt. Copilot-Dock verbindet erst beim Oeffnen, Telefonie
+  ist per Flag standardmaessig aus und pollt nicht global. API-Clients
+  normalisieren lokale Same-Origin-Proxy-Konfigurationen. Mehrere Seitenfehler
+  wurden durch Response-Normalisierung und korrigierte API-Pfade entschaerft.
+  Backend laeuft lokal mit vier Uvicorn-Workern, Request-Recycling und kurzem
+  Keep-Alive, damit Legacy-/Fehler-Routen den Healthcheck nicht vollstaendig
+  blockieren. Verbleibende Audit-Issues sind fachliche API-/Testdaten-Endpunkte
+  (401/403/404/422/500/503), nicht Browser-Haenger oder Render-Crashes.
+risks:
+  - "Der 774-Routen-Audit deckt noch 106 fachliche HTTP-Issues auf; diese sind separate Backend-/Daten-/Auth-Slices."
+  - "maplibre-gl und AppRouterProvider bleiben grosse Build-Chunks; derzeit kein gemessener Ladezeitblocker, aber ein Performance-Folgepunkt."
+external_gates:
+  - not_applicable

@@ -29,7 +29,7 @@ export default function AiApprovalsPage(): JSX.Element {
   const { data: pendingItems = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['admin', 'ai-approvals', 'ap-invoices-pending'],
     queryFn: async () => {
-      const res = await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=ZUR_FREIGABE&limit=50')
+      const res = await apiClient.get<APInvoice[]>('/api/v1/finance/ap/invoices/?status=ZUR_FREIGABE&limit=50')
       return Array.isArray(res?.data) ? res.data : []
     },
     staleTime: 60_000,
@@ -114,7 +114,7 @@ export default function AiApprovalsPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-2">
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• AP-Rechnungen: <code>/api/v1/ap/invoices?status=ZUR_FREIGABE</code></li>
+            <li>• AP-Rechnungen: <code>/api/v1/finance/ap/invoices/?status=ZUR_FREIGABE</code></li>
             <li>• Freigabe-Regeln: <code>/api/v1/ap/approval-workflow/rules</code></li>
             <li>• Freigabe-Aktion: <code>POST /api/v1/ap/approval-workflow/approve</code></li>
           </ul>

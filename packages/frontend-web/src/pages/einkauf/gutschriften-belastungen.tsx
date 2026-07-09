@@ -216,7 +216,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
 
   const loadOpenInvoices = async () => {
     try {
-      const response = await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=APPROVED')
+      const response = await apiClient.get<APInvoice[]>('/api/v1/finance/ap/invoices/?status=APPROVED')
       const rawList = Array.isArray(response.data) ? response.data : []
       const openItemsMap: Record<string, number> = {}
       try {
