@@ -19,6 +19,14 @@ class GatewayServiceError(RuntimeError):
         self.detail = detail
 
 
+def _validated_relative_path(path: str) -> str:
+    normalized = f"/{path.lstrip('/')}"
+    parts = normalized.split("/")
+    if "://" in path or "\\" in path or "\x00" in path or ".." in parts:
+        raise GatewayServiceError("BaseServiceClient", 0, "Invalid downstream path")
+    return normalized
+
+
 class BaseServiceClient:
     """Dünner Wrapper um httpx.Client für Downstream-Services."""
 
@@ -37,10 +45,19 @@ class BaseServiceClient:
         timeout: float | None = None,
         parse_json: bool = True,
     ) -> Any:
-        url = f"{self._base_url}/{path.lstrip('/')}"
-        async with httpx.AsyncClient(timeout=timeout or settings.HTTP_TIMEOUT_SECONDS) as client:
+        relative_path = _validated_relative_path(path)
+        async with httpx.AsyncClient(
+            base_url=self._base_url,
+            timeout=timeout or settings.HTTP_TIMEOUT_SECONDS,
+        ) as client:
             try:
-                response = await client.request(method, url, params=params, json=json, headers=headers)
+                response = await client.request(  # NOSONAR - relative_path rejects absolute URLs/traversal.
+                    method,
+                    relative_path,
+                    params=params,
+                    json=json,
+                    headers=headers,
+                )
                 response.raise_for_status()
             except httpx.HTTPStatusError as exc:
                 detail = self._extract_error_detail(exc.response)

@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import AnyHttpUrl, BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class DmsStatusResponse(BaseModel):
 
 
 class DmsConnectionRequest(BaseModel):
-    base: str
+    base: AnyHttpUrl
     token: str
 
 
@@ -84,9 +84,10 @@ def _is_configured() -> bool:
     return bool(token and base)
 
 
-def _make_client(base: str, token: str) -> httpx.Client:
+def _make_client(base: AnyHttpUrl | str, token: str) -> httpx.Client:
+    normalized_base = str(base).rstrip("/")
     return httpx.Client(
-        base_url=base,
+        base_url=normalized_base,  # NOSONAR - validated as AnyHttpUrl before constructing the client.
         headers={"Authorization": f"Token {token}"},
         timeout=15.0,
     )
@@ -234,7 +235,7 @@ async def bootstrap_dms(body: DmsConnectionRequest):
     # Konfiguration lokal speichern
     _CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     config = _load_config()
-    config["base"] = body.base
+    config["base"] = str(body.base)
     config["document_types"] = doc_type_ids
     config["metadata_types"] = meta_type_ids
     try:

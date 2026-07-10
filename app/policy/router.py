@@ -202,6 +202,17 @@ BACKUP_DIR = os.environ.get("POLICY_BACKUP_DIR", "data/backups")
 Path(BACKUP_DIR).mkdir(parents=True, exist_ok=True)
 
 
+def _resolve_backup_file(file_name: str) -> Path:
+    backup_root = Path(BACKUP_DIR).resolve()
+    submitted = Path(file_name)
+    if submitted.name != file_name or submitted.is_absolute():
+        raise HTTPException(status_code=400, detail="Backup path is invalid")
+    candidate = (backup_root / submitted.name).resolve()
+    if candidate.parent != backup_root:
+        raise HTTPException(status_code=400, detail="Backup path is invalid")
+    return candidate
+
+
 @router.get("/backup", dependencies=[Depends(require_roles("admin"))])
 async def backup_db(user: User = Depends(get_current_user)) -> dict:
     """Erstellt Backup der SQLite-Datenbank"""
@@ -254,7 +265,7 @@ async def restore_db(
     try:
         import datetime
 
-        src = Path(file)
+        src = _resolve_backup_file(file)
         if not src.exists():
             raise HTTPException(status_code=400, detail="Backup not found")
 

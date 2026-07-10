@@ -93,6 +93,13 @@ progress: >-
   imaplib-Aufrufen gehaertet und Grype-Ausnahme CVE-/Package-genau auf
   python binary begrenzt. Lokaler Grype-Scan fuer valeo-backend mit Policy:
   0 Matches.
+  2026-07-10 Sonar-App-Restclosure nach Rescan 9f44ddd73: 9 Head-Alerts
+  aus S5144/S5145/S5146/S6549/S7044 fachlich gehaertet: DMS-Base-URLs als
+  AnyHttpUrl/normalisiert, FiBu-/CRM-Downstream-Pfade nur relativ ohne
+  Traversal/absolute URL, Policy-Restore auf Backup-Dateinamen begrenzt,
+  IBAN/FAOSTAT-Pfade per Regex validiert, CRM-Marketing-Redirect auf
+  HTTP(S)+Host+keine Steuerzeichen begrenzt, Agrar-Delete-Log ohne freie
+  User-Begruendung.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
@@ -116,6 +123,9 @@ tests:
   - "docker run anchore/grype:latest -c .grype.yaml --only-fixed -o json valeo-backend:rest-alert-check -> matches=0."
   - "pytest tests/test_crm_connectors.py -q --noconftest --no-cov -> 11 passed."
   - "python -m py_compile app/services/connector_config.py app/services/mail_ingest_service.py tests/test_crm_connectors.py -> 0."
+  - "python -m py_compile fuer 9 Sonar-Restclosure-Dateien -> 0."
+  - "pytest tests/test_gap_fixes_batch6.py::test_sustainability_catalog_returns_200 tests/test_gap_fixes_batch6.py::test_sustainability_read_model_returns_200 tests/test_gap_fixes_batch6.py::test_sustainability_reports_returns_200 -q --noconftest --no-cov -> 3 passed."
+  - "pytest tests/test_contacts_api.py tests/test_crm_customer_business_partner_link.py -q --noconftest --no-cov -> 14 passed."
   - "GitHub Code Scanning Head-Alerts vor Grype-Restclosure -> 3; Dependabot #380 -> fixed."
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."

@@ -107,12 +107,12 @@ def delete_farmer(
         raise HTTPException(status_code=404, detail=f"Farmer {farmer_id} not found")
 
     logger.info(
-        "Farmer %s (%s %s) deleted by tenant=%s. Reason: %s",
+        "Farmer %s (%s %s) deleted by tenant=%s. Reason length: %d",
         farmer_id,
         farmer.first_name,
         farmer.last_name,
         effective_tenant,
-        body.reason,
+        len(body.reason or ""),
     )
     db.delete(farmer)
     db.commit()

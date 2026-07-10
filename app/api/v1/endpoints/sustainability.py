@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import io
 import os
+import re
 from collections import defaultdict
 from typing import Any, Optional
 
@@ -43,6 +44,7 @@ class SustainabilityOut(BaseSchema):
 
 router = APIRouter(prefix="/sustainability", tags=["Sustainability"])
 bvl_client = BVLPSMClient()
+FAOSTAT_DATASET_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$")
 
 
 class EmissionsEstimateRequest(BaseModel):
@@ -231,9 +233,11 @@ async def get_crop_nutrients(
     The endpoint forwards to FAOSTAT and returns the raw payload
     to keep source fidelity and avoid local data duplication.
     """
-    base_url = os.getenv("FAOSTAT_API_BASE_URL", "https://fenixservices.fao.org/faostat/api/v1/en").rstrip("/")
+    base_url = httpx.URL(os.getenv("FAOSTAT_API_BASE_URL", "https://fenixservices.fao.org/faostat/api/v1/en"))
     rel_dataset = dataset.strip("/")
-    url = f"{base_url}/{rel_dataset}"
+    if not FAOSTAT_DATASET_PATTERN.fullmatch(rel_dataset):
+        raise HTTPException(status_code=400, detail="Invalid FAOSTAT dataset path")
+    url = base_url.copy_with(path=f"{base_url.path.rstrip('/')}/{rel_dataset}")
 
     params: dict[str, Any] = {"page_size": limit}
     if item_code:
@@ -245,7 +249,7 @@ async def get_crop_nutrients(
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-            resp = await client.get(url, params=params)
+            resp = await client.get(url, params=params)  # NOSONAR - dataset path is regex validated.
             if resp.status_code >= 400:
                 # Externe Abhaengigkeit nicht verfuegbar => 503-by-design
                 # (Allowlist config/runtime_sweep_allowlist.yaml), kein Serverfehler.

@@ -389,6 +389,14 @@ async def escalate_case(case_id: str, reason: str, escalated_by: str) -> dict:
 _clients: dict[str, httpx.AsyncClient] = {}
 
 
+def _validated_relative_path(path: str) -> str:
+    normalized = f"/{path.lstrip('/')}"
+    parts = normalized.split("/")
+    if "://" in path or "\\" in path or "\x00" in path or ".." in parts:
+        raise ValueError("Invalid downstream path")
+    return normalized
+
+
 def _pooled_client(base_url: str, timeout: float) -> httpx.AsyncClient:
     client = _clients.get(base_url)
     if client is None or client.is_closed:
@@ -403,7 +411,11 @@ def _pooled_client(base_url: str, timeout: float) -> httpx.AsyncClient:
 
 async def _pooled_request(base_url: str, timeout: float, method: str, path: str, **kwargs: Any) -> Any:
     client = _pooled_client(base_url, timeout)
-    response = await client.request(method, path, **kwargs)
+    response = await client.request(  # NOSONAR - path is validated as a relative downstream path.
+        method,
+        _validated_relative_path(path),
+        **kwargs,
+    )
     response.raise_for_status()
     if response.content:
         return response.json()

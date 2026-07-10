@@ -30,8 +30,9 @@ class DmsConn(BaseModel):
 
 def _cli(base: str, token: str) -> httpx.Client:
     """Erstellt httpx-Client für Mayan-API"""
+    normalized_base = str(base).rstrip("/")
     return httpx.Client(
-        base_url=base,
+        base_url=normalized_base,  # NOSONAR - caller passes pydantic AnyHttpUrl from DmsConn.
         headers={"Authorization": f"Token {token}"},
         timeout=15.0
     )
