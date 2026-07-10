@@ -26,6 +26,7 @@ file_ownership:
   - "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
   - "app/api/v1/endpoints/liquidity.py"
   - "app/api/v1/endpoints/liquidity_planning.py"
+  - "app/api/v1/endpoints/price_hedge_api.py"
   - "app/api/v1/endpoints/silo_cells_readmodel.py"
   - "app/core/security.py"
   - "app/integrations/services/superglue_admin_state.py"
@@ -57,6 +58,7 @@ dateibesitz:
   - app/api/v1/endpoints/fibu_geschaeftsjahre.py
   - app/api/v1/endpoints/liquidity.py
   - app/api/v1/endpoints/liquidity_planning.py
+  - app/api/v1/endpoints/price_hedge_api.py
   - services/*/requirements.txt
   - app/api/v1/endpoints/silo_cells_readmodel.py
   - app/core/security.py
@@ -92,6 +94,10 @@ progress: >-
   bestehende Gate-Policy angeglichen; Sonar-Highs fuer 0.0.0.0-Direktstarts,
   eingebettete DB-Passwort-Defaults, JWT-Algorithmen, statischen
   Encryption-Master-Key, Path-Injection und Loop-Bounds priorisiert behoben.
+  2026-07-10 CI-Nachlauf: Agent-Handbuch-Eventquelle regeneriert den
+  Event-Katalog jetzt deterministisch statt einen lokalen stale Cache zu
+  verwenden; Preisabsicherungs-Liste `/price-hedge/hedges` hat `skip/limit`,
+  stabile Sortierung und kein unbounded `.all()` mehr.
 acceptance:
   - "Quality-Gate-Blocker SQL-f-string ist lokal gruen."
   - "Docs-Build-Inventare und Agent-Handbuch sind ohne Drift."
@@ -120,6 +126,8 @@ tests:
   - "pip install --dry-run fuer Inventory/Finance/Zoll/CRM-GDPR/FIBU-Core/FIBU-Gateway -> 0"
   - "YAML parse fuer geaenderte Workflows und Slice -> 0"
   - "docker build -f Dockerfile --target builder -t valeo-erp-root-builder-check . -> 0"
+  - "python scripts/check_pagination.py --threshold 53 -> 0"
+  - "python -m py_compile app/api/v1/endpoints/price_hedge_api.py -> 0"
 risks:
   - "Container-Scanner melden historische Base-Image-/OS-Funde erst nach erneutem SARIF-Upload/Rescan geschlossen."
   - "Vollstaendiger Root-Runtime-Docker-Build wurde lokal nach 10 Minuten Tool-Timeout abgebrochen; Builder-Stage mit Requirements ist gruen, Runtime-Export muss CI final bestaetigen."

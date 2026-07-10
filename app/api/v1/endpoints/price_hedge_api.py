@@ -65,8 +65,20 @@ def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
 @router.get("/hedges", summary="Hedges auflisten",
     response_model=list[PriceHedgeApiOut]
 )
-def list_hedges(tenant_id: str, db: Session = Depends(get_db)):
-    rows = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.tenant_id == tenant_id).all()
+def list_hedges(
+    tenant_id: str,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(HedgeReferenceDB)
+        .filter(HedgeReferenceDB.tenant_id == tenant_id)
+        .order_by(HedgeReferenceDB.created_at.desc(), HedgeReferenceDB.hedge_id.asc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     return [
         {
             "hedge_id": r.hedge_id,
