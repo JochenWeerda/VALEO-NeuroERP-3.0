@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATIONS-UX-RESPONSIVE-004 Responsive Workbench fuer Tablet und Mobile - in Arbeit 2026-07-10
+
+**Owner:** Codex. **Stand:** in Arbeit 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Paritaet Mobil/Tablet: Workbench-Wrapper nutzt bisher starres `gridTemplateColumns '220px 1fr 280px'` + fixe Viewport-Hoehe und bricht auf schmalen Screens. Umstellung auf `grid-cols-1 lg:grid-cols-[220px_1fr_280px]`, fixe Hoehe nur ab lg, natuerlicher Fluss darunter; breite Tabellen bleiben horizontal scrollbar. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.
+
 ## RATIONS-UX-KPI-003 Sticky Kennzahlen-Trio in der Rations-Workbench - abgeschlossen 2026-07-10
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Muster umgesetzt: sticky Kennzahlen-Trio (`RationSummaryBar`, sticky top-0 oben in der Workbench-Hauptspalte) mit Kosten/Kuh/Tag, IOFC (Milch x Milchpreis - Futter) und Futtergesundheit als Ampel. Futtergesundheit = transparenter Proxy (`rationHealthAmpel`: rot bei Solver != optimal oder harter Grenzverletzung, gelb bei weicher Verletzung/Warnungen, sonst gruen), kein neuer numerischer Score. Rendert nur bei vorhandenem Ergebnis. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.

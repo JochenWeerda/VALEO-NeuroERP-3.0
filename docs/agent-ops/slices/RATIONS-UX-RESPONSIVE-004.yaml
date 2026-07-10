@@ -1,0 +1,59 @@
+slice_id: RATIONS-UX-RESPONSIVE-004
+id: RATIONS-UX-RESPONSIVE-004
+title: Responsive Workbench fuer Tablet und Mobile
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-10"
+started_at: "2026-07-10"
+goal: >-
+  Fodjan-Paritaet Mobil/Tablet: die Rations-Workbench nutzt bisher ein starres
+  3-Spalten-Grid (220px/1fr/280px) mit fixer Viewport-Hoehe und bricht auf
+  schmalen Screens horizontal. Layout so umstellen, dass die Spalten unter der
+  lg-Breite stapeln und die Seite natuerlich scrollt; breite Tabellen bleiben in
+  horizontal scrollbaren Containern.
+scope:
+  - Aeusseres Grid der Workbench responsiv (grid-cols-1, lg:3-Spalten).
+  - Fixe Viewport-Hoehe nur ab lg; darunter natuerlicher Fluss.
+  - Sicherstellen, dass breite Tabellen horizontal scrollen statt den Body zu sprengen.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-UX-RESPONSIVE-004.yaml"
+  - "packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-UX-RESPONSIVE-004.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+progress: >-
+  2026-07-10 reserviert. Ausgangslage: Workbench-Wrapper nutzt
+  gridTemplateColumns '220px 1fr 280px' inline plus h-[calc(100vh-120px)]; auf
+  Tablet/Mobile entsteht horizontaler Ueberlauf. Linke Kontext-Sidebar, mittlere
+  Tabelle und rechte KPI-Spalte sollen unter lg gestapelt werden.
+acceptance:
+  - "Unter der lg-Breite stapeln die drei Spalten (context, tabelle, KPI) vertikal."
+  - "Ab lg bleibt das 3-Spalten-Layout mit fixer Hoehe erhalten."
+  - "Breite Tabellen scrollen horizontal in ihrem Container; der Body scrollt nicht horizontal."
+tests:
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "eslint der geaenderten Datei -> 0 neue Fehler."
+  - "pnpm run build -> 0."
+risks:
+  - "Sticky-Positionierung des Kennzahlen-Trios muss in beiden Layouts funktionieren."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Keine fachliche Aenderung an Rationslogik oder Kennzahlen; nur Layout/Responsive.
+  architektur_vertrag: >-
+    Reine Frontend-Layout-Aenderung in der bestehenden Workbench-Komponente; kein
+    neuer Service, keine Route, kein API-Kontrakt.
+  daten_vertrag: >-
+    Keine Datenmigration; keine Datenpfad-Aenderung.
+  security_vertrag: >-
+    Keine neuen Eingaben, kein Auth-/Tenant-Bezug.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung; Frontend-Build-Pfad unveraendert.
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren das responsive Verhalten.
+  test_vertrag: >-
+    tsc --noEmit, eslint und pnpm run build gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.
