@@ -2964,8 +2964,8 @@ function Workbench({
 
   return (
     <div
-      className="grid h-[calc(100vh-120px)] p-[15px] gap-[15px]"
-      style={{ gridTemplateColumns: '220px 1fr 280px', background: C.bg }}
+      className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px] lg:h-[calc(100vh-120px)] p-[15px] gap-[15px]"
+      style={{ background: C.bg }}
     >
       {/* ── Linke Sidebar ── */}
       <aside className="flex flex-col gap-[15px]">

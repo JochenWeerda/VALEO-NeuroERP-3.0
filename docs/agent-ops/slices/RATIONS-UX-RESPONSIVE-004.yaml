@@ -2,9 +2,10 @@ slice_id: RATIONS-UX-RESPONSIVE-004
 id: RATIONS-UX-RESPONSIVE-004
 title: Responsive Workbench fuer Tablet und Mobile
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-10"
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 goal: >-
   Fodjan-Paritaet Mobil/Tablet: die Rations-Workbench nutzt bisher ein starres
   3-Spalten-Grid (220px/1fr/280px) mit fixer Viewport-Hoehe und bricht auf
@@ -28,6 +29,11 @@ progress: >-
   gridTemplateColumns '220px 1fr 280px' inline plus h-[calc(100vh-120px)]; auf
   Tablet/Mobile entsteht horizontaler Ueberlauf. Linke Kontext-Sidebar, mittlere
   Tabelle und rechte KPI-Spalte sollen unter lg gestapelt werden.
+  2026-07-10 umgesetzt: Workbench-Wrapper von inline gridTemplateColumns auf
+  Tailwind grid-cols-1 lg:grid-cols-[220px_1fr_280px] umgestellt; fixe Hoehe nur
+  ab lg (lg:h-[calc(100vh-120px)]), darunter natuerlicher Fluss. Bestehende
+  Tabellen-Container behalten overflow-auto/overflow-hidden. Verifiziert:
+  tsc --noEmit 0, eslint 0, pnpm run build 0.
 acceptance:
   - "Unter der lg-Breite stapeln die drei Spalten (context, tabelle, KPI) vertikal."
   - "Ab lg bleibt das 3-Spalten-Layout mit fixer Hoehe erhalten."
