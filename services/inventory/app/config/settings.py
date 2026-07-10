@@ -6,7 +6,7 @@ from enum import Enum
 from functools import lru_cache
 from typing import Dict, List
 
-from pydantic import AnyHttpUrl, Field, PostgresDsn, field_validator, model_validator
+from pydantic import AnyHttpUrl, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -42,13 +42,7 @@ class Settings(BaseSettings):
     MODULE_MODE_OVERRIDES: Dict[str, OperationMode] = Field(default_factory=dict)
 
     # Datenbank
-    DATABASE_URL: PostgresDsn = PostgresDsn.build(
-        scheme="postgresql+asyncpg",
-        username="valeo_inventory",
-        host="postgres-inventory",
-        port=5432,
-        path="/valeo_inventory",
-    )
+    DATABASE_URL: str = ""
     DB_ECHO: bool = False
 
     # EventBus

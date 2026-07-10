@@ -4,27 +4,15 @@ Settings for CRM Service.
 
 from typing import Optional
 
-from pydantic import Field, PostgresDsn
+from pydantic import Field
 from pydantic_settings import BaseSettings
-
-
-def _default_database_url() -> str:
-    return str(
-        PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            username="valeo_dev",
-            host="localhost",
-            port=5432,
-            path="/valeo_neuro_erp",
-        )
-    )
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = Field(default_factory=_default_database_url)
+    DATABASE_URL: str = Field(default="")
 
     # Service
     SERVICE_NAME: str = Field(default="crm-service")

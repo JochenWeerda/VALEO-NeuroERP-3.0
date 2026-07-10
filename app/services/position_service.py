@@ -52,7 +52,7 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
     if period_mode == PERIOD_MODE_MONTH:
         y, m = int(period_from[:4]), int(period_from[5:7])
         y2, m2 = int(period_to[:4]), int(period_to[5:7])
-        for _ in range(MAX_POSITION_PERIODS):
+        for _ in range(MAX_POSITION_PERIODS):  # NOSONAR - fixed upper bound; covered by TestPeriodHelpers guard test.
             if (y, m) > (y2, m2):
                 break
             out.append(f"{y}-{m:02d}")
@@ -67,7 +67,7 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
         y1, w1 = int(period_from[:4]), int(period_from.split("-W")[1])
         y2, w2 = int(period_to[:4]), int(period_to.split("-W")[1])
         y, w = y1, w1
-        for _ in range(MAX_POSITION_PERIODS):
+        for _ in range(MAX_POSITION_PERIODS):  # NOSONAR - fixed upper bound; covered by TestPeriodHelpers guard test.
             if (y, w) > (y2, w2):
                 break
             out.append(f"{y}-W{w:02d}")
@@ -81,7 +81,7 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
         y1, q1 = int(period_from[:4]), int(period_from.split("-Q")[1])
         y2, q2 = int(period_to[:4]), int(period_to.split("-Q")[1])
         y, q = y1, q1
-        for _ in range(MAX_POSITION_PERIODS):
+        for _ in range(MAX_POSITION_PERIODS):  # NOSONAR - fixed upper bound; covered by TestPeriodHelpers guard test.
             if (y, q) > (y2, q2):
                 break
             out.append(f"{y}-Q{q}")

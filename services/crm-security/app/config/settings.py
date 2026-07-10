@@ -5,27 +5,15 @@ Settings for CRM Security & Compliance Service.
 import os
 from typing import List, Optional
 
-from pydantic import PostgresDsn, validator
+from pydantic import validator
 from pydantic_settings import BaseSettings
-
-
-def _default_database_url() -> str:
-    return str(
-        PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            username="valeo_dev",
-            host="localhost",
-            port=5432,
-            path="/valeo_neuro_erp",
-        )
-    )
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = _default_database_url()
+    DATABASE_URL: str = ""
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/11"
