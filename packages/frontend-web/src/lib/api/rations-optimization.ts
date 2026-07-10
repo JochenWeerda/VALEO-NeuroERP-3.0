@@ -247,6 +247,10 @@ export interface NutrientSupply {
   p_g: number
   na_g: number
   forage_share_pct: number
+  // GfE 2023 / DLG 2025: sid-Aminosäuren (Proteinqualität), vom Backend geliefert
+  sidlys_g?: number
+  sidmet_g?: number
+  sidlys_sidmet_ratio?: number
 }
 
 export interface ConstraintReportItem {

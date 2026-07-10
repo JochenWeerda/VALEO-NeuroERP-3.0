@@ -3255,6 +3255,14 @@ function Workbench({
                 : []),
               { label: 'pabKH', val: `${fmt(dlg.pabkh_kgdm, 0)} g/kg TM`, ok: dlg.pabkh_kgdm <= 210 },
               { label: 'RMD', val: dlg.rmd_gn_kgdm != null ? `${fmt(dlg.rmd_gn_kgdm, 2)} g N/kg TM` : '–', ok: dlg.rmd_gn_kgdm != null ? (dlg.rmd_gn_kgdm >= -1 && dlg.rmd_gn_kgdm <= 0.5) : null },
+              // GfE 2023 / DLG 2025: sid-Aminosäuren-Balance (Proteinqualität); Ziel ~3:1 (2,5–3,5)
+              ...(result?.nutrient_supply.sidlys_sidmet_ratio != null
+                ? [{
+                    label: 'sidLys:sidMet',
+                    val: `${fmt(result.nutrient_supply.sidlys_sidmet_ratio, 1)} : 1`,
+                    ok: result.nutrient_supply.sidlys_sidmet_ratio >= 2.5 && result.nutrient_supply.sidlys_sidmet_ratio <= 3.5,
+                  }]
+                : []),
             ].map((row) => (
               <div key={row.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
                 <span className="flex items-center gap-1.5">

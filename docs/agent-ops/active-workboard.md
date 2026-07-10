@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RATIONS-SCI-AA-005 sid-Aminosaeuren-Balance als KPI sichtbar - in Arbeit 2026-07-10
+## RATIONS-SCI-AA-005 sid-Aminosaeuren-Balance als KPI sichtbar - abgeschlossen 2026-07-10
 
-**Owner:** Codex. **Stand:** in Arbeit 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Wissenschaftlicher Vorsprung (GfE 2023/DLG 2025): Backend liefert bereits `nutrient_supply.sidlys_g/sidmet_g/sidlys_sidmet_ratio` + Warnung bei Verhaeltnis ausserhalb 2,5-3,5:1; Frontend-Ergebnistyp `NutrientSupply` verwirft die Felder noch. Slice erweitert den Typ und zeigt sidLys:sidMet als Ampel-KPI in der Workbench (Ziel ~3:1). Frontend-only, kein API-Vertrag. **Dateibesitz:** `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Wissenschaftlicher Vorsprung (GfE 2023/DLG 2025) sichtbar gemacht: Frontend-Ergebnistyp `NutrientSupply` um `sidlys_g/sidmet_g/sidlys_sidmet_ratio` (optional) erweitert; sidLys:sidMet-Verhaeltnis als Ampel-Zeile (2,5-3,5 gruen, Ziel ~3:1) im DLG/GfE-Panel der Workbench (nach RMD), nur bei vorhandenem Verhaeltnis. Backend liefert die Felder bereits inkl. Warnung ausserhalb Korridor - Frontend-only, kein API-Vertrag. **Dateibesitz:** `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.
 
 ## RATIONS-UX-RESPONSIVE-004 Responsive Workbench fuer Tablet und Mobile - abgeschlossen 2026-07-10
 

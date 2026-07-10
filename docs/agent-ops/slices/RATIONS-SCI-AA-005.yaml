@@ -2,9 +2,10 @@ slice_id: RATIONS-SCI-AA-005
 id: RATIONS-SCI-AA-005
 title: sid-Aminosaeuren-Balance als KPI sichtbar machen
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-10"
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 goal: >-
   Wissenschaftlicher Vorsprung (GfE 2023 / DLG 2025): das Backend liefert bereits
   nutrient_supply.sidlys_g, sidmet_g und sidlys_sidmet_ratio sowie Warnungen bei
@@ -31,6 +32,10 @@ progress: >-
   nutrient_supply.sidlys_g/sidmet_g/sidlys_sidmet_ratio in die Antwort (Z. 4444-
   4446) plus Warnungen (Z. 4706-4714). Frontend-Typ NutrientSupply (Z. 237) fuehrt
   die Felder noch nicht; NutrientSupplyExtended hat sie bereits.
+  2026-07-10 umgesetzt: NutrientSupply-Typ um sidlys_g/sidmet_g/sidlys_sidmet_ratio
+  (optional) erweitert. sidLys:sidMet-Zeile mit Ampel (2,5-3,5 gruen, Ziel ~3:1)
+  in das DLG/GfE-Panel der Workbench aufgenommen (nach RMD), nur bei vorhandenem
+  Verhaeltnis. Verifiziert: tsc --noEmit 0, eslint 0, pnpm run build 0.
 acceptance:
   - "NutrientSupply-Typ traegt sidlys_g/sidmet_g/sidlys_sidmet_ratio (optional)."
   - "Workbench zeigt sidLys:sidMet-Verhaeltnis als Ampel-KPI (gruen 2,5-3,5)."
