@@ -2,9 +2,10 @@ slice_id: RATIONS-UX-INTENT-002
 id: RATIONS-UX-INTENT-002
 title: Benannte Intent-Vorschlaege mit Vorschau-Delta
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-10"
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 goal: >-
   Fodjan-Muster: benannte Rations-Intents (Guenstiger, Mehr Milch, Weniger
   Stickstoff, Gesund & Guenstiger, Gesuender) als ein-Klick-Vorschlaege in der
@@ -32,6 +33,16 @@ progress: >-
   optimizeFromProfile in optimizeMutation.mutationFn (grosser Inline-Builder).
   Ergebnis traegt total_cost_eur_day, ecm_supply_kg_day, forage_performance
   (limiting_milk_kg) und warnings fuer die Delta-Anzeige.
+  2026-07-10 umgesetzt: Optimize-Request-Builder als Modul-Funktion
+  runOptimizeForWizard extrahiert (Haupt- und Vorschau-Mutation teilen ihn,
+  optimizeMutation.mutationFn ist jetzt ein Einzeiler). 5 Intents in
+  RATION_INTENTS (cheaper/more_milk/less_nitrogen/healthy_cheaper/healthier) als
+  WizardData-Override (mode + priorityWeights + softGoals; keine harten Grenzen).
+  IntentSuggestionsPanel ueber der Rationstabelle in der Workbench: 5 Buttons,
+  previewMutation rechnet die Vorschau, Delta-Karte (Kosten/Milch/IOFC/Warnungen
+  aktiv vs. neu) mit Uebernehmen/Verwerfen. Pending-Guard (previewMutation.isPending),
+  Fehler via setError. Verifiziert: tsc --noEmit 0, eslint 0, pnpm run build 0
+  (rationsoptimierung-Bundle kompiliert).
 acceptance:
   - "5 benannte Intent-Buttons erscheinen in der Workbench, wenn eine Ration aktiv ist."
   - "Ein Klick rechnet eine Vorschau ohne die aktive Ration zu ueberschreiben."

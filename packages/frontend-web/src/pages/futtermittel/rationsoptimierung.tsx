@@ -2840,6 +2840,12 @@ function Workbench({
   onGoDiagnose,
   onGoWizard,
   onApplySuggestionPatch,
+  previewResult,
+  previewIntent,
+  previewPending,
+  onRunIntent,
+  onAcceptPreview,
+  onDiscardPreview,
   chatSeed,
   tourStep,
   onTourNext: _onTourNext,
@@ -2856,6 +2862,12 @@ function Workbench({
   onGoDiagnose: () => void
   onGoWizard: () => void
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
+  previewResult: OptimizationResult | null
+  previewIntent: IntentKey | null
+  previewPending: boolean
+  onRunIntent: (intent: RationIntent) => void
+  onAcceptPreview: () => void
+  onDiscardPreview: () => void
   chatSeed?: { role: 'ai' | 'user'; text: string }[]
   tourStep?: number | null
   onTourNext?: () => void
@@ -3063,6 +3075,20 @@ function Workbench({
             <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
             {error}
           </div>
+        )}
+
+        {/* Intent-Vorschläge (Fodjan-Muster): benannte Ziele mit Vorschau-Delta */}
+        {wizardData && (
+          <IntentSuggestionsPanel
+            activeResult={result}
+            previewResult={previewResult}
+            previewIntent={previewIntent}
+            previewPending={previewPending}
+            milkPriceEur={wizardData.milkPriceEur ?? 0.44}
+            onRunIntent={onRunIntent}
+            onAcceptPreview={onAcceptPreview}
+            onDiscardPreview={onDiscardPreview}
+          />
         )}
 
         {/* Table */}
@@ -4037,6 +4063,314 @@ function Diagnose({
 
 type AppView = 'dashboard' | 'wizard' | 'workbench' | 'diagnose' | 'review'
 
+// ---------------------------------------------------------------------------
+// Optimize-Request-Builder (geteilt von Haupt- und Intent-Vorschau-Mutation)
+// ---------------------------------------------------------------------------
+
+/** Baut den Optimierungs-Request aus WizardData + Futtermitteln und ruft das Backend. */
+function runOptimizeForWizard(
+  nextWizardData: WizardData | null,
+  feeds: FeedIngredient[],
+): Promise<OptimizationResult> {
+  if (!nextWizardData) return optimizeDemo()
+  const profile: CowProfile = {
+    breed: 'Holstein',
+    body_weight_kg: nextWizardData.group.bodyMass,
+    milk_kg_day: nextWizardData.milkYield,
+    milk_fat_pct: nextWizardData.fatPercent,
+    milk_protein_pct: nextWizardData.proteinPercent,
+    lactation_stage_days: nextWizardData.group.lactationDays,
+    parity: Math.round(nextWizardData.group.lactationNumber),
+    target_dmi_kg: nextWizardData.dmiTarget,
+    wizard_dmi_min_kg: nextWizardData.wizardHardBounds?.dmiMinKg,
+    wizard_dmi_max_kg: nextWizardData.wizardHardBounds?.dmiMaxKg,
+    feeding_type: nextWizardData.feedingType,
+  }
+  const totalAvail =
+    feeds.length +
+    (nextWizardData.customFeeds?.length ?? 0) +
+    (nextWizardData.compoundFeeds?.length ?? 0)
+  const feedIds = nextWizardData.selectedFeedIds.size < totalAvail
+    ? [...nextWizardData.selectedFeedIds]
+    : undefined
+  const customOptimizerFeeds = [
+    ...((nextWizardData.customFeeds ?? []).map((gfa) => ({ ...gfa, _source: 'gfa' }))),
+    ...((nextWizardData.compoundFeeds ?? []).map((doc) => ({
+      ...(doc.optimizer_feed as Record<string, unknown>),
+      _source: 'compound_upload',
+    }))),
+  ]
+  // min/max FM → TM-Grenzen für den Solver (kg FM × TM-Anteil = kg TM)
+  const dmById = buildFeedDmById(feeds, nextWizardData)
+  const maxFmMap = nextWizardData.feedMaxFm ?? {}
+  const minFmMap = nextWizardData.feedMinFm ?? {}
+  const maxTmOverrides = Object.keys(maxFmMap).length > 0
+    ? Object.fromEntries(
+        Object.entries(maxFmMap).map(([id, maxFm]) => [id, maxFm * (dmById.get(id) ?? 0.86)]),
+      )
+    : undefined
+  const minTmOverrides = Object.keys(minFmMap).length > 0
+    ? Object.fromEntries(
+        Object.entries(minFmMap).map(([id, minFm]) => [id, minFm * (dmById.get(id) ?? 0.86)]),
+      )
+    : undefined
+  const prio = nextWizardData.priorityWeights ?? DEFAULT_PRIORITY_WEIGHTS
+  const hb = nextWizardData.wizardHardBounds ?? DEFAULT_WIZARD_HARD_BOUNDS
+  const sg = nextWizardData.wizardSoftGoals ?? DEFAULT_WIZARD_SOFT_GOALS
+  const objective_strategy = deriveObjectiveStrategy(nextWizardData.mode, prio)
+  // FAN-MODE-V1: Bewertungsmodus + Relaxation aus Wizard durchreichen
+  const extras = {
+    objective_strategy,
+    fan_options: {
+      mode: nextWizardData.fanMode,
+      ...(nextWizardData.fanMode === 'reference' ? { reference: nextWizardData.fanReference } : {}),
+    },
+    relaxation_policy: nextWizardData.relaxationPolicy,
+    ...(nextWizardData.seasonProfile ? { season_profile: nextWizardData.seasonProfile } : {}),
+    policy_overrides: {
+      wizard_priorities: prio,
+      wizard_hard_bounds: {
+        me_min_mj_per_kg_dm: hb.meMinMjPerKgDm,
+        starch_max_pct_tm: hb.starchMaxPctTm,
+        andfom_min_pct_tm: hb.andfomMinPctTm,
+        andfom_gf_min_pct_tm: hb.andfomGfMinPctTm,
+      },
+      wizard_soft_goals: {
+        minimize_soya: sg.minimizeSoya,
+        minimize_deviation_from_baseline: sg.minimizeDeviationFromBaseline,
+        maximize_n_efficiency_rmd: sg.maximizeNEfficiencyRmd,
+        prefer_homegrown: sg.preferHomegrown,
+      },
+      ...(sg.minimizeDeviationFromBaseline &&
+      nextWizardData.wizardBaselineKgDm &&
+      Object.keys(nextWizardData.wizardBaselineKgDm).length > 0
+        ? { wizard_baseline_kg_dm: nextWizardData.wizardBaselineKgDm }
+        : {}),
+    },
+    ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
+    feeding_system_config: nextWizardData.feedingSystemConfig ?? defaultFeedingSystemConfig(nextWizardData.feedingType),
+  }
+  if (nextWizardData.seasonProfile) {
+    profile.season_profile = nextWizardData.seasonProfile
+  }
+  return optimizeFromProfile(
+    profile,
+    feedIds,
+    customOptimizerFeeds.length > 0 ? customOptimizerFeeds : undefined,
+    undefined,
+    maxTmOverrides,
+    minTmOverrides,
+    extras,
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Intent-Vorschläge (Fodjan-Muster): benannte Ziele statt abstrakter Schieber
+// ---------------------------------------------------------------------------
+
+type IntentKey = 'cheaper' | 'more_milk' | 'less_nitrogen' | 'healthy_cheaper' | 'healthier'
+
+interface RationIntent {
+  key: IntentKey
+  label: string
+  hint: string
+  /** Erzeugt einen WizardData-Override; ändert nur Zielrichtung/weiche Gewichte, keine harten Grenzen. */
+  apply: (wd: WizardData) => WizardData
+}
+
+const RATION_INTENTS: RationIntent[] = [
+  {
+    key: 'cheaper',
+    label: 'Günstiger',
+    hint: 'Senkt die Futterkosten innerhalb der fachlichen Grenzen.',
+    apply: (wd) => ({
+      ...wd,
+      mode: 'Kosten minimieren',
+      priorityWeights: { cost: 95, performance: 45, rumen: 65, health: 55, simplicity: 60 },
+    }),
+  },
+  {
+    key: 'more_milk',
+    label: 'Mehr Milch',
+    hint: 'Priorisiert Milchleistung (Energie-/Proteindichte).',
+    apply: (wd) => ({
+      ...wd,
+      mode: 'Leistung absichern',
+      priorityWeights: { cost: 40, performance: 95, rumen: 70, health: 60, simplicity: 40 },
+    }),
+  },
+  {
+    key: 'less_nitrogen',
+    label: 'Weniger Stickstoff',
+    hint: 'Verbessert die N-Effizienz (RMD/RNB) und senkt Proteinüberschuss.',
+    apply: (wd) => ({
+      ...wd,
+      mode: 'Tiergesundheit',
+      priorityWeights: { cost: 50, performance: 55, rumen: 70, health: 80, simplicity: 45 },
+      wizardSoftGoals: { ...(wd.wizardSoftGoals ?? DEFAULT_WIZARD_SOFT_GOALS), maximizeNEfficiencyRmd: true },
+    }),
+  },
+  {
+    key: 'healthy_cheaper',
+    label: 'Gesund & Günstiger',
+    hint: 'Balanciert Kosten und Pansengesundheit.',
+    apply: (wd) => ({
+      ...wd,
+      mode: 'Kosten minimieren',
+      priorityWeights: { cost: 70, performance: 55, rumen: 75, health: 72, simplicity: 45 },
+    }),
+  },
+  {
+    key: 'healthier',
+    label: 'Gesünder',
+    hint: 'Priorisiert Pansensicherheit und Tiergesundheit.',
+    apply: (wd) => ({
+      ...wd,
+      mode: 'Tiergesundheit',
+      priorityWeights: { cost: 40, performance: 55, rumen: 88, health: 92, simplicity: 40 },
+    }),
+  },
+]
+
+/** Vergleichs-Kennzahlen für das Intent-Delta (robust gegen fehlende Felder). */
+function intentKpis(r: OptimizationResult, milkPriceEur: number): {
+  cost: number
+  milk: number
+  iofc: number
+  warnings: number
+} {
+  const cost = r.total_cost_eur_day ?? (r.ration_items ?? []).reduce((s, i) => s + (i.total_cost ?? 0), 0)
+  const milk =
+    r.forage_performance?.supplemented.limiting_milk_kg ??
+    r.ecm_supply_kg_day ??
+    r.forage_performance?.target_milk_kg ??
+    0
+  const iofc = milk * milkPriceEur - cost
+  const warnings = r.warnings?.length ?? 0
+  return { cost, milk, iofc, warnings }
+}
+
+/**
+ * Intent-Vorschläge: benannte Ein-Klick-Ziele + Vorschau-Delta gegen die aktive Ration.
+ * Übernehmen macht die Vorschau aktiv; Verwerfen lässt die aktive Ration unverändert.
+ */
+function IntentSuggestionsPanel({
+  activeResult,
+  previewResult,
+  previewIntent,
+  previewPending,
+  milkPriceEur,
+  onRunIntent,
+  onAcceptPreview,
+  onDiscardPreview,
+}: {
+  activeResult: OptimizationResult | null
+  previewResult: OptimizationResult | null
+  previewIntent: IntentKey | null
+  previewPending: boolean
+  milkPriceEur: number
+  onRunIntent: (intent: RationIntent) => void
+  onAcceptPreview: () => void
+  onDiscardPreview: () => void
+}) {
+  if (!activeResult) return null
+
+  const base = intentKpis(activeResult, milkPriceEur)
+  const preview = previewResult ? intentKpis(previewResult, milkPriceEur) : null
+  const activeIntentLabel = RATION_INTENTS.find((i) => i.key === previewIntent)?.label ?? ''
+
+  const deltaRow = (label: string, unit: string, baseVal: number, newVal: number, lowerIsBetter: boolean, digits = 2) => {
+    const diff = newVal - baseVal
+    const better = lowerIsBetter ? diff < -1e-6 : diff > 1e-6
+    const worse = lowerIsBetter ? diff > 1e-6 : diff < -1e-6
+    const color = better ? C.success : worse ? C.error : C.muted
+    const sign = diff > 1e-6 ? '+' : ''
+    return (
+      <div key={label} className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr] gap-2 items-center text-xs py-1.5 border-b" style={{ borderColor: '#F3F4F6' }}>
+        <span className="font-medium" style={{ color: C.dark }}>{label}</span>
+        <span className="text-right font-mono" style={{ color: C.muted }}>{fmt(baseVal, digits)} {unit}</span>
+        <span className="text-right font-mono font-bold" style={{ color: C.dark }}>{fmt(newVal, digits)} {unit}</span>
+        <span className="text-right font-mono font-semibold" style={{ color }}>{sign}{fmt(diff, digits)}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className={card('space-y-3')}>
+      <div className="flex items-center gap-2">
+        <Sparkles size={16} style={{ color: C.accent }} />
+        <div>
+          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Vorschläge</p>
+          <p className="text-sm font-semibold" style={{ color: C.dark }}>Ein Klick — Vorschau mit Auswirkung, dann übernehmen</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {RATION_INTENTS.map((intent) => {
+          const isActive = previewIntent === intent.key
+          return (
+            <button
+              key={intent.key}
+              type="button"
+              disabled={previewPending}
+              onClick={() => onRunIntent(intent)}
+              title={intent.hint}
+              className="px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors disabled:opacity-40"
+              style={{
+                background: isActive ? C.accent : '#fff',
+                color: isActive ? '#fff' : C.dark,
+                borderColor: isActive ? C.accent : C.border,
+              }}
+            >
+              {previewPending && isActive ? (
+                <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> {intent.label}</span>
+              ) : intent.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {preview && previewResult && (
+        <div className="rounded-lg border p-3 space-y-2" style={{ background: C.deltaBg, borderColor: C.deltaBorder }}>
+          <div className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr] gap-2 text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>
+            <span>Vorschlag: {activeIntentLabel}</span>
+            <span className="text-right">Aktiv</span>
+            <span className="text-right">Neu</span>
+            <span className="text-right">Δ</span>
+          </div>
+          {deltaRow('Kosten', '€/Tag', base.cost, preview.cost, true, 2)}
+          {deltaRow('Milch', 'kg', base.milk, preview.milk, false, 1)}
+          {deltaRow('IOFC', '€/Tag', base.iofc, preview.iofc, false, 2)}
+          {deltaRow('Warnungen', '', base.warnings, preview.warnings, true, 0)}
+          {previewResult.status !== 'optimal' && (
+            <p className="text-[11px] font-medium" style={{ color: C.error }}>
+              Solver-Status: {previewResult.status} — Vorschlag ggf. nicht vollständig erfüllbar.
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onAcceptPreview}
+              className="px-3 py-1.5 rounded text-xs font-bold text-white"
+              style={{ background: C.accent }}
+            >
+              Vorschlag übernehmen
+            </button>
+            <button
+              type="button"
+              onClick={onDiscardPreview}
+              className="px-3 py-1.5 rounded text-xs font-semibold border"
+              style={{ borderColor: C.border, color: C.dark }}
+            >
+              Verwerfen
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Rationsoptimierung() {
   const [view, setView] = useState<AppView>('dashboard')
   const [wizardBoot, setWizardBoot] = useState<{
@@ -4047,6 +4381,11 @@ export default function Rationsoptimierung() {
   const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Intent-Vorschau (RATIONS-UX-INTENT-002): transiente Vorschau ohne die aktive Ration zu ueberschreiben
+  const [previewIntent, setPreviewIntent] = useState<IntentKey | null>(null)
+  const [previewResult, setPreviewResult] = useState<OptimizationResult | null>(null)
+  const previewWizardRef = useRef<WizardData | null>(null)
 
   // Demo-Modus
   const [demoMode, setDemoMode] = useState(false)
@@ -4064,98 +4403,7 @@ export default function Rationsoptimierung() {
   })
 
   const optimizeMutation = useMutation({
-    mutationFn: (nextWizardData: WizardData | null) => {
-      if (!nextWizardData) return optimizeDemo()
-      const profile: CowProfile = {
-        breed: 'Holstein',
-        body_weight_kg: nextWizardData.group.bodyMass,
-        milk_kg_day: nextWizardData.milkYield,
-        milk_fat_pct: nextWizardData.fatPercent,
-        milk_protein_pct: nextWizardData.proteinPercent,
-        lactation_stage_days: nextWizardData.group.lactationDays,
-        parity: Math.round(nextWizardData.group.lactationNumber),
-        target_dmi_kg: nextWizardData.dmiTarget,
-        wizard_dmi_min_kg: nextWizardData.wizardHardBounds?.dmiMinKg,
-        wizard_dmi_max_kg: nextWizardData.wizardHardBounds?.dmiMaxKg,
-        feeding_type: nextWizardData.feedingType,
-      }
-      const totalAvail =
-        feeds.length +
-        (nextWizardData.customFeeds?.length ?? 0) +
-        (nextWizardData.compoundFeeds?.length ?? 0)
-      const feedIds = nextWizardData.selectedFeedIds.size < totalAvail
-        ? [...nextWizardData.selectedFeedIds]
-        : undefined
-      const customOptimizerFeeds = [
-        ...((nextWizardData.customFeeds ?? []).map((gfa) => ({ ...gfa, _source: 'gfa' }))),
-        ...((nextWizardData.compoundFeeds ?? []).map((doc) => ({
-          ...(doc.optimizer_feed as Record<string, unknown>),
-          _source: 'compound_upload',
-        }))),
-      ]
-      // min/max FM → TM-Grenzen für den Solver (kg FM × TM-Anteil = kg TM)
-      const dmById = buildFeedDmById(feeds, nextWizardData)
-      const maxFmMap = nextWizardData.feedMaxFm ?? {}
-      const minFmMap = nextWizardData.feedMinFm ?? {}
-      const maxTmOverrides = Object.keys(maxFmMap).length > 0
-        ? Object.fromEntries(
-            Object.entries(maxFmMap).map(([id, maxFm]) => [id, maxFm * (dmById.get(id) ?? 0.86)]),
-          )
-        : undefined
-      const minTmOverrides = Object.keys(minFmMap).length > 0
-        ? Object.fromEntries(
-            Object.entries(minFmMap).map(([id, minFm]) => [id, minFm * (dmById.get(id) ?? 0.86)]),
-          )
-        : undefined
-      const prio = nextWizardData.priorityWeights ?? DEFAULT_PRIORITY_WEIGHTS
-      const hb = nextWizardData.wizardHardBounds ?? DEFAULT_WIZARD_HARD_BOUNDS
-      const sg = nextWizardData.wizardSoftGoals ?? DEFAULT_WIZARD_SOFT_GOALS
-      const objective_strategy = deriveObjectiveStrategy(nextWizardData.mode, prio)
-      // FAN-MODE-V1: Bewertungsmodus + Relaxation aus Wizard durchreichen
-      const extras = {
-        objective_strategy,
-        fan_options: {
-          mode: nextWizardData.fanMode,
-          ...(nextWizardData.fanMode === 'reference' ? { reference: nextWizardData.fanReference } : {}),
-        },
-        relaxation_policy: nextWizardData.relaxationPolicy,
-        ...(nextWizardData.seasonProfile ? { season_profile: nextWizardData.seasonProfile } : {}),
-        policy_overrides: {
-          wizard_priorities: prio,
-          wizard_hard_bounds: {
-            me_min_mj_per_kg_dm: hb.meMinMjPerKgDm,
-            starch_max_pct_tm: hb.starchMaxPctTm,
-            andfom_min_pct_tm: hb.andfomMinPctTm,
-            andfom_gf_min_pct_tm: hb.andfomGfMinPctTm,
-          },
-          wizard_soft_goals: {
-            minimize_soya: sg.minimizeSoya,
-            minimize_deviation_from_baseline: sg.minimizeDeviationFromBaseline,
-            maximize_n_efficiency_rmd: sg.maximizeNEfficiencyRmd,
-            prefer_homegrown: sg.preferHomegrown,
-          },
-          ...(sg.minimizeDeviationFromBaseline &&
-          nextWizardData.wizardBaselineKgDm &&
-          Object.keys(nextWizardData.wizardBaselineKgDm).length > 0
-            ? { wizard_baseline_kg_dm: nextWizardData.wizardBaselineKgDm }
-            : {}),
-        },
-        ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
-        feeding_system_config: nextWizardData.feedingSystemConfig ?? defaultFeedingSystemConfig(nextWizardData.feedingType),
-      }
-      if (nextWizardData.seasonProfile) {
-        profile.season_profile = nextWizardData.seasonProfile
-      }
-      return optimizeFromProfile(
-        profile,
-        feedIds,
-        customOptimizerFeeds.length > 0 ? customOptimizerFeeds : undefined,
-        undefined,
-        maxTmOverrides,
-        minTmOverrides,
-        extras,
-      )
-    },
+    mutationFn: (nextWizardData: WizardData | null) => runOptimizeForWizard(nextWizardData, feeds),
     onSuccess: (data) => {
       setResult(data)
       setError(null)
@@ -4209,6 +4457,47 @@ export default function Rationsoptimierung() {
   })
 
   const isOptimizing = optimizeMutation.isPending || demoMutation.isPending
+
+  // Intent-Vorschau: rechnet mit einem WizardData-Override, ohne die aktive Ansicht zu überschreiben.
+  const previewMutation = useMutation({
+    mutationFn: (wd: WizardData) => runOptimizeForWizard(wd, feeds),
+    onSuccess: (data) => {
+      setPreviewResult(data)
+      setError(null)
+    },
+    onError: (err: unknown) => {
+      setError(getRationsApiErrorMessage(err, 'Vorschlag fehlgeschlagen'))
+      setPreviewIntent(null)
+      previewWizardRef.current = null
+    },
+  })
+
+  const handleRunIntent = useCallback(
+    (intent: RationIntent) => {
+      if (!wizardData || previewMutation.isPending) return
+      const overrideWd = intent.apply(wizardData)
+      previewWizardRef.current = overrideWd
+      setPreviewIntent(intent.key)
+      setPreviewResult(null)
+      previewMutation.mutate(overrideWd)
+    },
+    [wizardData, previewMutation],
+  )
+
+  const handleAcceptPreview = useCallback(() => {
+    if (!previewResult || !previewWizardRef.current) return
+    setResult(previewResult)
+    setWizardData(previewWizardRef.current)
+    setPreviewResult(null)
+    setPreviewIntent(null)
+    previewWizardRef.current = null
+  }, [previewResult])
+
+  const handleDiscardPreview = useCallback(() => {
+    setPreviewResult(null)
+    setPreviewIntent(null)
+    previewWizardRef.current = null
+  }, [])
 
   function handleWizardComplete(data: WizardData) {
     setWizardData(data)
@@ -4369,6 +4658,12 @@ export default function Rationsoptimierung() {
             onGoDiagnose={() => setView('diagnose')}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}
+            previewResult={previewResult}
+            previewIntent={previewIntent}
+            previewPending={previewMutation.isPending}
+            onRunIntent={handleRunIntent}
+            onAcceptPreview={handleAcceptPreview}
+            onDiscardPreview={handleDiscardPreview}
             chatSeed={demoChatSeed}
             tourStep={tourStep}
             onTourNext={() => tourStep !== null && tourStep < TOUR_STEPS.length - 1 ? setTourStep(tourStep + 1) : setTourStep(null)}
