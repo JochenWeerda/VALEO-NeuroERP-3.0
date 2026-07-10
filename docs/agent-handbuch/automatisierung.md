@@ -154,6 +154,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
+| `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `einkauf.bestellung.created_from_supplier` | outbox | `app/api/v1/endpoints/einkauf_kpis.py` |
