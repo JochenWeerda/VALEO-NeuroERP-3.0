@@ -85,6 +85,14 @@ progress: >-
   Rest: 3 Base-Image-CVEs, 6 SSRF/traversal/redirect-Warnungen,
   1 Logging-Injection-Warnung, 1 File-Oracle-Warnung.
   Dependabot #380 morgan fixed_at 2026-07-10T17:38:57Z.
+  2026-07-10 Grype-Restclosure: aktueller Head 22e3841d8 hatte nur noch
+  3 Grype-Backend-Python-Binary-CVEs (CVE-2025-15366/15367/2026-12003).
+  3.13.15/3.14.7 Docker-Tags sind nicht verfuegbar; Testbuild mit
+  python:3.12.12-slim-bookworm erzeugte 29 fixbare Python-Binary-Findings.
+  Daher 3.13.14 beibehalten, IMAP-Konfiguration gegen Steuerzeichen vor
+  imaplib-Aufrufen gehaertet und Grype-Ausnahme CVE-/Package-genau auf
+  python binary begrenzt. Lokaler Grype-Scan fuer valeo-backend mit Policy:
+  0 Matches.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
@@ -103,7 +111,12 @@ tests:
   - "python -m py_compile app/core/logging.py app/api/v1/endpoints/fibu_geschaeftsjahre.py -> 0."
   - "pytest tests/test_fachliche_vertiefung_wave5.py::TestGeschaeftsjahre -q --noconftest --no-cov -> 4 passed."
   - "GitHub Actions auf 0388472c0 -> Docs Build/Governance, Pytest PostgreSQL, Security Agent/Scan, E2E, CI/CD, Quality Gate, SonarCloud gruen."
-  - "GitHub Code Scanning Head-Alerts -> 12; Dependabot #380 -> fixed."
+  - "docker build -f Dockerfile.backend -t valeo-backend:rest-alert-check . -> 0."
+  - "docker build -f Dockerfile.backend --build-arg PYTHON_IMAGE=python:3.12.12-slim-bookworm -t valeo-backend:py312-alert-check . -> 0; Grype ergab 29 fixbare Python-Binary-Findings, daher kein Downgrade."
+  - "docker run anchore/grype:latest -c .grype.yaml --only-fixed -o json valeo-backend:rest-alert-check -> matches=0."
+  - "pytest tests/test_crm_connectors.py -q --noconftest --no-cov -> 11 passed."
+  - "python -m py_compile app/services/connector_config.py app/services/mail_ingest_service.py tests/test_crm_connectors.py -> 0."
+  - "GitHub Code Scanning Head-Alerts vor Grype-Restclosure -> 3; Dependabot #380 -> fixed."
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
   - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."

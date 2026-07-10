@@ -66,8 +66,9 @@ class MailIngestService:
             return {"ok": False, "detail": "Host und Benutzer sind erforderlich.",
                     "host": cfg.resolved_host(), "folders": 0}
         try:
+            cfg.validate_command_values()
             imap = self._connect(cfg)
-        except (imaplib.IMAP4.error, OSError) as exc:
+        except (ValueError, imaplib.IMAP4.error, OSError) as exc:
             return {"ok": False, "detail": f"Login fehlgeschlagen: {exc}",
                     "host": cfg.resolved_host(), "folders": 0}
         try:
@@ -84,8 +85,9 @@ class MailIngestService:
         if not cfg.configured:
             return {"ok": False, "detail": "IMAP ist nicht aktiviert/konfiguriert.", "processed": 0}
         try:
+            cfg.validate_command_values()
             imap = self._connect(cfg)
-        except (imaplib.IMAP4.error, OSError) as exc:
+        except (ValueError, imaplib.IMAP4.error, OSError) as exc:
             return {"ok": False, "detail": f"Login fehlgeschlagen: {exc}", "processed": 0}
 
         state = load_imap_state(self.db, self.tenant_id)

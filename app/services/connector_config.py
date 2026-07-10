@@ -33,6 +33,11 @@ SETTINGS_KEY = "connectors"
 STATE_KEY = "connectors_state"
 
 
+def _reject_imap_control_chars(value: str, field_name: str) -> None:
+    if any(ord(ch) < 32 or ord(ch) == 127 for ch in value):
+        raise ValueError(f"IMAP-Konfiguration enthaelt unzulaessige Steuerzeichen: {field_name}")
+
+
 # ── Tenant-Settings I/O ──────────────────────────────────────────────────────────
 def _read_settings(db: Optional[Session], tenant_id: Optional[str]) -> dict:
     if db is None or not tenant_id:
@@ -122,6 +127,17 @@ class ImapConfig:
 
     def resolved_password(self) -> str:
         return self.password or os.getenv("IMAP_PASSWORD", "")
+
+    def validate_command_values(self) -> None:
+        for field_name, value in (
+            ("host", self.resolved_host()),
+            ("user", self.resolved_user()),
+            ("password", self.resolved_password()),
+            ("inbox", self.inbox),
+            ("sent", self.sent),
+        ):
+            if value:
+                _reject_imap_control_chars(value, field_name)
 
     @property
     def configured(self) -> bool:
