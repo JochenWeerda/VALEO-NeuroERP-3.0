@@ -29,6 +29,10 @@ progress: >-
   nullable Booleans, negative Altbestaende sowie lagerorte. Inventory-Seed schreibt aktuelles
   Warehouse-Schema und ergaenzt SEED-00123/FERT-2007 idempotent. Kontrakte, GAP-Status,
   LkSG, Intrastat und Sanktionslisten wurden gegen lokale Schema-/Route-Drift gehaertet.
+  2026-07-10 Rescan-Nachlauf: Dependabot hatte nach dem Default-Branch-Scan noch
+  python-multipart#288 stale und aiosmtplib#379 offen. python-multipart ist auf origin/main
+  bereits 0.0.31; aiosmtplib im crm-communication-Service auf die gemeldete gepatchte
+  Version 5.1.1 gehoben. Der Push triggert den Dependency-Graph erneut.
 abnahme:
   - "python -m py_compile app/services/articles_service.py app/api/v1/endpoints/articles.py app/seeds/inventory_seed.py app/services/kontrakte_adapters.py app/services/gap_pipeline_service.py app/api/v1/endpoints/compliance_whistleblower_lksg.py"
   - "pytest tests/test_inventory_seed.py -q --noconftest --no-cov -> 3 passed"
@@ -37,6 +41,7 @@ abnahme:
   - "docker compose build backend && docker compose restart backend -> backend healthy"
   - "docker compose exec -T backend python -m app.seeds.inventory_seed -> idempotent"
   - "localhost:3000 API-Matrix: articles, category Saatgut, SEED-00123, kontrakte, gap, lksg, intrastat, sanctions -> 200"
+  - "2026-07-10: python -m py_compile services/crm-communication/**/*.py -> 0"
 risks:
   - "GitHub Dependabot-Alerts koennen bis zum naechsten Default-Branch-Scan weiter als offen angezeigt werden."
-  - "pnpm audit meldet ggf. weitere nicht zu diesen sechs Alerts gehoerende Altlasten; elliptic/jwk-to-pem sind entfernt."
+  - "pnpm audit meldet ggf. weitere nicht zu diesen Alerts gehoerende Altlasten; elliptic/jwk-to-pem sind entfernt."
