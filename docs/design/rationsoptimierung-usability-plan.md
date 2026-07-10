@@ -130,6 +130,32 @@ Async-Handler-Invarianten aus `CLAUDE.md` ein.
 
 ---
 
+## 4a. Zukunftsanforderungen & Schnittstellen (Recherche 2026-07-10)
+
+### Fachliche Norm — GfE 2023 (verbindliche Umstellung)
+- GfE 2023 löst GfE 2001 ab; **Umsetzung ab Oktober 2025**, praxistaugliche Tools
+  (Rationsempfehlungen, Planungsdaten, Kontrolle) bundesweit **ab Winter 2025**.
+- Kern der Umstellung: **NEL → ME**, **nXP → sidP**, ergänzt um **sid-Aminosäuren (sidAA,
+  v. a. Lys/Met)**, **RMD** (ruminale mikrobielle N-Bilanz, ersetzt RNB), moderne
+  Faserbewertung **aNDFom/peNDF**.
+- Referenz: DLG-Merkblatt 504 „Leitfaden zur Proteinbewertung und -versorgung von
+  Milchkühen"; Wettbewerber (dsp-Agrosoft FUTTERplus) setzen exakt dieses Set um.
+- **Konsequenz für uns:** ME ✅ + sidP ✅ vorhanden → wir sind normkonform; der Zukunftspfad
+  ist **sidAA + RMD + peNDF** (Maßnahmen M6/M7 hochziehen), damit wir mit der ab Winter 2025
+  ausgerollten Beratungslandschaft gleichziehen bzw. sie übertreffen.
+
+### Datenschnittstellen (Zukunft)
+| Standard | Zweck | Relevanz | Umsetzungsschritt |
+|----------|-------|----------|-------------------|
+| **agrirouter** (DKE-Data; ISOXML, EFDI, MQTT/HTTP) | herstellerübergreifender Maschinen-/Softwaredatenaustausch | Futtermischwagen-Ist-Mengen, Auftragsdaten | M12 (P3): Import-Adapter Ist-Fütterung |
+| **ICAR-ADE** (Animal Data Exchange, JSON/REST — Nachfolger ISOagriNET) | Tier-/Milchleistungsdaten (LKV/MLP) | Kuh-/Gruppenprofile, Milchleistung automatisch | M13 (P3): LKV/MLP-Import in Kuhprofil |
+| **Labor-Analyseformate** (LKS, LUFA, Eurofins) | Futteranalysen | Futterwerte je Charge/Silo | M14 (P2): Analyse-Import erweitern (Compound-Upload existiert) |
+| **Mischwagen-Systeme** (BvL, Siloking, Strautmann, PTM) | geladene Ist-Mengen | Fütterungscontrolling Soll/Ist | via agrirouter (M12) oder Direkt-CSV |
+
+Prinzip: **JSON/REST-first** (ICAR-ADE-kompatibel), Adapter-Muster statt harter Kopplung;
+Import mündet immer in die bestehenden Backend-Modelle (`CowProfile`, `FeedIngredient`),
+kein paralleler Datenpfad. Schnittstellen sind P2/P3 — erst nach den P0-UX-Hebeln.
+
 ## 5. Erfolgsmessung
 
 - **TS/FM-Umschalter** in Nutzungstest ohne Erklärung bedienbar (Landwirt-Proband).
