@@ -47,8 +47,8 @@ class GeschaeftsjahreCreate(BaseModel):
     groesstes_datum: Optional[date] = None
     warndatum_von: Optional[date] = None
     warndatum_bis: Optional[date] = None
-    anzahl_perioden_ware: int = Field(default=12, ge=1, le=14)
-    anzahl_perioden_fibu: int = Field(default=12, ge=1, le=14)
+    anzahl_perioden_ware: int = Field(default=12, ge=1, le=12)
+    anzahl_perioden_fibu: int = Field(default=12, ge=1, le=12)
     journal_nummernkreis: Optional[str] = None
 
     @model_validator(mode="after")

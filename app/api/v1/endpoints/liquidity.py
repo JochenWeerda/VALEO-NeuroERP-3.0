@@ -81,9 +81,10 @@ async def get_liquidity_overview(
     # Build forecast buckets (30-day intervals)
     prognose: list[LiquidityBucket] = []
     bucket_days = 30
-    for i in range(0, tage_voraus, bucket_days):
+    horizon_days = max(7, min(tage_voraus, 365))
+    for i in range(0, horizon_days, bucket_days):
         von = today + timedelta(days=i)
-        bis = today + timedelta(days=min(i + bucket_days, tage_voraus))
+        bis = today + timedelta(days=min(i + bucket_days, horizon_days))
 
         eingaenge = _safe_float(db.execute(text(
             "SELECT COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) "

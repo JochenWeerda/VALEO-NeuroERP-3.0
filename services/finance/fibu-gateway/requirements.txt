@@ -1,23 +1,19 @@
-fastapi==0.111.0
-uvicorn[standard]==0.30.1
-httpx==0.27.0
 pydantic-settings==2.2.1
-python-dotenv==1.2.2
 fastapi==0.115.4
 uvicorn[standard]==0.32.0
 pydantic==2.9.2
 httpx==0.27.2
--e ../../packages/finance-shared
+-e ../../../packages/finance-shared
 python-multipart==0.0.31
 redis==5.2.0
-asyncio-nats-client==0.12.0
+nats-py==2.6.0
 python-jose[cryptography]==3.4.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.2.2
 alembic==1.13.3
 psycopg2-binary==2.9.10
 pytest==9.0.3
-pytest-asyncio==0.24.0
+pytest-asyncio==1.3.0
 coverage==7.14.1
 pytest-cov==7.1.0
 httpx==0.27.2

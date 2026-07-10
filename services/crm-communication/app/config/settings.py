@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://valeo_dev:valeo_dev@localhost:5432/valeo_neuro_erp"
+    DATABASE_URL: str = "postgresql+asyncpg://valeo_dev@localhost:5432/valeo_neuro_erp"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/5"

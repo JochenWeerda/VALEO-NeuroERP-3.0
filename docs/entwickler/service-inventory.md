@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-06
+last_reviewed: 2026-07-10
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -45,6 +45,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
 | `business_partner_service` | Service layer for BusinessPartner aggregate management. |
+| `calendar_projection_service` | UIX-063 planning calendar projections. |
 | `case_management` | Case Management Service — NC-08 |
 | `closing_checklists_service` | Schemas and helpers for the Closing Checklists domain (FIBU-CLS-01). |
 | `command_handlers_finance` | Domain-Mutationen fuer Process-Kernel-Commands (Finance / AP). |
@@ -89,6 +90,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `einkauf_compat_service` | Service layer for compat einkauf domain routes. |
 | `einvoice_generator` | E-Rechnung XRechnung/ZUGFeRD Generator (EN 16931). |
 | `eric_submission_service` | ELSTER ERiC Submission Service für eBilanz-Übertragung. |
+| `esg_footprint_service` | ESG-CO2e-Fussabdruck je Charge (UIX-082) — auditierbarer Berechnungskern. |
 | `event_schema_registry` | Event Schema Registry — NC-G1 |
 | `external_mock_harness_service` | EXTERNAL-MOCK-HARNESS-001 — Simulierte Responses fuer externe Systeme. |
 | `fast_track` | Fast Track Classifier + Router — NC-E1/E2 |
@@ -208,6 +210,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
+| `studio_validation` | SD-Studio Draft-Validierung (UIX-090) — harte Sicherheitsregeln. |
 | `supply_chain_event_service` | Append-only Ketten-Ereignis-Log + kanonischer Übergabestatus (DOM-SUPPLY-004.2). |
 | `supply_chain_lot_service` | Lager-Lot-Folgeaktionen mit Abweichungsgrund (DOM-SUPPLY-004.3). |
 | `supply_chain_trace_service` | Supply-Chain-Traceability (DOM-SUPPLY-004) — durchgängige, prüfbare Kette. |

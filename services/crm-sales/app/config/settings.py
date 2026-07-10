@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://valeo_dev:valeo_dev@localhost:5432/valeo_neuro_erp"
+        default="postgresql+asyncpg://valeo_dev@localhost:5432/valeo_neuro_erp"
     )
 
     # Service

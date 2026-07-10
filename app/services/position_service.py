@@ -27,6 +27,7 @@ PERIOD_MODE_QUARTER = "Q"
 SEVERITY_GREEN = "GREEN"
 SEVERITY_YELLOW = "YELLOW"
 SEVERITY_RED = "RED"
+MAX_POSITION_PERIODS = 260
 
 
 def _period_key(dt: Optional[datetime], period_mode: str) -> Optional[str]:
@@ -52,6 +53,8 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
         y, m = int(period_from[:4]), int(period_from[5:7])
         y2, m2 = int(period_to[:4]), int(period_to[5:7])
         while (y, m) <= (y2, m2):
+            if len(out) >= MAX_POSITION_PERIODS:
+                raise ValueError("Period range is too large")
             out.append(f"{y}-{m:02d}")
             if m == 12:
                 y, m = y + 1, 1
@@ -63,6 +66,8 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
         y2, w2 = int(period_to[:4]), int(period_to.split("-W")[1])
         y, w = y1, w1
         while (y, w) <= (y2, w2):
+            if len(out) >= MAX_POSITION_PERIODS:
+                raise ValueError("Period range is too large")
             out.append(f"{y}-W{w:02d}")
             w += 1
             if w > 52:
@@ -73,6 +78,8 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
         y2, q2 = int(period_to[:4]), int(period_to.split("-Q")[1])
         y, q = y1, q1
         while (y, q) <= (y2, q2):
+            if len(out) >= MAX_POSITION_PERIODS:
+                raise ValueError("Period range is too large")
             out.append(f"{y}-Q{q}")
             q += 1
             if q > 4:

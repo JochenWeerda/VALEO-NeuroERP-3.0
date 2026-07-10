@@ -69,7 +69,7 @@ async def security_status():
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=6400,
         reload=settings.DEBUG,
         ssl_keyfile=settings.SSL_KEY_FILE,

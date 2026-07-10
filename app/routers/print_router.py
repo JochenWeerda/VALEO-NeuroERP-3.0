@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 from typing import Dict, Any
 import logging
+import re
 
 from app.services.pdf_service import generator
 from app.services.archive_service import archive
@@ -21,6 +22,14 @@ from app.core.dependency_container import container
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/documents", tags=["print"])
+
+_SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_.-]{1,120}$")
+
+
+def _safe_filename_part(value: str, *, field_name: str) -> str:
+    if not _SAFE_FILENAME_RE.fullmatch(value):
+        raise HTTPException(status_code=400, detail=f"Invalid {field_name}")
+    return value
 
 
 @router.get("/{domain}/{doc_id}/print")
@@ -56,10 +65,12 @@ async def print_document(domain: str, doc_id: str) -> FileResponse:
             workflow_repo = WorkflowRepository(wf_db)
             workflow_status = workflow_repo.get_status(workflow_domain, doc_id)
 
+        filename_doc_id = _safe_filename_part(doc_id, field_name="document id")
+
         # PDF generieren
         temp_dir = Path("data/temp")
         temp_dir.mkdir(parents=True, exist_ok=True)
-        pdf_path = temp_dir / f"{doc_id}.pdf"
+        pdf_path = temp_dir / f"{filename_doc_id}.pdf"
 
         generator.render_document(domain, doc, str(pdf_path), workflow_status)
 
@@ -85,7 +96,7 @@ async def print_document(domain: str, doc_id: str) -> FileResponse:
         logger.info(f"Generated and archived PDF for {doc_id}")
 
         return FileResponse(
-            pdf_path, media_type="application/pdf", filename=f"{doc_id}.pdf"
+            pdf_path, media_type="application/pdf", filename=f"{filename_doc_id}.pdf"
         )
     except HTTPException:
         raise

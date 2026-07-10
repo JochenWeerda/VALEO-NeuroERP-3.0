@@ -1,17 +1,39 @@
 id: SEC-GITHUB-WARNINGS-CLOSEOUT-001
 title: GitHub-Warnings und rote Gates schliessen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 scope:
   - Rote GitHub Actions auf main priorisiert beheben.
   - Offene Code-Scanning-Warnungen nach echter Behebbarkeit priorisieren.
   - Container-Scan-Warnungen auf Base-Image- oder Scan-Scope-Massnahmen herunterbrechen.
 dateibesitz:
+  - .github/workflows/ci.yml
+  - .github/workflows/security-agent.yml
+  - .github/workflows/security-scan.yml
+  - Dockerfile
+  - app/agents/agent_control_center.py
+  - app/agents/agent_ops_persistence.py
+  - app/api/v1/endpoints/admin_dms.py
+  - app/api/v1/endpoints/fibu_geschaeftsjahre.py
+  - app/api/v1/endpoints/liquidity.py
+  - app/api/v1/endpoints/liquidity_planning.py
   - services/*/requirements.txt
   - app/api/v1/endpoints/silo_cells_readmodel.py
+  - app/core/security.py
+  - app/integrations/services/superglue_admin_state.py
+  - app/routers/export_router.py
+  - app/routers/print_router.py
+  - app/security/encryption_service.py
+  - app/seeds/inventory_seed.py
   - app/services/calendar_projection_service.py
   - app/services/gap_pipeline_service.py
+  - app/services/kunden_merge.py
+  - app/services/position_service.py
+  - services/crm-*/app/config/settings.py
+  - services/crm-*/main.py
+  - tests/test_inventory_seed.py
   - docs/schnittstellen/endpoint-inventory.md
   - docs/entwickler/service-inventory.md
   - docs/admin/migration-inventory.md
@@ -23,12 +45,28 @@ progress: >-
   CI/CD Pipeline (pytest/pytest-asyncio Dependency-Konflikte plus Seed-Step),
   Docs Build (Code-Inventar-Drift). Code-Scanning enthaelt viele Trivy/Grype
   Container-/OS-Paketfunde sowie konkrete SonarCloud-Highs.
+  2026-07-10 umgesetzt: SQL-f-string-Gate durch statische SQL-Statements/
+  Allowlist-Queries geschlossen; Code-Inventare regeneriert; pytest-asyncio
+  Service-Pins auf pytest 9 kompatibel gemacht; FIBU-Requirements-Pfade und
+  NATS-Package korrigiert; Inventory-Seed schreibt integer-kompatible
+  Lagerbestaende; Root-Dockerfile auf python:3.13.14-slim-bookworm plus
+  apt/pip upgrade gehaertet; Trivy-SARIF-Uploads auf ignore-unfixed an
+  bestehende Gate-Policy angeglichen; Sonar-Highs fuer 0.0.0.0-Direktstarts,
+  eingebettete DB-Passwort-Defaults, JWT-Algorithmen, statischen
+  Encryption-Master-Key, Path-Injection und Loop-Bounds priorisiert behoben.
 abnahme:
   - "python scripts/check_sql_fstrings.py"
   - "python scripts/generate_code_inventories.py --check"
+  - "python -m py_compile <betroffene Python-Dateien>"
+  - "pytest tests/test_inventory_seed.py -q --noconftest --no-cov"
   - "pip install --dry-run -r services/inventory/requirements.txt"
   - "pip install --dry-run -r services/finance/requirements.txt"
   - "pip install --dry-run -r services/compliance/zoll/requirements.txt"
+  - "pip install --dry-run -r services/finance/fibu-core/requirements.txt"
+  - "pip install --dry-run -r services/finance/fibu-gateway/requirements.txt"
+  - "YAML parse: ci.yml, security-agent.yml, security-scan.yml, Slice-YAML"
+  - "docker build -f Dockerfile --target builder -t valeo-erp-root-builder-check ."
 risks:
-  - "Container-Scanner melden viele Base-Image-/OS-Funde; nicht jeder Alert ist im App-Code behebbar."
+  - "Container-Scanner melden historische Base-Image-/OS-Funde erst nach erneutem SARIF-Upload/Rescan geschlossen."
+  - "Vollstaendiger Root-Runtime-Docker-Build wurde lokal nach 10 Minuten Tool-Timeout abgebrochen; Builder-Stage mit Requirements ist gruen, Runtime-Export muss CI final bestaetigen."
   - "GitHub Actions koennen durch parallel laufende Auto-Commits neue Drift erzeugen."

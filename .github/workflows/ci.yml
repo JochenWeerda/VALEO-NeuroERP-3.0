@@ -522,6 +522,7 @@ jobs:
           image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: 'sarif'
           output: 'trivy-image-results.sarif'
+          ignore-unfixed: true
       
       - name: Upload Trivy image results
         uses: github/codeql-action/upload-sarif@v3

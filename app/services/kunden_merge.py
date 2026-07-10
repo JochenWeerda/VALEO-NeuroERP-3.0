@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field, asdict
+from pathlib import Path
 from typing import Any, Optional
 
 # ── Klassifizierung ───────────────────────────────────────────────────────────
@@ -566,6 +567,16 @@ def render_csv(report: dict) -> str:
     return buf.getvalue()
 
 
+def _resolve_report_output_path(output: str) -> Path:
+    """Restrict CLI report writes to the current workspace tree."""
+    path = Path(output).expanduser().resolve()
+    cwd = Path.cwd().resolve()
+    if path != cwd and cwd not in path.parents:
+        raise SystemExit(f"Output path must be inside the current working directory: {output}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -596,7 +607,9 @@ if __name__ == "__main__":
         report = reconcile(db, plz_prefixes)
         rendered = {"md": render_markdown, "json": render_json, "csv": render_csv}[args.format](report)
         if args.output:
-            with open(args.output, "w", encoding="utf-8") as fh:
+            output_path = _resolve_report_output_path(args.output)
+            args.output = str(output_path)
+            with output_path.open("w", encoding="utf-8") as fh:
                 fh.write(rendered)
             print(f"Report → {args.output}")
         else:

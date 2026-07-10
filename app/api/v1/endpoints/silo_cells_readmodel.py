@@ -157,25 +157,24 @@ async def list_silo_cells_twin(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> SiloCellsTwinOut:
-    filters = ["tenant_id = :tenant_id", "is_active = true"]
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    if warehouse_id:
-        filters.append("warehouse_id = :warehouse_id")
-        params["warehouse_id"] = warehouse_id
-    if silo_system_id:
-        filters.append("silo_system_id = :silo_system_id")
-        params["silo_system_id"] = silo_system_id
-    where = " AND ".join(filters)
+    params: dict[str, Any] = {
+        "tenant_id": tenant_id,
+        "warehouse_id": warehouse_id,
+        "silo_system_id": silo_system_id,
+    }
     rows = db.execute(
-        text(f"""
+        text("""
             SELECT id, silo_system_id, warehouse_id, cell_code, name, capacity_kg,
                    current_stock_kg, current_material_id, current_lot_id,
                    legacy_silo_id, qs_status, layout_x, layout_y
             FROM domain_inventory.silo_cells
-            WHERE {where}
+            WHERE tenant_id = :tenant_id
+              AND is_active = true
+              AND (:warehouse_id IS NULL OR warehouse_id = :warehouse_id)
+              AND (:silo_system_id IS NULL OR silo_system_id = :silo_system_id)
             ORDER BY cell_code
             LIMIT :limit
-        """),  # nosec S608 -- where fragments are code-controlled, values parameterized.
+        """),
         {**params, "limit": _MAX_CELLS},
     ).mappings().all()
     response.headers["Cache-Control"] = f"private, max-age={_CACHE_TTL_SECONDS}"

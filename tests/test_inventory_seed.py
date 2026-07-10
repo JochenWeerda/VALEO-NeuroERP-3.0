@@ -55,6 +55,10 @@ def test_ensure_articles_inserts_missing_seed_articles() -> None:
     assert len(inserts) == len(inventory_seed.ARTICLES)
     assert all(call[1]["tenant_id"] == settings.DEFAULT_TENANT_ID for call in inserts)
     assert any(call[1]["article_number"] == "GET-WEI-B" for call in inserts)
+    for _, payload in inserts:
+        assert isinstance(payload["current_stock"], int)
+        assert isinstance(payload["min_stock"], int)
+        assert isinstance(payload["max_stock"], int)
 
 
 def test_ensure_articles_updates_existing_seed_articles_without_duplicate_insert() -> None:

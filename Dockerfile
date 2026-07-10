@@ -1,6 +1,7 @@
 # Multi-stage build for VALEO-NeuroERP Backend
 # Stage 1: Builder
-FROM python:3.11-slim as builder
+ARG PYTHON_IMAGE=python:3.13.14-slim-bookworm
+FROM ${PYTHON_IMAGE} AS builder
 
 WORKDIR /build
 
@@ -9,16 +10,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     libpq-dev \
+    && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime
-FROM python:3.11-slim
+FROM ${PYTHON_IMAGE}
 
 # Create non-root user
 RUN groupadd -r appuser -g 1000 && \
@@ -29,6 +32,8 @@ WORKDIR /app
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
+    && apt-get upgrade -y --no-install-recommends \
+    && python -m pip install --no-cache-dir --upgrade pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python packages from builder

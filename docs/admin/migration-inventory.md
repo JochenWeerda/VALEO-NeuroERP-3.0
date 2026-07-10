@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-06
+last_reviewed: 2026-07-10
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -115,6 +115,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `c137c1d3ba3a_gdpr_requests_table` | — |
 | `c4d5e6f7a8b9_add_harvest_acceptance_extensions_20260217` | add_harvest_acceptance_extensions_20260217 |
 | `c68442f4d6dd_kontrakt_klasse_variante_enum` | kontrakt_klasse_variante_enum |
+| `calendar_items_uix063` | UIX-063: Planungskalender Read-Model und ICS-Token. |
 | `comp_artikel_sperren_20260618` | COMP-SPERR-001: Artikel-Sperr-Engine (artikel_sperren) |
 | `compliance_pcn_audit_20260623` | DOM-COMPLIANCE-004: compliance_pcn_meldungen, pcn_status_log, vvvo/sachkunde registers, artikel_sperre_audit |
 | `con_fixing_matif_20260611` | DOM-CON-004.2 — Fixierungs-Arbeitsraum + MATIF-Marktnotierung. |
@@ -162,6 +163,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ensure_creditors_table_20260304` | ensure creditors table exists after multi-head merges |
 | `ensure_finance_api_tables_20260413` | Ensure finance API tables exist on all upgrade paths |
 | `ensure_journal_entries_table_20260303` | domain_erp.journal_entries und journal_entry_lines anlegen (GoBD) |
+| `entity_notes_uix062` | UIX-062 entity notes for collab rail. |
+| `esg_charge_footprint_uix082` | UIX-082 ESG charge footprint read-model. |
 | `exchange_rates_compat_20260413` | Align exchange rate table with API contract |
 | `external_mock_sessions_20260623` | EXTERNAL-MOCK-HARNESS-001: Mock-Session-Log fuer Dev/Test. |
 | `f49745206879_add_zahlungslauf_kreditoren_table` | add zahlungslauf kreditoren table |
@@ -307,6 +310,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
+| `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |

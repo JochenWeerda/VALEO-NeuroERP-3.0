@@ -33,6 +33,17 @@ logger = logging.getLogger("gap.pipeline")
 
 VALID_COMMANDS = ["aggregate", "match", "snapshot", "hydrate-customers", "import"]
 PIPELINE_STEP_COUNT = 6
+GAP_STATUS_COUNT_QUERIES = {
+    ("gap_payments", "ref_year = :year"): text(
+        "SELECT COUNT(*) FROM gap_payments WHERE ref_year = :year"
+    ),
+    ("customer_potential_snapshot", "ref_year = :year"): text(
+        "SELECT COUNT(*) FROM customer_potential_snapshot WHERE ref_year = :year"
+    ),
+    ("customers", "analytics_gap_ref_year = :year"): text(
+        "SELECT COUNT(*) FROM customers WHERE analytics_gap_ref_year = :year"
+    ),
+}
 
 
 # ── Background workers (thread / BackgroundTask targets) ──────────────────────
@@ -282,10 +293,13 @@ class GapPipelineService:
         }
 
     def _safe_count(self, table: str, where_sql: str, params: dict[str, Any]) -> int:
+        statement = GAP_STATUS_COUNT_QUERIES.get((table, where_sql))
+        if statement is None:
+            raise ValueError(f"Unsupported GAP status count query: {table} / {where_sql}")
         try:
             return int(
                 self.db.execute(
-                    text(f"SELECT COUNT(*) FROM {table} WHERE {where_sql}"),  # noqa: S608 - table names are code-controlled.
+                    statement,
                     params,
                 ).scalar()
                 or 0

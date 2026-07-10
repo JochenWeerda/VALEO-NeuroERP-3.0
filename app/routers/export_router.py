@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 import pandas as pd
 import logging
+import re
 import time
 
 from app.auth.guards import require_scopes
@@ -19,6 +20,16 @@ from app.core.dependency_container import container
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/export", tags=["export"])
+
+_SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9_.-]{1,80}$")
+
+
+def _safe_slug(value: str, *, field_name: str) -> str:
+    if not _SAFE_SLUG_RE.fullmatch(value):
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=400, detail=f"Invalid {field_name}")
+    return value
 
 
 @router.get("/{domain}")
@@ -93,14 +104,21 @@ async def export_documents(
             }
             rows.append(row)
 
+        domain_slug = _safe_slug(domain, field_name="domain")
+        fmt_slug = _safe_slug(fmt.lower(), field_name="format")
+        if fmt_slug not in {"csv", "xlsx"}:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=400, detail="Invalid format")
+
         # Export
         temp_dir = Path("data/temp")
         temp_dir.mkdir(parents=True, exist_ok=True)
-        output_path = temp_dir / f"export_{domain}.{fmt}"
+        output_path = temp_dir / f"export_{domain_slug}.{fmt_slug}"
 
         df = pd.DataFrame(rows)
 
-        if fmt == "xlsx":
+        if fmt_slug == "xlsx":
             df.to_excel(output_path, index=False, engine="openpyxl")
             media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         else:
@@ -108,7 +126,7 @@ async def export_documents(
             media_type = "text/csv"
 
         # Audit-Logging für Export
-        logger.info(f"User {user.get('sub', 'unknown')} exported {len(rows)} {domain} documents as {fmt}")
+        logger.info(f"User {user.get('sub', 'unknown')} exported {len(rows)} {domain_slug} documents as {fmt_slug}")
 
         # SSE Broadcast für Export-Audit
         import asyncio
@@ -119,14 +137,14 @@ async def export_documents(
             "topic": "audit",
             "type": "export",
             "user": user.get('sub', 'unknown'),
-            "domain": domain,
-            "format": fmt,
+            "domain": domain_slug,
+            "format": fmt_slug,
             "count": len(rows),
-            "filename": f"{domain}_export.{fmt}",
+            "filename": f"{domain_slug}_export.{fmt_slug}",
         }))
 
         return FileResponse(
-            output_path, media_type=media_type, filename=f"{domain}_export.{fmt}"
+            output_path, media_type=media_type, filename=f"{domain_slug}_export.{fmt_slug}"
         )
     except Exception as e:
         logger.error(f"Failed to export: {e}")

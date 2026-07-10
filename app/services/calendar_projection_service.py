@@ -583,11 +583,21 @@ class CalendarProjectionService:
 
     def list_items(self, tenant_id: str, from_ts: datetime, to_ts: datetime, layers: list[str] | None = None) -> list[dict[str, Any]]:
         params: dict[str, Any] = {"tenant_id": tenant_id, "from_ts": from_ts, "to_ts": to_ts}
-        layer_sql = ""
         if layers:
             params["layers"] = layers
-            layer_sql = "AND layer = ANY(:layers)"
-        rows = self.db.execute(text(f"""
+            statement = text("""
+                SELECT id, tenant_id, source, source_key, layer, item_type, title,
+                       starts_at, ends_at, all_day, status, object_type, object_id,
+                       object_screen_id, object_route, payload, created_at, updated_at
+                FROM domain_shared.calendar_items
+                WHERE tenant_id = :tenant_id
+                  AND starts_at >= :from_ts
+                  AND starts_at < :to_ts
+                  AND layer = ANY(:layers)
+                ORDER BY starts_at ASC, layer ASC, title ASC
+            """)
+        else:
+            statement = text("""
             SELECT id, tenant_id, source, source_key, layer, item_type, title,
                    starts_at, ends_at, all_day, status, object_type, object_id,
                    object_screen_id, object_route, payload, created_at, updated_at
@@ -595,9 +605,9 @@ class CalendarProjectionService:
             WHERE tenant_id = :tenant_id
               AND starts_at >= :from_ts
               AND starts_at < :to_ts
-              {layer_sql}
             ORDER BY starts_at ASC, layer ASC, title ASC
-        """), params).mappings().all()
+        """)
+        rows = self.db.execute(statement, params).mappings().all()
         return [_as_mapping(row) for row in rows]
 
     def transition_proposed(self, tenant_id: str, item_id: str, status: str) -> dict[str, Any] | None:

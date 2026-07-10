@@ -387,7 +387,7 @@ def ensure_articles(conn, tenant_id: str) -> None:
 
 
 def _article_params(article: dict[str, object], tenant_id: str) -> dict[str, object]:
-    current_stock = article["current_stock"]
+    current_stock = int(article["current_stock"])
     return {
         "id": article["id"],
         "tenant_id": tenant_id,
@@ -400,9 +400,9 @@ def _article_params(article: dict[str, object], tenant_id: str) -> dict[str, obj
         "unit": article["unit"],
         "purchase_price": str(article["purchase_price"]),
         "sales_price": str(article["sales_price"]),
-        "current_stock": str(current_stock),
-        "min_stock": str(article["min_stock"]),
-        "max_stock": str(article["max_stock"]),
+        "current_stock": current_stock,
+        "min_stock": int(article["min_stock"]),
+        "max_stock": int(article["max_stock"]),
         "chargenpflicht": bool(article["chargenpflicht"]),
         "qs_pruefung_erforderlich": bool(article["qs_pruefung_erforderlich"]),
         "lagerorte": json.dumps(["MAIN"]),

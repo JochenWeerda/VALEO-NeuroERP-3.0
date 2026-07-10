@@ -88,6 +88,8 @@ def claims_from_bearer_token(token: str) -> dict[str, Any] | None:
         header = jwt.get_unverified_header(token)
         kid = header.get("kid")
         algorithm = header.get("alg", "RS256")
+        if algorithm not in {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}:
+            return None
         key_data = _find_jwk(keys, kid)
         if key_data is None:
             keys = _get_jwks(jwks_url, force_refresh=True)

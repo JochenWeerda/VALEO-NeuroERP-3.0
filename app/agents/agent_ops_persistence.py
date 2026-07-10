@@ -15,15 +15,23 @@ def _utcnow() -> str:
 
 
 def _state_path() -> Path:
-    return Path(settings.AGENT_OPS_STATE_PATH)
+    return _resolve_runtime_path(settings.AGENT_OPS_STATE_PATH)
 
 
 def _history_path() -> Path:
-    return Path(settings.AGENT_OPS_HISTORY_PATH)
+    return _resolve_runtime_path(settings.AGENT_OPS_HISTORY_PATH)
 
 
 def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _resolve_runtime_path(configured_path: str) -> Path:
+    path = Path(configured_path).expanduser().resolve()
+    cwd = Path.cwd().resolve()
+    if path != cwd and cwd not in path.parents:
+        raise ValueError(f"Runtime path must stay inside the working directory: {configured_path}")
+    return path
 
 
 def _read_state() -> dict[str, Any]:

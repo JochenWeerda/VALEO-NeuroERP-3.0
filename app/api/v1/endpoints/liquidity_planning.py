@@ -148,8 +148,9 @@ def liquidity_forecast(
     cash_start = _get_cash_at_bank(db, tenant_id)
     cumulative = cash_start
 
+    bounded_weeks = max(1, min(weeks, 52))
     result = []
-    for i in range(weeks):
+    for i in range(bounded_weeks):
         ws = _week_start(today, i)
         we = ws + timedelta(days=6)
 
@@ -267,7 +268,8 @@ def _compute_scenario(
     cash_start = _get_cash_at_bank(db, tenant_id)
     cumulative = cash_start
     weeks_out = []
-    for i in range(13):
+    scenario_weeks = 13
+    for i in range(scenario_weeks):
         ws = _week_start(today, i)
         we = ws + timedelta(days=6)
         week_num = i + 1

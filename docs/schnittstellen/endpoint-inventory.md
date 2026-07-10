@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-06
+last_reviewed: 2026-07-10
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -92,6 +92,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `charges` | Charges API - Lot/Batch Management (SQLAlchemy) |
 | `chart_of_accounts` | Chart of Accounts management endpoints |
 | `closing_checklists` | Closing Checklists API |
+| `collab_notes` | Collab Rail notes API (UIX-062). |
 | `collective_documents` | Sammellieferschein / Sammelrechnung — thin-router, sqlalchemy.text(). |
 | `command_catalog` | Command Catalog API — Wave 5 Paket A. |
 | `commodity_positions` | Commodity Position Matrix API: Matrix, Drilldown, KPI, Coverage Monitor, Refresh. |
@@ -160,6 +161,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `ernte_kampagne_api` | — |
 | `ernte_planung` | Ernte-Planungsübersicht — CRUD für Ernteplanung (Schlag, Kultur, Menge, Status). |
 | `ers_settlement` | Einkauf — ERS (Evaluated Receipt Settlement) |
+| `esg_footprint` | UIX-082 ESG charge footprint API. |
 | `etiketten` | Etiketten (Label Printing) API |
 | `exchange_rates` | Exchange Rates API |
 | `export_service` | Central Export Mikroservice |
@@ -285,6 +287,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `periodische_buchungen` | Periodische Buchungen [WZA] — Wiederkehrende FIBU-Buchungen. |
 | `personal` | Personal endpoints for employee list, time entries and timesheets. |
 | `pick_lists` | Pick-list endpoints (l3c-pickliste) |
+| `planung_kalender` | UIX-063 planning calendar API. |
 | `policies` | Policy Manager API Endpoints |
 | `portal_feldbuch` | Portal Feldbuch — Endpoints für den Landwirt im Kundenportal |
 | `portal_innendienst` | — |
@@ -357,6 +360,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `self_billing` | Self-Billing API endpoints. |
 | `service_anfragen` | Service-Anfragen API — CRUD for service requests, feedback, and case closure. |
 | `silo` | Silo capacity and virtual lot endpoints (AGRAR-SILO-01). |
+| `silo_cells_readmodel` | UIX-081 Twin-Panel Read-Model fuer Silozellen. |
 | `silo_operations_api` | — |
 | `silo_target_cell` | WM-SILO-RULE-ENGINE-001 — Zielzellen-Vorschlag API. |
 | `sla_escalation_api` | SLA-Eskalation API — Wave 12 |
@@ -381,6 +385,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `training` | — |
 | `transporte` | Transporte — Fahrerverwaltung, vollständiges CRUD. |
 | `users` | User API endpoints |
+| `ux_overlays` | User-scoped ScreenDefinition overlays (UIX-071). |
+| `ux_telemetry` | UX-Telemetrie — Omnibox-Intent-Signale (UIX-060). |
 | `vat_codes` | VAT Tax Codes Admin API |
 | `vat_return_export` | VAT Return Export API |
 | `verladung` | Verladung — vollständiges CRUD. |

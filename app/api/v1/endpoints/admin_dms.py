@@ -20,8 +20,16 @@ from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 router = APIRouter(prefix="/admin/dms")
 
+def _workspace_path(relative_path: str) -> Path:
+    path = (Path.cwd() / relative_path).resolve()
+    cwd = Path.cwd().resolve()
+    if path != cwd and cwd not in path.parents:
+        raise RuntimeError(f"Runtime path must stay inside the working directory: {relative_path}")
+    return path
+
+
 # Pfad zur DMS-Konfigurationsdatei (identisch mit dms_client.py)
-_CONFIG_PATH = Path("data/config/dms.json")
+_CONFIG_PATH = _workspace_path("data/config/dms.json")
 
 
 # ---------------------------------------------------------------------------
