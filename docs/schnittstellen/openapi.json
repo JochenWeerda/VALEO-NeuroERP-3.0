@@ -35395,6 +35395,8 @@
       "DmsConnectionRequest": {
         "properties": {
           "base": {
+            "format": "uri",
+            "minLength": 1,
             "title": "Base",
             "type": "string"
           },
