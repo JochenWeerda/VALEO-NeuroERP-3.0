@@ -1,13 +1,51 @@
+slice_id: SEC-GITHUB-WARNINGS-CLOSEOUT-001
 id: SEC-GITHUB-WARNINGS-CLOSEOUT-001
 title: GitHub-Warnings und rote Gates schliessen
 owner: Codex
 status: abgeschlossen
+created_at: "2026-07-10"
 started_at: "2026-07-10"
 completed_at: "2026-07-10"
+goal: >-
+  Offene GitHub-Warnings soweit praktisch behebbar schliessen: rote
+  Default-Branch-Actions priorisiert reparieren, konkrete SonarCloud-Highs im
+  Quellcode beheben und Container-Scan-Warnungen auf Base-Image- oder
+  Scan-Scope-Massnahmen herunterbrechen.
 scope:
   - Rote GitHub Actions auf main priorisiert beheben.
   - Offene Code-Scanning-Warnungen nach echter Behebbarkeit priorisieren.
   - Container-Scan-Warnungen auf Base-Image- oder Scan-Scope-Massnahmen herunterbrechen.
+file_ownership:
+  - ".github/workflows/ci.yml"
+  - ".github/workflows/security-agent.yml"
+  - ".github/workflows/security-scan.yml"
+  - "Dockerfile"
+  - "app/agents/agent_control_center.py"
+  - "app/agents/agent_ops_persistence.py"
+  - "app/api/v1/endpoints/admin_dms.py"
+  - "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
+  - "app/api/v1/endpoints/liquidity.py"
+  - "app/api/v1/endpoints/liquidity_planning.py"
+  - "app/api/v1/endpoints/silo_cells_readmodel.py"
+  - "app/core/security.py"
+  - "app/integrations/services/superglue_admin_state.py"
+  - "app/routers/export_router.py"
+  - "app/routers/print_router.py"
+  - "app/security/encryption_service.py"
+  - "app/seeds/inventory_seed.py"
+  - "app/services/calendar_projection_service.py"
+  - "app/services/gap_pipeline_service.py"
+  - "app/services/kunden_merge.py"
+  - "app/services/position_service.py"
+  - "services/*/requirements.txt"
+  - "services/crm-*/app/config/settings.py"
+  - "services/crm-*/main.py"
+  - "tests/test_inventory_seed.py"
+  - "docs/schnittstellen/endpoint-inventory.md"
+  - "docs/entwickler/service-inventory.md"
+  - "docs/admin/migration-inventory.md"
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/SEC-GITHUB-WARNINGS-CLOSEOUT-001.yaml"
 dateibesitz:
   - .github/workflows/ci.yml
   - .github/workflows/security-agent.yml
@@ -54,6 +92,13 @@ progress: >-
   bestehende Gate-Policy angeglichen; Sonar-Highs fuer 0.0.0.0-Direktstarts,
   eingebettete DB-Passwort-Defaults, JWT-Algorithmen, statischen
   Encryption-Master-Key, Path-Injection und Loop-Bounds priorisiert behoben.
+acceptance:
+  - "Quality-Gate-Blocker SQL-f-string ist lokal gruen."
+  - "Docs-Build-Inventare und Agent-Handbuch sind ohne Drift."
+  - "CI/CD-Dependency-Konflikte fuer pytest/pytest-asyncio und FIBU-Subservices sind lokal im Dry-Run aufloesbar."
+  - "Fresh-DB-Inventory-Seed nutzt integer-kompatible Bestaende und ist fokussiert getestet."
+  - "Praktisch behebbare SonarCloud-Highs aus Source-Code sind priorisiert adressiert."
+  - "Container-Scanning meldet per SARIF nur noch fixbare High/Critical-Funde; Root-Dockerfile-Builder baut."
 abnahme:
   - "python scripts/check_sql_fstrings.py"
   - "python scripts/generate_code_inventories.py --check"
@@ -66,7 +111,49 @@ abnahme:
   - "pip install --dry-run -r services/finance/fibu-gateway/requirements.txt"
   - "YAML parse: ci.yml, security-agent.yml, security-scan.yml, Slice-YAML"
   - "docker build -f Dockerfile --target builder -t valeo-erp-root-builder-check ."
+tests:
+  - "python scripts/check_sql_fstrings.py -> 0"
+  - "python scripts/generate_code_inventories.py --check -> 0"
+  - "python scripts/generate_agent_handbuch.py --check -> 0"
+  - "python -m py_compile <betroffene Python-Dateien> -> 0"
+  - "pytest tests/test_inventory_seed.py -q --noconftest --no-cov -> 3 passed"
+  - "pip install --dry-run fuer Inventory/Finance/Zoll/CRM-GDPR/FIBU-Core/FIBU-Gateway -> 0"
+  - "YAML parse fuer geaenderte Workflows und Slice -> 0"
+  - "docker build -f Dockerfile --target builder -t valeo-erp-root-builder-check . -> 0"
 risks:
   - "Container-Scanner melden historische Base-Image-/OS-Funde erst nach erneutem SARIF-Upload/Rescan geschlossen."
   - "Vollstaendiger Root-Runtime-Docker-Build wurde lokal nach 10 Minuten Tool-Timeout abgebrochen; Builder-Stage mit Requirements ist gruen, Runtime-Export muss CI final bestaetigen."
   - "GitHub Actions koennen durch parallel laufende Auto-Commits neue Drift erzeugen."
+external_gates:
+  - "GitHub Actions nach Push: Docs Build, Docs Governance, Quality Gate, CI/CD Pipeline, Security Scan, SonarCloud, Dependency Graph Rescan."
+ai_harness:
+  fachlicher_vertrag: >-
+    GitHub-Warnungen sind produktionsnahe Governance-Signale. Echte
+    Abhaengigkeits-, Seed-, Doku- und Sicherheitsfunde werden im Code behoben;
+    nicht fixbare Container-OS-Funde werden nicht als App-Code-Arbeit maskiert,
+    sondern ueber die Scan-Policy auf fixbare Vendor-Funde begrenzt.
+  architektur_vertrag: >-
+    Aenderungen bleiben in CI-/Security-Konfiguration, Backend-Helpern,
+    Service-Requirements, CRM-Microservice-Defaults und Doku-Inventaren. Keine
+    neuen Domaenen- oder API-Schnittstellen werden eingefuehrt.
+  daten_vertrag: >-
+    Inventory-Seed bleibt idempotent und veraendert nur Seed-eigene Artikel.
+    CRM-DB-Defaults enthalten keine Passwortwerte mehr; echte Credentials
+    muessen ueber Umgebung oder Secret-Store kommen.
+  security_vertrag: >-
+    JWT-OIDC akzeptiert keine Algorithmen aus dem Token-Header ausser einer
+    festen asymmetrischen Allowlist. Runtime-/Export-/Report-Pfade werden
+    begrenzt. Der Encryption-Master-Key darf nicht aus einem statischen
+    Repository-Seed stammen.
+  betriebs_vertrag: >-
+    Direkte lokale Microservice-Starts binden nur auf Loopback. Container-
+    Starts bleiben ueber Dockerfile/Compose gesondert erreichbar. Nicht fixbare
+    Container-CVEs werden nicht als blockierende Deploy-Gates behandelt, solange
+    kein Vendor-Fix existiert.
+  dokumentations_vertrag: >-
+    Code-Inventare, Agent-Handbuch und Active Workboard muessen den geaenderten
+    API-/Service-/CI-Stand widerspiegeln; Slice-YAML folgt dem AI-Harness-
+    Pflichtschema.
+  test_vertrag: >-
+    Lokale Gates decken die zuvor roten CI-Ursachen ab; GitHub Actions und
+    Code-Scanning muessen nach Push die Default-Branch-Schliessung bestaetigen.
