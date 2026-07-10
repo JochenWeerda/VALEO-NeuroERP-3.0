@@ -81,10 +81,10 @@ progress: >-
   2026-07-10 Restnachlauf: Log-Redaction-Pattern scannerfreundlich
   gesplittet und FiBu-Geschaeftsjahre-Periodenloop mit expliziter 12er-
   Obergrenze versehen.
-  2026-07-10 finaler Sonar-Rescan 0388472c0: Head-Alerts 13 (von 102).
+  2026-07-10 finaler Sonar-Rescan 5fce99b22: Head-Alerts 12 (von 102).
   Rest: 3 Base-Image-CVEs, 6 SSRF/traversal/redirect-Warnungen,
-  1 Logging-Injection-Warnung, 1 File-Oracle-Warnung, 1 Loop-False-Positive
-  FIBU-Jahre. Dependabot #380 morgan fixed_at 2026-07-10T17:38:57Z.
+  1 Logging-Injection-Warnung, 1 File-Oracle-Warnung.
+  Dependabot #380 morgan fixed_at 2026-07-10T17:38:57Z.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
@@ -103,7 +103,7 @@ tests:
   - "python -m py_compile app/core/logging.py app/api/v1/endpoints/fibu_geschaeftsjahre.py -> 0."
   - "pytest tests/test_fachliche_vertiefung_wave5.py::TestGeschaeftsjahre -q --noconftest --no-cov -> 4 passed."
   - "GitHub Actions auf 0388472c0 -> Docs Build/Governance, Pytest PostgreSQL, Security Agent/Scan, E2E, CI/CD, Quality Gate, SonarCloud gruen."
-  - "GitHub Code Scanning Head-Alerts -> 13; Dependabot #380 -> fixed."
+  - "GitHub Code Scanning Head-Alerts -> 12; Dependabot #380 -> fixed."
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
   - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."
