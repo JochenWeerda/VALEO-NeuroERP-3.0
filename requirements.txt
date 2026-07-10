@@ -5,6 +5,7 @@
 fastapi==0.136.3
 uvicorn[standard]==0.24.0
 starlette==1.3.1
+# Keep at or above 0.0.31; Dependabot alert #288 flags older parser builds.
 python-multipart==0.0.31
 
 # Database and ORM

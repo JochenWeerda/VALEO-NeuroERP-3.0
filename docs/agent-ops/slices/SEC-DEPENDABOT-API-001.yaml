@@ -32,7 +32,9 @@ progress: >-
   2026-07-10 Rescan-Nachlauf: Dependabot hatte nach dem Default-Branch-Scan noch
   python-multipart#288 stale und aiosmtplib#379 offen. python-multipart ist auf origin/main
   bereits 0.0.31; aiosmtplib im crm-communication-Service auf die gemeldete gepatchte
-  Version 5.1.1 gehoben. Der Push triggert den Dependency-Graph erneut.
+  Version 5.1.1 gehoben. Der Push triggert den Dependency-Graph erneut. Nach Scan blieb
+  nur python-multipart#288 stale; root requirements.txt gezielt getouched, damit GitHub
+  das betroffene Manifest neu einliest.
 abnahme:
   - "python -m py_compile app/services/articles_service.py app/api/v1/endpoints/articles.py app/seeds/inventory_seed.py app/services/kontrakte_adapters.py app/services/gap_pipeline_service.py app/api/v1/endpoints/compliance_whistleblower_lksg.py"
   - "pytest tests/test_inventory_seed.py -q --noconftest --no-cov -> 3 passed"
