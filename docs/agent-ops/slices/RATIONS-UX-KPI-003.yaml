@@ -2,9 +2,10 @@ slice_id: RATIONS-UX-KPI-003
 id: RATIONS-UX-KPI-003
 title: Sticky Kennzahlen-Trio in der Rations-Workbench
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-10"
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 goal: >-
   Fodjan-Muster: ein bei jeder Rationsansicht sichtbares Kennzahlen-Trio
   (Kosten/Kuh/Tag, IOFC, Futtergesundheit) als sticky Ampel-Leiste oben in der
@@ -27,6 +28,12 @@ progress: >-
   rechten aside-Spalte (kpi-bar). Ergebnis traegt total_cost_eur_day,
   forage_performance/ecm_supply_kg_day (Milch), warnings und constraint_status/
   dlg_indicators als Basis fuer den Gesundheits-Proxy.
+  2026-07-10 umgesetzt: Helfer rationHealthAmpel (rot bei Solver != optimal oder
+  hart verletzter Grenze, gelb bei weicher Verletzung/Warnungen, sonst gruen) und
+  Komponente RationSummaryBar (sticky top-0 oben in der Workbench-Hauptspalte) mit
+  drei Kacheln: Kosten/Kuh/Tag, IOFC (Milch x Milchpreis - Futter), Futtergesundheit
+  als Ampel. Rendert nur bei vorhandenem Ergebnis. Verifiziert: tsc --noEmit 0,
+  eslint 0, pnpm run build 0.
 acceptance:
   - "Sticky Leiste oben in der Workbench zeigt Kosten/Kuh/Tag, IOFC und Futtergesundheit."
   - "Futtergesundheit als Ampel (gruen/gelb/rot) aus Warnungen/Constraints/Status."

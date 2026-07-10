@@ -3033,6 +3033,9 @@ function Workbench({
 
       {/* ── Mitte: Rationstabelle ── */}
       <main className="flex flex-col gap-[15px]">
+        {/* Sticky Kennzahlen-Trio (Fodjan-Muster): immer sichtbar beim Scrollen */}
+        <RationSummaryBar result={result} milkPriceEur={wizardData?.milkPriceEur ?? 0.44} />
+
         {/* Toolbar */}
         <div className="flex gap-[10px] flex-wrap">
           <button
@@ -4367,6 +4370,54 @@ function IntentSuggestionsPanel({
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Sticky Kennzahlen-Trio (Fodjan-Muster): Kosten · IOFC · Futtergesundheit
+// ---------------------------------------------------------------------------
+
+/**
+ * Futtergesundheit als transparenter Ampel-Proxy (KEIN exakter Score):
+ * rot bei nicht-optimalem Solver-Status oder hart verletzter Grenze,
+ * gelb bei weicher Verletzung oder Warnungen, sonst grün.
+ */
+function rationHealthAmpel(r: OptimizationResult): { state: AmpelState; label: string } {
+  const cs = r.constraint_status ?? []
+  const hardViolated = r.status !== 'optimal' || cs.some((c) => c.status === 'hard_violated')
+  const softViolated = cs.some((c) => c.status === 'violated')
+  const warnings = r.warnings?.length ?? 0
+  if (hardViolated) return { state: 'error', label: 'Prüfen' }
+  if (softViolated || warnings > 0) return { state: 'warn', label: 'Grenzwertig' }
+  return { state: 'ok', label: 'Gut' }
+}
+
+/** Immer sichtbares Kennzahlen-Trio oben in der Workbench (sticky). */
+function RationSummaryBar({ result, milkPriceEur }: { result: OptimizationResult | null; milkPriceEur: number }) {
+  if (!result) return null
+  const k = intentKpis(result, milkPriceEur)
+  const health = rationHealthAmpel(result)
+
+  const tile = (label: string, value: string, sub: string, ampel?: AmpelState) => (
+    <div className="flex-1 min-w-[120px] px-3 py-2">
+      <div className="text-[10px] uppercase font-bold tracking-[0.4px] flex items-center gap-1.5" style={{ color: C.muted }}>
+        {ampel && ampelDot(ampel)}
+        {label}
+      </div>
+      <div className="text-lg font-bold leading-tight" style={{ color: C.dark }}>{value}</div>
+      <div className="text-[10px]" style={{ color: C.muted }}>{sub}</div>
+    </div>
+  )
+
+  return (
+    <div
+      className="sticky top-0 z-20 flex flex-wrap items-stretch rounded-[6px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] divide-x"
+      style={{ background: C.card, borderColor: C.border }}
+    >
+      {tile('Kosten', `${fmt(k.cost, 2)} €`, 'je Kuh · Tag')}
+      {tile('IOFC', `${fmt(k.iofc, 2)} €`, `Milcherlös − Futter (${fmt(milkPriceEur, 2)} €/kg)`)}
+      {tile('Futtergesundheit', health.label, `${result.warnings?.length ?? 0} Warnung(en)`, health.state)}
     </div>
   )
 }

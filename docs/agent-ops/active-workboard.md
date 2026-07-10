@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RATIONS-UX-KPI-003 Sticky Kennzahlen-Trio in der Rations-Workbench - in Arbeit 2026-07-10
+## RATIONS-UX-KPI-003 Sticky Kennzahlen-Trio in der Rations-Workbench - abgeschlossen 2026-07-10
 
-**Owner:** Codex. **Stand:** in Arbeit 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Muster: sticky Kennzahlen-Trio (Kosten/Kuh/Tag, IOFC, Futtergesundheit) oben in der Workbench-Hauptspalte fuer sofortiges Wirtschafts-/Gesundheits-Feedback. Kosten/IOFC aus dem Ergebnis; Futtergesundheit als transparenter Ampel-Proxy (Warnungen/Constraints/Solver-Status), kein neuer Score. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Muster umgesetzt: sticky Kennzahlen-Trio (`RationSummaryBar`, sticky top-0 oben in der Workbench-Hauptspalte) mit Kosten/Kuh/Tag, IOFC (Milch x Milchpreis - Futter) und Futtergesundheit als Ampel. Futtergesundheit = transparenter Proxy (`rationHealthAmpel`: rot bei Solver != optimal oder harter Grenzverletzung, gelb bei weicher Verletzung/Warnungen, sonst gruen), kein neuer numerischer Score. Rendert nur bei vorhandenem Ergebnis. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.
 
 ## RATIONS-UX-INTENT-002 Benannte Intent-Vorschlaege mit Vorschau-Delta - abgeschlossen 2026-07-10
 
