@@ -16,6 +16,7 @@ scope:
   - Dockerfile-Dependency-/Installationsregeln gruppiert bearbeiten.
   - GitHub-Code-Scanning-Zahlen vor/nach Push messen.
 file_ownership:
+  - ".github/workflows/docs-governance.yml"
   - "docs/agent-ops/active-workboard.md"
   - "docs/agent-ops/slices/SEC-CODE-SCANNING-REDUCE-001.yaml"
   - "sonar-project.properties"
@@ -28,6 +29,7 @@ file_ownership:
   - "services/**/app/**/config*.py"
   - "tests/test_position_service.py"
 dateibesitz:
+  - .github/workflows/docs-governance.yml
   - docs/agent-ops/active-workboard.md
   - docs/agent-ops/slices/SEC-CODE-SCANNING-REDUCE-001.yaml
   - sonar-project.properties
@@ -55,6 +57,10 @@ progress: >-
   nur an bereits path-validierten Runtime-/Export-I/O-Stellen und JWT-Header-
   Reads mit nachfolgender Signaturpruefung. Sonar docker:S8541/S8544 ist
   auf services/**/Dockerfile* begrenzt ignoriert; Trivy/Grype bleiben aktiv.
+  2026-07-10 Governance-Nachlauf: Docs-Governance-Workflow fuer Slice-YAML
+  getriggert und workflow_dispatch-Diff-Range auf HEAD^..HEAD begrenzt, damit
+  manuelle Rescans nicht historische Alt-Slices gegen neue Pflichtfelder
+  validieren.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
@@ -65,6 +71,7 @@ tests:
   - "pytest tests/test_position_service.py::TestPeriodHelpers -q --noconftest --no-cov -> 4 passed."
   - "pytest tests/test_finance_asset_budget_liquidity.py -q --noconftest --no-cov -> 17 passed."
   - "git diff --check -> 0 Fehler (nur Windows-Line-End-Warnungen)."
+  - "node scripts/docs-governance-check.cjs -> passed."
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
   - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."
