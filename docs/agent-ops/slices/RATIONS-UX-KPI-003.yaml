@@ -1,0 +1,62 @@
+slice_id: RATIONS-UX-KPI-003
+id: RATIONS-UX-KPI-003
+title: Sticky Kennzahlen-Trio in der Rations-Workbench
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-10"
+started_at: "2026-07-10"
+goal: >-
+  Fodjan-Muster: ein bei jeder Rationsansicht sichtbares Kennzahlen-Trio
+  (Kosten/Kuh/Tag, IOFC, Futtergesundheit) als sticky Ampel-Leiste oben in der
+  Workbench-Hauptspalte. Gibt sofortiges Wirtschafts- und Gesundheits-Feedback,
+  ohne in die rechte KPI-Spalte scrollen zu muessen.
+scope:
+  - Sticky Summary-Bar oben in der Workbench-Hauptspalte.
+  - Kosten/Kuh/Tag und IOFC aus dem Ergebnis; Futtergesundheit als Ampel-Proxy.
+  - Ampellogik gruen/gelb/rot; kein neuer API-/Solver-Kontrakt.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-UX-KPI-003.yaml"
+  - "packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-UX-KPI-003.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+progress: >-
+  2026-07-10 reserviert. Ausgangslage: Workbench hat KPI-Kacheln nur in der
+  rechten aside-Spalte (kpi-bar). Ergebnis traegt total_cost_eur_day,
+  forage_performance/ecm_supply_kg_day (Milch), warnings und constraint_status/
+  dlg_indicators als Basis fuer den Gesundheits-Proxy.
+acceptance:
+  - "Sticky Leiste oben in der Workbench zeigt Kosten/Kuh/Tag, IOFC und Futtergesundheit."
+  - "Futtergesundheit als Ampel (gruen/gelb/rot) aus Warnungen/Constraints/Status."
+  - "Leiste bleibt beim Scrollen der Hauptspalte oben sichtbar (sticky)."
+  - "Keine Anzeige ohne Ergebnis (kein leerer Zustand)."
+tests:
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "eslint der geaenderten Datei -> 0 neue Fehler."
+  - "pnpm run build -> 0."
+risks:
+  - "Gesundheits-Proxy ist eine Naeherung; darf nicht als exakter Score missverstanden werden (Beschriftung)."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Kosten und IOFC stammen aus dem Solver-Ergebnis (total_cost_eur_day, Milch x
+    Milchpreis). Futtergesundheit ist ein transparenter Ampel-Proxy aus Warnungen,
+    Constraint-Status und Solver-Status, kein neuer numerischer Bewertungsscore.
+  architektur_vertrag: >-
+    Reine Frontend-Anzeige in der bestehenden Workbench-Komponente. Kein neuer
+    Service, keine Route, kein API-/Solver-Kontrakt.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt ausschliesslich bereits vorhandene Ergebnisfelder.
+  security_vertrag: >-
+    Keine neuen Eingaben, kein Auth-/Tenant-Bezug; reine Darstellung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung; Frontend-Build-Pfad unveraendert.
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren die Ampel-Herleitung und den
+    Proxy-Charakter der Futtergesundheit.
+  test_vertrag: >-
+    tsc --noEmit, eslint und pnpm run build gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.

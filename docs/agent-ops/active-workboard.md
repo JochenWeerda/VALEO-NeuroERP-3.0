@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATIONS-UX-KPI-003 Sticky Kennzahlen-Trio in der Rations-Workbench - in Arbeit 2026-07-10
+
+**Owner:** Codex. **Stand:** in Arbeit 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Muster: sticky Kennzahlen-Trio (Kosten/Kuh/Tag, IOFC, Futtergesundheit) oben in der Workbench-Hauptspalte fuer sofortiges Wirtschafts-/Gesundheits-Feedback. Kosten/IOFC aus dem Ergebnis; Futtergesundheit als transparenter Ampel-Proxy (Warnungen/Constraints/Solver-Status), kein neuer Score. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.
+
 ## RATIONS-UX-INTENT-002 Benannte Intent-Vorschlaege mit Vorschau-Delta - abgeschlossen 2026-07-10
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Muster umgesetzt: 5 benannte Rations-Intents (Guenstiger, Mehr Milch, Weniger Stickstoff, Gesund & Guenstiger, Gesuender) als Ein-Klick-Vorschlaege ueber der Rationstabelle in der Workbench. Jeder Intent rechnet per `previewMutation` eine Vorschau-Ration (WizardData-Override aus mode+priorityWeights+softGoals) und zeigt eine Delta-Karte (Kosten, Milch, IOFC, Warnungen aktiv vs. neu); "Uebernehmen" aktiviert den Vorschlag, "Verwerfen" laesst die aktive Ration unveraendert. Pending-Guard, Fehler-Feedback. Optimize-Request-Builder als Modul-Funktion `runOptimizeForWizard` extrahiert (Haupt- und Vorschau-Mutation geteilt). Intents aendern nur Zielrichtung/weiche Gewichte; harte GfE/DLG-Grenzen unangetastet. Prioritaets-Schieber bleiben als Feinsteuerung. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0 (rationsoptimierung-Bundle kompiliert).
