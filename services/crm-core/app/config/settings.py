@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="CRM_CORE_", case_sensitive=False)
 
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 5600
     DEBUG: bool = True
 
@@ -23,7 +23,6 @@ class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn = PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username="valeo_dev",
-        password="REDACTED_PASSWORD",
         host="postgres",
         port=5432,
         path="/valeo_neuro_erp",

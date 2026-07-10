@@ -85,7 +85,7 @@ def claims_from_bearer_token(token: str) -> dict[str, Any] | None:
 
     try:
         keys = _get_jwks(jwks_url)
-        header = jwt.get_unverified_header(token)
+        header = jwt.get_unverified_header(token)  # NOSONAR - only kid/alg are read before signed JWT validation.
         kid = header.get("kid")
         algorithm = header.get("alg", "RS256")
         if algorithm not in {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}:

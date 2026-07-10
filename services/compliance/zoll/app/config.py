@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="ZOLL_", case_sensitive=True)
 
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 5300
     DEBUG: bool = False
 
@@ -27,9 +27,8 @@ class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn = PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username="valeo_compliance",
-        password="REDACTED_PASSWORD",
         host="postgres-events",
-        port="5432",
+        port=5432,
         path="/valeo_compliance",
     )
     DB_ECHO: bool = False
@@ -60,7 +59,7 @@ class Settings(BaseSettings):
     EU_API_KEY: str | None = None
 
     API_URL: AnyHttpUrl = AnyHttpUrl.build(scheme="http", host="localhost", port=8000)
-    API_KEY: str = "your_api_key"
+    API_KEY: str | None = None
 
 
 @lru_cache

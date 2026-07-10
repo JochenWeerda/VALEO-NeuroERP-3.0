@@ -1,16 +1,26 @@
 """Application settings."""
 
-from pydantic import Field
+from pydantic import Field, PostgresDsn
 from pydantic_settings import BaseSettings
+
+
+def _default_database_url() -> str:
+    return str(
+        PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username="valeo_dev",
+            host="localhost",
+            port=5432,
+            path="/valeo_neuro_erp",
+        )
+    )
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://valeo_dev@localhost:5432/valeo_neuro_erp"
-    )
+    DATABASE_URL: str = Field(default_factory=_default_database_url)
     
     # Service
     SERVICE_NAME: str = Field(default="crm-consent")

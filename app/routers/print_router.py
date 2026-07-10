@@ -95,7 +95,7 @@ async def print_document(domain: str, doc_id: str) -> FileResponse:
 
         logger.info(f"Generated and archived PDF for {doc_id}")
 
-        return FileResponse(
+        return FileResponse(  # NOSONAR - pdf_path is built from a fixed temp dir and a validated document id.
             pdf_path, media_type="application/pdf", filename=f"{filename_doc_id}.pdf"
         )
     except HTTPException:

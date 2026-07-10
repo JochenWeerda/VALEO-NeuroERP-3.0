@@ -5,8 +5,19 @@ Centralized configuration management using Pydantic settings
 
 import json
 from typing import Any, List, Optional, Union
-from pydantic import Field, field_validator
+from pydantic import Field, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _default_database_url() -> str:
+    return str(
+        PostgresDsn.build(
+            scheme="postgresql",
+            host="postgres",
+            port=5432,
+            path="/valeo_neuro_erp",
+        )
+    )
 
 
 class Settings(BaseSettings):
@@ -23,7 +34,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
 
     # Server Configuration
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 8000
     APP_ENV: str = "development"
     DEBUG: bool = False
@@ -68,9 +79,7 @@ class Settings(BaseSettings):
     # Database Configuration
     # HINWEIS: In Docker-Umgebung muss host="postgres" sein (Service-Name aus docker-compose.yml)
     # In lokalen Umgebung ohne Docker kann 127.0.0.1 verwendet werden
-    DATABASE_URL: str = Field(
-        default="postgresql://CHANGE_ME_USER:CHANGE_ME_PASSWORD@postgres:5432/CHANGE_ME_DB"
-    )
+    DATABASE_URL: str = Field(default_factory=_default_database_url)
     DATABASE_CONNECT_ARGS: dict = {}
 
     # Redis Configuration

@@ -2,7 +2,20 @@
 DMS Adapter Configuration
 """
 from pydantic_settings import BaseSettings
+from pydantic import PostgresDsn
 from functools import lru_cache
+
+
+def _default_database_url() -> str:
+    return str(
+        PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username="postgres",
+            host="postgres",
+            port=5432,
+            path="/neuroerp",
+        )
+    )
 
 
 class Settings(BaseSettings):
@@ -18,7 +31,7 @@ class Settings(BaseSettings):
     PAPERLESS_TIMEOUT: int = 30
     
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@postgres:5432/neuroerp"
+    DATABASE_URL: str = _default_database_url()
     
     # Security
     JWT_SECRET: str = "change-me-in-production"

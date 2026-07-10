@@ -19,7 +19,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 8600
     DEBUG: bool = False
 

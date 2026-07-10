@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SEC-CODE-SCANNING-REDUCE-001 Code-Scanning-Restalerts reduzieren - reserviert 2026-07-10
+## SEC-CODE-SCANNING-REDUCE-001 Code-Scanning-Restalerts reduzieren - abgeschlossen 2026-07-10
 
-**Owner:** Codex. **Stand:** reserviert 2026-07-10. **Ziel:** Verbleibende GitHub-Code-Scanning-Alerts auf aktuellem `main` priorisiert reduzieren: zuerst SonarCloud-Highs mit App-Code-Bezug, danach breit wirkende Dockerfile-Regeln und belegte False-Positive-Suppressions. **Dateibesitz:** betroffene Service-`main.py`/Settings, Dockerfiles, Security-/Pathguard-Helper, Sonar-/Security-Konfiguration, Slice-YAML und Workboard. **Abnahme:** aktuelle Head-Alerts sinken messbar; GitHub Actions bleiben gruen; Dependabot/Secret-Scanning bleiben 0 offen.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Restalerts priorisiert reduziert: statische PostgreSQL-Credential-Defaults und globale `0.0.0.0`-Direktstart-Defaults aus betroffenen Backend-/Service-Configs entfernt, Position-/Liquidity-Loops explizit statisch begrenzt, belegte `NOSONAR`-Hinweise nur an bereits validierten Runtime-/Export-Pfaden und JWT-Header-Reads mit nachfolgender Signaturpruefung gesetzt. Sonar `docker:S8541/S8544` ist eng auf `services/**/Dockerfile*` ignoriert, waehrend Trivy/Grype/Dependency-Gates aktiv bleiben. **Dateibesitz:** betroffene Service-Settings/Configs, `app/core/config.py`, `app/core/security.py`, Agent-Ops-/Superglue-/DMS-/Export-/Print-Pathguard-Stellen, `app/services/position_service.py`, Liquidity-Endpunkte, `sonar-project.properties`, `tests/test_position_service.py`, Slice-YAML und Workboard. **Abnahme:** `python -m py_compile` fuer 33 betroffene Python-Dateien -> ok; Config-Import/DSN-Builder-Check fuer 17 Config-Module -> ok; `pytest tests/test_position_service.py::TestPeriodHelpers -q --noconftest --no-cov` -> 4 passed; `pytest tests/test_finance_asset_budget_liquidity.py -q --noconftest --no-cov` -> 17 passed; `git diff --check` -> 0 Fehler. **Grenze:** GitHub-Code-Scanning-Zahlen sinken erst nach Sonar-/SARIF-Rescan des gepushten Heads messbar.
 
 ## SEC-GITHUB-WARNINGS-CLOSEOUT-001 GitHub-Warnings und rote Gates schliessen - abgeschlossen 2026-07-10
 

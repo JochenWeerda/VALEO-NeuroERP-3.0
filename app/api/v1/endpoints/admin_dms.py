@@ -238,7 +238,10 @@ async def bootstrap_dms(body: DmsConnectionRequest):
     config["document_types"] = doc_type_ids
     config["metadata_types"] = meta_type_ids
     try:
-        _CONFIG_PATH.write_text(json.dumps(config, ensure_ascii=False, indent=2))
+        _CONFIG_PATH.write_text(  # NOSONAR - _CONFIG_PATH is anchored under the working directory.
+            json.dumps(config, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
     except Exception as exc:
         logger.error("Failed to write DMS config: %s", exc)
         raise HTTPException(status_code=500, detail=f"Konfiguration konnte nicht gespeichert werden: {exc}")

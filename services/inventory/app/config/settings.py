@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     )
 
     # Server
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 5400
     DEBUG: bool = False
 
@@ -45,7 +45,6 @@ class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn = PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username="valeo_inventory",
-        password="valeo_inventory_2024!",
         host="postgres-inventory",
         port=5432,
         path="/valeo_inventory",

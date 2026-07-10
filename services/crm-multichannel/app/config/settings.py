@@ -5,14 +5,27 @@ Settings for CRM Multi-Channel Integration Service.
 import os
 from typing import Optional
 
+from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
+
+
+def _default_database_url() -> str:
+    return str(
+        PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username="valeo_dev",
+            host="localhost",
+            port=5432,
+            path="/valeo_neuro_erp",
+        )
+    )
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://valeo_dev@localhost:5432/valeo_neuro_erp"
+    DATABASE_URL: str = _default_database_url()
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/9"

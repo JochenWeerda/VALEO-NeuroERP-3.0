@@ -143,7 +143,7 @@ async def export_documents(
             "filename": f"{domain_slug}_export.{fmt_slug}",
         }))
 
-        return FileResponse(
+        return FileResponse(  # NOSONAR - output_path is built from a fixed temp dir and validated slugs.
             output_path, media_type=media_type, filename=f"{domain_slug}_export.{fmt_slug}"
         )
     except Exception as e:

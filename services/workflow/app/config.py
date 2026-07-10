@@ -3,15 +3,27 @@ Konfiguration für den Workflow-Service.
 """
 
 from typing import List
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, PostgresDsn
 from pydantic_settings import BaseSettings
+
+
+def _default_database_url() -> str:
+    return str(
+        PostgresDsn.build(
+            scheme="postgresql",
+            username="valeo_dev",
+            host="postgres-events",
+            port=5432,
+            path="/valeo_events",
+        )
+    )
 
 
 class Settings(BaseSettings):
     """Serviceweite Einstellungen."""
 
     # Server
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 5100
     DEBUG: bool = True
 
@@ -26,7 +38,7 @@ class Settings(BaseSettings):
     METRICS_ENABLED: bool = True
 
     # Datenbank
-    DATABASE_URL: str = "postgresql://valeo_dev:REDACTED_PASSWORD@postgres-events:5432/valeo_events"
+    DATABASE_URL: str = _default_database_url()
 
     # Eventbus (NATS)
     EVENT_BUS_ENABLED: bool = True

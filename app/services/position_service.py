@@ -52,38 +52,44 @@ def _periods_between(period_from: str, period_to: str, period_mode: str) -> list
     if period_mode == PERIOD_MODE_MONTH:
         y, m = int(period_from[:4]), int(period_from[5:7])
         y2, m2 = int(period_to[:4]), int(period_to[5:7])
-        while (y, m) <= (y2, m2):
-            if len(out) >= MAX_POSITION_PERIODS:
-                raise ValueError("Period range is too large")
+        for _ in range(MAX_POSITION_PERIODS):
+            if (y, m) > (y2, m2):
+                break
             out.append(f"{y}-{m:02d}")
             if m == 12:
                 y, m = y + 1, 1
             else:
                 m += 1
+        if (y, m) <= (y2, m2):
+            raise ValueError("Period range is too large")
     elif period_mode == PERIOD_MODE_WEEK:
         # Parse YYYY-Wnn
         y1, w1 = int(period_from[:4]), int(period_from.split("-W")[1])
         y2, w2 = int(period_to[:4]), int(period_to.split("-W")[1])
         y, w = y1, w1
-        while (y, w) <= (y2, w2):
-            if len(out) >= MAX_POSITION_PERIODS:
-                raise ValueError("Period range is too large")
+        for _ in range(MAX_POSITION_PERIODS):
+            if (y, w) > (y2, w2):
+                break
             out.append(f"{y}-W{w:02d}")
             w += 1
             if w > 52:
                 y, w = y + 1, 1
+        if (y, w) <= (y2, w2):
+            raise ValueError("Period range is too large")
     else:
         # Quarter: YYYY-Qn
         y1, q1 = int(period_from[:4]), int(period_from.split("-Q")[1])
         y2, q2 = int(period_to[:4]), int(period_to.split("-Q")[1])
         y, q = y1, q1
-        while (y, q) <= (y2, q2):
-            if len(out) >= MAX_POSITION_PERIODS:
-                raise ValueError("Period range is too large")
+        for _ in range(MAX_POSITION_PERIODS):
+            if (y, q) > (y2, q2):
+                break
             out.append(f"{y}-Q{q}")
             q += 1
             if q > 4:
                 y, q = y + 1, 1
+        if (y, q) <= (y2, q2):
+            raise ValueError("Period range is too large")
     return out
 
 

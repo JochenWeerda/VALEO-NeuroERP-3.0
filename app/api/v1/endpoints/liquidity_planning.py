@@ -25,6 +25,7 @@ from app.api.v1.schemas.liquidity_planning_schemas import LiquidityPlanningOut
 router = APIRouter(prefix="/finance/liquidity", tags=["finance", "liquidity"])
 
 _TABLE_SCENARIOS = "domain_finance.liquidity_scenarios"
+MAX_LIQUIDITY_FORECAST_WEEKS = 52
 
 
 def _503(hint: str = "alembic upgrade head") -> HTTPException:
@@ -148,9 +149,11 @@ def liquidity_forecast(
     cash_start = _get_cash_at_bank(db, tenant_id)
     cumulative = cash_start
 
-    bounded_weeks = max(1, min(weeks, 52))
+    bounded_weeks = max(1, min(weeks, MAX_LIQUIDITY_FORECAST_WEEKS))
     result = []
-    for i in range(bounded_weeks):
+    for i in range(MAX_LIQUIDITY_FORECAST_WEEKS):
+        if i >= bounded_weeks:
+            break
         ws = _week_start(today, i)
         we = ws + timedelta(days=6)
 

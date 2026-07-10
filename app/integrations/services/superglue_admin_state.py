@@ -49,7 +49,10 @@ def _read_state() -> dict[str, Any]:
 def _write_state(payload: dict[str, Any]) -> None:
     path = _state_path()
     _ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    path.write_text(  # NOSONAR - path is resolved and constrained by _resolve_runtime_path.
+        json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _tenant_state(payload: dict[str, Any], tenant_id: str) -> dict[str, Any]:

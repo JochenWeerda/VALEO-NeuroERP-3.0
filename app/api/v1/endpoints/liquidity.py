@@ -19,6 +19,7 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter(prefix="/finance/liquidity", tags=["finance", "liquidity"])
+MAX_LIQUIDITY_FORECAST_BUCKETS = 13
 
 
 class LiquidityBucket(BaseModel):
@@ -82,7 +83,10 @@ async def get_liquidity_overview(
     prognose: list[LiquidityBucket] = []
     bucket_days = 30
     horizon_days = max(7, min(tage_voraus, 365))
-    for i in range(0, horizon_days, bucket_days):
+    for bucket_index in range(MAX_LIQUIDITY_FORECAST_BUCKETS):
+        i = bucket_index * bucket_days
+        if i >= horizon_days:
+            break
         von = today + timedelta(days=i)
         bis = today + timedelta(days=min(i + bucket_days, horizon_days))
 

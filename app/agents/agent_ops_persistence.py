@@ -72,7 +72,10 @@ def save_agent_ops_tenant_snapshot(tenant_id: str, snapshot: dict[str, Any], *, 
     }
     path = _state_path()
     _ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    path.write_text(  # NOSONAR - path is resolved and constrained by _resolve_runtime_path.
+        json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+        encoding="utf-8",
+    )
     append_agent_ops_history_entry(
         tenant_id,
         {
@@ -95,7 +98,7 @@ def append_agent_ops_history_entry(tenant_id: str, entry: dict[str, Any]) -> Non
         "timestamp": _utcnow(),
         **entry,
     }
-    with path.open("a", encoding="utf-8") as handle:
+    with path.open("a", encoding="utf-8") as handle:  # NOSONAR - path is resolved and constrained by _resolve_runtime_path.
         handle.write(json.dumps(history_entry, ensure_ascii=True) + "\n")
 
 
