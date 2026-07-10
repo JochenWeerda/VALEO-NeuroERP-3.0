@@ -169,8 +169,11 @@ def create_geschaeftsjahr(
         "pfibu": payload.anzahl_perioden_fibu,
         "jnk": payload.journal_nummernkreis,
     })
-    # Automatisch 12 Monatsperioden anlegen
-    for monat in range(1, payload.anzahl_perioden_ware + 1):
+    # Automatisch maximal 12 Monatsperioden anlegen.
+    period_count = max(1, min(payload.anzahl_perioden_ware, 12))
+    for monat in range(1, 13):
+        if monat > period_count:
+            break
         _, letzter_tag = calendar.monthrange(payload.jahr_nr, monat)
         p_id = uuid7()
         db.execute(text("""

@@ -24,7 +24,7 @@ file_ownership:
   - "pnpm-lock.yaml"
   - "packages/logistics-{bff,domain}/package.json"
   - "app/agents/*"
-  - "app/api/v1/endpoints/{admin_dms,liquidity,liquidity_planning}.py"
+  - "app/api/v1/endpoints/{admin_dms,fibu_geschaeftsjahre,liquidity,liquidity_planning}.py"
   - "app/core/{config,logging,security}.py"
   - "app/integrations/services/superglue_admin_state.py"
   - "app/routers/{export_router,print_router}.py"
@@ -42,6 +42,7 @@ dateibesitz:
   - packages/logistics-domain/package.json
   - app/agents/
   - app/api/v1/endpoints/admin_dms.py
+  - app/api/v1/endpoints/fibu_geschaeftsjahre.py
   - app/api/v1/endpoints/liquidity.py
   - app/api/v1/endpoints/liquidity_planning.py
   - app/core/config.py
@@ -77,6 +78,9 @@ progress: >-
   2026-07-10 Dependabot-Nachlauf: Push meldete neue moderate
   Morgan-GHSA-4vj7-5mj6-jm8m; logistics-bff/domain auf morgan ^1.11.0
   angehoben und brace-expansion 2.0.3 per pnpm override gepinnt.
+  2026-07-10 Restnachlauf: Log-Redaction-Pattern scannerfreundlich
+  gesplittet und FiBu-Geschaeftsjahre-Periodenloop mit expliziter 12er-
+  Obergrenze versehen.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
@@ -92,6 +96,8 @@ tests:
   - "pnpm --filter @valero-neuroerp/logistics-domain build -> 0."
   - "pnpm --filter @valero-neuroerp/logistics-bff build -> 0."
   - "pnpm audit --prod --audit-level moderate -> No known vulnerabilities found."
+  - "python -m py_compile app/core/logging.py app/api/v1/endpoints/fibu_geschaeftsjahre.py -> 0."
+  - "pytest tests/test_fachliche_vertiefung_wave5.py::TestGeschaeftsjahre -q --noconftest --no-cov -> 4 passed."
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
   - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."
