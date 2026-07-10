@@ -1,0 +1,75 @@
+slice_id: RATIONS-UX-INTENT-002
+id: RATIONS-UX-INTENT-002
+title: Benannte Intent-Vorschlaege mit Vorschau-Delta
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-10"
+started_at: "2026-07-10"
+goal: >-
+  Fodjan-Muster: benannte Rations-Intents (Guenstiger, Mehr Milch, Weniger
+  Stickstoff, Gesund & Guenstiger, Gesuender) als ein-Klick-Vorschlaege in der
+  Workbench. Jeder Intent rechnet im Hintergrund eine Vorschau-Ration und zeigt
+  das Delta (Kosten, IOFC, Milch, Warnungen) gegen die aktive Ration; erst
+  "Uebernehmen" macht den Vorschlag aktiv. Die bestehenden Prioritaets-Schieber
+  bleiben unter Feinsteuerung erhalten.
+scope:
+  - Optimize-Request-Builder aus der Mutation in eine wiederverwendbare Funktion extrahieren.
+  - Intent-Panel mit 5 Buttons; je Intent ein WizardData-Override (mode/objective/soft-goals).
+  - Vorschau-Mutation rechnet ohne die aktive Ansicht zu ueberschreiben; Delta-Karte.
+  - Uebernehmen setzt Ergebnis + WizardData; Verwerfen verwirft die Vorschau.
+  - Mutation-Lifecycle: Guard, disabled, finally-Reset, Fehler-/Erfolg-Feedback.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-UX-INTENT-002.yaml"
+  - "packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-UX-INTENT-002.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+progress: >-
+  2026-07-10 reserviert. Ausgangslage: Zielsteuerung ueber mode (OptMode) plus 5
+  Prioritaets-Schieberegler -> deriveObjectiveStrategy. Optimierung via
+  optimizeFromProfile in optimizeMutation.mutationFn (grosser Inline-Builder).
+  Ergebnis traegt total_cost_eur_day, ecm_supply_kg_day, forage_performance
+  (limiting_milk_kg) und warnings fuer die Delta-Anzeige.
+acceptance:
+  - "5 benannte Intent-Buttons erscheinen in der Workbench, wenn eine Ration aktiv ist."
+  - "Ein Klick rechnet eine Vorschau ohne die aktive Ration zu ueberschreiben."
+  - "Delta-Karte zeigt Kosten, Milch, IOFC und Warnungen Vorschau vs. aktiv."
+  - "Uebernehmen aktiviert die Vorschau; Verwerfen laesst die aktive Ration unveraendert."
+  - "Buttons sind waehrend der Berechnung deaktiviert; Fehler werden sichtbar gemeldet."
+tests:
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "eslint der geaenderten Datei -> 0 neue Fehler."
+  - "Live-Check: Intent Guenstiger senkt Kosten-Delta; Uebernehmen aktualisiert die Ration."
+risks:
+  - "Doppelte Solver-Last durch Vorschau; nur ein Vorschau-Lauf gleichzeitig (Guard)."
+  - "Intent-Override darf harte GfE/DLG-Grenzen nicht aufweichen (nur Ziel-/Softgewichte)."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Intents veraendern nur Zielrichtung und weiche Gewichte (objective_strategy,
+    soft goals, Prioritaeten). Harte tiergesundheitliche/fachliche Grenzen
+    (GfE/DLG, Aufnahme, Struktur) bleiben unangetastet; Wirtschaftlichkeit nur
+    innerhalb dieser Grenzen.
+  architektur_vertrag: >-
+    Reine Frontend-Aenderung. Der Optimize-Request-Builder wird in eine reine
+    Modul-Funktion extrahiert und von Haupt- und Vorschau-Mutation geteilt; kein
+    neuer Service, keine neue Route, keine API-Vertragsaenderung.
+  daten_vertrag: >-
+    Keine Datenmigration. Vorschau nutzt denselben optimizeFromProfile-Aufruf wie
+    die Hauptoptimierung; keine zusaetzliche Persistenz ausser transientem
+    Vorschau-State.
+  security_vertrag: >-
+    Keine neuen Backend-Eingaben oder Auth-/Tenant-Aenderungen; identischer
+    Optimierungs-Endpoint wie bisher.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung. Zusaetzliche Solver-Last ist auf einen
+    Vorschau-Lauf gleichzeitig begrenzt (Pending-Guard).
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren Intent-Mapping, Vorschau-Delta
+    und Uebernahme-/Verwerfen-Verhalten.
+  test_vertrag: >-
+    tsc --noEmit und Lint gruen; Live-Check von mindestens einem Intent inkl.
+    Uebernahme vor Abschluss; GitHub Actions bestaetigen den Default-Branch.

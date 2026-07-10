@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATIONS-UX-INTENT-002 Benannte Intent-Vorschlaege mit Vorschau-Delta - in Arbeit 2026-07-10
+
+**Owner:** Codex. **Stand:** in Arbeit 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Muster: benannte Rations-Intents (Guenstiger, Mehr Milch, Weniger Stickstoff, Gesund & Guenstiger, Gesuender) als Ein-Klick-Vorschlaege in der Workbench. Jeder Intent rechnet eine Vorschau-Ration und zeigt das Delta (Kosten, IOFC, Milch, Warnungen) gegen die aktive Ration; erst "Uebernehmen" aktiviert den Vorschlag. Prioritaets-Schieber bleiben als Feinsteuerung erhalten. Intents veraendern nur Zielrichtung/weiche Gewichte; harte GfE/DLG-Grenzen bleiben unangetastet. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `tsc --noEmit` -> 0; `eslint` -> 0; Live-Check eines Intents inkl. Uebernahme.
+
 ## RATIONS-UX-TSFM-001 TS/Frischmasse-Umschalter fuer Rationsgrenzen - abgeschlossen 2026-07-10
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Usability-Hebel umgesetzt: Futter-Verzehrsgrenzen wahlweise in kg TM oder kg FM eingeben. Segmented Toggle `kg TM / kg FM` ueber der Futtermitteltabelle im Wizard-Schritt 2; Min/Max-Spaltenkopf, Titel und Eingaben folgen dem Modus. Umrechnung ueber reine Helfer `limitFmToDisplay`/`limitDisplayToFm` mit `dm_frac`; kanonische Speichergroesse bleibt kg FM (`feedMinFm`/`feedMaxFm`), Solver-Payload unveraendert. Modus persistiert in `PersistedFeedSelection` (abwaertskompatibel, Default FM). **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` der Datei -> 0; Umrechnungs-/Kein-Drift-Check (TM 5 -> FM 5,6818 -> TM 5; nach 5x Hin/Her stabil, leer bleibt leer).
