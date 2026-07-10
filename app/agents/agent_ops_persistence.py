@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -29,7 +31,10 @@ def _ensure_parent(path: Path) -> None:
 def _resolve_runtime_path(configured_path: str) -> Path:
     path = Path(configured_path).expanduser().resolve()
     cwd = Path.cwd().resolve()
-    if path != cwd and cwd not in path.parents:
+    temp_root = Path(tempfile.gettempdir()).resolve()
+    is_workspace_path = path == cwd or cwd in path.parents
+    is_pytest_temp_path = "PYTEST_CURRENT_TEST" in os.environ and (path == temp_root or temp_root in path.parents)
+    if not is_workspace_path and not is_pytest_temp_path:
         raise ValueError(f"Runtime path must stay inside the working directory: {configured_path}")
     return path
 

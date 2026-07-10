@@ -215,10 +215,10 @@ class TestUIX048AgentSafety:
                         "entweder Endpoint aktivieren oder stubReason setzen"
                     )
 
-    def test_all_26_screen_definitions_present(self):
-        """Stellt sicher, dass genau 26 native ScreenDefinitions registriert sind."""
-        assert len(ALL_SCREEN_IDS) == 26, (
-            f"Erwartet 26 ScreenDefinitions, gefunden: {len(ALL_SCREEN_IDS)}: {ALL_SCREEN_IDS}"
+    def test_all_screen_definitions_present(self):
+        """Stellt sicher, dass alle produktiven nativen ScreenDefinitions registriert sind."""
+        assert len(ALL_SCREEN_IDS) == 33, (
+            f"Erwartet 33 ScreenDefinitions, gefunden: {len(ALL_SCREEN_IDS)}: {ALL_SCREEN_IDS}"
         )
 
     def test_payment_run_is_critical(self):

@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-07-06
+# Architecture Index — generiert 2026-07-10
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-06T11:06:08Z'
+generated_at: '2026-07-10T08:45:00Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -286,6 +286,7 @@ domains:
     - contract_fixing_service
     - contract_fulfillment_service
     - contract_settlement_service
+    - esg_footprint_service
     - feed_inventory_link_service
     - feed_production_chain_service
     - feed_produktion_lifecycle_service
@@ -334,6 +335,7 @@ domains:
     - ernte_kampagne_api
     - ernte_planung
     - ers_settlement
+    - esg_footprint
     - farm_profiles
     - feed_produktion_actions
     - foerderung
@@ -363,6 +365,7 @@ domains:
     - saatzucht
     - self_billing
     - silo
+    - silo_cells_readmodel
     - silo_operations_api
     - silo_target_cell
     - supply_chain
@@ -1507,6 +1510,7 @@ domains:
     - /mobile/scanner
     - /monitoring/alerts
     - /monitoring/regeln
+    - /planung/kalender
     - /projekte
     - /projekte/:id
     - /projekte/liste
@@ -1545,12 +1549,18 @@ domains:
     - /workflows/history
     - /workflows/supervisor
     - /workflows/trigger
+    - /workspace/einkauf
+    - /workspace/fibu
+    - /workspace/lager
+    - /workspace/leitung
+    - /workspace/verkauf
     backend_services:
     - action_execution_mutations
     - admin_core_service
     - ai_data_classification_service
     - ai_engineering_metrics_service
     - article_image_enrichment
+    - calendar_projection_service
     - compat_helpers
     - compensation_engine
     - event_schema_registry
@@ -1584,6 +1594,7 @@ domains:
     - secrets_vault
     - security_observability
     - stt_client
+    - studio_validation
     - sync_scheduler
     - voice_adapter
     - wf_cockpit_nats_projector
@@ -1614,6 +1625,7 @@ domains:
     - benchmark_cockpit
     - blockchain_runtime
     - channel_work_surfaces
+    - collab_notes
     - collective_documents
     - command_catalog
     - compat
@@ -1660,6 +1672,7 @@ domains:
     - o2c_uat_scaffold
     - operational_governance
     - operator_agent
+    - planung_kalender
     - process_kernel_api
     - process_map
     - process_mining_api
@@ -1683,6 +1696,8 @@ domains:
     - terminology
     - training
     - users
+    - ux_overlays
+    - ux_telemetry
     - versicherungen
     - wartung
     - webhook_system
@@ -1808,12 +1823,12 @@ domains:
     decisions:
     - docs/adr/adr-014-service-layer-pattern.md
 mapping_stats:
-  frontend_routes_total: 889
-  frontend_routes_mapped: 889
-  backend_services_total: 207
-  backend_services_mapped: 207
-  backend_endpoints_total: 399
-  backend_endpoints_mapped: 399
+  frontend_routes_total: 895
+  frontend_routes_mapped: 895
+  backend_services_total: 210
+  backend_services_mapped: 210
+  backend_endpoints_total: 405
+  backend_endpoints_mapped: 405
 unmapped:
   frontend_routes: []
   backend_services: []

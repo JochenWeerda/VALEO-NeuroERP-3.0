@@ -20,6 +20,7 @@ file_ownership:
   - ".github/workflows/security-agent.yml"
   - ".github/workflows/security-scan.yml"
   - "Dockerfile"
+  - "Dockerfile.frontend"
   - "app/agents/agent_control_center.py"
   - "app/agents/agent_ops_persistence.py"
   - "app/api/v1/endpoints/admin_dms.py"
@@ -38,10 +39,14 @@ file_ownership:
   - "app/services/gap_pipeline_service.py"
   - "app/services/kunden_merge.py"
   - "app/services/position_service.py"
+  - "app/core/screen_definitions.py"
+  - "config/architecture-domain-prefixes.yaml"
+  - "config/architecture-index.yaml"
   - "services/*/requirements.txt"
   - "services/crm-*/app/config/settings.py"
   - "services/crm-*/main.py"
   - "tests/test_inventory_seed.py"
+  - "tests/test_uix046_048_command_endpoints_safety.py"
   - "docs/schnittstellen/endpoint-inventory.md"
   - "docs/entwickler/service-inventory.md"
   - "docs/admin/migration-inventory.md"
@@ -52,8 +57,10 @@ dateibesitz:
   - .github/workflows/security-agent.yml
   - .github/workflows/security-scan.yml
   - Dockerfile
+  - Dockerfile.frontend
   - app/agents/agent_control_center.py
   - app/agents/agent_ops_persistence.py
+  - app/core/screen_definitions.py
   - app/api/v1/endpoints/admin_dms.py
   - app/api/v1/endpoints/fibu_geschaeftsjahre.py
   - app/api/v1/endpoints/liquidity.py
@@ -71,9 +78,12 @@ dateibesitz:
   - app/services/gap_pipeline_service.py
   - app/services/kunden_merge.py
   - app/services/position_service.py
+  - config/architecture-domain-prefixes.yaml
+  - config/architecture-index.yaml
   - services/crm-*/app/config/settings.py
   - services/crm-*/main.py
   - tests/test_inventory_seed.py
+  - tests/test_uix046_048_command_endpoints_safety.py
   - docs/schnittstellen/endpoint-inventory.md
   - docs/entwickler/service-inventory.md
   - docs/admin/migration-inventory.md
@@ -98,6 +108,12 @@ progress: >-
   Event-Katalog jetzt deterministisch statt einen lokalen stale Cache zu
   verwenden; Preisabsicherungs-Liste `/price-hedge/hedges` hat `skip/limit`,
   stabile Sortierung und kein unbounded `.all()` mehr.
+  2026-07-10 CI/CD-Nachlauf: Agent-Ops-Runtime-Pfadguards erlauben unter
+  pytest explizit System-Tempdirs; neue Workspace-/Kalender-/Leitstand-SDs
+  deklarieren `agentContract.sensitiveFields`; Architecture-Prefix-Regeln
+  decken UIX-/UX-/ESG-Routen, Services und Endpoints vollstaendig ab;
+  `Dockerfile.frontend` nutzt wieder den vertraglich geprueften
+  `pnpm run build:prod`-Pfad.
 acceptance:
   - "Quality-Gate-Blocker SQL-f-string ist lokal gruen."
   - "Docs-Build-Inventare und Agent-Handbuch sind ohne Drift."
@@ -128,6 +144,11 @@ tests:
   - "docker build -f Dockerfile --target builder -t valeo-erp-root-builder-check . -> 0"
   - "python scripts/check_pagination.py --threshold 53 -> 0"
   - "python -m py_compile app/api/v1/endpoints/price_hedge_api.py -> 0"
+  - "pytest tests/test_agents_neuroassist_api.py::<5 CI-fehlgeschlagene Tests> -q --noconftest --no-cov -> 5 passed"
+  - "pytest tests/test_uix046_048_command_endpoints_safety.py -q --noconftest --no-cov -> 309 passed"
+  - "pytest tests/test_generate_architecture_index.py::test_build_index_mapping_complete -q --noconftest --no-cov -> 1 passed"
+  - "pytest tests/test_production_readiness_contract.py::test_frontend_runtime_is_static_non_root_and_spa_capable -q --noconftest --no-cov -> 1 passed"
+  - "python scripts/generate_architecture_index.py --check --require-complete -> 0"
 risks:
   - "Container-Scanner melden historische Base-Image-/OS-Funde erst nach erneutem SARIF-Upload/Rescan geschlossen."
   - "Vollstaendiger Root-Runtime-Docker-Build wurde lokal nach 10 Minuten Tool-Timeout abgebrochen; Builder-Stage mit Requirements ist gruen, Runtime-Export muss CI final bestaetigen."

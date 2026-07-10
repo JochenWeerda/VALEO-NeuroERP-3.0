@@ -2695,6 +2695,7 @@ def get_screen_definition(mask_id: str, *, today: str | None = None) -> dict[str
         return None
     definition = _with_meridian_layout(builder())
     contract = definition.setdefault("agentContract", {})
+    contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
     _resolve_tile_routes(definition)
     _apply_season_profile(definition, today)

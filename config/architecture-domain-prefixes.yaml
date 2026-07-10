@@ -425,6 +425,8 @@ domains:
       - verify
       - alerts
       - management
+      - planung
+      - workspace
       - einstellungen
       - genossenschaft
       - wissen
@@ -467,6 +469,8 @@ domains:
       - article_image_enrichment
       - mask_rollout_
       - mask_action_
+      - calendar_projection_
+      - studio_validation
     endpoint_prefixes:
       - admin_
       - agents
@@ -563,6 +567,9 @@ domains:
       - data_quality
       - nutrient_compositions
       - supply_chain_blockchain
+      - collab_notes
+      - planning_kalender
+      - ux_
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
@@ -575,6 +582,9 @@ exact_service_stems:
   scheduler_service: platform
   notification_service: crm
   process_map_service: platform
+  calendar_projection_service: platform
+  studio_validation: platform
+  esg_footprint_service: agrar
   workflow_service: platform
   workflow_guards: platform
   workflow_cockpit_service: platform
@@ -595,3 +605,8 @@ exact_endpoint_stems:
   milchvieh_crosssell: crm
   supply_chain: agrar
   vertraege: agrar
+  collab_notes: platform
+  esg_footprint: agrar
+  planung_kalender: platform
+  ux_overlays: platform
+  ux_telemetry: platform
