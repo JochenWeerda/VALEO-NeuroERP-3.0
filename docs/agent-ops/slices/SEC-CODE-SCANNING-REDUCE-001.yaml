@@ -5,6 +5,7 @@ owner: Codex
 status: abgeschlossen
 created_at: "2026-07-10"
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 goal: >-
   Verbleibende GitHub-Code-Scanning-Alerts auf dem aktuellen main-Head
   priorisiert reduzieren: echte App-Code-Highs beheben, breit wirkende
@@ -67,3 +68,34 @@ tests:
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
   - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Security Scan, SonarCloud Analysis, Quality Gate, CI/CD Pipeline."
+  - "GitHub Code Scanning Rescan fuer messbare Alert-Reduktion auf dem neuen Head."
+ai_harness:
+  fachlicher_vertrag: >-
+    Restalerts werden nach Behebbarkeit reduziert: echte Credential-, Host-,
+    Loop- und Pathguard-Themen im Code beheben; belegte False Positives nur
+    eng begrenzt dokumentieren.
+  architektur_vertrag: >-
+    Keine neuen Services, Domaenen oder API-Vertraege. Aenderungen bleiben in
+    Security-/Config-Defaults, bestehenden Backend-Helpern, Sonar-Konfiguration
+    und Slice-Dokumentation.
+  daten_vertrag: >-
+    Keine Produktivdaten- oder Seed-Migrationen. Statische Datenbank-Passwoerter
+    werden aus Defaults entfernt; echte Credentials muessen aus Umgebung oder
+    Secret-Store kommen.
+  security_vertrag: >-
+    Direkte Service-Starts binden defensiv auf Loopback. JWT-Header werden nur
+    fuer kid/alg gelesen und danach gegen feste Algorithmus-Allowlist und
+    Signatur validiert. Runtime-Dateipfade bleiben workspace-/tempdir- oder
+    slug-validiert.
+  betriebs_vertrag: >-
+    Container-Expose-Verhalten bleibt ueber Docker/Compose-Env-Overrides
+    steuerbar. Sonar-Docker-Ausnahme ist auf services/**/Dockerfile* und die
+    Regeln docker:S8541/S8544 begrenzt; Trivy/Grype bleiben aktiv.
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren Umsetzung, Tests und die
+    Grenze, dass GitHub-Code-Scanning erst nach Rescan messbar sinkt.
+  test_vertrag: >-
+    Lokale Syntax-, Config-, Pytest-, YAML-, Docs-Governance- und Diff-Checks
+    muessen vor Push gruen sein; GitHub Actions bestaetigen den Default-Branch.
