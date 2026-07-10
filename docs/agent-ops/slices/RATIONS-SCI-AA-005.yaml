@@ -1,0 +1,65 @@
+slice_id: RATIONS-SCI-AA-005
+id: RATIONS-SCI-AA-005
+title: sid-Aminosaeuren-Balance als KPI sichtbar machen
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-10"
+started_at: "2026-07-10"
+goal: >-
+  Wissenschaftlicher Vorsprung (GfE 2023 / DLG 2025): das Backend liefert bereits
+  nutrient_supply.sidlys_g, sidmet_g und sidlys_sidmet_ratio sowie Warnungen bei
+  einem Verhaeltnis ausserhalb 2,5-3,5:1, aber der Frontend-Ergebnistyp verwirft
+  diese Felder. Dieser Slice macht die sidLys:sidMet-Balance als Ampel-KPI in der
+  Workbench sichtbar (Zielkorridor ~3:1) - Proteinqualitaet statt nur -menge.
+scope:
+  - NutrientSupply-Typ im Frontend um sidlys_g/sidmet_g/sidlys_sidmet_ratio erweitern.
+  - KPI/Panel in der Workbench: sidLys:sidMet-Verhaeltnis mit Ampel (2,5-3,5 gruen).
+  - Keine Backend-/API-Vertragsaenderung (Felder existieren bereits).
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-SCI-AA-005.yaml"
+  - "packages/frontend-web/src/lib/api/rations-optimization.ts"
+  - "packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-SCI-AA-005.yaml
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+progress: >-
+  2026-07-10 reserviert. Ausgangslage: Backend-Endpoint rations_optimization.py
+  berechnet sidlys_sup/sidmet_sup aus dem Aggregator und legt sie als
+  nutrient_supply.sidlys_g/sidmet_g/sidlys_sidmet_ratio in die Antwort (Z. 4444-
+  4446) plus Warnungen (Z. 4706-4714). Frontend-Typ NutrientSupply (Z. 237) fuehrt
+  die Felder noch nicht; NutrientSupplyExtended hat sie bereits.
+acceptance:
+  - "NutrientSupply-Typ traegt sidlys_g/sidmet_g/sidlys_sidmet_ratio (optional)."
+  - "Workbench zeigt sidLys:sidMet-Verhaeltnis als Ampel-KPI (gruen 2,5-3,5)."
+  - "Kein neuer API-/Solver-Kontrakt; nur Frontend-Anzeige."
+tests:
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "eslint der geaenderten Dateien -> 0 neue Fehler."
+  - "pnpm run build -> 0."
+risks:
+  - "Verhaeltnis kann fehlen (kein sidMet) -> KPI nur bei vorhandenem Wert anzeigen."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    sidLys:sidMet ist die GfE-2023-Proteinqualitaetsgroesse; Zielkorridor rund
+    2,5-3,5:1 (ideal ~3:1). Der KPI spiegelt die bereits im Backend berechnete
+    Groesse, ohne die Berechnung zu veraendern.
+  architektur_vertrag: >-
+    Reine Frontend-Anzeige. Der Ergebnistyp wird um bereits gelieferte
+    Antwortfelder erweitert; kein neuer Service, keine Route, kein API-Kontrakt.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt bereits vorhandene Antwortfelder aus DLG-2025-
+    Aminosaeuredaten.
+  security_vertrag: >-
+    Keine neuen Eingaben, kein Auth-/Tenant-Bezug; reine Darstellung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung; Frontend-Build-Pfad unveraendert.
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren KPI-Herleitung und Zielkorridor.
+  test_vertrag: >-
+    tsc --noEmit, eslint und pnpm run build gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.
