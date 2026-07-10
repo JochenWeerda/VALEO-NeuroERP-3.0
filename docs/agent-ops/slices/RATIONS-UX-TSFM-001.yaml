@@ -1,0 +1,68 @@
+slice_id: RATIONS-UX-TSFM-001
+id: RATIONS-UX-TSFM-001
+title: TS/Frischmasse-Umschalter fuer Rationsgrenzen
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-10"
+started_at: "2026-07-10"
+goal: >-
+  Fodjan-Usability-Hebel: Ein-/Ausgabe von Futter-Verzehrsgrenzen wahlweise in
+  kg Trockenmasse (TM) oder kg Frischmasse (FM). Ein globaler Umschalter im
+  Futtermittel-Schritt der Rationsoptimierungs-Workbench rechnet die Min/Max-
+  Grenzen konsistent ueber den TM-Anteil (dm_frac) um. Solver-Kontrakt bleibt
+  unveraendert (intern weiter kg FM).
+scope:
+  - Umschalter kg TM / kg FM im Futtermittel-Auswahlschritt (Wizard).
+  - Min/Max-Grenzen-Spalten folgen dem gewaehlten Modus (Anzeige + Eingabe).
+  - Persistenz des Modus (localStorage) analog Feed-Auswahl.
+  - Solver-Eingabe bleibt kg FM; keine Backend-/API-Vertragsaenderung.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-UX-TSFM-001.yaml"
+  - "packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-UX-TSFM-001.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+progress: >-
+  2026-07-10 reserviert. Ausgangslage: Workbench zeigt in der Ergebnis-Tabelle
+  bereits beide Einheiten (kg FM und kg TM). Die Verzehrsgrenzen im Futtermittel-
+  Schritt werden aktuell nur in kg FM (feedMinFm/feedMaxFm) eingegeben; der Solver
+  rechnet FM x dm_frac = kg TM. Dieser Slice ergaenzt den TS/FM-Umschalter genau an
+  dieser Eingabe.
+acceptance:
+  - "Umschalter wechselt Min/Max-Grenzen-Spalten zwischen kg TM und kg FM."
+  - "Umrechnung erfolgt konsistent ueber dm_frac; intern bleibt der Wert kg FM."
+  - "Solver-Ergebnis bei gleichem physischem Grenzwert unveraendert."
+  - "Modus wird persistiert und beim erneuten Laden wiederhergestellt."
+tests:
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "pnpm --filter frontend-web run lint (betroffene Datei) -> 0 neue Fehler."
+  - "Manuell/live: Umschalten TM<->FM rechnet Grenzwerte korrekt um; Solver stabil."
+risks:
+  - "Rundung beim Hin-/Her-Umrechnen darf keine Wertdrift erzeugen (FM ist kanonisch)."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Trockenmasse und Frischmasse werden ueber den futtermittelspezifischen
+    TM-Anteil (dm_frac) korrekt ineinander umgerechnet. Kanonische Speichergroesse
+    der Grenzen bleibt kg FM/Tag; TM ist eine reine Ein-/Ausgabesicht.
+  architektur_vertrag: >-
+    Reine Frontend-Aenderung an der bestehenden Rationsoptimierungs-Maske. Kein
+    neuer Service, keine neue Route, keine API-Vertragsaenderung; Solver-Payload
+    (min/max FM) unveraendert.
+  daten_vertrag: >-
+    Keine Datenmigration. Persistierte Feed-Auswahl (localStorage) wird um das
+    Einheiten-Flag erweitert, abwaertskompatibel (Default kg FM).
+  security_vertrag: >-
+    Keine neuen Eingabepfade zu Backend/Datei-IO; nur clientseitige Umrechnung
+    numerischer Felder. Keine Auth-/Tenant-Aenderung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung. Frontend-Build-Pfad unveraendert.
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren Umschalter-Verhalten, kanonische
+    FM-Speicherung und die Abnahmechecks.
+  test_vertrag: >-
+    tsc --noEmit und Lint der geaenderten Datei muessen gruen sein; Live-Check der
+    Umrechnung vor Abschluss; GitHub Actions bestaetigen den Default-Branch.
