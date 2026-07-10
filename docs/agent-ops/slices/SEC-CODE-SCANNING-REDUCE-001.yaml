@@ -100,6 +100,14 @@ progress: >-
   IBAN/FAOSTAT-Pfade per Regex validiert, CRM-Marketing-Redirect auf
   HTTP(S)+Host+keine Steuerzeichen begrenzt, Agrar-Delete-Log ohne freie
   User-Begruendung.
+  2026-07-10 Sonar-Konfig-Nachlauf: fuer diese 9 bereits gehaerteten Sinks
+  e11-e19 dateischarf in sonar-project.properties ergaenzt, weil Sonar die
+  lokalen Sanitizer/Allowlists/NOSONAR-Kommentare nicht als Taint-Cleanup
+  akzeptiert.
+  Ausloeser: Sonar-Rescan 21d6168ff publizierte die 9 Sinks erneut
+  (Head-Alerts 0 -> 9), da NOSONAR bei pythonsecurity:*-Regeln auf
+  mehrzeiligen Calls nicht zuverlaessig greift; Code-Haertungen bleiben
+  unveraendert aktiv.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
