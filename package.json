@@ -61,7 +61,8 @@
       "cheerio": "^1.1.2",
       "esbuild": "^0.25.0",
       "xml2js": "^0.5.0",
-      "send": "^0.19.0"
+      "send": "^0.19.0",
+      "brace-expansion": "2.0.3"
     }
   },
   "scripts": {

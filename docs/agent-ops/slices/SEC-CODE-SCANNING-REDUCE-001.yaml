@@ -20,6 +20,9 @@ file_ownership:
   - "docs/agent-ops/active-workboard.md"
   - "docs/agent-ops/slices/SEC-CODE-SCANNING-REDUCE-001.yaml"
   - "sonar-project.properties"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "packages/logistics-{bff,domain}/package.json"
   - "app/agents/*"
   - "app/api/v1/endpoints/{admin_dms,liquidity,liquidity_planning}.py"
   - "app/core/{config,logging,security}.py"
@@ -33,6 +36,10 @@ dateibesitz:
   - docs/agent-ops/active-workboard.md
   - docs/agent-ops/slices/SEC-CODE-SCANNING-REDUCE-001.yaml
   - sonar-project.properties
+  - package.json
+  - pnpm-lock.yaml
+  - packages/logistics-bff/package.json
+  - packages/logistics-domain/package.json
   - app/agents/
   - app/api/v1/endpoints/admin_dms.py
   - app/api/v1/endpoints/liquidity.py
@@ -67,6 +74,9 @@ progress: >-
   Gates), CRM-/Inventory-DATABASE_URL-Defaults auf leer statt lokaler DSN,
   Log-Redaction-S2068 und belegte JWT-/Path-/Loop-False-Positives
   dateischarf in Sonar eingegrenzt.
+  2026-07-10 Dependabot-Nachlauf: Push meldete neue moderate
+  Morgan-GHSA-4vj7-5mj6-jm8m; logistics-bff/domain auf morgan ^1.11.0
+  angehoben und brace-expansion 2.0.3 per pnpm override gepinnt.
 acceptance:
   - "Head-bezogene Code-Scanning-Alerts sinken messbar."
   - "Keine neuen roten GitHub Actions."
@@ -79,6 +89,9 @@ tests:
   - "pytest tests/test_finance_asset_budget_liquidity.py -q --noconftest --no-cov -> 17 passed."
   - "git diff --check -> 0 Fehler (nur Windows-Line-End-Warnungen)."
   - "node scripts/docs-governance-check.cjs -> passed."
+  - "pnpm --filter @valero-neuroerp/logistics-domain build -> 0."
+  - "pnpm --filter @valero-neuroerp/logistics-bff build -> 0."
+  - "pnpm audit --prod --audit-level moderate -> No known vulnerabilities found."
 risks:
   - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
   - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."
