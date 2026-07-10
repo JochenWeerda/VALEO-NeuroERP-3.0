@@ -281,6 +281,7 @@ interface PersistedFeedSelection {
   customFeedIds: string[]  // GFA-ids (müssen beim Laden neu abgefragt werden)
   feedMaxFm: Record<string, number>
   feedMinFm: Record<string, number>
+  feedLimitUnit?: FeedLimitUnit  // Ein-/Ausgabeeinheit der Grenzen; Default 'FM' (abwärtskompatibel)
   savedAt: string
 }
 
@@ -304,6 +305,26 @@ function cn(...classes: (string | boolean | undefined)[]) {
 function fmt(v: number | null | undefined, d = 2) {
   if (v == null || isNaN(v as number)) return '–'
   return (v as number).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d })
+}
+
+/**
+ * Einheit für die Ein-/Ausgabe der Verzehrsgrenzen (Fodjan-Muster TS ⇄ FM).
+ * Kanonisch gespeichert werden die Grenzen als kg Frischmasse/Tag (`feedMinFm`/`feedMaxFm`);
+ * TM ist eine reine Anzeige-/Eingabesicht, umgerechnet über den TM-Anteil (dm_frac).
+ */
+type FeedLimitUnit = 'FM' | 'TM'
+
+/** Kanonischen FM-Grenzwert in die gewählte Anzeigeeinheit umrechnen (leer bleibt leer). */
+function limitFmToDisplay(fmValue: number | undefined, dmFrac: number, unit: FeedLimitUnit): number | '' {
+  if (fmValue == null) return ''
+  if (unit === 'TM') return Math.round(fmValue * dmFrac * 1000) / 1000
+  return fmValue
+}
+
+/** Eingegebenen Wert (in gewählter Einheit) zurück nach kg FM/Tag rechnen. FM bleibt kanonisch. */
+function limitDisplayToFm(entered: number, dmFrac: number, unit: FeedLimitUnit): number {
+  if (unit === 'TM' && dmFrac > 0) return entered / dmFrac
+  return entered
 }
 
 function card(extra = '') {
@@ -1604,6 +1625,8 @@ function Wizard({
   )
   const [feedMaxFm, setFeedMaxFm] = useState<Record<string, number>>(() => ({ ...resumeFrom?.feedMaxFm }))
   const [feedMinFm, setFeedMinFm] = useState<Record<string, number>>(() => ({ ...resumeFrom?.feedMinFm }))
+  // TS/FM-Umschalter (Fodjan-Muster): Ein-/Ausgabeeinheit der Verzehrsgrenzen. Kanonisch bleibt kg FM.
+  const [feedLimitUnit, setFeedLimitUnit] = useState<FeedLimitUnit>('FM')
   const [searchQuery, setSearchQuery] = useState('')
   const [customFeeds, setCustomFeeds] = useState<GrundfutterAnalyse[]>(() => [...(resumeFrom?.customFeeds ?? [])])
   const [compoundFeeds, setCompoundFeeds] = useState<UploadedCompoundFeed[]>(() => [...(resumeFrom?.compoundFeeds ?? [])])
@@ -1629,6 +1652,7 @@ function Wizard({
           setSelectedFeedIds(new Set(restored))
           setFeedMaxFm(saved.feedMaxFm ?? {})
           setFeedMinFm(saved.feedMinFm ?? {})
+          if (saved.feedLimitUnit === 'TM' || saved.feedLimitUnit === 'FM') setFeedLimitUnit(saved.feedLimitUnit)
           return
         }
       }
@@ -1646,11 +1670,12 @@ function Wizard({
         customFeedIds: customFeeds.map((c) => c.id),
         feedMaxFm,
         feedMinFm,
+        feedLimitUnit,
         savedAt: new Date().toISOString(),
       }
       localStorage.setItem(LS_FEED_SELECTION, JSON.stringify(payload))
     } catch { /* ignore */ }
-  }, [selectedFeedIds, customFeeds, feedMaxFm, feedMinFm])
+  }, [selectedFeedIds, customFeeds, feedMaxFm, feedMinFm, feedLimitUnit])
 
   // Custom feeds (betriebseigen) immer oben, dann DLG alphabetisch
   const allDisplayFeeds = useMemo(() => {
@@ -2284,6 +2309,25 @@ function Wizard({
               </div>
             )}
 
+            {/* TS/FM-Umschalter für die Verzehrsgrenzen-Eingabe (Fodjan-Muster) */}
+            <div className="flex items-center justify-end gap-2 mb-2">
+              <span className="text-[11px] font-medium" style={{ color: C.muted }}>Grenzen eingeben in:</span>
+              <div className="inline-flex rounded-md border overflow-hidden" style={{ borderColor: C.border }}>
+                {(['TM', 'FM'] as FeedLimitUnit[]).map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => setFeedLimitUnit(u)}
+                    className="px-3 py-1 text-xs font-semibold transition-colors"
+                    style={{ background: feedLimitUnit === u ? C.accent : '#fff', color: feedLimitUnit === u ? '#fff' : C.dark }}
+                    title={u === 'TM' ? 'Grenzen in kg Trockenmasse/Tag eingeben' : 'Grenzen in kg Frischmasse/Tag eingeben'}
+                  >
+                    {u === 'TM' ? 'kg TM' : 'kg FM'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Feed-Tabelle */}
             <div className="flex-1 overflow-auto">
               <table className="w-full text-left border-collapse">
@@ -2297,8 +2341,8 @@ function Wizard({
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>sidP</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>Stärke</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>€/kg TM</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title="Mindestverzehr in kg Frischmasse/Tag (leer = keine Untergrenze).">Min FM kg/d</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title="Max. Verzehrsgrenze in kg Frischmasse/Tag (0 = unbegrenzt). Sinnvoll bei saisonal begrenzten Vorräten.">Max FM kg/d</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title={`Mindestverzehr in kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = keine Untergrenze).`}>Min {feedLimitUnit} kg/d</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title={`Max. Verzehrsgrenze in kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = unbegrenzt). Sinnvoll bei saisonal begrenzten Vorräten.`}>Max {feedLimitUnit} kg/d</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold w-8" style={{ borderColor: C.border }} />
                   </tr>
                 </thead>
@@ -2345,20 +2389,20 @@ function Wizard({
                             type="number"
                             min={0}
                             step={0.5}
-                            value={feedMinFm[f.id] ?? ''}
+                            value={limitFmToDisplay(feedMinFm[f.id], f.dm_frac, feedLimitUnit)}
                             onChange={(e) => {
                               const v = parseFloat(e.target.value)
                               setFeedMinFm((prev) => {
                                 const next = { ...prev }
                                 if (isNaN(v) || v <= 0) delete next[f.id]
-                                else next[f.id] = v
+                                else next[f.id] = limitDisplayToFm(v, f.dm_frac, feedLimitUnit)
                                 return next
                               })
                             }}
                             placeholder="—"
                             className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-none focus:ring-1 focus:ring-[#88B04B]"
                             style={{ borderColor: feedMinFm[f.id] ? C.accent : C.border }}
-                            title="Min. kg Frischmasse/Tag (leer = keine Untergrenze)"
+                            title={`Min. kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = keine Untergrenze)`}
                           />
                         </td>
                         <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
@@ -2366,20 +2410,20 @@ function Wizard({
                             type="number"
                             min={0}
                             step={0.5}
-                            value={feedMaxFm[f.id] ?? ''}
+                            value={limitFmToDisplay(feedMaxFm[f.id], f.dm_frac, feedLimitUnit)}
                             onChange={(e) => {
                               const v = parseFloat(e.target.value)
                               setFeedMaxFm((prev) => {
                                 const next = { ...prev }
                                 if (isNaN(v) || v <= 0) delete next[f.id]
-                                else next[f.id] = v
+                                else next[f.id] = limitDisplayToFm(v, f.dm_frac, feedLimitUnit)
                                 return next
                               })
                             }}
                             placeholder="∞"
                             className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-none focus:ring-1 focus:ring-[#88B04B]"
                             style={{ borderColor: feedMaxFm[f.id] ? C.accent : C.border }}
-                            title="Max. kg Frischmasse/Tag (leer = unbegrenzt)"
+                            title={`Max. kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = unbegrenzt)`}
                           />
                         </td>
                         <td className="px-4 py-3">

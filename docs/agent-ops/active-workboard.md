@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RATIONS-UX-TSFM-001 TS/Frischmasse-Umschalter fuer Rationsgrenzen - in Arbeit 2026-07-10
+## RATIONS-UX-TSFM-001 TS/Frischmasse-Umschalter fuer Rationsgrenzen - abgeschlossen 2026-07-10
 
-**Owner:** Codex. **Stand:** in Arbeit 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Usability-Hebel: Futter-Verzehrsgrenzen wahlweise in kg TM oder kg FM eingeben. Globaler Umschalter im Futtermittel-Schritt der Rationsoptimierungs-Maske; Min/Max-Grenzen-Spalten folgen dem Modus, Umrechnung ueber `dm_frac`. Kanonische Speichergroesse bleibt kg FM (`feedMinFm`/`feedMaxFm`), Solver-Payload unveraendert. **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `tsc --noEmit` -> 0; Lint der Datei -> 0 neue Fehler; Live-Umrechnung TM<->FM korrekt, Solver stabil.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Fodjan-Usability-Hebel umgesetzt: Futter-Verzehrsgrenzen wahlweise in kg TM oder kg FM eingeben. Segmented Toggle `kg TM / kg FM` ueber der Futtermitteltabelle im Wizard-Schritt 2; Min/Max-Spaltenkopf, Titel und Eingaben folgen dem Modus. Umrechnung ueber reine Helfer `limitFmToDisplay`/`limitDisplayToFm` mit `dm_frac`; kanonische Speichergroesse bleibt kg FM (`feedMinFm`/`feedMaxFm`), Solver-Payload unveraendert. Modus persistiert in `PersistedFeedSelection` (abwaertskompatibel, Default FM). **Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` der Datei -> 0; Umrechnungs-/Kein-Drift-Check (TM 5 -> FM 5,6818 -> TM 5; nach 5x Hin/Her stabil, leer bleibt leer).
 
 ## SEC-CODE-SCANNING-REDUCE-001 Code-Scanning-Restalerts reduzieren - abgeschlossen 2026-07-10
 

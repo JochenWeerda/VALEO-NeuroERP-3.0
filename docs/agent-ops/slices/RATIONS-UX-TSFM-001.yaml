@@ -2,9 +2,10 @@ slice_id: RATIONS-UX-TSFM-001
 id: RATIONS-UX-TSFM-001
 title: TS/Frischmasse-Umschalter fuer Rationsgrenzen
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-10"
 started_at: "2026-07-10"
+completed_at: "2026-07-10"
 goal: >-
   Fodjan-Usability-Hebel: Ein-/Ausgabe von Futter-Verzehrsgrenzen wahlweise in
   kg Trockenmasse (TM) oder kg Frischmasse (FM). Ein globaler Umschalter im
@@ -30,6 +31,13 @@ progress: >-
   Schritt werden aktuell nur in kg FM (feedMinFm/feedMaxFm) eingegeben; der Solver
   rechnet FM x dm_frac = kg TM. Dieser Slice ergaenzt den TS/FM-Umschalter genau an
   dieser Eingabe.
+  2026-07-10 umgesetzt: Typ FeedLimitUnit + reine Umrechnungs-Helfer limitFmToDisplay/
+  limitDisplayToFm (kanonisch kg FM, TM = Anzeigesicht ueber dm_frac). State feedLimitUnit
+  (Default FM) im Wizard, persistiert in PersistedFeedSelection (abwaertskompatibel).
+  Segmented Toggle kg TM / kg FM ueber der Futtermitteltabelle; Min/Max-Spaltenkopf,
+  Titel und Eingaben folgen dem Modus. Solver-Payload (min/max FM) unveraendert.
+  Verifiziert: tsc --noEmit 0, eslint 0, Umrechnungs-/Kein-Drift-Check (TM 5 -> FM 5,6818
+  -> TM 5; nach 5x Hin/Her stabil).
 acceptance:
   - "Umschalter wechselt Min/Max-Grenzen-Spalten zwischen kg TM und kg FM."
   - "Umrechnung erfolgt konsistent ueber dm_frac; intern bleibt der Wert kg FM."
