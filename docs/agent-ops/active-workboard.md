@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATIONS-SCI-ECM-006 ECM-Formel-Praezisierung auf DLG 01|2025 + Formel-Audit - in Arbeit 2026-07-11
+
+**Owner:** Codex. **Stand:** in Arbeit 2026-07-11 - Folgewelle F7 (Plan `docs/design/rationsoptimierung-folgewellen-masterplan.md`). ECM auf exakte DLG-01|2025-Formel `Milch•(38,5•Fett + 24,2•Protein + 16,5•Laktose)÷3,15÷100` umstellen (bisher Naeherungen ohne Laktose: Standalone `0,337+0,116•F+0,06•E`, Backend NRC `0,327+0,1295•F+0,072•P`). `CowProfile.milk_lactose_pct` (Default 4,8) + Formel-Audit-Regression. **Dateibesitz:** `rationsoptimierung/app/nutrition/gfe2023.py`, `rationsoptimierung/app/domain/models.py`, `rationsoptimierung/tests/test_formula_audit_dlg2025.py`, `app/api/v1/endpoints/rations_optimization.py`, Slice-YAML und Workboard. **Abnahme:** Formel-Audit + gfe2023-Regression gruen; py_compile 0.
+
 ## RATIONS-SCI-AA-005 sid-Aminosaeuren-Balance als KPI sichtbar - abgeschlossen 2026-07-10
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-10 - Teil des Programms "besseres Fodjan-Nachfolge-Tool" (Plan `docs/design/rationsoptimierung-usability-plan.md`). Wissenschaftlicher Vorsprung (GfE 2023/DLG 2025) sichtbar gemacht: Frontend-Ergebnistyp `NutrientSupply` um `sidlys_g/sidmet_g/sidlys_sidmet_ratio` (optional) erweitert; sidLys:sidMet-Verhaeltnis als Ampel-Zeile (2,5-3,5 gruen, Ziel ~3:1) im DLG/GfE-Panel der Workbench (nach RMD), nur bei vorhandenem Verhaeltnis. Backend liefert die Felder bereits inkl. Warnung ausserhalb Korridor - Frontend-only, kein API-Vertrag. **Dateibesitz:** `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0.

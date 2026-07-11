@@ -1,0 +1,67 @@
+slice_id: RATIONS-SCI-ECM-006
+id: RATIONS-SCI-ECM-006
+title: ECM-Formel-Praezisierung auf DLG 01|2025 + Formel-Audit
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-11"
+started_at: "2026-07-11"
+goal: >-
+  Energiekorrigierte Milch (ECM) im Rations-Backend auf die exakte DLG-01|2025-
+  Definition umstellen: ECM[kg] = kg Milch • (38,5•Fett% + 24,2•Protein% +
+  16,5•Laktose%) ÷ 3,15 ÷ 100. Bisher Naeherungen ohne Laktose (Standalone
+  0,337+0,116•F+0,06•E; Backend NRC 0,327+0,1295•F+0,072•P). Zusaetzlich ein
+  Formel-Audit-Regressionstest gegen DLG-Referenzwerte.
+scope:
+  - energy_corrected_milk_kg in rationsoptimierung/app/nutrition/gfe2023.py auf DLG-Formel.
+  - _ecm_kg_per_kg_milk_factor im Backend-Endpoint auf DLG-Formel.
+  - CowProfile um optional milk_lactose_pct (Default 4,8) erweitern.
+  - Formel-Audit-Regressionstest (ECM/ME-Erhaltung/sidP) gegen DLG 01|2025.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-SCI-ECM-006.yaml"
+  - "rationsoptimierung/app/nutrition/gfe2023.py"
+  - "rationsoptimierung/app/domain/models.py"
+  - "rationsoptimierung/tests/test_formula_audit_dlg2025.py"
+  - "app/api/v1/endpoints/rations_optimization.py"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-SCI-ECM-006.yaml
+  - rationsoptimierung/app/nutrition/gfe2023.py
+  - rationsoptimierung/app/domain/models.py
+  - rationsoptimierung/tests/test_formula_audit_dlg2025.py
+  - app/api/v1/endpoints/rations_optimization.py
+progress: >-
+  2026-07-11 reserviert. Grundlage DLG Information 01|2025 (Kap. 10 /
+  Abkuerzungen). Bisherige ECM-Naeherungen ohne Laktose; DLG-Formel bezieht
+  Laktose ein (Referenz 4,8 %). Verifikation 4,0/3,4/4,8 -> ~1,0015 kg ECM/kg Milch.
+acceptance:
+  - "energy_corrected_milk_kg und Backend-ECM nutzen die DLG-Formel inkl. Laktose."
+  - "CowProfile traegt optional milk_lactose_pct (Default 4,8)."
+  - "Formel-Audit-Test reproduziert die DLG-ECM-Definition; bestehende Tests bleiben gruen."
+tests:
+  - "pytest rationsoptimierung/tests/test_formula_audit_dlg2025.py -q -> passed."
+  - "pytest rationsoptimierung/tests/test_gfe2023.py -q -> passed (Regression)."
+  - "python -m py_compile der geaenderten Dateien -> 0."
+risks:
+  - "ECM ist solver-kritisch (Kosten je ECM); Aenderung mit Regression absichern."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    ECM folgt der DLG-01|2025-Definition (Fett/Protein/Laktose, 3,15 MJ/kg).
+    Laktose-Default 4,8 % entspricht der DLG-ECM-Referenzzusammensetzung.
+  architektur_vertrag: >-
+    Keine neuen Services/Routen. Formelfunktionen werden praezisiert; API-Vertrag
+    unveraendert (nur optionales Profilfeld milk_lactose_pct).
+  daten_vertrag: >-
+    Keine Datenmigration. milk_lactose_pct ist optional mit Default; abwaertskompatibel.
+  security_vertrag: >-
+    Keine neuen Eingabepfade/Auth-Aenderungen; reine Berechnung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung.
+  dokumentations_vertrag: >-
+    Workboard/Slice-YAML dokumentieren Formelwechsel und Audit; README-Nutrition-
+    Abschnitt wird nachgezogen.
+  test_vertrag: >-
+    Formel-Audit plus bestehende gfe2023-Tests gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.
