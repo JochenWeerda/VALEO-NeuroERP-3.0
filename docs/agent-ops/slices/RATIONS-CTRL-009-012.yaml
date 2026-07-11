@@ -1,0 +1,41 @@
+slice_id: RATIONS-CTRL-009-012
+id: RATIONS-CTRL-009-012
+title: Fuetterungscontrolling-Regelkreis nach DLG 01|2025
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-11"
+started_at: "2026-07-11"
+completed_at: "2026-07-11"
+goal: Persistentes SOLL/IST-Fuetterungscontrolling mit Mischgenauigkeit, TM-Verzehr, Schuettelbox/peNDF, Nacherwaermung und IOFC.
+scope:
+  - Tenantisolierte Feeding-Logs je Gruppe und Datum.
+  - DLG-Kennzahlen und erklaerbare Anpassungsvorschlaege.
+  - Erfassung und Zeitreihe in der bestehenden Rations-Workbench.
+file_ownership:
+  - app/agrar/rations/control/**
+  - app/api/v1/endpoints/rations_optimization.py
+  - alembic/versions/rations_feeding_control_20260711.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+  - tests/test_rations_feeding_control_dlg2025.py
+  - docs/design/rationsoptimierung-folgewellen-masterplan.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Mischgenauigkeit, TM-Verzehr und IOFC stimmen gegen Handrechnung.
+  - Schuettelbox liefert Strukturanteil, peNDF-SOLL/IST-Ampel und Selektionsrisiko.
+  - Feeding-Logs werden per tenant_id/group_id/feeding_date persistiert und als Zeitreihe gelesen.
+  - Workbench zeigt SOLL, IST, Kennzahlen und Anpassungsvorschlaege.
+tests:
+  - pytest tests/test_rations_feeding_control_dlg2025.py -q --no-cov -> 12 passed.
+  - frontend tsc --noEmit -> 0.
+  - python py_compile -> 0; alembic heads -> one head.
+risks:
+  - peNDF-Ist ist ein Schuettelbox-/aNDFomGF-Proxy und wird in der UI nicht als Laboranalyse ausgegeben.
+ai_harness:
+  fachlicher_vertrag: DLG 01|2025 Kapitel 11 und 12; Mischabweichung bis 5 Prozent als Toleranz.
+  architektur_vertrag: Bestehende Rationsroute und Workbench erweitert; kein paralleles UI-System.
+  daten_vertrag: domain_agrar.feeding_logs mit Tenant-FK und eindeutigem Gruppentag.
+  security_vertrag: Pflicht-Tenant aus zentraler Dependency; alle Zeitreihenabfragen tenantgefiltert.
+  betriebs_vertrag: Alembic-Migration vor Nutzung der Persistenz erforderlich.
+  dokumentations_vertrag: Workboard, Masterplan, Slice-YAML und generierte API-Doku werden aktualisiert.
+  test_vertrag: Formeltests, TypeScript, OpenAPI- und Handbuch-Drift-Gates.

@@ -42,6 +42,8 @@ import {
   fetchFeeds,
   optimizeFromProfile,
   optimizeDemo,
+  saveFeedingControlLog,
+  fetchFeedingControlLogs,
   uploadCompoundFeedDocument,
   getRationsApiErrorMessage,
   fetchDlgInfo,
@@ -70,6 +72,7 @@ import {
   type ConcentrateCallUp,
   type RationBlocks,
   type MixingProtocol,
+  type FeedingControlResult,
   type RationAdjustmentApplyPatch,
   type RationAdjustmentSuggestion,
   type ObjectiveStrategy,
@@ -1057,6 +1060,49 @@ function MixingProtocolPanel({
   )
 }
 
+function FeedingControlPanel({ protocol, wizardData, result }: { protocol: MixingProtocol | null | undefined; wizardData: WizardData | null; result: OptimizationResult | null }) {
+  const [restKg, setRestKg] = useState(0)
+  const [tmPct, setTmPct] = useState(40)
+  const [loadPct, setLoadPct] = useState(100)
+  const [topPct, setTopPct] = useState(8)
+  const [middlePct, setMiddlePct] = useState(42)
+  const [feedTemp, setFeedTemp] = useState(20)
+  const [ambientTemp, setAmbientTemp] = useState(18)
+  const groupId = wizardData?.group.id ?? ''
+  const history = useQuery({ queryKey: ['feeding-control', groupId], queryFn: () => fetchFeedingControlLogs(groupId), enabled: Boolean(groupId) })
+  const save = useMutation({ mutationFn: saveFeedingControlLog, onSuccess: () => void history.refetch() })
+  if (!protocol || !wizardData || !result) return null
+  const components = protocol.steps.filter((step) => step.feed_id).map((step) => {
+    const soll = step.kgfm * wizardData.group.count
+    return { feed_id: step.feed_id as string, name: step.name, soll_kg: soll, ist_kg: soll * loadPct / 100 }
+  })
+  const latest = save.data?.control_result ?? history.data?.[0]?.control_result as FeedingControlResult | undefined
+  const submit = () => save.mutate({
+    group_id: groupId, feeding_date: new Date().toISOString().slice(0, 10), ration_ref: 'active-optimization',
+    komponenten: components, restfutter_kg: restKg, tierzahl: wizardData.group.count, tm_pct: tmPct,
+    milch_kg_kuh: wizardData.milkYield, milchpreis_eur_kg: wizardData.milkPriceEur ?? 0.44,
+    futterkosten_eur_kuh: result.total_cost_eur_day ?? null, futtertisch_temp_c: feedTemp, umgebung_temp_c: ambientTemp,
+    schuettelbox: { oben_pct: topPct, mitte_pct: middlePct, unten_pct: 100 - topPct - middlePct, fein_pct: 0,
+      pendf_soll_g_kgdm: result.dlg_indicators?.pendf_kgdm ?? null, ndf_g_kgdm: result.dlg_indicators?.andfom_gf_kgdm ?? null },
+  })
+  return <div className={card('space-y-3')}>
+    <div><p className="text-[11px] uppercase font-bold" style={{ color: C.muted }}>Fütterungscontrolling · SOLL → IST → Anpassung</p><p className="text-sm font-semibold">Tagesprotokoll {wizardData.group.name}</p></div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <label>Beladung IST %<input className="w-full border rounded p-1" type="number" value={loadPct} onChange={e => setLoadPct(Number(e.target.value))} /></label>
+      <label>Restfutter kg<input className="w-full border rounded p-1" type="number" value={restKg} onChange={e => setRestKg(Number(e.target.value))} /></label>
+      <label>TM gemessen %<input className="w-full border rounded p-1" type="number" value={tmPct} onChange={e => setTmPct(Number(e.target.value))} /></label>
+      <label>Futter/Umgebung °C<div className="flex"><input className="w-1/2 border rounded p-1" type="number" value={feedTemp} onChange={e => setFeedTemp(Number(e.target.value))} /><input className="w-1/2 border rounded p-1" type="number" value={ambientTemp} onChange={e => setAmbientTemp(Number(e.target.value))} /></div></label>
+      <label>Schüttelbox &gt;19 mm %<input className="w-full border rounded p-1" type="number" value={topPct} onChange={e => setTopPct(Number(e.target.value))} /></label>
+      <label>Schüttelbox 8–19 mm %<input className="w-full border rounded p-1" type="number" value={middlePct} onChange={e => setMiddlePct(Number(e.target.value))} /></label>
+    </div>
+    <button onClick={submit} disabled={save.isPending} className="px-3 py-2 rounded text-xs font-bold text-white" style={{ background: C.accent }}>{save.isPending ? 'Speichert…' : 'IST erfassen & Regelkreis bewerten'}</button>
+    {latest && <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div>Mischgenauigkeit <b>{latest.mischgenauigkeit_pct ?? '–'} %</b></div><div>TM-Verzehr <b>{latest.tm_verzehr_kg_kuh ?? '–'} kg/Kuh</b></div><div>IOFC <b>{latest.iofc_eur_kuh ?? '–'} €/Kuh</b></div><div>peNDF IST <b>{latest.schuettelbox?.pendf_ist_g_kgdm ?? '–'} g/kg TM</b></div>
+    </div>}
+    {latest?.anpassungsvorschlaege?.map((item) => <div key={item} className="text-xs rounded border p-2" style={{ background: C.deltaBg, borderColor: C.deltaBorder }}>{item}</div>)}
+    <p className="text-[10px]" style={{ color: C.muted }}>Zeitreihe: {history.data?.length ?? 0} Protokolle · DLG-Toleranz Mischgenauigkeit ≤ 5 %. peNDF-Ist ist ein Schüttelbox-/NDF-Proxy, keine Laboranalyse.</p>
+  </div>
+}
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
@@ -3177,6 +3223,7 @@ function Workbench({
         <ConcentrateCallUpPanel callUp={result?.concentrate_call_up ?? null} compact />
         {/* Slice 3: Misch- und Fuetterungsprotokoll (TMR-Mischmasse). */}
         <MixingProtocolPanel protocol={result?.mixing_protocol ?? null} compact />
+        <FeedingControlPanel protocol={result?.mixing_protocol ?? null} wizardData={wizardData} result={result} />
       </main>
 
       {/* ── Rechte Spalte: KPI + AI ── */}

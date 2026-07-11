@@ -120312,6 +120312,165 @@
         "title": "_FanOptions",
         "type": "object"
       },
+      "_FeedingControlComponent": {
+        "properties": {
+          "feed_id": {
+            "title": "Feed Id",
+            "type": "string"
+          },
+          "ist_kg": {
+            "title": "Ist Kg",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "soll_kg": {
+            "title": "Soll Kg",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feed_id",
+          "name",
+          "soll_kg",
+          "ist_kg"
+        ],
+        "title": "_FeedingControlComponent",
+        "type": "object"
+      },
+      "_FeedingControlIn": {
+        "description": "Fuetterungsprotokoll (Ist) fuer die Rationskontrolle (DLG 01|2025, Kap. 11/12).",
+        "properties": {
+          "feeding_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding Date"
+          },
+          "futterkosten_eur_kuh": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Futterkosten Eur Kuh"
+          },
+          "futtertisch_temp_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Futtertisch Temp C"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "komponenten": {
+            "items": {
+              "$ref": "#/components/schemas/_FeedingControlComponent"
+            },
+            "title": "Komponenten",
+            "type": "array"
+          },
+          "milch_kg_kuh": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milch Kg Kuh"
+          },
+          "milchpreis_eur_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milchpreis Eur Kg"
+          },
+          "ration_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ration Ref"
+          },
+          "restfutter_kg": {
+            "default": 0.0,
+            "title": "Restfutter Kg",
+            "type": "number"
+          },
+          "schuettelbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_ShakerBoxIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tierzahl": {
+            "title": "Tierzahl",
+            "type": "integer"
+          },
+          "tm_pct": {
+            "title": "Tm Pct",
+            "type": "number"
+          },
+          "umgebung_temp_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umgebung Temp C"
+          }
+        },
+        "required": [
+          "komponenten",
+          "tierzahl",
+          "tm_pct"
+        ],
+        "title": "_FeedingControlIn",
+        "type": "object"
+      },
       "_FollowUpActionItem": {
         "properties": {
           "value": {
@@ -120539,6 +120698,56 @@
           "cow_profile"
         ],
         "title": "_OptimizeFromProfileBody",
+        "type": "object"
+      },
+      "_ShakerBoxIn": {
+        "properties": {
+          "fein_pct": {
+            "default": 0.0,
+            "title": "Fein Pct",
+            "type": "number"
+          },
+          "mitte_pct": {
+            "title": "Mitte Pct",
+            "type": "number"
+          },
+          "ndf_g_kgdm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ndf G Kgdm"
+          },
+          "oben_pct": {
+            "title": "Oben Pct",
+            "type": "number"
+          },
+          "pendf_soll_g_kgdm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pendf Soll G Kgdm"
+          },
+          "unten_pct": {
+            "title": "Unten Pct",
+            "type": "number"
+          }
+        },
+        "required": [
+          "oben_pct",
+          "mitte_pct",
+          "unten_pct"
+        ],
+        "title": "_ShakerBoxIn",
         "type": "object"
       },
       "_StringListItem": {
@@ -150339,6 +150548,196 @@
           }
         ],
         "summary": "Strukturindex berechnen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding-control/evaluate": {
+      "post": {
+        "description": "Verrechnet ein Fuetterungsprotokoll zu Kontroll-Kennzahlen (DLG 01|2025, Kap. 11/12):\nTM-Verzehr je Kuh, Mischgenauigkeit (Toleranz < 5 %) und IOFC.",
+        "operationId": "evaluate_feeding_control_api_v1_agrar_rations_optimization_feeding_control_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_FeedingControlIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fuetterungscontrolling: SOLL/IST-Kontrolle",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding-control/logs": {
+      "get": {
+        "operationId": "list_feeding_control_logs_api_v1_agrar_rations_optimization_feeding_control_logs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fuetterungscontrolling-Zeitreihe",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization"
+        ]
+      },
+      "post": {
+        "operationId": "save_feeding_control_log_api_v1_agrar_rations_optimization_feeding_control_logs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_FeedingControlIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fuetterungsprotokoll speichern",
         "tags": [
           "agrar",
           "futtermittel",

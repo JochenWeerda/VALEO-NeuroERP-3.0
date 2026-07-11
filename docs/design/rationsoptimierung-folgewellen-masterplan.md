@@ -129,6 +129,8 @@ energy_efficiency_kg_ecm_per_10mj, protein_efficiency_pct, bodymass_efficiency_k
 
 ## F1 — Fütterungscontrolling & Rationskontrolle (P1, XL)
 
+**F1-Umsetzungsstand 2026-07-11: abgeschlossen.** Persistente Feeding-Logs, SOLL/IST-Kontrolle, Schüttelbox/peNDF-Proxy, Nacherwärmung, IOFC, Zeitreihe und Workbench-Regelkreis sind umgesetzt; Nachweis: `RATIONS-CTRL-009-012`.
+
 ### Fachlicher Kontext (DLG 01|2025, Kap. 11 + 12)
 Der **Regelkreis** Planung(SOLL) → Füttern → Kontrolle(IST) → Anpassung (Abb. 9) ist der
 Kern der DLG-Empfehlung — und genau Fodjans „Fütterungscontrolling"-Stärke. Kontrollpunkte:

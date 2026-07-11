@@ -839,6 +839,73 @@ export async function optimizeDemo(): Promise<OptimizationResult> {
   return data
 }
 
+// F1 (DLG 01|2025, Kap. 11/12): Fütterungscontrolling — SOLL/IST-Kontrolle
+export interface FeedingControlComponentIn {
+  feed_id: string
+  name: string
+  soll_kg: number
+  ist_kg: number
+}
+
+export interface FeedingControlIn {
+  komponenten: FeedingControlComponentIn[]
+  restfutter_kg?: number
+  tierzahl: number
+  tm_pct: number
+  milch_kg_kuh?: number | null
+  milchpreis_eur_kg?: number | null
+  futterkosten_eur_kuh?: number | null
+  group_id?: string
+  feeding_date?: string
+  ration_ref?: string | null
+  futtertisch_temp_c?: number | null
+  umgebung_temp_c?: number | null
+  schuettelbox?: { oben_pct: number; mitte_pct: number; unten_pct: number; fein_pct?: number; pendf_soll_g_kgdm?: number | null; ndf_g_kgdm?: number | null } | null
+}
+
+export interface FeedingControlResult {
+  tm_verzehr_kg_kuh: number | null
+  vorgelegt_kg: number
+  restfutter_kg: number
+  aufgenommen_fm_kg: number
+  tierzahl: number
+  tm_pct: number
+  mischgenauigkeit_pct: number | null
+  mischgenauigkeit_ok: boolean
+  komponenten: Array<{
+    feed_id: string
+    name: string
+    soll_kg: number
+    ist_kg: number
+    abweichung_kg: number
+    abweichung_pct: number | null
+    innerhalb_toleranz: boolean
+  }>
+  iofc_eur_kuh: number | null
+  futterkosten_eur_kuh: number | null
+  warnungen: string[]
+  anpassungsvorschlaege: string[]
+  futtertisch_temp_c: number | null
+  umgebung_temp_c: number | null
+  schuettelbox: { struktur_gt_8mm_pct: number; pendf_soll_g_kgdm: number | null; pendf_ist_g_kgdm: number | null; pendf_delta_g_kgdm: number | null; status: string; selektionsrisiko: boolean } | null
+}
+
+export async function evaluateFeedingControl(payload: FeedingControlIn): Promise<FeedingControlResult> {
+  const { data } = await apiClient.post<FeedingControlResult>(`${BASE}/feeding-control/evaluate`, payload)
+  return data
+}
+
+export interface FeedingControlLog { id: string; group_id: string; feeding_date: string; ration_ref: string | null; control_result: FeedingControlResult; created_at: string }
+
+export async function saveFeedingControlLog(payload: FeedingControlIn): Promise<FeedingControlLog> {
+  const { data } = await apiClient.post<FeedingControlLog>(`${BASE}/feeding-control/logs`, payload)
+  return data
+}
+
+export async function fetchFeedingControlLogs(groupId: string, limit = 30): Promise<FeedingControlLog[]> {
+  const { data } = await apiClient.get<FeedingControlLog[]>(`${BASE}/feeding-control/logs`, { params: { group_id: groupId, limit } })
+  return data
+}
 export async function uploadCompoundFeedDocument(file: File): Promise<CompoundFeedUploadResult> {
   const form = new FormData()
   form.append('file', file)

@@ -21,11 +21,17 @@ from __future__ import annotations
 import json
 import logging
 import os
+from datetime import date
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple
 
-from fastapi import APIRouter, File, Header, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.core.uuid7 import uuid7
 
 
 logger = logging.getLogger(__name__)
@@ -6840,6 +6846,97 @@ async def calculate_requirements(
             raise HTTPException(status_code=500, detail=str(exc))
     tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request("POST", "/api/v1/requirements/calculate", tenant_id=tenant_id, json_body=body)
+
+
+class _FeedingControlComponent(BaseModel):
+    feed_id: str
+    name: str
+    soll_kg: float
+    ist_kg: float
+
+
+class _ShakerBoxIn(BaseModel):
+    oben_pct: float
+    mitte_pct: float
+    unten_pct: float
+    fein_pct: float = 0.0
+    pendf_soll_g_kgdm: Optional[float] = None
+    ndf_g_kgdm: Optional[float] = None
+
+class _FeedingControlIn(BaseModel):
+    """Fuetterungsprotokoll (Ist) fuer die Rationskontrolle (DLG 01|2025, Kap. 11/12)."""
+    komponenten: List[_FeedingControlComponent]
+    restfutter_kg: float = 0.0
+    tierzahl: int
+    tm_pct: float
+    milch_kg_kuh: Optional[float] = None
+    milchpreis_eur_kg: Optional[float] = None
+    futterkosten_eur_kuh: Optional[float] = None
+    schuettelbox: Optional[_ShakerBoxIn] = None
+    futtertisch_temp_c: Optional[float] = None
+    umgebung_temp_c: Optional[float] = None
+    group_id: Optional[str] = None
+    feeding_date: Optional[date] = None
+    ration_ref: Optional[str] = None
+
+
+@router.post("/feeding-control/evaluate", summary="Fuetterungscontrolling: SOLL/IST-Kontrolle")
+async def evaluate_feeding_control(payload: _FeedingControlIn):
+    """Verrechnet ein Fuetterungsprotokoll zu Kontroll-Kennzahlen (DLG 01|2025, Kap. 11/12):
+    TM-Verzehr je Kuh, Mischgenauigkeit (Toleranz < 5 %) und IOFC.
+    """
+    from app.agrar.rations.control.feeding_control import (
+        LoadedComponent,
+        compute_feeding_control,
+        evaluate_shaker_box,
+    )
+
+    comps = [
+        LoadedComponent(feed_id=c.feed_id, name=c.name, soll_kg=c.soll_kg, ist_kg=c.ist_kg)
+        for c in payload.komponenten
+    ]
+    shaker = evaluate_shaker_box(**payload.schuettelbox.model_dump()) if payload.schuettelbox else None
+    result = compute_feeding_control(
+        comps,
+        restfutter_kg=payload.restfutter_kg,
+        tierzahl=payload.tierzahl,
+        tm_pct=payload.tm_pct,
+        milch_kg_kuh=payload.milch_kg_kuh,
+        milchpreis_eur_kg=payload.milchpreis_eur_kg,
+        futterkosten_eur_kuh=payload.futterkosten_eur_kuh,
+        schuettelbox=shaker,
+        futtertisch_temp_c=payload.futtertisch_temp_c,
+        umgebung_temp_c=payload.umgebung_temp_c,
+    )
+    return JSONResponse(content=result.to_dict())
+
+@router.post("/feeding-control/logs", summary="Fuetterungsprotokoll speichern")
+async def save_feeding_control_log(payload: _FeedingControlIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    if not payload.group_id or not payload.feeding_date:
+        raise HTTPException(status_code=422, detail="group_id und feeding_date sind fuer die Persistenz erforderlich.")
+    evaluated = await evaluate_feeding_control(payload)
+    result = json.loads(evaluated.body)
+    row = db.execute(text("""
+      INSERT INTO domain_agrar.feeding_logs (id, tenant_id, group_id, feeding_date, ration_ref, payload, control_result)
+      VALUES (:id,:tenant_id,:group_id,:feeding_date,:ration_ref,CAST(:payload AS jsonb),CAST(:control_result AS jsonb))
+      ON CONFLICT (tenant_id,group_id,feeding_date) DO UPDATE SET ration_ref=EXCLUDED.ration_ref,
+        payload=EXCLUDED.payload, control_result=EXCLUDED.control_result, created_at=now()
+      RETURNING id, tenant_id, group_id, feeding_date, ration_ref, control_result, created_at
+    """), {"id": uuid7(), "tenant_id": tenant_id, "group_id": payload.group_id,
+      "feeding_date": payload.feeding_date, "ration_ref": payload.ration_ref,
+      "payload": json.dumps(payload.model_dump(mode="json"), ensure_ascii=False),
+      "control_result": json.dumps(result, ensure_ascii=False)}).mappings().first()
+    db.commit()
+    return dict(row)
+
+@router.get("/feeding-control/logs", summary="Fuetterungscontrolling-Zeitreihe")
+async def list_feeding_control_logs(group_id: str, limit: int = Query(default=30, ge=1, le=365), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    rows = db.execute(text("""
+      SELECT id, group_id, feeding_date, ration_ref, control_result, created_at
+      FROM domain_agrar.feeding_logs WHERE tenant_id=:tenant_id AND group_id=:group_id
+      ORDER BY feeding_date DESC LIMIT :limit
+    """), {"tenant_id": tenant_id, "group_id": group_id, "limit": limit}).mappings().all()
+    return [dict(row) for row in rows]
 
 
 @router.post("/requirements/maintenance", summary="Requirements maintenance",
