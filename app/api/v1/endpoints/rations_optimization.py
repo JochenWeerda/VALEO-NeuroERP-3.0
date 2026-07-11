@@ -3245,6 +3245,34 @@ def _ecm_kg_per_kg_milk_factor(profile: Dict[str, Any]) -> float:
     return (38.5 * fat + 24.2 * prot + 16.5 * lac) / 3.15 / 100.0
 
 
+def _efficiency_metrics(
+    ecm_kg_day: float,
+    dmi_kg: float,
+    me_mj: float,
+    milk_protein_g: float,
+    cp_intake_g: float,
+    body_weight_kg: float,
+) -> Dict[str, Any]:
+    """Effizienz-Kennzahlen nach DLG Information 01|2025 (Kap. 10).
+
+    Nur Energie-/Naehrstoff-basierte Effizienzen sind aussagekraeftig (kg ECM/kg TM
+    allein sagt nichts ueber die Bedarfsdeckung). Milch-Energiegehalt 3,15 MJ/kg.
+    """
+    return {
+        "ecm_kg_day": round(ecm_kg_day, 2),
+        # Futtereffizienz = kg ECM / kg TM-Aufnahme
+        "feed_efficiency_kg_ecm_per_kg_dm": round(ecm_kg_day / dmi_kg, 3) if dmi_kg > 1e-9 else None,
+        # Energieeffizienz = MJ Milchenergie (ECM*3,15) / MJ ME-Aufnahme
+        "energy_efficiency_mj_per_mj": round(ecm_kg_day * 3.15 / me_mj, 3) if me_mj > 1e-9 else None,
+        # Energieeffizienz = kg ECM / 10 MJ ME
+        "energy_efficiency_kg_ecm_per_10mj": round(ecm_kg_day / (me_mj / 10.0), 3) if me_mj > 1e-9 else None,
+        # Proteineffizienz = g Milchprotein / g CP-Aufnahme (in %)
+        "protein_efficiency_pct": round(milk_protein_g / cp_intake_g * 100.0, 1) if cp_intake_g > 1e-9 else None,
+        # Koerpermasseeffizienz = kg ECM / kg KM
+        "bodymass_efficiency_kg_ecm_per_kg": round(ecm_kg_day / body_weight_kg, 4) if body_weight_kg > 1e-9 else None,
+    }
+
+
 def _charnes_cooper_min_cost_per_milk_transform(
     A_ub: List[List[float]],
     b_ub: List[float],
@@ -4964,9 +4992,23 @@ def _build_response(
     _lim_mk = float(supplemented_milk.get("limiting_milk_kg") or 0.0)
     _ecm_day_kg = _lim_mk * _ecm_kg_per_kg_milk_factor(profile) if _lim_mk > 1e-9 else 0.0
     feed_cost_eur_per_kg_ecm = round(total_cost / max(_ecm_day_kg, 1e-9), 5)
+    # F2 (DLG 01|2025, Kap. 10): Effizienz-Kennzahlen aus dem Solver-Ergebnis.
+    _milk_prot_g = (
+        float(profile.get("milk_kg_day") or 0.0)
+        * float(profile.get("milk_protein_pct") or 0.0) / 100.0 * 1000.0
+    )
+    efficiency = _efficiency_metrics(
+        ecm_kg_day=_ecm_day_kg,
+        dmi_kg=total_dmi,
+        me_mj=float(nutrient_supply.get("me_mj") or 0.0),
+        milk_protein_g=_milk_prot_g,
+        cp_intake_g=float(nutrient_supply.get("cp_g") or 0.0),
+        body_weight_kg=float(profile.get("body_weight_kg") or 0.0),
+    )
 
     return {
         "status": "optimal",
+        "efficiency": efficiency,
         "objective_value": round(_f(result.fun), 4),
         "total_cost_eur_day": round(total_cost, 4),
         "total_cost_eur_100kg_milk": round(total_cost / (float(profile.get("milk_kg_day") or 1)) * 100, 2),

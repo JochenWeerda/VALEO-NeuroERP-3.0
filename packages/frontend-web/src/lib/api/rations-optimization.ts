@@ -618,6 +618,15 @@ export interface RationFeedSuggestion {
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
   objective_value?: number
+  // F2 (DLG 01|2025, Kap. 10): Effizienz-Kennzahlen
+  efficiency?: {
+    ecm_kg_day?: number
+    feed_efficiency_kg_ecm_per_kg_dm?: number | null
+    energy_efficiency_mj_per_mj?: number | null
+    energy_efficiency_kg_ecm_per_10mj?: number | null
+    protein_efficiency_pct?: number | null
+    bodymass_efficiency_kg_ecm_per_kg?: number | null
+  }
   total_cost_eur_day?: number
   total_cost_eur_100kg_milk?: number
   /** Feedkosten je kg ECM (Milch-Fett/-Protein-% aus Profil; ECM linearisiert NRC-artig). */

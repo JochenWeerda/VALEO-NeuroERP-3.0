@@ -3203,6 +3203,9 @@ function Workbench({
           </div>
         </div>
 
+        {/* Effizienz-Cockpit (F2, DLG 01|2025 Kap. 10) ------------------------ */}
+        <EfficiencyPanel result={result} />
+
         {/* FAN-Kalibrierung (GfE 2023) ---------------------------------------- */}
         {result?.fan_calibration && (
           <FanCalibrationPanel
@@ -4399,6 +4402,60 @@ function rationHealthAmpel(r: OptimizationResult): { state: AmpelState; label: s
   if (hardViolated) return { state: 'error', label: 'Prüfen' }
   if (softViolated || warnings > 0) return { state: 'warn', label: 'Grenzwertig' }
   return { state: 'ok', label: 'Gut' }
+}
+
+/**
+ * Effizienz-Cockpit (DLG 01|2025, Kap. 10): Futter-, Energie-, Protein- und
+ * Körpermasseeffizienz. Nur Energie-/Nährstoff-basierte Effizienzen sind aussagekräftig.
+ */
+function EfficiencyPanel({ result }: { result: OptimizationResult | null }) {
+  const eff = result?.efficiency
+  if (!eff) return null
+  const rows: { label: string; val: string; hint: string; ok: boolean | null }[] = [
+    {
+      label: 'Futtereffizienz',
+      val: eff.feed_efficiency_kg_ecm_per_kg_dm != null ? `${fmt(eff.feed_efficiency_kg_ecm_per_kg_dm, 2)} kg ECM/kg TM` : '–',
+      hint: 'Orientierung 1,3–1,6',
+      ok: eff.feed_efficiency_kg_ecm_per_kg_dm != null ? eff.feed_efficiency_kg_ecm_per_kg_dm >= 1.3 : null,
+    },
+    {
+      label: 'Energieeffizienz',
+      val: eff.energy_efficiency_kg_ecm_per_10mj != null ? `${fmt(eff.energy_efficiency_kg_ecm_per_10mj, 2)} kg ECM/10 MJ ME` : '–',
+      hint: eff.energy_efficiency_mj_per_mj != null ? `${fmt(eff.energy_efficiency_mj_per_mj, 2)} MJ/MJ` : '',
+      ok: eff.energy_efficiency_kg_ecm_per_10mj != null ? eff.energy_efficiency_kg_ecm_per_10mj >= 1.3 : null,
+    },
+    {
+      label: 'Proteineffizienz',
+      val: eff.protein_efficiency_pct != null ? `${fmt(eff.protein_efficiency_pct, 0)} %` : '–',
+      hint: 'Milch-N aus Futter-CP; Ziel ≥ 30 %',
+      ok: eff.protein_efficiency_pct != null ? eff.protein_efficiency_pct >= 30 : null,
+    },
+    {
+      label: 'Körpermasseeffizienz',
+      val: eff.bodymass_efficiency_kg_ecm_per_kg != null ? `${fmt(eff.bodymass_efficiency_kg_ecm_per_kg, 3)} kg ECM/kg KM` : '–',
+      hint: '',
+      ok: null,
+    },
+  ]
+  return (
+    <div className={card()}>
+      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+        Effizienz (DLG 01|25, Kap. 10)
+      </div>
+      {rows.map((r) => (
+        <div key={r.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-full" style={{ background: r.ok === null ? '#94a3b8' : r.ok ? C.success : C.error }} />
+            {r.label}
+          </span>
+          <span className="text-right">
+            <span className="font-mono font-medium">{r.val}</span>
+            {r.hint && <span className="block text-[9px]" style={{ color: C.muted }}>{r.hint}</span>}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 /** Immer sichtbares Kennzahlen-Trio oben in der Workbench (sticky). */
