@@ -2,9 +2,10 @@ slice_id: RATIONS-SCI-ECM-006
 id: RATIONS-SCI-ECM-006
 title: ECM-Formel-Praezisierung auf DLG 01|2025 + Formel-Audit
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-11"
 started_at: "2026-07-11"
+completed_at: "2026-07-11"
 goal: >-
   Energiekorrigierte Milch (ECM) im Rations-Backend auf die exakte DLG-01|2025-
   Definition umstellen: ECM[kg] = kg Milch • (38,5•Fett% + 24,2•Protein% +
@@ -34,6 +35,13 @@ progress: >-
   2026-07-11 reserviert. Grundlage DLG Information 01|2025 (Kap. 10 /
   Abkuerzungen). Bisherige ECM-Naeherungen ohne Laktose; DLG-Formel bezieht
   Laktose ein (Referenz 4,8 %). Verifikation 4,0/3,4/4,8 -> ~1,0015 kg ECM/kg Milch.
+  2026-07-11 umgesetzt: energy_corrected_milk_kg + total_me_requirement_mj auf DLG-
+  Formel (Laktose-Param, Default ECM_REFERENCE_LACTOSE_PCT=4,8); Backend
+  _ecm_kg_per_kg_milk_factor ebenso; CowProfile.milk_lactose_pct (Default 4,8);
+  RequirementService reicht Laktose durch. Neuer Test test_formula_audit_dlg2025.py
+  (ECM/ME-Erhaltung/ME-per-ECM/DCAB) + test_gfe2023 auf DLG-Formel angepasst.
+  Verifiziert: pytest formula_audit+gfe2023 13 passed, requirements+optimization 8
+  passed, backend py_compile 0. README-Nutrition-Abschnitt nachgezogen.
 acceptance:
   - "energy_corrected_milk_kg und Backend-ECM nutzen die DLG-Formel inkl. Laktose."
   - "CowProfile traegt optional milk_lactose_pct (Default 4,8)."

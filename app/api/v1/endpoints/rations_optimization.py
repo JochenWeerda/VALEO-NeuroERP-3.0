@@ -3233,15 +3233,16 @@ def _milk_from_supply(
 
 
 def _ecm_kg_per_kg_milk_factor(profile: Dict[str, Any]) -> float:
-    """kg ECM je kg Milch bei festem Fett-/Proteingehalt der Milch [%].
+    """kg ECM je kg Milch bei festem Fett-/Protein-/Laktosegehalt der Milch [%].
 
-    Gaengige Linearisierung (NRC-Ansatz):
-      ECM [kg/d] = 0.327*M + 12.95*Fett_kg/d + 7.2*Protein_kg/d
-    mit Fett_kg/d = M * fat%/100, Protein analog.
+    DLG Information 01|2025 (Kap. 10):
+      ECM [kg] = kg Milch * (38,5*Fett% + 24,2*Protein% + 16,5*Laktose%) / 3,15 / 100
+    Milch-Energiegehalt 3,15 MJ/kg; Laktose-Default 4,8 % (DLG-ECM-Referenz).
     """
     fat = float(profile.get("milk_fat_pct") or 4.0)
     prot = float(profile.get("milk_protein_pct") or 3.4)
-    return 0.327 + 0.1295 * fat + 0.072 * prot
+    lac = float(profile.get("milk_lactose_pct") or 4.8)
+    return (38.5 * fat + 24.2 * prot + 16.5 * lac) / 3.15 / 100.0
 
 
 def _charnes_cooper_min_cost_per_milk_transform(

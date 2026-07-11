@@ -61,25 +61,31 @@ def energy_maintenance_me_mj(live_weight_kg: float) -> float:
     return ME_MAINTENANCE_MJ_PER_KG_METABOLIC_BW * metabolic_body_weight_kg(live_weight_kg)
 
 
+# ECM-Referenz-Laktosegehalt [%] (DLG 01|2025: ECM mit 4,8 % Laktose).
+ECM_REFERENCE_LACTOSE_PCT = 4.8
+
+
 def energy_corrected_milk_kg(
     milk_kg_day: float,
     fat_percent: float,
     protein_percent: float,
+    lactose_percent: float = ECM_REFERENCE_LACTOSE_PCT,
 ) -> float:
     """
-    Energiekorrigierte Milch ECM [kg/Tag].
+    Energiekorrigierte Milch ECM [kg/Tag] nach DLG Information 01|2025 (Kap. 10).
 
-    ECM ≈ Milch × (0,337 + 0,116 × Fett% + 0,06 × Eiweiß%)
-    mit Fett% und Eiweiß% als Prozentangaben (z. B. 3,8 und 3,2).
+    ECM [kg] = kg Milch × (38,5 × Fett% + 24,2 × Protein% + 16,5 × Laktose%) ÷ 3,15 ÷ 100
 
-    Gängige Schätzformel in DE-Beratungsmaterial als Bezugsgröße für die GfE-2023-ME-Milch-
-    Formel; exakte Definition siehe GfE-Handbuch.
+    mit Fett%, Protein% und Laktose% als Prozentangaben (z. B. 4,0 / 3,4 / 4,8) und
+    dem Milch-Energiegehalt 3,15 MJ/kg. Bei Referenzzusammensetzung (4,0/3,4/4,8) ergibt
+    sich ECM ≈ Milch. Laktose default 4,8 % (DLG-ECM-Referenz), falls nicht analysiert.
     """
     if milk_kg_day < 0:
         raise ValueError("Milchmenge darf nicht negativ sein")
     f = max(fat_percent, 0.0)
     p = max(protein_percent, 0.0)
-    factor = 0.337 + 0.116 * f + 0.06 * p
+    la = max(lactose_percent, 0.0)
+    factor = (38.5 * f + 24.2 * p + 16.5 * la) / 3.15 / 100.0
     return milk_kg_day * factor
 
 
@@ -99,15 +105,16 @@ def total_me_requirement_mj(
     milk_kg_day: float,
     fat_percent: float,
     protein_percent: float,
+    lactose_percent: float = ECM_REFERENCE_LACTOSE_PCT,
 ) -> Tuple[float, float, float]:
     """
-    Gesamt-ME-Bedarf [MJ/Tag] = Erhaltung + Milch (über ECM).
+    Gesamt-ME-Bedarf [MJ/Tag] = Erhaltung + Milch (über ECM nach DLG 01|2025).
 
     Returns:
         (me_total, me_maintenance, me_lactation)
     """
     me_m = energy_maintenance_me_mj(live_weight_kg)
-    ecm = energy_corrected_milk_kg(milk_kg_day, fat_percent, protein_percent)
+    ecm = energy_corrected_milk_kg(milk_kg_day, fat_percent, protein_percent, lactose_percent)
     me_l = energy_lactation_me_mj(ecm)
     return me_m + me_l, me_m, me_l
 

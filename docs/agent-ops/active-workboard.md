@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RATIONS-SCI-ECM-006 ECM-Formel-Praezisierung auf DLG 01|2025 + Formel-Audit - in Arbeit 2026-07-11
+## RATIONS-SCI-ECM-006 ECM-Formel-Praezisierung auf DLG 01|2025 + Formel-Audit - abgeschlossen 2026-07-11
 
-**Owner:** Codex. **Stand:** in Arbeit 2026-07-11 - Folgewelle F7 (Plan `docs/design/rationsoptimierung-folgewellen-masterplan.md`). ECM auf exakte DLG-01|2025-Formel `Milch•(38,5•Fett + 24,2•Protein + 16,5•Laktose)÷3,15÷100` umstellen (bisher Naeherungen ohne Laktose: Standalone `0,337+0,116•F+0,06•E`, Backend NRC `0,327+0,1295•F+0,072•P`). `CowProfile.milk_lactose_pct` (Default 4,8) + Formel-Audit-Regression. **Dateibesitz:** `rationsoptimierung/app/nutrition/gfe2023.py`, `rationsoptimierung/app/domain/models.py`, `rationsoptimierung/tests/test_formula_audit_dlg2025.py`, `app/api/v1/endpoints/rations_optimization.py`, Slice-YAML und Workboard. **Abnahme:** Formel-Audit + gfe2023-Regression gruen; py_compile 0.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-11 - Folgewelle F7 (Plan `docs/design/rationsoptimierung-folgewellen-masterplan.md`). ECM auf exakte DLG-01|2025-Formel `Milch•(38,5•Fett + 24,2•Protein + 16,5•Laktose)÷3,15÷100` umgestellt (Standalone `energy_corrected_milk_kg`/`total_me_requirement_mj` + Backend `_ecm_kg_per_kg_milk_factor`); `ECM_REFERENCE_LACTOSE_PCT=4,8`, `CowProfile.milk_lactose_pct` (Default 4,8), RequirementService reicht Laktose durch. Neuer Formel-Audit `tests/test_formula_audit_dlg2025.py` (ECM/ME-Erhaltung/ME-per-ECM/DCAB), `test_gfe2023` auf DLG-Formel angepasst. **Dateibesitz:** `rationsoptimierung/app/nutrition/gfe2023.py`, `rationsoptimierung/app/domain/models.py`, `rationsoptimierung/app/services/requirement_service.py`, `rationsoptimierung/tests/test_formula_audit_dlg2025.py`, `rationsoptimierung/tests/test_gfe2023.py`, `rationsoptimierung/README.md`, `app/api/v1/endpoints/rations_optimization.py`, Slice-YAML und Workboard. **Abnahme:** pytest formula_audit+gfe2023 -> 13 passed; requirements+optimization -> 8 passed; backend py_compile -> 0.
 
 ## RATIONS-SCI-AA-005 sid-Aminosaeuren-Balance als KPI sichtbar - abgeschlossen 2026-07-10
 
