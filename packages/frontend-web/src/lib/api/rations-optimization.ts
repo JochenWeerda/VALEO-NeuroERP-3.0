@@ -251,6 +251,11 @@ export interface NutrientSupply {
   sidlys_g?: number
   sidmet_g?: number
   sidlys_sidmet_ratio?: number
+  // F3 (DLG 01|2025, Kap. 9.2.2): DCAB der Ration + K-Dichte + S/Cl
+  s_g?: number | null
+  cl_g?: number | null
+  dcab_meq_kgdm?: number
+  k_g_kgdm?: number
 }
 
 export interface ConstraintReportItem {

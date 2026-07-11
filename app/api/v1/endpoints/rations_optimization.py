@@ -4238,6 +4238,12 @@ def _build_response(
     na_sup = _agg.na
     mg_sup = _agg.mg
     k_sup = _agg.k
+    s_sup = _agg.s
+    cl_sup = _agg.cl
+    # F3 (DLG 01|2025, Kap. 9.2.2): Rations-DCAB = TM-gewichtete DCAB / Gesamt-TM [meq/kg TM].
+    dcab_meq_kgdm = (_agg.dcab / total_dmi) if total_dmi > 1e-9 else 0.0
+    # K-Dichte [g/kg TM] fuer close-up-Kontrolle (Ziel < 12 g/kg TM).
+    k_density_kgdm = (k_sup / total_dmi) if total_dmi > 1e-9 else 0.0
     sidlys_sup = _agg.sidlys
     sidmet_sup = _agg.sidmet
 
@@ -4470,6 +4476,11 @@ def _build_response(
         "na_g": round(na_sup, 1),
         "mg_g": round(mg_sup, 1),
         "k_g": round(k_sup, 1),
+        "s_g": round(s_sup, 1) if s_sup else None,
+        "cl_g": round(cl_sup, 1) if cl_sup else None,
+        # F3: DCAB der Ration und K-Dichte (close-up-Kontrolle)
+        "dcab_meq_kgdm": round(dcab_meq_kgdm, 0),
+        "k_g_kgdm": round(k_density_kgdm, 1),
         "sidlys_g": round(sidlys_sup, 1) if sidlys_sup else None,
         "sidmet_g": round(sidmet_sup, 1) if sidmet_sup else None,
         "sidlys_sidmet_ratio": round(sidlys_sup / sidmet_sup, 2) if sidmet_sup and sidmet_sup > 0 else None,

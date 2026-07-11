@@ -3266,6 +3266,22 @@ function Workbench({
                     ok: result.nutrient_supply.sidlys_sidmet_ratio >= 2.5 && result.nutrient_supply.sidlys_sidmet_ratio <= 3.5,
                   }]
                 : []),
+              // F3 (DLG 01|2025, Kap. 9.2.2): DCAB der Ration (Kontrolle Trockensteher/close-up = anionisch)
+              ...(result?.nutrient_supply.dcab_meq_kgdm != null
+                ? [{
+                    label: 'DCAB',
+                    val: `${fmt(result.nutrient_supply.dcab_meq_kgdm, 0)} meq/kg TM`,
+                    ok: null,
+                  }]
+                : []),
+              // F3: K-Dichte (close-up möglichst < 12 g/kg TM zur DCAB-Absenkung)
+              ...(result?.nutrient_supply.k_g_kgdm != null
+                ? [{
+                    label: 'K-Dichte',
+                    val: `${fmt(result.nutrient_supply.k_g_kgdm, 1)} g/kg TM`,
+                    ok: result.nutrient_supply.k_g_kgdm <= 12,
+                  }]
+                : []),
             ].map((row) => (
               <div key={row.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
                 <span className="flex items-center gap-1.5">

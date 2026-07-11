@@ -1,0 +1,75 @@
+slice_id: RATIONS-SCI-DRYCOW-008
+id: RATIONS-SCI-DRYCOW-008
+title: DCAB-Rations-Aggregat + Mineralexposition (DLG 01|2025)
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-11"
+started_at: "2026-07-11"
+completed_at: "2026-07-11"
+goal: >-
+  DLG-01|2025-Trockensteher-/DCAB-Kontrolle (Kap. 9.2.2): Rations-DCAB als
+  TM-gewichteten Mittelwert der futtermittelspezifischen DCAB [meq/kg TM]
+  aggregieren und mit K-Dichte, S und Cl in der Antwort ausweisen; DCAB und
+  K-Dichte (close-up Ziel < 12 g/kg TM) als Kennzahlen in der Workbench zeigen.
+  DCAB = (Na+ + K+) - (Cl- + S2-).
+scope:
+  - DCAB/S/Cl-Aggregation im Rations-Aggregator (TM-gewichtet).
+  - nutrient_supply um dcab_meq_kgdm, k_g_kgdm, s_g, cl_g erweitern.
+  - Frontend NutrientSupply-Typ + DCAB/K-Dichte-Zeilen im DLG-Panel.
+  - DCAB-Aggregations-Regressionstest.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-SCI-DRYCOW-008.yaml"
+  - "app/agrar/rations/response/aggregator.py"
+  - "app/api/v1/endpoints/rations_optimization.py"
+  - "tests/test_rations_dcab_dlg2025.py"
+  - "packages/frontend-web/src/lib/api/rations-optimization.ts"
+  - "packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-SCI-DRYCOW-008.yaml
+  - app/agrar/rations/response/aggregator.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - tests/test_rations_dcab_dlg2025.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+progress: >-
+  2026-07-11 umgesetzt: Aggregator um s/cl/dcab (TM-gewichtet) erweitert; Endpoint
+  berechnet dcab_meq_kgdm = dcab/total_dmi und k_g_kgdm; nutrient_supply traegt
+  dcab_meq_kgdm, k_g_kgdm, s_g, cl_g. Frontend-Typ erweitert; DCAB- und K-Dichte-
+  Zeilen (close-up Ziel < 12 g/kg TM) im DLG-Panel. Regressionstest DCAB
+  TM-gewichteter Mittelwert. Hinweis: die exakten Trockensteher-ME/sidP-Zielbaender
+  (far-off/close-up, Tab. 11) sind ueber die bestehende Policy-Profil-Infrastruktur
+  als Folgeschritt vorgesehen; dieser Slice liefert das DCAB-/Mineral-Fundament.
+acceptance:
+  - "Rations-DCAB = TM-gewichteter Mittelwert der Feed-DCAB (Regressionstest)."
+  - "nutrient_supply liefert dcab_meq_kgdm, k_g_kgdm, s_g, cl_g."
+  - "Workbench zeigt DCAB und K-Dichte; tsc/eslint/build gruen."
+tests:
+  - "pytest tests/test_rations_dcab_dlg2025.py -> 4 passed."
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "eslint -> 0; pnpm run build -> 0; backend py_compile -> 0."
+risks:
+  - "DCAB ist eine Dichte (meq/kg TM); Aggregation nur als TM-gewichteter Mittelwert korrekt (getestet)."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate, E2E."
+ai_harness:
+  fachlicher_vertrag: >-
+    DCAB = (Na+ + K+) - (Cl- + S2-) [meq/kg TM] nach DLG 01|2025, Kap. 9.2.2.
+    Rations-DCAB als TM-gewichteter Mittelwert der Feed-DCAB. K-Dichte-Kontrolle
+    close-up Ziel < 12 g/kg TM.
+  architektur_vertrag: >-
+    Additive Aggregat-/Antwortfelder in bestehendem Aggregator/Endpoint; kein
+    neuer Service/Route, kein Solver-Kontraktbruch.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt vorhandene DLG-Futterwerte (dcab, s, cl, k je Feed).
+  security_vertrag: >-
+    Keine neuen Eingaben/Auth-Aenderungen; reine Berechnung/Anzeige.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung.
+  dokumentations_vertrag: >-
+    Workboard/Slice-YAML dokumentieren DCAB-Aggregation und den Trockensteher-
+    ME/sidP-Folgeschritt.
+  test_vertrag: >-
+    DCAB-Regression + Frontend tsc/eslint/build + backend py_compile gruen vor
+    Push; GitHub Actions bestaetigen den Default-Branch.
