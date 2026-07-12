@@ -43,7 +43,7 @@ def _persist_feeding_log(db: Session, tenant_id: str, mapped: dict[str, Any]) ->
        "ration_ref": target.get("ration_ref"), "payload": json.dumps(target, ensure_ascii=False), "result": json.dumps(result, ensure_ascii=False)})
     return result
 
-@router.post("/{adapter}/import", summary="Rationsdaten aus externem Standard importieren")
+@router.post("/{adapter}/import", summary="Rationsdaten aus externem Standard importieren", response_model=dict)
 async def import_rations_data(adapter: AdapterName, body: ImportBody, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         mapped = _ADAPTERS[adapter](body.payload)
@@ -68,7 +68,7 @@ async def import_rations_data(adapter: AdapterName, body: ImportBody, tenant_id:
     output["duplicate"] = False
     return output
 
-@router.get("/imports", summary="Importjournal der Rationsschnittstellen")
+@router.get("/imports", summary="Importjournal der Rationsschnittstellen", response_model=list[dict])
 async def list_rations_imports(adapter: AdapterName | None = None, limit: int = Query(default=50, ge=1, le=250),
                                tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     rows = db.execute(text("""SELECT id,adapter,external_id,source_version,target_model,result,imported_at

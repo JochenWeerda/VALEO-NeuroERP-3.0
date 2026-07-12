@@ -151094,7 +151094,14 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Rations Imports Api V1 Agrar Rations Optimization Integrations Imports Get",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -151175,7 +151182,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Import Rations Data Api V1 Agrar Rations Optimization Integrations  Adapter  Import Post",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
