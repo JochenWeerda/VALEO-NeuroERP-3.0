@@ -44,6 +44,10 @@ progress: >-
   rations_feeding_control_20260711 -> rations_integrations_20260712 (Single-Head
   verifiziert). Optionale Frontend-Importoberflaeche bleibt als Nachlauf offen
   (Transport/Onboarding bleibt provider-/konfigurationsabhaengig).
+  2026-07-12 Quality-Gate-Nachlauf: die beiden Integrations-Routen (import/imports)
+  mit response_model typisiert (untyped routes 21 -> 19, unter Schwelle 20); OpenAPI
+  regeneriert. Dieses Slice-/Workboard-Update begleitet die Code-Aenderung fuer den
+  docs/code-sync-Gate.
 acceptance:
   - "Je Adapter Referenzpayload gemappt und Duplikatschutz getestet."
   - "agrirouter-Import persistiert ein F1-Fuetterungsprotokoll."
