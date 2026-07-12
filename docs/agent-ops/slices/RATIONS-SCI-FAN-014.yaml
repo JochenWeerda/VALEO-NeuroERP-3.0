@@ -33,3 +33,6 @@ ai_harness:
   betriebs_vertrag: Keine Migration oder neue Abhaengigkeit.
   dokumentations_vertrag: Workboard, Masterplan, Slice und generierte Doku.
   test_vertrag: DLG-Referenztests, komplette FAN-Regression, tsc, eslint, build.
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
+  - "Solver-/FAN-Regression im Pytest-Gate."

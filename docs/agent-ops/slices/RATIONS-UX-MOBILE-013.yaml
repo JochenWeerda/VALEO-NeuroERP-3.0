@@ -35,3 +35,6 @@ ai_harness:
   betriebs_vertrag: Keine neue Laufzeitabhaengigkeit.
   dokumentations_vertrag: Workboard, Masterplan, Slice und generierte Routen-/Handbuchartefakte.
   test_vertrag: tsc, eslint, build und 390px Playwright.
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+  - "Playwright-Mobile-Smoke (390px) im E2E-Gate."

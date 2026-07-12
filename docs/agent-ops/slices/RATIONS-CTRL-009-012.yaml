@@ -39,3 +39,6 @@ ai_harness:
   betriebs_vertrag: Alembic-Migration vor Nutzung der Persistenz erforderlich.
   dokumentations_vertrag: Workboard, Masterplan, Slice-YAML und generierte API-Doku werden aktualisiert.
   test_vertrag: Formeltests, TypeScript, OpenAPI- und Handbuch-Drift-Gates.
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate, E2E."
+  - "OpenAPI-/Code-Inventar-Drift-Gate nach neuen feeding-control-Endpunkten."

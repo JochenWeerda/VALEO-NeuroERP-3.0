@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -289,6 +289,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `proc_three_way_invoice_20260611` | Ensure finance_erechnungen for procurement three-way match. |
 | `prod_fibu_journal_ref_20260618` | PROD-FIBU-001: fibu_journal_ref auf ProduktionsAuftrag |
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
+| `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_zugang_dsgvo_20260420` | rations_zugang DSGVO access control table |
 | `repair_article_dangerous_goods_20260610` | Repair dangerous-goods columns required by the Article runtime model. |
 | `repair_business_partner_contract_20260610` | Complete the canonical business-partner runtime contract. |
