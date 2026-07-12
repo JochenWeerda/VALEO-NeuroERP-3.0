@@ -189,6 +189,8 @@ Menge/Ist erfassen". Fressplatzbreite-Hinweis 80–85 cm (min 75) als Kontroll-C
 
 ## F4 — FAN-abhängige Passagerate/OMD/ME-Präzisierung (P2, L)
 
+**F4-Umsetzungsstand 2026-07-12: abgeschlossen.** DLG-OMD/ME-Kette, Tabelle-6-Passagerate, EDG/UDP und UI-Nachweis sind umgesetzt; Nachweis: `RATIONS-SCI-FAN-014`.
+
 ### Fachlicher Kontext (DLG 01|2025, Kap. 4.3, 6.2, Tab. 6)
 Das **Futteraufnahmeniveau (FAN)** senkt OMD/ME (schnellere Passage). Die **Passagerate k
 [%/h]** steigt linear mit FAN und ist futtermittelgruppen-abhängig (Grobfutter < Misch/Saft

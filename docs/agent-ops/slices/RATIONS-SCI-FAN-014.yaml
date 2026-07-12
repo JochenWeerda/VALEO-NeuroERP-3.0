@@ -1,0 +1,35 @@
+slice_id: RATIONS-SCI-FAN-014
+id: RATIONS-SCI-FAN-014
+title: FAN-Passagerate OMD ME EDG UDP nach DLG 01|2025
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-12"
+started_at: "2026-07-12"
+completed_at: "2026-07-12"
+goal: Exakte FAN-Wirkung nach DLG Kap. 4.3/6.2 in der bestehenden Solveriteration und transparent in der UI.
+file_ownership:
+  - app/agrar/rations/fan_precision.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - tests/test_rations_fan_precision_dlg2025.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+acceptance:
+  - OMD-FAN-Gleichung reproduziert 80 Prozent bei FAN1 zu 74.4 Prozent bei FAN3.5.
+  - ME-Beispiel reproduziert rund 12.00 zu 11.56 MJ je kg TM.
+  - Tabelle-6-Passageraten und EDG-Grasbeispiel werden reproduziert.
+  - DLG-Feeds nutzen a/b/c/lag; unvollstaendige Eigenfutter sind sichtbar als Fallback markiert.
+  - UI zeigt TM-gewichtete Passage-, OMD-, ME-, EDG- und UDP-Werte.
+tests:
+  - FAN-/Saison-Regressionssatz -> 102 passed.
+  - TypeScript --noEmit -> 0; ESLint -> 0; production build -> 0.
+risks:
+  - Die PDF-Extraktion der Misch-/Saftfutterzeile bei FAN2 ist nicht monoton; umgesetzt ist die im Text geforderte lineare Beziehung aus den verifizierten Endpunkten FAN1/FAN4.
+  - FAN wird auf den bestehenden, dokumentierten Modellbereich 1 bis 5 begrenzt.
+ai_harness:
+  fachlicher_vertrag: DLG 01|2025 OMD-Gleichung, ME-Kette, Tabelle 6 und EDG-Formel.
+  architektur_vertrag: Reines Formelmodul innerhalb bestehender FAN-Iteration; kein zweiter Solver.
+  daten_vertrag: DLG-JSON liefert CA/CP/GE/OMD/A/B/C/LAGTIME/SIDUDP.
+  security_vertrag: Reine Berechnung ohne neue Eingabe- oder Authflaeche.
+  betriebs_vertrag: Keine Migration oder neue Abhaengigkeit.
+  dokumentations_vertrag: Workboard, Masterplan, Slice und generierte Doku.
+  test_vertrag: DLG-Referenztests, komplette FAN-Regression, tsc, eslint, build.

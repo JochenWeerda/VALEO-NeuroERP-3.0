@@ -166,6 +166,19 @@ export interface FanCalibrationPayload {
   feeds_mapped?: number
   feeds_fallback?: number
   fallback_warning?: string | null
+  precision_summary?: {
+    method: string
+    dmi_covered_kg: number
+    passage_rate_pct_h: number | null
+    omd_fan1_pct: number | null
+    omd_fani_pct: number | null
+    me_fan1_mj_kgdm: number | null
+    me_fani_mj_kgdm: number | null
+    edg_fan1_pct: number | null
+    edg_fani_pct: number | null
+    udp_fani_pct: number | null
+    fallback_items: number
+  }
 }
 
 export interface ConstraintStatusItem {

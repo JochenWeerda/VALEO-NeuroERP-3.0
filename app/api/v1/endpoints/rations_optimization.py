@@ -512,6 +512,7 @@ def _load_dlg_feeds_from_json(json_path: str) -> List[Dict[str, Any]]:
 
         sidp = _v(entry.get("SIDPFAN1"))
         cp = _v(entry.get("CP")) or 0.0
+        ash = _v(entry.get("CA"))
         ndf = _v(entry.get("ANDFOM")) or 0.0
         adf = _v(entry.get("ADFOM")) or 0.0
         st = _v(entry.get("STAERKE")) or 0.0
@@ -526,6 +527,11 @@ def _load_dlg_feeds_from_json(json_path: str) -> List[Dict[str, Any]]:
         k = _v(entry.get("K")) or 0.0
         dcab = _v(entry.get("DCAB"))
         edg = _v(entry.get("EDGFAN1"))
+        protein_a = _v(entry.get("A"))
+        protein_b = _v(entry.get("B"))
+        protein_c = _v(entry.get("C"))
+        protein_lag = _v(entry.get("LAGTIME"))
+        sidudp_pct = _v(entry.get("SIDUDP"))
         rmd = _v(entry.get("RMDFAN1"))
         omdfan1 = _v(entry.get("OMDFAN1"))
         ndfd = _v(entry.get("NDFD"))
@@ -576,6 +582,7 @@ def _load_dlg_feeds_from_json(json_path: str) -> List[Dict[str, Any]]:
             "me": me,
             "sidp": sidp or 0.0,
             "cp": cp,
+            "ash": ash,
             "ndf": ndf,
             "adf": adf,
             "st": st,
@@ -590,6 +597,11 @@ def _load_dlg_feeds_from_json(json_path: str) -> List[Dict[str, Any]]:
             "k": k,
             "dcab": dcab,
             "edg": edg,
+            "protein_a": protein_a,
+            "protein_b": protein_b,
+            "protein_c": protein_c,
+            "protein_lag": protein_lag,
+            "sidudp_pct": sidudp_pct,
             "rmd": rmd,
             "omdfan1": omdfan1,
             "ndfd": ndfd,
@@ -4218,8 +4230,30 @@ def _build_response(
             # FAN-MODE-V1: Herkunft der FAN-abhaengigen Koeffizienten (Spec §8.2.3).
             # In Slice 1 noch komplett "fallback"; Slice 3 ersetzt dies durch den Katalog.
             "fan_slope_source": feed.get("_fan_slope_source", "fallback"),
+            "fan_precision": feed.get("_fan_precision"),
         })
 
+    # F4: TM-weighted, explainable DLG FAN precision summary for UI/audit.
+    _precision_items = [(item["kgdm"], item.get("fan_precision")) for item in ration_items if item.get("fan_precision")]
+    if _precision_items:
+        _precision_dm = sum(weight for weight, _ in _precision_items)
+        def _weighted_precision(key: str) -> Optional[float]:
+            pairs = [(weight, payload.get(key)) for weight, payload in _precision_items if payload.get(key) is not None]
+            denominator = sum(weight for weight, _ in pairs)
+            return round(sum(weight * float(value) for weight, value in pairs) / denominator, 3) if denominator > 0 else None
+        fan_calibration["precision_summary"] = {
+            "method": "DLG-01|2025-ch4.3-ch6.2",
+            "dmi_covered_kg": round(_precision_dm, 3),
+            "passage_rate_pct_h": _weighted_precision("passage_rate_pct_h"),
+            "omd_fan1_pct": _weighted_precision("omd_fan1_pct"),
+            "omd_fani_pct": _weighted_precision("omd_fani_pct"),
+            "me_fan1_mj_kgdm": _weighted_precision("me_fan1_mj_kgdm"),
+            "me_fani_mj_kgdm": _weighted_precision("me_fani_mj_kgdm"),
+            "edg_fan1_pct": _weighted_precision("edg_fan1_pct"),
+            "edg_fani_pct": _weighted_precision("edg_fani_pct"),
+            "udp_fani_pct": _weighted_precision("udp_fani_pct"),
+            "fallback_items": sum(1 for _, payload in _precision_items if str(payload.get("method", "")).startswith("conservative")),
+        }
     # --- Nährstoffversorgung (Refactor Schritt 2, 2026-04-23) -------------
     # Alle Tagesaggregate werden in einem einzigen Pass berechnet;
     # Legacy-Variablennamen bleiben als Aliase erhalten, damit der Rest
@@ -5377,6 +5411,12 @@ def _annotate_feeds_with_fan_catalog(
         feed["_fan_slope_me"] = float(grp_def.get("slope_me", 0.0))
         feed["_fan_k_fan1"] = float(grp_def.get("k_fan1", 0.0))
         feed["_fan_slope_source"] = source
+        feed["_fan_passage_class"] = (
+            "mixed_juice" if grp_id == "roughage_juice_feed" else
+            "concentrate" if grp_id.startswith("concentrate_") else
+            "roughage" if feed.get("forage") or grp_id.startswith("roughage_") else
+            "concentrate"
+        )
         if source == "exact":
             info["feeds_exact"] += 1
         elif source == "mapped":
@@ -5404,32 +5444,37 @@ def _fan1_reference_kg(profile: Dict[str, Any]) -> float:
 
 
 def _apply_fan_effect(feeds: List[Dict[str, Any]], fani: float) -> List[Dict[str, Any]]:
-    """Passt ME und sidP-Koeffizienten jedes Feeds an das gewaehlte FAN-Niveau an.
+    """Apply exact DLG 01|2025 OMD/ME, passage-rate and EDG/UDP formulas."""
+    from app.agrar.rations.fan_precision import precision_for_feed
 
-    Spec §8.2: ME(FANi) = ME_FAN1 + slope_me * (FANi - 1)
-    Der Proteinwert (sidP) wird entsprechend der Passage-k-Steigerung um
-    (1 + k_fan1 * (FANi - 1)) multipliziert, was eine konservative Annaeherung an das
-    in DLG 504 beschriebene lineare Passageraten-Modell ist.
-    """
     out: List[Dict[str, Any]] = []
-    delta = fani - 1.0
     for feed in feeds:
-        base = feed.get("_me_fan1")
-        if base is None:
-            base = float(feed.get("me") or 0.0)
-            feed["_me_fan1"] = base
-        sidp_base = feed.get("_sidp_fan1")
-        if sidp_base is None:
-            sidp_base = float(feed.get("sidp") or 0.0)
-            feed["_sidp_fan1"] = sidp_base
-        slope_me = float(feed.get("_fan_slope_me") or 0.0)
-        k_fan1 = float(feed.get("_fan_k_fan1") or 0.0)
-        new_me = max(0.0, base + slope_me * delta)
-        sidp_factor = max(0.0, 1.0 + k_fan1 * delta)
-        new_sidp = sidp_base * sidp_factor
+        me_base = float(feed.get("_me_fan1") if feed.get("_me_fan1") is not None else feed.get("me") or 0.0)
+        sidp_base = float(feed.get("_sidp_fan1") if feed.get("_sidp_fan1") is not None else feed.get("sidp") or 0.0)
+        precision = precision_for_feed(
+            fani=fani,
+            passage_class=feed.get("_fan_passage_class", "roughage" if feed.get("forage") else "concentrate"),
+            me_fan1=me_base, sidp_fan1=sidp_base, ge_mj_kgdm=feed.get("ge"),
+            ash_g_kgdm=feed.get("ash"), cp_g_kgdm=feed.get("cp"), omd_fan1_pct=feed.get("omdfan1"),
+            a_pct=feed.get("protein_a"), b_pct=feed.get("protein_b"), c_pct_h=feed.get("protein_c"),
+            lag_h=feed.get("protein_lag"), sidudp_pct=feed.get("sidudp_pct"),
+        )
         adjusted = dict(feed)
-        adjusted["me"] = new_me
-        adjusted["sidp"] = new_sidp
+        adjusted["_me_fan1"] = me_base
+        adjusted["_sidp_fan1"] = sidp_base
+        if precision.omd_fani_pct is None:
+            # Custom/incomplete feed: exact DLG chain is impossible without OMD/GE/ash/CP.
+            delta = max(1.0, min(float(fani), 5.0)) - 1.0
+            adjusted["me"] = max(0.0, me_base + float(feed.get("_fan_slope_me") or 0.0) * delta)
+            adjusted["sidp"] = max(0.0, sidp_base * (1.0 + float(feed.get("_fan_k_fan1") or 0.0) * delta))
+            precision_payload = precision.to_dict()
+            precision_payload["method"] = "conservative-catalog-fallback-missing-analysis"
+            adjusted["_fan_precision"] = precision_payload
+        else:
+            adjusted["me"] = precision.me_fani_mj_kgdm
+            adjusted["sidp"] = precision.sidp_fani_g_kgdm
+            adjusted["_fan_precision"] = precision.to_dict()
+        adjusted["edg"] = precision.edg_fani_pct if precision.edg_fani_pct is not None else feed.get("edg")
         out.append(adjusted)
     return out
 

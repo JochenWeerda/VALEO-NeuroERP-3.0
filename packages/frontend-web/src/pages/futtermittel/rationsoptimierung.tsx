@@ -2758,7 +2758,19 @@ function FanCalibrationPanel({
             </span>
           </div>
         )}
-        {(policyProfile || seasonProfile || relaxationPolicy) && (
+        {fan.precision_summary && (
+          <div className="col-span-2 mt-1 rounded border p-2" style={{ borderColor: C.border, background: '#F8FAFC' }}>
+            <div className="mb-1 flex justify-between font-semibold"><span>DLG-FAN-Präzision</span><span>Kap. 4.3 / 6.2</span></div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-[10px]">
+              <span>Passage k</span><span className="text-right">{fan.precision_summary.passage_rate_pct_h?.toFixed(2) ?? '–'} %/h</span>
+              <span>OMD FAN1 → FANi</span><span className="text-right">{fan.precision_summary.omd_fan1_pct?.toFixed(1) ?? '–'} → {fan.precision_summary.omd_fani_pct?.toFixed(1) ?? '–'} %</span>
+              <span>ME FAN1 → FANi</span><span className="text-right">{fan.precision_summary.me_fan1_mj_kgdm?.toFixed(2) ?? '–'} → {fan.precision_summary.me_fani_mj_kgdm?.toFixed(2) ?? '–'}</span>
+              <span>EDG FAN1 → FANi</span><span className="text-right">{fan.precision_summary.edg_fan1_pct?.toFixed(1) ?? '–'} → {fan.precision_summary.edg_fani_pct?.toFixed(1) ?? '–'} %</span>
+              <span>UDP FANi</span><span className="text-right">{fan.precision_summary.udp_fani_pct?.toFixed(1) ?? '–'} %</span>
+            </div>
+            {fan.precision_summary.fallback_items > 0 && <p className="mt-1 text-[10px]" style={{ color: C.warn }}>{fan.precision_summary.fallback_items} Position(en) ohne vollständige Analytik: konservativer Fallback.</p>}
+          </div>
+        )}        {(policyProfile || seasonProfile || relaxationPolicy) && (
           <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
             <span style={{ color: C.muted }}>Policy</span>
             <span className="font-mono text-[10px]">
