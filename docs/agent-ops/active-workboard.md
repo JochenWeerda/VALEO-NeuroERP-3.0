@@ -11,6 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATIONS-SCI-FAN-014 FAN-Passagerate/OMD/ME-Praezisierung - reserviert
+
+**Owner:** Codex. **Stand:** reserviert 2026-07-12. **Ziel:** FAN-abhaengige Passagerate je Futtermittelgruppe, OMD-/ME-Korrektur und EDG/UDP-Wirkung nach DLG 01|2025 Kap. 4.3/6.2 in die bestehende FAN-/Solver-/Aggregator-Kette integrieren und als erklaerbares Ergebnis ausweisen. **Dateibesitz:** `app/agrar/rations/**`, gezielte Erweiterungen im Rationsendpoint, fokussierte Tests, Frontend-API/UI nur fuer transparente Kennzahlen, Workboard, Slice, Masterplan und generierte API-/Handbuchartefakte. **Abnahme:** Referenz-FAN reproduziert DLG-Tabellenpunkte; keine doppelte Energiekorrektur; Rationsregression, TypeScript/Build und Doku-Drift gruen. **Risiken:** DLG 2025c-Gleichungen duerfen nicht durch unbelegte Interpolation ersetzt werden; Geltungsbereich und Extrapolationsgrenzen muessen sichtbar sein.
 ## RATIONS-UX-MOBILE-013 Mobile Fuetterungsdokumentation - abgeschlossen 2026-07-12
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-12. **Ergebnis:** Eigene touch-optimierte Route `/futtermittel/fuetterungsdokumentation-mobil`: freigegebene Aktivration als SOLL-Mischfolge, "Jetzt fuettern", komponentenweise Ist-Mengen, Restfutter/TM, Schuettelbox und Temperatur; Speichern direkt in den tenantisolierten F1-Feeding-Log, Ergebnisansicht mit Mischabweichung, TM-Verzehr, IOFC, peNDF und Anpassungshinweisen. Kein Solver auf dem Mobilgeraet. Route und Navigation registriert. **Dateibesitz:** mobile Seite, Aktivrations-Snapshot in der bestehenden Workbench, Navigation, Route-Artefakte, E2E-Test, Slice und Doku. **Abnahme:** TypeScript und ESLint gruen; Playwright 390x844 `1 passed`, kein horizontaler Body-Scroll; Production-Build gruen.
