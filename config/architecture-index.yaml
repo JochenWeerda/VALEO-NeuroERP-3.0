@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-12
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-12T10:25:22Z'
+generated_at: '2026-07-12T11:25:15Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -357,6 +357,7 @@ domains:
     - partiestamm
     - produktion_mischfutter
     - produktion_rezepturgruppen
+    - rations_integrations
     - rations_optimization
     - rations_zugang
     - reklamation_api
@@ -1828,8 +1829,8 @@ mapping_stats:
   frontend_routes_mapped: 896
   backend_services_total: 210
   backend_services_mapped: 210
-  backend_endpoints_total: 405
-  backend_endpoints_mapped: 405
+  backend_endpoints_total: 406
+  backend_endpoints_mapped: 406
 unmapped:
   frontend_routes: []
   backend_services: []

@@ -328,6 +328,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `quality_lot_binding` | Quality Lot Binding Endpoints — FEED-CHAIN-003. |
 | `quality_protocols` | Quality Protocol API endpoints. |
 | `rag` | RAG API Endpoints |
+| `rations_integrations` | Ration integration imports: agrirouter 2.0, ICAR ADE and laboratory JSON. |
 | `rations_optimization` | Rationsoptimierung API  (GfE 2023 / DLG-Futterwerttabellen Stand Juli 2025) |
 | `rations_zugang` | Rationsoptimierung – DSGVO-Zugangsverwaltung |
 | `read_model_snapshots` | — |

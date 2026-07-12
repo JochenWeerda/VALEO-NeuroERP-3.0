@@ -53384,6 +53384,21 @@
         "title": "ImageEnrichResult",
         "type": "object"
       },
+      "ImportBody": {
+        "properties": {
+          "payload": {
+            "additionalProperties": true,
+            "description": "Provider payload, decoded to JSON at the transport boundary",
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "required": [
+          "payload"
+        ],
+        "title": "ImportBody",
+        "type": "object"
+      },
       "ImportError": {
         "description": "Import error for a single row",
         "properties": {
@@ -151018,6 +151033,177 @@
           "rations-optimization",
           "agrar",
           "rations-optimization"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/integrations/imports": {
+      "get": {
+        "operationId": "list_rations_imports_api_v1_agrar_rations_optimization_integrations_imports_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "adapter",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "agrirouter",
+                    "icar-ade",
+                    "laboratory"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Adapter"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 250,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Importjournal der Rationsschnittstellen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/integrations/{adapter}/import": {
+      "post": {
+        "operationId": "import_rations_data_api_v1_agrar_rations_optimization_integrations__adapter__import_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "adapter",
+            "required": true,
+            "schema": {
+              "enum": [
+                "agrirouter",
+                "icar-ade",
+                "laboratory"
+              ],
+              "title": "Adapter",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsdaten aus externem Standard importieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
         ]
       }
     },

@@ -1,0 +1,85 @@
+slice_id: RATIONS-INT-015-017
+id: RATIONS-INT-015-017
+title: Rations-Schnittstellen agrirouter/ICAR-ADE/Labor (JSON-first Adapter)
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-12"
+started_at: "2026-07-12"
+completed_at: "2026-07-12"
+goal: >-
+  JSON-first Integrationsadapter fuer Mischwagen-Istwerte (agrirouter 2.0,
+  EFDI/TaskData), LKV/MLP-Tierdaten (ICAR-ADE) und Futterlaboranalysen
+  (LKS/LUFA/Eurofins-normalisiert). Importe muenden in die kanonischen Modelle
+  F1-FeedingLog, CowProfile und FeedIngredient statt paralleler Datenwege, mit
+  tenantisoliertem Idempotenz-/Auditjournal (Folgewelle F5).
+scope:
+  - Reine Adapter-Funktionen agrirouter_to_feeding_log/icar_ade_to_cow_profile/laboratory_to_feed_ingredient.
+  - Import-Endpoint /agrar/rations-optimization/integrations/{adapter}/import mit Duplikatschutz + Journal.
+  - agrirouter-Import persistiert direkt ein F1-Fuetterungsprotokoll (compute_feeding_control).
+  - Migration domain_agrar.rations_integration_imports (tenant-FK, Unique, Zeitindex).
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-INT-015-017.yaml"
+  - "app/agrar/rations/integrations/__init__.py"
+  - "app/agrar/rations/integrations/adapters.py"
+  - "app/api/v1/endpoints/rations_integrations.py"
+  - "app/api/v1/endpoints/rations_optimization.py"
+  - "alembic/versions/rations_integrations_20260712.py"
+  - "tests/test_rations_integrations_f5.py"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-INT-015-017.yaml
+  - app/agrar/rations/integrations/__init__.py
+  - app/agrar/rations/integrations/adapters.py
+  - app/api/v1/endpoints/rations_integrations.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - alembic/versions/rations_integrations_20260712.py
+  - tests/test_rations_integrations_f5.py
+progress: >-
+  2026-07-12 umgesetzt (Codex) und in dieser Session reviewt/finalisiert: drei
+  JSON-first Adapter mit kanonischen Zielvertraegen; Import-Endpoint mit
+  tenantisoliertem Idempotenz-/Auditjournal (payload_hash, Unique je
+  tenant/adapter/external_id); agrirouter persistiert ein F1-FeedingLog ueber
+  compute_feeding_control; Import-Journal-Listing. Alembic-Kette
+  rations_feeding_control_20260711 -> rations_integrations_20260712 (Single-Head
+  verifiziert). Optionale Frontend-Importoberflaeche bleibt als Nachlauf offen
+  (Transport/Onboarding bleibt provider-/konfigurationsabhaengig).
+acceptance:
+  - "Je Adapter Referenzpayload gemappt und Duplikatschutz getestet."
+  - "agrirouter-Import persistiert ein F1-Fuetterungsprotokoll."
+  - "ICAR/Labor liefern kanonische Zielvertraege (CowProfile/FeedIngredient)."
+  - "Alembic Single-Head; OpenAPI-/Inventar-/Architektur-Drift-Gates gruen."
+tests:
+  - "pytest tests/test_rations_integrations_f5.py -> 6 passed."
+  - "python -m alembic heads -> Single-Head (1)."
+  - "python -m py_compile der F5-Dateien -> 0."
+risks:
+  - "Provider-Transport/Onboarding bleibt konfigurationsabhaengig; keine erfundenen Live-Credentials oder Zertifizierung."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate, Security Scan."
+  - "OpenAPI-/Code-Inventar-/Architektur-Index-Drift-Gate nach den neuen Integrations-Endpunkten."
+ai_harness:
+  fachlicher_vertrag: >-
+    Importe muenden in die kanonischen Rationsmodelle (F1-FeedingLog, CowProfile,
+    FeedIngredient); keine parallelen Datenmodelle. agrirouter-Istwerte werden
+    ueber die DLG-01|2025-Kontrolllogik (compute_feeding_control) verrechnet.
+  architektur_vertrag: >-
+    Reine Adapter + ein Import-Endpoint unter dem bestehenden Rationsprefix; der
+    Integrations-Router wird in den Rationsrouter eingebunden. Kein neuer Service.
+  daten_vertrag: >-
+    Neue Tabelle domain_agrar.rations_integration_imports mit Tenant-FK und
+    Unique (tenant, adapter, external_id) fuer Idempotenz; Alembic-Migration
+    verkettet auf die F1-Feeding-Log-Migration (Single-Head).
+  security_vertrag: >-
+    Pflicht-Tenant aus zentraler Dependency (get_tenant_id); alle Journal-/
+    Persistenzabfragen tenantgefiltert. Payload wird als bereits dekodiertes JSON
+    an der Transportgrenze entgegengenommen; payload_hash fuer Audit.
+  betriebs_vertrag: >-
+    Alembic-Migration vor Nutzung erforderlich; Provider-Transport (agrirouter/
+    ICAR/Labor) bleibt betrieblich/konfigurativ anzubinden.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML, OpenAPI, Code-Inventare und Architektur-Index werden
+    fuer die neuen Endpunkte aktualisiert.
+  test_vertrag: >-
+    Adapter-/Endpoint-Tests, Alembic-Single-Head, py_compile und die Doku-Drift-
+    Gates muessen vor Push gruen sein; GitHub Actions bestaetigen den Default-Branch.
