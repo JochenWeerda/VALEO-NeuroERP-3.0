@@ -11,6 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATIONS-INT-015..017 agrirouter/ICAR-ADE/Laboradapter - reserviert
+
+**Owner:** Codex. **Stand:** reserviert 2026-07-12. **Ziel:** JSON-first Integrationsadapter fuer Mischwagen-Istwerte (agrirouter), LKV/MLP-Tierdaten (ICAR-ADE) und Futterlaboranalysen; Ergebnisse muenden in F1-FeedingLog, CowProfile und FeedIngredient statt paralleler Datenmodelle, mit tenantisoliertem Idempotenz-/Auditjournal. **Dateibesitz:** `app/agrar/rations/integrations/**`, Rationsendpoint, zugehoerige Migration, fokussierte Tests, optionale UI-Importoberflaeche im bestehenden Rationsprogramm, Frontendvertrag, Workboard/Slice/Masterplan und generierte API-/Handbuchartefakte. **Abnahme:** je Adapter Referenzpayload und Duplikatschutz getestet; agrirouter persistiert F1-Protokoll; ICAR/Labor liefern kanonische Zielvertraege; UI zeigt Importstatus; pytest/tsc/eslint/build/Drift-Gates gruen. **Risiken:** Provider-Transport/Onboarding bleibt konfigurationsabhaengig; keine erfundenen Live-Credentials oder vermeintliche Zertifizierung.
 ## RATIONS-SCI-FAN-014 FAN-Passagerate/OMD/ME-Praezisierung - abgeschlossen 2026-07-12
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-12. **Ergebnis:** Interne ME-/sidP-Slope-Naeherung fuer vollstaendige DLG-Futterwerte durch DLG-01|2025-Formeln ersetzt: OMD(FANi), ME-Kette inkl. Methan-/Harnenergie, Tabelle-6-Passagerate je Grobfutter/Konzentrat/Misch-/Saftfutter, EDG aus a/b/c/lag, UDP und MCP-/sidP-Wirkung. DLG-Rohfelder werden geladen; unvollstaendige Eigenfutter bleiben explizit als konservativer Fallback markiert. FAN-Panel zeigt TM-gewichtete Passage, OMD, ME, EDG und UDP. **Abnahme:** 102 FAN-/Saison-Tests gruen; TypeScript/ESLint/Build gruen. **Dateibesitz:** FAN-Präzisionsmodul, Rationsendpoint, Tests, Frontendvertrag/-panel, Slice, Workboard und Masterplan.
