@@ -42,5 +42,6 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "mischfuttermittel-stamm"
   },
   { "module": "@/pages/futtermittel/rationsoptimierung", "path": "rationsoptimierung" },
+  { "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil", "path": "fuetterungsdokumentation-mobil" },
   { "module": "@/pages/futtermittel/rations-zugang", "path": "rations-zugang" },
 ]

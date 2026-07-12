@@ -1,0 +1,37 @@
+slice_id: RATIONS-UX-MOBILE-013
+id: RATIONS-UX-MOBILE-013
+title: Mobile Fuetterungsdokumentation
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-12"
+started_at: "2026-07-12"
+completed_at: "2026-07-12"
+goal: Touch-optimierter Jetzt-fuettern-Flow ohne mobilen Solver, gespeist aus aktiver Ration und mit Persistenz in F1.
+file_ownership:
+  - packages/frontend-web/src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+  - packages/frontend-web/src/app/navigation/domains/operations.tsx
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/futtermittel.ts
+  - packages/frontend-web/src/app/routing/route-tree.gen.tsx
+  - packages/frontend-web/src/app/routing/route-inventory.gen.json
+  - packages/frontend-web/tests/e2e/rations-mobile-feeding.spec.ts
+acceptance:
+  - Aktive Ration wird als schlanker Snapshot fuer die Stallarbeit bereitgestellt.
+  - Mobile Route erfasst Ist-Mengen, Restfutter, TM, Schuettelbox und Temperatur.
+  - Speichern nutzt den F1-Feeding-Log-Vertrag und startet keinen Solver.
+  - 390px-Kernflow hat keinen horizontalen Body-Scroll.
+tests:
+  - TypeScript --noEmit -> 0.
+  - ESLint fokussiert -> 0.
+  - Playwright mobile 390x844 -> 1 passed.
+  - Frontend production build -> 0.
+risks:
+  - Aktivrations-Snapshot liegt lokal im Browser; das eigentliche Tagesprotokoll wird serverseitig tenantisoliert persistiert.
+ai_harness:
+  fachlicher_vertrag: DLG 01|2025 Kapitel 11, mobile Ist-Dokumentation ohne Neuberechnung.
+  architektur_vertrag: Verwendet bestehende Rationsseite, API-Client, F1-Endpoint und App-Routing; kein paralleler Solver.
+  daten_vertrag: Browser-Snapshot ist read-only Ausgangspunkt, Feeding-Log ist kanonische Persistenz.
+  security_vertrag: API-Client fuehrt bestehende Auth-/Tenant-Header mit.
+  betriebs_vertrag: Keine neue Laufzeitabhaengigkeit.
+  dokumentations_vertrag: Workboard, Masterplan, Slice und generierte Routen-/Handbuchartefakte.
+  test_vertrag: tsc, eslint, build und 390px Playwright.

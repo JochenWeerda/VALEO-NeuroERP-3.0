@@ -171,6 +171,8 @@ tm_verzehr_kg, iofc_eur, peNDF_ist, warnungen[]). Neue Endpoints unter
 
 ## F6 — Mobile Dokumentations-Ansicht (P2, L)
 
+**F6-Umsetzungsstand 2026-07-12: abgeschlossen.** Mobile SOLL→IST→Kontrolle, F1-Persistenz, 390px-Smoke und Navigation sind umgesetzt; Nachweis: `RATIONS-UX-MOBILE-013`.
+
 ### Fachlicher Kontext
 Fodjan-App-Parität: On-farm-Erfassung ohne Solver. DLG Kap. 11: „nur die aufgenommene
 Menge/Ist erfassen". Fressplatzbreite-Hinweis 80–85 cm (min 75) als Kontroll-Checkliste.

@@ -2741,6 +2741,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
+      "path": "futtermittel/fuetterungsdokumentation-mobil",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/futtermittel/futtermittel-bestellung",
       "path": "futtermittel/futtermittel-bestellung",
       "source": "auto"

@@ -619,6 +619,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
             mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
           },
           {
+            id: 'fuetterungsdokumentation-mobil',
+            label: 'Jetzt füttern (mobil)',
+            icon: Smartphone,
+            module: '@/pages/futtermittel/fuetterungsdokumentation-mobil',
+            preferredPath: 'futtermittel/fuetterungsdokumentation-mobil',
+            mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
+          },
+          {
             id: 'grundfutteranalysen',
             label: 'Grundfutter-Analysen',
             icon: Microscope,

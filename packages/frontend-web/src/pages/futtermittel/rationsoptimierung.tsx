@@ -4560,6 +4560,26 @@ export default function Rationsoptimierung() {
   const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    if (!result || !wizardData || typeof window === 'undefined') return
+    const protocolItems = result.mixing_protocol?.steps?.filter((item) => item.feed_id) ?? []
+    const components = (protocolItems.length ? protocolItems : result.ration_items).map((item) => ({
+      feed_id: item.feed_id as string,
+      name: item.name,
+      soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * wizardData.group.count,
+    })).filter((item) => item.soll_kg > 0)
+    localStorage.setItem('valeo.rations.active-mobile.v1', JSON.stringify({
+      version: 1,
+      updatedAt: new Date().toISOString(),
+      group: { id: wizardData.group.id, name: wizardData.group.name, count: wizardData.group.count },
+      milkYield: wizardData.milkYield,
+      milkPriceEur: wizardData.milkPriceEur ?? 0.44,
+      totalCostEurDay: result.total_cost_eur_day ?? 0,
+      pendfSollGKgdm: result.dlg_indicators?.pendf_kgdm ?? null,
+      ndfProxyGKgdm: result.dlg_indicators?.andfom_gf_kgdm ?? null,
+      components,
+    }))
+  }, [result, wizardData])
 
   // Intent-Vorschau (RATIONS-UX-INTENT-002): transiente Vorschau ohne die aktive Ration zu ueberschreiben
   const [previewIntent, setPreviewIntent] = useState<IntentKey | null>(null)
