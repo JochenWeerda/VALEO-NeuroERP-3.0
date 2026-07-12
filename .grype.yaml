@@ -32,3 +32,13 @@ ignore:
     package:
       name: python
       type: binary
+
+  # CPython binary finding whose only "fixed in" release is 3.15.0, i.e. a
+  # future minor branch with no supported 3.13/3.14 slim-bookworm Docker tag
+  # available (checked 2026-07-12). Not an actionable upgrade for the pinned
+  # 3.13 line. Keep package/binary scoped and drop once a patched supported
+  # CPython image ships.
+  - vulnerability: CVE-2026-15308
+    package:
+      name: python
+      type: binary
