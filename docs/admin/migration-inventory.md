@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -188,6 +188,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `feed_chain_verbrauch_20260612` | Futtermittel-Produktionsauftrag: Verbrauchs-Snapshot + Charge-Referenz. |
 | `feed_produktion_lifecycle_20260623` | DOM-FEED-PROD-004 — Mischfutter Produktionsauftrag, Rezeptur, QS-Log |
 | `feed_qs_wf_cockpit_repair_20260626` | FEED-QS-001 + WF-COCKPIT-002: Futtermittel-QS-Tabellen + domain_workflow sicherstellen. |
+| `feldbuch_acker_waves_20260713` | Ackerschlagkartei wave fields (AS-W1/W2/W4/W5/W6). |
 | `feldbuch_schlag_massnahme_20260226` | Add feldbuch_schlaege and feldbuch_massnahmen to domain_agrar |
 | `ff7b1a7899b4_add_customer_inquiries_table` | add_customer_inquiries_table |
 | `fibu_connector_asset_ledger_rename_20260301` | FIBU Connector: QUADRIGA → ASSET_LEDGER (geschützter Name entfernt) |

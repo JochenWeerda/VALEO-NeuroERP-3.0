@@ -170,7 +170,31 @@ class PortalSchlagUpdate(BaseModel):
     status: Optional[str] = None
 
 
-class PortalMassnahmeCreate(BaseModel):
+# Nicht-Spalten-Eingaben (nur zur Berechnung), werden vor dem Persistieren entfernt.
+_NUTRIENT_INPUT_KEYS = ("n_gehalt", "p2o5_gehalt", "k2o_gehalt", "mgo_gehalt", "s_gehalt", "preis_je_einheit")
+
+
+class PortalMassnahmeBase(BaseModel):
+    # AS-W1: Düngung — Reinnährstoffe werden aus Gehalten (% des Produkts) berechnet
+    n_gehalt: Optional[float] = None
+    p2o5_gehalt: Optional[float] = None
+    k2o_gehalt: Optional[float] = None
+    mgo_gehalt: Optional[float] = None
+    s_gehalt: Optional[float] = None
+    preis_je_einheit: Optional[float] = None   # €/kg bzw. €/l Produkt → kosten_eur
+    duenger_form: Optional[str] = None         # 'M' | 'O'
+    # AS-W4: Pflanzenschutz
+    wirkungsbereich: Optional[str] = None
+    begruendung: Optional[str] = None
+    # AS-W6: Ernte
+    ertrag_dt_ha: Optional[float] = None
+    qualitaet: Optional[str] = None
+    erloes_eur: Optional[float] = None
+    nebenleistung_eur: Optional[float] = None
+    kosten_eur: Optional[float] = None
+
+
+class PortalMassnahmeCreate(PortalMassnahmeBase):
     schlag_id: Optional[str] = None
     datum: datetime
     uhrzeit: Optional[str] = None
@@ -184,7 +208,7 @@ class PortalMassnahmeCreate(BaseModel):
     bemerkung: Optional[str] = None
 
 
-class PortalMassnahmeUpdate(BaseModel):
+class PortalMassnahmeUpdate(PortalMassnahmeBase):
     schlag_id: Optional[str] = None
     datum: Optional[datetime] = None
     uhrzeit: Optional[str] = None
@@ -196,6 +220,40 @@ class PortalMassnahmeUpdate(BaseModel):
     flaeche: Optional[float] = None
     anwender: Optional[str] = None
     bemerkung: Optional[str] = None
+
+
+def _apply_duengung_nutrients(payload: dict[str, Any]) -> dict[str, Any]:
+    """AS-W1: Reinnährstoffe (N/P2O5/K2O/MgO/S) + Kosten aus Gehalten berechnen.
+
+    Erwartet die Gehalt-Prozente und Produktmenge/ha (`menge`) + Fläche im Payload,
+    entfernt die Nicht-Spalten-Eingaben und ergänzt die berechneten Spalten.
+    """
+    from app.agrar.feldbuch.naehrstoff import NaehrstoffGehalt, reinnaehrstoffe_kg
+
+    gehalt = NaehrstoffGehalt(
+        n=float(payload.get("n_gehalt") or 0.0),
+        p2o5=float(payload.get("p2o5_gehalt") or 0.0),
+        k2o=float(payload.get("k2o_gehalt") or 0.0),
+        mgo=float(payload.get("mgo_gehalt") or 0.0),
+        s=float(payload.get("s_gehalt") or 0.0),
+        organisch=(payload.get("duenger_form") == "O"),
+    )
+    menge = float(payload.get("menge") or 0.0)
+    flaeche = float(payload.get("flaeche") or 0.0)
+    has_gehalt = any(getattr(gehalt, k) > 0 for k in ("n", "p2o5", "k2o", "mgo", "s"))
+    if has_gehalt and menge > 0 and flaeche > 0:
+        rn = reinnaehrstoffe_kg(menge, flaeche, gehalt)
+        payload["n_kg"] = rn["n"]
+        payload["p2o5_kg"] = rn["p2o5"]
+        payload["k2o_kg"] = rn["k2o"]
+        payload["mgo_kg"] = rn["mgo"]
+        payload["s_kg"] = rn["s"]
+    preis = payload.get("preis_je_einheit")
+    if preis is not None and menge > 0 and flaeche > 0:
+        payload["kosten_eur"] = round(float(preis) * menge * flaeche, 2)
+    for key in _NUTRIENT_INPUT_KEYS:
+        payload.pop(key, None)
+    return payload
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -241,6 +299,23 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
         "compliant": bool(m.compliant) if m.compliant is not None else True,
         "exportiert": bool(m.exportiert) if m.exportiert is not None else False,
         "bemerkung": str(m.bemerkung) if m.bemerkung else None,
+        # AS-W1: Reinnährstoffe + Kosten
+        "nKg": float(m.n_kg) if m.n_kg is not None else None,
+        "p2o5Kg": float(m.p2o5_kg) if m.p2o5_kg is not None else None,
+        "k2oKg": float(m.k2o_kg) if m.k2o_kg is not None else None,
+        "mgoKg": float(m.mgo_kg) if m.mgo_kg is not None else None,
+        "sKg": float(m.s_kg) if m.s_kg is not None else None,
+        "duengerForm": str(m.duenger_form) if m.duenger_form else None,
+        "kostenEur": float(m.kosten_eur) if m.kosten_eur is not None else None,
+        # AS-W4: Pflanzenschutz
+        "wirkungsbereich": str(m.wirkungsbereich) if m.wirkungsbereich else None,
+        "begruendung": str(m.begruendung) if m.begruendung else None,
+        "wartezeitTage": int(m.wartezeit_tage) if m.wartezeit_tage is not None else None,
+        # AS-W6: Ernte
+        "ertragDtHa": float(m.ertrag_dt_ha) if m.ertrag_dt_ha is not None else None,
+        "qualitaet": str(m.qualitaet) if m.qualitaet else None,
+        "erloesEur": float(m.erloes_eur) if m.erloes_eur is not None else None,
+        "nebenleistungEur": float(m.nebenleistung_eur) if m.nebenleistung_eur is not None else None,
     }
 
 
@@ -414,12 +489,13 @@ async def portal_create_massnahme(
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
 ) -> dict[str, Any]:
+    payload = _apply_duengung_nutrients(data.model_dump())
     massnahme = FeldbuchMassnahme(
         id=uuid7(),
         tenant_id=tenant_id,
         customer_id=customer_id,
         quelle="portal",
-        **data.model_dump(),
+        **payload,
     )
     db.add(massnahme)
     db.commit()
@@ -444,11 +520,84 @@ async def portal_update_massnahme(
             status_code=403,
             detail="VALEO-Dienstleistungen können nicht bearbeitet werden",
         )
-    for field, value in data.model_dump(exclude_none=True).items():
+    payload = _apply_duengung_nutrients(data.model_dump(exclude_none=True))
+    for field, value in payload.items():
         setattr(massnahme, field, value)
     db.commit()
     db.refresh(massnahme)
     return _massnahme_to_dict(massnahme)
+
+
+@router.get("/feldbuch/duengebilanz", summary="Duengebilanz portal (DueV)",
+    response_model=PortalFeldbuchOut
+)
+async def portal_duengebilanz(
+    jahr: int = Query(default=None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W1 (DüV): Nährstoffbilanz je Schlag aus den erfassten Düngungsmaßnahmen.
+
+    Aggregiert N/P2O5/K2O, trennt organisch/mineralisch und prüft die
+    170-kg-N/ha-Obergrenze für organische Düngung.
+    """
+    from sqlalchemy import extract
+
+    from app.agrar.feldbuch.naehrstoff import duev_n_org_check
+
+    year = jahr or datetime.now().year
+    q = (
+        db.query(FeldbuchMassnahme)
+        .filter(
+            FeldbuchMassnahme.tenant_id == tenant_id,
+            FeldbuchMassnahme.customer_id == customer_id,
+            FeldbuchMassnahme.typ == "duengung",
+            extract("year", FeldbuchMassnahme.datum) == year,
+        )
+    )
+    per_schlag: dict[str, dict[str, Any]] = {}
+    for m in q.all():
+        sid = m.schlag_id or "ohne_schlag"
+        row = per_schlag.setdefault(sid, {
+            "schlagId": None if sid == "ohne_schlag" else sid,
+            "schlagName": (m.schlag.name if m.schlag else None),
+            "flaecheHa": float(m.schlag.flaeche) if (m.schlag and m.schlag.flaeche) else 0.0,
+            "nKg": 0.0, "nOrganischKg": 0.0, "nMineralischKg": 0.0,
+            "p2o5Kg": 0.0, "k2oKg": 0.0, "massnahmen": 0,
+        })
+        n = float(m.n_kg or 0.0)
+        row["nKg"] += n
+        row["p2o5Kg"] += float(m.p2o5_kg or 0.0)
+        row["k2oKg"] += float(m.k2o_kg or 0.0)
+        if m.duenger_form == "O":
+            row["nOrganischKg"] += n
+        else:
+            row["nMineralischKg"] += n
+        row["massnahmen"] += 1
+
+    schlaege = []
+    ueberschreitungen = 0
+    for row in per_schlag.values():
+        check = duev_n_org_check(row["nOrganischKg"], row["flaecheHa"] or 1.0)
+        row["duevOrgCheck"] = {
+            "nOrganischProHa": check["n_organisch_pro_ha"],
+            "grenzwertKgHa": check["grenzwert_kg_ha"],
+            "ueberschritten": check["ueberschritten"],
+            "auslastungPct": check["auslastung_pct"],
+        }
+        for k in ("nKg", "nOrganischKg", "nMineralischKg", "p2o5Kg", "k2oKg"):
+            row[k] = round(row[k], 2)
+        if check["ueberschritten"]:
+            ueberschreitungen += 1
+        schlaege.append(row)
+
+    return {
+        "jahr": year,
+        "schlaege": schlaege,
+        "ueberschreitungenOrgN": ueberschreitungen,
+        "grenzwertKgHa": 170.0,
+    }
 
 
 # ────────────────────────────────────────────────────────────────────────────

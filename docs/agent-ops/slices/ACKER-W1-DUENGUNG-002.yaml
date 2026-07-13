@@ -1,0 +1,83 @@
+slice_id: ACKER-W1-DUENGUNG-002
+id: ACKER-W1-DUENGUNG-002
+title: Ackerschlagkartei AS-W1 Reinnaehrstoff-Duengung + Portal-Duengebilanz
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-13"
+started_at: "2026-07-13"
+completed_at: "2026-07-13"
+goal: >-
+  Welle AS-W1 Backend: Portal-Duengungsmassnahmen berechnen beim Speichern die
+  Reinnaehrstoffe (N/P2O5/K2O/MgO/S) und Kosten aus den Gehalten (Rechenkern
+  naehrstoff.py); Portal-Duengebilanz-Endpoint aggregiert je Schlag und prueft die
+  DueV-170-kg-N/ha-Grenze fuer organische Duengung. Konsolidierte Modell-/Migrations-
+  basis fuer die Wellen W1/W2/W4/W5/W6.
+scope:
+  - Modell-Erweiterung FeldbuchMassnahme (Reinnaehrstoffe, Duengerform, Kosten,
+    PSM-Wirkungsbereich/Begruendung, Ernte-Kennzahlen) + FeldbuchSchlag (Sollwert,
+    Nmin, Bodenuntersuchung) via einer Migration.
+  - Portal-Massnahmen-Schemas + _apply_duengung_nutrients (Berechnung/Bereinigung).
+  - Portal-Duengebilanz-Endpoint (DueV-Check je Schlag).
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/ACKER-W1-DUENGUNG-002.yaml"
+  - "app/infrastructure/models/agrar_models.py"
+  - "alembic/versions/feldbuch_acker_waves_20260713.py"
+  - "app/api/v1/endpoints/portal_feldbuch.py"
+  - "tests/test_portal_feldbuch_duengung_w1.py"
+  - "docs/schnittstellen/openapi.json"
+  - "docs/schnittstellen/endpoint-inventory.md"
+  - "docs/admin/migration-inventory.md"
+  - "config/architecture-index.yaml"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ACKER-W1-DUENGUNG-002.yaml
+  - app/infrastructure/models/agrar_models.py
+  - alembic/versions/feldbuch_acker_waves_20260713.py
+  - app/api/v1/endpoints/portal_feldbuch.py
+  - tests/test_portal_feldbuch_duengung_w1.py
+  - docs/schnittstellen/openapi.json
+  - docs/schnittstellen/endpoint-inventory.md
+  - docs/admin/migration-inventory.md
+  - config/architecture-index.yaml
+progress: >-
+  2026-07-13 umgesetzt: Migration feldbuch_acker_waves_20260713 (Single-Head)
+  ergaenzt nullable Spalten fuer W1/W2/W4/W5/W6. Portal-Massnahmen nehmen Gehalte
+  (n/p2o5/k2o/mgo/s %), Duengerform und Preis je Einheit entgegen; beim Speichern
+  werden Reinnaehrstoffe + Kosten berechnet und die Nicht-Spalten-Eingaben entfernt.
+  Neuer Endpoint /portal/feldbuch/duengebilanz aggregiert je Schlag und prueft die
+  170-kg-N/ha-org.-Grenze. Bestehende Duenger/PSM-Modelle und ERP-Bilanz unangetastet.
+acceptance:
+  - "Reinnaehrstoffe/Kosten werden korrekt berechnet und persistiert."
+  - "Duengebilanz-Endpoint liefert je Schlag N/P2O5/K2O + DueV-org-N-Check."
+  - "Alembic Single-Head; OpenAPI/Inventar/Architektur-Index ohne Drift."
+tests:
+  - "pytest tests/test_portal_feldbuch_duengung_w1.py tests/test_feldbuch_naehrstoff_duev.py -> 13 passed."
+  - "python -m alembic heads -> Single-Head (1)."
+  - "python -m py_compile portal_feldbuch.py agrar_models.py migration -> 0."
+risks:
+  - "Jahresbezug: Sollwert/Nmin/Boden liegen aktuell am Schlag (aktuelles Jahr); Mehrjahres-Historie ist Folgeausbau."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate, Security Scan."
+  - "OpenAPI-/Inventar-/Architektur-Index-Drift-Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Reinnaehrstoffe und org.-N-Grenze folgen der DueV; Gehalte als deklarierte
+    Oxidprozente. Bilanz je Schlag aus persistierten Reinnaehrstoffen.
+  architektur_vertrag: >-
+    Additive Modellspalten (nullable) + Endpoint im bestehenden Portal-Feldbuch;
+    kein neuer Service, keine Aenderung an ERP-Bilanz/Duenger-Modellen.
+  daten_vertrag: >-
+    Eine Alembic-Migration (idempotente ADD COLUMN IF NOT EXISTS), verkettet auf
+    rations_integrations_20260712 (Single-Head).
+  security_vertrag: >-
+    Tenant-/Kundenfilter unveraendert; Berechnung serverseitig, keine neuen
+    Auth-Pfade.
+  betriebs_vertrag: >-
+    Migration vor Nutzung erforderlich; keine weitere Deploy-Aenderung.
+  dokumentations_vertrag: >-
+    Masterplan, Workboard, Slice-YAML sowie OpenAPI/Inventare/Architektur-Index
+    werden aktualisiert.
+  test_vertrag: >-
+    Reinnaehrstoff-/Portal-Tests, Single-Head, py_compile und Drift-Gates gruen
+    vor Push; GitHub Actions bestaetigen den Default-Branch.

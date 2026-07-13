@@ -82392,6 +82392,17 @@
             ],
             "title": "Anwender"
           },
+          "begruendung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Begruendung"
+          },
           "bemerkung": {
             "anyOf": [
               {
@@ -82419,6 +82430,17 @@
             "title": "Datum",
             "type": "string"
           },
+          "duenger_form": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duenger Form"
+          },
           "einheit": {
             "anyOf": [
               {
@@ -82429,6 +82451,28 @@
               }
             ],
             "title": "Einheit"
+          },
+          "erloes_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erloes Eur"
+          },
+          "ertrag_dt_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ertrag Dt Ha"
           },
           "flaeche": {
             "anyOf": [
@@ -82441,6 +82485,28 @@
             ],
             "title": "Flaeche"
           },
+          "k2o_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O Gehalt"
+          },
+          "kosten_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kosten Eur"
+          },
           "menge": {
             "anyOf": [
               {
@@ -82452,6 +82518,17 @@
             ],
             "title": "Menge"
           },
+          "mgo_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mgo Gehalt"
+          },
           "mittel": {
             "anyOf": [
               {
@@ -82462,6 +82539,72 @@
               }
             ],
             "title": "Mittel"
+          },
+          "n_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Gehalt"
+          },
+          "nebenleistung_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nebenleistung Eur"
+          },
+          "p2o5_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5 Gehalt"
+          },
+          "preis_je_einheit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Je Einheit"
+          },
+          "qualitaet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualitaet"
+          },
+          "s_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "S Gehalt"
           },
           "schlag_id": {
             "anyOf": [
@@ -82488,6 +82631,17 @@
               }
             ],
             "title": "Uhrzeit"
+          },
+          "wirkungsbereich": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wirkungsbereich"
           }
         },
         "required": [
@@ -82509,6 +82663,17 @@
               }
             ],
             "title": "Anwender"
+          },
+          "begruendung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Begruendung"
           },
           "bemerkung": {
             "anyOf": [
@@ -82544,6 +82709,17 @@
             ],
             "title": "Datum"
           },
+          "duenger_form": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duenger Form"
+          },
           "einheit": {
             "anyOf": [
               {
@@ -82554,6 +82730,28 @@
               }
             ],
             "title": "Einheit"
+          },
+          "erloes_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erloes Eur"
+          },
+          "ertrag_dt_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ertrag Dt Ha"
           },
           "flaeche": {
             "anyOf": [
@@ -82566,6 +82764,28 @@
             ],
             "title": "Flaeche"
           },
+          "k2o_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O Gehalt"
+          },
+          "kosten_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kosten Eur"
+          },
           "menge": {
             "anyOf": [
               {
@@ -82577,6 +82797,17 @@
             ],
             "title": "Menge"
           },
+          "mgo_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mgo Gehalt"
+          },
           "mittel": {
             "anyOf": [
               {
@@ -82587,6 +82818,72 @@
               }
             ],
             "title": "Mittel"
+          },
+          "n_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Gehalt"
+          },
+          "nebenleistung_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nebenleistung Eur"
+          },
+          "p2o5_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5 Gehalt"
+          },
+          "preis_je_einheit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Je Einheit"
+          },
+          "qualitaet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualitaet"
+          },
+          "s_gehalt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "S Gehalt"
           },
           "schlag_id": {
             "anyOf": [
@@ -82620,6 +82917,17 @@
               }
             ],
             "title": "Uhrzeit"
+          },
+          "wirkungsbereich": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wirkungsbereich"
           }
         },
         "title": "PortalMassnahmeUpdate",
@@ -279899,6 +280207,89 @@
         "summary": "Feldbuch portal",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/duengebilanz": {
+      "get": {
+        "description": "AS-W1 (DüV): Nährstoffbilanz je Schlag aus den erfassten Düngungsmaßnahmen.\n\nAggregiert N/P2O5/K2O, trennt organisch/mineralisch und prüft die\n170-kg-N/ha-Obergrenze für organische Düngung.",
+        "operationId": "portal_duengebilanz_api_v1_portal_feldbuch_duengebilanz_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "jahr",
+            "required": false,
+            "schema": {
+              "title": "Jahr",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Duengebilanz portal (DueV)",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
         ]
       }
     },
