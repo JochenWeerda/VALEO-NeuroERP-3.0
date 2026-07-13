@@ -2801,6 +2801,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/rations-schnittstellen-import",
+      "path": "futtermittel/rations-schnittstellen-import",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/rations-zugang",
       "path": "futtermittel/rations-zugang",
       "source": "auto"

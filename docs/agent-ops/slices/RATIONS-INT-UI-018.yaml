@@ -2,9 +2,10 @@ slice_id: RATIONS-INT-UI-018
 id: RATIONS-INT-UI-018
 title: Frontend-Importoberflaeche fuer Rations-Schnittstellen (F5-UI)
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-13"
 started_at: "2026-07-13"
+completed_at: "2026-07-13"
 goal: >-
   Optionale Frontend-Importoberflaeche fuer die F5-Schnittstellen (agrirouter,
   ICAR-ADE, Labor): dekodiertes JSON-Payload je Adapter einreichen, Import-
@@ -34,6 +35,13 @@ progress: >-
   /agrar/rations-optimization/integrations/{adapter}/import und /imports). Die UI
   nimmt bereits dekodiertes JSON entgegen (Transport/Onboarding bleibt provider-
   abhaengig) und zeigt Ergebnis + Journal.
+  2026-07-13 umgesetzt: API-Client importRationsData/fetchRationsImports; Seite
+  rations-schnittstellen-import.tsx mit Adapterauswahl (agrirouter/ICAR-ADE/Labor),
+  JSON-Eingabe inkl. Beispiel-Payloads, Import-Mutation mit Guard/Fehler-/Erfolg-
+  Feedback, Ergebnis (Zielmodell/Duplikat/F1-Kontrolle) und Importjournal-Tabelle.
+  Navigations-Eintrag (Upload-Icon) + route-alias futtermittel/rations-schnittstellen-
+  import; Routen regeneriert (897). Verifiziert: tsc 0, eslint 0, build 0,
+  Navigation-Target-Check grün.
 acceptance:
   - "Seite bietet Adapterauswahl (agrirouter/ICAR-ADE/Labor) und JSON-Eingabe."
   - "Import ruft den F5-Endpunkt, zeigt Ergebnis/Duplikat und aktualisiert das Journal."

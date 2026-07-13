@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RATIONS-INT-UI-018 Frontend-Importoberflaeche fuer Rations-Schnittstellen - in Arbeit 2026-07-13
+## RATIONS-INT-UI-018 Frontend-Importoberflaeche fuer Rations-Schnittstellen - abgeschlossen 2026-07-13
 
-**Owner:** Codex. **Stand:** in Arbeit 2026-07-13 - optionale F5-UI (Nachlauf zu `RATIONS-INT-015-017`). Import-Seite fuer agrirouter/ICAR-ADE/Labor: dekodiertes JSON-Payload je Adapter einreichen, Ergebnis (kanonisches Ziel + ggf. F1-Kontrolle) und tenantisoliertes Importjournal anzeigen. API-Client `importRationsData`/`fetchRationsImports`, neue Seite `rations-schnittstellen-import.tsx`, Navigations-Eintrag + Route. Reine Anzeige-/Bedienschicht auf den bestehenden F5-Endpunkten. **Dateibesitz:** `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rations-schnittstellen-import.tsx`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`, `packages/frontend-web/src/app/route-aliases.json`, Slice-YAML und Workboard. **Abnahme:** `tsc`/`eslint`/`build` -> 0; Route ohne Drift.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-13 - optionale F5-UI (Nachlauf zu `RATIONS-INT-015-017`). Import-Seite `rations-schnittstellen-import.tsx` fuer agrirouter/ICAR-ADE/Labor: Adapterauswahl, dekodiertes JSON-Payload (inkl. Beispiel-Payloads) je Adapter einreichen, Import-Mutation mit Guard/Fehler-/Erfolg-Feedback, Ergebnis (Zielmodell/Duplikat/F1-Kontrolle) und tenantisoliertes Importjournal (Tabelle). API-Client `importRationsData`/`fetchRationsImports`; Navigations-Eintrag (Upload) + route-alias `futtermittel/rations-schnittstellen-import`; Routen regeneriert (897). Reine Anzeige-/Bedienschicht auf den bestehenden F5-Endpunkten. **Dateibesitz:** `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rations-schnittstellen-import.tsx`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`, `packages/frontend-web/src/app/route-aliases.json`, generierte Route-Artefakte, Slice-YAML und Workboard. **Abnahme:** `pnpm --filter frontend-web exec tsc --noEmit` -> 0; `eslint` -> 0; `pnpm run build` -> 0; Navigation-Target-Check grün.
 
 ## RATIONS-INT-015-017 agrirouter/ICAR-ADE/Laboradapter - abgeschlossen 2026-07-12
 

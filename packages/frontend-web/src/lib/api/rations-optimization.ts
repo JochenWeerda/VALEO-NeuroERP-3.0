@@ -919,6 +919,52 @@ export async function fetchFeedingControlLogs(groupId: string, limit = 30): Prom
   const { data } = await apiClient.get<FeedingControlLog[]>(`${BASE}/feeding-control/logs`, { params: { group_id: groupId, limit } })
   return data
 }
+
+// F5-UI (RATIONS-INT-UI-018): Import-Schnittstellen agrirouter/ICAR-ADE/Labor
+export type RationsIntegrationAdapter = 'agrirouter' | 'icar-ade' | 'laboratory'
+
+export interface RationsImportResult {
+  id?: string
+  adapter?: string
+  external_id?: string
+  source?: string
+  source_version?: string | null
+  target_model?: string
+  target?: Record<string, unknown>
+  result?: Record<string, unknown>
+  feeding_control?: Record<string, unknown>
+  duplicate: boolean
+  imported_at?: string
+  [key: string]: unknown
+}
+
+export interface RationsImportJournalEntry {
+  id: string
+  adapter: string
+  external_id: string
+  source_version: string | null
+  target_model: string
+  result: Record<string, unknown>
+  imported_at: string
+}
+
+export async function importRationsData(
+  adapter: RationsIntegrationAdapter,
+  payload: Record<string, unknown>,
+): Promise<RationsImportResult> {
+  const { data } = await apiClient.post<RationsImportResult>(`${BASE}/integrations/${adapter}/import`, { payload })
+  return data
+}
+
+export async function fetchRationsImports(
+  adapter?: RationsIntegrationAdapter,
+  limit = 50,
+): Promise<RationsImportJournalEntry[]> {
+  const params: Record<string, unknown> = { limit }
+  if (adapter) params.adapter = adapter
+  const { data } = await apiClient.get<RationsImportJournalEntry[]>(`${BASE}/integrations/imports`, { params })
+  return data
+}
 export async function uploadCompoundFeedDocument(file: File): Promise<CompoundFeedUploadResult> {
   const form = new FormData()
   form.append('file', file)

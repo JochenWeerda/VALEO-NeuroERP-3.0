@@ -627,6 +627,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
             mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
           },
           {
+            id: 'rations-schnittstellen-import',
+            label: 'Schnittstellen-Import',
+            icon: Upload,
+            module: '@/pages/futtermittel/rations-schnittstellen-import',
+            preferredPath: 'futtermittel/rations-schnittstellen-import',
+            mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
+          },
+          {
             id: 'grundfutteranalysen',
             label: 'Grundfutter-Analysen',
             icon: Microscope,

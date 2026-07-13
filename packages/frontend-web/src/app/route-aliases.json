@@ -2567,6 +2567,10 @@
     {
       "module": "@/pages/planung/kalender",
       "path": "planung/kalender"
+    },
+    {
+      "module": "@/pages/futtermittel/rations-schnittstellen-import",
+      "path": "futtermittel/rations-schnittstellen-import"
     }
   ]
 }
