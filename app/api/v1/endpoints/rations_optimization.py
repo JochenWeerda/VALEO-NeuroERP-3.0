@@ -6776,6 +6776,64 @@ async def optimize_from_profile(
     )
 
 
+def _build_demo_result() -> Dict[str, Any]:
+    """Self-contained Demo-Showcase inkl. vollständiger DLG-/Struktur-Analyse.
+
+    Nutzt die interne Optimierung mit kuratiertem Demo-Profil und praxistypischen
+    Mindest-/Höchstmengen — unabhängig von Mandant und Solver-Microservice. Damit
+    liefert "Demo starten" immer ein komplettes Ergebnis (KPIs, DLG-Panel, Ration).
+    """
+    demo = _demo_profile()
+    demo_feed_ids = demo.pop("_demo_feed_ids", None)
+    # Praxistypische Mindest-/Höchstmengen für TMR Hochleistung (Musterbetrieb).
+    # Ziel: Maissilage als TMR-Rückgrat, Grassilage als Ergänzung.
+    demo_min = {
+        "dlg_10490020": 5.0,   # Maissilage hohe OMD ≥ 5 kg TM (TMR-Backbone)
+        "dlg_30970130": 2.0,   # Raps-Extraktionsschrot ≥ 2 kg TM (Protein/CP)
+        "dlg_31050130": 0.8,   # Sojaschrot ≥ 0.8 kg TM (sidP, Lys)
+        "dlg_30820030": 2.5,   # Gerste ≥ 2.5 kg TM (Stärke-Quelle)
+    }
+    demo_max = {
+        "dlg_10490020": 9.0,   # Maissilage hohe OMD ≤ 9 kg TM
+        "dlg_10500020": 3.0,   # Maissilage mittlere OMD ≤ 3 kg TM
+        "dlg_10320020": 3.5,   # Grassilage gute OMD ≤ 3.5 kg TM
+        "dlg_10150030": 1.5,   # Heu gute OMD ≤ 1.5 kg TM
+        "dlg_10610000": 2.0,   # Stroh Gerste ≤ 2 kg TM (peNDF-Puffer)
+        "dlg_20750012": 2.0,   # Rübenpressschnitzel ≤ 2 kg TM
+        "dlg_41290030": 0.5,   # Melasse ≤ 0.5 kg TM
+    }
+    # Mineralfutter Milchvieh: Nicht im DLG-FWT enthalten → als Custom-Feed.
+    # Typische Zusammensetzung für Laktation (Ca:Mg 2:1 Typ, 250g/d Gabe).
+    demo_custom: List[Dict[str, Any]] = [{
+        "id": "demo_mineralfutter",
+        "name": "Mineralfutter Milchvieh (Demo)",
+        "group": "Mineralfutter",
+        "futterart": "Mineralien/Zusatzstoffe",
+        "forage": False,
+        "structural_coproduct": False,
+        "dm_frac": 0.970,
+        "price": 1.80,     # EUR/kg TM
+        "min_kg": 0.05,    # min. 50 g TM/d als Pflichtbaustein
+        "max_kg": 0.25,    # max 250 g TM/d
+        "me": 0.0, "sidp": 0.0, "cp": 0.0,
+        "ndf": 0.0, "adf": 0.0, "st": 0.0,
+        "bst": 0.0, "zu": 0.0, "nfc": 0.0,
+        "xl": 0.0,
+        "ca": 150.0,   # g/kg TM — typisches Laktations-Mineralfutter
+        "p": 50.0,
+        "na": 80.0,
+        "mg": 180.0,   # g/kg TM — Mg-reich für Grastetanie-Prophylaxe
+        "k": 0.0,
+        "sidlys": 0.0, "sidmet": 0.0,
+    }]
+    return _optimize_internal(
+        demo, feed_ids=demo_feed_ids,
+        custom_feeds=demo_custom,
+        min_tm_overrides=demo_min,
+        max_tm_overrides=demo_max,
+    )
+
+
 @router.post("/optimize/demo", summary="Demo optimize",
     response_model=RationsOptimizationOut
 )
@@ -6783,63 +6841,14 @@ async def optimize_demo(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
-    if not get_rations_base_url():
-        try:
-            demo = _demo_profile()
-            demo_feed_ids = demo.pop("_demo_feed_ids", None)
-            # Praxistypische Mindest-/Höchstmengen für TMR Hochleistung (Musterbetrieb).
-            # Ziel: Maissilage als TMR-Rückgrat, Grassilage als Ergänzung.
-            demo_min = {
-                "dlg_10490020": 5.0,   # Maissilage hohe OMD ≥ 5 kg TM (TMR-Backbone)
-                "dlg_30970130": 2.0,   # Raps-Extraktionsschrot ≥ 2 kg TM (Protein/CP)
-                "dlg_31050130": 0.8,   # Sojaschrot ≥ 0.8 kg TM (sidP, Lys)
-                "dlg_30820030": 2.5,   # Gerste ≥ 2.5 kg TM (Stärke-Quelle)
-            }
-            demo_max = {
-                "dlg_10490020": 9.0,   # Maissilage hohe OMD ≤ 9 kg TM
-                "dlg_10500020": 3.0,   # Maissilage mittlere OMD ≤ 3 kg TM
-                "dlg_10320020": 3.5,   # Grassilage gute OMD ≤ 3.5 kg TM
-                "dlg_10150030": 1.5,   # Heu gute OMD ≤ 1.5 kg TM
-                "dlg_10610000": 2.0,   # Stroh Gerste ≤ 2 kg TM (peNDF-Puffer)
-                "dlg_20750012": 2.0,   # Rübenpressschnitzel ≤ 2 kg TM
-                "dlg_41290030": 0.5,   # Melasse ≤ 0.5 kg TM
-            }
-            # Mineralfutter Milchvieh: Nicht im DLG-FWT enthalten → als Custom-Feed.
-            # Typische Zusammensetzung für Laktation (Ca:Mg 2:1 Typ, 250g/d Gabe).
-            demo_custom: List[Dict[str, Any]] = [{
-                "id": "demo_mineralfutter",
-                "name": "Mineralfutter Milchvieh (Demo)",
-                "group": "Mineralfutter",
-                "futterart": "Mineralien/Zusatzstoffe",
-                "forage": False,
-                "structural_coproduct": False,
-                "dm_frac": 0.970,
-                "price": 1.80,     # EUR/kg TM
-                "min_kg": 0.05,    # min. 50 g TM/d als Pflichtbaustein
-                "max_kg": 0.25,    # max 250 g TM/d
-                "me": 0.0, "sidp": 0.0, "cp": 0.0,
-                "ndf": 0.0, "adf": 0.0, "st": 0.0,
-                "bst": 0.0, "zu": 0.0, "nfc": 0.0,
-                "xl": 0.0,
-                "ca": 150.0,   # g/kg TM — typisches Laktations-Mineralfutter
-                "p": 50.0,
-                "na": 80.0,
-                "mg": 180.0,   # g/kg TM — Mg-reich für Grastetanie-Prophylaxe
-                "k": 0.0,
-                "sidlys": 0.0, "sidmet": 0.0,
-            }]
-            result = _optimize_internal(
-                demo, feed_ids=demo_feed_ids,
-                custom_feeds=demo_custom,
-                min_tm_overrides=demo_min,
-                max_tm_overrides=demo_max,
-            )
-            return JSONResponse(content=result)
-        except Exception as exc:
-            logger.exception("Demo-Optimierung fehlgeschlagen: %s", exc)
-            raise HTTPException(status_code=500, detail=f"Demo fehlgeschlagen: {exc}")
-    tenant_id = _tenant_from_request(request, x_tenant_id)
-    return await _proxy_request("POST", "/api/v1/optimize/demo", tenant_id=tenant_id)
+    # "Demo starten" ist ein self-contained Showcase und muss immer ein komplettes
+    # Ergebnis (inkl. DLG-Panel) liefern — daher unabhängig vom Solver-Microservice
+    # und vom Mandanten stets die interne Referenz-Optimierung.
+    try:
+        return JSONResponse(content=_build_demo_result())
+    except Exception as exc:
+        logger.exception("Demo-Optimierung fehlgeschlagen: %s", exc)
+        raise HTTPException(status_code=500, detail=f"Demo fehlgeschlagen: {exc}") from exc
 
 
 @router.post("/optimize", summary="Optimize",

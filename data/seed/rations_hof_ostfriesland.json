@@ -1,0 +1,231 @@
+{
+  "betrieb": "Hof Ostfriesland — Milchvieh (Simulation)",
+  "erstellt": "2026-07-13T20:08:15.753183+00:00",
+  "grundfutter_analysen": [
+    {
+      "id": "gs1-2026",
+      "name": "Grassilage 1. Schnitt (2026)",
+      "futterart": "Grassilage",
+      "konservierung": "Silage",
+      "forage": true,
+      "dm_frac": 0.35,
+      "cp_g_kgdm": 165,
+      "me_mj_kgdm": 10.6,
+      "nel_mj_kgdm": 6.4,
+      "ndf_g_kgdm": 420,
+      "adf_g_kgdm": 270,
+      "xf_g_kgdm": 235,
+      "sugar_g_kgdm": 60,
+      "xa_g_kgdm": 95,
+      "ca_g_kgdm": 6.5,
+      "p_g_kgdm": 3.4,
+      "labor": "LKV Weser-Ems",
+      "probe_datum": "2026-05-28"
+    },
+    {
+      "id": "gs2-2026",
+      "name": "Grassilage 2. Schnitt (2026)",
+      "futterart": "Grassilage",
+      "konservierung": "Silage",
+      "forage": true,
+      "dm_frac": 0.38,
+      "cp_g_kgdm": 150,
+      "me_mj_kgdm": 10.1,
+      "nel_mj_kgdm": 6.1,
+      "ndf_g_kgdm": 460,
+      "adf_g_kgdm": 290,
+      "xf_g_kgdm": 255,
+      "sugar_g_kgdm": 45,
+      "xa_g_kgdm": 100,
+      "ca_g_kgdm": 7.2,
+      "p_g_kgdm": 3.1,
+      "labor": "LKV Weser-Ems",
+      "probe_datum": "2026-07-02"
+    },
+    {
+      "id": "ms-2025",
+      "name": "Maissilage (Ernte 2025)",
+      "futterart": "Maissilage",
+      "konservierung": "Silage",
+      "forage": true,
+      "dm_frac": 0.335,
+      "cp_g_kgdm": 78,
+      "me_mj_kgdm": 11.0,
+      "nel_mj_kgdm": 6.6,
+      "ndf_g_kgdm": 380,
+      "adf_g_kgdm": 210,
+      "starch_g_kgdm": 330,
+      "sugar_g_kgdm": 15,
+      "xa_g_kgdm": 38,
+      "ca_g_kgdm": 2.2,
+      "p_g_kgdm": 2.3,
+      "labor": "LKV Weser-Ems",
+      "probe_datum": "2025-11-15"
+    },
+    {
+      "id": "heu-2026",
+      "name": "Wiesenheu (belueftet)",
+      "futterart": "Heu",
+      "konservierung": "Trocken",
+      "forage": true,
+      "dm_frac": 0.86,
+      "cp_g_kgdm": 112,
+      "me_mj_kgdm": 8.6,
+      "nel_mj_kgdm": 5.1,
+      "ndf_g_kgdm": 560,
+      "adf_g_kgdm": 340,
+      "xf_g_kgdm": 300,
+      "sugar_g_kgdm": 90,
+      "xa_g_kgdm": 78,
+      "ca_g_kgdm": 5.5,
+      "p_g_kgdm": 2.6,
+      "labor": "LKV Weser-Ems",
+      "probe_datum": "2026-06-20"
+    }
+  ],
+  "kraftfutter_rezepturen": [
+    {
+      "id": "mlf-183",
+      "name": "Milchleistungsfutter 18/3",
+      "futterart": "Kraftfutter",
+      "forage": false,
+      "dm_frac": 0.88,
+      "cp_g_kgdm": 205,
+      "me_mj_kgdm": 12.4,
+      "nel_mj_kgdm": 7.5,
+      "ndf_g_kgdm": 180,
+      "starch_g_kgdm": 250,
+      "sugar_g_kgdm": 70,
+      "ca_g_kgdm": 9.0,
+      "p_g_kgdm": 5.5,
+      "price_eur_kgdm": 0.34,
+      "rezeptur": [
+        {
+          "komponente": "Weizen",
+          "anteil": 0.3
+        },
+        {
+          "komponente": "Gerste",
+          "anteil": 0.2
+        },
+        {
+          "komponente": "Sojaextraktionsschrot",
+          "anteil": 0.22
+        },
+        {
+          "komponente": "Rapsextraktionsschrot",
+          "anteil": 0.18
+        },
+        {
+          "komponente": "Zuckerrübenschnitzel",
+          "anteil": 0.07
+        },
+        {
+          "komponente": "Mineralfutter 8-12-20",
+          "anteil": 0.03
+        }
+      ]
+    },
+    {
+      "id": "energie-konz",
+      "name": "Energiekonzentrat (Getreide)",
+      "futterart": "Kraftfutter",
+      "forage": false,
+      "dm_frac": 0.87,
+      "cp_g_kgdm": 125,
+      "me_mj_kgdm": 13.1,
+      "nel_mj_kgdm": 8.1,
+      "ndf_g_kgdm": 130,
+      "starch_g_kgdm": 520,
+      "sugar_g_kgdm": 30,
+      "ca_g_kgdm": 0.8,
+      "p_g_kgdm": 3.6,
+      "price_eur_kgdm": 0.28,
+      "rezeptur": [
+        {
+          "komponente": "Weizen",
+          "anteil": 0.45
+        },
+        {
+          "komponente": "Körnermais",
+          "anteil": 0.35
+        },
+        {
+          "komponente": "Gerste",
+          "anteil": 0.2
+        }
+      ]
+    },
+    {
+      "id": "eiweiss-konz",
+      "name": "Eiweißkonzentrat (Raps/Soja)",
+      "futterart": "Kraftfutter",
+      "forage": false,
+      "dm_frac": 0.89,
+      "cp_g_kgdm": 380,
+      "me_mj_kgdm": 11.6,
+      "nel_mj_kgdm": 7.0,
+      "ndf_g_kgdm": 240,
+      "starch_g_kgdm": 40,
+      "sugar_g_kgdm": 90,
+      "ca_g_kgdm": 7.5,
+      "p_g_kgdm": 10.5,
+      "price_eur_kgdm": 0.42,
+      "rezeptur": [
+        {
+          "komponente": "Rapsextraktionsschrot",
+          "anteil": 0.55
+        },
+        {
+          "komponente": "Sojaextraktionsschrot",
+          "anteil": 0.45
+        }
+      ]
+    },
+    {
+      "id": "mineral-transit",
+      "name": "Mineralfutter Transitkuh (DCAB-arm)",
+      "futterart": "Mineralfutter",
+      "forage": false,
+      "dm_frac": 0.97,
+      "cp_g_kgdm": 0,
+      "me_mj_kgdm": 0,
+      "nel_mj_kgdm": 0,
+      "ca_g_kgdm": 120,
+      "p_g_kgdm": 60,
+      "mg_g_kgdm": 80,
+      "na_g_kgdm": 10,
+      "price_eur_kgdm": 1.55,
+      "hinweis": "Anionische Salze zur Milchfieberprophylaxe (DCAB negativ), Trockensteher."
+    }
+  ],
+  "fuetterungsgruppen": [
+    {
+      "id": "hl-frisch",
+      "name": "Frischmelker / Hochleistung",
+      "milch_kg": 42,
+      "fett_pct": 4.0,
+      "eiweiss_pct": 3.4,
+      "laktationstag": 60,
+      "gewicht_kg": 650
+    },
+    {
+      "id": "ml-mitte",
+      "name": "Mittlere Laktation",
+      "milch_kg": 32,
+      "fett_pct": 4.1,
+      "eiweiss_pct": 3.5,
+      "laktationstag": 150,
+      "gewicht_kg": 680
+    },
+    {
+      "id": "trockensteher",
+      "name": "Trockensteher (Transit)",
+      "milch_kg": 0,
+      "fett_pct": 0,
+      "eiweiss_pct": 0,
+      "laktationstag": -21,
+      "gewicht_kg": 720
+    }
+  ]
+}

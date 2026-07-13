@@ -281316,6 +281316,79 @@
       }
     },
     "/api/v1/portal/feldbuch/massnahmen/{massnahme_id}": {
+      "delete": {
+        "operationId": "portal_delete_massnahme_api_v1_portal_feldbuch_massnahmen__massnahme_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massnahme_id",
+            "required": true,
+            "schema": {
+              "title": "Massnahme Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete massnahme portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      },
       "put": {
         "operationId": "portal_update_massnahme_api_v1_portal_feldbuch_massnahmen__massnahme_id__put",
         "parameters": [
@@ -281672,6 +281745,79 @@
       }
     },
     "/api/v1/portal/feldbuch/schlaege/{schlag_id}": {
+      "delete": {
+        "operationId": "portal_delete_schlag_api_v1_portal_feldbuch_schlaege__schlag_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schlag_id",
+            "required": true,
+            "schema": {
+              "title": "Schlag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete schlag portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      },
       "put": {
         "operationId": "portal_update_schlag_api_v1_portal_feldbuch_schlaege__schlag_id__put",
         "parameters": [

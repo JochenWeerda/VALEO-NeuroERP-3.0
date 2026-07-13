@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -453,6 +453,53 @@ async def portal_update_schlag(
     return _schlag_to_dict(schlag)
 
 
+@router.delete("/feldbuch/schlaege/{schlag_id}", status_code=204, response_class=Response,
+    summary="Delete schlag portal"
+)
+async def portal_delete_schlag(
+    schlag_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> Response:
+    schlag = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.id == schlag_id,
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+        )
+        .first()
+    )
+    if not schlag:
+        raise HTTPException(status_code=404, detail="Schlag nicht gefunden")
+    # Kaskade: eigene (Portal-)Maßnahmen des Schlags mitlöschen; VALEO-Dienst-
+    # Einträge (erp_*) bleiben als Nachweis erhalten und blocken den Löschvorgang.
+    erp_massn = (
+        db.query(FeldbuchMassnahme)
+        .filter(
+            FeldbuchMassnahme.schlag_id == schlag_id,
+            FeldbuchMassnahme.tenant_id == tenant_id,
+            FeldbuchMassnahme.customer_id == customer_id,
+            FeldbuchMassnahme.quelle.in_(("erp_service", "erp_lieferschein")),
+        )
+        .count()
+    )
+    if erp_massn:
+        raise HTTPException(
+            status_code=409,
+            detail="Schlag hat VALEO-Dienstleistungs-Maßnahmen und kann nicht gelöscht werden.",
+        )
+    db.query(FeldbuchMassnahme).filter(
+        FeldbuchMassnahme.schlag_id == schlag_id,
+        FeldbuchMassnahme.tenant_id == tenant_id,
+        FeldbuchMassnahme.customer_id == customer_id,
+    ).delete(synchronize_session=False)
+    db.delete(schlag)
+    db.commit()
+    return Response(status_code=204)
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # Maßnahmen
 # ────────────────────────────────────────────────────────────────────────────
@@ -552,6 +599,27 @@ async def portal_update_massnahme(
     db.commit()
     db.refresh(massnahme)
     return _massnahme_to_dict(massnahme)
+
+
+@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response,
+    summary="Delete massnahme portal"
+)
+async def portal_delete_massnahme(
+    massnahme_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> Response:
+    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db)
+    # VALEO-Dienstleistungen (erp_*) sind Nachweise und dürfen nicht gelöscht werden.
+    if massnahme.quelle in ("erp_service", "erp_lieferschein"):
+        raise HTTPException(
+            status_code=403,
+            detail="VALEO-Dienstleistungen können nicht gelöscht werden",
+        )
+    db.delete(massnahme)
+    db.commit()
+    return Response(status_code=204)
 
 
 @router.get("/feldbuch/duengebilanz", response_model=PortalFeldbuchOut,
