@@ -280847,6 +280847,89 @@
         ]
       }
     },
+    "/api/v1/portal/feldbuch/pflanzenschutz-uebersicht": {
+      "get": {
+        "description": "AS-W4 (PflSchG/CC): Spritztagebuch-Uebersicht mit Kostensplit nach\nWirkungsbereich und Pflichtangaben-Pruefung je Massnahme.",
+        "operationId": "portal_pflanzenschutz_uebersicht_api_v1_portal_feldbuch_pflanzenschutz_uebersicht_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "jahr",
+            "required": false,
+            "schema": {
+              "title": "Jahr",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pflanzenschutz-Uebersicht portal (PflSchG)",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch/schlaege": {
       "get": {
         "operationId": "portal_list_schlaege_api_v1_portal_feldbuch_schlaege_get",

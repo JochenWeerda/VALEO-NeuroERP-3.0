@@ -600,6 +600,88 @@ async def portal_duengebilanz(
     }
 
 
+@router.get("/feldbuch/pflanzenschutz-uebersicht", summary="Pflanzenschutz-Uebersicht portal (PflSchG)",
+    response_model=PortalFeldbuchOut
+)
+async def portal_pflanzenschutz_uebersicht(
+    jahr: int = Query(default=None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W4 (PflSchG/CC): Spritztagebuch-Uebersicht mit Kostensplit nach
+    Wirkungsbereich und Pflichtangaben-Pruefung je Massnahme.
+    """
+    from sqlalchemy import extract
+
+    from app.agrar.feldbuch.pflanzenschutz import (
+        PsmMassnahme,
+        kostensplit_nach_wirkungsbereich,
+        psm_compliance,
+    )
+
+    year = jahr or datetime.now().year
+    rows = (
+        db.query(FeldbuchMassnahme)
+        .filter(
+            FeldbuchMassnahme.tenant_id == tenant_id,
+            FeldbuchMassnahme.customer_id == customer_id,
+            FeldbuchMassnahme.typ == "psm",
+            extract("year", FeldbuchMassnahme.datum) == year,
+        )
+        .order_by(FeldbuchMassnahme.datum.desc())
+        .all()
+    )
+    psm_objs = [
+        PsmMassnahme(
+            datum=m.datum.date() if m.datum else None,
+            mittel=m.mittel,
+            menge=float(m.menge) if m.menge is not None else None,
+            flaeche=float(m.flaeche) if m.flaeche is not None else None,
+            anwender=m.anwender,
+            wirkungsbereich=m.wirkungsbereich,
+            begruendung=m.begruendung,
+            wartezeit_tage=int(m.wartezeit_tage) if m.wartezeit_tage is not None else None,
+            kosten_eur=float(m.kosten_eur) if m.kosten_eur is not None else None,
+        )
+        for m in rows
+    ]
+    split = kostensplit_nach_wirkungsbereich(psm_objs)
+    unvollstaendig = 0
+    massnahmen_out = []
+    for m, obj in zip(rows, psm_objs):
+        comp = psm_compliance(obj)
+        if not comp["compliant"]:
+            unvollstaendig += 1
+        massnahmen_out.append({
+            "id": str(m.id),
+            "datum": m.datum.date().isoformat() if m.datum else None,
+            "schlagName": (m.schlag.name if m.schlag else None),
+            "mittel": m.mittel,
+            "wirkungsbereich": m.wirkungsbereich,
+            "anwender": m.anwender,
+            "begruendung": m.begruendung,
+            "wartezeitTage": int(m.wartezeit_tage) if m.wartezeit_tage is not None else None,
+            "kostenEur": float(m.kosten_eur) if m.kosten_eur is not None else None,
+            "compliant": comp["compliant"],
+            "fehlendePflichtangaben": comp["fehlende_pflichtangaben"],
+        })
+    return {
+        "jahr": year,
+        "anzahl": len(rows),
+        "unvollstaendig": unvollstaendig,
+        "kostensplit": {
+            "herbizide": split["Herbizid"],
+            "fungizide": split["Fungizid"],
+            "insektizide": split["Insektizid"],
+            "wachstumsregler": split["Wachstumsregler"],
+            "sonstiges": split["Sonstiges"],
+            "gesamt": round(sum(split.values()), 2),
+        },
+        "massnahmen": massnahmen_out,
+    }
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # Stats
 # ────────────────────────────────────────────────────────────────────────────

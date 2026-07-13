@@ -1,0 +1,71 @@
+slice_id: ACKER-W4-PFLANZENSCHUTZ-003
+id: ACKER-W4-PFLANZENSCHUTZ-003
+title: Ackerschlagkartei AS-W4 Pflanzenschutz-Dokumentation (PflSchG/CC)
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-13"
+started_at: "2026-07-13"
+completed_at: "2026-07-13"
+goal: >-
+  Welle AS-W4: rechtssichere Pflanzenschutz-Dokumentation nach PflSchG/Cross
+  Compliance. Reine Logik fuer Pflichtangaben-Pruefung, Wartezeit-Hinweis gegen
+  geplante Ernte und Kostensplit nach Wirkungsbereich; Portal-Endpoint fuer die
+  Spritztagebuch-Uebersicht.
+scope:
+  - Modul app/agrar/feldbuch/pflanzenschutz.py (psm_compliance, wartezeit_hinweis, kostensplit).
+  - Portal-Endpoint /portal/feldbuch/pflanzenschutz-uebersicht.
+  - Wirkungsbereich/Begruendung werden bereits ueber die W1-Migration persistiert.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/ACKER-W4-PFLANZENSCHUTZ-003.yaml"
+  - "app/agrar/feldbuch/pflanzenschutz.py"
+  - "app/api/v1/endpoints/portal_feldbuch.py"
+  - "tests/test_feldbuch_pflanzenschutz_w4.py"
+  - "docs/schnittstellen/openapi.json"
+  - "docs/schnittstellen/endpoint-inventory.md"
+  - "config/architecture-index.yaml"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ACKER-W4-PFLANZENSCHUTZ-003.yaml
+  - app/agrar/feldbuch/pflanzenschutz.py
+  - app/api/v1/endpoints/portal_feldbuch.py
+  - tests/test_feldbuch_pflanzenschutz_w4.py
+  - docs/schnittstellen/openapi.json
+  - docs/schnittstellen/endpoint-inventory.md
+  - config/architecture-index.yaml
+progress: >-
+  2026-07-13 umgesetzt: pflanzenschutz.py mit PsmMassnahme, psm_compliance
+  (Mittel/Menge/Flaeche/Datum/Anwender/Begruendung), wartezeit_hinweis
+  (fruehester Erntetermin vs. geplante Ernte) und kostensplit_nach_wirkungsbereich
+  (Herbizid/Fungizid/Insektizid/Wachstumsregler/Sonstiges). Portal-Endpoint liefert
+  Kostensplit + Pflichtangaben-Status je Massnahme. Keine neue Migration
+  (Spalten aus AS-W1).
+acceptance:
+  - "Pflichtangaben-Pruefung erkennt fehlenden Anwender/Begruendung."
+  - "Wartezeit-Hinweis meldet Verletzung des Erntetermins."
+  - "Kostensplit summiert je Wirkungsbereich; Endpoint liefert Uebersicht."
+tests:
+  - "pytest tests/test_feldbuch_pflanzenschutz_w4.py -> 6 passed."
+  - "python -m py_compile pflanzenschutz.py portal_feldbuch.py -> 0."
+risks:
+  - "Wirkstoff-/Wartezeit-Stammdaten aus PSM-Master sind Folgeausbau; hier Massnahmen-Ebene."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
+  - "OpenAPI-/Inventar-/Architektur-Index-Drift-Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    PSM-Pflichtangaben und Wartezeit folgen PflSchG/CC; Kostensplit nach
+    Wirkungsbereich fuer die betriebswirtschaftliche Auswertung.
+  architektur_vertrag: >-
+    Reines Logikmodul + additiver Portal-Endpoint; kein neuer Service, keine Migration.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt die in AS-W1 ergaenzten Massnahmenspalten.
+  security_vertrag: >-
+    Tenant-/Kundenfilter unveraendert; reine Auswertung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML und OpenAPI/Inventare/Architektur-Index werden aktualisiert.
+  test_vertrag: >-
+    PSM-Tests, py_compile und Drift-Gates gruen vor Push; GitHub Actions bestaetigen
+    den Default-Branch.
