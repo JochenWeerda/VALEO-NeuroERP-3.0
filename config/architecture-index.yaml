@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-13T08:02:42Z'
+generated_at: '2026-07-13T14:01:58Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -528,6 +528,7 @@ domains:
     - /portal/dokumente
     - /portal/empfehlungen
     - /portal/feldbuch
+    - /portal/feldbuch-auswertungen
     - /portal/lohndienste
     - /portal/lohndienste/neu
     - /portal/naehrstoffbilanzen
@@ -1826,8 +1827,8 @@ domains:
     decisions:
     - docs/adr/adr-014-service-layer-pattern.md
 mapping_stats:
-  frontend_routes_total: 897
-  frontend_routes_mapped: 897
+  frontend_routes_total: 898
+  frontend_routes_mapped: 898
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

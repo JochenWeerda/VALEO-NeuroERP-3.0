@@ -6315,89 +6315,96 @@ const portalRoute0005 = createRoute({
 
 const portalRoute0006 = createRoute({
   getParentRoute: () => portalLayoutRoute,
+  path: "feldbuch-auswertungen",
+  component: () => renderPage("@/pages/portal/feldbuch-auswertungen"),
+  staticData: {"breadcrumb":"Feldbuch Auswertungen","module":"@/pages/portal/feldbuch-auswertungen","legacyPath":"/portal/feldbuch-auswertungen"},
+})
+
+const portalRoute0007 = createRoute({
+  getParentRoute: () => portalLayoutRoute,
   path: "lohndienste",
   component: () => renderPage("@/pages/portal/lohndienste"),
   staticData: {"breadcrumb":"Lohndienste","module":"@/pages/portal/lohndienste","legacyPath":"/portal/lohndienste"},
 })
 
-const portalRoute0007 = createRoute({
+const portalRoute0008 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "lohndienste/neu",
   component: () => renderPage("@/pages/portal/lohndienste"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/portal/lohndienste","legacyPath":"/portal/lohndienste/neu"},
 })
 
-const portalRoute0008 = createRoute({
+const portalRoute0009 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "naehrstoffbilanzen",
   component: () => renderPage("@/pages/portal/naehrstoffbilanzen"),
   staticData: {"breadcrumb":"Naehrstoffbilanzen","module":"@/pages/portal/naehrstoffbilanzen","legacyPath":"/portal/naehrstoffbilanzen"},
 })
 
-const portalRoute0009 = createRoute({
+const portalRoute0010 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "onboarding",
   component: () => renderPage("@/pages/portal/onboarding"),
   staticData: {"breadcrumb":"Onboarding","module":"@/pages/portal/onboarding","legacyPath":"/portal/onboarding"},
 })
 
-const portalRoute0010 = createRoute({
+const portalRoute0011 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "portal",
   component: () => renderPage("@/pages/portal/index"),
   staticData: {"breadcrumb":"Portal","module":"@/pages/portal/index","legacyPath":"/portal/portal"},
 })
 
-const portalRoute0011 = createRoute({
+const portalRoute0012 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "preisspiegel",
   component: () => renderPage("@/pages/portal/preisspiegel"),
   staticData: {"breadcrumb":"Preisspiegel","module":"@/pages/portal/preisspiegel","legacyPath":"/portal/preisspiegel"},
 })
 
-const portalRoute0012 = createRoute({
+const portalRoute0013 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "profil",
   component: () => renderPage("@/pages/portal/index"),
   staticData: {"breadcrumb":"Profil","module":"@/pages/portal/index","legacyPath":"/portal/profil"},
 })
 
-const portalRoute0013 = createRoute({
+const portalRoute0014 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "rationsoptimierung",
   component: () => renderPage("@/pages/portal/rationsoptimierung"),
   staticData: {"breadcrumb":"Rationsoptimierung","module":"@/pages/portal/rationsoptimierung","legacyPath":"/portal/rationsoptimierung"},
 })
 
-const portalRoute0014 = createRoute({
+const portalRoute0015 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "rechnungen",
   component: () => renderPage("@/pages/portal/rechnungen"),
   staticData: {"breadcrumb":"Rechnungen","module":"@/pages/portal/rechnungen","legacyPath":"/portal/rechnungen"},
 })
 
-const portalRoute0015 = createRoute({
+const portalRoute0016 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "shop",
   component: () => renderPage("@/pages/portal/shop"),
   staticData: {"breadcrumb":"Shop","module":"@/pages/portal/shop","legacyPath":"/portal/shop"},
 })
 
-const portalRoute0016 = createRoute({
+const portalRoute0017 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "vertraege",
   component: () => renderPage("@/pages/portal/vertraege"),
   staticData: {"breadcrumb":"Vertraege","module":"@/pages/portal/vertraege","legacyPath":"/portal/vertraege"},
 })
 
-const portalRoute0017 = createRoute({
+const portalRoute0018 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "whatsapp-simulator",
   component: () => renderPage("@/pages/portal/whatsapp-simulator"),
   staticData: {"breadcrumb":"Whatsapp Simulator","module":"@/pages/portal/whatsapp-simulator","legacyPath":"/portal/whatsapp-simulator"},
 })
 
-const portalRoute0018 = createRoute({
+const portalRoute0019 = createRoute({
   getParentRoute: () => portalLayoutRoute,
   path: "zertifikate",
   component: () => renderPage("@/pages/portal/zertifikate"),
@@ -7299,7 +7306,8 @@ export const routeTree = rootRoute.addChildren([
     portalRoute0015,
     portalRoute0016,
     portalRoute0017,
-    portalRoute0018
+    portalRoute0018,
+    portalRoute0019
   ]),
   publicRoute0000,
   publicRoute0001,
@@ -10663,6 +10671,11 @@ export const generatedRouteInventory = [
     "module": "@/pages/portal/feldbuch",
     "path": "portal/feldbuch",
     "source": "auto"
+  },
+  {
+    "module": "@/pages/portal/feldbuch-auswertungen",
+    "path": "portal/feldbuch-auswertungen",
+    "source": "alias"
   },
   {
     "module": "@/pages/portal/lohndienste",

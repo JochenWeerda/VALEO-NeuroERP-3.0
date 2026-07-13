@@ -3356,6 +3356,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/portal/feldbuch-auswertungen",
+      "path": "portal/feldbuch-auswertungen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/portal/lohndienste",
       "path": "portal/lohndienste",
       "source": "navigation"

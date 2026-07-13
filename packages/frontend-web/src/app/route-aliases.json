@@ -2571,6 +2571,10 @@
     {
       "module": "@/pages/futtermittel/rations-schnittstellen-import",
       "path": "futtermittel/rations-schnittstellen-import"
+    },
+    {
+      "module": "@/pages/portal/feldbuch-auswertungen",
+      "path": "portal/feldbuch-auswertungen"
     }
   ]
 }

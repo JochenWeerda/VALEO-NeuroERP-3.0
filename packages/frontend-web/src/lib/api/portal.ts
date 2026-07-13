@@ -221,6 +221,49 @@ export function usePortalFeldbuchStats() {
   })
 }
 
+// ── DüV-Auswertungen (Ackerschlagkartei AS-W1..W6) ──────────────────────────
+const FB = '/api/v1/portal/feldbuch'
+
+export function usePortalDuengebilanz(jahr?: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'duengebilanz', jahr ?? 'current'],
+    queryFn: async () => (await apiClient.get<Record<string, unknown>>(`${FB}/duengebilanz${jahr ? `?jahr=${jahr}` : ''}`)).data,
+    staleTime: 60 * 1000,
+  })
+}
+
+export function usePortalDuengebedarf(jahr?: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'duengebedarf', jahr ?? 'current'],
+    queryFn: async () => (await apiClient.get<Record<string, unknown>>(`${FB}/duengebedarf${jahr ? `?jahr=${jahr}` : ''}`)).data,
+    staleTime: 60 * 1000,
+  })
+}
+
+export function usePortalStoffstrombilanz(jahr?: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'stoffstrombilanz', jahr ?? 'current'],
+    queryFn: async () => (await apiClient.get<Record<string, unknown>>(`${FB}/stoffstrombilanz${jahr ? `?jahr=${jahr}` : ''}`)).data,
+    staleTime: 60 * 1000,
+  })
+}
+
+export function usePortalPflanzenschutzUebersicht(jahr?: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'psm-uebersicht', jahr ?? 'current'],
+    queryFn: async () => (await apiClient.get<Record<string, unknown>>(`${FB}/pflanzenschutz-uebersicht${jahr ? `?jahr=${jahr}` : ''}`)).data,
+    staleTime: 60 * 1000,
+  })
+}
+
+export function usePortalErnteAuswertung(jahr?: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'ernte-auswertung', jahr ?? 'current'],
+    queryFn: async () => (await apiClient.get<Record<string, unknown>>(`${FB}/ernte-auswertung${jahr ? `?jahr=${jahr}` : ''}`)).data,
+    staleTime: 60 * 1000,
+  })
+}
+
 export function useCreatePortalSchlag() {
   const queryClient = useQueryClient()
   return useMutation({
