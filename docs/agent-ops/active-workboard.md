@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ACKER-W2W5-BEDARF-NMIN-004 Ackerschlagkartei AS-W2 Duengebedarf + AS-W5 Nmin/Bodenuntersuchung - abgeschlossen 2026-07-13
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-13 - Wellen AS-W2/AS-W5 (Masterplan `docs/design/ackerschlagkartei-lwk-gap-masterplan.md`). Schlag-Schemas nehmen `n_sollwert_kg_ha`, `ertragsniveau_dt_ha`, `nmin_fruehjahr_kg_ha`, `nmin_in_bedarf` sowie Bodenuntersuchung (P2O5/K2O/MgO/pH, `boden_datum`, Versorgungsstufe A..E) entgegen (Spalten aus AS-W1-Migration); `_schlag_to_dict` gibt sie aus. Endpoint `/portal/feldbuch/duengebedarf` berechnet je Schlag N-Bedarf = `duengebedarf_n(Sollwert, Nmin) x Flaeche` und den Restbedarf gegen die ausgebrachte N-Menge; Fruehjahrs-Nmin nur bei `nmin_in_bedarf`. Keine neue Migration. **Dateibesitz:** `app/api/v1/endpoints/portal_feldbuch.py`, OpenAPI/Inventar/Architektur-Index, Slice-YAML und Workboard. **Abnahme:** `pytest tests/test_feldbuch_naehrstoff_duev.py::TestDuengebedarf` -> passed; py_compile 0.
+
 ## ACKER-W4-PFLANZENSCHUTZ-003 Ackerschlagkartei AS-W4 Pflanzenschutz-Dokumentation (PflSchG/CC) - abgeschlossen 2026-07-13
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-13 - Welle AS-W4 (Masterplan `docs/design/ackerschlagkartei-lwk-gap-masterplan.md`). Modul `app/agrar/feldbuch/pflanzenschutz.py`: `psm_compliance` (Pflichtangaben Mittel/Menge/Flaeche/Datum/Anwender/Begruendung nach PflSchG/CC), `wartezeit_hinweis` (fruehester Erntetermin vs. geplante Ernte), `kostensplit_nach_wirkungsbereich` (Herbizid/Fungizid/Insektizid/Wachstumsregler/Sonstiges). Portal-Endpoint `/portal/feldbuch/pflanzenschutz-uebersicht` liefert Spritztagebuch-Uebersicht mit Kostensplit + Pflichtangaben-Status. Keine neue Migration (Spalten aus AS-W1). **Dateibesitz:** `app/agrar/feldbuch/pflanzenschutz.py`, `app/api/v1/endpoints/portal_feldbuch.py`, `tests/test_feldbuch_pflanzenschutz_w4.py`, OpenAPI/Inventar/Architektur-Index, Slice-YAML und Workboard. **Abnahme:** `pytest tests/test_feldbuch_pflanzenschutz_w4.py` -> 6 passed; py_compile 0.

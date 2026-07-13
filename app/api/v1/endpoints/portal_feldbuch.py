@@ -144,7 +144,22 @@ def _get_customer_id(
 # Pydantic Schemas
 # ────────────────────────────────────────────────────────────────────────────
 
-class PortalSchlagCreate(BaseModel):
+class _SchlagDuevFields(BaseModel):
+    # AS-W2 (DüV): N-Düngebedarf-Grundlagen
+    n_sollwert_kg_ha: Optional[float] = None
+    ertragsniveau_dt_ha: Optional[float] = None
+    # AS-W5 (DüV): Nmin + Bodenuntersuchung
+    nmin_fruehjahr_kg_ha: Optional[float] = None
+    nmin_in_bedarf: Optional[bool] = None
+    boden_p2o5_mg: Optional[float] = None
+    boden_k2o_mg: Optional[float] = None
+    boden_mgo_mg: Optional[float] = None
+    boden_ph: Optional[float] = None
+    boden_datum: Optional[datetime] = None
+    versorgungsstufe: Optional[str] = None
+
+
+class PortalSchlagCreate(_SchlagDuevFields):
     name: str
     flik: Optional[str] = None
     flaeche: float
@@ -157,7 +172,7 @@ class PortalSchlagCreate(BaseModel):
     status: str = "aktiv"
 
 
-class PortalSchlagUpdate(BaseModel):
+class PortalSchlagUpdate(_SchlagDuevFields):
     name: Optional[str] = None
     flik: Optional[str] = None
     flaeche: Optional[float] = None
@@ -273,6 +288,17 @@ def _schlag_to_dict(s: FeldbuchSchlag) -> dict[str, Any]:
         "bodenart": str(s.bodenart) if s.bodenart else None,
         "ackerzahl": float(s.ackerzahl) if s.ackerzahl is not None else None,
         "status": str(s.status) if s.status else "aktiv",
+        # AS-W2/W5 (DüV): Sollwert, Nmin, Bodenuntersuchung
+        "nSollwertKgHa": float(s.n_sollwert_kg_ha) if s.n_sollwert_kg_ha is not None else None,
+        "ertragsniveauDtHa": float(s.ertragsniveau_dt_ha) if s.ertragsniveau_dt_ha is not None else None,
+        "nminFruehjahrKgHa": float(s.nmin_fruehjahr_kg_ha) if s.nmin_fruehjahr_kg_ha is not None else None,
+        "nminInBedarf": bool(s.nmin_in_bedarf) if s.nmin_in_bedarf is not None else True,
+        "bodenP2o5Mg": float(s.boden_p2o5_mg) if s.boden_p2o5_mg is not None else None,
+        "bodenK2oMg": float(s.boden_k2o_mg) if s.boden_k2o_mg is not None else None,
+        "bodenMgoMg": float(s.boden_mgo_mg) if s.boden_mgo_mg is not None else None,
+        "bodenPh": float(s.boden_ph) if s.boden_ph is not None else None,
+        "bodenDatum": s.boden_datum.date().isoformat() if s.boden_datum else None,
+        "versorgungsstufe": str(s.versorgungsstufe) if s.versorgungsstufe else None,
     }
 
 
@@ -598,6 +624,74 @@ async def portal_duengebilanz(
         "ueberschreitungenOrgN": ueberschreitungen,
         "grenzwertKgHa": 170.0,
     }
+
+
+@router.get("/feldbuch/duengebedarf", summary="N-Duengebedarf portal (DueV)",
+    response_model=PortalFeldbuchOut
+)
+async def portal_duengebedarf(
+    jahr: int = Query(default=None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W2 (DüV): N-Düngebedarfsermittlung je Schlag (Sollwert − Nmin) und
+    Abgleich gegen die ausgebrachte N-Menge des Jahres.
+    """
+    from sqlalchemy import extract
+
+    from app.agrar.feldbuch.naehrstoff import duengebedarf_n
+
+    year = jahr or datetime.now().year
+    schlaege = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+            FeldbuchSchlag.status == "aktiv",
+        )
+        .all()
+    )
+    # ausgebrachte N je Schlag (kg gesamt)
+    ausgebracht: dict[str, float] = {}
+    for m in (
+        db.query(FeldbuchMassnahme)
+        .filter(
+            FeldbuchMassnahme.tenant_id == tenant_id,
+            FeldbuchMassnahme.customer_id == customer_id,
+            FeldbuchMassnahme.typ == "duengung",
+            extract("year", FeldbuchMassnahme.datum) == year,
+        )
+        .all()
+    ):
+        ausgebracht[m.schlag_id or ""] = ausgebracht.get(m.schlag_id or "", 0.0) + float(m.n_kg or 0.0)
+
+    out = []
+    for s in schlaege:
+        sollwert = float(s.n_sollwert_kg_ha or 0.0)
+        nmin = float(s.nmin_fruehjahr_kg_ha or 0.0) if (s.nmin_in_bedarf is None or s.nmin_in_bedarf) else 0.0
+        bedarf_kg_ha = duengebedarf_n(sollwert, nmin) if sollwert > 0 else None
+        ha = float(s.flaeche or 0.0)
+        bedarf_kg = round(bedarf_kg_ha * ha, 1) if (bedarf_kg_ha is not None and ha > 0) else None
+        ausg_kg = round(ausgebracht.get(str(s.id), 0.0), 1)
+        ausg_kg_ha = round(ausg_kg / ha, 1) if ha > 0 else None
+        rest = round(bedarf_kg - ausg_kg, 1) if bedarf_kg is not None else None
+        out.append({
+            "schlagId": str(s.id),
+            "schlagName": str(s.name),
+            "kultur": str(s.kultur) if s.kultur else None,
+            "flaecheHa": ha,
+            "nSollwertKgHa": sollwert or None,
+            "nminFruehjahrKgHa": nmin or None,
+            "nminBeruecksichtigt": bool(s.nmin_in_bedarf) if s.nmin_in_bedarf is not None else True,
+            "nBedarfKgHa": bedarf_kg_ha,
+            "nBedarfKg": bedarf_kg,
+            "nAusgebrachtKg": ausg_kg,
+            "nAusgebrachtKgHa": ausg_kg_ha,
+            "nRestbedarfKg": rest,
+            "ueberschritten": bool(rest is not None and rest < 0),
+        })
+    return {"jahr": year, "schlaege": out}
 
 
 @router.get("/feldbuch/pflanzenschutz-uebersicht", summary="Pflanzenschutz-Uebersicht portal (PflSchG)",

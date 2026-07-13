@@ -83157,6 +83157,62 @@
             ],
             "title": "Ackerzahl"
           },
+          "boden_datum": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden Datum"
+          },
+          "boden_k2o_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden K2O Mg"
+          },
+          "boden_mgo_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden Mgo Mg"
+          },
+          "boden_p2o5_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden P2O5 Mg"
+          },
+          "boden_ph": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden Ph"
+          },
           "bodenart": {
             "anyOf": [
               {
@@ -83167,6 +83223,17 @@
               }
             ],
             "title": "Bodenart"
+          },
+          "ertragsniveau_dt_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ertragsniveau Dt Ha"
           },
           "flaeche": {
             "title": "Flaeche",
@@ -83216,14 +83283,58 @@
             ],
             "title": "Kultur"
           },
+          "n_sollwert_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Sollwert Kg Ha"
+          },
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "nmin_fruehjahr_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nmin Fruehjahr Kg Ha"
+          },
+          "nmin_in_bedarf": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nmin In Bedarf"
           },
           "status": {
             "default": "aktiv",
             "title": "Status",
             "type": "string"
+          },
+          "versorgungsstufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Versorgungsstufe"
           },
           "vorkultur": {
             "anyOf": [
@@ -83257,6 +83368,62 @@
             ],
             "title": "Ackerzahl"
           },
+          "boden_datum": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden Datum"
+          },
+          "boden_k2o_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden K2O Mg"
+          },
+          "boden_mgo_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden Mgo Mg"
+          },
+          "boden_p2o5_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden P2O5 Mg"
+          },
+          "boden_ph": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boden Ph"
+          },
           "bodenart": {
             "anyOf": [
               {
@@ -83267,6 +83434,17 @@
               }
             ],
             "title": "Bodenart"
+          },
+          "ertragsniveau_dt_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ertragsniveau Dt Ha"
           },
           "flaeche": {
             "anyOf": [
@@ -83323,6 +83501,17 @@
             ],
             "title": "Kultur"
           },
+          "n_sollwert_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Sollwert Kg Ha"
+          },
           "name": {
             "anyOf": [
               {
@@ -83334,6 +83523,28 @@
             ],
             "title": "Name"
           },
+          "nmin_fruehjahr_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nmin Fruehjahr Kg Ha"
+          },
+          "nmin_in_bedarf": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nmin In Bedarf"
+          },
           "status": {
             "anyOf": [
               {
@@ -83344,6 +83555,17 @@
               }
             ],
             "title": "Status"
+          },
+          "versorgungsstufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Versorgungsstufe"
           },
           "vorkultur": {
             "anyOf": [
@@ -280207,6 +280429,89 @@
         "summary": "Feldbuch portal",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/duengebedarf": {
+      "get": {
+        "description": "AS-W2 (DüV): N-Düngebedarfsermittlung je Schlag (Sollwert − Nmin) und\nAbgleich gegen die ausgebrachte N-Menge des Jahres.",
+        "operationId": "portal_duengebedarf_api_v1_portal_feldbuch_duengebedarf_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "jahr",
+            "required": false,
+            "schema": {
+              "title": "Jahr",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "N-Duengebedarf portal (DueV)",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
         ]
       }
     },
