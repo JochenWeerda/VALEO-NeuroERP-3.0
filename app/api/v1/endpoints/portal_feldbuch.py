@@ -554,8 +554,8 @@ async def portal_update_massnahme(
     return _massnahme_to_dict(massnahme)
 
 
-@router.get("/feldbuch/duengebilanz", summary="Duengebilanz portal (DueV)",
-    response_model=PortalFeldbuchOut
+@router.get("/feldbuch/duengebilanz", response_model=PortalFeldbuchOut,
+    summary="Duengebilanz portal (DueV)"
 )
 async def portal_duengebilanz(
     jahr: int = Query(default=None),
@@ -626,8 +626,8 @@ async def portal_duengebilanz(
     }
 
 
-@router.get("/feldbuch/anbauplan-uebersicht", summary="Anbauplan-Uebersicht portal (LWK)",
-    response_model=PortalFeldbuchOut
+@router.get("/feldbuch/anbauplan-uebersicht", response_model=PortalFeldbuchOut,
+    summary="Anbauplan-Uebersicht portal (LWK)"
 )
 async def portal_anbauplan_uebersicht(
     db: Session = Depends(get_db),
@@ -679,8 +679,8 @@ class _AndiImportBody(BaseModel):
     xml: str
 
 
-@router.post("/feldbuch/andi-import", summary="ANDI-Schlagdaten importieren (AS-W8)",
-    response_model=PortalFeldbuchOut
+@router.post("/feldbuch/andi-import", response_model=PortalFeldbuchOut,
+    summary="ANDI-Schlagdaten importieren (AS-W8)"
 )
 async def portal_andi_import(
     body: _AndiImportBody,
@@ -730,8 +730,8 @@ async def portal_andi_import(
     }
 
 
-@router.get("/feldbuch/stoffstrombilanz", summary="Naehrstoffvergleich/Stoffstrombilanz portal (DueV/StoffBilV)",
-    response_model=PortalFeldbuchOut
+@router.get("/feldbuch/stoffstrombilanz", response_model=PortalFeldbuchOut,
+    summary="Naehrstoffvergleich/Stoffstrombilanz portal (DueV/StoffBilV)"
 )
 async def portal_stoffstrombilanz(
     jahr: int = Query(default=None),
@@ -844,8 +844,8 @@ async def portal_ernte_auswertung(
     return {"jahr": year, "schlaege": out}
 
 
-@router.get("/feldbuch/duengebedarf", summary="N-Duengebedarf portal (DueV)",
-    response_model=PortalFeldbuchOut
+@router.get("/feldbuch/duengebedarf", response_model=PortalFeldbuchOut,
+    summary="N-Duengebedarf portal (DueV)"
 )
 async def portal_duengebedarf(
     jahr: int = Query(default=None),
@@ -912,8 +912,8 @@ async def portal_duengebedarf(
     return {"jahr": year, "schlaege": out}
 
 
-@router.get("/feldbuch/pflanzenschutz-uebersicht", summary="Pflanzenschutz-Uebersicht portal (PflSchG)",
-    response_model=PortalFeldbuchOut
+@router.get("/feldbuch/pflanzenschutz-uebersicht", response_model=PortalFeldbuchOut,
+    summary="Pflanzenschutz-Uebersicht portal (PflSchG)"
 )
 async def portal_pflanzenschutz_uebersicht(
     jahr: int = Query(default=None),
