@@ -1,5 +1,6 @@
 @import './styles/design-tokens-meridian.css' layer(base);
 @import './styles/design-tokens-terra.css' layer(base);
+@import './styles/density.css' layer(base);
 
 @import 'tailwindcss';
 
