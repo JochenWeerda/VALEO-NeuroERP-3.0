@@ -129,6 +129,20 @@ Rationsoptimierung, Ackerschlagkartei-Auswertungen.
 3. **Token-Migration:** HSL vereinheitlichen, `@theme inline`, tokens/-Struktur (B+C), danach `tailwind.config.js` abbauen.
 4. **Nachweise:** Prod-Build, Bundle-Budget, Typecheck, Vitest, Playwright-Smoke, A11y, Screenshot-Diff, Mask-Render-A/B.
 
+## Umsetzungsstand (Pilot-Branch `chore/tailwind-v4-pilot`)
+
+| Phase | Ergebnis |
+|-------|----------|
+| 1 Vorprüfung | ✅ Baseline-Build (185 KB CSS), Analyse, dieses Dokument |
+| 2 Technischer Pilot | ✅ tailwindcss 4.3.2, `@tailwindcss/postcss`, `@import 'tailwindcss'`, `@plugin 'tailwindcss-animate'`, deprecated Utilities migriert, Codemod-Fehlrename `outline`→`outline-solid` (381 Stellen) korrigiert |
+| 3 Token-Migration | ✅ teilw.: `tailwind.config.js` → `@theme inline` (Zirkularität vermieden); **Density-Modi** `density.css` (comfortable/compact/dense). ⏳ offen: vollständige primitives/semantic/themes-Trennung der 150 Duplikate (bewusst nach visueller Absicherung, hohes Risiko) |
+| 4 Nachweise | ✅ Prod-Build grün (25,5 s), `tsc` 0 Fehler, Docker-Prod-Image grün, Playwright-Vollnutzungssmoke **14/14, 0 Fehler**; CSS-Bundle 185→229 KB (v4-typisch). ⏳ offen: Screenshot-Diff-Gate, A11y-Benchmark |
+
+**Bekannte Punkte:** CSS-Bundle +44 KB (v4-Preflight/mehr Varianten) — bei Bedarf via
+Content-Purge/Prune prüfen. Browser-Matrix-Freigabe weiterhin erforderlich vor Merge nach
+`main`. `@tailwindcss/vite`-Plugin optional (aktuell PostCSS-Plugin, funktioniert); Wechsel
+als reine Performance-Optimierung möglich.
+
 ## Schlussurteil
 
 Technische Kompatibilität ≈ 80 %. Der Stack ist gut vorbereitet; die Hauptaufgaben sind
