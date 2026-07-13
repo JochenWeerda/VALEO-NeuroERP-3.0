@@ -1,0 +1,73 @@
+slice_id: ACKER-W3W6-BILANZ-ERNTE-005
+id: ACKER-W3W6-BILANZ-ERNTE-005
+title: Ackerschlagkartei AS-W3 Stoffstrombilanz + AS-W6 Ernte/Direktkostenfreie Leistung
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-13"
+started_at: "2026-07-13"
+completed_at: "2026-07-13"
+goal: >-
+  Welle AS-W3 (Naehrstoffvergleich/Stoffstrombilanz nach DueV/StoffBilV): Zufuhr
+  (Duengung) vs. Abfuhr (Erntegut, Ertrag x Naehrstoffentzug) -> N-/P2O5-Saldo je
+  Schlag und Betrieb. Welle AS-W6 (Ernte): Erloes/Nebenleistung + Direktkostenfreie
+  Leistung je Schlag.
+scope:
+  - Modul app/agrar/feldbuch/stoffstrombilanz.py (Entzugswerte, Abfuhr, Bilanz).
+  - Portal-Endpoint /portal/feldbuch/stoffstrombilanz.
+  - Portal-Endpoint /portal/feldbuch/ernte-auswertung (Direktkostenfreie Leistung).
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/ACKER-W3W6-BILANZ-ERNTE-005.yaml"
+  - "app/agrar/feldbuch/stoffstrombilanz.py"
+  - "app/api/v1/endpoints/portal_feldbuch.py"
+  - "tests/test_feldbuch_stoffstrombilanz_w3.py"
+  - "docs/schnittstellen/openapi.json"
+  - "docs/schnittstellen/endpoint-inventory.md"
+  - "config/architecture-index.yaml"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ACKER-W3W6-BILANZ-ERNTE-005.yaml
+  - app/agrar/feldbuch/stoffstrombilanz.py
+  - app/api/v1/endpoints/portal_feldbuch.py
+  - tests/test_feldbuch_stoffstrombilanz_w3.py
+  - docs/schnittstellen/openapi.json
+  - docs/schnittstellen/endpoint-inventory.md
+  - config/architecture-index.yaml
+progress: >-
+  2026-07-13 umgesetzt: stoffstrombilanz.py mit konfigurierbaren Entzugswerten
+  (N/P2O5 je dt Haupterntegut), naehrstoffabfuhr_kg und stoffstrombilanz (Zufuhr/
+  Abfuhr/Saldo). Endpoint /portal/feldbuch/stoffstrombilanz verrechnet Duengungs-
+  Reinnaehrstoffe (Zufuhr) gegen die Ernte-Abfuhr je Schlag und Betrieb. Endpoint
+  /portal/feldbuch/ernte-auswertung liefert Erloes/Nebenleistung, Direktkosten und
+  Direktkostenfreie Leistung je Schlag. Keine neue Migration (Ernte-Spalten aus AS-W1).
+acceptance:
+  - "Abfuhr = Ertrag x Entzug; Saldo = Zufuhr - Abfuhr (N/P2O5)."
+  - "Betriebs- und Schlagbilanz werden geliefert."
+  - "Direktkostenfreie Leistung = Erloes + Nebenleistung - Direktkosten je Schlag."
+tests:
+  - "pytest tests/test_feldbuch_stoffstrombilanz_w3.py -> 5 passed."
+  - "python -m py_compile stoffstrombilanz.py portal_feldbuch.py -> 0."
+risks:
+  - "Entzugswerte sind Orientierungswerte; regionale LWK-Tabellen ueber ENTZUG konfigurierbar. Nebenprodukt-Abfuhr (Stroh) ist Folgeausbau."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
+  - "OpenAPI-/Inventar-/Architektur-Index-Drift-Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Naehrstoffvergleich/Stoffstrombilanz folgt DueV/StoffBilV (Zufuhr-Abfuhr-Saldo);
+    Entzugswerte sind konfigurierbare Orientierungswerte. Direktkostenfreie Leistung
+    = Erloes + Nebenleistung - Direktkosten.
+  architektur_vertrag: >-
+    Reines Bilanzmodul + zwei additive Portal-Endpoints; keine neue Migration,
+    kein neuer Service.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt Reinnaehrstoffe (AS-W1) und Ernte-Spalten (AS-W1).
+  security_vertrag: >-
+    Tenant-/Kundenfilter unveraendert; reine Auswertung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML und OpenAPI/Inventare/Architektur-Index werden aktualisiert.
+  test_vertrag: >-
+    Bilanz-Tests, py_compile und Drift-Gates gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.

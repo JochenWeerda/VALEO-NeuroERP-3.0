@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ACKER-W3W6-BILANZ-ERNTE-005 Ackerschlagkartei AS-W3 Stoffstrombilanz + AS-W6 Ernte/Direktkostenfreie Leistung - abgeschlossen 2026-07-13
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-13 - Wellen AS-W3/AS-W6 (Masterplan `docs/design/ackerschlagkartei-lwk-gap-masterplan.md`). Modul `app/agrar/feldbuch/stoffstrombilanz.py` (konfigurierbare N/P2O5-Entzugswerte je dt, `naehrstoffabfuhr_kg`, `stoffstrombilanz`). Endpoint `/portal/feldbuch/stoffstrombilanz` verrechnet Duengungs-Reinnaehrstoffe (Zufuhr) gegen Ernte-Abfuhr je Schlag + Betrieb (N-/P2O5-Saldo, DueV/StoffBilV). Endpoint `/portal/feldbuch/ernte-auswertung` liefert Erloes/Nebenleistung, Direktkosten und Direktkostenfreie Leistung je Schlag. Keine neue Migration (Ernte-Spalten aus AS-W1). **Dateibesitz:** `app/agrar/feldbuch/stoffstrombilanz.py`, `app/api/v1/endpoints/portal_feldbuch.py`, `tests/test_feldbuch_stoffstrombilanz_w3.py`, OpenAPI/Inventar/Architektur-Index, Slice-YAML und Workboard. **Abnahme:** `pytest tests/test_feldbuch_stoffstrombilanz_w3.py` -> 5 passed; py_compile 0.
+
 ## ACKER-W2W5-BEDARF-NMIN-004 Ackerschlagkartei AS-W2 Duengebedarf + AS-W5 Nmin/Bodenuntersuchung - abgeschlossen 2026-07-13
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-13 - Wellen AS-W2/AS-W5 (Masterplan `docs/design/ackerschlagkartei-lwk-gap-masterplan.md`). Schlag-Schemas nehmen `n_sollwert_kg_ha`, `ertragsniveau_dt_ha`, `nmin_fruehjahr_kg_ha`, `nmin_in_bedarf` sowie Bodenuntersuchung (P2O5/K2O/MgO/pH, `boden_datum`, Versorgungsstufe A..E) entgegen (Spalten aus AS-W1-Migration); `_schlag_to_dict` gibt sie aus. Endpoint `/portal/feldbuch/duengebedarf` berechnet je Schlag N-Bedarf = `duengebedarf_n(Sollwert, Nmin) x Flaeche` und den Restbedarf gegen die ausgebrachte N-Menge; Fruehjahrs-Nmin nur bei `nmin_in_bedarf`. Keine neue Migration. **Dateibesitz:** `app/api/v1/endpoints/portal_feldbuch.py`, OpenAPI/Inventar/Architektur-Index, Slice-YAML und Workboard. **Abnahme:** `pytest tests/test_feldbuch_naehrstoff_duev.py::TestDuengebedarf` -> passed; py_compile 0.

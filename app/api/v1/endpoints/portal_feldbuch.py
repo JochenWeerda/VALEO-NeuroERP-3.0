@@ -626,6 +626,120 @@ async def portal_duengebilanz(
     }
 
 
+@router.get("/feldbuch/stoffstrombilanz", summary="Naehrstoffvergleich/Stoffstrombilanz portal (DueV/StoffBilV)",
+    response_model=PortalFeldbuchOut
+)
+async def portal_stoffstrombilanz(
+    jahr: int = Query(default=None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W3 (DüV/StoffBilV): Nährstoffvergleich — Zufuhr (Düngung) vs. Abfuhr
+    (Erntegut) je Schlag und für den Betrieb; N- und P2O5-Saldo.
+    """
+    from sqlalchemy import extract
+
+    from app.agrar.feldbuch.stoffstrombilanz import SchlagStrom, naehrstoffabfuhr_kg, stoffstrombilanz
+
+    year = jahr or datetime.now().year
+    zufuhr: dict[str, dict[str, float]] = {}
+    ernte: dict[str, dict[str, Any]] = {}
+    for m in (
+        db.query(FeldbuchMassnahme)
+        .filter(
+            FeldbuchMassnahme.tenant_id == tenant_id,
+            FeldbuchMassnahme.customer_id == customer_id,
+            extract("year", FeldbuchMassnahme.datum) == year,
+        )
+        .all()
+    ):
+        sid = m.schlag_id or "ohne_schlag"
+        if m.typ == "duengung":
+            z = zufuhr.setdefault(sid, {"n": 0.0, "p2o5": 0.0})
+            z["n"] += float(m.n_kg or 0.0)
+            z["p2o5"] += float(m.p2o5_kg or 0.0)
+        elif m.typ == "ernte" and m.ertrag_dt_ha:
+            e = ernte.setdefault(sid, {"kultur": None, "ertrag": 0.0, "flaeche": 0.0})
+            e["kultur"] = (m.schlag.kultur if m.schlag else None)
+            e["ertrag"] = float(m.ertrag_dt_ha)
+            e["flaeche"] = float(m.flaeche or (m.schlag.flaeche if m.schlag else 0.0) or 0.0)
+
+    stroeme = []
+    schlaege_out = []
+    all_sids = set(zufuhr) | set(ernte)
+    for sid in all_sids:
+        z = zufuhr.get(sid, {"n": 0.0, "p2o5": 0.0})
+        e = ernte.get(sid, {"kultur": None, "ertrag": 0.0, "flaeche": 0.0})
+        strom = SchlagStrom(
+            n_zufuhr_kg=z["n"], p2o5_zufuhr_kg=z["p2o5"],
+            kultur=e["kultur"], ertrag_dt_ha=e["ertrag"], flaeche_ha=e["flaeche"],
+        )
+        stroeme.append(strom)
+        ab = naehrstoffabfuhr_kg(e["kultur"], e["ertrag"], e["flaeche"])
+        schlaege_out.append({
+            "schlagId": None if sid == "ohne_schlag" else sid,
+            "kultur": e["kultur"],
+            "nZufuhrKg": round(z["n"], 2), "nAbfuhrKg": ab["n"], "nSaldoKg": round(z["n"] - ab["n"], 2),
+            "p2o5ZufuhrKg": round(z["p2o5"], 2), "p2o5AbfuhrKg": ab["p2o5"], "p2o5SaldoKg": round(z["p2o5"] - ab["p2o5"], 2),
+        })
+    betrieb = stoffstrombilanz(stroeme)
+    return {"jahr": year, "betrieb": betrieb, "schlaege": schlaege_out}
+
+
+@router.get("/feldbuch/ernte-auswertung", summary="Ernte + Direktkostenfreie Leistung portal",
+    response_model=PortalFeldbuchOut
+)
+async def portal_ernte_auswertung(
+    jahr: int = Query(default=None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W6: Ernte-Auswertung je Schlag — Erlös, Nebenleistung und
+    Direktkostenfreie Leistung (Erlös − Direktkosten aus Düngung/PSM/Saatgut).
+    """
+    from sqlalchemy import extract
+
+    year = jahr or datetime.now().year
+    per_schlag: dict[str, dict[str, Any]] = {}
+    for m in (
+        db.query(FeldbuchMassnahme)
+        .filter(
+            FeldbuchMassnahme.tenant_id == tenant_id,
+            FeldbuchMassnahme.customer_id == customer_id,
+            extract("year", FeldbuchMassnahme.datum) == year,
+        )
+        .all()
+    ):
+        sid = m.schlag_id or "ohne_schlag"
+        row = per_schlag.setdefault(sid, {
+            "schlagId": None if sid == "ohne_schlag" else sid,
+            "schlagName": (m.schlag.name if m.schlag else None),
+            "kultur": (m.schlag.kultur if m.schlag else None),
+            "flaecheHa": float(m.schlag.flaeche) if (m.schlag and m.schlag.flaeche) else 0.0,
+            "erloesEur": 0.0, "nebenleistungEur": 0.0, "direktkostenEur": 0.0,
+            "ertragDtHa": None,
+        })
+        row["erloesEur"] += float(m.erloes_eur or 0.0)
+        row["nebenleistungEur"] += float(m.nebenleistung_eur or 0.0)
+        row["direktkostenEur"] += float(m.kosten_eur or 0.0)
+        if m.typ == "ernte" and m.ertrag_dt_ha:
+            row["ertragDtHa"] = float(m.ertrag_dt_ha)
+
+    out = []
+    for row in per_schlag.values():
+        dfl = row["erloesEur"] + row["nebenleistungEur"] - row["direktkostenEur"]
+        ha = row["flaecheHa"] or 0.0
+        row["erloesEur"] = round(row["erloesEur"], 2)
+        row["nebenleistungEur"] = round(row["nebenleistungEur"], 2)
+        row["direktkostenEur"] = round(row["direktkostenEur"], 2)
+        row["direktkostenfreieLeistungEur"] = round(dfl, 2)
+        row["direktkostenfreieLeistungEurHa"] = round(dfl / ha, 2) if ha > 0 else None
+        out.append(row)
+    return {"jahr": year, "schlaege": out}
+
+
 @router.get("/feldbuch/duengebedarf", summary="N-Duengebedarf portal (DueV)",
     response_model=PortalFeldbuchOut
 )
