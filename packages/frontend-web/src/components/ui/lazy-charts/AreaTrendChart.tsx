@@ -11,7 +11,7 @@ interface AreaTrendChartProps {
 
 export default function AreaTrendChart({ data, dataKey, stroke, fill }: AreaTrendChartProps): JSX.Element {
   return (
-    <div className="h-full rounded-lg border border-slate-100 bg-gradient-to-b from-white to-slate-50/80 p-3">
+    <div className="h-full rounded-lg border border-slate-100 bg-linear-to-b from-white to-slate-50/80 p-3">
       <SimpleLineChart
         data={data.map((item) => ({ label: item.name, [dataKey]: item.value }))}
         series={[{ key: dataKey, color: stroke, label: dataKey }]}

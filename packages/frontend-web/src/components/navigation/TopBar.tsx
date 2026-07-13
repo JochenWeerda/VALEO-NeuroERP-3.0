@@ -184,7 +184,7 @@ export function TopBar({
 
   return (
     <header
-      className="flex h-[var(--toolbar-height,56px)] items-center gap-2 border-b border-border bg-card/90 px-3 shadow-sm backdrop-blur md:gap-4 md:px-6"
+      className="flex h-(--toolbar-height,56px) items-center gap-2 border-b border-border bg-card/90 px-3 shadow-sm backdrop-blur-sm md:gap-4 md:px-6"
       role="banner"
       data-mcp-component="top-bar"
     >

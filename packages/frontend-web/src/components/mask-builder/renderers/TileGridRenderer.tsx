@@ -40,7 +40,7 @@ export const TileGridRenderer = memo(function TileGridRenderer({
             data-testid={`tile-${tile.key}`}
             data-tone={tile.tone}
             onClick={() => navigate(tile.targetPath)}
-            className={`group flex items-center justify-between rounded-md border border-l-4 ${TONE_ACCENT[tile.tone]} bg-card px-4 py-3 text-left shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+            className={`group flex items-center justify-between rounded-md border border-l-4 ${TONE_ACCENT[tile.tone]} bg-card px-4 py-3 text-left shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring`}
           >
             <span className="flex flex-col">
               <span className="text-sm font-medium">{tile.label}</span>

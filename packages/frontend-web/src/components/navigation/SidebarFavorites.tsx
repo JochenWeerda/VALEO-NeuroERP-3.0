@@ -18,7 +18,7 @@ export default function SidebarFavorites({ favorites, onNavigate }: SidebarFavor
   }
 
   return (
-    <div className="mb-3 rounded-[8px] border border-[var(--sidebar-border)] bg-[hsl(215,30%,18%)] p-2">
+    <div className="mb-3 rounded-[8px] border border-(--sidebar-border) bg-[hsl(215,30%,18%)] p-2">
       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[hsl(210,20%,70%)]">Favoriten</p>
       <div className="space-y-1">
         {favorites.map((favorite) => {
@@ -31,12 +31,12 @@ export default function SidebarFavorites({ favorites, onNavigate }: SidebarFavor
               className={({ isActive }) =>
                 clsx(
                   'flex min-h-11 items-center gap-2 rounded-[8px] px-2 py-1.5 text-xs font-medium transition-colors',
-                  'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
-                  isActive ? 'bg-[var(--sidebar-item-active-bg)] text-white' : 'text-[hsl(210,20%,75%)]',
+                  'hover:bg-(--sidebar-item-hover-bg) hover:text-white',
+                  isActive ? 'bg-(--sidebar-item-active-bg) text-white' : 'text-[hsl(210,20%,75%)]',
                 )
               }
             >
-              <FavoriteIcon className="h-3.5 w-3.5 flex-shrink-0" />
+              <FavoriteIcon className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">{favorite.item.label}</span>
             </NavLink>
           )

@@ -801,7 +801,7 @@ export default function MassnahmenPage(): JSX.Element {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 bg-gradient-to-br from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-lg flex items-center justify-center">
+              <div className="h-64 bg-linear-to-br from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-lg flex items-center justify-center">
                 <div className="text-center space-y-4">
                   <Droplets className="h-16 w-16 mx-auto text-blue-600" />
                   <div>

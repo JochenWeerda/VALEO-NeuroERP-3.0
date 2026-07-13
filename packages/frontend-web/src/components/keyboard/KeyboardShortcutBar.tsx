@@ -45,7 +45,7 @@ export function KeyboardShortcutBar({
         className,
       )}
     >
-      <Keyboard className="mr-2 h-3.5 w-3.5 flex-shrink-0 text-slate-400" aria-hidden />
+      <Keyboard className="mr-2 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {visible.map((sc) => (
           <span key={`${sc.key}-${sc.ctrl}-${sc.alt}`} className="flex items-center gap-1">

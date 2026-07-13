@@ -109,7 +109,7 @@ export function PolicyExplanationBadge({
             .filter((g) => g.ist_entscheidend)
             .map((g) => (
               <li key={g.regel_id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                <span className="mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current opacity-50" />
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-50" />
                 {g.ergebnis_text}
               </li>
             ))}

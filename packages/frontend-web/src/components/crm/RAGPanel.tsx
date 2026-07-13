@@ -214,7 +214,7 @@ export function RAGPanel({ customerId, customerName, className }: RAGPanelProps)
                           )}
                         >
                           <div className="flex items-start gap-2">
-                            <Icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <Icon className="h-4 w-4 mt-0.5 shrink-0" />
                             <div>
                               <div className="font-medium">{insight.title}</div>
                               <div className="text-xs mt-1 opacity-80">

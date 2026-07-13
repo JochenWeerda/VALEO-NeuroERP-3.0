@@ -136,7 +136,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
             <div className="flex gap-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold text-blue-900 mb-1">
                   Human-in-the-Loop-Prinzip

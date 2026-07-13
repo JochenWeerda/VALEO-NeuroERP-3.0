@@ -197,7 +197,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           <div className="flex items-center gap-2">
             <Label className="text-xs text-muted-foreground whitespace-nowrap">im Pfad</Label>
             <div className="flex-1 flex items-center gap-1 border rounded px-2 py-1 bg-muted/30 text-sm font-mono">
-              <FolderOpen className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+              <FolderOpen className="h-3 w-3 text-muted-foreground shrink-0" />
               <span className="text-muted-foreground truncate">Download (Browser)</span>
             </div>
           </div>
@@ -348,7 +348,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           {/* Fehler */}
           {error && (
             <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">
-              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}

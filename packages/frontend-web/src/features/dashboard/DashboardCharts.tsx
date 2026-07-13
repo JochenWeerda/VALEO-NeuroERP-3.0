@@ -32,7 +32,7 @@ function EmptyChartState({
   description: string
 }): ReactElement {
   return (
-    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-[var(--radius)] border border-dashed border-border bg-muted text-center">
+    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-(--radius) border border-dashed border-border bg-muted text-center">
       <p className="text-sm font-semibold text-foreground">{title}</p>
       <p className="text-xs text-muted-foreground">{description}</p>
     </div>
@@ -41,7 +41,7 @@ function EmptyChartState({
 
 function ErrorChartState({ message, onRetry }: { message: string; onRetry: () => void }): ReactElement {
   return (
-    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-[var(--radius)] border border-dashed border-border bg-muted">
+    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-(--radius) border border-dashed border-border bg-muted">
       <p className="text-sm font-medium text-foreground">{message}</p>
       <Button variant="outline" size="sm" onClick={onRetry}>
         Erneut laden
@@ -51,7 +51,7 @@ function ErrorChartState({ message, onRetry }: { message: string; onRetry: () =>
 }
 
 function ChartSkeleton(): ReactElement {
-  return <div className="h-[300px] w-full animate-pulse rounded-[var(--radius)] bg-muted" />
+  return <div className="h-[300px] w-full animate-pulse rounded-(--radius) bg-muted" />
 }
 
 export default function DashboardCharts({

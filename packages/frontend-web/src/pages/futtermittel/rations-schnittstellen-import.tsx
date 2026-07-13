@@ -142,7 +142,7 @@ export default function RationsSchnittstellenImport() {
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-5 p-5 text-slate-900">
-      <header className="rounded-2xl bg-gradient-to-r from-emerald-800 to-emerald-950 p-5 text-white shadow">
+      <header className="rounded-2xl bg-linear-to-r from-emerald-800 to-emerald-950 p-5 text-white shadow">
         <div className="flex items-center gap-2 text-emerald-200">
           <Upload className="h-5 w-5" />
           <span className="text-xs font-semibold uppercase tracking-wide">Rations-Schnittstellen</span>
@@ -182,7 +182,7 @@ export default function RationsSchnittstellenImport() {
             <Button variant="outline" size="sm" onClick={loadSample}><Copy className="mr-1 h-4 w-4" />Beispiel laden</Button>
           </div>
           <textarea
-            className="h-80 w-full rounded-lg border border-slate-300 p-3 font-mono text-xs outline-none focus:ring-2 focus:ring-emerald-500"
+            className="h-80 w-full rounded-lg border border-slate-300 p-3 font-mono text-xs outline-hidden focus:ring-2 focus:ring-emerald-500"
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
             spellCheck={false}

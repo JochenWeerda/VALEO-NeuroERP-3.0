@@ -414,7 +414,7 @@ function DetailPanel({ knowledgeId }: DetailPanelProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="inhalt" className="flex-1 flex flex-col overflow-hidden bg-white">
-        <TabsList className="mx-4 mt-3 w-fit flex-shrink-0">
+        <TabsList className="mx-4 mt-3 w-fit shrink-0">
           <TabsTrigger value="inhalt">Inhalt</TabsTrigger>
           <TabsTrigger value="versionen">Versionen ({item.versionen_count})</TabsTrigger>
           <TabsTrigger value="metadaten">Metadaten</TabsTrigger>
@@ -556,7 +556,7 @@ export default function WissensbasisPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
       {/* Page-Header */}
-      <div className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <div className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Wissensbasis</h1>
           <p className="text-sm text-gray-500">
@@ -574,7 +574,7 @@ export default function WissensbasisPage() {
       {/* Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Linke Spalte — Liste */}
-        <div className="w-80 flex-shrink-0 flex flex-col border-r bg-white overflow-hidden">
+        <div className="w-80 shrink-0 flex flex-col border-r bg-white overflow-hidden">
           {/* Suche */}
           <div className="p-3 border-b">
             <Input

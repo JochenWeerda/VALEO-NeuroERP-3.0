@@ -91,7 +91,7 @@ function FilterChips({
             <button
               type="button"
               aria-label={`Filter ${colLabel} entfernen`}
-              className="ml-0.5 rounded-full hover:text-foreground focus:outline-none focus:ring-1"
+              className="ml-0.5 rounded-full hover:text-foreground focus:outline-hidden focus:ring-1"
               onClick={() => onRemove(colKey)}
             >
               ×
@@ -175,7 +175,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
               placeholder="Suchen…"
               value={q ?? ''}
               onChange={(e) => onQueryChange({ q: e.target.value || undefined, page: 1 })}
-              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Suche in ${table.label}`}
               data-testid={`search-${table.key}`}
             />
@@ -242,7 +242,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             <select
               value={filterColumn}
               onChange={(event) => setFilterColumn(event.target.value)}
-              className="h-7 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-7 rounded border border-input bg-background px-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Filterspalte fuer ${table.label}`}
               data-testid={`filter-column-${table.key}`}
             >
@@ -260,7 +260,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 if (event.key === 'Enter') handleApplyFilter()
               }}
               placeholder="Filterwert"
-              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Filterwert fuer ${table.label}`}
               data-testid={`filter-value-${table.key}`}
             />

@@ -722,7 +722,7 @@ export default function ReklamationDetailPage(): JSX.Element {
                       key={entry.eintrag_id}
                       className="flex items-start gap-3 rounded border p-3 text-sm"
                     >
-                      <div className="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                      <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{entry.beschreibung}</span>

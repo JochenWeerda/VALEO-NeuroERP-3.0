@@ -263,7 +263,7 @@ export function DataTable<T>({
                 tabIndex={0}
                 aria-selected={focusedRowIndex === rowIndex}
                 onFocus={() => { setFocusedRowIndex(rowIndex); onRowFocus?.(row) }}
-                className={focusedRowIndex === rowIndex ? 'outline outline-2 outline-primary/50' : undefined}
+                className={focusedRowIndex === rowIndex ? 'outline-solid outline-2 outline-primary/50' : undefined}
               >
                 {visibleColumns.map((column, columnIndex) => {
                   const cellContent =

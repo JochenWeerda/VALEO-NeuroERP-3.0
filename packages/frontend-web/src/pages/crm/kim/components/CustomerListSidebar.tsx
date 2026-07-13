@@ -207,7 +207,7 @@ export default function CustomerListSidebar({
       <div className="flex items-center border-b border-border bg-background px-1.5 py-1 text-xs font-medium text-muted-foreground overflow-x-auto gap-0.5" id="alphabetical-nav-scroller">
         <button
           onClick={() => setSelectedAlphabet(null)}
-          className={`px-1.5 py-0.5 rounded transition flex-shrink-0 ${
+          className={`px-1.5 py-0.5 rounded transition shrink-0 ${
             selectedAlphabet === null ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-primary'
           }`}
           title="Gesamte Liste"
@@ -221,7 +221,7 @@ export default function CustomerListSidebar({
             <button
               key={letter}
               onClick={() => setSelectedAlphabet(active ? null : letter)}
-              className={`px-1 py-0.5 rounded transition flex-shrink-0 ${
+              className={`px-1 py-0.5 rounded transition shrink-0 ${
                 active
                   ? 'bg-primary text-primary-foreground'
                   : has
@@ -257,7 +257,7 @@ export default function CustomerListSidebar({
                 key={cust.id}
                 id={`sidebar-cust-item-${cust.id}`}
                 onClick={() => { onSelectCustomer(cust.id); setFocusedIndex(idx); }}
-                className={`w-full text-left p-2 rounded-md transition border outline-none text-sm flex flex-col gap-1 ${
+                className={`w-full text-left p-2 rounded-md transition border outline-hidden text-sm flex flex-col gap-1 ${
                   isSelected
                     ? 'bg-primary/10 border-primary text-foreground'
                     : isKeyboardFocused
@@ -269,7 +269,7 @@ export default function CustomerListSidebar({
               >
                 <div className="flex justify-between items-center w-full gap-2">
                   <span className="font-semibold truncate">{cust.name}</span>
-                  <span className="text-xs text-muted-foreground flex-shrink-0">{cust.debtorNo}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{cust.debtorNo}</span>
                 </div>
 
                 <div className="flex justify-between items-center w-full text-xs text-muted-foreground">

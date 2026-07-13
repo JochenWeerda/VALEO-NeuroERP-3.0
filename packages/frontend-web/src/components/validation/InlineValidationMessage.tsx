@@ -43,11 +43,11 @@ interface InlineValidationMessageProps {
 const _iconFor = (severity: ValidationSeverity) => {
   switch (severity) {
     case 'ERROR':
-      return <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      return <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
     case 'WARNING':
-      return <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      return <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
     case 'INFO':
-      return <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      return <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
   }
 }
 

@@ -415,7 +415,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   return (
     <div className="space-y-8 p-4 md:p-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 rounded-(--radius) border border-border bg-card p-6 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-normal text-foreground">{config.title}</h1>
           {config.subtitle && (

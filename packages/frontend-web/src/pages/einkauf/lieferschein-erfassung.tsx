@@ -1049,7 +1049,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                     <textarea
                       value={state.texte}
                       onChange={(e) => setState((p) => ({ ...p, texte: e.target.value }))}
-                      className="w-full h-16 text-sm border rounded p-2 resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full h-16 text-sm border rounded p-2 resize-none focus:outline-hidden focus:ring-1 focus:ring-ring"
                       placeholder="Freitext..."
                     />
                   </div>

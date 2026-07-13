@@ -96,7 +96,7 @@ export function ScanResult({
         )}
       >
         <div className="flex items-start gap-4">
-          <XCircle className="h-12 w-12 text-red-500 flex-shrink-0" />
+          <XCircle className="h-12 w-12 text-red-500 shrink-0" />
           <div>
             <p className="text-xl font-bold text-red-500">Artikel nicht gefunden</p>
             <p className="text-muted-foreground mt-1">

@@ -128,7 +128,7 @@ export function ErrorPanel({
       {/* Header */}
       <div className="flex items-start gap-3">
         {!compact && (
-          <div className="flex-shrink-0 opacity-70">{icon}</div>
+          <div className="shrink-0 opacity-70">{icon}</div>
         )}
         <div className="flex flex-col gap-1">
           <h3 className={cn('font-semibold', compact ? 'text-sm' : 'text-base')}>
@@ -143,7 +143,7 @@ export function ErrorPanel({
       {/* Datenverlust-Warnung */}
       {error.data_loss_risk && (
         <div className="flex items-center gap-2 rounded-md bg-white/60 px-3 py-2 text-xs font-medium">
-          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Möglicherweise gehen ungespeicherte Daten verloren.
         </div>
       )}

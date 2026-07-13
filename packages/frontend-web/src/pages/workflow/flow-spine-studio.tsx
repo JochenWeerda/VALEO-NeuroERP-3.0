@@ -38,7 +38,7 @@ export default function FlowSpineStudioPage(): JSX.Element {
         <PageSection title="Flow Spine Studio" description="Prozesskatalog wird geladen…">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-32 animate-pulse rounded-2xl border border-white/5 bg-white/[0.03]" />
+              <div key={i} className="h-32 animate-pulse rounded-2xl border border-white/5 bg-white/3" />
             ))}
           </div>
         </PageSection>
@@ -63,7 +63,7 @@ export default function FlowSpineStudioPage(): JSX.Element {
   return (
     <PageSurface
       data-page-surface="flow-spine-studio"
-      className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.10),_transparent_30%),linear-gradient(180deg,#08101f,#0d1528)]"
+      className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.10),transparent_30%),linear-gradient(180deg,#08101f,#0d1528)]"
     >
       <PageSection
         title=""
@@ -84,7 +84,7 @@ export default function FlowSpineStudioPage(): JSX.Element {
           {processes.map((process) => (
             <Card
               key={process.key}
-              className="cursor-pointer border-white/10 bg-white/[0.03] text-slate-100 transition hover:bg-white/[0.06] hover:shadow-lg hover:shadow-indigo-950/30"
+              className="cursor-pointer border-white/10 bg-white/3 text-slate-100 transition hover:bg-white/6 hover:shadow-lg hover:shadow-indigo-950/30"
               onClick={() => navigate(process.route_path)}
             >
               <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">

@@ -219,7 +219,7 @@ export default function Weighing(): ReactElement {
           <div className="space-y-4">
             {isPending
               ? Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-                  <div key={index} className="rounded-[var(--radius)] border border-border p-4">
+                  <div key={index} className="rounded-(--radius) border border-border p-4">
                     <Skeleton className="h-5 w-32" />
                     <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                       <Skeleton className="h-4 w-24" />
@@ -228,7 +228,7 @@ export default function Weighing(): ReactElement {
                   </div>
                 ))
               : tickets.map((ticket) => (
-                  <div key={ticket.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
+                  <div key={ticket.id} className="rounded-(--radius) border border-border p-4 transition-colors hover:bg-primary/5">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -259,7 +259,7 @@ export default function Weighing(): ReactElement {
                   </div>
                 ))}
             {!isPending && tickets.length === 0 ? (
-              <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+              <div className="rounded-(--radius) border border-dashed border-border bg-muted p-6 text-center">
                 <p className="text-sm font-medium text-foreground">Keine Tickets fuer heute</p>
                 <p className="text-xs text-muted-foreground">Neue Wiegevorgaenge erscheinen automatisch.</p>
               </div>

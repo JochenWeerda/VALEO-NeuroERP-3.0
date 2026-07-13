@@ -45,7 +45,7 @@ export function AgentUxPanel({
 }: AgentUxPanelProps): JSX.Element {
   const safeConfidence = clampConfidence(confidence)
   return (
-    <Card className={cn('border-slate-200 bg-gradient-to-br from-slate-50 to-white', className)}>
+    <Card className={cn('border-slate-200 bg-linear-to-br from-slate-50 to-white', className)}>
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center gap-2 text-xl">
           <Sparkles className="h-5 w-5 text-slate-700" />

@@ -517,10 +517,10 @@ export default function POSTerminalPage(): JSX.Element {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
 
       {/* ── Header ── */}
-      <div className="bg-primary text-primary-foreground px-5 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="bg-primary text-primary-foreground px-5 py-3 flex items-center justify-between shrink-0">
         {/* Links: Logo */}
         <div className="flex items-center gap-3 min-w-0">
-          <ShoppingCart className="h-7 w-7 flex-shrink-0" />
+          <ShoppingCart className="h-7 w-7 shrink-0" />
           <div className="min-w-0">
             <h1 className="text-xl font-bold leading-none">VALEO POS</h1>
             <p className="text-xs opacity-75 mt-0.5">Haus & Gartenmarkt</p>
@@ -606,7 +606,7 @@ export default function POSTerminalPage(): JSX.Element {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Warenkorb (links) ── */}
-        <div className="w-80 flex-shrink-0 border-r bg-white flex flex-col">
+        <div className="w-80 shrink-0 border-r bg-white flex flex-col">
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
             <h2 className="font-bold text-base flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
@@ -654,7 +654,7 @@ export default function POSTerminalPage(): JSX.Element {
                       <span className="font-semibold text-foreground ml-1">= {fmt(item.preis * (1 - (item.rabatt_pct ?? 0) / 100) * item.menge)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge - 1)}>−</Button>
                     <span className="w-7 text-center text-sm font-bold">{item.menge}</span>
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge + 1)}>+</Button>
@@ -747,7 +747,7 @@ export default function POSTerminalPage(): JSX.Element {
 
           <Tabs value={articleTab} onValueChange={(v) => setArticleTab(v as typeof articleTab)} className="flex-1 flex flex-col overflow-hidden">
             {/* Tab-Leiste */}
-            <div className="px-4 pt-3 pb-0 flex-shrink-0">
+            <div className="px-4 pt-3 pb-0 shrink-0">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="scanner" className="gap-1.5">
                   <Scan className="h-4 w-4" />Scanner
@@ -783,7 +783,7 @@ export default function POSTerminalPage(): JSX.Element {
             {/* Artikel-Grid */}
             <TabsContent value="grid" className="flex-1 flex flex-col overflow-hidden px-4 pb-3 pt-2">
               {/* Mengen-Schnelleingabe */}
-              <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+              <div className="flex items-center gap-2 mb-2 shrink-0">
                 <span className="text-xs text-muted-foreground">Menge:</span>
                 <div className="flex gap-1">
                   {[1, 2, 3, 5, 10, 25, 50].map((n) => (
@@ -808,7 +808,7 @@ export default function POSTerminalPage(): JSX.Element {
 
               {/* Kategorie-Filter */}
               {categories.length > 0 && (
-                <div className="w-full flex-shrink-0 mb-3 overflow-x-auto">
+                <div className="w-full shrink-0 mb-3 overflow-x-auto">
                   <div className="flex gap-2 pb-1 min-w-max">
                     <Button
                       size="sm"
@@ -866,7 +866,7 @@ export default function POSTerminalPage(): JSX.Element {
                         </button>
                         <ArticleImageLarge imageUrl={article.image_url} name={article.bezeichnung} category={article.category} />
                         <CardContent className="p-2 text-center">
-                          <div className="font-semibold text-xs leading-tight line-clamp-2 mb-1 min-h-[2.5rem] flex items-center justify-center">
+                          <div className="font-semibold text-xs leading-tight line-clamp-2 mb-1 min-h-10 flex items-center justify-center">
                             {article.bezeichnung}
                           </div>
                           <div className="text-lg font-bold text-primary tabular-nums">{fmt(article.preis)}</div>
@@ -898,7 +898,7 @@ export default function POSTerminalPage(): JSX.Element {
 
         {/* ── Touch-Bedienfeld (rechts) ── */}
         {showTouchBedienfeld && (
-          <div className="w-64 flex-shrink-0 border-l bg-slate-50 flex flex-col overflow-auto">
+          <div className="w-64 shrink-0 border-l bg-slate-50 flex flex-col overflow-auto">
             <div className="px-3 pt-3 pb-1 text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
               <Keyboard className="h-3.5 w-3.5" />Bedienfeld
             </div>

@@ -77,7 +77,7 @@ export function TouchNumpad({
                   'h-14 w-full rounded-lg text-xl font-semibold',
                   'flex items-center justify-center',
                   'transition-colors active:scale-95',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
                   isDelete
                     ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
                     : 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
@@ -103,7 +103,7 @@ export function TouchNumpad({
             'bg-primary text-primary-foreground hover:bg-primary/90',
             'disabled:opacity-50 disabled:pointer-events-none',
             'transition-colors active:scale-95',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
           )}
         >
           <Check className="h-5 w-5" />

@@ -51,7 +51,7 @@ export function KpiCard({
       )}
     >
       <div className="flex items-start justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </p>
         {Icon && <Icon className={cn('h-4 w-4', iconStyles[accent])} />}

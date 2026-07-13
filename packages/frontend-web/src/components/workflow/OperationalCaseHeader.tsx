@@ -25,7 +25,7 @@ export function OperationalCaseHeader({
   tags = [],
 }: OperationalCaseHeaderProps): JSX.Element {
   return (
-    <Card className="border-slate-200/80 bg-gradient-to-r from-slate-50 to-white">
+    <Card className="border-slate-200/80 bg-linear-to-r from-slate-50 to-white">
       <CardContent className="space-y-4 pt-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
@@ -71,7 +71,7 @@ export function OperationalCaseHeader({
         </div>
         {blocker ? (
           <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{blocker}</span>
           </div>
         ) : null}

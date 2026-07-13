@@ -159,7 +159,7 @@ export default function RetourePage(): JSX.Element {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="bg-red-600 text-white px-5 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="bg-red-600 text-white px-5 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <RotateCcw className="h-6 w-6" />
           <div>
@@ -176,7 +176,7 @@ export default function RetourePage(): JSX.Element {
         {/* Linke Spalte: Positionen */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <Card className="flex-1 flex flex-col overflow-hidden">
-            <CardHeader className="py-3 px-4 border-b flex-shrink-0">
+            <CardHeader className="py-3 px-4 border-b shrink-0">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Rückgabe-Positionen</CardTitle>
                 <Button size="sm" onClick={() => setShowArtikelDialog(true)} className="gap-1.5">
@@ -199,7 +199,7 @@ export default function RetourePage(): JSX.Element {
                         <div className="font-semibold text-sm truncate">{pos.bezeichnung}</div>
                         <div className="text-xs text-muted-foreground">{pos.artikelnr} · {fmt(pos.einzelpreis)}/Stk</div>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateMenge(pos.artikelnr, pos.menge - 1)}><Minus className="h-3 w-3" /></Button>
                         <span className="w-8 text-center font-bold text-sm">{pos.menge}</span>
                         <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateMenge(pos.artikelnr, pos.menge + 1)}><Plus className="h-3 w-3" /></Button>
@@ -223,7 +223,7 @@ export default function RetourePage(): JSX.Element {
         </div>
 
         {/* Rechte Spalte: Metadaten + Abschluss */}
-        <div className="w-80 flex-shrink-0 flex flex-col gap-3">
+        <div className="w-80 shrink-0 flex flex-col gap-3">
           {/* Bon-Referenz */}
           <Card>
             <CardContent className="pt-4 space-y-3">

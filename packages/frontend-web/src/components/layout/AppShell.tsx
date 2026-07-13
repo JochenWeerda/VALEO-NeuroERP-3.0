@@ -184,7 +184,7 @@ function GlobalSearch(): ReactNode {
       </form>
 
       {summary !== null ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 rounded-[var(--radius)] border border-border bg-card p-4 shadow-xl">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 rounded-(--radius) border border-border bg-card p-4 shadow-xl">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -262,12 +262,12 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
         />
         <nav
           className={clsx(
-            'fixed inset-y-0 left-0 z-50 flex w-[var(--sidebar-width-expanded,240px)] max-w-full flex-col bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] shadow-xl transition-transform duration-200',
+            'fixed inset-y-0 left-0 z-50 flex w-(--sidebar-width-expanded,240px) max-w-full flex-col bg-(--sidebar-bg) text-(--sidebar-fg) shadow-xl transition-transform duration-200',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
           aria-label="Hauptnavigation mobil"
         >
-          <div className="flex items-center justify-between border-b border-[var(--sidebar-border)] px-4 py-4">
+          <div className="flex items-center justify-between border-b border-(--sidebar-border) px-4 py-4">
             <div>
               <p className="text-sm font-medium text-[hsl(210,20%,70%)]">Tenant</p>
               <p className="text-base font-semibold text-white">{tenantLabel}</p>
@@ -276,7 +276,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
               variant="ghost"
               size="icon"
               onClick={closeSidebar}
-              className="text-[hsl(210,20%,80%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white"
+              className="text-[hsl(210,20%,80%)] hover:bg-(--sidebar-item-hover-bg) hover:text-white"
               aria-label="Navigation schliessen"
             >
               <X className="h-5 w-5" />
@@ -293,8 +293,8 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
                       clsx(
                         'flex items-center gap-3 rounded-[8px] border-l-[3px] px-3 py-2 text-sm font-medium transition-colors',
                         isActive
-                          ? 'border-l-[var(--sidebar-item-active-indicator)] bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)]'
-                          : 'border-l-transparent text-[hsl(210,20%,75%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white'
+                          ? 'border-l-(--sidebar-item-active-indicator) bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg)'
+                          : 'border-l-transparent text-[hsl(210,20%,75%)] hover:bg-(--sidebar-item-hover-bg) hover:text-white'
                       )
                     }
                     onClick={closeSidebar}
@@ -310,10 +310,10 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
       </div>
 
       <aside
-        className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[var(--sidebar-width-expanded,240px)] lg:flex-col lg:border-r lg:border-[var(--sidebar-border)] lg:bg-[var(--sidebar-bg)] lg:text-[var(--sidebar-fg)] lg:shadow-sm"
+        className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-(--sidebar-width-expanded,240px) lg:flex-col lg:border-r lg:border-(--sidebar-border) lg:bg-(--sidebar-bg) lg:text-(--sidebar-fg) lg:shadow-sm"
         aria-label="Hauptnavigation"
       >
-        <div className="flex h-16 flex-shrink-0 items-center border-b border-[var(--sidebar-border)] px-6">
+        <div className="flex h-16 shrink-0 items-center border-b border-(--sidebar-border) px-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-white">VALEO NeuroERP</p>
             <p className="text-sm text-[hsl(210,20%,70%)]">Tenant {tenantLabel}</p>
@@ -331,8 +331,8 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
                       clsx(
                         'flex items-center gap-3 rounded-[8px] border-l-[3px] px-3 py-2 text-sm font-medium transition-colors',
                         isActive
-                          ? 'border-l-[var(--sidebar-item-active-indicator)] bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)]'
-                          : 'border-l-transparent text-[hsl(210,20%,75%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white'
+                          ? 'border-l-(--sidebar-item-active-indicator) bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg)'
+                          : 'border-l-transparent text-[hsl(210,20%,75%)] hover:bg-(--sidebar-item-hover-bg) hover:text-white'
                       )
                     }
                   >
@@ -343,15 +343,15 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
               ))}
             </ul>
           </nav>
-          <div className="mt-8 rounded-[var(--radius)] border border-[var(--sidebar-border)] bg-[hsl(215,30%,18%)] px-4 py-3 text-xs text-[hsl(210,20%,70%)] shadow-inner">
+          <div className="mt-8 rounded-(--radius) border border-(--sidebar-border) bg-[hsl(215,30%,18%)] px-4 py-3 text-xs text-[hsl(210,20%,70%)] shadow-inner">
             <p className="font-semibold text-white">Support</p>
             <p>Bei Fragen bitte das Ops-Team informieren.</p>
           </div>
         </div>
       </aside>
 
-      <div className="lg:pl-[var(--sidebar-width-expanded,240px)]">
-        <header className="sticky top-0 z-30 flex h-[var(--toolbar-height,56px)] items-center border-b border-border bg-card/90 backdrop-blur">
+      <div className="lg:pl-(--sidebar-width-expanded,240px)">
+        <header className="sticky top-0 z-30 flex h-(--toolbar-height,56px) items-center border-b border-border bg-card/90 backdrop-blur-sm">
           <div className="flex flex-1 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <Button
@@ -379,7 +379,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
         </header>
 
         <main id="main-content" className="min-h-[calc(100vh-var(--toolbar-height,56px))] bg-transparent">
-          <div className="mx-auto w-full max-w-[var(--content-max-width,1400px)] px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-(--content-max-width,1400px) px-4 py-8 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

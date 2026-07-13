@@ -149,7 +149,7 @@ export default function UebernahmeKassePage(): JSX.Element {
           {/* Fehler */}
           {mutation.isError && (
             <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">
-              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{(mutation.error as Error).message}</span>
             </div>
           )}

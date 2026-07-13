@@ -150,7 +150,7 @@ export function CommandPalette({
             }}
             onKeyDown={handleKeyDown}
             placeholder="Suchen oder Befehl eingeben..."
-            className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-base outline-hidden placeholder:text-muted-foreground"
           />
           <kbd className="hidden h-6 items-center gap-1 rounded border bg-muted px-2 text-xs text-muted-foreground sm:inline-flex">
             <Command className="h-3 w-3" />K

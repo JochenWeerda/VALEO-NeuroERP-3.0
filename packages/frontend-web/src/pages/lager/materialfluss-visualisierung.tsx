@@ -62,11 +62,11 @@ const SiloCellRfNode = memo(function SiloCellRfNode(props: NodeProps): JSX.Eleme
     <div
       className={`rounded-lg border-2 bg-card text-card-foreground px-2 py-2 text-xs shadow-sm min-w-[140px] max-w-[180px] ${border}`}
     >
-      <Handle type="target" position={Position.Top} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="target" position={Position.Top} className="h-2! w-2! bg-muted-foreground!" />
       <div className="font-semibold leading-tight">{d?.label ?? '—'}</div>
       {d?.sub ? <div className="text-[10px] text-muted-foreground mt-0.5">{d.sub}</div> : null}
       <div className="text-[10px] mt-1">{qsStatusGermanLabel(qs)}</div>
-      <Handle type="source" position={Position.Bottom} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="source" position={Position.Bottom} className="h-2! w-2! bg-muted-foreground!" />
     </div>
   )
 })
@@ -81,11 +81,11 @@ const FlowProcRfNode = memo(function FlowProcRfNode(props: NodeProps): JSX.Eleme
     <div
       className={`rounded-md border-2 bg-card text-card-foreground px-2 py-1.5 text-xs shadow-sm min-w-[130px] max-w-[200px] ${border}`}
     >
-      <Handle type="target" position={Position.Left} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="target" position={Position.Left} className="h-2! w-2! bg-muted-foreground!" />
       <div className="font-semibold leading-tight">{d?.label ?? '—'}</div>
       {d?.sub ? <div className="text-[10px] text-muted-foreground mt-0.5">{d.sub}</div> : null}
       <div className="text-[10px] mt-1 opacity-90">{flowNodeStatusGermanLabel(st)}</div>
-      <Handle type="source" position={Position.Right} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="source" position={Position.Right} className="h-2! w-2! bg-muted-foreground!" />
     </div>
   )
 })
@@ -538,8 +538,8 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                   proOptions={{ hideAttribution: true }}
                 >
                   <Background />
-                  <Controls className="!bg-card !border-border !shadow-md" />
-                  <MiniMap pannable zoomable className="!bg-card/95 !border-border" />
+                  <Controls className="bg-card! border-border! shadow-md!" />
+                  <MiniMap pannable zoomable className="bg-card/95! border-border!" />
                   <Panel
                     position="top-right"
                     className="text-xs text-muted-foreground rounded-md border border-border bg-card/95 px-2 py-1.5 shadow-sm"
@@ -643,8 +643,8 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                   proOptions={{ hideAttribution: true }}
                 >
                   <Background />
-                  <Controls className="!bg-card !border-border !shadow-md" />
-                  <MiniMap pannable zoomable className="!bg-card/95 !border-border" />
+                  <Controls className="bg-card! border-border! shadow-md!" />
+                  <MiniMap pannable zoomable className="bg-card/95! border-border!" />
                   <Panel
                     position="top-right"
                     className="text-xs text-muted-foreground rounded-md border border-border bg-card/95 px-2 py-1.5 shadow-sm"

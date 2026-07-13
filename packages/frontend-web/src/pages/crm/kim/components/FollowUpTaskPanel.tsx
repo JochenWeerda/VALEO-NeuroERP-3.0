@@ -56,7 +56,7 @@ export default function FollowUpTaskPanel({ logs, customer, onResolveTask }: Fol
                 id={`task-row-${task.id}`}
               >
                 <div className="flex items-start gap-2.5 min-w-0">
-                  <div className={`p-1.5 rounded-md border flex-shrink-0 ${isOverdue ? 'bg-destructive/10 border-destructive/30 text-destructive' : 'bg-primary/10 border-primary/20 text-primary'}`}>
+                  <div className={`p-1.5 rounded-md border shrink-0 ${isOverdue ? 'bg-destructive/10 border-destructive/30 text-destructive' : 'bg-primary/10 border-primary/20 text-primary'}`}>
                     <Calendar size={14} />
                   </div>
                   <div className="min-w-0">
@@ -77,7 +77,7 @@ export default function FollowUpTaskPanel({ logs, customer, onResolveTask }: Fol
                   </div>
                 </div>
 
-                <Button size="sm" onClick={() => onResolveTask(task.id)} title="Folgekontakt abschließen" className="gap-1 flex-shrink-0">
+                <Button size="sm" onClick={() => onResolveTask(task.id)} title="Folgekontakt abschließen" className="gap-1 shrink-0">
                   <CheckCircle2 size={13} />
                   Erledigen
                 </Button>

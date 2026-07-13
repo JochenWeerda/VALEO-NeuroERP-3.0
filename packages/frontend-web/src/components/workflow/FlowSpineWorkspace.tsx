@@ -787,7 +787,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
     return (
       <PageSurface
         data-page-surface={`flow-spine-${processKey}`}
-        className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+        className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
       >
         <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0">
           {/* Header skeleton */}
@@ -807,7 +807,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             {/* Main content skeleton */}
             <div className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6 space-y-6">
               <div className="h-8 w-72 rounded-full bg-white/10 animate-pulse" />
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+              <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
                 {/* Node circles */}
                 <div className="flex justify-around mb-8">
                   {Array.from({ length: 6 }).map((_, i) => (
@@ -886,7 +886,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
   return (
     <PageSurface
       data-page-surface={`flow-spine-${processKey}`}
-      className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+      className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
     >
       <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0 shadow-2xl shadow-indigo-950/20">
         <header className="flex h-16 items-center justify-between border-b border-white/5 px-5">
@@ -955,7 +955,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Favoriten</p>
               <div className="space-y-2 text-sm text-slate-300">
                 {navFavorites.map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.03] px-3 py-3">{item}</div>
+                  <div key={item} className="rounded-2xl border border-white/5 bg-white/3 px-3 py-3">{item}</div>
                 ))}
               </div>
             </div>
@@ -980,7 +980,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       'w-full rounded-xl border px-3 py-2 text-left transition',
                       instanceId === inst.instance_id
                         ? 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100'
-                        : 'border-white/5 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]',
+                        : 'border-white/5 bg-white/3 text-slate-300 hover:bg-white/6',
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -1091,7 +1091,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       </div>
                     </div>
                     {workspace.resume_route ? (
-                      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                      <div className="rounded-xl border border-white/10 bg-white/3 px-3 py-2 text-xs text-slate-400">
                         Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
                       </div>
                     ) : null}
@@ -1162,10 +1162,10 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </div>
             ) : null}
 
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+            <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
               <div className="relative mb-8">
                 <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-white/10" />
-                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-gradient-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
+                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-linear-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
                 <div className={cn('relative grid gap-4', nodes.length === 4 ? 'grid-cols-4' : nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
                   {nodes.map((node) => {
                     const Icon = ICONS[node.icon as keyof typeof ICONS] ?? Sparkles
@@ -1205,7 +1205,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       </CardContent>
                     </Card>
 
-                    <Card className="border-white/10 bg-white/[0.06] text-slate-100">
+                    <Card className="border-white/10 bg-white/6 text-slate-100">
                       <CardHeader>
                         <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-400">KPI Health Score</CardTitle>
                       </CardHeader>
@@ -1220,15 +1220,15 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                   </div>
 
                   <div className="grid gap-4 lg:grid-cols-4">
-                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                    <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">KPIs</CardTitle></CardHeader>
                       <CardContent className="space-y-2 text-sm">{selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)}</CardContent>
                     </Card>
-                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                    <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Dokumente</CardTitle></CardHeader>
                       <CardContent className="space-y-2 text-sm">{selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</button>)}</CardContent>
                     </Card>
-                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                    <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
                       <CardContent className="space-y-3">
                         {selectedNode.actions.map((action) => (
@@ -1270,7 +1270,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                             }
                             if (module.href) go(module.href)
                           }}
-                          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
+                          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
                         >
                           <span>{module.label}</span>
                           <ChevronRight className="h-4 w-4 text-slate-500" />
@@ -1330,7 +1330,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 <TabsTrigger value="kpis">KPIs</TabsTrigger>
               </TabsList>
               <TabsContent value="agent" className="mt-4 space-y-4">
-                <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                <Card className="border-white/10 bg-white/3 text-slate-100">
                   <CardHeader><CardTitle className="text-base">{selectedNode.agent.headline}</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <p>{selectedNode.agent.message}</p>
@@ -1368,18 +1368,18 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </TabsContent>
               <TabsContent value="timeline" className="mt-4 space-y-3">
                 {!instanceId ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
                     Timeline verfuegbar, sobald eine konkrete Instanz geladen ist.
                   </div>
                 ) : timelineQuery.isLoading ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
                     Timeline wird geladen...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {timelineQuery.data?.events.length ? (
                       timelineQuery.data.events.slice().reverse().map((event) => (
-                        <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                        <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/3 p-4">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 text-sm font-medium text-slate-100">
                               <History className="h-4 w-4 text-slate-500" />
@@ -1396,7 +1396,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                      <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
                         Noch keine Timeline-Eintraege vorhanden.
                       </div>
                     )}
@@ -1408,7 +1408,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                   <button
                     key={`${doc.label}-${doc.href}`}
                     onClick={() => go(doc.href)}
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
                   >
                     <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</span>
                     <ChevronRight className="h-4 w-4 text-slate-500" />
@@ -1417,7 +1417,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </TabsContent>
               <TabsContent value="kpis" className="mt-4 space-y-3">
                 {selectedNode.kpis.map((kpi) => (
-                  <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/3 p-4">
                     <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{kpi.label}</div>
                     <div className="mt-2 text-lg font-semibold text-white">{kpi.value}</div>
                   </div>
@@ -1500,7 +1500,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
               />
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+            <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-300">
               <div className="font-medium text-slate-100">Praxislogik</div>
               <div className="mt-1">{startConfig.explanation}</div>
             </div>

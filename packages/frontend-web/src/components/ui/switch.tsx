@@ -38,7 +38,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           aria-hidden="true"
           className={cn(
             'relative inline-flex h-5 w-9 flex-none items-center rounded-full border border-slate-300 bg-slate-100 transition-colors',
-            'peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-slate-950 peer-focus-visible:ring-offset-2',
+            'peer-focus-visible:outline-hidden peer-focus-visible:ring-2 peer-focus-visible:ring-slate-950 peer-focus-visible:ring-offset-2',
             'peer-checked:bg-slate-900 peer-checked:border-slate-900'
           )}
         >

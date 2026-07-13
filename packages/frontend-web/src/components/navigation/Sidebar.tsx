@@ -168,10 +168,10 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
             clsx(
               'flex min-h-11 items-center gap-3 rounded-[8px] px-3 py-2 text-sm font-medium transition-colors',
               depth > 0 && 'ml-2 text-xs',
-              'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+              'hover:bg-(--sidebar-item-hover-bg) hover:text-white',
+              'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/20',
               isActive
-                ? 'border-l-[3px] border-l-[var(--sidebar-item-active-indicator)] bg-[var(--sidebar-item-active-bg)] text-white'
+                ? 'border-l-[3px] border-l-(--sidebar-item-active-indicator) bg-(--sidebar-item-active-bg) text-white'
                 : 'text-[hsl(210,20%,70%)]',
             )
           }
@@ -179,7 +179,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           data-mcp-nav-item={item.id}
           data-mcp-domain={item.mcp.businessDomain}
         >
-          <Icon className={clsx('h-5 w-5 flex-shrink-0', depth > 0 && 'h-4 w-4')} />
+          <Icon className={clsx('h-5 w-5 shrink-0', depth > 0 && 'h-4 w-4')} />
           {!collapsed && <span>{item.label}</span>}
         </NavLink>
       )
@@ -196,12 +196,12 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           className={clsx(
             'flex min-h-11 w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm font-medium transition-colors',
             depth > 0 && 'ml-2 text-xs',
-            'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
+            'hover:bg-(--sidebar-item-hover-bg) hover:text-white',
             'text-[hsl(210,20%,70%)]',
           )}
           title={collapsed ? item.label : undefined}
         >
-          <Icon className={clsx('h-5 w-5 flex-shrink-0', depth > 0 && 'h-4 w-4')} />
+          <Icon className={clsx('h-5 w-5 shrink-0', depth > 0 && 'h-4 w-4')} />
           {!collapsed && (
             <>
               <span className="flex-1 text-left">{item.label}</span>
@@ -225,7 +225,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
                   )
                 }
               >
-                <Icon className="h-4 w-4 flex-shrink-0" />
+                <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.label} oeffnen</span>
               </NavLink>
             ) : null}
@@ -239,9 +239,9 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     <aside
       className={clsx(
         'relative flex h-full max-h-screen min-h-0 flex-col border-r transition-all',
-        'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
-        'border-[var(--sidebar-border)]',
-        collapsed ? 'w-[var(--sidebar-width-collapsed,64px)]' : 'w-[var(--sidebar-width-expanded,240px)]',
+        'bg-(--sidebar-bg) text-(--sidebar-fg)',
+        'border-(--sidebar-border)',
+        collapsed ? 'w-(--sidebar-width-collapsed,64px)' : 'w-(--sidebar-width-expanded,240px)',
       )}
       style={{ transitionProperty: 'width', transitionDuration: 'var(--duration-normal,250ms)', transitionTimingFunction: 'var(--ease-spring)' }}
       role="navigation"
@@ -249,10 +249,10 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-component="sidebar"
       data-mcp-collapsed={collapsed}
     >
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--sidebar-border)] px-4">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-(--sidebar-border) px-4">
         <Link
           to="/"
-          className="flex min-h-11 min-w-11 items-center rounded focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="flex min-h-11 min-w-11 items-center rounded focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Zur Startseite"
         >
           {collapsed ? (
@@ -273,7 +273,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           variant="ghost"
           size="icon"
           onClick={onToggle}
-          className="h-11 w-11 text-[hsl(210,20%,70%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white"
+          className="h-11 w-11 text-[hsl(210,20%,70%)] hover:bg-(--sidebar-item-hover-bg) hover:text-white"
           aria-label={collapsed ? 'Sidebar erweitern' : 'Sidebar einklappen'}
           title={collapsed ? 'Erweitern (Strg+B)' : 'Einklappen (Strg+B)'}
         >
@@ -285,7 +285,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
         {filteredNavItems.map((item) => renderNavItem(item, 0))}
       </nav>
 
-      <div className="shrink-0 border-t border-[var(--sidebar-border)] p-2">
+      <div className="shrink-0 border-t border-(--sidebar-border) p-2">
         {!collapsed ? (
           <Suspense fallback={null}>
             <SidebarFavorites favorites={favoriteLinks} onNavigate={onNavigate} />

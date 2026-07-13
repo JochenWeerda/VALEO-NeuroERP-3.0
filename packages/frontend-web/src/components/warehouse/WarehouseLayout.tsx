@@ -184,7 +184,7 @@ export function WarehouseLayout({
         <input
           id="warehouse-scan-input"
           type="text"
-          className="absolute -left-[9999px]"
+          className="absolute left-[-9999px]"
           autoComplete="off"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
