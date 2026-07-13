@@ -120780,6 +120780,19 @@
         "title": "ZurueckziehenBody",
         "type": "object"
       },
+      "_AndiImportBody": {
+        "properties": {
+          "xml": {
+            "title": "Xml",
+            "type": "string"
+          }
+        },
+        "required": [
+          "xml"
+        ],
+        "title": "_AndiImportBody",
+        "type": "object"
+      },
       "_CertificationItem": {
         "properties": {
           "value": {
@@ -280429,6 +280442,164 @@
         "summary": "Feldbuch portal",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/anbauplan-uebersicht": {
+      "get": {
+        "description": "AS-W7: Anbauplan-Uebersicht — Schlaege je Kultur und Hauptfruechte nach\nGesamtumfang (analog LWK-Uebersicht), plus Fruchtfolge (Vorkultur -> Kultur).",
+        "operationId": "portal_anbauplan_uebersicht_api_v1_portal_feldbuch_anbauplan_uebersicht_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anbauplan-Uebersicht portal (LWK)",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/andi-import": {
+      "post": {
+        "description": "AS-W8: uebernimmt Schlaege aus dekodiertem ANDI-Schlag-XML in das Feldbuch.\n\nBereits vorhandene Schlaege (gleicher Name + FLIK) werden uebersprungen\n(idempotent), neue angelegt.",
+        "operationId": "portal_andi_import_api_v1_portal_feldbuch_andi_import_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_AndiImportBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "ANDI-Schlagdaten importieren (AS-W8)",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
         ]
       }
     },

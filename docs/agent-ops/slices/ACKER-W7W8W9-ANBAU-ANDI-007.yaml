@@ -1,0 +1,72 @@
+slice_id: ACKER-W7W8W9-ANBAU-ANDI-007
+id: ACKER-W7W8W9-ANBAU-ANDI-007
+title: Ackerschlagkartei AS-W7 Anbauplan/Fruchtfolge + AS-W8 ANDI-Import (+ W9 Hinweis)
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-13"
+started_at: "2026-07-13"
+completed_at: "2026-07-13"
+goal: >-
+  Welle AS-W7 (Anbauplan-Uebersicht/Fruchtfolge) und AS-W8 (ANDI-Schlagdaten-
+  Import). Anbauplan-Uebersicht liefert Schlaege je Kultur und Hauptfruechte nach
+  Umfang (LWK-Uebersicht) plus Fruchtfolge (Vorkultur -> Kultur). ANDI-Import
+  parst dekodiertes Schlag-XML und legt neue Schlaege idempotent an. AS-W9
+  (Beregnung/QS) wird ueber das bestehende generische Massnahmenmodell abgedeckt.
+scope:
+  - Modul app/agrar/feldbuch/andi_import.py (XML-Parser, namespace-robust).
+  - Portal-Endpoints /portal/feldbuch/anbauplan-uebersicht und /andi-import.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/ACKER-W7W8W9-ANBAU-ANDI-007.yaml"
+  - "app/agrar/feldbuch/andi_import.py"
+  - "app/api/v1/endpoints/portal_feldbuch.py"
+  - "tests/test_feldbuch_andi_import_w8.py"
+  - "docs/schnittstellen/openapi.json"
+  - "docs/schnittstellen/endpoint-inventory.md"
+  - "config/architecture-index.yaml"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ACKER-W7W8W9-ANBAU-ANDI-007.yaml
+  - app/agrar/feldbuch/andi_import.py
+  - app/api/v1/endpoints/portal_feldbuch.py
+  - tests/test_feldbuch_andi_import_w8.py
+  - docs/schnittstellen/openapi.json
+  - docs/schnittstellen/endpoint-inventory.md
+  - config/architecture-index.yaml
+progress: >-
+  2026-07-13 umgesetzt: andi_import.parse_andi_schlaege (robust gegen Namespaces,
+  Komma-Dezimal, Pflichtfeld-Pruefung). Endpoint /portal/feldbuch/anbauplan-
+  uebersicht (Schlaege, Hauptfruechte nach Umfang, Fruchtfolge). Endpoint
+  /portal/feldbuch/andi-import legt neue Schlaege idempotent an (Duplikat per
+  Name+FLIK). AS-W9 (Beregnung) nutzt das generische Massnahmenmodell (typ,
+  menge=Wassermenge); QS/GLOBALGAP-Zusatzangaben ueber das auflagen-JSONB.
+acceptance:
+  - "Anbauplan-Uebersicht liefert Hauptfruechte nach Umfang + Fruchtfolge."
+  - "ANDI-Import parst XML (auch mit Namespaces) und legt neue Schlaege idempotent an."
+  - "Ungueltiges/fehlerhaftes XML -> 422 mit Meldung."
+tests:
+  - "pytest tests/test_feldbuch_andi_import_w8.py -> 5 passed."
+  - "python -m py_compile andi_import.py portal_feldbuch.py -> 0."
+risks:
+  - "ANDI-XML-Schema variiert; Parser deckt die gaengigen Attributnamen ab und ist erweiterbar. GIS-Kartenanzeige nutzt das bestehende geometry_geojson-Feld."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
+  - "OpenAPI-/Inventar-/Architektur-Index-Drift-Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Anbauplan/Fruchtfolge und ANDI-Import uebernehmen Schlagdaten in die
+    kanonischen Feldbuch-Modelle; keine amtliche Antragstellung. Beregnung/QS
+    ueber das generische Massnahmenmodell.
+  architektur_vertrag: >-
+    Reiner XML-Parser + additive Portal-Endpoints; kein neuer Service, keine Migration.
+  daten_vertrag: >-
+    ANDI-Import legt FeldbuchSchlag idempotent an (Name+FLIK); keine Migration.
+  security_vertrag: >-
+    Tenant-/Kundenfilter; XML wird als bereits dekodiertes Dokument entgegengenommen.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung; ANDI-Transport bleibt konfigurativ.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML und OpenAPI/Inventare/Architektur-Index werden aktualisiert.
+  test_vertrag: >-
+    ANDI-Parser-Tests, py_compile und Drift-Gates gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.

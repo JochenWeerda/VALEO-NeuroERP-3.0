@@ -626,6 +626,110 @@ async def portal_duengebilanz(
     }
 
 
+@router.get("/feldbuch/anbauplan-uebersicht", summary="Anbauplan-Uebersicht portal (LWK)",
+    response_model=PortalFeldbuchOut
+)
+async def portal_anbauplan_uebersicht(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W7: Anbauplan-Uebersicht — Schlaege je Kultur und Hauptfruechte nach
+    Gesamtumfang (analog LWK-Uebersicht), plus Fruchtfolge (Vorkultur -> Kultur).
+    """
+    schlaege = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+            FeldbuchSchlag.status == "aktiv",
+        )
+        .order_by(FeldbuchSchlag.name)
+        .all()
+    )
+    hauptfruechte: dict[str, dict[str, Any]] = {}
+    schlag_liste = []
+    gesamt_ha = 0.0
+    for s in schlaege:
+        ha = float(s.flaeche or 0.0)
+        gesamt_ha += ha
+        kultur = str(s.kultur) if s.kultur else "ohne Kultur"
+        agg = hauptfruechte.setdefault(kultur, {"kultur": kultur, "flaecheHa": 0.0, "anzahlSchlaege": 0})
+        agg["flaecheHa"] = round(agg["flaecheHa"] + ha, 2)
+        agg["anzahlSchlaege"] += 1
+        schlag_liste.append({
+            "schlagId": str(s.id),
+            "name": str(s.name),
+            "flik": str(s.flik) if s.flik else None,
+            "flaecheHa": ha,
+            "kultur": (str(s.kultur) if s.kultur else None),
+            "vorkultur": (str(s.vorkultur) if s.vorkultur else None),
+            "fruchtfolge": f"{s.vorkultur or '?'} → {s.kultur or '?'}",
+        })
+    fruechte = sorted(hauptfruechte.values(), key=lambda x: x["flaecheHa"], reverse=True)
+    return {
+        "schlaege": schlag_liste,
+        "hauptfruechte": fruechte,
+        "gesamtFlaecheHa": round(gesamt_ha, 2),
+        "anzahlSchlaege": len(schlaege),
+    }
+
+
+class _AndiImportBody(BaseModel):
+    xml: str
+
+
+@router.post("/feldbuch/andi-import", summary="ANDI-Schlagdaten importieren (AS-W8)",
+    response_model=PortalFeldbuchOut
+)
+async def portal_andi_import(
+    body: _AndiImportBody,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """AS-W8: uebernimmt Schlaege aus dekodiertem ANDI-Schlag-XML in das Feldbuch.
+
+    Bereits vorhandene Schlaege (gleicher Name + FLIK) werden uebersprungen
+    (idempotent), neue angelegt.
+    """
+    from app.agrar.feldbuch.andi_import import parse_andi_schlaege
+
+    try:
+        parsed = parse_andi_schlaege(body.xml)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    existing = {
+        (str(s.name), str(s.flik or "")): s
+        for s in db.query(FeldbuchSchlag).filter(
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+        ).all()
+    }
+    angelegt = 0
+    uebersprungen = 0
+    for sch in parsed["schlaege"]:
+        key = (str(sch["name"]), str(sch.get("flik") or ""))
+        if key in existing:
+            uebersprungen += 1
+            continue
+        db.add(FeldbuchSchlag(
+            id=uuid7(), tenant_id=tenant_id, customer_id=customer_id,
+            name=sch["name"], flaeche=sch["flaeche"], flik=sch.get("flik"),
+            kultur=sch.get("kultur"), gemeinde=sch.get("gemeinde"), gemarkung=sch.get("gemarkung"),
+            status="aktiv", created_by=f"andi:{customer_id}",
+        ))
+        angelegt += 1
+    db.commit()
+    return {
+        "jahr": parsed.get("jahr"),
+        "gefunden": parsed["anzahl"],
+        "angelegt": angelegt,
+        "uebersprungen": uebersprungen,
+    }
+
+
 @router.get("/feldbuch/stoffstrombilanz", summary="Naehrstoffvergleich/Stoffstrombilanz portal (DueV/StoffBilV)",
     response_model=PortalFeldbuchOut
 )
