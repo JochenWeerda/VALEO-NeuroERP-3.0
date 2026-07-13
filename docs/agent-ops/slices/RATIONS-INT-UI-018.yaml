@@ -1,0 +1,70 @@
+slice_id: RATIONS-INT-UI-018
+id: RATIONS-INT-UI-018
+title: Frontend-Importoberflaeche fuer Rations-Schnittstellen (F5-UI)
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-13"
+started_at: "2026-07-13"
+goal: >-
+  Optionale Frontend-Importoberflaeche fuer die F5-Schnittstellen (agrirouter,
+  ICAR-ADE, Labor): dekodiertes JSON-Payload je Adapter einreichen, Import-
+  Ergebnis (kanonisches Ziel + ggf. F1-Kontrolle) und das tenantisolierte
+  Importjournal anzeigen. Reine Anzeige-/Bedienschicht auf den bestehenden
+  F5-Endpunkten; kein neuer Datenweg.
+scope:
+  - API-Client-Funktionen importRationsData/fetchRationsImports.
+  - Import-Seite mit Adapterauswahl, JSON-Eingabe, Ergebnis und Journal.
+  - Navigations-Eintrag + Route unter futtermittel.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/RATIONS-INT-UI-018.yaml"
+  - "packages/frontend-web/src/lib/api/rations-optimization.ts"
+  - "packages/frontend-web/src/pages/futtermittel/rations-schnittstellen-import.tsx"
+  - "packages/frontend-web/src/app/navigation/domains/operations.tsx"
+  - "packages/frontend-web/src/app/route-aliases.json"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/RATIONS-INT-UI-018.yaml
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rations-schnittstellen-import.tsx
+  - packages/frontend-web/src/app/navigation/domains/operations.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+progress: >-
+  2026-07-13 reserviert. Aufsetzend auf RATIONS-INT-015-017 (Endpunkte
+  /agrar/rations-optimization/integrations/{adapter}/import und /imports). Die UI
+  nimmt bereits dekodiertes JSON entgegen (Transport/Onboarding bleibt provider-
+  abhaengig) und zeigt Ergebnis + Journal.
+acceptance:
+  - "Seite bietet Adapterauswahl (agrirouter/ICAR-ADE/Labor) und JSON-Eingabe."
+  - "Import ruft den F5-Endpunkt, zeigt Ergebnis/Duplikat und aktualisiert das Journal."
+  - "Mutation-Lifecycle: Guard, disabled, finally-Reset, sichtbares Fehler-/Erfolg-Feedback."
+  - "Navigations-Eintrag + Route erreichbar; tsc/eslint/build gruen."
+tests:
+  - "pnpm --filter frontend-web exec tsc --noEmit -> 0."
+  - "eslint der geaenderten Dateien -> 0."
+  - "pnpm run build -> 0."
+  - "Routen generiert (generate-tanstack-routes) ohne Drift."
+risks:
+  - "Provider-Transport ist nicht Teil der UI; Beispielpayloads nur zur Bedienung, keine Live-Credentials."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, CI/CD, E2E, Quality Gate."
+  - "Route-Drift-/Docs-Gates nach neuer Seite/Navigation."
+ai_harness:
+  fachlicher_vertrag: >-
+    Die UI bedient nur die bestehenden F5-Adapter und zeigt deren kanonische
+    Zielvertraege sowie das Importjournal; keine eigene fachliche Logik.
+  architektur_vertrag: >-
+    Reine Frontend-Seite plus zwei API-Client-Funktionen auf bestehenden
+    Endpunkten; kein neuer Service/Datenweg.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt das bestehende Integrations-Importjournal.
+  security_vertrag: >-
+    API-Client fuehrt bestehende Auth-/Tenant-Header; Payload ist bereits
+    dekodiertes JSON, keine Credential-Eingabe in der UI.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung; Frontend-Build-Pfad unveraendert.
+  dokumentations_vertrag: >-
+    Workboard, Slice-YAML und generierte Routen-/Navigationsartefakte werden aktualisiert.
+  test_vertrag: >-
+    tsc, eslint, build und Routengenerierung gruen vor Push; GitHub Actions
+    bestaetigen den Default-Branch.
