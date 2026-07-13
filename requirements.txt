@@ -60,7 +60,7 @@ schedule==1.2.2
 nats-py==2.6.0
 
 # Code quality and utilities
-click==8.2.1
+click==8.3.3
 colorama==0.4.6
 GitPython==3.1.50
 
