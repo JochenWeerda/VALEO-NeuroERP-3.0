@@ -49,6 +49,11 @@ tests:
   - "python -m py_compile andi_import.py portal_feldbuch.py -> 0."
 risks:
   - "ANDI-XML-Schema variiert; Parser deckt die gaengigen Attributnamen ab und ist erweiterbar. GIS-Kartenanzeige nutzt das bestehende geometry_geojson-Feld."
+gotchas:
+  - "check_response_models.py bricht seine Regex am ersten ) ab: Klammern im summary
+    (z.B. (DueV), (LWK), (PflSchG)) verstecken ein nachfolgendes response_model, sodass
+    die Route faelschlich als untypisiert gezaehlt wird. Loesung: response_model VOR das
+    summary mit Klammer setzen (Commit 923facc4)."
 external_gates:
   - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
   - "OpenAPI-/Inventar-/Architektur-Index-Drift-Gate."
