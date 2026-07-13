@@ -730,8 +730,8 @@ async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_
 
 @router.post(
     "/pos/tse/transaction/start",
-    summary="Kassentransaktion starten (StartTransaction)",
     response_model=AdminPosOut,
+    summary="Kassentransaktion starten (StartTransaction)",
 )
 async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = Depends(get_tenant_id)):
     """Startet eine signaturpflichtige Kassentransaktion und gibt Fiskaly-Signatur zurück."""
@@ -744,8 +744,8 @@ async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = De
 
 @router.post(
     "/pos/tse/transaction/finish",
-    summary="Kassentransaktion abschließen (FinishTransaction)",
     response_model=AdminPosOut,
+    summary="Kassentransaktion abschließen (FinishTransaction)",
 )
 async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depends(get_tenant_id)):
     """Schließt eine TSE-Transaktion ab und liefert die finale Signatur für den Bon."""

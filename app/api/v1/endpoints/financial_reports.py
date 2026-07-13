@@ -668,6 +668,7 @@ async def export_report(
 
 @router.get(
     "/periodenvergleich",
+    response_model=dict,
     summary="Konten-Saldenliste mit Periodenvergleich (BI-DRILL-001)",
 )
 async def get_periodenvergleich(

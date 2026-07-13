@@ -146,8 +146,8 @@ class TourCancelIn(BaseModel):
 
 @router.get(
     "/sales-delivery-note-by-ref",
-    summary="Lieferschein zu Referenz (Read)",
     response_model=LogisticsTourOut,
+    summary="Lieferschein zu Referenz (Read)",
 )
 def resolve_sales_delivery_note_by_ref(
     ref: str = Query(..., min_length=1, description="Lieferschein-ID oder delivery_note_number"),
@@ -449,8 +449,8 @@ def patch_stop(
 
 @router.post(
     "/tours/{tour_id}/cancel",
-    summary="Tour stornieren (fail-closed)",
     response_model=LogisticsTourOut,
+    summary="Tour stornieren (fail-closed)",
 )
 def cancel_tour(
     tour_id: str,
@@ -514,8 +514,8 @@ def cancel_tour(
 
 @router.post(
     "/tours/{tour_id}/stops/{stop_id}/cancel",
-    summary="Tour-Stopp stornieren (fail-closed)",
     response_model=LogisticsTourOut,
+    summary="Tour-Stopp stornieren (fail-closed)",
 )
 def cancel_stop(
     tour_id: str,
@@ -950,8 +950,8 @@ class DispositionCheckIn(BaseModel):
 @router.post(
     "/tours/{tour_id}/disposition-check",
     status_code=200,
-    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)",
     response_model=LogisticsTourOut,
+    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)",
 )
 def disposition_check(
     tour_id: str,
@@ -999,8 +999,8 @@ class EpodSettleIn(BaseModel):
 @router.post(
     "/tours/{tour_id}/stops/{stop_id}/settle",
     status_code=201,
-    summary="ePOD-Settlement (DOM-LOG-004.3)",
     response_model=LogisticsTourOut,
+    summary="ePOD-Settlement (DOM-LOG-004.3)",
 )
 def settle_epod_stop(
     tour_id: str,

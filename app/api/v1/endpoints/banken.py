@@ -178,8 +178,8 @@ async def fints_get_konten(
 
 @router.get(
     "/fints/umsaetze",
-    summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ)",
     response_model=BankenOut,
+    summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ)",
 )
 async def fints_get_umsaetze(
     iban: str = Query(..., description="IBAN des Kontos"),
@@ -217,8 +217,8 @@ async def fints_get_umsaetze(
 
 @router.post(
     "/fints/ueberweisung",
-    summary="SEPA-Überweisung via FinTS senden (HKCCM)",
     response_model=BankenOut,
+    summary="SEPA-Überweisung via FinTS senden (HKCCM)",
 )
 async def fints_send_ueberweisung(
     body: UeberweisungRequest,

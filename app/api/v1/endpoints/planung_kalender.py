@@ -180,7 +180,7 @@ async def rotate_ics_token(
     return IcsTokenOut(token=token, feedUrl=f"/api/v1/planung/kalender/ics?token={token}")
 
 
-@router.get("/ics", summary="ICS Feed abrufen")
+@router.get("/ics", response_class=Response, summary="ICS Feed abrufen")
 async def get_ics_feed(
     token: str = Query(..., min_length=16),
     db: Session = Depends(get_db),

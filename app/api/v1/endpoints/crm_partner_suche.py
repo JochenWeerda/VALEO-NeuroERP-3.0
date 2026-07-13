@@ -33,7 +33,7 @@ def _safe(db: Session, sql: str, params: dict) -> list[dict]:
         return []
 
 
-@router.get("", summary="Partner suchen (Kunde/Lieferant/Lead, Multi-Rolle)")
+@router.get("", response_model=list[dict[str, Any]], summary="Partner suchen (Kunde/Lieferant/Lead, Multi-Rolle)")
 def partner_suche(
     q: str = Query("", description="Such-Token (Name/Nr.)"),
     limit: int = Query(30, ge=1, le=100),

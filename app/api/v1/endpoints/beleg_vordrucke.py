@@ -304,7 +304,7 @@ def _render_pdf(vordruck: VordruckOut, daten: dict[str, Any]) -> bytes:
     return buf.getvalue()
 
 
-@router.post("/{vordruck_id}/render", summary="Vordruck als PDF rendern")
+@router.post("/{vordruck_id}/render", response_class=Response, summary="Vordruck als PDF rendern")
 def render_vordruck(
     vordruck_id: str,
     payload: RenderRequest,

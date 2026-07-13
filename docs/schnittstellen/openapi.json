@@ -135944,11 +135944,6 @@
         },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
             "description": "Successful Response"
           },
           "422": {
@@ -151210,7 +151205,14 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Feeding Control Logs Api V1 Agrar Rations Optimization Feeding Control Logs Get",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -151274,7 +151276,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Save Feeding Control Log Api V1 Agrar Rations Optimization Feeding Control Logs Post",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -279367,11 +279373,6 @@
         ],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
             "description": "Successful Response"
           },
           "422": {
@@ -309026,7 +309027,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export Report Api V1 Reports Export  Report Type  Get",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"

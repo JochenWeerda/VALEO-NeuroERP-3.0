@@ -318,8 +318,8 @@ def zusammenfassung(
 
 @router.post(
     "/meldungen/{meldezeitraum}/export-csv",
-    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
     response_model=IntrastatOut,
+    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
 )
 def export_csv(
     meldezeitraum: str,

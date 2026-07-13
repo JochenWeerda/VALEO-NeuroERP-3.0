@@ -14,7 +14,7 @@ from app.core.tenant import get_tenant_id
 router = APIRouter(prefix="/reports", tags=["reports", "export"])
 
 
-@router.get("/export/{report_type}", summary="Bericht exportieren")
+@router.get("/export/{report_type}", response_model=dict, summary="Bericht exportieren")
 async def export_report(
     report_type: str = Path(..., description="Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag"),
     format: str = Query("xlsx", description="Ausgabeformat: xlsx, csv, pdf"),

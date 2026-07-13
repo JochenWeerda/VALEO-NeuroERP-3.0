@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -319,7 +319,7 @@ async def update_note(
     return _row_to_note(row)
 
 
-@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Collab-Notiz loeschen")
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Collab-Notiz loeschen")
 async def delete_note(
     note_id: str,
     request: Request,

@@ -224,8 +224,8 @@ def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
 
 @router.patch(
     "/bins/{bin_id}/stock-lines/{stock_line_id}",
-    summary="Bestandszeile (bin_stock) absolute Menge setzen",
     response_model=WarehouseWmsOut,
+    summary="Bestandszeile (bin_stock) absolute Menge setzen",
 )
 def patch_bin_stock_line(
     bin_id: str,
@@ -349,8 +349,8 @@ class PickListFromDeliveryNoteIn(BaseModel):
 @router.post(
     "/pick-lists/from-delivery-note/{ls_id}",
     status_code=status.HTTP_201_CREATED,
-    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)",
     response_model=WarehouseWmsOut,
+    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)",
 )
 def create_pick_list_from_delivery_note(
     ls_id: str,

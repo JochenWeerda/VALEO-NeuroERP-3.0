@@ -23,7 +23,7 @@ from app.services.fiscalization.service import FiscalizationService
 router = APIRouter()
 
 
-@router.get("/dsfinvk/export", summary="Providergestuetzten DSFinV-K-Export anfordern")
+@router.get("/dsfinvk/export", response_model=None, summary="Providergestuetzten DSFinV-K-Export anfordern")
 async def dsfinvk_export(
     period_from: date | None = Query(default=None),
     period_to: date | None = Query(default=None),

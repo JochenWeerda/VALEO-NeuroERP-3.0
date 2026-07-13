@@ -6925,7 +6925,7 @@ class _FeedingControlIn(BaseModel):
     ration_ref: Optional[str] = None
 
 
-@router.post("/feeding-control/evaluate", summary="Fuetterungscontrolling: SOLL/IST-Kontrolle")
+@router.post("/feeding-control/evaluate", response_model=None, summary="Fuetterungscontrolling: SOLL/IST-Kontrolle")
 async def evaluate_feeding_control(payload: _FeedingControlIn):
     """Verrechnet ein Fuetterungsprotokoll zu Kontroll-Kennzahlen (DLG 01|2025, Kap. 11/12):
     TM-Verzehr je Kuh, Mischgenauigkeit (Toleranz < 5 %) und IOFC.
@@ -6955,7 +6955,7 @@ async def evaluate_feeding_control(payload: _FeedingControlIn):
     )
     return JSONResponse(content=result.to_dict())
 
-@router.post("/feeding-control/logs", summary="Fuetterungsprotokoll speichern")
+@router.post("/feeding-control/logs", response_model=dict, summary="Fuetterungsprotokoll speichern")
 async def save_feeding_control_log(payload: _FeedingControlIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     if not payload.group_id or not payload.feeding_date:
         raise HTTPException(status_code=422, detail="group_id und feeding_date sind fuer die Persistenz erforderlich.")
@@ -6974,7 +6974,7 @@ async def save_feeding_control_log(payload: _FeedingControlIn, tenant_id: str = 
     db.commit()
     return dict(row)
 
-@router.get("/feeding-control/logs", summary="Fuetterungscontrolling-Zeitreihe")
+@router.get("/feeding-control/logs", response_model=list[dict], summary="Fuetterungscontrolling-Zeitreihe")
 async def list_feeding_control_logs(group_id: str, limit: int = Query(default=30, ge=1, le=365), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     rows = db.execute(text("""
       SELECT id, group_id, feeding_date, ration_ref, control_result, created_at

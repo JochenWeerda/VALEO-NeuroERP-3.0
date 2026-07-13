@@ -204,8 +204,8 @@ def create_tariff(
 
 @router.post(
     "/freight-tariffs/{tariff_id}/cancel",
-    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)",
     response_model=LogisticsFreightOut,
+    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)",
 )
 def cancel_tariff(
     tariff_id: str,

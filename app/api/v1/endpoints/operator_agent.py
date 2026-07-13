@@ -143,8 +143,8 @@ async def get_proposal(
 
 @router.post(
     "/proposals/{proposal_id}/approve",
-    summary="Agent-Proposal freigeben (Human Approval)",
     response_model=dict[str, Any],
+    summary="Agent-Proposal freigeben (Human Approval)",
 )
 async def approve_proposal(
     proposal_id: str,
