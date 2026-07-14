@@ -56,3 +56,11 @@ def test_feed_readiness_is_native_inventory_worklist() -> None:
     assert definition["layout"]["tableProfile"] == "inventory"
     assert definition["dataSources"][0]["endpoint"].endswith("/readiness/materials")
     assert _check_readiness(definition)["generatorReady"] is True
+
+
+def test_feed_controlling_is_native_time_series_worklist() -> None:
+    definition = get_screen_definition("agrar/feed-controlling")
+    assert definition is not None
+    assert definition["dataSources"][0]["endpoint"].endswith("/controlling/series")
+    assert any(column["key"] == "actual_ecm_kg_cow" for column in definition["tables"][0]["columns"])
+    assert _check_readiness(definition)["generatorReady"] is True

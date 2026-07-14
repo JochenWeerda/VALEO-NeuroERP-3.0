@@ -909,6 +909,37 @@
       ]
     },
     {
+      "mask_id": "agrar/feed-controlling",
+      "title": "Fuetterungscontrolling",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feed-controlling/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feed-controlling/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feed-controlling/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feed-controlling/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "record_observation",
+          "label": "Tageswerte erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "actual_cost_eur_cow"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "agrar/feed-readiness",
       "title": "Futter-Einsatzbereitschaft",
       "domain": "agrar",

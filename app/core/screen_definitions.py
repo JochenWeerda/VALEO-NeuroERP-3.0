@@ -2143,6 +2143,36 @@ def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_feed_controlling_screen_definition() -> dict[str, Any]:
+    """Native daily target/actual feeding-control worklist."""
+    return {
+        "schemaVersion": 1, "id": "agrar/feed-controlling", "domain": "agrar", "mode": "list",
+        "title": "Fuetterungscontrolling", "subtitle": "Soll-Ist-Trends je Tiergruppe und aktiver Rationsversion",
+        "adapter": {"type": "native", "sourceId": "agrar/feed-controlling", "temporary": False},
+        "dataSources": [{"key": "series", "endpoint": "/api/v1/agrar/rations-optimization/controlling/series", "pageSize": 100, "staleTimeMs": 30_000}],
+        "tables": [{"key": "series", "label": "Tageswerte der letzten 30 Tage", "dataSourceKey": "series",
+            "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+            "columns": [
+                {"key": "observation_date", "label": "Tag", "renderKind": "date", "sortable": True, "width": 120},
+                {"key": "group_name", "label": "Tiergruppe", "sortable": True, "filterable": True, "width": 200},
+                {"key": "source", "label": "Quelle", "filterable": True, "width": 120},
+                {"key": "actual_dmi_kg_cow", "label": "Aufnahme Ist kg", "numeric": True, "width": 140},
+                {"key": "dmi_deviation_kg", "label": "Abw. Aufnahme", "numeric": True, "width": 140},
+                {"key": "actual_cost_eur_cow", "label": "Kosten Ist", "renderKind": "currency", "numeric": True, "width": 125},
+                {"key": "cost_deviation_eur", "label": "Abw. Kosten", "renderKind": "currency", "numeric": True, "width": 125},
+                {"key": "actual_milk_kg_cow", "label": "Milch kg", "numeric": True, "width": 110},
+                {"key": "actual_ecm_kg_cow", "label": "ECM kg", "numeric": True, "width": 110},
+                {"key": "nitrogen_efficiency_pct", "label": "N-Effizienz %", "numeric": True, "width": 140},
+                {"key": "actual_methane_kg_cow", "label": "Methan kg", "numeric": True, "width": 120},
+            ]}],
+        "actions": [{"key": "record_observation", "label": "Tageswerte erfassen", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"}],
+        "noWorkflowReason": "Idempotente Tagesbeobachtungen sind Messwerte; fachliche Freigaben bleiben am Rationslebenszyklus.",
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "copilot", "tableProfile": "standard"},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
+        "agentContract": {"businessPurpose": "Aufnahme, Kosten, Milch/ECM, Stickstoff und Methan je Tiergruppe im Zeitverlauf vergleichen.", "examplePrompts": ["Welche Gruppe weicht bei der Aufnahme ab?", "Wie entwickeln sich ECM und Futterkosten?"], "sensitiveFields": ["actual_cost_eur_cow"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-controlling']"}},
+    }
+
+
 def build_agrar_ration_detail_screen_definition() -> dict[str, Any]:
     """Native object page for one ration and its immutable versions."""
     return {
@@ -2376,6 +2406,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
+    "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
@@ -2892,6 +2923,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
+    "agrar/feed-controlling": "/portal/rationsoptimierung?view=controlling",
     "agrar/ration": "/portal/rationsoptimierung?view=rations",
     "agrar/duenger": "/agrar/duenger",
     "agrar/harvest-settlement": "/agrar/kontrakt-settlement",

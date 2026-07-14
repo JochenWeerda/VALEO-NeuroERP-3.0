@@ -24,6 +24,11 @@ Tagesbedarf, verifizierte Analyse und gültigen Preis. Blocker verhindern Freiga
 und Aktivierung; eine begründete Ausnahme wird mit `OVERRIDE:` kenntlich gemacht
 und über die normale Lifecycle-Transition auditiert.
 
+Nach Fuetterungsstart werden manuelle, Mischwagen-, Herd- oder Importwerte über
+`Gruppe + Tag + Quelle + Quellenreferenz` idempotent gespeichert. Die aktive
+Rationsversion liefert den Sollstand. ECM und N-Effizienz werden nur bei
+vollständiger Datengrundlage berechnet; Methanschätzungen bleiben gekennzeichnet.
+
 - Ernteannahme → Partie → Settlement: [seq-agrar-settlement.md](../../views/sequences/seq-agrar-settlement.md)
 - [Benutzerhandbuch Annahme](../../../benutzerhandbuch/annahme.md)
 - Kontrakte / Trocknung / Selbstabrechnung — Process Kernel Agrar-Wellen

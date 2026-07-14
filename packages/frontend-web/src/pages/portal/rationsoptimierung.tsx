@@ -4,6 +4,7 @@ import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalN
 import { useLocation } from '@/app/routing/typed-router'
 import { RationLifecycleWorklist } from '@/features/feed-advice/RationLifecycleWorklist'
 import { RationLifecycleDetail } from '@/features/feed-advice/RationLifecycleDetail'
+import { FeedControllingPage } from '@/features/feed-advice/FeedControllingPage'
 
 const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsoptimierung'))
 
@@ -20,7 +21,7 @@ export default function PortalFeedAdvicePage(): JSX.Element {
   const routeState = useMemo(() => {
     const params = new URLSearchParams(search)
     return {
-      expert: params.get('mode') === 'expert' || params.get('view') === 'controlling',
+      expert: params.get('mode') === 'expert',
       view: params.get('view'),
       rationId: params.get('ration_id'),
     }
@@ -46,6 +47,10 @@ export default function PortalFeedAdvicePage(): JSX.Element {
         }}
       />
     )
+  }
+
+  if (routeState.view === 'controlling') {
+    return <FeedControllingPage />
   }
 
   if (!routeState.expert) {

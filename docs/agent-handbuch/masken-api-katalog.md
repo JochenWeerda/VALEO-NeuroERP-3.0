@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (37 Masken).
+> Generiert aus `app/core/screen_definitions.py` (38 Masken).
 
 ## Übersicht
 
@@ -19,6 +19,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|---|
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
+| `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
 | `agrar/feed-readiness` | Futter-Einsatzbereitschaft | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
@@ -123,6 +124,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige mir den schnellsten Weg zur heutigen Fuetterung.
 
 **Sensible Felder:** `futterkosten, milchleistung`
+
+---
+
+### `agrar/feed-controlling` — Fuetterungscontrolling
+
+**Zweck:** Aufnahme, Kosten, Milch/ECM, Stickstoff und Methan je Tiergruppe im Zeitverlauf vergleichen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feed-controlling/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feed-controlling/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feed-controlling/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `series` → `/api/v1/agrar/rations-optimization/controlling/series`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Gruppe weicht bei der Aufnahme ab?
+- Wie entwickeln sich ECM und Futterkosten?
+
+**Sensible Felder:** `actual_cost_eur_cow`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `record_observation` | Tageswerte erfassen | safe | nein | `—` |
 
 ---
 

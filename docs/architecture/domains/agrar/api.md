@@ -56,3 +56,12 @@ Entscheidung: [ADR-042](../../../adr/adr-042-immutable-ration-lifecycle.md).
   aktuell eingesetzten Futtermittel mit Reichweite und Handlungsbedarf.
 
 Entscheidung: [ADR-043](../../../adr/adr-043-feed-readiness-read-model.md).
+
+## Fütterungsberatung / Controlling
+
+- `POST /api/v1/agrar/rations-optimization/controlling/observations` — idempotente
+  Tagesbeobachtung je Gruppe, Quelle und Quellenreferenz.
+- `GET /api/v1/agrar/rations-optimization/controlling/series` — gruppen- und
+  zeitraumfilterbare Soll-Ist-Serie.
+
+Entscheidung: [ADR-044](../../../adr/adr-044-feeding-controlling-observations.md).

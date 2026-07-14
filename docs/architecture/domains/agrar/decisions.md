@@ -19,3 +19,4 @@ version: 1.0.0
 | [ADR-041](../../../adr/adr-041-hybrid-feed-advice-experience.md) | Hybride Experience-Architektur der Fuetterungsberatung |
 | [ADR-042](../../../adr/adr-042-immutable-ration-lifecycle.md) | Unveraenderliche Rationsversionen und expliziter Lebenszyklus |
 | [ADR-043](../../../adr/adr-043-feed-readiness-read-model.md) | Futter-Readiness als domänenübergreifendes Read-Model |
+| [ADR-044](../../../adr/adr-044-feeding-controlling-observations.md) | Kanonische Tagesbeobachtungen für das Fütterungscontrolling |

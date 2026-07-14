@@ -411,6 +411,7 @@ nav:
           - ADR-041 Hybride Experience-Architektur der Fuetterungsberatung: adr/adr-041-hybrid-feed-advice-experience.md
           - ADR-042 Unveraenderliche Rationsversionen und expliziter Lebenszyklus: adr/adr-042-immutable-ration-lifecycle.md
           - ADR-043 Futter-Readiness als domänenübergreifendes Read-Model: adr/adr-043-feed-readiness-read-model.md
+          - ADR-044 Kanonische Tagesbeobachtungen für das Fütterungscontrolling: adr/adr-044-feeding-controlling-observations.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

@@ -90,5 +90,9 @@ test.describe('Fuetterungsberatung — nativer Rationslebenszyklus', () => {
     await page.goto('/portal/rationsoptimierung?view=readiness', { waitUntil: 'domcontentloaded' })
     await waitForDashboardShell(page)
     await expect(page.getByText('Futter-Einsatzbereitschaft')).toBeVisible()
+
+    await page.goto('/portal/rationsoptimierung?view=controlling', { waitUntil: 'domcontentloaded' })
+    await waitForDashboardShell(page)
+    await expect(page.getByText('Fuetterungscontrolling')).toBeVisible()
   })
 })

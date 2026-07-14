@@ -62,7 +62,7 @@ Betrieb und Tiergruppen
 | Zusammenarbeit | Kommentare, Beschreibung, Freigabe und nachvollziehbare Änderung | persistente Reviewgründe, Rollenprüfung und Änderungsaudit | Benachrichtigungskanäle anbinden |
 | Ausgabe | Rezept, Auswertung, Vergleich, Teilen und Maschinenexport | PDF-/Review-Pfad und Importseite vorhanden | profilierte Landwirt-/Berater-/Fütterer-Ausgaben |
 | Fütterung | Mischfolge, Sollmengen, Restfutter und tatsächlich geladene Mengen | mobiles Protokoll liest die freigegebene aktive Serverversion; Browsercache bleibt Offline-Fallback | Mischwagen-Rückmeldung und Sync-Konflikte |
-| Controlling | Aufnahme, Kosten, Effizienz, Stickstoff, Methan und Milchbezug | Einzelkennzahlen vorhanden | gemeinsame Zeitreihen mit Gruppen-/Zeitraumfilter und Soll-Ist-Abweichung |
+| Controlling | Aufnahme, Kosten, Effizienz, Stickstoff, Methan und Milchbezug | idempotente Gruppen-/Versions-Tagesreihe, Soll-Ist-Abweichung, ECM, N-Effizienz und gekennzeichnetes Methan umgesetzt | grafische Langfristtrends und Benchmarking |
 | Externe Daten | Labor, Mischwagen, MLP, Milchgüte und AMS | Integrationsimport angelegt | Connector-Readiness, Mapping und Fehlerquarantäne je Betrieb |
 
 ## Gelieferter Slice UIX-P0-PORTAL-RATIONS-006
@@ -103,8 +103,10 @@ Die gewichtete Variantenbewertung und UX-Gates stehen in
 2. `FEED-ADVICE-INVENTORY-008`: **abgeschlossen 2026-07-14** — Bestands- und
    Reichweitenprüfung, Analysealter/-wechsel, Preisgültigkeit, native Readiness-
    Worklist sowie auditierte Ausnahme bei blockierter Freigabe/Aktivierung.
-3. `FEED-ADVICE-CONTROLLING-009`: gruppenbezogene Soll-Ist-Zeitreihen für
-   Aufnahme, Mischgenauigkeit, Kosten, ECM, Stickstoff und Methan.
+3. `FEED-ADVICE-CONTROLLING-009`: **abgeschlossen 2026-07-14** —
+   gruppenbezogene, idempotente Soll-Ist-Tagesreihen für Aufnahme, Kosten,
+   Milch/ECM, Stickstoffeffizienz und gekennzeichnetes Methan samt nativer
+   Meridian-Worklist und kompakter manueller Erfassung.
 4. `FEED-ADVICE-CONNECTORS-010`: Labor-, Mischwagen-, MLP-, Milchgüte- und
    AMS-Connectoren mit Mapping, Readiness und Quarantäne. **Teil 1 abgeschlossen
    2026-07-14:** providerneutraler Herd-Data-/DDW-Vertrag, Delta-Sync,

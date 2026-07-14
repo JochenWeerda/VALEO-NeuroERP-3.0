@@ -66,4 +66,11 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
     expect(screen.getByTestId('native-feed-cockpit')).toHaveTextContent('agrar/feed-readiness')
     expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
   })
+
+  it('routes controlling through a native screen definition', () => {
+    locationState.search = '?view=controlling'
+    render(<PortalFeedAdvicePage />)
+    expect(screen.getByTestId('native-feed-cockpit')).toHaveTextContent('agrar/feed-controlling')
+    expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
+  })
 })
