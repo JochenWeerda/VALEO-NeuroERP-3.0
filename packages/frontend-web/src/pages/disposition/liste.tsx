@@ -81,7 +81,7 @@ export default function DispositionPage(): JSX.Element {
   ]
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-density="dense">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>

@@ -208,7 +208,32 @@ Rollout-Plan-Positionen 1, 2, 3 und 6 sind umgesetzt:
 
 Validierung: Vitest 371/371 ✅ · tsc ✅ · eslint 0 Fehler ✅ · Build 19,0 s ✅ · axe-E2E 8/8 ✅.
 
+## 7c. Update 2026-07-14 — Density + Finanz-Audit (DESIGN-ROLLOUT-DENSITY-FIN-004)
+
+Rollout-Plan-Positionen 4 und 5:
+
+- **Lager/Disposition dense:** `data-density="dense"` am Maskenwurzel von
+  `lager/bestandsuebersicht`, `lager/lagerbewegungen`, `lager/kommissionierung`,
+  `disposition/liste` — Tabellenzeilen 32 px über den zentralen Scope
+  (`ui/table.tsx` konsumiert `--table-row-height`). Weitere Lager-Masken folgen
+  demselben 1-Zeilen-Muster bei Bedarf.
+- **Finanzen-Mutation-Audit:** `zahlungslauf-kreditoren.tsx` und
+  `lastschriften-debitoren.tsx` erfüllen die Mask-Builder-Action-Invariante bereits
+  (`useMaskActions` + `loadingActionKey` an ObjectPage) — kein Handlungsbedarf.
+  **Befund:** `mahnwesen/mahnlauf.tsx` sendet beim Wizard-Abschluss keine
+  Backend-Mutation (`onFinish` navigiert nur), obwohl der Erfolgstext Versand
+  suggeriert — fachliches Gap, braucht einen eigenen Slice mit API-Vertrag
+  (hier bewusst keine Geschäftslogik erfunden).
+
 ## 8. Verbleibende Risiken & Folgearbeiten
+
+> **Stand nach Slices 002–004:** Punkte 1–4 sind erledigt (1 → 7b, 2/3/4 → 7a);
+> Rollout-Prios 1/2/3/6 → 7b, Prios 4/5 → 7c. **Offen bleiben:** Punkt 5
+> (Chart-Palette aus Tokens — eigener Slice mit visueller QA je Chart), Punkt 6
+> (`patterns/`-Konsolidierung — Großvorhaben im Zuge der Universal-Mask-Promotion),
+> Punkt 7 (Token-Quellen — Koordination mit Codex/TW4-Dateibesitz nötig), der
+> `text-*-400`-Nachzug (dunkle Spezialflächen, gezielt statt mechanisch) sowie neu:
+> **Mahnlauf ohne Backend-Mutation** (fachlicher Slice mit API-Vertrag, siehe 7c).
 
 1. **Weitere Eigenbau-Reiterleisten** (z. B. `SalesDocumentsPanel`-Kategorien,
    `InformationPanel`-Sektionen, Sidebar-Alphabetregister) auf die Register-/Default-Variante

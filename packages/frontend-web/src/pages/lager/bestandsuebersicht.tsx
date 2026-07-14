@@ -87,7 +87,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
   }, [bestand, hasData, mhdItems])
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6" data-density="dense">
       {workflowInstanceId && !workflowContext && (
         <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
