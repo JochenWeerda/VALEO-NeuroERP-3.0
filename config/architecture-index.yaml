@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-07-13
+# Architecture Index — generiert 2026-07-14
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-13T20:29:24Z'
+generated_at: '2026-07-14T19:48:03Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -398,6 +398,7 @@ domains:
     - docs/adr/adr-033-rollback-strategie-get-db.md
     - docs/adr/adr-035-kein-workflow-designer.md
     - docs/adr/adr-036-architecture-documentation-stack.md
+    - docs/adr/adr-040-contract-gated-herd-data-connectors.md
     status: active
   crm:
     owner: domain/crm
@@ -1341,6 +1342,7 @@ domains:
     - docs/adr/adr-037-structurizr-c4-source-of-truth.md
     - docs/adr/adr-038-address-value-object.md
     - docs/adr/adr-039-repo-layout.md
+    - docs/adr/adr-040-contract-gated-herd-data-connectors.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1421,6 +1423,7 @@ domains:
     - versandprofile
     decisions:
     - docs/adr/adr-008-eventing-outbox-standard.md
+    - docs/adr/adr-040-contract-gated-herd-data-connectors.md
   platform:
     owner: platform
     frontend_route_prefixes:

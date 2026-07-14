@@ -87,7 +87,10 @@ Betrieb und Tiergruppen
 3. `FEED-ADVICE-CONTROLLING-009`: gruppenbezogene Soll-Ist-Zeitreihen für
    Aufnahme, Mischgenauigkeit, Kosten, ECM, Stickstoff und Methan.
 4. `FEED-ADVICE-CONNECTORS-010`: Labor-, Mischwagen-, MLP-, Milchgüte- und
-   AMS-Connectoren mit Mapping, Readiness und Quarantäne.
+   AMS-Connectoren mit Mapping, Readiness und Quarantäne. **Teil 1 abgeschlossen
+   2026-07-14:** providerneutraler Herd-Data-/DDW-Vertrag, Delta-Sync,
+   Consent-/Contract-/Secret-/Egress-Gates und kanonische Beobachtungen. Reale
+   DDW-Pfade/Auth bleiben bis zum lizenzierten Partnervertrag bewusst offen.
 
 Jeder Folgeslice braucht einen eigenen Workboard-Claim. Neue API-Verträge sind
 nach dem Architecture Agent Protocol mit Domain-Pack-, ADR- und Drift-Nachweis

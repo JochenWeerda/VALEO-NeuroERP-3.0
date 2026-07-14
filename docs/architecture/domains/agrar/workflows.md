@@ -14,3 +14,7 @@ version: 1.0.0
 - [Benutzerhandbuch Annahme](../../../benutzerhandbuch/annahme.md)
 - Kontrakte / Trocknung / Selbstabrechnung — Process Kernel Agrar-Wellen
 - Waage / L3: externe Integration (System Context)
+- Herd-Data-Delta-Sync: Verbindung freigeben → täglicher Worker →
+  providerneutral normalisieren → idempotent speichern → Fütterungsberatung.
+  Gruppenwechsel und Lösch-/Abgangsereignisse werden explizit erhalten;
+  Live-Zugriff bleibt ohne Vertrag und Betriebseinwilligung blockiert.

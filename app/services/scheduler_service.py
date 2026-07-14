@@ -98,6 +98,9 @@ class SchedulerService:
         # WF-Trigger-Pending-Queue: alle 15 Minuten offene Trigger nachfeuern
         schedule.every(15).minutes.do(self._execute_wf_trigger_pending_job).tag('wf-trigger-pending')
 
+        # FEED-ADVICE-CONNECTORS-010: taeglicher Delta-Sync nach dem ueblichen Nacht-Upload
+        schedule.every().day.at("03:30").do(self._execute_herd_data_sync_job).tag('herd-data-sync')
+
         logger.info("Registered scheduled jobs")
 
     def _run_scheduler(self):
@@ -265,6 +268,12 @@ class SchedulerService:
                 db.close()
         except Exception as exc:
             logger.error("WF-Trigger-Pending-Job fehlgeschlagen: %s", exc)
+
+    def _execute_herd_data_sync_job(self):
+        """Synchronize all explicitly enabled herd-data connections."""
+        from ..workers.herd_data_sync_worker import execute_herd_data_syncs
+
+        return self._execute_job("herd-data-sync", execute_herd_data_syncs, "herd-data delta sync")
 
     def get_job_status(self) -> Dict[str, Any]:
         """Get status of all scheduled jobs"""

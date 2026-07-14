@@ -12,6 +12,7 @@ version: 1.0.0
 
 ```bash
 pytest tests/test_agri*.py tests/test_agrar*.py tests/test_drying_rule_engine.py
+pytest tests/test_rations_herd_data_connectors.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`

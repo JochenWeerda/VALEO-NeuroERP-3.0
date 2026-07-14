@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-ADVICE-CONNECTORS-010 Herd-Data-/DDW-Delta-Sync - in Arbeit (Claim 2026-07-14)
+## FEED-ADVICE-CONNECTORS-010 Herd-Data-/DDW-Delta-Sync - abgeschlossen 2026-07-14
 
-**Owner:** Codex. **Ziel:** bestehende Rationsschnittstellen um einen providerneutralen täglichen Herd-Data-Delta-Sync mit DDW-Vertragsprofil erweitern; Gruppen-KPIs, Tiergesundheitsalarme und genetische Profile normalisieren, Idempotenz/Löschung/Gruppenwechsel berücksichtigen und Live-Aufrufe an explizite Zugriffsrechte sowie konfigurierbare Endpunkt-Templates binden. **Dateibesitz:** `app/agrar/rations/integrations/`, `app/api/v1/endpoints/rations_integrations.py`, neue `app/services/rations_*`-Dateien, passende Alembic-Migration/Tests, Agrar-Domain-Pack, `.env.example`, Parity-Doku und Workboard. **Abnahme:** keine erfundenen DDW-Produktivpfade; Mock-Vertrag und Delta-Normalisierung getestet; Tenant-/Consent-/SSRF-Gates; Architektur- und Doku-Gates grün.
+**Owner:** Codex. **Stand:** providerneutraler täglicher Herd-Data-Delta-Sync mit DDW-Vertragsprofil geliefert. Gruppen-KPIs, Tiergesundheitsalarme und genetische Profile werden kanonisch normalisiert; Gruppenwechsel sowie gelöscht/verkauft/abgegangen bleiben explizit; Beobachtungen sind idempotent und zeitbezogen. Tenant-Verbindungen speichern keine Secrets und Live-Sync benötigt `enabled` + `live_enabled`, Vertragsreferenz, Betriebseinwilligung, Secret und HTTPS-Egress-Allowlist. Endpoint-Templates/Query-Namen bleiben mangels öffentlicher Provider-Spezifikation konfigurierbar; es wurden keine `/v2/...`-Pfade erfunden. Täglicher isolierter Worker 03:30, manuelle Sync-/Mock-/Read-APIs, lineare Migration `feed_advice_connectors_20260714`, ADR-040 und Domain-Pack-Nachweis. **Abnahme:** 10/10 Connector-/Bestandsintegrationstests; Python-Compile; Alembic lokal auf Head; Architecture Validate/Drift grün; Mapping 898/898 Routes, 210/210 Services, 406/406 Endpoints.
 
 ## UIX-P0-PORTAL-RATIONS-006 Portal-API-Prefix-Fixes + Rations-Zeilen-CRUD + Praxis-KPIs - abgeschlossen 2026-07-14
 
