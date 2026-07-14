@@ -89,6 +89,8 @@ waehlen. Der Expertenarbeitsplatz hat einen stets sichtbaren Rueckweg.
   einer Aktion.
 - Mobile Stallarbeit laedt keinen Solver.
 - Lifecycle-Mutationen zeigen Status, Delta, Guard und Ergebnis.
+- Die native Rations-Worklist und ObjectPage sind mit FEED-ADVICE-LIFECYCLE-007
+  produktiv; der Solver uebergibt nur noch unveraenderliche Entwurfssnapshots.
 - Keine horizontale Body-Scrollflaeche bei 390 px; Expertentabellen duerfen einen
   lokal begrenzten horizontalen Scrollcontainer besitzen.
 - ScreenDefinition, RenderPlan, Runtime und Renderer sind in Tests nachweisbar.
@@ -101,4 +103,3 @@ waehlen. Der Expertenarbeitsplatz hat einen stets sichtbaren Rueckweg.
 4. Controlling als eigenstaendige native Aufgabe liefern.
 5. Spezialdatei entlang ihrer Fachpanels modularisieren; keine neue Portal- oder
    Lifecycle-Funktion mehr direkt in den Monolithen einbauen.
-

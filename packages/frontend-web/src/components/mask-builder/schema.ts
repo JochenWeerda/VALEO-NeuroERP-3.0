@@ -93,6 +93,8 @@ export interface ScreenTableDefinition {
   virtualized?: boolean
   rowHeight?: number
   serverPagination?: boolean
+  /** Declarative row navigation; placeholders such as {id} resolve from row data. */
+  rowRouteTemplate?: string
 }
 
 export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'

@@ -2048,6 +2048,147 @@ def build_agrar_feed_advice_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
+    """Native worklist for persistent ration versions."""
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/rations-lifecycle",
+        "domain": "agrar",
+        "mode": "list",
+        "title": "Rationen und Freigaben",
+        "subtitle": "Versionen, Status und Fuetterungsbeginn je Tiergruppe",
+        "adapter": {"type": "native", "sourceId": "agrar/rations-lifecycle", "temporary": False},
+        "dataSources": [
+            {
+                "key": "rations",
+                "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations",
+                "pageSize": 100,
+                "staleTimeMs": 10_000,
+            }
+        ],
+        "tables": [
+            {
+                "key": "rations",
+                "label": "Rationsversionen",
+                "dataSourceKey": "rations",
+                "serverPagination": True,
+                "pageSize": 100,
+                "virtualized": True,
+                "rowHeight": 48,
+                "rowRouteTemplate": "/portal/rationsoptimierung?view=ration&ration_id={id}",
+                "columns": [
+                    {"key": "name", "label": "Ration", "sortable": True, "filterable": True, "width": 230},
+                    {"key": "group_name", "label": "Tiergruppe", "sortable": True, "filterable": True, "width": 220},
+                    {"key": "version_no", "label": "Version", "numeric": True, "sortable": True, "width": 90},
+                    {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 130},
+                    {"key": "feeding_start", "label": "Fuetterungsbeginn", "renderKind": "datetime", "sortable": True, "width": 180},
+                    {"key": "animal_count", "label": "Tiere", "numeric": True, "width": 80},
+                    {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 170},
+                ],
+            }
+        ],
+        "actions": [
+            {"key": "plan_ration", "label": "Neue Ration planen", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+            {"key": "create_group", "label": "Tiergruppe anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+        ],
+        "noWorkflowReason": "Die Worklist aggregiert Lifecycle-Objekte; Statuswechsel erfolgen an einer konkreten Rationsversion.",
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "worklist", "density": "compact", "contextRail": "copilot", "tableProfile": "standard",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 36, "requiresLazyTabs": True,
+            "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Rationsversionen nach Tiergruppe, Status und Fuetterungsbeginn steuern.",
+            "examplePrompts": ["Welche Rationen warten auf Freigabe?", "Welche Ration ist je Tiergruppe aktiv?"],
+            "sensitiveFields": ["snapshot_checksum"],
+            "testSelectors": {"screenRoot": "[data-testid='screen-agrar/rations-lifecycle']", "primaryAction": "[data-action-kind='primary']"},
+        },
+    }
+
+
+def build_agrar_ration_detail_screen_definition() -> dict[str, Any]:
+    """Native object page for one ration and its immutable versions."""
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/ration",
+        "domain": "agrar",
+        "mode": "detail",
+        "title": "Rationsfreigabe",
+        "subtitle": "Version, Freigabe, Fuetterungsbeginn und Audit",
+        "adapter": {"type": "native", "sourceId": "agrar/ration", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}"},
+            {"key": "versions", "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/versions", "pageSize": 50},
+            {"key": "audit", "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/audit", "pageSize": 100},
+        ],
+        "fields": [
+            {"key": "name", "label": "Ration", "type": "text", "readOnly": True},
+            {"key": "group_name", "label": "Tiergruppe", "type": "text", "readOnly": True},
+            {"key": "latest_version_no", "label": "Aktuelle Version", "type": "number", "readOnly": True},
+            {"key": "latest_status", "label": "Status", "type": "text", "readOnly": True},
+            {"key": "latest_feeding_start", "label": "Fuetterungsbeginn", "type": "datetime", "readOnly": True},
+        ],
+        "tabs": [
+            {
+                "key": "versions", "label": "Versionen", "lazy": False, "keepAlive": True,
+                "tables": [{
+                    "key": "versions", "label": "Unveraenderliche Fachstaende", "dataSourceKey": "versions",
+                    "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 48,
+                    "columns": [
+                        {"key": "version_no", "label": "Version", "numeric": True, "sortable": True, "width": 90},
+                        {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 130},
+                        {"key": "source", "label": "Quelle", "width": 110},
+                        {"key": "created_by", "label": "Erstellt durch", "width": 150},
+                        {"key": "created_at", "label": "Erstellt", "renderKind": "datetime", "width": 180},
+                        {"key": "feeding_start", "label": "Fuetterungsbeginn", "renderKind": "datetime", "width": 180},
+                    ],
+                }],
+            },
+            {
+                "key": "audit", "label": "Audit", "lazy": True, "keepAlive": False,
+                "tables": [{
+                    "key": "audit", "label": "Status- und Versionsereignisse", "dataSourceKey": "audit",
+                    "serverPagination": True, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                    "columns": [
+                        {"key": "occurred_at", "label": "Zeit", "renderKind": "datetime", "sortable": True, "width": 180},
+                        {"key": "event_type", "label": "Ereignis", "filterable": True, "width": 150},
+                        {"key": "from_status", "label": "Von", "renderKind": "status", "width": 110},
+                        {"key": "to_status", "label": "Nach", "renderKind": "status", "width": 110},
+                        {"key": "actor", "label": "Akteur", "width": 140},
+                        {"key": "reason", "label": "Grund", "width": 300},
+                    ],
+                }],
+            },
+        ],
+        "actions": [
+            {"key": "submit_review", "label": "Zur Pruefung", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+            {"key": "approve", "label": "Freigeben", "kind": "workflow", "dangerLevel": "moderate", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "humanApprovalRequired": True},
+            {"key": "schedule", "label": "Fuetterungsbeginn planen", "kind": "secondary", "dangerLevel": "moderate", "permission": "futtermittel.rations.update"},
+            {"key": "activate", "label": "Jetzt aktivieren", "kind": "workflow", "dangerLevel": "moderate", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "humanApprovalRequired": True},
+            {"key": "retire", "label": "Fuetterung beenden", "kind": "secondary", "dangerLevel": "high", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "auditReasonRequired": True},
+            {"key": "archive", "label": "Archivieren", "kind": "danger", "dangerLevel": "high", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "auditReasonRequired": True},
+        ],
+        "workflow": {"processKey": "ration-version-lifecycle", "auditRequired": True, "evidenceRequired": False},
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "combined", "tableProfile": "audit",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 48, "requiresLazyTabs": True,
+            "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Eine Rationsversion pruefen, freigeben, terminieren, aktivieren oder revisionssicher beenden.",
+            "examplePrompts": ["Warum wurde diese Ration freigegeben?", "Wann beginnt die Fuetterung dieser Version?"],
+            "sensitiveFields": ["snapshot", "snapshot_checksum"],
+            "testSelectors": {"screenRoot": "[data-testid='screen-agrar/ration']", "primaryAction": "[data-action-kind='primary']"},
+        },
+    }
+
+
 def build_lager_leitstand_screen_definition() -> dict[str, Any]:
     """Native cockpit ScreenDefinition fuer UIX-081 Twin-Panel Leitstand."""
 
@@ -2196,6 +2337,8 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "workspace/fibu": build_workspace_fibu_screen_definition,
     "workspace/leitung": build_workspace_leitung_screen_definition,
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
+    "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
+    "agrar/ration": build_agrar_ration_detail_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
     "einkauf/supplier": build_supplier_screen_definition,
@@ -2709,6 +2852,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feed-advice": "/portal/rationsoptimierung",
+    "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
+    "agrar/ration": "/portal/rationsoptimierung?view=rations",
     "agrar/duenger": "/agrar/duenger",
     "agrar/harvest-settlement": "/agrar/kontrakt-settlement",
     "agrar/kontrakte": "/kontrakte",

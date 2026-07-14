@@ -36,6 +36,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
       virtualized: table.virtualized,
       rowHeight: table.rowHeight,
       serverPagination: table.serverPagination,
+      rowRouteTemplate: table.rowRouteTemplate,
     })),
   }))
 
@@ -62,6 +63,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
         virtualized: table.virtualized,
         rowHeight: table.rowHeight,
         serverPagination: table.serverPagination,
+        rowRouteTemplate: table.rowRouteTemplate,
       })),
     actions: plan.actions.map((action) => ({
       key: action.key,

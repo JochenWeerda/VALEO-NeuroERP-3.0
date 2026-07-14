@@ -36,3 +36,15 @@ def test_feed_advice_cockpit_separates_role_sized_tasks() -> None:
     assert tiles["analysen"]["targetRoute"].endswith("grundfutteranalysen")
     assert all(tile["targetRoute"].startswith("/") for tile in tiles.values())
 
+
+def test_ration_lifecycle_worklist_and_detail_are_native_and_ready() -> None:
+    worklist = get_screen_definition("agrar/rations-lifecycle")
+    detail = get_screen_definition("agrar/ration")
+
+    assert worklist is not None and detail is not None
+    assert worklist["adapter"]["temporary"] is False
+    assert detail["adapter"]["temporary"] is False
+    assert worklist["tables"][0]["rowRouteTemplate"].endswith("ration_id={id}")
+    assert detail["workflow"]["processKey"] == "ration-version-lifecycle"
+    assert _check_readiness(worklist)["generatorReady"] is True
+    assert _check_readiness(detail)["generatorReady"] is True

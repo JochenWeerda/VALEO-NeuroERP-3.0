@@ -977,6 +977,135 @@
       ]
     },
     {
+      "mask_id": "agrar/ration",
+      "title": "Rationsfreigabe",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__ration/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/ration/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/ration/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/ration/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "submit_review",
+          "label": "Zur Pruefung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "approve",
+          "label": "Freigeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "schedule",
+          "label": "Fuetterungsbeginn planen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "activate",
+          "label": "Jetzt aktivieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "retire",
+          "label": "Fuetterung beenden",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "archive",
+          "label": "Archivieren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "snapshot",
+        "snapshot_checksum"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/rations-lifecycle",
+      "title": "Rationen und Freigaben",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__rations-lifecycle/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/rations-lifecycle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/rations-lifecycle/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/rations-lifecycle/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "plan_ration",
+          "label": "Neue Ration planen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_group",
+          "label": "Tiergruppe anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "snapshot_checksum"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "agrar/saatgut",
       "title": "Saatgut",
       "domain": "agrar",

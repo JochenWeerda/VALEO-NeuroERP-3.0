@@ -2,6 +2,8 @@ import { lazy, Suspense, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 import { useLocation } from '@/app/routing/typed-router'
+import { RationLifecycleWorklist } from '@/features/feed-advice/RationLifecycleWorklist'
+import { RationLifecycleDetail } from '@/features/feed-advice/RationLifecycleDetail'
 
 const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsoptimierung'))
 
@@ -15,12 +17,24 @@ const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsopt
  */
 export default function PortalFeedAdvicePage(): JSX.Element {
   const { search } = useLocation()
-  const taskMode = useMemo(() => {
+  const routeState = useMemo(() => {
     const params = new URLSearchParams(search)
-    return params.get('mode') === 'expert' || Boolean(params.get('view'))
+    return {
+      expert: params.get('mode') === 'expert' || params.get('view') === 'controlling',
+      view: params.get('view'),
+      rationId: params.get('ration_id'),
+    }
   }, [search])
 
-  if (!taskMode) {
+  if (routeState.view === 'rations') {
+    return <RationLifecycleWorklist />
+  }
+
+  if (routeState.view === 'ration' && routeState.rationId) {
+    return <RationLifecycleDetail rationId={routeState.rationId} />
+  }
+
+  if (!routeState.expert) {
     return <UniversalNativeCockpitPage screenId="agrar/feed-advice" testId="feed-advice-cockpit" />
   }
 

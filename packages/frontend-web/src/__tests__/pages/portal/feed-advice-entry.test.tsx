@@ -18,6 +18,14 @@ vi.mock('@/pages/futtermittel/rationsoptimierung', () => ({
   default: () => <div data-testid="expert-ration-workspace">Expert</div>,
 }))
 
+vi.mock('@/features/feed-advice/RationLifecycleWorklist', () => ({
+  RationLifecycleWorklist: () => <div data-testid="ration-lifecycle-list">List</div>,
+}))
+
+vi.mock('@/features/feed-advice/RationLifecycleDetail', () => ({
+  RationLifecycleDetail: ({ rationId }: { rationId: string }) => <div data-testid="ration-lifecycle-detail">{rationId}</div>,
+}))
+
 describe('Portal Fuetterungsberatung entry architecture', () => {
   beforeEach(() => {
     locationState.search = ''
@@ -40,5 +48,15 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
       '/portal/rationsoptimierung',
     )
   })
-})
 
+  it('routes lifecycle list and detail without loading the solver', () => {
+    locationState.search = '?view=rations'
+    const { rerender } = render(<PortalFeedAdvicePage />)
+    expect(screen.getByTestId('ration-lifecycle-list')).toBeInTheDocument()
+    expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
+
+    locationState.search = '?view=ration&ration_id=r-42'
+    rerender(<PortalFeedAdvicePage />)
+    expect(screen.getByTestId('ration-lifecycle-detail')).toHaveTextContent('r-42')
+  })
+})

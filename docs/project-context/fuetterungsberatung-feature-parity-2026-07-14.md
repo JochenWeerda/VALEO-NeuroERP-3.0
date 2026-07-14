@@ -48,7 +48,7 @@ Betrieb und Tiergruppen
 | Arbeitsbereich | Zielbild | Stand 2026-07-14 | Nächster Ausbau |
 |---|---|---|---|
 | Betrieb und Rollen | Betriebe, Berater, Fütterer und Freigaberechte | Portal-/Rationszugang vorhanden | Rollen in jeder Mutation serverseitig erzwingen |
-| Futtergruppen | Tiergruppe, Tierzahl, Laktation, Leistung, Lebendmasse, Fütterungssystem | im Wizard nutzbar | persistenter Gruppenstamm mit Historie |
+| Futtergruppen | Tiergruppe, Tierzahl, Laktation, Leistung, Lebendmasse, Fütterungssystem | persistenter, tenantisolierter Gruppenstamm und native Worklist | fachliche Gruppenhistorie aus Herd-Deltas verdichten |
 | Futterbestand | Eigene Futtermittel, Preise, Mengen, Chargen und Reichweite | Stamm-, Wareneingangs- und Analysepfade vorhanden | Solver direkt mit verfügbarem Bestand und Reichweitenwarnung koppeln |
 | Laboranalysen | Atteste importieren, Werte prüfen, für neue Futterversion übernehmen | Grundfutteranalyse und Dokumentimport vorhanden | Analysewechsel als versionierten Rationshinweis anzeigen |
 | Bedarfsprofil | Erhaltung, Leistung, Mineralstoffe und Inhaltsstoffkorridore | GfE-/DLG-Profile und Constraints vorhanden | verständliche gruppenbezogene Override-Historie |
@@ -58,10 +58,10 @@ Betrieb und Tiergruppen
 | Alternativen | Austauschbare Futtermittel vorschlagen und Wirkung vorab vergleichen | Vorschläge/Copilot vorhanden | Alternativen nach Bestand, Preis und Restriktionen ranken |
 | Tiergesundheit | Mangel/Überschuss, Struktur, Pansen- und DLG-Indikatoren | Diagnose und Warnungsanpassung vorhanden | Maßnahmen mit Verantwortlichem und Fälligkeit nachverfolgen |
 | Wirtschaftlichkeit | Kosten je Kuh, je kg ECM, IOFC und Kraftfuttereffizienz | Praxis-KPIs ergänzt | Preisänderungsszenarien und Sensitivität |
-| Varianten und Status | Entwurf, geplant, aktiv, gefüttert, archiviert | UI-Varianten bislang nicht persistent | versionierter Rationskopf mit Fütterungsbeginn und Statusautomat |
-| Zusammenarbeit | Kommentare, Beschreibung, Freigabe und nachvollziehbare Änderung | Review vorhanden | persistente Kommentare, Freigabeaudit und Benachrichtigung |
+| Varianten und Status | Entwurf, geplant, aktiv, gefüttert, archiviert | unveränderliche Versionen, Statusautomat, geplante Aktivierung und Ein-Aktiv-Regel umgesetzt | gefütterte Chargen gegen Version abschließen |
+| Zusammenarbeit | Kommentare, Beschreibung, Freigabe und nachvollziehbare Änderung | persistente Reviewgründe, Rollenprüfung und Änderungsaudit | Benachrichtigungskanäle anbinden |
 | Ausgabe | Rezept, Auswertung, Vergleich, Teilen und Maschinenexport | PDF-/Review-Pfad und Importseite vorhanden | profilierte Landwirt-/Berater-/Fütterer-Ausgaben |
-| Fütterung | Mischfolge, Sollmengen, Restfutter und tatsächlich geladene Mengen | mobiles Protokoll vorhanden | offlinefähiger Ausführungsdialog und Mischwagen-Rückmeldung |
+| Fütterung | Mischfolge, Sollmengen, Restfutter und tatsächlich geladene Mengen | mobiles Protokoll liest die freigegebene aktive Serverversion; Browsercache bleibt Offline-Fallback | Mischwagen-Rückmeldung und Sync-Konflikte |
 | Controlling | Aufnahme, Kosten, Effizienz, Stickstoff, Methan und Milchbezug | Einzelkennzahlen vorhanden | gemeinsame Zeitreihen mit Gruppen-/Zeitraumfilter und Soll-Ist-Abweichung |
 | Externe Daten | Labor, Mischwagen, MLP, Milchgüte und AMS | Integrationsimport angelegt | Connector-Readiness, Mapping und Fehlerquarantäne je Betrieb |
 
@@ -97,8 +97,9 @@ Die gewichtete Variantenbewertung und UX-Gates stehen in
 
 ## Priorisierte Folge-Slices
 
-1. `FEED-ADVICE-LIFECYCLE-007`: persistente Futtergruppen und Rationsversionen,
-   Statusautomat sowie Fütterungsbeginn.
+1. `FEED-ADVICE-LIFECYCLE-007`: **abgeschlossen 2026-07-14** — persistente
+   Futtergruppen, unveränderliche Rationsversionen, auditierter Statusautomat,
+   geplante Aktivierung und serverseitige aktive Ausführungssnapshots.
 2. `FEED-ADVICE-INVENTORY-008`: Bestands-/Reichweitenprüfung im Solver-Request,
    Analysewechsel und Preisgültigkeit.
 3. `FEED-ADVICE-CONTROLLING-009`: gruppenbezogene Soll-Ist-Zeitreihen für

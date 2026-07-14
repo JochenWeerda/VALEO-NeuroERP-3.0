@@ -296,6 +296,17 @@ export const FastTableRenderer = memo(function FastTableRenderer({
               ? (colKey, dir) => onQueryChange({ sort: colKey, sortDir: dir })
               : undefined
           }
+          onRowClick={table.rowRouteTemplate
+            ? (row) => {
+                const target = table.rowRouteTemplate?.replace(/\{([^}]+)\}/g, (_match, key: string) =>
+                  encodeURIComponent(String(row[key] ?? '')),
+                )
+                if (target) {
+                  window.history.pushState(null, '', target)
+                  window.dispatchEvent(new PopStateEvent('popstate'))
+                }
+              }
+            : undefined}
           columns={table.columns.map((column) => ({
             key: column.key,
             label: column.label,

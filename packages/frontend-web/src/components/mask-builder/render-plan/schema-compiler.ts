@@ -70,6 +70,7 @@ function compileTable(
     rowHeight: table.rowHeight ?? 52,
     serverPagination: table.serverPagination ?? true,
     tableProfile,
+    rowRouteTemplate: table.rowRouteTemplate,
   }
 }
 

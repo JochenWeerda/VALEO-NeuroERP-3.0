@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-07-14
 version: 3.1.0
 description: Docker-Compose-Services (Dev + Production) — Basis fuer C4 Container Drift-Check.
 ---
@@ -15,7 +15,7 @@ description: Docker-Compose-Services (Dev + Production) — Basis fuer C4 Contai
 
 Architektur-Sicht: [C4 Container](../architecture/views/c4-02-containers.md).
 
-**Stand:** 2026-07-05 — **38** Services (alle Compose-Dateien)
+**Stand:** 2026-07-14 — **38** Services (alle Compose-Dateien)
 
 ## Development (`docker-compose.yml`)
 

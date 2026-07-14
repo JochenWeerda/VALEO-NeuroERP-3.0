@@ -101,6 +101,9 @@ class SchedulerService:
         # FEED-ADVICE-CONNECTORS-010: taeglicher Delta-Sync nach dem ueblichen Nacht-Upload
         schedule.every().day.at("03:30").do(self._execute_herd_data_sync_job).tag('herd-data-sync')
 
+        # FEED-ADVICE-LIFECYCLE-007: faellige Fuetterungsstarts zeitnah aktivieren
+        schedule.every(5).minutes.do(self._execute_due_ration_activation_job).tag('ration-lifecycle')
+
         logger.info("Registered scheduled jobs")
 
     def _run_scheduler(self):
@@ -274,6 +277,12 @@ class SchedulerService:
         from ..workers.herd_data_sync_worker import execute_herd_data_syncs
 
         return self._execute_job("herd-data-sync", execute_herd_data_syncs, "herd-data delta sync")
+
+    def _execute_due_ration_activation_job(self):
+        """Activate scheduled ration versions whose feeding start is due."""
+        from ..workers.ration_lifecycle_worker import execute_due_ration_activations
+
+        return self._execute_job("ration-lifecycle", execute_due_ration_activations, "ration lifecycle")
 
     def get_job_status(self) -> Dict[str, Any]:
         """Get status of all scheduled jobs"""

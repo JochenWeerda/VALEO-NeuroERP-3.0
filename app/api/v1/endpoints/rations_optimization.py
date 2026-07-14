@@ -7183,3 +7183,5 @@ async def feed_from_grundfutter(request: Request):
 # F5 integration adapters share the canonical rations prefix and target models.
 from app.api.v1.endpoints.rations_integrations import router as _rations_integrations_router
 router.include_router(_rations_integrations_router)
+from app.api.v1.endpoints.rations_lifecycle import router as _rations_lifecycle_router
+router.include_router(_rations_lifecycle_router)

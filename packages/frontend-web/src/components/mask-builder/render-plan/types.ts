@@ -167,6 +167,7 @@ export interface RenderTablePlan {
   rowHeight: number
   serverPagination: boolean
   tableProfile: ScreenTableProfile
+  rowRouteTemplate?: string
   /** Aktive Nutzer-Variante (UIX-071 Overlay) */
   activeVariant?: string
   /** Nutzer-definierte Varianten (UIX-071 Overlay) */

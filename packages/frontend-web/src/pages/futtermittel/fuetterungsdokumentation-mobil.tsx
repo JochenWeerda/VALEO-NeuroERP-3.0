@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { fetchFeedingControlLogs, saveFeedingControlLog, type FeedingControlResult } from '@/lib/api/rations-optimization'
+import { fetchActiveRations } from '@/lib/api/rations-lifecycle'
 
 const ACTIVE_RATION_KEY = 'valeo.rations.active-mobile.v1'
 
@@ -42,7 +43,8 @@ function NumberField({ label, value, onChange, suffix, min = 0, step = 0.1 }: { 
 }
 
 export default function MobileFuetterungsdokumentation() {
-  const [ration] = useState<ActiveRation | null>(() => readActiveRation())
+  const [ration, setRation] = useState<ActiveRation | null>(() => readActiveRation())
+  const activeRations = useQuery({ queryKey: ['active-rations-mobile'], queryFn: fetchActiveRations })
   const [phase, setPhase] = useState<Phase>('plan')
   const [actual, setActual] = useState<Record<string, number>>({})
   const [restKg, setRestKg] = useState(0)
@@ -56,6 +58,15 @@ export default function MobileFuetterungsdokumentation() {
   const save = useMutation({ mutationFn: saveFeedingControlLog, onSuccess: () => { setPhase('result'); void history.refetch() } })
 
   useEffect(() => {
+    const mobile = activeRations.data?.[0]?.snapshot?.mobile
+    if (!mobile || typeof mobile !== 'object') return
+    const candidate = mobile as unknown as ActiveRation
+    if (candidate.version !== 1 || !Array.isArray(candidate.components)) return
+    setRation(candidate)
+    localStorage.setItem(ACTIVE_RATION_KEY, JSON.stringify(candidate))
+  }, [activeRations.data])
+
+  useEffect(() => {
     if (!ration) return
     setActual(Object.fromEntries(ration.components.map((item) => [item.feed_id, item.soll_kg])))
   }, [ration])
@@ -65,6 +76,8 @@ export default function MobileFuetterungsdokumentation() {
   const latest: FeedingControlResult | undefined = save.data?.control_result ?? history.data?.[0]?.control_result
   const shakerRemainder = 100 - topPct - middlePct
   const canSave = Boolean(ration?.components.length && shakerRemainder >= 0 && tmPct > 0 && tmPct <= 100)
+
+  if (!ration && activeRations.isLoading) return <main className="mx-auto min-h-screen max-w-md bg-slate-50 p-6 text-sm text-slate-600">Aktive Ration wird geladen…</main>
 
   if (!ration) return <main className="mx-auto min-h-screen max-w-md bg-slate-50 p-4 text-slate-900">
     <section className="mt-12 rounded-2xl border bg-white p-6 text-center shadow-sm"><Wheat className="mx-auto mb-4 h-10 w-10 text-emerald-700" /><h1 className="text-xl font-bold">Keine aktive Ration</h1><p className="mt-2 text-sm text-slate-600">Ration zuerst in der Rationsoptimierung berechnen und freigeben. Danach steht sie hier ohne Solver für die Stallarbeit bereit.</p><Button className="mt-5 w-full" asChild><a href="/futtermittel/rationsoptimierung">Zur Rationsoptimierung</a></Button></section>

@@ -2,6 +2,8 @@ import { AlertCircle } from 'lucide-react'
 import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useScreenDefinition } from '@/lib/api/masks'
 
+const EMPTY_PERMISSIONS: string[] = []
+
 /**
  * UniversalNativeCockpitPage (UIX-061): rendert einen cockpit-Workspace als
  * rollenbasierte Startseite. Kein Entity — die Seite kompiliert die
@@ -13,15 +15,20 @@ import { useScreenDefinition } from '@/lib/api/masks'
 export function UniversalNativeCockpitPage({
   screenId,
   testId,
+  onAction,
+  permissions = EMPTY_PERMISSIONS,
 }: {
   screenId: string
   testId?: string
+  onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
+  permissions?: string[]
 }): JSX.Element {
   const schemaQuery = useScreenDefinition(screenId)
   const runtime = useUniversalMaskRuntime({
     screenId,
     schema: schemaQuery.data,
     enabled: Boolean(schemaQuery.data),
+    permissions,
   })
   const plan = runtime.plan
 
@@ -58,6 +65,7 @@ export function UniversalNativeCockpitPage({
         onOverlayChange={runtime.updateUserOverlay}
         onOverlayReset={runtime.resetUserOverlay}
         lookupBindings={runtime.lookupBindings}
+        onAction={onAction}
       />
     </div>
   )

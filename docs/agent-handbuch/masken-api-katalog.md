@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (34 Masken).
+> Generiert aus `app/core/screen_definitions.py` (36 Masken).
 
 ## Übersicht
 
@@ -21,6 +21,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
+| `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
+| `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
 | `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
@@ -201,6 +203,86 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/ration` — Rationsfreigabe
+
+**Zweck:** Eine Rationsversion pruefen, freigeben, terminieren, aktivieren oder revisionssicher beenden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/ration/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/ration/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/ration/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__ration/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}`
+- `versions` → `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/versions`
+- `audit` → `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/audit`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Warum wurde diese Ration freigegeben?
+- Wann beginnt die Fuetterung dieser Version?
+
+**Sensible Felder:** `snapshot, snapshot_checksum`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `submit_review` | Zur Pruefung | safe | nein | `—` |
+| `approve` | Freigeben | moderate | ja | `—` |
+| `schedule` | Fuetterungsbeginn planen | moderate | nein | `—` |
+| `activate` | Jetzt aktivieren | moderate | ja | `—` |
+| `retire` | Fuetterung beenden | high | nein | `—` |
+| `archive` | Archivieren | high | nein | `—` |
+
+---
+
+### `agrar/rations-lifecycle` — Rationen und Freigaben
+
+**Zweck:** Rationsversionen nach Tiergruppe, Status und Fuetterungsbeginn steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/rations-lifecycle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/rations-lifecycle/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__rations-lifecycle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `rations` → `/api/v1/agrar/rations-optimization/lifecycle/rations`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Rationen warten auf Freigabe?
+- Welche Ration ist je Tiergruppe aktiv?
+
+**Sensible Felder:** `snapshot_checksum`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `plan_ration` | Neue Ration planen | safe | nein | `—` |
+| `create_group` | Tiergruppe anlegen | safe | nein | `—` |
 
 ---
 

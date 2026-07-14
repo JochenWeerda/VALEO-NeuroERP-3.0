@@ -80,6 +80,7 @@ import {
   type FeedingSystemConfig,
 } from '@/lib/api/rations-optimization'
 import { isRecord, numberValue, stringValue } from '@/lib/record-utils'
+import { createRationDraft, ensureFeedingGroup, transitionRationVersion } from '@/lib/api/rations-lifecycle'
 
 // ---------------------------------------------------------------------------
 // Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
@@ -3799,15 +3800,17 @@ function Review({
   onGoWizard,
   onApplySuggestionPatch,
   onReoptimize,
+  isFinalizing,
 }: {
   wizardData: WizardData | null
   result: OptimizationResult | null
   onBack: () => void
-  onFinalize: () => void
+  onFinalize: () => void | Promise<void>
   isOptimizing: boolean
   onGoWizard: () => void
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
   onReoptimize: () => void
+  isFinalizing: boolean
 }) {
   const comparison = result
     ? [
@@ -4059,11 +4062,12 @@ function Review({
             <FileText size={18} /> PDF speichern
           </button>
           <button
-            onClick={onFinalize}
+            onClick={() => { void onFinalize() }}
+            disabled={isFinalizing}
             className="px-10 py-3 font-bold rounded-xl text-white shadow-xl flex items-center gap-2 transition-opacity hover:opacity-90"
             style={{ background: C.accent }}
           >
-            Ration freigeben <ArrowRight size={18} />
+            {isFinalizing ? 'Wird eingereicht…' : 'Zur Pruefung einreichen'} <ArrowRight size={18} />
           </button>
         </div>
       </div>
@@ -4734,26 +4738,67 @@ export default function Rationsoptimierung() {
   const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  useEffect(() => {
-    if (!result || !wizardData || typeof window === 'undefined') return
-    const protocolItems = result.mixing_protocol?.steps?.filter((item) => item.feed_id) ?? []
-    const components = (protocolItems.length ? protocolItems : result.ration_items).map((item) => ({
-      feed_id: item.feed_id as string,
-      name: item.name,
-      soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * wizardData.group.count,
-    })).filter((item) => item.soll_kg > 0)
-    localStorage.setItem('valeo.rations.active-mobile.v1', JSON.stringify({
-      version: 1,
-      updatedAt: new Date().toISOString(),
-      group: { id: wizardData.group.id, name: wizardData.group.name, count: wizardData.group.count },
-      milkYield: wizardData.milkYield,
-      milkPriceEur: wizardData.milkPriceEur ?? 0.44,
-      totalCostEurDay: result.total_cost_eur_day ?? 0,
-      pendfSollGKgdm: result.dlg_indicators?.pendf_kgdm ?? null,
-      ndfProxyGKgdm: result.dlg_indicators?.andfom_gf_kgdm ?? null,
-      components,
-    }))
-  }, [result, wizardData])
+
+  const lifecycleMutation = useMutation({
+    mutationFn: async () => {
+      if (!result || !wizardData) throw new Error('Keine berechnete Ration vorhanden.')
+      const group = await ensureFeedingGroup({
+        external_ref: wizardData.group.id,
+        name: wizardData.group.name,
+        animal_count: wizardData.group.count,
+        body_mass_kg: wizardData.group.bodyMass,
+        days_in_milk: wizardData.group.lactationDays,
+        lactation_number: wizardData.group.lactationNumber,
+        target_milk_kg: wizardData.milkYield,
+        feeding_system: wizardData.feedingType,
+        location: wizardData.group.location,
+      })
+      const protocolItems = result.mixing_protocol?.steps?.filter((item) => item.feed_id) ?? []
+      const components = (protocolItems.length ? protocolItems : result.ration_items).map((item) => ({
+        feed_id: item.feed_id as string,
+        name: item.name,
+        soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * wizardData.group.count,
+      })).filter((item) => item.soll_kg > 0)
+      const mobile = {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        group: { id: group.id, name: group.name, count: group.animal_count },
+        milkYield: wizardData.milkYield,
+        milkPriceEur: wizardData.milkPriceEur ?? 0.44,
+        totalCostEurDay: result.total_cost_eur_day ?? 0,
+        pendfSollGKgdm: result.dlg_indicators?.pendf_kgdm ?? null,
+        ndfProxyGKgdm: result.dlg_indicators?.andfom_gf_kgdm ?? null,
+        components,
+      }
+      const ration = await createRationDraft({
+        group_id: group.id,
+        name: `${wizardData.group.name} · ${new Date().toLocaleDateString('de-DE')}`,
+        description: `${wizardData.mode} · ${wizardData.feedingType}`,
+        source: 'solver',
+        comment: 'Aus der VALEO-Rationsoptimierung eingereicht.',
+        snapshot: {
+          schema_version: 1,
+          wizard: {
+            ...wizardData,
+            selectedFeedIds: [...wizardData.selectedFeedIds],
+          },
+          optimization_result: result,
+          mobile,
+        },
+      })
+      await transitionRationVersion({
+        versionId: ration.latest_version_id,
+        expectedStatus: 'draft',
+        targetStatus: 'in_review',
+        reason: 'Vom Ersteller zur fachlichen Pruefung eingereicht.',
+      })
+      return ration.id
+    },
+    onSuccess: (rationId) => {
+      window.location.assign(`/portal/rationsoptimierung?view=ration&ration_id=${encodeURIComponent(rationId)}`)
+    },
+    onError: (err: unknown) => setError(getRationsApiErrorMessage(err, 'Ration konnte nicht eingereicht werden.')),
+  })
 
   // Intent-Vorschau (RATIONS-UX-INTENT-002): transiente Vorschau ohne die aktive Ration zu ueberschreiben
   const [previewIntent, setPreviewIntent] = useState<IntentKey | null>(null)
@@ -5056,8 +5101,9 @@ export default function Rationsoptimierung() {
             result={result}
             onBack={() => setView('workbench')}
             onFinalize={() => {
-              setView('dashboard')
+              lifecycleMutation.mutate()
             }}
+            isFinalizing={lifecycleMutation.isPending}
             isOptimizing={isOptimizing}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}
