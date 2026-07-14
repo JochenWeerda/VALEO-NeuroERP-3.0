@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DESIGN-AUDIT-KIM-001 Frontend-Design-Audit + Referenz-Pilot KIM-Cockpit (Register-Tabs) - in Arbeit (Claim 2026-07-14)
+
+**Owner:** Claude. **Stand:** geclaimt 2026-07-14. Frontend-Design-Skill-Audit (Tokens/Themes/Density/Mask-Builder/Primitives) + Referenzimplementierung im KIM-CRM-360-Cockpit: zentrale Tabs-`variant="register"` (ARIA/Pfeiltasten/Fokusring), h1-Hierarchie, Token-Bereinigung, Chef-Anweisungs-Auto-Save nach Mutation-Lifecycle-Invariante; Audit-Doku `docs/design/frontend-design-skill-audit.md` + kompakte Design-Regeln in `CLAUDE.md`.
+
 ## PORTAL-FIX-001 Portal-Dashboard-Crash + Rations-Rebranding - abgeschlossen 2026-07-14
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-14. Drei vom User gemeldete Punkte an der laufenden Portal-App: (1) `/portal` zeigte „Fehler beim Laden der Seite" — Ursache `PreisspiegalWidget` in `pages/portal/index.tsx` griff ungeschuetzt auf `data.preisspiegel` (`.map`/`.length`) zu, wenn die Preisspiegel-API keine `preisspiegel`-Liste liefert -> defensive Guards `(data.preisspiegel ?? [])` sowie fuer `kpis`/`letzteBestellungen`/`neueDokumente`. (2)+(3) Erfundenes Produktbranding „KLARAGRI" im Rations-Tool (`pages/futtermittel/rationsoptimierung.tsx`, Header Z. 1377/4788) -> ersetzt durch „Rationsoptimierung" (Zwei-Ton-Styling erhalten); Kommentare in beiden Rations-Dateien bereinigt. `/portal/rationsoptimierung` ist nur ein Re-Export des vollen Tools (kein Duplikat). **Dateibesitz:** `packages/frontend-web/src/pages/portal/index.tsx`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/src/pages/portal/rationsoptimierung.tsx`, Workboard. **Abnahme (Docker-Prod-Build):** `/portal` laedt ohne Fehler; Rations-Header ohne KLARAGRI, zeigt „Rationsoptimierung"; tsc 0 Fehler.
