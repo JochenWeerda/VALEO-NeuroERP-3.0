@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DESIGN-ROLLOUT-DENSITY-FIN-004 Rollout Prio 4+5: Lager/Dispo-Density dense + Finanzen-Mutation-Audit - in Arbeit (Claim 2026-07-14)
+
+**Owner:** Claude. **Stand:** geclaimt 2026-07-14. Rollout-Plan-Positionen 4+5 aus `docs/design/frontend-design-skill-audit.md`: `data-density="dense"` fuer operative Lager-/Dispo-Masken (zentraler Scope statt per-Maske-Metriken); Audit der Finanzen-Massenaktionen gegen die Mutation-Lifecycle-Invariante.
+
 ## DESIGN-ROLLOUT-REGISTER-003 Register-Rollout: KIM-Restumschalter, ObjectPage-Standard-Look, Belegketten-Koepfe - abgeschlossen 2026-07-14
 
 **Owner:** Claude. **Stand:** abgeschlossen 2026-07-14. Rollout-Plan-Positionen 1/2/3/6 aus `docs/design/frontend-design-skill-audit.md` (Abschnitt 7b): (1) `LazyTabs` mit Variant-Durchleitung, `UniversalMaskRenderer` + Mask-Builder-`ObjectPage` auf `variant="register"` → **alle nativen SD- und Konfigmasken erben den Belegregister-Look** (starres `grid-cols-4` entfiel); (2) Belegkopf-Register vereinheitlicht in Auftrag (`OrderEditorLegacyPage`), VK-/EK-Lieferschein und Ernte-Annahmebeleg — dabei Doppel-`TabsList`-Konstruktion beseitigt, die die Pfeiltasten-Navigation je 4er-Reihe zerschnitt; (3) KIM `SalesDocumentsPanel`-Kategorien bewusst als `aria-pressed`-Toggle-Gruppe (Filter, kein Register) + `tabular-nums` in der Forderungsspalte; Ansichtsumschalter regulaerer Seiten bewusst im Default-Look. **Dateibesitz:** `ui/LazyTabs.tsx`, `mask-builder/UniversalMaskRenderer.tsx`, `mask-builder/ObjectPage.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `pages/sales/OrderEditorLegacyPage.tsx`, `pages/einkauf/lieferschein-erfassung.tsx`, `pages/agrar/ernte-annahme-erfassung.tsx`, KIM `SalesDocumentsPanel.tsx` + `FinancialOpenItemsPanel.tsx`, Audit-Doku 7b, Slice-YAML, Workboard. **Abnahme:** Vitest 371/371 (+1 skipped); tsc 0; eslint 0 Fehler; Build 19,0 s; axe-E2E 8/8.
