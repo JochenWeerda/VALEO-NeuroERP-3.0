@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FIN-MAHNLAUF-MUTATION-005 Mahnlauf-Abschluss mit echter Backend-Mutation - in Arbeit (Claim 2026-07-14)
+
+**Owner:** Claude. **Stand:** geclaimt 2026-07-14. Befund aus DESIGN-ROLLOUT-DENSITY-FIN-004: der Mahnlauf-Wizard (`pages/mahnwesen/mahnlauf.tsx`) suggeriert Versand, sendet aber keine Mutation (`onFinish` navigiert nur). Ziel: POST-Endpoint im Mahnwesen-Router (falls fehlend) + Frontend-Anbindung nach Mutation-Lifecycle-Invariante (Guard, disabled, Toast, Navigation erst nach Erfolg); Roh-Palettenreste der Maske bereinigen.
+
 ## DESIGN-ROLLOUT-DENSITY-FIN-004 Rollout Prio 4+5: Lager/Dispo-Density dense + Finanzen-Mutation-Audit - abgeschlossen 2026-07-14
 
 **Owner:** Claude. **Stand:** abgeschlossen 2026-07-14. Rollout-Positionen 4+5 (`docs/design/frontend-design-skill-audit.md` Abschnitt 7c): `data-density="dense"` am Maskenwurzel von `lager/bestandsuebersicht`, `lager/lagerbewegungen`, `lager/kommissionierung`, `disposition/liste` (je 1-Zeilen-Diff; `ui/table.tsx` konsumiert `--table-row-height` → 32px-Zeilen). Finanzen-Audit: `zahlungslauf-kreditoren` + `lastschriften-debitoren` erfuellen die Mask-Builder-Action-Invariante bereits (`useMaskActions`+`loadingActionKey`) — kein Handlungsbedarf. **Befund:** `mahnwesen/mahnlauf.tsx` sendet beim Abschluss keine Backend-Mutation (onFinish=navigate) → Folge-Slice FIN-MAHNLAUF-MUTATION-005. **Dateibesitz:** die 4 Masken, Audit-Doku 7c+8, Slice-YAML, Workboard. **Abnahme:** tsc 0; Build 32,7 s; Vitest 371/371 (+1 skipped; ein paralleler Lauf zeigte einen Flaky des FS-Scan-Tests `print-html-sinks`, isoliert + im ruhigen Voll-Lauf gruen).
