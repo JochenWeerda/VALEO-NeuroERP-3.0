@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-P0-PORTAL-RATIONS-006 Portal-API-Prefix-Fixes + Rations-Zeilen-CRUD + Praxis-KPIs - in Arbeit (Claim 2026-07-14)
+## UIX-P0-PORTAL-RATIONS-006 Portal-API-Prefix-Fixes + Rations-Zeilen-CRUD + Praxis-KPIs - abgeschlossen 2026-07-14
 
-**Owner:** Codex. **Stand:** übernommen 2026-07-14 mit ausdrücklicher Nutzerfreigabe (vorheriger Claude-Chat für 20 Stunden pausiert). User-Befunde als echte Anwendung reproduziert (Playwright gegen Dev-Stack): (1) Portal-Tabs crashen — 5 neue Portal-Seiten rufen APIs ohne `/api/v1`-Prefix (Vite-Proxy liefert SPA-HTML statt JSON → `.length` auf undefined; preisspiegel, lohndienste + Widget-„Stand undefined"); (2) Rations-Workbench ohne Zeilen-CRUD; (3) €/Kuh/Tag statt Praxis-KPIs. Ziel: Prefix-Fixes + Guards; Workbench-Zeilen editierbar (Fixieren Min=Max, Entfernen, Hinzufügen via bestehendem Patch-/Reoptimierungsweg); KPIs Futterkosten ct/kg ECM + Kraftfutter-Effizienz g KF-TM/kg ECM (Backend-Felder vorhanden, nur nicht angezeigt).
+**Owner:** Codex. **Stand:** abgeschlossen nach Übernahme mit ausdrücklicher Nutzerfreigabe. Portal-Fachseiten verwenden `/api/v1/portal`, optionale Listen/Preisstand sind defensiv; die Workbench unterstützt Hinzufügen, Entfernen, Fixieren (Min=Max) und Lösen mit sofortiger Reoptimierung; Praxis-KPIs zeigen `ct/kg ECM` und `g KF-TM/kg ECM`, `€/Kuh/Tag` bleibt im Detail. Eigenständiger Funktionsabgleich samt Folge-Slices: `docs/project-context/fuetterungsberatung-feature-parity-2026-07-14.md`. **Dateibesitz:** sieben Portal-/Rations-TS(X)-Dateien, zwei Regressionstests, Parity-Doku, Workboard. **Abnahme:** focused tsc 0; ESLint 0 Fehler; Vitest 3/3; Playwright Portal-API-Prefix 1/1; Rations-Smoke 1/1; Docs-Governance und `git diff --check` grün.
 
 ## FIN-MAHNLAUF-MUTATION-005 Mahnlauf-Mutation + sonner-Toaster global - abgeschlossen 2026-07-14
 

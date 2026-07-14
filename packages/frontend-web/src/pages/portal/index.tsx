@@ -129,7 +129,7 @@ function PreisspiegalWidget() {
     queryKey: ['portal-preisspiegel-widget', DEMO_ARTIKEL_IDS],
     queryFn: async () => {
       const res = await apiClient.get<PreisspiegalData>(
-        `/portal/preisspiegel/kunde?artikel_ids=${DEMO_ARTIKEL_IDS}`,
+        `/api/v1/portal/preisspiegel/kunde?artikel_ids=${DEMO_ARTIKEL_IDS}`,
       )
       return res.data
     },
@@ -152,7 +152,7 @@ function PreisspiegalWidget() {
             Aktuelle Getreidekurse
           </CardTitle>
           <CardDescription>
-            Ankaufspreise für Ihre Ernte{data ? ` — Stand ${data.stand}` : ''}
+            Ankaufspreise für Ihre Ernte{data?.stand ? ` — Stand ${data.stand}` : ''}
           </CardDescription>
         </div>
         <Link to="/portal/preisspiegel">
@@ -224,7 +224,7 @@ function EmpfehlungsBanner() {
     queryKey: ['portal-empfehlungen-badge', DEMO_KUNDEN_NR],
     queryFn: async () => {
       const res = await apiClient.get<EmpfehlungZusammenfassung>(
-        `/portal/empfehlungen/${DEMO_KUNDEN_NR}/zusammenfassung`,
+        `/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}/zusammenfassung`,
       )
       return res.data
     },

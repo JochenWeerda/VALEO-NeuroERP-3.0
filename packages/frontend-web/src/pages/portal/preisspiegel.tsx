@@ -151,7 +151,7 @@ export default function PreisspiedelPage() {
     queryKey: ['portal-preisspiegel', artikelFilter],
     queryFn: async () => {
       const res = await apiClient.get<PreisspigelResponse>(
-        `/portal/preisspiegel/kunde?artikel_ids=${artikelFilter}`,
+        `/api/v1/portal/preisspiegel/kunde?artikel_ids=${artikelFilter}`,
       )
       return res.data
     },
@@ -212,14 +212,14 @@ export default function PreisspiedelPage() {
 
       {data && (
         <div className="space-y-4">
-          {data.preisspiegel.length === 0 ? (
+          {(data.preisspiegel ?? []).length === 0 ? (
             <Alert>
               <AlertDescription>
                 Für Ihre Früchte liegen aktuell keine Ankaufspreise vor. Wenden Sie sich an Ihren Innendienst.
               </AlertDescription>
             </Alert>
           ) : (
-            data.preisspiegel.map((artikel) => (
+            (data.preisspiegel ?? []).map((artikel) => (
               <ArtikelPreiskarte key={artikel.artikel_id} artikel={artikel} />
             ))
           )}
@@ -238,7 +238,7 @@ export default function PreisspiedelPage() {
             </CardContent>
           </Card>
 
-          <div className="text-xs text-gray-400 text-right">Preisstand: {data.stand}</div>
+          <div className="text-xs text-gray-400 text-right">Preisstand: {data.stand ?? '—'}</div>
         </div>
       )}
     </div>

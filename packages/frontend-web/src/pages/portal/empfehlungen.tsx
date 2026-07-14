@@ -119,7 +119,7 @@ export default function EmpfehlungenPage() {
     queryKey: ['portal-empfehlungen', DEMO_KUNDEN_NR],
     queryFn: async () => {
       const res = await apiClient.get<{ items: Empfehlung[]; count: number }>(
-        `/portal/empfehlungen/${DEMO_KUNDEN_NR}`,
+        `/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}`,
       )
       return res.data
     },
@@ -127,7 +127,7 @@ export default function EmpfehlungenPage() {
 
   const gesehenMutation = useMutation({
     mutationFn: async (empfehlung_id: string) => {
-      await apiClient.post(`/portal/empfehlungen/${DEMO_KUNDEN_NR}/gesehen/${empfehlung_id}`)
+      await apiClient.post(`/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}/gesehen/${empfehlung_id}`)
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['portal-empfehlungen'] })

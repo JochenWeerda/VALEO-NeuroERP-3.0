@@ -583,6 +583,12 @@ export interface RationAdjustmentApplyPatch {
   relaxation_policy?: RelaxationPolicy
   policy_profile?: PolicyProfile | null
   add_feed_ids?: string[]
+  /** Zeilen-CRUD Workbench: Menge je feed_id auf kg FM/Tag fixieren (Min=Max-Constraint). */
+  fix_feed_fm?: Record<string, number>
+  /** Zeilen-CRUD Workbench: Fixierung lösen (Min-/Max-Grenzen der feed_ids entfernen). */
+  unfix_feed_ids?: string[]
+  /** Zeilen-CRUD Workbench: Futtermittel aus dem Korb entfernen. */
+  remove_feed_ids?: string[]
 }
 
 export interface RationAdjustmentSuggestion {

@@ -37,6 +37,7 @@ import {
   Database,
   RefreshCw,
   FlaskConical,
+  Pin,
 } from 'lucide-react'
 import {
   fetchFeeds,
@@ -256,13 +257,42 @@ type WizardData = {
   milkPriceEur?: number
 }
 
-function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
+export function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
   const next: WizardData = { ...wd }
   if (patch.relaxation_policy != null) next.relaxationPolicy = patch.relaxation_policy
   if (patch.policy_profile !== undefined) next.policyProfile = patch.policy_profile
   if (patch.add_feed_ids?.length) {
     const s = new Set(next.selectedFeedIds)
     for (const id of patch.add_feed_ids) s.add(id)
+    next.selectedFeedIds = s
+  }
+  // Zeilen-CRUD der Workbench: Fixieren = Min=Max in kg FM; Lösen/Entfernen räumt Grenzen auf.
+  if (patch.fix_feed_fm && Object.keys(patch.fix_feed_fm).length > 0) {
+    next.feedMinFm = { ...(next.feedMinFm ?? {}) }
+    next.feedMaxFm = { ...next.feedMaxFm }
+    for (const [id, kgfm] of Object.entries(patch.fix_feed_fm)) {
+      if (!Number.isFinite(kgfm) || kgfm <= 0) continue
+      next.feedMinFm[id] = kgfm
+      next.feedMaxFm[id] = kgfm
+    }
+  }
+  if (patch.unfix_feed_ids?.length) {
+    next.feedMinFm = { ...(next.feedMinFm ?? {}) }
+    next.feedMaxFm = { ...next.feedMaxFm }
+    for (const id of patch.unfix_feed_ids) {
+      delete next.feedMinFm[id]
+      delete next.feedMaxFm[id]
+    }
+  }
+  if (patch.remove_feed_ids?.length) {
+    const s = new Set(next.selectedFeedIds)
+    next.feedMinFm = { ...(next.feedMinFm ?? {}) }
+    next.feedMaxFm = { ...next.feedMaxFm }
+    for (const id of patch.remove_feed_ids) {
+      s.delete(id)
+      delete next.feedMinFm[id]
+      delete next.feedMaxFm[id]
+    }
     next.selectedFeedIds = s
   }
   return next
@@ -273,6 +303,9 @@ function patchHasSolverKeys(patch: RationAdjustmentApplyPatch): boolean {
     patch.relaxation_policy != null
     || patch.policy_profile !== undefined
     || (patch.add_feed_ids?.length ?? 0) > 0
+    || Object.keys(patch.fix_feed_fm ?? {}).length > 0
+    || (patch.unfix_feed_ids?.length ?? 0) > 0
+    || (patch.remove_feed_ids?.length ?? 0) > 0
   )
 }
 
@@ -1462,8 +1495,8 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
           <h2 className="text-sm font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Letzte Projekte</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { name: 'Hochleistung Sep', group: 'Hochleistung Nordstall', milk: 38, cost: 6.42, status: 'Entwurf' },
-              { name: 'Frischmelker 08/2026', group: 'Frischmelker', milk: 32, cost: 5.88, status: 'Freigegeben' },
+              { name: 'Hochleistung Sep', group: 'Hochleistung Nordstall', milk: 38, ctPerEcm: 16.9, status: 'Entwurf' },
+              { name: 'Frischmelker 08/2026', group: 'Frischmelker', milk: 32, ctPerEcm: 18.4, status: 'Freigegeben' },
             ].map((r) => (
               <div
                 key={r.name}
@@ -1482,7 +1515,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
                   <div className="flex justify-between"><span style={{ color: C.muted }}>Ziel-Milch:</span><span className="font-semibold">{r.milk} kg</span></div>
                 </div>
                 <div className="mt-4 flex items-center justify-between text-[11px] font-bold border-t pt-3" style={{ borderColor: '#F3F4F6', color: C.dark }}>
-                  <span>{fmt(r.cost)} €/Kuh/Tag</span>
+                  <span>{fmt(r.ctPerEcm, 1)} ct/kg ECM</span>
                   <span className="flex items-center gap-1" style={{ color: C.accent }}>Öffnen <ChevronRight size={10} /></span>
                 </div>
               </div>
@@ -2951,6 +2984,16 @@ function Workbench({
   const totalKgdm = rationItems.reduce((s, r) => s + r.kgdm, 0)
   const totalCost = rationItems.reduce((s, r) => s + r.total_cost, 0)
 
+  // Zeilen-CRUD: nur mit eigener Ration (Demo hat kein WizardData als Solver-Basis)
+  const canEditRation = Boolean(wizardData) && !isOptimizing
+  const feedsAvailableToAdd = useMemo(() => {
+    if (!wizardData) return []
+    const inRation = new Set(rationItems.map((r) => r.feed_id))
+    return feeds
+      .filter((f) => !inRation.has(f.id) && !wizardData.selectedFeedIds.has(f.id))
+      .sort((a, b) => a.name.localeCompare(b.name, 'de'))
+  }, [feeds, wizardData, rationItems])
+
   // Tour highlight: ring around active panel
   const TOUR_TARGETS = ['kpi-bar', 'feed-table', 'dlg-panel', 'ai-copilot']
   function tourRing(target: string): React.CSSProperties {
@@ -2966,9 +3009,39 @@ function Workbench({
   const maeMapStatus: 'success' | 'warn' | 'error' =
     maeMapDiff == null ? 'warn' : maeMapDiff <= 2 ? 'success' : maeMapDiff <= 5 ? 'warn' : 'error'
 
+  // Praxis-KPIs: Was zählt, sind Kosten je erzeugtem kg ECM und der Kraftfutter-
+  // einsatz je kg Milch — nicht €/Kuh/Tag (die bleiben als Tooltip erhalten).
+  const ecmKgDay = result?.efficiency?.ecm_kg_day ?? result?.ecm_supply_kg_day ?? null
+  const feedCostCtPerKgEcm = result?.feed_cost_eur_per_kg_ecm != null
+    ? result.feed_cost_eur_per_kg_ecm * 100
+    : (ecmKgDay && ecmKgDay > 0 && result?.total_cost_eur_day != null
+        ? (result.total_cost_eur_day / ecmKgDay) * 100
+        : null)
+  const concentrateDmiKg = supplementedPerformance.concentrate_dmi_kg == null
+    ? null
+    : numberValue(supplementedPerformance.concentrate_dmi_kg)
+  const kfGramPerKgEcm = (concentrateDmiKg != null && ecmKgDay && ecmKgDay > 0)
+    ? (concentrateDmiKg * 1000) / ecmKgDay
+    : null
+
   const kpis = result
     ? [
-        { label: 'Kosten', value: fmt(result.total_cost_eur_day ?? 0), unit: '€/Kuh', status: 'success' as const },
+        {
+          label: 'Futterkosten',
+          value: feedCostCtPerKgEcm != null ? fmt(feedCostCtPerKgEcm, 1) : fmt(result.total_cost_eur_day ?? 0),
+          unit: feedCostCtPerKgEcm != null ? 'ct/kg ECM' : '€/Kuh',
+          status: (feedCostCtPerKgEcm == null ? 'success' : feedCostCtPerKgEcm <= 25 ? 'success' : feedCostCtPerKgEcm <= 30 ? 'warn' : 'error') as 'success' | 'warn' | 'error',
+          title: `${fmt(result.total_cost_eur_day ?? 0)} €/Kuh/Tag · ${ecmKgDay ? `${fmt(ecmKgDay, 1)} kg ECM/Tag` : 'ECM unbekannt'} · Praxisorientierung ~20–25 ct/kg ECM (betriebsindividuell)`,
+        },
+        {
+          label: 'KF-Effizienz',
+          value: kfGramPerKgEcm != null ? fmt(kfGramPerKgEcm, 0) : '–',
+          unit: 'g KF-TM/kg ECM',
+          status: (kfGramPerKgEcm == null ? 'warn' : kfGramPerKgEcm <= 250 ? 'success' : kfGramPerKgEcm <= 350 ? 'warn' : 'error') as 'success' | 'warn' | 'error',
+          title: concentrateDmiKg != null
+            ? `Kraftfutter ${fmt(concentrateDmiKg, 2)} kg TM/Tag je ${fmt(ecmKgDay, 1)} kg ECM · je weniger Kraftfutter pro kg Milch, desto besser die Grundfutterleistung`
+            : 'Kraftfutteranteil aus der Modellbilanz nicht verfügbar',
+        },
         { label: 'ME (MJ/kg)', value: fmt(result.nutrient_supply.me_mj / (result.nutrient_supply.dmi_kg || 1), 2), unit: 'MJ/kg TM', status: 'success' as const },
         { label: 'sidP (g/d)', value: fmt(result.nutrient_supply.sidp_g, 0), unit: 'g/Tag', status: 'success' as const },
         {
@@ -3006,7 +3079,9 @@ function Workbench({
         ? `Aktuelle Warnungen: ${result.warnings.slice(0, 2).join(' | ')}`
         : 'Keine kritischen Probleme gefunden. Die Ration ist pansensicher.'
     } else if (msg.includes('kosten') || msg.includes('günstig') || msg.includes('spar')) {
-      response = `Aktuell ${fmt(result?.total_cost_eur_day ?? 0)} €/Kuh/Tag. Durch Reduzierung von Kraftfutter und Erhöhung von Grundfutter können weitere Einsparungen erzielt werden.`
+      response = feedCostCtPerKgEcm != null
+        ? `Aktuell ${fmt(feedCostCtPerKgEcm, 1)} ct je kg ECM (${fmt(result?.total_cost_eur_day ?? 0)} €/Kuh/Tag). Hebel: Grundfutterqualität erhöhen und Kraftfutter je kg Milch senken.`
+        : `Aktuell ${fmt(result?.total_cost_eur_day ?? 0)} €/Kuh/Tag. Durch Reduzierung von Kraftfutter und Erhöhung von Grundfutter können weitere Einsparungen erzielt werden.`
     } else if (msg.includes('soja')) {
       response = 'Sojaschrot kann durch Rapsschrot oder DDGS ersetzt werden bei ähnlichem sidP-Niveau. Starten Sie eine neue Optimierung mit Soja deaktiviert.'
     } else if (msg.includes('struktur') || msg.includes('pansen')) {
@@ -3031,7 +3106,7 @@ function Workbench({
           <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Varianten</div>
           {[
             { name: 'Ist-Ration', price: '–' },
-            { name: 'Entwurf A', price: result ? `${fmt(result.total_cost_eur_day ?? 0)} €` : '…' },
+            { name: 'Entwurf A', price: result ? (feedCostCtPerKgEcm != null ? `${fmt(feedCostCtPerKgEcm, 1)} ct/kg` : `${fmt(result.total_cost_eur_day ?? 0)} €`) : '…' },
             { name: 'Entwurf B', price: '–' },
           ].map((v) => (
             <div
@@ -3163,8 +3238,8 @@ function Workbench({
             <table className="w-full text-[12px]">
               <thead>
                 <tr style={{ background: '#F9FAFB' }}>
-                  {['Futtermittel', 'kg FM', 'kg TM', '% TM', 'ME (MJ)', 'sidP (g)', '€/Tag'].map((h) => (
-                    <th key={h} className="py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] text-right first:text-left" style={{ borderColor: C.border }}>
+                  {['Futtermittel', 'kg FM', 'kg TM', '% TM', 'ME (MJ)', 'sidP (g)', '€/Tag', ''].map((h, hi) => (
+                    <th key={`${h}-${hi}`} className="py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] text-right first:text-left" style={{ borderColor: C.border }}>
                       {h}
                     </th>
                   ))}
@@ -3177,26 +3252,82 @@ function Workbench({
                   const meBeitrag = feed ? item.kgdm * feed.me_mj_kgdm : 0
                   const sidpBeitrag = feed ? item.kgdm * feed.sidp_g_kgdm : 0
                   const dupName = (rationNameDupCounts.get(item.name) ?? 0) > 1
+                  const isFixed = wizardData?.feedMinFm?.[item.feed_id] != null
+                    && wizardData.feedMinFm[item.feed_id] === wizardData.feedMaxFm?.[item.feed_id]
                   return (
-                    <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50 cursor-pointer" style={{ borderColor: '#F3F4F6' }}>
+                    <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50" style={{ borderColor: '#F3F4F6' }}>
                       <td className="p-2 font-medium" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
                         {item.name}
                         {dupName ? (
                           <span className="text-slate-400 font-normal text-[11px] ml-1">({item.feed_id})</span>
                         ) : null}
                       </td>
-                      <td className="p-2 text-right font-mono text-xs">{fmt(item.kgfm, 1)}</td>
+                      <td className="p-2 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {isFixed && (
+                            <button
+                              type="button"
+                              onClick={() => onApplySuggestionPatch({ unfix_feed_ids: [item.feed_id] })}
+                              disabled={!canEditRation}
+                              aria-label={`Fixierung für ${item.name} lösen und neu optimieren`}
+                              title="Menge ist fixiert — Klick löst die Fixierung und optimiert neu"
+                              className="rounded p-0.5 hover:bg-slate-100 disabled:opacity-40"
+                              style={{ color: C.accent }}
+                            >
+                              <Pin size={11} />
+                            </button>
+                          )}
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            step={0.1}
+                            min={0}
+                            key={`${item.feed_id}:${item.kgfm.toFixed(1)}`}
+                            defaultValue={Number(item.kgfm.toFixed(1))}
+                            disabled={!canEditRation}
+                            aria-label={`Menge ${item.name} in kg Frischmasse je Tag (Eingabe fixiert die Menge; 0 entfernt die Zutat)`}
+                            title={canEditRation
+                              ? 'Menge eingeben und Enter: fixiert die Zutat (Min=Max) und optimiert neu; 0 entfernt sie'
+                              : 'Im Demo-Modus nicht editierbar — eigene Ration über „Neue Ration" starten'}
+                            onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+                            onBlur={(e) => {
+                              const v = e.target.valueAsNumber
+                              if (!Number.isFinite(v) || v < 0) return
+                              if (Math.abs(v - item.kgfm) < 0.05) return
+                              if (v === 0) {
+                                onApplySuggestionPatch({ remove_feed_ids: [item.feed_id] })
+                              } else {
+                                onApplySuggestionPatch({ fix_feed_fm: { [item.feed_id]: v } })
+                              }
+                            }}
+                            className="w-16 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-xs focus-visible:ring-1 disabled:opacity-60"
+                            style={{ borderColor: isFixed ? C.accent : C.border }}
+                          />
+                        </div>
+                      </td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(item.kgdm, 2)}</td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(anteil, 1)}%</td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(meBeitrag, 1)}</td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(sidpBeitrag, 0)}</td>
                       <td className="p-2 text-right font-mono text-xs font-bold">{fmt(item.total_cost, 2)}</td>
+                      <td className="p-1 text-right">
+                        <button
+                          type="button"
+                          onClick={() => onApplySuggestionPatch({ remove_feed_ids: [item.feed_id] })}
+                          disabled={!canEditRation}
+                          aria-label={`${item.name} aus der Ration entfernen und neu optimieren`}
+                          title="Zutat entfernen und neu optimieren"
+                          className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-status-error disabled:opacity-40"
+                        >
+                          <XIcon size={12} />
+                        </button>
+                      </td>
                     </tr>
                   )
                 })}
                 {rationItems.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-16 text-center text-sm" style={{ color: C.muted }}>
+                    <td colSpan={8} className="py-16 text-center text-sm" style={{ color: C.muted }}>
                       Starten Sie die Optimierung oder laden Sie die Demo
                     </td>
                   </tr>
@@ -3212,10 +3343,39 @@ function Workbench({
                     <td className="p-2 text-right font-mono text-xs">{fmt(result?.nutrient_supply.me_mj ?? 0, 1)}</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(result?.nutrient_supply.sidp_g ?? 0, 0)}</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(totalCost, 2)}</td>
+                    <td />
                   </tr>
                 </tfoot>
               )}
             </table>
+          )}
+          {!isOptimizing && rationItems.length > 0 && (
+            <div className="flex items-center gap-2 border-t px-2 py-1.5" style={{ borderColor: C.border }}>
+              <Plus size={13} style={{ color: C.muted }} aria-hidden="true" />
+              <select
+                value=""
+                disabled={!canEditRation || feedsAvailableToAdd.length === 0}
+                aria-label="Futtermittel zur Ration hinzufügen und neu optimieren"
+                title={canEditRation
+                  ? 'Futtermittel in den Korb aufnehmen — der Solver vergibt die Menge; danach per kg-FM-Eingabe fixierbar'
+                  : 'Im Demo-Modus nicht verfügbar — eigene Ration über „Neue Ration" starten'}
+                onChange={(e) => {
+                  const id = e.target.value
+                  if (id) onApplySuggestionPatch({ add_feed_ids: [id] })
+                }}
+                className="w-full max-w-md rounded border bg-transparent px-2 py-1 text-xs disabled:opacity-50"
+                style={{ borderColor: C.border, color: C.muted }}
+              >
+                <option value="">
+                  {feedsAvailableToAdd.length > 0
+                    ? `Futtermittel hinzufügen … (${feedsAvailableToAdd.length} verfügbar)`
+                    : 'Alle Katalog-Futtermittel sind bereits im Korb'}
+                </option>
+                {feedsAvailableToAdd.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
           )}
         </div>
 
@@ -4461,7 +4621,7 @@ function IntentSuggestionsPanel({
 }
 
 // ---------------------------------------------------------------------------
-// Sticky Kennzahlen-Trio (Fodjan-Muster): Kosten · IOFC · Futtergesundheit
+// Sticky Kennzahlen-Trio: Kosten · IOFC · Futtergesundheit
 // ---------------------------------------------------------------------------
 
 /**

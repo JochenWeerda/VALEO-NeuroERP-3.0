@@ -145,7 +145,7 @@ export default function LohndienstePage() {
     queryKey: ['portal-lohndienste', DEMO_KUNDEN_NR],
     queryFn: async () => {
       const res = await apiClient.get<{ items: LohnAuftrag[]; count: number }>(
-        `/portal/lohndienste?kunden_nr=${DEMO_KUNDEN_NR}`,
+        `/api/v1/portal/lohndienste?kunden_nr=${DEMO_KUNDEN_NR}`,
       )
       return res.data
     },
@@ -155,7 +155,7 @@ export default function LohndienstePage() {
     if (saving) return
     setSaving(true)
     try {
-      await apiClient.post('/portal/lohndienste', {
+      await apiClient.post('/api/v1/portal/lohndienste', {
         kunden_nr: DEMO_KUNDEN_NR,
         typ: form.typ,
         schlag_beschreibung: form.schlag_beschreibung,
@@ -325,7 +325,7 @@ export default function LohndienstePage() {
         </div>
       )}
 
-      {data?.items.length === 0 && (
+      {(data?.items ?? []).length === 0 && !isLoading && (
         <Alert>
           <AlertDescription>
             Sie haben noch keine Lohndienstleistungen angefragt. Klicken Sie auf „Neuen Auftrag anfragen".
@@ -334,7 +334,7 @@ export default function LohndienstePage() {
       )}
 
       <div className="space-y-3">
-        {data?.items.map((a) => <AuftragKarte key={a.auftrag_id} a={a} />)}
+        {(data?.items ?? []).map((a) => <AuftragKarte key={a.auftrag_id} a={a} />)}
       </div>
     </div>
   )

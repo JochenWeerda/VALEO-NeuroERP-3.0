@@ -98,7 +98,7 @@ export default function OnboardingPage() {
     setSaving(true)
     setFehler(null)
     try {
-      await apiClient.post('/portal/interessenten', {
+      await apiClient.post('/api/v1/portal/interessenten', {
         ...form,
         flaeche_ha: form.flaeche_ha ? parseFloat(form.flaeche_ha) : null,
         hauptkulturen: form.hauptkulturen ? form.hauptkulturen.split(',').map((k) => k.trim()) : [],
