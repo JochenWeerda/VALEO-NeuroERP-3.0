@@ -7,10 +7,11 @@
  * design-tokens-meridian.css und design-tokens-terra.css auf.
  *
  * Bewusst NICHT hier: die 15 semantischen Aliase (--background, --primary-foreground,
- * ...). Sie referenzieren die theme-eigene --color-gray-*-Palette, die namentlich mit
- * Tailwind v4s eingebauter Palette kollidiert; eine hoch-spezifische Neudefinition wuerde
- * Tailwinds (unlayered) Palette ziehen. Sie bleiben daher in den Theme-Dateien, wo ihre
- * :root-Variante vom nicht-kollidierenden index.css-System harmlos beschattet wird.
+ * ...). Sie sind zwar in beiden Themes wertgleich, bleiben aber theme-scoped, weil sie
+ * die theme-eigene Palette referenzieren und pro Theme (Meridian/Terra) an der richtigen
+ * Spezifitaet (:root[data-theme="..."]) greifen muessen. Die Theme-Palette heisst
+ * --palette-gray-* (nicht --color-gray-*), um die Namenskollision mit Tailwind v4s
+ * eingebauter --color-gray-*-Palette zu vermeiden.
  */
 :root {
   --font-weight-light: 300;

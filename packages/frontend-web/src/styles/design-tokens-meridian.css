@@ -141,16 +141,16 @@
      HSL-Referenz: 210 xx% xx%
      ---------------------------------------------------------------- */
 
-  --color-gray-50:  210 20% 98%;       /* #f5f8fc -- Off-White Hintergrund */
-  --color-gray-100: 210 18% 95%;       /* #eff3f8 -- Sunken Surfaces */
-  --color-gray-200: 210 16% 90%;       /* #dde5ef -- Borders */
-  --color-gray-300: 210 14% 82%;       /* #c4cfde -- Disabled Borders */
-  --color-gray-400: 210 12% 68%;       /* #9aacbe -- Placeholder */
-  --color-gray-500: 210 10% 50%;       /* #6d828f -- Muted Text */
-  --color-gray-600: 210 10% 38%;       /* #4e6273 -- Sekundaer-Text */
-  --color-gray-700: 210 12% 26%;       /* #32445c */
-  --color-gray-800: 210 14% 16%;       /* #1a2a38 */
-  --color-gray-900: 210 18% 10%;       /* #0f1e2e -- Primaer-Text */
+  --palette-gray-50:  210 20% 98%;       /* #f5f8fc -- Off-White Hintergrund */
+  --palette-gray-100: 210 18% 95%;       /* #eff3f8 -- Sunken Surfaces */
+  --palette-gray-200: 210 16% 90%;       /* #dde5ef -- Borders */
+  --palette-gray-300: 210 14% 82%;       /* #c4cfde -- Disabled Borders */
+  --palette-gray-400: 210 12% 68%;       /* #9aacbe -- Placeholder */
+  --palette-gray-500: 210 10% 50%;       /* #6d828f -- Muted Text */
+  --palette-gray-600: 210 10% 38%;       /* #4e6273 -- Sekundaer-Text */
+  --palette-gray-700: 210 12% 26%;       /* #32445c */
+  --palette-gray-800: 210 14% 16%;       /* #1a2a38 */
+  --palette-gray-900: 210 18% 10%;       /* #0f1e2e -- Primaer-Text */
 
   /* ----------------------------------------------------------------
      FARBEN — SEMANTISCH
@@ -181,12 +181,12 @@
      ---------------------------------------------------------------- */
 
   /* Oberflaechenfarben */
-  --background:            var(--color-gray-50);    /* 210 20% 98% */
-  --foreground:            var(--color-gray-900);   /* 210 18% 10% */
+  --background:            var(--palette-gray-50);    /* 210 20% 98% */
+  --foreground:            var(--palette-gray-900);   /* 210 18% 10% */
   --card:                  0 0% 100%;
-  --card-foreground:       var(--color-gray-900);
+  --card-foreground:       var(--palette-gray-900);
   --popover:               0 0% 100%;
-  --popover-foreground:    var(--color-gray-900);
+  --popover-foreground:    var(--palette-gray-900);
 
   /* Primaer-System */
   --primary:               var(--color-primary-600);   /* 215 85% 42% */
@@ -197,8 +197,8 @@
   --secondary-foreground:  var(--color-harvest-700);   /* 38 85% 28% */
 
   /* Muted (Hintergruende fuer gedaempfte Elemente) */
-  --muted:                 var(--color-gray-100);      /* 210 18% 95% */
-  --muted-foreground:      var(--color-gray-600);      /* 210 10% 38% -- 5.9:1 Kontrast */
+  --muted:                 var(--palette-gray-100);      /* 210 18% 95% */
+  --muted-foreground:      var(--palette-gray-600);      /* 210 10% 38% -- 5.9:1 Kontrast */
 
   /* Akzent (Harvest fuer Highlights) */
   --accent:                var(--color-harvest-400);   /* 38 95% 52% */
@@ -209,8 +209,8 @@
   --destructive-foreground: 0 0% 100%;
 
   /* Rahmung und Fokus */
-  --border:                var(--color-gray-200);      /* 210 16% 90% */
-  --input:                 var(--color-gray-200);
+  --border:                var(--palette-gray-200);      /* 210 16% 90% */
+  --input:                 var(--palette-gray-200);
   --ring:                  var(--color-primary-600);   /* 215 85% 42% */
 
   /* ----------------------------------------------------------------

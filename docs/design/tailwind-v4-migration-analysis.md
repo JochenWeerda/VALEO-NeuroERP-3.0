@@ -144,17 +144,23 @@ Wertvergleich der 150 gleichnamigen Tokens:
 | Gruppe | Anzahl | Behandlung |
 |--------|:------:|-----------|
 | **Wertgleich, strukturell** (Font-Gewichte, Basis-Schriftgrößen, Zeilenhöhen, Spacing-Basis, Steuerhöhen, Radius-Grenzen, Motion, Z-Index) | **38** | ✅ nach `src/styles/tokens/primitives.css` (`:root`) extrahiert, aus beiden Theme-Dateien entfernt — **echte Duplikate eliminiert** |
-| **Wertgleich, semantisch** (`--background`, `--muted`, `--border`, `--accent`, `--secondary`, Foregrounds …) | 15 | bleiben in den Theme-Dateien — referenzieren die theme-eigene `--color-gray-*`-Palette, die **namentlich mit Tailwind v4s eingebauter Palette kollidiert**; eine hoch-spezifische Neudefinition an `:root[data-theme]` würde Tailwinds (unlayered) `oklch`-Werte ziehen und `hsl(var(--background))` ungültig machen |
+| **Wertgleich, semantisch** (`--background`, `--muted`, `--border`, `--accent`, `--secondary`, Foregrounds …) | 15 | bleiben theme-scoped in den Theme-Dateien (müssen pro Theme an `:root[data-theme]`-Spezifität greifen); referenzieren jetzt die kollisionsfrei umbenannte Palette `--palette-gray-*` |
 | **Wertverschieden** (Paletten `--color-primary-*`/`--color-harvest-*`/`--color-gray-*`, `--primary`, `--radius`, `--font-family-*`, Schatten, Sidebar, abweichende Schriftgrößen/Spacing/Motion …) | 97 | **keine Duplikate** — intentionale Theme-Varianten, bleiben je Theme |
 
-Verifikation: Prod-Build grün; Meridian-Vollnutzungssmoke **14/14, 0 Fehler** (Default unverändert `--background: 210 20% 98%`); Theme-Kaskade intakt (`data-theme="terra"` schaltet kollisionsfreies `--primary` auf Waldgrün `158 64% 28%`).
+### Behoben: `--color-gray-*` / Tailwind-Paletten-Kollision
 
-> **Bekannter Folgepunkt (migrationsbedingt, unabhängig von der Dedup):** Die Theme-
-> Paletten nutzen `--color-gray-*`, was mit Tailwind v4s eingebauter `--color-gray-*`
-> (oklch, unlayered) kollidiert. Unter aktivem Terra ziehen `--background`/`--muted`/
-> `--border` dadurch Tailwind-Werte. Das aktive Default-System (`index.css`) umgeht das
-> bereits über nicht-kollidierende Namen (`--color-neutral-*-hsl`). Saubere Lösung:
-> Theme-Paletten auf `--palette-*`/`--color-neutral-*` umbenennen (eigener Slice).
+Die Theme-Paletten (Meridian/Terra) hießen `--color-gray-*` und kollidierten namentlich
+mit Tailwind v4s eingebauter `--color-gray-*`-Palette (oklch, unlayered → gewann). Unter
+aktivem Terra zogen `--background`/`--muted`/`--border` dadurch ungültige Tailwind-`oklch`-
+Werte statt der Terra-HSL-Palette. **Fix:** Die theme-eigene Palette in beiden Theme-Dateien
+zu **`--palette-gray-*`** umbenannt (Definitionen + `var()`-Referenzen der semantischen
+Tokens). Tailwinds `--color-gray-*` (für `bg-gray-*`-Utilities und den index.css-Border-
+Kompat-Shim) bleibt unangetastet.
+
+Verifikation: Prod-Build grün; Meridian-Vollnutzungssmoke **14/14, 0 Fehler**; **Theme-Kaskade
+jetzt vollständig** — `data-theme="terra"` schaltet `--background` auf `40 15% 96%`,
+`--muted` auf `40 12% 92%` und `--primary` auf `158 64% 28%` (Waldgrün); Default (Meridian)
+unverändert (`--background: 210 20% 98%`, `--primary: 215 85% 42%`).
 | 4 Nachweise | ✅ Prod-Build grün (25,5 s), `tsc` 0 Fehler, Docker-Prod-Image grün, Playwright-Vollnutzungssmoke **14/14, 0 Fehler**; CSS-Bundle 185→229 KB (v4-typisch). ⏳ offen: Screenshot-Diff-Gate, A11y-Benchmark |
 
 **Bekannte Punkte:** CSS-Bundle +44 KB (v4-Preflight/mehr Varianten) — bei Bedarf via

@@ -151,16 +151,16 @@
      HSL-Referenz: 40 xx% xx%
      ---------------------------------------------------------------- */
 
-  --color-gray-50:    40 15% 96%;    /* #f4f2ee -- Warm-Grau Hintergrund */
-  --color-gray-100:   40 12% 92%;    /* #eceae4 */
-  --color-gray-200:   40 10% 86%;    /* #dcdad4 */
-  --color-gray-300:   40  8% 76%;    /* #c4c2bc */
-  --color-gray-400:   40  6% 62%;    /* #9e9c97 */
-  --color-gray-500:   40  5% 48%;    /* #7b7975 */
-  --color-gray-600:   40  5% 36%;    /* #5c5a56 */
-  --color-gray-700:   40  6% 25%;    /* #403e3a */
-  --color-gray-800:   40  8% 16%;    /* #2a2826 */
-  --color-gray-900:   40 10% 10%;    /* #1a1816 */
+  --palette-gray-50:    40 15% 96%;    /* #f4f2ee -- Warm-Grau Hintergrund */
+  --palette-gray-100:   40 12% 92%;    /* #eceae4 */
+  --palette-gray-200:   40 10% 86%;    /* #dcdad4 */
+  --palette-gray-300:   40  8% 76%;    /* #c4c2bc */
+  --palette-gray-400:   40  6% 62%;    /* #9e9c97 */
+  --palette-gray-500:   40  5% 48%;    /* #7b7975 */
+  --palette-gray-600:   40  5% 36%;    /* #5c5a56 */
+  --palette-gray-700:   40  6% 25%;    /* #403e3a */
+  --palette-gray-800:   40  8% 16%;    /* #2a2826 */
+  --palette-gray-900:   40 10% 10%;    /* #1a1816 */
 
   /* ----------------------------------------------------------------
      FARBEN — SEMANTISCH
@@ -190,12 +190,12 @@
      SEMANTIC ALIASES (shadcn/ui kompatibel)
      ---------------------------------------------------------------- */
 
-  --background:            var(--color-gray-50);      /* 40 15% 96% */
-  --foreground:            var(--color-gray-900);     /* 40 10% 10% */
+  --background:            var(--palette-gray-50);      /* 40 15% 96% */
+  --foreground:            var(--palette-gray-900);     /* 40 10% 10% */
   --card:                  40 20% 99%;                /* Fast weiss */
-  --card-foreground:       var(--color-gray-900);
+  --card-foreground:       var(--palette-gray-900);
   --popover:               0 0% 100%;                 /* Reines Weiss */
-  --popover-foreground:    var(--color-gray-900);
+  --popover-foreground:    var(--palette-gray-900);
 
   --primary:               var(--color-primary-500);  /* 158 64% 28% */
   --primary-foreground:    0 0% 100%;
@@ -203,8 +203,8 @@
   --secondary:             var(--color-harvest-50);   /* 45 93% 94% */
   --secondary-foreground:  var(--color-harvest-700);  /* 45 93% 20% */
 
-  --muted:                 var(--color-gray-100);     /* 40 12% 92% */
-  --muted-foreground:      var(--color-gray-600);     /* 40  5% 36% */
+  --muted:                 var(--palette-gray-100);     /* 40 12% 92% */
+  --muted-foreground:      var(--palette-gray-600);     /* 40  5% 36% */
 
   --accent:                var(--color-harvest-400);  /* 45 93% 47% */
   --accent-foreground:     var(--color-harvest-700);  /* 45 93% 20% */
@@ -212,8 +212,8 @@
   --destructive:           0 70% 48%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:                var(--color-gray-200);     /* 40 10% 86% */
-  --input:                 var(--color-gray-200);
+  --border:                var(--palette-gray-200);     /* 40 10% 86% */
+  --input:                 var(--palette-gray-200);
   --ring:                  var(--color-primary-500);  /* 158 64% 28% */
 
   /* ----------------------------------------------------------------

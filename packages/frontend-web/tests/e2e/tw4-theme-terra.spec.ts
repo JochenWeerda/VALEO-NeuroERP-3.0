@@ -22,7 +22,7 @@ test.describe('TW4 Terra-Theme (Token-Split)', () => {
         return {
           theme: document.documentElement.dataset.theme || '(none)',
           background: cs.getPropertyValue('--background').trim(),
-          gray50: cs.getPropertyValue('--color-gray-50').trim(),
+          muted: cs.getPropertyValue('--muted').trim(),
           primary: cs.getPropertyValue('--primary').trim(),
         }
       })
@@ -30,8 +30,7 @@ test.describe('TW4 Terra-Theme (Token-Split)', () => {
     const def = await read()
     // eslint-disable-next-line no-console
     console.log(`[terra] default=${JSON.stringify(def)}`)
-    // Default (index.css/Meridian): --background = 210 20% 98% (Off-White). Nach der
-    // Primitive-Extraktion unveraendert — Farb-/Semantik-Tokens wurden nicht angefasst.
+    // Default (Meridian): Off-White 210 20% 98%, Ozeanblau 215 85% 42%.
     expect(def.background.replace(/\s+/g, ' ')).toContain('210 20% 98%')
     expect(def.primary.replace(/\s+/g, ' ')).toContain('215 85% 42%')
 
@@ -42,12 +41,11 @@ test.describe('TW4 Terra-Theme (Token-Split)', () => {
     const terra = await read()
     // eslint-disable-next-line no-console
     console.log(`[terra] terra=${JSON.stringify(terra)}`)
-    // Terra aktiv: die Theme-Kaskade (:root[data-theme="terra"], 0,2,0) greift und
-    // schaltet --primary auf Waldgruen (var(--color-primary-500) = 158 64% 28%). Dies
-    // beweist, dass die Token-Trennung die Theme-Umschaltung nicht bricht.
-    // Hinweis: --background/--muted/--border nutzen --color-gray-*, das namentlich mit
-    // Tailwind v4s eingebauter Palette kollidiert (bekannter, migrationsbedingter Punkt,
-    // unabhaengig von der Dedup) — daher hier nur das kollisionsfreie --primary geprueft.
+    // Terra aktiv: die Theme-Kaskade (:root[data-theme="terra"], 0,2,0) greift vollstaendig.
+    // Nach Behebung der --color-gray-*/Tailwind-Kollision (Palette -> --palette-gray-*)
+    // schaltet auch --background auf die Terra-Palette (Warm-Grau 40 15% 96%) statt auf
+    // Tailwinds oklch; --primary = Waldgruen 158 64% 28%.
+    expect(terra.background.replace(/\s+/g, ' ')).toContain('40 15% 96%')
     expect(terra.primary.replace(/\s+/g, ' ')).toContain('158 64% 28%')
 
     const outDir = path.join(process.cwd(), 'test-results', 'tw4-visual')
