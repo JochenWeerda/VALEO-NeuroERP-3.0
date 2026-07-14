@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useBankkonten, type BankKonto } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -114,8 +114,8 @@ export default function BankkontenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <Euro className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtSaldo)}
               </span>
             </div>

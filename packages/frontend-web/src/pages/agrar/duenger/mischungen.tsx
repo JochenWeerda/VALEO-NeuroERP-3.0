@@ -332,7 +332,7 @@ export default function DuengerMischungenPage(): JSX.Element {
                         variant="outline"
                         size="sm"
                         onClick={() => removeKomponente(index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-status-error hover:text-red-700"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -415,9 +415,9 @@ export default function DuengerMischungenPage(): JSX.Element {
                 <div className="text-xs text-blue-600">Ziel: {mischung.ziel_npk.n}%</div>
               </div>
               <div className="p-4 bg-green-50 rounded-lg">
-                <div className="text-sm text-green-600">Gesamt P</div>
+                <div className="text-sm text-status-success">Gesamt P</div>
                 <div className="text-2xl font-bold text-green-900">{mischung.berechnete_werte.gesamt_p}%</div>
-                <div className="text-xs text-green-600">Ziel: {mischung.ziel_npk.p}%</div>
+                <div className="text-xs text-status-success">Ziel: {mischung.ziel_npk.p}%</div>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg">
                 <div className="text-sm text-purple-600">Gesamt K</div>
@@ -425,15 +425,15 @@ export default function DuengerMischungenPage(): JSX.Element {
                 <div className="text-xs text-purple-600">Ziel: {mischung.ziel_npk.k}%</div>
               </div>
               <div className="p-4 bg-orange-50 rounded-lg">
-                <div className="text-sm text-orange-600">Kosten/Tonne</div>
+                <div className="text-sm text-status-warning">Kosten/Tonne</div>
                 <div className="text-2xl font-bold text-orange-900">{mischung.berechnete_werte.kosten_pro_tonne}</div>
-                <div className="text-xs text-orange-600">Gesamt: {mischung.berechnete_werte.gesamt_menge}t</div>
+                <div className="text-xs text-status-warning">Gesamt: {mischung.berechnete_werte.gesamt_menge}t</div>
               </div>
             </div>
 
             {!validateMischung() && (
               <div className="mt-4 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <AlertTriangle className="h-5 w-5 text-status-error" />
                 <span className="text-red-800 font-medium">
                   Die Anteile summieren sich nicht auf 100%!
                   Aktuell: {mischung.komponenten.reduce((sum, k) => sum + k.anteil, 0)}%

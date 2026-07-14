@@ -277,7 +277,7 @@ function LegacyKundenStammModern(): JSX.Element {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium"><Zap className="h-4 w-4 text-yellow-500" />Responsive UI</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium"><Zap className="h-4 w-4 text-status-warning" />Responsive UI</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
             {responsiveMode === 'sm' && 'Mobile: 1 Spalte, schnelle Folgeaktionen.'}
@@ -293,7 +293,7 @@ function LegacyKundenStammModern(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium"><Shield className="h-4 w-4 text-green-500" />Validierung</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium"><Shield className="h-4 w-4 text-status-success" />Validierung</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">USt-ID, Ownership und Pflichtdaten lassen sich vor Folgeprozessen absichern.</CardContent>
         </Card>

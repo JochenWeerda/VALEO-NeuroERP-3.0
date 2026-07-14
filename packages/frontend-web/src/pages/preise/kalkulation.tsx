@@ -96,7 +96,7 @@ export default function PreisKalkulationPage(): JSX.Element {
             <div className="grid gap-4 md:grid-cols-3">
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Netto</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{fmt(result.netto_preis)} €</span></CardContent></Card>
               <Card><CardHeader className="pb-2"><CardTitle className="text-sm">MwSt.</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-muted-foreground">{fmt(result.mwst_betrag)} €</span></CardContent></Card>
-              <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Brutto</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{fmt(result.brutto_preis)} €</span></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Brutto</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{fmt(result.brutto_preis)} €</span></CardContent></Card>
             </div>
 
             <Card>
@@ -109,7 +109,7 @@ export default function PreisKalkulationPage(): JSX.Element {
                       <tr key={i} className="border-b">
                         <td className="py-1">{k.schritt}</td>
                         <td className="py-1 text-right font-mono">{fmt(k.wert)} €</td>
-                        <td className={`py-1 text-right font-mono ${k.delta < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        <td className={`py-1 text-right font-mono ${k.delta < 0 ? 'text-status-error' : 'text-status-success'}`}>
                           {k.delta >= 0 ? '+' : ''}{fmt(k.delta)} €
                         </td>
                       </tr>

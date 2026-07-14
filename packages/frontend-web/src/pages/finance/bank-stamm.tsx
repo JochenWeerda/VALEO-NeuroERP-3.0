@@ -161,7 +161,7 @@ export default function BankStammPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           {isLoading && <p className="text-muted-foreground text-sm">Lade Bankkonten...</p>}
-          {isError && <p className="text-red-600 text-sm">Fehler beim Laden.</p>}
+          {isError && <p className="text-status-error text-sm">Fehler beim Laden.</p>}
           {!isLoading && !isError && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

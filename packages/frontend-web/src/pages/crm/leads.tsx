@@ -124,7 +124,7 @@ export default function LeadsPage(): JSX.Element {
     return (
       <div className="space-y-4 p-3 md:p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">{t('crud.messages.loadError')}</h1>
+          <h1 className="text-2xl font-bold text-status-error">{t('crud.messages.loadError')}</h1>
           <p className="text-muted-foreground">
             {error instanceof Error ? error.message : t('crud.messages.unknownError')}
           </p>
@@ -177,7 +177,7 @@ export default function LeadsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">{t('crud.fields.qualified')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{qualifiedLeads}</span>
+            <span className="text-2xl font-bold text-status-success">{qualifiedLeads}</span>
           </CardContent>
         </Card>
 
@@ -186,7 +186,7 @@ export default function LeadsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">{t('crud.fields.highPriority')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{highPriorityLeads}</span>
+            <span className="text-2xl font-bold text-status-error">{highPriorityLeads}</span>
           </CardContent>
         </Card>
       </div>

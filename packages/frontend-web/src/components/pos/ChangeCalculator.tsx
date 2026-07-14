@@ -91,13 +91,13 @@ export function ChangeCalculator({ total, onTenderedChange }: ChangeCalculatorPr
             </Label>
             <div
               className={`text-5xl font-bold ${
-                change >= 0 ? 'text-green-600' : 'text-red-600'
+                change >= 0 ? 'text-status-success' : 'text-status-error'
               }`}
             >
               {Math.abs(change).toFixed(2)} €
             </div>
             {change < 0 && (
-              <p className="text-sm text-red-600 mt-2">
+              <p className="text-sm text-status-error mt-2">
                 Noch {Math.abs(change).toFixed(2)} € fehlen
               </p>
             )}

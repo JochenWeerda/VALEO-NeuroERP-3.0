@@ -271,7 +271,7 @@ export default function ReklamationDetailPage(): JSX.Element {
       <div className="p-6">
         <Card className="border-red-500">
           <CardContent className="pt-6">
-            <p className="text-red-600">Reklamation konnte nicht geladen werden.</p>
+            <p className="text-status-error">Reklamation konnte nicht geladen werden.</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/qualitaet/reklamationen')}>
               Zurueck zur Liste
             </Button>

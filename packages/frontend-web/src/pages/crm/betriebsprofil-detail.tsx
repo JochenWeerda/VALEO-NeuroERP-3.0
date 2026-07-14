@@ -185,7 +185,7 @@ export default function BetriebsprofilePage(): JSX.Element {
             </Button>
           )}
           <div className="flex items-center gap-3">
-            <Tractor className="h-8 w-8 text-green-600" />
+            <Tractor className="h-8 w-8 text-status-success" />
             <div>
               <h1 className="text-3xl font-bold">{pageTitle}</h1>
               <p className="text-muted-foreground">
@@ -324,7 +324,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                     <span className="text-lg font-bold">{totalCropArea.toFixed(2)} {t('crud.fields.hectares')}</span>
                   </div>
                   {farmProfile.totalArea && totalCropArea > farmProfile.totalArea && (
-                    <p className="mt-2 flex items-center gap-1.5 text-sm text-red-600">
+                    <p className="mt-2 flex items-center gap-1.5 text-sm text-status-error">
                       <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
                       {t('crud.messages.cropAreaExceedsTotal')}
                     </p>

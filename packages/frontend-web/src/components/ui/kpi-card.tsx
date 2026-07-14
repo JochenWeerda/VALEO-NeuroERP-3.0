@@ -24,9 +24,9 @@ const accentStyles: Record<KpiAccent, string> = {
 
 const iconStyles: Record<KpiAccent, string> = {
   primary: 'text-primary',
-  amber:   'text-amber-600',
-  green:   'text-green-600',
-  red:     'text-red-600',
+  amber:   'text-status-warning',
+  green:   'text-status-success',
+  red:     'text-status-error',
   neutral: 'text-muted-foreground',
 }
 
@@ -61,8 +61,8 @@ export function KpiCard({
         <div
           className={cn(
             'mt-1 flex items-center gap-1 text-xs font-medium',
-            isPositive && 'text-green-600',
-            isNegative && 'text-red-600',
+            isPositive && 'text-status-success',
+            isNegative && 'text-status-error',
             !isPositive && !isNegative && 'text-muted-foreground',
           )}
         >

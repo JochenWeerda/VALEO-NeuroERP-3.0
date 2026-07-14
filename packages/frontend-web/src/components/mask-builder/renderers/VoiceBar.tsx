@@ -93,7 +93,7 @@ export function VoiceBar({
             aria-label="Transkript (editierbar)"
             className="flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
           />
-          <button type="button" data-testid="voice-commit" aria-label="Uebernehmen" onClick={() => commit()} className="inline-flex h-7 w-7 items-center justify-center rounded text-emerald-600 hover:bg-accent">
+          <button type="button" data-testid="voice-commit" aria-label="Uebernehmen" onClick={() => commit()} className="inline-flex h-7 w-7 items-center justify-center rounded text-status-success hover:bg-accent">
             <Check className="h-4 w-4" />
           </button>
           <button type="button" data-testid="voice-cancel" aria-label="Verwerfen" onClick={() => cancel()} className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-accent">

@@ -420,19 +420,19 @@ export default function OpKreditorenPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertCircle className="h-4 w-4 text-status-error" />
               Überfällig
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{fmt(sumUeberfaellig)}</span>
+            <span className="text-2xl font-bold text-status-error">{fmt(sumUeberfaellig)}</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <CheckCircle2 className="h-4 w-4 text-status-success" />
               Rechnungsbetrag Gesamt
             </CardTitle>
           </CardHeader>
@@ -461,7 +461,7 @@ export default function OpKreditorenPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           {isLoading && <p className="text-muted-foreground text-sm">Lade offene Posten...</p>}
-          {isError && <p className="text-red-600 text-sm">Fehler beim Laden der offenen Posten.</p>}
+          {isError && <p className="text-status-error text-sm">Fehler beim Laden der offenen Posten.</p>}
           {!isLoading && !isError && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -534,7 +534,7 @@ export default function OpKreditorenPage(): JSX.Element {
                             disabled={!isEditable(op.op_status)}
                             onClick={() => deleteMutation.mutate(op.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-red-600" />
+                            <Trash2 className="h-4 w-4 text-status-error" />
                           </Button>
                         </div>
                       </td>

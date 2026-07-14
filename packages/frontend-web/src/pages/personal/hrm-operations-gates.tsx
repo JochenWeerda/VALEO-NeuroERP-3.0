@@ -492,7 +492,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Risiko / Prio</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <AlertTriangle className={`h-3 w-3 ${gate.riskLevel === 'hoch' ? 'text-red-500' : 'text-amber-500'}`} />
+                <AlertTriangle className={`h-3 w-3 ${gate.riskLevel === 'hoch' ? 'text-status-error' : 'text-status-warning'}`} />
                 {gate.riskLevel.toUpperCase()} / {gate.priority}
               </span>
             </div>
@@ -505,7 +505,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Letzter Test</span>
-              <span className={`text-[13px] font-bold ${gate.lastProbeStatus === 'passed' ? 'text-emerald-600' : gate.lastProbeStatus === 'failed' ? 'text-red-600' : 'text-gray-700'}`}>
+              <span className={`text-[13px] font-bold ${gate.lastProbeStatus === 'passed' ? 'text-status-success' : gate.lastProbeStatus === 'failed' ? 'text-status-error' : 'text-gray-700'}`}>
                 {gate.lastProbeStatus ? probeLabel[gate.lastProbeStatus] ?? gate.lastProbeStatus : '-'}
               </span>
             </div>
@@ -561,7 +561,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
                   <ul className="space-y-3">
                     {gate.acceptanceCriteria.map((item) => (
                       <li key={item} className="flex items-start gap-2.5 text-[13px] text-gray-600">
-                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-status-success" />
                         {item}
                       </li>
                     ))}
@@ -664,8 +664,8 @@ export default function HrmOperationsGatesPage(): JSX.Element {
       <main className="mx-auto mt-8 max-w-[1440px] space-y-6 px-4 lg:px-8">
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KpiItem label="Pruefpunkte Gesamt" value={gates.length} icon={Shield} colorClass="text-blue-700" />
-          <KpiItem label="Erledigt" value={approvedCount} icon={CheckCircle2} colorClass="text-emerald-600" />
-          <KpiItem label="Aktive Stopper" value={blockerCount} icon={ShieldAlert} colorClass="text-red-600" />
+          <KpiItem label="Erledigt" value={approvedCount} icon={CheckCircle2} colorClass="text-status-success" />
+          <KpiItem label="Aktive Stopper" value={blockerCount} icon={ShieldAlert} colorClass="text-status-error" />
           <KpiItem label="Nachweise Gesamt" value={evidenceCount} icon={FileText} colorClass="text-blue-500" />
         </section>
 

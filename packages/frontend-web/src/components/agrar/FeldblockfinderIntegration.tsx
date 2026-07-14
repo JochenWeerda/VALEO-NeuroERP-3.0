@@ -285,7 +285,7 @@ export function FeldblockfinderIntegration({
             {/* Info für Niedersachsen Schlaginfo */}
             {selectedBundesland === 'niedersachsen' && (
               <Alert className="bg-green-50 border-green-200">
-                <MapPin className="h-4 w-4 text-green-600" />
+                <MapPin className="h-4 w-4 text-status-success" />
                 <AlertTitle className="text-green-800">Niedersachsen Schlaginfo</AlertTitle>
                 <AlertDescription className="text-green-700">
                   <p>Öffnen Sie das Portal im neuen Tab und nutzen Sie folgende Funktionen:</p>
@@ -340,7 +340,7 @@ export function FeldblockfinderIntegration({
                   style={{ height: '300px' }}
                 >
                   <div className="text-center space-y-4">
-                    <MapPin className="h-16 w-16 mx-auto text-green-600 dark:text-green-400" />
+                    <MapPin className="h-16 w-16 mx-auto text-status-success dark:text-green-400" />
                     <div>
                       <h3 className="text-lg font-semibold">Feldblockfinder {bundeslandInfo.name}</h3>
                       <p className="text-sm text-muted-foreground mt-1">

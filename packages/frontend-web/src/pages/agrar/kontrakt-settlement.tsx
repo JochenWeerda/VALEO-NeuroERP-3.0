@@ -160,7 +160,7 @@ export default function KontraktSettlementPage() {
                               {m.status === 'offen' && (
                                 <span className="inline-flex gap-1">
                                   <Button size="sm" variant="ghost" onClick={() => doHandover(m.movement_id)} disabled={handover.isPending}><FileCheck2 size={13} /></Button>
-                                  <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'movement', id: m.movement_id, label: `Bewegung ${m.menge} ${einheit}` }); setGrund('') }}><Ban size={13} className="text-red-600" /></Button>
+                                  <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'movement', id: m.movement_id, label: `Bewegung ${m.menge} ${einheit}` }); setGrund('') }}><Ban size={13} className="text-status-error" /></Button>
                                 </span>
                               )}
                             </td>
@@ -199,7 +199,7 @@ export default function KontraktSettlementPage() {
                               <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[f.status] ?? ''}`}>{f.status}</Badge></td>
                               <td className="px-3 py-1.5 text-right">
                                 {f.status === 'aktiv' && (
-                                  <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'fixing', id: f.fixing_id, label: `Fixierung #${f.fixing_no} (${f.menge} ${einheit})` }); setGrund('') }}><Ban size={13} className="text-red-600" /></Button>
+                                  <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'fixing', id: f.fixing_id, label: `Fixierung #${f.fixing_no} (${f.menge} ${einheit})` }); setGrund('') }}><Ban size={13} className="text-status-error" /></Button>
                                 )}
                               </td>
                             </tr>

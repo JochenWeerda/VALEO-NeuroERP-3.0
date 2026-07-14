@@ -54,7 +54,7 @@ export function DuplicateWarning({
       variant="destructive"
       className={cn('border-amber-300 bg-amber-50', className)}
     >
-      <AlertTriangle className="h-4 w-4 text-amber-600" />
+      <AlertTriangle className="h-4 w-4 text-status-warning" />
       <AlertTitle className="text-amber-800 flex items-center gap-2">
         Mögliche Duplikate gefunden
         <Badge variant="secondary" className="text-xs">
@@ -69,7 +69,7 @@ export function DuplicateWarning({
               className="flex items-center justify-between p-3 bg-white rounded-lg border border-amber-200"
             >
               <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-amber-600" />
+                <Users className="h-5 w-5 text-status-warning" />
                 <div>
                   <div className="font-medium text-gray-900">{candidate.name}</div>
                   <div className="text-xs text-gray-500 flex gap-2">

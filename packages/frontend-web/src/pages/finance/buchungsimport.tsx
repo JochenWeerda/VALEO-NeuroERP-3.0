@@ -238,7 +238,7 @@ export default function BuchungsimportPage(): JSX.Element {
             </div>
 
             {importMutation.isError && (
-              <p className="text-red-600 text-sm flex items-center gap-2">
+              <p className="text-status-error text-sm flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
                 {(importMutation.error as Error).message}
               </p>
@@ -263,11 +263,11 @@ export default function BuchungsimportPage(): JSX.Element {
                 <div className="text-sm text-muted-foreground">Zeilen gesamt</div>
               </div>
               <div className="text-center p-4 border rounded-lg border-green-200 bg-green-50">
-                <div className="text-3xl font-bold text-green-600">{preview.successful}</div>
+                <div className="text-3xl font-bold text-status-success">{preview.successful}</div>
                 <div className="text-sm text-muted-foreground">Gültig</div>
               </div>
               <div className={`text-center p-4 border rounded-lg ${preview.failed > 0 ? 'border-red-200 bg-red-50' : ''}`}>
-                <div className={`text-3xl font-bold ${preview.failed > 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                <div className={`text-3xl font-bold ${preview.failed > 0 ? 'text-status-error' : 'text-muted-foreground'}`}>
                   {preview.failed}
                 </div>
                 <div className="text-sm text-muted-foreground">Fehler</div>
@@ -276,7 +276,7 @@ export default function BuchungsimportPage(): JSX.Element {
 
             {preview.errors.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-medium text-red-600 flex items-center gap-2">
+                <h4 className="font-medium text-status-error flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
                   Validierungsfehler
                 </h4>
@@ -318,7 +318,7 @@ export default function BuchungsimportPage(): JSX.Element {
             </div>
 
             {importMutation.isError && (
-              <p className="text-red-600 text-sm">{(importMutation.error as Error).message}</p>
+              <p className="text-status-error text-sm">{(importMutation.error as Error).message}</p>
             )}
           </CardContent>
         </Card>
@@ -329,18 +329,18 @@ export default function BuchungsimportPage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <CheckCircle2 className="h-5 w-5 text-status-success" />
               Import abgeschlossen
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <div className="text-center p-4 border rounded-lg border-green-200 bg-green-50">
-                <div className="text-3xl font-bold text-green-600">{result.successful}</div>
+                <div className="text-3xl font-bold text-status-success">{result.successful}</div>
                 <div className="text-sm text-muted-foreground">Erfolgreich importiert</div>
               </div>
               <div className={`text-center p-4 border rounded-lg ${result.failed > 0 ? 'border-red-200 bg-red-50' : ''}`}>
-                <div className={`text-3xl font-bold ${result.failed > 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                <div className={`text-3xl font-bold ${result.failed > 0 ? 'text-status-error' : 'text-muted-foreground'}`}>
                   {result.failed}
                 </div>
                 <div className="text-sm text-muted-foreground">Fehler</div>
@@ -353,9 +353,9 @@ export default function BuchungsimportPage(): JSX.Element {
 
             {result.errors.length > 0 && (
               <div>
-                <h4 className="font-medium text-red-600 mb-2">Nicht importierte Zeilen:</h4>
+                <h4 className="font-medium text-status-error mb-2">Nicht importierte Zeilen:</h4>
                 {result.errors.map((err, i) => (
-                  <p key={i} className="text-sm text-red-600">
+                  <p key={i} className="text-sm text-status-error">
                     Zeile {err.row_number}: {err.error_message}
                   </p>
                 ))}

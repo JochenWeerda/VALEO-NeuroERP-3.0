@@ -1,7 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import UniversalSalesOrderPilotPage from '@/pages/sales/UniversalSalesOrderPilotPage'
+
+// Renderer-Teilbäume (z. B. CalendarRenderer) nutzen useQuery und brauchen im
+// Test-Harness einen QueryClient; retry aus, damit Fehlerpfade sofort greifen.
+function renderPage(): ReturnType<typeof render> {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <UniversalSalesOrderPilotPage />
+    </QueryClientProvider>,
+  )
+}
 import { useSalesOrder, useSalesOrderScreenSummary } from '@/lib/api/sales'
 import { useSalesOrderTabData } from '@/features/sales-masks/use-sales-order-tab-data'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -87,7 +99,7 @@ describe('UniversalSalesOrderPilotPage', () => {
       error: null,
     } as ReturnType<typeof useSalesOrderScreenSummary>)
 
-    render(<UniversalSalesOrderPilotPage />)
+    renderPage()
 
     expect(screen.getByText('Summary wird geladen...')).toBeInTheDocument()
     expect(mockedUseSalesOrder).toHaveBeenCalledWith('order-1', { enabled: false })
@@ -115,7 +127,7 @@ describe('UniversalSalesOrderPilotPage', () => {
       error: null,
     } as ReturnType<typeof useSalesOrderScreenSummary>)
 
-    render(<UniversalSalesOrderPilotPage />)
+    renderPage()
 
     expect(screen.getByTestId('universal-sales-order-pilot')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Weizen Lieferung' })).toBeInTheDocument()
@@ -146,7 +158,7 @@ describe('UniversalSalesOrderPilotPage', () => {
       error: null,
     } as ReturnType<typeof useSalesOrderScreenSummary>)
 
-    render(<UniversalSalesOrderPilotPage />)
+    renderPage()
 
     await user.click(screen.getByRole('tab', { name: /positionen/i }))
 
@@ -183,7 +195,7 @@ describe('UniversalSalesOrderPilotPage', () => {
       error: null,
     } as ReturnType<typeof useSalesOrderScreenSummary>)
 
-    render(<UniversalSalesOrderPilotPage />)
+    renderPage()
 
     await user.click(screen.getByRole('tab', { name: /lieferung/i }))
 

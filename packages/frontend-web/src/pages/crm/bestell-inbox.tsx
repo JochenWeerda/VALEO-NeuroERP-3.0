@@ -67,7 +67,7 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4 text-green-600" />
+            <MessageCircle className="h-4 w-4 text-status-success" />
             <span className="text-xs text-muted-foreground">{item.absender ?? 'unbekannt'} · {new Date(item.eingegangen_am).toLocaleString('de-DE')}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
                   {match.name} <span className="text-xs text-muted-foreground">({match.kunden_nr}{match.ort ? ` · ${match.ort}` : ''})</span>
                 </button>
               ) : (
-                <span className="flex items-center gap-1 text-amber-600">
+                <span className="flex items-center gap-1 text-status-warning">
                   <AlertTriangle className="h-3.5 w-3.5" />Kunde „{p.kunde ?? '?'}" nicht eindeutig zugeordnet
                 </span>
               )}
@@ -195,7 +195,7 @@ export default function BestellInboxPage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h1 className="flex items-center gap-2 text-3xl font-bold"><MessageCircle className="h-7 w-7 text-green-600" />Bestell-Inbox</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold"><MessageCircle className="h-7 w-7 text-status-success" />Bestell-Inbox</h1>
         <p className="text-muted-foreground">Eingehende WhatsApp-/Freitext-Bestellungen einfügen — die AI erkennt Kunde, Artikel, Menge, Termin und Silo und legt Kontakt + Beleg an.</p>
       </div>
 

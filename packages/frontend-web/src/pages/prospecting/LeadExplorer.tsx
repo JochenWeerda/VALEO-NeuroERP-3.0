@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { toast } from '@/hooks/use-toast'
 import { LeadCandidate, LeadSegment, LeadSourceSystem } from '@/types/prospecting'
@@ -538,7 +538,7 @@ export default function LeadExplorer(): JSX.Element {
                         size="sm" 
                         disabled={pipelineBusy}
                         title="DEBUG: Alle GAP-Daten aller Jahre zurücksetzen"
-                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        className="border-red-300 text-status-error hover:bg-red-50"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Debug: Alle Jahre
@@ -567,7 +567,7 @@ export default function LeadExplorer(): JSX.Element {
                         {/* Schritt-Details */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                           {Object.entries(pipelineProgress.steps).map(([key, step]) => (
-                            <div key={key} className={`flex items-center gap-1 ${step.completed ? 'text-green-600' : 'text-muted-foreground'}`}>
+                            <div key={key} className={`flex items-center gap-1 ${step.completed ? 'text-status-success' : 'text-muted-foreground'}`}>
                               <div className={`w-2 h-2 rounded-full ${step.completed ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
                               <span>{step.name}</span>
                             </div>
@@ -775,7 +775,7 @@ export default function LeadExplorer(): JSX.Element {
                     <td className="py-2 pl-4">
                       <div className="flex items-center gap-2">
                         {(candidate.is_core_customer || candidate.is_locked_by_sales) && (
-                          <Badge variant="outline" className="border-red-400 text-xs text-red-600">
+                          <Badge variant="outline" className="border-red-400 text-xs text-status-error">
                             Geschützt
                           </Badge>
                         )}

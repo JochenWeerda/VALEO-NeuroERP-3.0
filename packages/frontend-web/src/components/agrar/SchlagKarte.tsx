@@ -155,7 +155,7 @@ export function SchlagKarte({ height = '480px', className = '' }: SchlagKartePro
       {!mapReady && !mapError && (
         <div className="absolute inset-0 flex items-center justify-center bg-green-50 dark:bg-green-950/30">
           <div className="text-center space-y-2">
-            <Map className="h-10 w-10 mx-auto text-green-600 animate-pulse" />
+            <Map className="h-10 w-10 mx-auto text-status-success animate-pulse" />
             <p className="text-sm text-muted-foreground">Karte wird geladen…</p>
           </div>
         </div>

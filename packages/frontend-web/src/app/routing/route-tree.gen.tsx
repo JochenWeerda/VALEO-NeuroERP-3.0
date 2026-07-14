@@ -10665,7 +10665,7 @@ export const generatedRouteInventory = [
   {
     "module": "@/pages/portal/empfehlungen",
     "path": "portal/empfehlungen",
-    "source": "navigation"
+    "source": "alias"
   },
   {
     "module": "@/pages/portal/feldbuch",
@@ -10680,7 +10680,7 @@ export const generatedRouteInventory = [
   {
     "module": "@/pages/portal/lohndienste",
     "path": "portal/lohndienste",
-    "source": "navigation"
+    "source": "alias"
   },
   {
     "module": "@/pages/portal/lohndienste",
@@ -10695,7 +10695,7 @@ export const generatedRouteInventory = [
   {
     "module": "@/pages/portal/onboarding",
     "path": "portal/onboarding",
-    "source": "navigation"
+    "source": "alias"
   },
   {
     "module": "@/pages/portal/index",
@@ -10705,7 +10705,7 @@ export const generatedRouteInventory = [
   {
     "module": "@/pages/portal/preisspiegel",
     "path": "portal/preisspiegel",
-    "source": "navigation"
+    "source": "alias"
   },
   {
     "module": "@/pages/portal/index",
@@ -10735,7 +10735,7 @@ export const generatedRouteInventory = [
   {
     "module": "@/pages/portal/whatsapp-simulator",
     "path": "portal/whatsapp-simulator",
-    "source": "navigation"
+    "source": "alias"
   },
   {
     "module": "@/pages/portal/zertifikate",

@@ -49,7 +49,7 @@ export default function DebitorenPage(): JSX.Element {
         const faellig = new Date(op.faelligkeit)
         const ueberfaellig = faellig < new Date()
         return (
-          <span className={ueberfaellig ? 'font-semibold text-red-600' : ''}>
+          <span className={ueberfaellig ? 'font-semibold text-status-error' : ''}>
             {faellig.toLocaleDateString('de-DE')}
           </span>
         )
@@ -125,8 +125,8 @@ export default function DebitorenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">
+              <Euro className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtOffen)}
               </span>
             </div>
@@ -138,7 +138,7 @@ export default function DebitorenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Überfällig</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{ueberfaellig}</span>
+            <span className="text-2xl font-bold text-status-error">{ueberfaellig}</span>
           </CardContent>
         </Card>
 
@@ -147,7 +147,7 @@ export default function DebitorenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">In Mahnung</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{mahnungen}</span>
+            <span className="text-2xl font-bold text-status-error">{mahnungen}</span>
           </CardContent>
         </Card>
       </div>

@@ -107,7 +107,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
   }
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Lade Checkliste...</div>
-  if (error) return <div className="p-6 text-sm text-red-600">Checkliste konnte nicht geladen werden.</div>
+  if (error) return <div className="p-6 text-sm text-status-error">Checkliste konnte nicht geladen werden.</div>
 
   const openRequiredItems = checklist.required_items - checklist.completed_required_items
   const openItems = checklist.total_items - checklist.completed_items
@@ -200,7 +200,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
             >
               <div className="flex items-center gap-3">
                 {item.status === 'completed' ? (
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-status-success" />
                 ) : (
                   <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
                 )}

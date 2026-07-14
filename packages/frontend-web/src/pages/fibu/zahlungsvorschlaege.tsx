@@ -152,7 +152,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
       render: (vorschlag: Zahlungsvorschlag) =>
         vorschlag.skonto > 0 ? (
           <div className="text-sm">
-            <div className="font-semibold text-green-600">{vorschlag.skonto}%</div>
+            <div className="font-semibold text-status-success">{vorschlag.skonto}%</div>
             <div className="text-muted-foreground">
               bis {new Date(vorschlag.skontoBis).toLocaleDateString('de-DE')}
             </div>
@@ -166,7 +166,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
       label: 'Ersparnis',
       render: (vorschlag: Zahlungsvorschlag) =>
         vorschlag.skonto > 0 ? (
-          <span className="font-semibold text-green-600">
+          <span className="font-semibold text-status-success">
             {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
               (vorschlag.betrag * vorschlag.skonto) / 100
             )}
@@ -240,8 +240,8 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <TrendingDown className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
                   skontoErsparnis
                 )}

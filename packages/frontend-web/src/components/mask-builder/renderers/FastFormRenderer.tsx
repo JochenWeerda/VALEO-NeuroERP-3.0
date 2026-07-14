@@ -63,7 +63,7 @@ const FastFieldItem = memo(function FastFieldItem({
         {fieldErrors.map((err) => (
           <p
             key={err.message}
-            className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-yellow-600'}`}
+            className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-status-warning'}`}
             role="alert"
             data-field-error={field.key}
           >
@@ -86,7 +86,7 @@ const FastFieldItem = memo(function FastFieldItem({
       {fieldErrors.map((err) => (
         <p
           key={err.message}
-          className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-yellow-600'}`}
+          className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-status-warning'}`}
           role="alert"
           data-field-error={field.key}
         >

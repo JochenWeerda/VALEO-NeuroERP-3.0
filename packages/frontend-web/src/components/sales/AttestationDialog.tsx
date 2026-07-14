@@ -89,7 +89,7 @@ export function AttestationDialog({
 
           <div className="space-y-2">
             <Label htmlFor="reason" className="text-sm font-medium">
-              Begründung <span className="text-red-500">*</span>
+              Begründung <span className="text-status-error">*</span>
             </Label>
             <Textarea
               id="reason"
@@ -103,7 +103,7 @@ export function AttestationDialog({
               className={error ? 'border-red-500' : ''}
             />
             {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-sm text-status-error">{error}</p>
             )}
             <p className="text-xs text-muted-foreground">
               Mindestens 10 Zeichen erforderlich. Diese Begründung wird im Audit-Log gespeichert.

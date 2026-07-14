@@ -291,7 +291,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
     return (
       <div className="p-6">
         <ModuleToolbar backTarget="/waage/wiegungen" closeTarget="/waage/wiegungen" title="Wiegeschein" />
-        <div className="mt-8 text-center text-red-600">Wiegeschein konnte nicht geladen werden.</div>
+        <div className="mt-8 text-center text-status-error">Wiegeschein konnte nicht geladen werden.</div>
       </div>
     )
   }

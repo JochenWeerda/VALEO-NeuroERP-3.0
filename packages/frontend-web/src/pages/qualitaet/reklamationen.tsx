@@ -216,18 +216,18 @@ export default function ReklamationenPage(): JSX.Element {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Neu</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold text-red-600">{neu}</span></CardContent>
+            <CardContent><span className="text-2xl font-bold text-status-error">{neu}</span></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-orange-600">{list.filter((r) => r.status === 'in-bearbeitung').length}</span>
+              <span className="text-2xl font-bold text-status-warning">{list.filter((r) => r.status === 'in-bearbeitung').length}</span>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Geloest</CardTitle></CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-green-600">{list.filter((r) => r.status === 'geloest').length}</span>
+              <span className="text-2xl font-bold text-status-success">{list.filter((r) => r.status === 'geloest').length}</span>
             </CardContent>
           </Card>
         </div>

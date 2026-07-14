@@ -112,7 +112,7 @@ export default function PortalZertifikate() {
       {/* Warnung bei auslaufenden Zertifikaten */}
       {auslaufendeZertifikate > 0 && (
         <Alert className="border-amber-200 bg-amber-50">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertCircle className="h-4 w-4 text-status-warning" />
           <AlertTitle className="text-amber-800">Zertifikate laufen bald aus</AlertTitle>
           <AlertDescription className="text-amber-700">
             {auslaufendeZertifikate} Zertifikat(e) laufen in den nächsten Wochen aus.
@@ -126,7 +126,7 @@ export default function PortalZertifikate() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -139,7 +139,7 @@ export default function PortalZertifikate() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>

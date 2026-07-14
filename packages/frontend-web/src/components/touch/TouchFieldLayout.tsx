@@ -97,7 +97,7 @@ export function TouchCardGroup({ label, children, required }: TouchCardGroupProp
     <div className="space-y-2">
       <p className="text-base font-medium text-slate-700">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ml-1 text-status-error">*</span>}
       </p>
       <div className="space-y-2">{children}</div>
     </div>
@@ -139,7 +139,7 @@ export function TouchNumericInput({
     <div className={cn('space-y-1', className)}>
       <label htmlFor={inputId} className="block text-base font-medium text-slate-700">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ml-1 text-status-error">*</span>}
       </label>
       <div className="relative flex items-center">
         <input
@@ -198,7 +198,7 @@ export function TouchToggle({
       {label && (
         <p className="text-base font-medium text-slate-700">
           {label}
-          {required && <span className="ml-1 text-red-500">*</span>}
+          {required && <span className="ml-1 text-status-error">*</span>}
         </p>
       )}
       <div className="grid grid-cols-2 gap-3">
@@ -322,7 +322,7 @@ export function TouchTextInput({
     <div className={cn('space-y-1', className)}>
       <label htmlFor={inputId} className="block text-base font-medium text-slate-700">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ml-1 text-status-error">*</span>}
       </label>
       <input
         id={inputId}

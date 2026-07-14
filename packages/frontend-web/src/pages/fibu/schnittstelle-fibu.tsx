@@ -347,7 +347,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
 
           {/* Fehler */}
           {error && (
-            <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">
+            <div className="flex items-start gap-2 text-status-error text-sm bg-red-50 border border-red-200 rounded p-3">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>

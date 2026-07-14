@@ -196,8 +196,8 @@ export function TrendIndicator({
   }
 
   const directionStyles = {
-    up: 'text-emerald-600',
-    down: 'text-red-600',
+    up: 'text-status-success',
+    down: 'text-status-error',
     neutral: 'text-muted-foreground',
   }
 

@@ -356,7 +356,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
         </Card>
         <Card className="p-4">
           <div className="text-xs font-semibold uppercase text-muted-foreground">Dringend</div>
-          <div className="mt-2 text-2xl font-bold text-red-600">{urgentTasks}</div>
+          <div className="mt-2 text-2xl font-bold text-status-error">{urgentTasks}</div>
         </Card>
         <Card className="p-4">
           <div className="text-xs font-semibold uppercase text-muted-foreground">In Bearbeitung</div>

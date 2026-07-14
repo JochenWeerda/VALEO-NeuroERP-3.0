@@ -35,8 +35,8 @@ function LoadingSkeleton(): JSX.Element {
 function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => void }): JSX.Element {
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center">
-      <AlertTriangle className="mb-4 h-12 w-12 text-red-500" />
-      <h2 className="mb-2 text-xl font-semibold text-red-600">Backend nicht erreichbar</h2>
+      <AlertTriangle className="mb-4 h-12 w-12 text-status-error" />
+      <h2 className="mb-2 text-xl font-semibold text-status-error">Backend nicht erreichbar</h2>
       <p className="mb-4 text-muted-foreground">
         {error?.message || 'Die Dokumenten-Daten konnten nicht geladen werden.'}
       </p>

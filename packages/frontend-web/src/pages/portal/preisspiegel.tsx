@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Getreidekurs-Preisspiegel
  *
  * Zeigt dem Ackerbauer seine Erntefrüchte mit allen 4 Preisvarianten:
@@ -163,7 +163,7 @@ export default function PreisspiedelPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-green-600" />
+            <TrendingUp className="h-6 w-6 text-status-success" />
             Getreidekurse
           </h1>
           <p className="text-gray-500 text-sm mt-1">

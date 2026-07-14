@@ -251,7 +251,7 @@ export default function WechselkursePage(): JSX.Element {
                           onClick={() => deleteRate.mutate(r.id)}
                           disabled={deleteRate.isPending}
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-status-error" />
                         </Button>
                       </td>
                     </tr>

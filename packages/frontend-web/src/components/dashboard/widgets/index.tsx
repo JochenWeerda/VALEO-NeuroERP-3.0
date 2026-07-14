@@ -211,7 +211,7 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
           <div
             className={clsx(
               'flex items-center text-xs mt-1',
-              isPositive ? 'text-green-600' : 'text-red-600'
+              isPositive ? 'text-status-success' : 'text-status-error'
             )}
           >
             {isPositive ? (
@@ -300,9 +300,9 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
   }
 
   const statusColors = {
-    success: 'text-green-600 bg-green-100',
-    warning: 'text-amber-600 bg-amber-100',
-    error: 'text-red-600 bg-red-100',
+    success: 'text-status-success bg-green-100',
+    warning: 'text-status-warning bg-amber-100',
+    error: 'text-status-error bg-red-100',
   }
 
   return (

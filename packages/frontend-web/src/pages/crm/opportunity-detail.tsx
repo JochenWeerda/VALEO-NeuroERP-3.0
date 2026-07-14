@@ -329,11 +329,11 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
                 <div className="font-medium">{stringValue(entry.field_name)}</div>
                 <div className="text-sm text-muted-foreground mt-1">
                   {Boolean(entry.old_value) && (
-                    <span className="line-through text-red-600">{stringValue(entry.old_value)}</span>
+                    <span className="line-through text-status-error">{stringValue(entry.old_value)}</span>
                   )}
                   {Boolean(entry.old_value) && Boolean(entry.new_value) && ' -> '}
                   {Boolean(entry.new_value) && (
-                    <span className="text-green-600">{stringValue(entry.new_value)}</span>
+                    <span className="text-status-success">{stringValue(entry.new_value)}</span>
                   )}
                 </div>
                 {Boolean(entry.change_reason) && (

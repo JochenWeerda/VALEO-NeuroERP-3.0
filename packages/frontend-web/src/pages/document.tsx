@@ -49,11 +49,11 @@ const documentRoleProfiles = [
 function getFileIcon(type: string) {
   switch (type.toLowerCase()) {
     case 'pdf':
-      return <FileText className="h-5 w-5 text-red-500" />
+      return <FileText className="h-5 w-5 text-status-error" />
     case 'xlsx':
     case 'xls':
     case 'csv':
-      return <FileSpreadsheet className="h-5 w-5 text-green-600" />
+      return <FileSpreadsheet className="h-5 w-5 text-status-success" />
     case 'jpg':
     case 'jpeg':
     case 'png':
@@ -418,7 +418,7 @@ export default function DocumentPanel(): JSX.Element {
       {/* DMS Status Alert */}
       {dmsConnected && (
         <Alert className="bg-green-50 border-green-200">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <CheckCircle2 className="h-4 w-4 text-status-success" />
           <AlertTitle className="text-green-800">DMS verbunden</AlertTitle>
           <AlertDescription className="text-green-700">
             Paperless-ngx Dokumentenmanagement ist aktiv. Dokumente werden automatisch per OCR verarbeitet.
@@ -528,7 +528,7 @@ export default function DocumentPanel(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Shield className="h-4 w-4 text-green-600" />
+              <Shield className="h-4 w-4 text-status-success" />
               Zertifikate
             </CardTitle>
           </CardHeader>
@@ -536,15 +536,15 @@ export default function DocumentPanel(): JSX.Element {
             <ul className="space-y-2 text-sm">
               <li className="flex justify-between">
                 <span>ISO 9001:2015</span>
-                <Badge variant="outline" className="text-green-600">Gültig</Badge>
+                <Badge variant="outline" className="text-status-success">Gültig</Badge>
               </li>
               <li className="flex justify-between">
                 <span>GMP+ B1</span>
-                <Badge variant="outline" className="text-green-600">Gültig</Badge>
+                <Badge variant="outline" className="text-status-success">Gültig</Badge>
               </li>
               <li className="flex justify-between">
                 <span>QS-Zertifikat</span>
-                <Badge variant="outline" className="text-green-600">Gültig</Badge>
+                <Badge variant="outline" className="text-status-success">Gültig</Badge>
               </li>
             </ul>
           </CardContent>
@@ -578,7 +578,7 @@ export default function DocumentPanel(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-amber-600" />
+              <CheckCircle2 className="h-4 w-4 text-status-warning" />
               Prüfberichte
             </CardTitle>
           </CardHeader>
@@ -586,15 +586,15 @@ export default function DocumentPanel(): JSX.Element {
             <ul className="space-y-2 text-sm">
               <li className="flex justify-between">
                 <span>Internes Audit Q4/2024</span>
-                <Badge variant="outline" className="text-green-600">Bestanden</Badge>
+                <Badge variant="outline" className="text-status-success">Bestanden</Badge>
               </li>
               <li className="flex justify-between">
                 <span>Lieferantenaudit</span>
-                <Badge variant="outline" className="text-green-600">Bestanden</Badge>
+                <Badge variant="outline" className="text-status-success">Bestanden</Badge>
               </li>
               <li className="flex justify-between">
                 <span>Kundenaudit</span>
-                <Badge variant="outline" className="text-amber-600">Offen</Badge>
+                <Badge variant="outline" className="text-status-warning">Offen</Badge>
               </li>
             </ul>
           </CardContent>

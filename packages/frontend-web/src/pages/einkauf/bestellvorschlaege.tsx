@@ -205,7 +205,7 @@ export default function BestellvorschlaegePage(): JSX.Element {
       label: 'Bestand',
       render: (vorschlag: Bestellvorschlag) => (
         <div className="text-sm">
-          <div className={vorschlag.aktuellBestand < vorschlag.mindestbestand ? 'font-semibold text-red-600' : ''}>
+          <div className={vorschlag.aktuellBestand < vorschlag.mindestbestand ? 'font-semibold text-status-error' : ''}>
             Aktuell: {vorschlag.aktuellBestand}
           </div>
           <div className="text-muted-foreground">Mindest: {vorschlag.mindestbestand}</div>
@@ -282,7 +282,7 @@ export default function BestellvorschlaegePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{selected.size}</span>
             </div>
           </CardContent>

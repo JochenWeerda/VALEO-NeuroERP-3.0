@@ -116,7 +116,7 @@ function FixingForm({ kontrakt, position, einheit, defaultPraemie }: {
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {menge && preis ? `Effektiv ≈ ${(preisNum + (praemie === '' ? 0 : Number(praemie))).toFixed(2)} / ${einheit}` : 'Menge + MATIF-Preis eingeben'}
-            {mengeNum > offen && <span className="text-red-600 ml-2">Menge übersteigt offene {offen} {einheit}</span>}
+            {mengeNum > offen && <span className="text-status-error ml-2">Menge übersteigt offene {offen} {einheit}</span>}
           </span>
           <Button size="sm" onClick={submit} disabled={!valid || create.isPending}>
             {create.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Lock size={14} className="mr-1" />}

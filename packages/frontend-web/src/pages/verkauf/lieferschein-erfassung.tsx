@@ -1917,7 +1917,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0 text-amber-600 ml-auto"
+            className="h-6 w-6 p-0 text-status-warning ml-auto"
             onClick={() => setVorgaengerCount(0)}
           >
             <X className="h-3 w-3" />
@@ -2451,7 +2451,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-red-600 hover:text-red-700"
+                          className="h-7 w-7 text-status-error hover:text-red-700"
                           title="Position löschen"
                           onClick={() => handleDeletePosition(idx)}
                           disabled={state.status !== 'draft'}
@@ -2883,7 +2883,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-red-600" onClick={() => setShowDeleteDialog(true)}>
+          <Button variant="outline" size="sm" className="gap-2 text-status-error" onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
             LS löschen
           </Button>

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -334,7 +334,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
       key: 'balance' as const,
       label: 'Saldo',
       render: (account: Account) => (
-        <div className={`font-mono text-right ${account.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className={`font-mono text-right ${account.balance >= 0 ? 'text-status-success' : 'text-status-error'}`}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: account.currency || 'EUR' }).format(account.balance)}
         </div>
       ),
@@ -388,7 +388,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
     return (
       <div className="space-y-4 p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Fehler beim Laden der Konten</h1>
+          <h1 className="text-2xl font-bold text-status-error">Fehler beim Laden der Konten</h1>
           <p className="text-muted-foreground">{error instanceof Error ? error.message : 'Unbekannter Fehler'}</p>
         </div>
       </div>
@@ -422,7 +422,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   value={createForm.account_number}
                   onChange={(event) => handleCreateField('account_number', event.target.value)}
                 />
-                {createErrors.account_number ? <p className="text-sm text-red-500">{createErrors.account_number}</p> : null}
+                {createErrors.account_number ? <p className="text-sm text-status-error">{createErrors.account_number}</p> : null}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="create-account-name">{t('crud.fields.accountName')} *</Label>
@@ -432,7 +432,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   value={createForm.account_name}
                   onChange={(event) => handleCreateField('account_name', event.target.value)}
                 />
-                {createErrors.account_name ? <p className="text-sm text-red-500">{createErrors.account_name}</p> : null}
+                {createErrors.account_name ? <p className="text-sm text-status-error">{createErrors.account_name}</p> : null}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="create-account-type">{t('crud.fields.accountType')} *</Label>
@@ -441,7 +441,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
               <div className="space-y-2">
                 <Label htmlFor="create-account-category">{t('crud.fields.accountCategory')} *</Label>
                 <NativeSelect id="create-account-category" value={createForm.category} onValueChange={(value) => handleCreateField('category', value)} options={categoryOptions} />
-                {createErrors.category ? <p className="text-sm text-red-500">{createErrors.category}</p> : null}
+                {createErrors.category ? <p className="text-sm text-status-error">{createErrors.category}</p> : null}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="create-account-currency">Waehrung</Label>
@@ -451,7 +451,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   value={createForm.currency}
                   onChange={(event) => handleCreateField('currency', event.target.value.toUpperCase())}
                 />
-                {createErrors.currency ? <p className="text-sm text-red-500">{createErrors.currency}</p> : null}
+                {createErrors.currency ? <p className="text-sm text-status-error">{createErrors.currency}</p> : null}
               </div>
               <div className="flex items-center justify-between rounded-md border p-3">
                 <div>
@@ -481,11 +481,11 @@ export default function ChartOfAccountsPage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-6">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Building2 className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{stats.total}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeAsset')}</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-600" /><span className="text-2xl font-bold">{stats.assets}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeLiability')}</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingDown className="h-5 w-5 text-red-600" /><span className="text-2xl font-bold">{stats.liabilities}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeAsset')}</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-status-success" /><span className="text-2xl font-bold">{stats.assets}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeLiability')}</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingDown className="h-5 w-5 text-status-error" /><span className="text-2xl font-bold">{stats.liabilities}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Eigenkapital</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><DollarSign className="h-5 w-5 text-purple-600" /><span className="text-2xl font-bold">{stats.equity}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Erloese</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{stats.revenue}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aufwendungen</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingDown className="h-5 w-5 text-orange-600" /><span className="text-2xl font-bold">{stats.expenses}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aufwendungen</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingDown className="h-5 w-5 text-status-warning" /><span className="text-2xl font-bold">{stats.expenses}</span></div></CardContent></Card>
       </div>
 
       <Card>
@@ -560,7 +560,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
             <div className="space-y-2">
               <Label htmlFor="update-account-name">{t('crud.fields.accountName')} *</Label>
               <Input id="update-account-name" value={updateForm.account_name} onChange={(event) => handleUpdateField('account_name', event.target.value)} />
-              {updateErrors.account_name ? <p className="text-sm text-red-500">{updateErrors.account_name}</p> : null}
+              {updateErrors.account_name ? <p className="text-sm text-status-error">{updateErrors.account_name}</p> : null}
             </div>
             <div className="space-y-2">
               <Label htmlFor="update-account-type">{t('crud.fields.accountType')} *</Label>
@@ -569,12 +569,12 @@ export default function ChartOfAccountsPage(): JSX.Element {
             <div className="space-y-2">
               <Label htmlFor="update-account-category">{t('crud.fields.accountCategory')} *</Label>
               <NativeSelect id="update-account-category" value={updateForm.category} onValueChange={(value) => handleUpdateField('category', value)} options={categoryOptions} />
-              {updateErrors.category ? <p className="text-sm text-red-500">{updateErrors.category}</p> : null}
+              {updateErrors.category ? <p className="text-sm text-status-error">{updateErrors.category}</p> : null}
             </div>
             <div className="space-y-2">
               <Label htmlFor="update-account-currency">Waehrung</Label>
               <Input id="update-account-currency" maxLength={3} value={updateForm.currency} onChange={(event) => handleUpdateField('currency', event.target.value.toUpperCase())} />
-              {updateErrors.currency ? <p className="text-sm text-red-500">{updateErrors.currency}</p> : null}
+              {updateErrors.currency ? <p className="text-sm text-status-error">{updateErrors.currency}</p> : null}
             </div>
             <div className="flex items-center justify-between rounded-md border p-3">
               <div>

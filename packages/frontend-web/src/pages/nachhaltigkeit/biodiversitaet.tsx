@@ -103,7 +103,7 @@ export default function BiodiversitaetPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-green-600" />
+              <Leaf className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">
                 {totalCo2eT.toLocaleString('de-DE', { maximumFractionDigits: 2 })} t
               </span>
@@ -117,7 +117,7 @@ export default function BiodiversitaetPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Flower2 className="h-5 w-5 text-green-600" />
+              <Flower2 className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">
                 {agrarCo2e.toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg
               </span>
@@ -190,7 +190,7 @@ export default function BiodiversitaetPage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-status-success" />
               Agrarbezogene Emissionskategorien
             </CardTitle>
           </CardHeader>

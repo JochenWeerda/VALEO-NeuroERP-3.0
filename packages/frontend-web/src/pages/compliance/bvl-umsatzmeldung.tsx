@@ -126,7 +126,7 @@ export default function BVLUmsatzmeldungPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">BVL-Meldung bereit</h3>
             <dl className="grid gap-3">

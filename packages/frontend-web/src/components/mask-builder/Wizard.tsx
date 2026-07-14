@@ -106,7 +106,7 @@ const Wizard: React.FC<WizardProps> = ({
       <div key={fieldName} className="space-y-2">
         <Label htmlFor={fieldName}>
           {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-status-error ml-1">*</span>}
         </Label>
 
         <Controller
@@ -211,7 +211,7 @@ const Wizard: React.FC<WizardProps> = ({
         />
 
         {error && (
-          <p className="text-sm text-red-600 flex items-center gap-1">
+          <p className="text-sm text-status-error flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
             {error}
           </p>

@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -170,7 +170,7 @@ export default function SteuerschluesselPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           {isLoading && <p className="text-muted-foreground text-sm">Lade Steuerschluessel...</p>}
-          {isError && <p className="text-red-600 text-sm">Fehler beim Laden der Steuerschluessel.</p>}
+          {isError && <p className="text-status-error text-sm">Fehler beim Laden der Steuerschluessel.</p>}
           {!isLoading && !isError && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

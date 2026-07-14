@@ -54,7 +54,7 @@ export default function KreditlinienPage(): JSX.Element {
       key: 'bonitaet' as const,
       label: 'Bonität',
       render: (k: Kreditlinie) => {
-        const colors = { A: 'text-green-600', B: 'text-blue-600', C: 'text-orange-600', D: 'text-red-600' }
+        const colors = { A: 'text-status-success', B: 'text-blue-600', C: 'text-status-warning', D: 'text-status-error' }
         return <span className={`text-2xl font-bold ${colors[k.bonitaet]}`}>{k.bonitaet}</span>
       },
     },
@@ -83,7 +83,7 @@ export default function KreditlinienPage(): JSX.Element {
       key: 'verfuegbar' as const,
       label: 'Verfügbar',
       render: (k: Kreditlinie) => (
-        <span className={k.verfuegbar < 10000 ? 'font-semibold text-red-600' : 'font-semibold text-green-600'}>
+        <span className={k.verfuegbar < 10000 ? 'font-semibold text-status-error' : 'font-semibold text-status-success'}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.verfuegbar)}
         </span>
       ),
@@ -93,7 +93,7 @@ export default function KreditlinienPage(): JSX.Element {
       label: 'Überfällig',
       render: (k: Kreditlinie) =>
         k.ueberfaellig > 0 ? (
-          <span className="font-semibold text-red-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.ueberfaellig)}</span>
+          <span className="font-semibold text-status-error">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.ueberfaellig)}</span>
         ) : (
           <span className="text-muted-foreground">–</span>
         ),
@@ -228,7 +228,7 @@ export default function KreditlinienPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ausgenutzt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAusgenutzt)}</span>
+            <span className="text-2xl font-bold text-status-warning">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAusgenutzt)}</span>
           </CardContent>
         </Card>
 
@@ -237,7 +237,7 @@ export default function KreditlinienPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Verfügbar</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtVerfuegbar)}</span>
+            <span className="text-2xl font-bold text-status-success">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtVerfuegbar)}</span>
           </CardContent>
         </Card>
       </div>

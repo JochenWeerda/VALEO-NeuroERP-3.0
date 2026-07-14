@@ -1,4 +1,4 @@
-﻿import { useNavigate } from '@/app/routing/typed-router'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useDisposition, type DispoPosition } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -48,7 +48,7 @@ export default function DispositionPage(): JSX.Element {
       key: 'bestand' as const,
       label: 'Bestand',
       render: (d: DispoPosition) => (
-        <span className={d.bestand < d.mindestbestand ? 'font-semibold text-red-600' : ''}>
+        <span className={d.bestand < d.mindestbestand ? 'font-semibold text-status-error' : ''}>
           {d.bestand} t
         </span>
       ),
@@ -61,9 +61,9 @@ export default function DispositionPage(): JSX.Element {
       render: (d: DispoPosition) => (
         <div className="flex items-center gap-2">
           {d.bedarf > 0 ? (
-            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertTriangle className="h-4 w-4 text-status-warning" />
           ) : (
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-status-success" />
           )}
           <span>{d.empfehlung}</span>
         </div>
@@ -121,7 +121,7 @@ export default function DispositionPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Unter Mindestbestand</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{unterMindest}</span>
+            <span className="text-2xl font-bold text-status-error">{unterMindest}</span>
           </CardContent>
         </Card>
 
@@ -130,7 +130,7 @@ export default function DispositionPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Hohe Prioritaet</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{dispo.filter((d) => d.prioritaet === 'hoch').length}</span>
+            <span className="text-2xl font-bold text-status-warning">{dispo.filter((d) => d.prioritaet === 'hoch').length}</span>
           </CardContent>
         </Card>
 

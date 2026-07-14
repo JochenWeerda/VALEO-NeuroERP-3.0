@@ -90,7 +90,7 @@ export default function AnalyticsDashboard(): JSX.Element {
               <Card className="bg-linear-to-br from-emerald-50 to-white p-4 shadow-md">
                 <div className="text-sm opacity-70">{label}</div>
                 <div className="text-2xl font-bold">{valueText}</div>
-                <div className={k.delta >= 0 ? 'text-sm text-green-600' : 'text-sm text-red-600'}>{deltaText}</div>
+                <div className={k.delta >= 0 ? 'text-sm text-status-success' : 'text-sm text-status-error'}>{deltaText}</div>
               </Card>
             </div>
           )
@@ -123,7 +123,7 @@ export default function AnalyticsDashboard(): JSX.Element {
         >
           <div className="flex items-center gap-2 font-semibold">
             <span>Prognose</span>
-            {forecast?.forecast?.anomaly === true && <span className="text-xs text-red-600">ANOMALIE</span>}
+            {forecast?.forecast?.anomaly === true && <span className="text-xs text-status-error">ANOMALIE</span>}
           </div>
           <p className="mt-1 text-sm">{forecast?.summary ?? 'Keine Prognosedaten verfuegbar.'}</p>
           {(forecast?.factors?.length ?? 0) > 0 && (

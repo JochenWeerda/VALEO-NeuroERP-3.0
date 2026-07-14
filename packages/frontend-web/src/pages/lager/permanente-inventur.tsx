@@ -135,7 +135,7 @@ export default function PermanenteInventurPage() {
                       <TableCell>{p.lagerplatz ?? '—'}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.buchbestand)}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.zaehlmenge)}</TableCell>
-                      <TableCell className={`text-right font-mono ${(p.differenz ?? 0) < 0 ? 'text-red-600' : (p.differenz ?? 0) > 0 ? 'text-emerald-700' : ''}`}>{num(p.differenz)}</TableCell>
+                      <TableCell className={`text-right font-mono ${(p.differenz ?? 0) < 0 ? 'text-status-error' : (p.differenz ?? 0) > 0 ? 'text-emerald-700' : ''}`}>{num(p.differenz)}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.differenzwert_eur)}</TableCell>
                       {offen && (
                         <TableCell>

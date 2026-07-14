@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Duenger-Liste Maske
  * ListReport fuer Duenger-Uebersicht mit Filter und Suche
  */
@@ -260,7 +260,7 @@ export default function DuengerListePage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">Gefahrstoffe</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">{stats?.by_safety?.['GHS+GHS'] || 0}</div>
+                <div className="text-2xl font-bold text-status-error">{stats?.by_safety?.['GHS+GHS'] || 0}</div>
               </CardContent>
             </Card>
             <Card>

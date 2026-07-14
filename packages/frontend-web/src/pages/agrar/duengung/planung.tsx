@@ -110,7 +110,7 @@ export default function DuengungsplanungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Sprout className="h-5 w-5 text-green-600" />
+              <Sprout className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{schlaegeListe.length}</span>
             </div>
           </CardContent>
@@ -165,12 +165,12 @@ export default function DuengungsplanungPage(): JSX.Element {
                     </div>
                     <div className="rounded-lg bg-orange-50 p-3 text-center">
                       <div className="text-sm text-muted-foreground">P (Phosphor)</div>
-                      <div className="text-lg font-bold text-orange-600 mt-1">—</div>
+                      <div className="text-lg font-bold text-status-warning mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
                     <div className="rounded-lg bg-green-50 p-3 text-center">
                       <div className="text-sm text-muted-foreground">K (Kalium)</div>
-                      <div className="text-lg font-bold text-green-600 mt-1">—</div>
+                      <div className="text-lg font-bold text-status-success mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
                   </div>

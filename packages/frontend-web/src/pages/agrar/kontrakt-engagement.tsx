@@ -26,7 +26,7 @@ function DunningRow({ c, onMahnen, pending }: { c: DunningCandidate; onMahnen: (
       <td className="px-3 py-1.5"><Badge variant="outline" className="text-[10px]">{c.typ}</Badge></td>
       <td className="px-3 py-1.5">{c.party_id ?? '—'}</td>
       <td className="px-3 py-1.5 text-right"><Num v={c.offen} unit={c.einheit ?? ''} /></td>
-      <td className="px-3 py-1.5 text-right text-red-600">{c.tage_ueberfaellig} Tage</td>
+      <td className="px-3 py-1.5 text-right text-status-error">{c.tage_ueberfaellig} Tage</td>
       <td className="px-3 py-1.5 text-center">{c.letzte_mahnstufe ?? '—'}</td>
       <td className="px-3 py-1.5 text-right">
         <Button size="sm" variant="outline" onClick={onMahnen} disabled={pending}>
@@ -152,7 +152,7 @@ export default function KontraktEngagementPage() {
       <Card>
         <CardHeader className="py-3">
           <CardTitle className="text-sm flex items-center gap-2">
-            <AlertTriangle size={15} className="text-amber-600" /> Kontraktmahnung — überfällig & untererfüllt
+            <AlertTriangle size={15} className="text-status-warning" /> Kontraktmahnung — überfällig & untererfüllt
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

@@ -166,11 +166,11 @@ export default function KontraktAlarmDashboard(): JSX.Element {
 
   const alarmIcon = (type: AlarmItem['alarmType']): JSX.Element => {
     switch (type) {
-      case 'expiring': return <Clock className="h-4 w-4 text-amber-600" />
-      case 'low_rest': return <Package className="h-4 w-4 text-orange-600" />
+      case 'expiring': return <Clock className="h-4 w-4 text-status-warning" />
+      case 'low_rest': return <Package className="h-4 w-4 text-status-warning" />
       case 'matif_open': return <TrendingUp className="h-4 w-4 text-blue-600" />
       case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-fuchsia-600" />
-      case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-red-600" />
+      case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-status-error" />
       case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-rose-700" />
       case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-amber-700" />
       case 'print_missing': return <Package className="h-4 w-4 text-slate-700" />
@@ -210,7 +210,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
       </div>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <AlertTriangle className="h-5 w-5 text-status-warning" />
           Kontrakt-Alarme
         </h1>
         <Button variant="outline" onClick={() => navigate('/kontrakte')}>Zur Kontraktliste</Button>
@@ -220,7 +220,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-4 w-4 text-amber-600" />
+              <Clock className="h-4 w-4 text-status-warning" />
               Ablaufende Kontrakte
             </CardTitle>
           </CardHeader>
@@ -233,7 +233,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Package className="h-4 w-4 text-orange-600" />
+              <Package className="h-4 w-4 text-status-warning" />
               Niedrige Restmenge
             </CardTitle>
           </CardHeader>
@@ -272,7 +272,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertTriangle className="h-4 w-4 text-status-error" />
               Mahnfaellige
             </CardTitle>
           </CardHeader>

@@ -123,7 +123,7 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
   if (state === 'unsupported') {
     return (
       <div className={`flex flex-col items-center gap-3 rounded-lg border border-orange-300 bg-orange-50 p-6 text-center ${className ?? ''}`} role="alert">
-        <CameraOff className="h-10 w-10 text-orange-500" aria-hidden="true" />
+        <CameraOff className="h-10 w-10 text-status-warning" aria-hidden="true" />
         <p className="font-medium text-orange-900">Scanner nicht verfügbar</p>
         <p className="text-sm text-orange-700">
           Dieser Browser unterstützt die BarcodeDetector Web API nicht.
@@ -158,7 +158,7 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
       </div>
 
       {state === 'error' && (
-        <p role="alert" className="text-sm text-red-600">{errorMsg}</p>
+        <p role="alert" className="text-sm text-status-error">{errorMsg}</p>
       )}
 
       <Button

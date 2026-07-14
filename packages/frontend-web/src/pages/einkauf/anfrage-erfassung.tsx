@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Einkauf-Anfrage-Erfassung
  * 1:1 Nachbau der zvoove ANFRAGE-Maske
  */
@@ -795,7 +795,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
             onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-red-600"
+          <Button variant="outline" size="sm" className="gap-2 text-status-error"
             onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />Anfrage löschen
           </Button>

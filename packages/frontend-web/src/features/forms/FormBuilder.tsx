@@ -173,7 +173,7 @@ export function FormBuilder<T extends Record<string, unknown>>({
               }}
             />
             {errors[field.name] !== undefined ? (
-              <span className="text-sm text-red-600">{errors[field.name]}</span>
+              <span className="text-sm text-status-error">{errors[field.name]}</span>
             ) : null}
           </div>
         ))}
@@ -193,7 +193,7 @@ export function FormBuilder<T extends Record<string, unknown>>({
           {Object.entries(errors)
             .filter(([path]) => path.startsWith(`${schema.lines?.name}.`))
             .map(([path, message]) => (
-              <div key={path} className="text-sm text-red-600">
+              <div key={path} className="text-sm text-status-error">
                 {message}
               </div>
             ))}

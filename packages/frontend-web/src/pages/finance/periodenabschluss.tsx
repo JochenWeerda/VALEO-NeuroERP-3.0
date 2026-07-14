@@ -94,7 +94,7 @@ export default function PeriodenabschlussPage() {
                           </Badge>
                         </td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{p.offen_count}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">{p.storno_inkonsistent > 0 ? <span className="text-red-600">{p.storno_inkonsistent}</span> : 0}</td>
+                        <td className="px-3 py-1.5 text-right tabular-nums">{p.storno_inkonsistent > 0 ? <span className="text-status-error">{p.storno_inkonsistent}</span> : 0}</td>
                         <td className="px-3 py-1.5">
                           {p.abschlussreif ? <span className="text-emerald-700">reif</span> : <span className="text-amber-700 inline-flex items-center gap-1"><AlertTriangle size={12} />offen</span>}
                         </td>

@@ -62,7 +62,7 @@ export default function TagesabschlussPage(): JSX.Element {
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span className="font-medium">Differenz:</span>
-                <span className={`font-bold ${abschluss.differenz === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`font-bold ${abschluss.differenz === 0 ? 'text-status-success' : 'text-status-error'}`}>
                   {abschluss.differenz > 0 ? '+' : ''}
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenz)}
                 </span>
@@ -101,7 +101,7 @@ export default function TagesabschlussPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Tagesabschluss bereit</h3>
             <dl className="grid gap-3">

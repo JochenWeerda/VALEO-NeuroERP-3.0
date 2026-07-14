@@ -650,7 +650,7 @@ export default function BestellungStammPage(): JSX.Element {
             {data?.status === 'FREIGEGEBEN' && (
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5" />
                   <div className="text-sm text-yellow-800">
                     {t('crud.dialogs.cancel.warning')}
                   </div>
@@ -819,7 +819,7 @@ export default function BestellungStammPage(): JSX.Element {
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <AlertTriangle className="h-5 w-5 text-status-warning mt-0.5" />
               <div>
                 <div className="font-semibold text-yellow-800 mb-1">
                   {t('crud.messages.approvalRequired')}

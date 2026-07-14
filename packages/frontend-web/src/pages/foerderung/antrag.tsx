@@ -95,7 +95,7 @@ export default function FoerderantragPage(): JSX.Element {
             <div className="flex justify-between items-center">
               <div>
                 <div className="text-sm text-muted-foreground">Voraussichtliche Förderung</div>
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-status-success">
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(foerderung.betrag)}
                 </div>
               </div>
@@ -132,7 +132,7 @@ export default function FoerderantragPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Antrag bereit</h3>
             <dl className="grid gap-3">
@@ -150,7 +150,7 @@ export default function FoerderantragPage(): JSX.Element {
               </div>
               <div className="flex justify-between pt-2">
                 <dt className="font-bold">Förderbetrag</dt>
-                <dd className="font-bold text-green-600">
+                <dd className="font-bold text-status-success">
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(foerderung.betrag)}
                 </dd>
               </div>

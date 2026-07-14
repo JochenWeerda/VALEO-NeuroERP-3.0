@@ -112,7 +112,7 @@ export default function AnlagenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Kumulierte AfA</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">
+            <span className="text-2xl font-bold text-status-warning">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAfa)}
             </span>
           </CardContent>
@@ -123,7 +123,7 @@ export default function AnlagenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Buchwert Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtBuchwert)}
             </span>
           </CardContent>

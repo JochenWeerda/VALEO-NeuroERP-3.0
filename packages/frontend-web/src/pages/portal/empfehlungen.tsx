@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Personalisierte Empfehlungen (Cross-Sell Intelligence)
  *
  * Zeigt dem Kunden:
@@ -76,7 +76,7 @@ function EmpfehlungCard({ e, onGesehen }: { e: Empfehlung; onGesehen: (id: strin
                 <span className="font-semibold text-gray-900">{e.titel}</span>
                 <Badge className={PRIORITAET_FARBE[e.prioritaet]}>{e.prioritaet}</Badge>
                 <Badge variant="outline">{cfg.badge}</Badge>
-                {e.gesehen && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                {e.gesehen && <CheckCircle2 className="h-4 w-4 text-status-success" />}
               </div>
               <p className="text-sm text-gray-600 mb-3">{e.beschreibung}</p>
               <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ export default function EmpfehlungenPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-amber-500" />
+            <Sparkles className="h-6 w-6 text-status-warning" />
             Empfehlungen für Sie
           </h1>
           <p className="text-gray-500 text-sm mt-1">

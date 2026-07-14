@@ -251,7 +251,7 @@ export default function SchlagkarteiPage(): JSX.Element {
       label: 'Kultur', 
       render: (s: Schlag) => (
         <div className="flex items-center gap-2">
-          <Leaf className="h-4 w-4 text-green-600" />
+          <Leaf className="h-4 w-4 text-status-success" />
           <Badge variant="outline">{s.kultur}</Badge>
         </div>
       )
@@ -334,7 +334,7 @@ export default function SchlagkarteiPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <MapPin className="h-8 w-8 text-green-600" />
+            <MapPin className="h-8 w-8 text-status-success" />
             Schlagkartei
           </h1>
           <p className="text-muted-foreground">
@@ -455,7 +455,7 @@ export default function SchlagkarteiPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Map className="h-4 w-4 text-green-600" />
+              <Map className="h-4 w-4 text-status-success" />
               Gesamtfläche
             </CardTitle>
           </CardHeader>
@@ -468,7 +468,7 @@ export default function SchlagkarteiPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Leaf className="h-4 w-4 text-amber-600" />
+              <Leaf className="h-4 w-4 text-status-warning" />
               Kulturen
             </CardTitle>
           </CardHeader>
@@ -616,7 +616,7 @@ export default function SchlagkarteiPage(): JSX.Element {
                   return (
                     <div key={kultur} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <Leaf className="h-5 w-5 text-green-600" />
+                        <Leaf className="h-5 w-5 text-status-success" />
                         <div>
                           <div className="font-medium">{kultur}</div>
                           <div className="text-sm text-muted-foreground">

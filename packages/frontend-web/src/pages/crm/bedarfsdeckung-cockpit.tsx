@@ -167,7 +167,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
               </CardContent>
             </Card>
             <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Bedarf/Jahr · Deckung</p><p className="text-2xl font-bold">{EUR(data.bedarf_jahr_eur_gesamt)}</p><DeckungBar pct={data.deckung_pct_gesamt} /></CardContent></Card>
-            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Realistisch gewinnbar</p><p className="text-2xl font-bold text-amber-600">{EUR(data.realistische_luecke_eur_gesamt)}</p><p className="text-[11px] text-muted-foreground">von {EUR(data.luecke_eur_gesamt)} theoret. Lücke</p></CardContent></Card>
+            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Realistisch gewinnbar</p><p className="text-2xl font-bold text-status-warning">{EUR(data.realistische_luecke_eur_gesamt)}</p><p className="text-[11px] text-muted-foreground">von {EUR(data.luecke_eur_gesamt)} theoret. Lücke</p></CardContent></Card>
             <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Geschützte Restlücke</p><p className="text-2xl font-bold text-slate-400">{EUR(data.geschuetzte_luecke_eur_gesamt)}</p><p className="text-[11px] text-muted-foreground">bewusst woanders — nicht forcieren</p></CardContent></Card>
           </div>
 

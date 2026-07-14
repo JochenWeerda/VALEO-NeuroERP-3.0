@@ -159,7 +159,7 @@ export default function KontaktDetailPage(): JSX.Element {
               variant="outline"
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="text-red-600 hover:text-red-700"
+              className="text-status-error hover:text-red-700"
             >
               {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Trash2 className="h-4 w-4 mr-2" />

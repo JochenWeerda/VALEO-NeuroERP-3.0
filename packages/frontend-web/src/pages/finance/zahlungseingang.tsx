@@ -64,7 +64,7 @@ function PaymentForm({ op }: { op: OpItem }) {
             </Button>
           </div>
         </div>
-        {betragNum + skontoNum > offen + 0.01 && <div className="text-xs text-red-600">Ausgleich übersteigt offenen Betrag.</div>}
+        {betragNum + skontoNum > offen + 0.01 && <div className="text-xs text-status-error">Ausgleich übersteigt offenen Betrag.</div>}
       </CardContent>
     </Card>
   )

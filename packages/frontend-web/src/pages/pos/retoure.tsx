@@ -132,10 +132,10 @@ export default function RetourePage(): JSX.Element {
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <Card className="max-w-md w-full mx-4">
           <CardContent className="pt-8 text-center">
-            <CheckCircle2 className="h-20 w-20 text-green-500 mx-auto mb-4" />
+            <CheckCircle2 className="h-20 w-20 text-status-success mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Retoure erfolgreich</h2>
             <p className="text-muted-foreground mb-1">Bon-Nr: <strong>{successData.bonNr}</strong></p>
-            <p className="text-3xl font-bold text-red-600 my-4">−{fmt(successData.gesamt)}</p>
+            <p className="text-3xl font-bold text-status-error my-4">−{fmt(successData.gesamt)}</p>
             <p className="text-sm text-muted-foreground mb-6">
               Rückerstattung via: <strong>{RUECKERSTATTUNG_LABELS[rueckerstattung]}</strong>
             </p>
@@ -213,7 +213,7 @@ export default function RetourePage(): JSX.Element {
                         onChange={(e) => updateGrund(pos.artikelnr, e.target.value)}
                         className="h-7 text-xs flex-1 mr-2"
                       />
-                      <span className="text-sm font-bold text-red-600 whitespace-nowrap">−{fmt(pos.einzelpreis * pos.menge)}</span>
+                      <span className="text-sm font-bold text-status-error whitespace-nowrap">−{fmt(pos.einzelpreis * pos.menge)}</span>
                     </div>
                   </div>
                 ))
@@ -277,7 +277,7 @@ export default function RetourePage(): JSX.Element {
                 <span className="text-sm text-muted-foreground">{positionen.length} Position(en)</span>
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">Rückerstattungsbetrag</div>
-                  <div className="text-3xl font-bold text-red-600">−{fmt(gesamt)}</div>
+                  <div className="text-3xl font-bold text-status-error">−{fmt(gesamt)}</div>
                 </div>
               </div>
               <Button

@@ -30,25 +30,25 @@ const STATUS_CONFIG = {
     label: "OK",
     variant: "default" as const,
     icon: CheckCircle2,
-    className: "text-green-600",
+    className: "text-status-success",
   },
   warning: {
     label: "Warnung",
     variant: "secondary" as const,
     icon: AlertTriangle,
-    className: "text-yellow-600",
+    className: "text-status-warning",
   },
   faellig: {
     label: "Fällig",
     variant: "destructive" as const,
     icon: Clock,
-    className: "text-orange-600",
+    className: "text-status-warning",
   },
   fehler: {
     label: "Fehler",
     variant: "destructive" as const,
     icon: XCircle,
-    className: "text-red-600",
+    className: "text-status-error",
   },
   unbekannt: {
     label: "Unbekannt",
@@ -143,11 +143,11 @@ export default function ExterneGatesPage() {
             <div className="text-xs text-muted-foreground">Systeme gesamt</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-green-600">{summary["ok"] ?? 0}</div>
+            <div className="text-2xl font-bold text-status-success">{summary["ok"] ?? 0}</div>
             <div className="text-xs text-muted-foreground">OK</div>
           </Card>
           <Card className="text-center p-4">
-            <div className={`text-2xl font-bold ${problemCount > 0 ? "text-orange-600" : "text-muted-foreground"}`}>
+            <div className={`text-2xl font-bold ${problemCount > 0 ? "text-status-warning" : "text-muted-foreground"}`}>
               {problemCount}
             </div>
             <div className="text-xs text-muted-foreground">Handlungsbedarf</div>

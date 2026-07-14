@@ -223,7 +223,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
       </div>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold flex items-center gap-2">
-          <ShieldAlert className="h-5 w-5 text-red-600" />
+          <ShieldAlert className="h-5 w-5 text-status-error" />
           Rohwaren-Positionsmonitor
         </h1>
         <div className="flex items-center gap-3">
@@ -243,7 +243,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
       {critical && (
         <Card className="border-red-300 bg-red-50">
           <CardContent className="flex items-center gap-4 py-4">
-            <AlertTriangle className="h-8 w-8 text-red-600 shrink-0" />
+            <AlertTriangle className="h-8 w-8 text-status-error shrink-0" />
             <div>
               <p className="font-semibold text-red-800">
                 Kritische Unterdeckung: {critical.article_desc} ({critical.article_id})
@@ -269,7 +269,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldAlert className="h-4 w-4 text-red-600" />
+              <ShieldAlert className="h-4 w-4 text-status-error" />
               Short (unterdeckt)
             </CardTitle>
           </CardHeader>
@@ -282,7 +282,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck className="h-4 w-4 text-green-600" />
+              <ShieldCheck className="h-4 w-4 text-status-success" />
               Long (ueberdeckt)
             </CardTitle>
           </CardHeader>
@@ -309,9 +309,9 @@ export default function KontraktPositionsmonitor(): JSX.Element {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               {(critical?.spread ?? 0) >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-green-600" />
+                <TrendingUp className="h-4 w-4 text-status-success" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-600" />
+                <TrendingDown className="h-4 w-4 text-status-error" />
               )}
               Krit. Spread
             </CardTitle>
@@ -437,7 +437,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
                     <TableCell className={`text-right font-bold font-mono ${p.net_position < 0 ? 'text-red-700' : p.net_position > 0 ? 'text-green-700' : ''}`}>
                       {fmt(p.net_position)}
                     </TableCell>
-                    <TableCell className={`text-right font-mono ${(p.spread ?? 0) < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <TableCell className={`text-right font-mono ${(p.spread ?? 0) < 0 ? 'text-status-error' : 'text-status-success'}`}>
                       {fmtEur(p.spread)}
                     </TableCell>
                   </TableRow>

@@ -49,7 +49,7 @@ export default function RahmenvertraegePage(): JSX.Element {
     { key: 'partner' as const, label: 'Partner' },
     { key: 'typ' as const, label: 'Typ', render: (v: Vertrag) => <Badge variant="outline">{v.typ}</Badge> },
     { key: 'artikel' as const, label: 'Artikel' },
-    { key: 'restmenge' as const, label: 'Restmenge', render: (v: Vertrag) => <span className={v.restmenge < v.menge * 0.2 ? 'font-semibold text-orange-600' : ''}>{v.restmenge} / {v.menge} t</span> },
+    { key: 'restmenge' as const, label: 'Restmenge', render: (v: Vertrag) => <span className={v.restmenge < v.menge * 0.2 ? 'font-semibold text-status-warning' : ''}>{v.restmenge} / {v.menge} t</span> },
     { key: 'laufzeitBis' as const, label: 'Laufzeit bis', render: (v: Vertrag) => new Date(v.laufzeitBis).toLocaleDateString('de-DE') },
     { key: 'status' as const, label: 'Status', render: (v: Vertrag) => <Badge variant={v.status === 'aktiv' ? 'outline' : v.status === 'auslaufend' ? 'secondary' : 'destructive'}>{v.status === 'aktiv' ? 'Aktiv' : v.status === 'auslaufend' ? 'Auslaufend' : 'Beendet'}</Badge> },
   ]
@@ -60,8 +60,8 @@ export default function RahmenvertraegePage(): JSX.Element {
       {auslaufendeVertraege.length > 0 && <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{auslaufendeVertraege.length} Vertrag/Vertraege laufen bald aus!</span></div></CardContent></Card>}
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Vertraege Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FileText className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteVertraege.length}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{gefilterteVertraege.filter((v) => v.status === 'aktiv').length}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kritische Restmenge</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{kritischeRestmengen.length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{gefilterteVertraege.filter((v) => v.status === 'aktiv').length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kritische Restmenge</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{kritischeRestmengen.length}</span></CardContent></Card>
       </div>
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2" onClick={handleExport}><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>

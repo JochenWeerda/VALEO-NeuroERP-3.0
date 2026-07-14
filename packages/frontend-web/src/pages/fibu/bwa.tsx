@@ -130,7 +130,7 @@ export default function BwaPage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">Kosten</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-2xl font-bold text-red-600">{fmtNum(totalCosts)} €</span>
+                <span className="text-2xl font-bold text-status-error">{fmtNum(totalCosts)} €</span>
               </CardContent>
             </Card>
             <Card>
@@ -138,7 +138,7 @@ export default function BwaPage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">Ergebnis</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className={`text-2xl font-bold ${netResult >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-2xl font-bold ${netResult >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                   {fmtNum(netResult)} €
                 </span>
               </CardContent>
@@ -148,7 +148,7 @@ export default function BwaPage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">Ergebnis-Quote</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className={`text-2xl font-bold ${netResult >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-2xl font-bold ${netResult >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                   {netResultPct}%
                 </span>
               </CardContent>
@@ -177,7 +177,7 @@ export default function BwaPage(): JSX.Element {
                       return (
                         <tr key={i} className={`border-b ${isTotal ? 'bg-blue-50 font-bold' : ''}`}>
                           <td className={`py-3 ${isTotal ? '' : 'pl-4'}`}>{item.description}</td>
-                          <td className={`text-right ${Number(item.current_period) < 0 ? 'text-red-600' : ''}`}>
+                          <td className={`text-right ${Number(item.current_period) < 0 ? 'text-status-error' : ''}`}>
                             {fmtNum(Number(item.current_period))}
                           </td>
                           <td className="text-right text-muted-foreground">

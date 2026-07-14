@@ -289,7 +289,7 @@ export default function WarteschlangePage(): JSX.Element {
               <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-orange-600">{inBearbeitung}</span>
+              <span className="text-2xl font-bold text-status-warning">{inBearbeitung}</span>
             </CardContent>
           </Card>
 
@@ -310,7 +310,7 @@ export default function WarteschlangePage(): JSX.Element {
               <CardTitle className="text-sm font-medium">Heute abgefertigt</CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-green-600">{abgeschlossen}</span>
+              <span className="text-2xl font-bold text-status-success">{abgeschlossen}</span>
             </CardContent>
           </Card>
         </div>

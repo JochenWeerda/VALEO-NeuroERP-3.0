@@ -142,7 +142,7 @@ export default function SchadenMeldungPage(): JSX.Element {
               {meldungMutation.isPending ? (
                 <Loader2 className="h-20 w-20 text-blue-600 animate-spin" />
               ) : (
-                <CheckCircle className="h-20 w-20 text-green-600" />
+                <CheckCircle className="h-20 w-20 text-status-success" />
               )}
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">

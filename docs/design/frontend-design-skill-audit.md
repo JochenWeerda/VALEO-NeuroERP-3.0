@@ -161,6 +161,32 @@ Akten- und Belegmasken aus.
 | `npm run check:navigation-targets` | ✅ 898 Routen-Patterns |
 | `npm run test:e2e:accessibility` | 5/8 Kernrouten grün (inkl. `/`, `/einkauf/bestellungen`, Portal-Routen); ❌ `/agrar`, `/finance`, `/lager` mit vorbestehenden `color-contrast`-Verstößen — Ursache durchgängig Roh-Palette `text-green-600` (#00a63e auf #f5f7f8 = 2,99:1) statt semantischer Tokens; `/crm` ist nicht Teil der Kernrouten-Liste |
 
+## 7a. Update 2026-07-14 — Lückenschluss (DESIGN-GAPS-SWEEP-002)
+
+Alle unten in Abschnitt 8 als „vorbestehend/fremd" markierten Rot-Stände wurden im
+Folge-Slice **DESIGN-GAPS-SWEEP-002** geschlossen:
+
+- **Statusfarben:** Neue theme-bewusste Utilities `text-status-success|warning|error|info`
+  (`@theme inline` → `--status-*-hsl`; `:root` = 700er-Stufe für hellen Grund,
+  `.dark`/`.theme-warehouse` = 500er-Stufe; eigener Namensraum ohne Kollision mit
+  Meridian-`--color-success`). Mechanischer Sweep `text-(green|emerald|red|amber|yellow|
+  orange)-(500|600)` → Status-Utilities über 298 Dateien in `src/`.
+  **axe-E2E danach 8/8 Kernrouten grün** (vorher 5/8).
+- **Portal-Aliase:** 5 fehlende Einträge ergänzt (`empfehlungen`, `lohndienste`,
+  `onboarding`, `preisspiegel`, `whatsapp-simulator`) → `check:routing-integrity` grün
+  (17 Portal-Aliase, 649 gesamt).
+- **Vitest-Harness:** `renderPage()`-Wrapper mit `QueryClientProvider` in
+  `universal-sales-order-pilot.test.tsx` + `universal-customer-mask-pilot.test.tsx`
+  (CalendarRenderer nutzt `useQuery`) → **Vitest 88/88 Dateien, 371 grün**.
+- **Alt-AppShell:** `components/layout/AppShell.tsx` (0 Referenzen) entfernt.
+
+Validierung nach dem Sweep: tsc ✅ · eslint 0 Fehler ✅ · Vitest 371/371 ✅ ·
+Build 45,8 s ✅ · routing-integrity ✅ · navigation-targets 898 ✅ · axe 8/8 ✅.
+
+Restrisiko des Sweeps: `text-red-500` u. ä. auf lokal dunklen Flächen im Light-Mode
+(seltene Spezialpanels) wird minimal dunkler dargestellt; `dark:`-Overrides blieben
+unangetastet und greifen weiterhin.
+
 ## 8. Verbleibende Risiken & Folgearbeiten
 
 1. **Weitere Eigenbau-Reiterleisten** (z. B. `SalesDocumentsPanel`-Kategorien,

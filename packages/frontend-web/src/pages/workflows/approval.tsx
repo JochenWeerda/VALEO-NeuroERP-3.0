@@ -150,7 +150,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
-                    <Euro className="h-5 w-5 text-green-600" />
+                    <Euro className="h-5 w-5 text-status-success" />
                     <span className="text-2xl font-bold">
                       {new Intl.NumberFormat('de-DE', { 
                         style: 'currency', 
@@ -168,7 +168,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-orange-600" />
+                    <Clock className="h-5 w-5 text-status-warning" />
                     <span className="text-lg font-semibold">
                       {new Date(proposal.created_at).toLocaleTimeString('de-DE', {
                         hour: '2-digit',
@@ -301,7 +301,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
           <Card className="border-green-200 bg-green-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+                <CheckCircle className="h-8 w-8 text-status-success" />
                 <div>
                   <h3 className="font-semibold text-lg">Bestellung erstellt</h3>
                   <p className="text-sm text-muted-foreground">
@@ -318,7 +318,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
           <Card className="border-red-200 bg-red-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <XCircle className="h-8 w-8 text-red-600" />
+                <XCircle className="h-8 w-8 text-status-error" />
                 <div>
                   <h3 className="font-semibold text-lg">Vorschlag abgelehnt</h3>
                   <p className="text-sm text-muted-foreground">

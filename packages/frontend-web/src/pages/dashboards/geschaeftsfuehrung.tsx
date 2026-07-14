@@ -79,7 +79,7 @@ export default function GeschaeftsfuehrungDashboardPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Jahresertrag</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.ertrag)}
             </span>
           </CardContent>
@@ -91,8 +91,8 @@ export default function GeschaeftsfuehrungDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">+{dashboard.wachstum}%</span>
+              <TrendingUp className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">+{dashboard.wachstum}%</span>
             </div>
           </CardContent>
         </Card>
@@ -133,7 +133,7 @@ export default function GeschaeftsfuehrungDashboardPage(): JSX.Element {
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-bold">{kz.wert}</div>
-                    <div className="text-sm font-semibold text-green-600">{kz.trend}</div>
+                    <div className="text-sm font-semibold text-status-success">{kz.trend}</div>
                   </div>
                 </div>
               ))}

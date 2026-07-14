@@ -135,7 +135,7 @@ export default function PortalRechnungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                 <Euro className="h-5 w-5" />
               </div>
               <div>
@@ -150,7 +150,7 @@ export default function PortalRechnungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-red-100 p-2 text-red-600">
+              <div className="rounded-lg bg-red-100 p-2 text-status-error">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
@@ -165,7 +165,7 @@ export default function PortalRechnungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -322,11 +322,11 @@ export default function PortalRechnungen() {
                   </div>
                   {selectedRechnung.bezahltBetrag > 0 && (
                     <>
-                      <div className="flex justify-between text-emerald-600">
+                      <div className="flex justify-between text-status-success">
                         <span>Bezahlt</span>
                         <span>- € {selectedRechnung.bezahltBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="flex justify-between border-t pt-2 font-semibold text-amber-600">
+                      <div className="flex justify-between border-t pt-2 font-semibold text-status-warning">
                         <span>Noch offen</span>
                         <span>€ {(selectedRechnung.bruttobetrag - selectedRechnung.bezahltBetrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                       </div>

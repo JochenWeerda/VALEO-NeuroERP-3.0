@@ -80,8 +80,8 @@ export default function LksgPage(): JSX.Element {
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Lieferanten bewertet</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{assessments.length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">HIGH / CRITICAL</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-red-600">{highRisk}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">LOW / MEDIUM</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{assessments.length - highRisk}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">HIGH / CRITICAL</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-error">{highRisk}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">LOW / MEDIUM</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{assessments.length - highRisk}</span></CardContent></Card>
         </div>
 
         <Card>

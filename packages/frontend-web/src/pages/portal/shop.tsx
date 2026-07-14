@@ -547,7 +547,7 @@ export default function PortalShop() {
           {orderSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <Check className="h-8 w-8 text-emerald-600" />
+                <Check className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Bestellung erfolgreich!</h3>
@@ -586,7 +586,7 @@ export default function PortalShop() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 w-8 text-status-error hover:text-red-700 hover:bg-red-50"
                           onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -697,12 +697,12 @@ export default function PortalShop() {
                             {/* Kaufanreiz: Nächste günstigere Staffel */}
                             {staffelInfo.naechsteStaffel && (
                               <Alert className="py-2 border-emerald-200 bg-emerald-50">
-                                <Info className="h-4 w-4 text-emerald-600" />
+                                <Info className="h-4 w-4 text-status-success" />
                                 <AlertDescription className="text-emerald-800 text-sm">
                                   <strong>Tipp:</strong> Sie erreichen die nächst günstigere Preisstaffel ab{' '}
                                   <span className="font-bold">{staffelInfo.naechsteStaffel.abMenge} {item.einheit}</span>.
                                   <br />
-                                  <span className="text-emerald-600">
+                                  <span className="text-status-success">
                                     Ersparnis: € {formatPrice(staffelInfo.naechsteStaffel.ersparnis)}/{item.einheit}
                                   </span>
                                 </AlertDescription>
@@ -712,7 +712,7 @@ export default function PortalShop() {
                             {/* Staffel erreicht */}
                             {!staffelInfo.naechsteStaffel && staffelInfo.zuschlag === 0 && (
                               <Alert className="py-2 border-emerald-200 bg-emerald-50">
-                                <Check className="h-4 w-4 text-emerald-600" />
+                                <Check className="h-4 w-4 text-status-success" />
                                 <AlertDescription className="text-emerald-800 text-sm">
                                   <strong>Beste Staffel erreicht!</strong> Kein Mengenzuschlag.
                                 </AlertDescription>
@@ -858,7 +858,7 @@ export default function PortalShop() {
           {anfrageSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <Check className="h-8 w-8 text-emerald-600" />
+                <Check className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Anfrage gesendet!</h3>
@@ -1072,7 +1072,7 @@ function ProductCard({
                 className={cn('h-2', prePurchaseLow ? '[&>div]:bg-orange-500' : '[&>div]:bg-purple-500')} 
               />
               {prePurchaseLow && (
-                <p className="text-xs text-orange-600">Nur noch {Math.round(prePurchasePercent)}% übrig</p>
+                <p className="text-xs text-status-warning">Nur noch {Math.round(prePurchasePercent)}% übrig</p>
               )}
               <div className="space-y-1">
                 <div className="flex justify-between">
@@ -1085,7 +1085,7 @@ function ProductCard({
                 </div>
                 <div className="flex justify-between pt-1 border-t">
                   <span className="text-xs font-medium text-emerald-700">Jetzt fällig</span>
-                  <span className="text-lg font-bold text-emerald-600">€ 0,00</span>
+                  <span className="text-lg font-bold text-status-success">€ 0,00</span>
                 </div>
                 <p className="text-xs text-muted-foreground">(bei Abruf bis {prePurchaseRemaining} {product.einheit})</p>
               </div>
@@ -1106,12 +1106,12 @@ function ProductCard({
                 className={cn('h-2', contractPercent < 20 ? '[&>div]:bg-orange-500' : '[&>div]:bg-emerald-500')} 
               />
               {contractPercent < 20 && (
-                <p className="text-xs text-orange-600">Nur noch {Math.round(contractPercent)}% übrig</p>
+                <p className="text-xs text-status-warning">Nur noch {Math.round(contractPercent)}% übrig</p>
               )}
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Kontraktpreis</span>
-                  <span className="text-lg font-bold text-emerald-600">€ {formatPrice((product.contractPrice ?? product.preis))}</span>
+                  <span className="text-lg font-bold text-status-success">€ {formatPrice((product.contractPrice ?? product.preis))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Listenpreis</span>
@@ -1144,7 +1144,7 @@ function ProductCard({
                 <div className="space-y-1">
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs text-muted-foreground">Aktionspreis</span>
-                    <span className="text-lg font-bold text-emerald-600">€ {formatPrice(product.rabattPreis)}</span>
+                    <span className="text-lg font-bold text-status-success">€ {formatPrice(product.rabattPreis)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-xs text-muted-foreground">Listenpreis</span>

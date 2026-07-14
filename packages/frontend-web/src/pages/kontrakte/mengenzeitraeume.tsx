@@ -145,7 +145,7 @@ export default function KontraktMengenzeitraeumePage() {
                                   try { await deleteZeitraum.mutateAsync({ kontraktNr: aktiverKontrakt, id: z.id }); toast.success('Gelöscht.') }
                                   catch (e) { toast.error(e instanceof Error ? e.message : 'Löschen fehlgeschlagen') }
                                 }}>
-                                <Trash2 className="h-4 w-4 text-red-600" />
+                                <Trash2 className="h-4 w-4 text-status-error" />
                               </Button>
                             </TableCell>
                           </TableRow>

@@ -158,7 +158,7 @@ export default function AuftragLieferscheinAbgleichPage() {
                   <CardContent className="space-y-1.5">
                     {d.luecken.map((l, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
-                        <AlertTriangle size={15} className="mt-0.5 text-amber-600 shrink-0" />
+                        <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" />
                         <span>{l.text}</span>
                       </div>
                     ))}

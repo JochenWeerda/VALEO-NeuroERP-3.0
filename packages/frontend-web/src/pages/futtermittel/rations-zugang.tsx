@@ -169,7 +169,7 @@ function AddZugangDialog({ tenantId, open, onClose }: AddDialogProps) {
           </div>
 
           {mut.error && (
-            <p className="text-sm text-red-600 flex gap-1 items-center">
+            <p className="text-sm text-status-error flex gap-1 items-center">
               <AlertCircle className="h-4 w-4" />
               Fehler beim Speichern.
             </p>
@@ -272,7 +272,7 @@ function ShareLinkDialog({ tenantId, open, onClose }: ShareLinkDialogProps) {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            {copied && <p className="text-xs text-green-600">In Zwischenablage kopiert.</p>}
+            {copied && <p className="text-xs text-status-success">In Zwischenablage kopiert.</p>}
             {result.gueltig_bis && (
               <p className="text-xs text-muted-foreground">Gültig bis: {fmt(result.gueltig_bis)}</p>
             )}
@@ -407,7 +407,7 @@ export default function RationsZugangPage() {
                     {e.darf_lesen && <Badge variant="outline" className="text-xs">Lesen</Badge>}
                     {e.darf_rationen_anlegen && <Badge variant="outline" className="text-xs">Rationen</Badge>}
                     {e.darf_grundfutter_anlegen && <Badge variant="outline" className="text-xs">Grundfutter</Badge>}
-                    {e.darf_zugang_verwalten && <Badge variant="outline" className="text-xs text-red-600">Verwalten</Badge>}
+                    {e.darf_zugang_verwalten && <Badge variant="outline" className="text-xs text-status-error">Verwalten</Badge>}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -416,7 +416,7 @@ export default function RationsZugangPage() {
                       <CheckCircle className="h-3.5 w-3.5" /> Aktiv
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-red-600 text-xs">
+                    <span className="flex items-center gap-1 text-status-error text-xs">
                       <Ban className="h-3.5 w-3.5" /> Gesperrt
                     </span>
                   )}
@@ -432,9 +432,9 @@ export default function RationsZugangPage() {
                       }
                     >
                       {e.ist_aktiv ? (
-                        <Ban className="h-4 w-4 text-orange-500" />
+                        <Ban className="h-4 w-4 text-status-warning" />
                       ) : (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <CheckCircle className="h-4 w-4 text-status-success" />
                       )}
                     </Button>
                     <Button
@@ -446,7 +446,7 @@ export default function RationsZugangPage() {
                           delMut.mutate(e.id)
                       }}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-status-error" />
                     </Button>
                   </div>
                 </TableCell>

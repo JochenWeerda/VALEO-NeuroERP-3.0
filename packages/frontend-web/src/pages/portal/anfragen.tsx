@@ -145,7 +145,7 @@ export default function PortalAnfragen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                 <Clock className="h-5 w-5" />
               </div>
               <div>
@@ -175,7 +175,7 @@ export default function PortalAnfragen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -344,7 +344,7 @@ export default function PortalAnfragen() {
           {submitSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                <CheckCircle2 className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Anfrage gesendet!</h3>

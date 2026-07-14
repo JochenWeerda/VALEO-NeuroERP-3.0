@@ -61,9 +61,9 @@ const typConfig: Record<string, { label: string; icon: React.ReactNode; color: s
 }
 
 const formatIcons: Record<string, React.ReactNode> = {
-  pdf: <FileText className="h-8 w-8 text-red-500" />,
-  csv: <FileSpreadsheet className="h-8 w-8 text-green-500" />,
-  xlsx: <FileSpreadsheet className="h-8 w-8 text-emerald-500" />,
+  pdf: <FileText className="h-8 w-8 text-status-error" />,
+  csv: <FileSpreadsheet className="h-8 w-8 text-status-success" />,
+  xlsx: <FileSpreadsheet className="h-8 w-8 text-status-success" />,
 }
 
 export default function PortalDokumente(): JSX.Element {
@@ -166,7 +166,7 @@ export default function PortalDokumente(): JSX.Element {
         <Card className="cursor-pointer transition-all hover:shadow-md" onClick={() => setActiveTab('naehrstoff')}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                 <BarChart3 className="h-5 w-5" />
               </div>
               <div>
@@ -192,7 +192,7 @@ export default function PortalDokumente(): JSX.Element {
         <Card className="transition-all hover:shadow-md">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
@@ -242,11 +242,11 @@ export default function PortalDokumente(): JSX.Element {
         <Card>
           <CardContent className="space-y-3 p-4">
             <div className="flex items-center gap-2 font-semibold">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <ShieldCheck className="h-4 w-4 text-status-success" />
               Compliance-Spur
             </div>
             {isPsmDocsError ? (
-              <div className="text-sm text-red-600">{(psmDocsError as Error)?.message || 'PSM-Compliance nicht erreichbar'}</div>
+              <div className="text-sm text-status-error">{(psmDocsError as Error)?.message || 'PSM-Compliance nicht erreichbar'}</div>
             ) : (
               psmLieferscheine.slice(0, 3).map((entry) => (
                 <div key={entry.number} className="rounded-lg border p-3 text-sm">

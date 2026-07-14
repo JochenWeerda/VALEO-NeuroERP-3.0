@@ -218,11 +218,11 @@ export default function DuengerListePage(): JSX.Element {
                   <TableCell>{d.hersteller}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className={isZulassungAblaufend(d.ablauf_zulassung) ? 'text-red-600 font-medium' : ''}>
+                      <span className={isZulassungAblaufend(d.ablauf_zulassung) ? 'text-status-error font-medium' : ''}>
                         {new Date(d.ablauf_zulassung).toLocaleDateString('de-DE')}
                       </span>
                       {isZulassungAblaufend(d.ablauf_zulassung) && (
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <AlertTriangle className="h-4 w-4 text-status-error" />
                       )}
                     </div>
                   </TableCell>
@@ -288,19 +288,19 @@ export default function DuengerListePage(): JSX.Element {
               <div className="text-sm text-muted-foreground">Düngemittel</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-status-success">
                 {filteredDuenger.filter(d => d.ist_aktiv).length}
               </div>
               <div className="text-sm text-muted-foreground">Aktiv</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-status-warning">
                 {filteredDuenger.filter(d => d.erklaerung_landwirt_erforderlich && d.erklaerung_landwirt_status === 'ausstehend').length}
               </div>
               <div className="text-sm text-muted-foreground">Erklärungen ausstehend</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-status-error">
                 {filteredDuenger.filter(d => isZulassungAblaufend(d.ablauf_zulassung)).length}
               </div>
               <div className="text-sm text-muted-foreground">Zulassungen ablaufend</div>

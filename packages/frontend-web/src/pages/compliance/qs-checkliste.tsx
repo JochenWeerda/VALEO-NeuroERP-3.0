@@ -1,4 +1,4 @@
-﻿import { useQSCheckliste, type QSItem } from '@/lib/api/betrieb'
+import { useQSCheckliste, type QSItem } from '@/lib/api/betrieb'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -48,13 +48,13 @@ export default function QSChecklistePage(): JSX.Element {
       render: (q: QSItem) => (
         q.erfuellt ? (
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="font-semibold text-green-600">Erfuellt</span>
+            <CheckCircle className="h-5 w-5 text-status-success" />
+            <span className="font-semibold text-status-success">Erfuellt</span>
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <span className="font-semibold text-red-600">Offen</span>
+            <AlertTriangle className="h-5 w-5 text-status-error" />
+            <span className="font-semibold text-status-error">Offen</span>
           </div>
         )
       ),
@@ -168,8 +168,8 @@ export default function QSChecklistePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{erfuellt}</span>
+              <CheckCircle className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{erfuellt}</span>
             </div>
           </CardContent>
         </Card>
@@ -179,7 +179,7 @@ export default function QSChecklistePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{offen}</span>
+            <span className="text-2xl font-bold text-status-error">{offen}</span>
           </CardContent>
         </Card>
       </div>

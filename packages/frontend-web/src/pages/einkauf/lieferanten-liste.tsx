@@ -133,7 +133,7 @@ export default function LieferantenListePage(): JSX.Element {
             {isLoading ? (
               <Skeleton className="h-8 w-12" />
             ) : (
-              <span className="text-2xl font-bold text-green-600">{aktiveLieferanten.length}</span>
+              <span className="text-2xl font-bold text-status-success">{aktiveLieferanten.length}</span>
             )}
           </CardContent>
         </Card>

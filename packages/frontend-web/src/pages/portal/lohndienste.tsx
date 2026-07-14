@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Lohndienstleistungen buchen und verwalten
  *
  * Unterstützte Dienste:
@@ -187,7 +187,7 @@ export default function LohndienstePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Tractor className="h-6 w-6 text-amber-600" />
+            <Tractor className="h-6 w-6 text-status-warning" />
             Lohndienstleistungen
           </h1>
           <p className="text-gray-500 text-sm mt-1">

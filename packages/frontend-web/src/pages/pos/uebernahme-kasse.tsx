@@ -148,7 +148,7 @@ export default function UebernahmeKassePage(): JSX.Element {
 
           {/* Fehler */}
           {mutation.isError && (
-            <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">
+            <div className="flex items-start gap-2 text-status-error text-sm bg-red-50 border border-red-200 rounded p-3">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{(mutation.error as Error).message}</span>
             </div>
@@ -187,9 +187,9 @@ export default function UebernahmeKassePage(): JSX.Element {
 
               {result.errors.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-red-600">Warnungen:</p>
+                  <p className="text-xs font-semibold text-status-error">Warnungen:</p>
                   {result.errors.map((e, i) => (
-                    <p key={i} className="text-xs text-red-600">{e}</p>
+                    <p key={i} className="text-xs text-status-error">{e}</p>
                   ))}
                 </div>
               )}

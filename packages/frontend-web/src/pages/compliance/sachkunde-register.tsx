@@ -53,7 +53,7 @@ export default function SachkundeRegisterPage(): JSX.Element {
       render: (s: Sachkundenachweis) => {
         const ablauf = new Date(s.gueltigBis)
         const istAblaufend = ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-        return <span className={istAblaufend ? 'font-semibold text-orange-600' : ''}>{ablauf.toLocaleDateString('de-DE')}</span>
+        return <span className={istAblaufend ? 'font-semibold text-status-warning' : ''}>{ablauf.toLocaleDateString('de-DE')}</span>
       },
     },
     { key: 'ausstellendeStelle' as const, label: 'Ausgestellt von' },
@@ -96,9 +96,9 @@ export default function SachkundeRegisterPage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nachweise Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{sachkunde.length}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{sachkunde.filter((s) => s.status === 'gueltig').length}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laeuft ab (3 Mon.)</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{ablaufend}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgelaufen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-red-600">{sachkunde.filter((s) => s.status === 'abgelaufen').length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{sachkunde.filter((s) => s.status === 'gueltig').length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laeuft ab (3 Mon.)</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{ablaufend}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgelaufen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-error">{sachkunde.filter((s) => s.status === 'abgelaufen').length}</span></CardContent></Card>
       </div>
 
       <Card>

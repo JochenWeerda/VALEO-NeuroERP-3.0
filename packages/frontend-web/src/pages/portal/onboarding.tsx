@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Interessenten-Onboarding / Selbstregistrierung
  *
  * Öffentliche Seite (kein Login nötig).
@@ -44,10 +44,10 @@ const INTERESSE_THEMEN = [
 ]
 
 const VORTEILE = [
-  { icon: <TrendingUp className="h-5 w-5 text-green-600" />, text: 'Tagesaktuelle Getreidepreise in allen Varianten' },
-  { icon: <Tractor className="h-5 w-5 text-amber-600" />, text: 'Online-Buchung von Lohndienstleistungen' },
+  { icon: <TrendingUp className="h-5 w-5 text-status-success" />, text: 'Tagesaktuelle Getreidepreise in allen Varianten' },
+  { icon: <Tractor className="h-5 w-5 text-status-warning" />, text: 'Online-Buchung von Lohndienstleistungen' },
   { icon: <Wheat className="h-5 w-5 text-lime-600" />, text: 'Digitale Schlagkartei & Spritztagebuch' },
-  { icon: <Leaf className="h-5 w-5 text-emerald-600" />, text: 'Personalisierte Ankaufs- und Kontraktangebote' },
+  { icon: <Leaf className="h-5 w-5 text-status-success" />, text: 'Personalisierte Ankaufs- und Kontraktangebote' },
   { icon: <Users className="h-5 w-5 text-blue-600" />, text: 'Direkter Draht zu Ihrem Berater im Innendienst' },
 ]
 
@@ -115,7 +115,7 @@ export default function OnboardingPage() {
   if (erfolg) {
     return (
       <div className="max-w-lg mx-auto p-8 text-center space-y-4">
-        <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
+        <CheckCircle2 className="h-16 w-16 text-status-success mx-auto" />
         <h1 className="text-2xl font-bold text-gray-900">Vielen Dank!</h1>
         <p className="text-gray-600">
           Ihre Anfrage ist bei uns eingegangen. Unser Innendienst meldet sich in Kürze bei Ihnen.

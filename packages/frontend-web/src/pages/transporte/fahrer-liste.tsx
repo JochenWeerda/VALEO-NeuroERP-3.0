@@ -87,8 +87,8 @@ export default function FahrerListePage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fahrer Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Truck className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{filteredFahrer.length}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfuegbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{availableDrivers.length}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Unterwegs</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{filteredFahrer.filter((f) => f.status === 'unterwegs').length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfuegbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{availableDrivers.length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Unterwegs</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{filteredFahrer.filter((f) => f.status === 'unterwegs').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Touren Heute</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{filteredFahrer.reduce((sum, f) => sum + f.tourenHeute, 0)}</span></CardContent></Card>
       </div>
 

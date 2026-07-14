@@ -104,8 +104,8 @@ export default function OPVerwaltungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">
+              <Euro className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.debitoren.summe)}
               </span>
             </div>
@@ -131,7 +131,7 @@ export default function OPVerwaltungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Liquidität (Bank)</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.bank)}
             </span>
           </CardContent>
@@ -143,8 +143,8 @@ export default function OPVerwaltungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <TrendingUp className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.prognose)}
               </span>
             </div>
@@ -165,12 +165,12 @@ export default function OPVerwaltungPage(): JSX.Element {
             <div className="rounded-lg border p-4">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-orange-600" />
+                  <FileText className="h-5 w-5 text-status-warning" />
                   <span className="font-semibold">Offene Posten</span>
                 </div>
                 <Badge variant="outline">{opData.debitoren.gesamt}</Badge>
               </div>
-              <div className="text-3xl font-bold text-orange-600">
+              <div className="text-3xl font-bold text-status-warning">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.debitoren.summe)}
               </div>
             </div>
@@ -178,11 +178,11 @@ export default function OPVerwaltungPage(): JSX.Element {
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg border p-3">
                 <div className="text-sm text-muted-foreground mb-1">Überfällig</div>
-                <div className="text-2xl font-bold text-red-600">{opData.debitoren.ueberfaellig}</div>
+                <div className="text-2xl font-bold text-status-error">{opData.debitoren.ueberfaellig}</div>
               </div>
               <div className="rounded-lg border p-3">
                 <div className="text-sm text-muted-foreground mb-1">In Mahnung</div>
-                <div className="text-2xl font-bold text-red-600">{opData.debitoren.mahnungen}</div>
+                <div className="text-2xl font-bold text-status-error">{opData.debitoren.mahnungen}</div>
               </div>
             </div>
 
@@ -220,11 +220,11 @@ export default function OPVerwaltungPage(): JSX.Element {
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg border p-3">
                 <div className="text-sm text-muted-foreground mb-1">Zahlbar</div>
-                <div className="text-2xl font-bold text-green-600">{opData.kreditoren.zahlbar}</div>
+                <div className="text-2xl font-bold text-status-success">{opData.kreditoren.zahlbar}</div>
               </div>
               <div className="rounded-lg border p-3">
                 <div className="text-sm text-muted-foreground mb-1">Skonto verfügbar</div>
-                <div className="text-2xl font-bold text-green-600">{opData.kreditoren.skonto}</div>
+                <div className="text-2xl font-bold text-status-success">{opData.kreditoren.skonto}</div>
               </div>
             </div>
 
@@ -247,25 +247,25 @@ export default function OPVerwaltungPage(): JSX.Element {
           <div className="space-y-3">
             <div className="flex justify-between border-b pb-2">
               <span className="font-semibold">Aktuelle Liquidität (Bank)</span>
-              <span className="font-bold text-green-600">
+              <span className="font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.bank)}
               </span>
             </div>
             <div className="flex justify-between border-b pb-2">
               <span>+ Erwartete Zahlungseingänge</span>
-              <span className="text-green-600">
+              <span className="text-status-success">
                 + {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.erwarteteEingaenge)}
               </span>
             </div>
             <div className="flex justify-between border-b pb-2">
               <span>- Fällige Zahlungen</span>
-              <span className="text-red-600">
+              <span className="text-status-error">
                 - {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.falligeAusgaben)}
               </span>
             </div>
             <div className="flex justify-between pt-3 border-t-2">
               <span className="text-xl font-bold">= Prognostizierte Liquidität</span>
-              <span className="text-xl font-bold text-green-600">
+              <span className="text-xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.prognose)}
               </span>
             </div>

@@ -322,7 +322,7 @@ export default function PSMBeratungPage(): JSX.Element {
                   </div>
                   <div>
                     <div className="text-sm font-medium">Effektivität</div>
-                    <div className="text-lg font-bold text-green-600">{psm.effektivitaet}%</div>
+                    <div className="text-lg font-bold text-status-success">{psm.effektivitaet}%</div>
                   </div>
                   <div>
                     <div className="text-sm font-medium">Kosten</div>
@@ -345,7 +345,7 @@ export default function PSMBeratungPage(): JSX.Element {
 
                 {index === 0 && (
                   <div className="mt-3 flex items-center gap-2 p-2 bg-green-50 rounded">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-4 w-4 text-status-success" />
                     <span className="text-sm font-medium text-green-800">Top-Empfehlung</span>
                   </div>
                 )}

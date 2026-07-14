@@ -114,7 +114,7 @@ export default function KontenplanPage(): JSX.Element {
       key: 'saldo' as const,
       label: 'Saldo',
       render: (k: Konto) => (
-        <span className={`font-bold ${k.saldo < 0 ? 'text-red-600' : 'text-green-600'}`}>
+        <span className={`font-bold ${k.saldo < 0 ? 'text-status-error' : 'text-status-success'}`}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.abs(k.saldo))}
           {k.saldo < 0 ? ' H' : ' S'}
         </span>
@@ -217,7 +217,7 @@ export default function KontenplanPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ertrag</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{konten.filter((k) => k.typ === 'ertrag').length}</span>
+            <span className="text-2xl font-bold text-status-success">{konten.filter((k) => k.typ === 'ertrag').length}</span>
           </CardContent>
         </Card>
       </div>

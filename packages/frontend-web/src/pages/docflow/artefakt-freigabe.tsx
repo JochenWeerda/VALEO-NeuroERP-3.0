@@ -34,7 +34,7 @@ function ArtifactActions({ doc, a }: { doc: string; a: ArtifactItem }) {
   }
   if (a.freigabe_status === 'entwurf') {
     return <Button size="sm" variant="ghost" onClick={() => act('freigegeben')} disabled={setFreigabe.isPending}>
-      {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <CheckCircle2 size={13} className="mr-1 text-emerald-600" />}Freigeben
+      {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <CheckCircle2 size={13} className="mr-1 text-status-success" />}Freigeben
     </Button>
   }
   if (a.freigabe_status === 'freigegeben') {

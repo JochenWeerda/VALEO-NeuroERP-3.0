@@ -1873,7 +1873,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="gap-2 text-red-600"
+                className="gap-2 text-status-error"
                 onClick={() => {
                   if (!state.id) {
                     push('Keine Ernte-Annahme zum Löschen vorhanden')

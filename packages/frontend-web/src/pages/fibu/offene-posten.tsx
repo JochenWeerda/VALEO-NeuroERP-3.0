@@ -289,7 +289,7 @@ export default function OffenePostenPage(): JSX.Element {
         const heute = new Date()
         const isUeberfaellig = faellig < heute
         return (
-          <span className={isUeberfaellig ? 'font-semibold text-red-600' : ''}>
+          <span className={isUeberfaellig ? 'font-semibold text-status-error' : ''}>
             {faellig.toLocaleDateString('de-DE')}
           </span>
         )
@@ -309,7 +309,7 @@ export default function OffenePostenPage(): JSX.Element {
       label: 'Tage überfällig',
       render: (posten: OffenerPosten) =>
         posten.tageUeberfaellig > 0 ? (
-          <span className="flex items-center gap-1 text-red-600">
+          <span className="flex items-center gap-1 text-status-error">
             <AlertCircle className="h-4 w-4" />
             {posten.tageUeberfaellig} Tage
           </span>
@@ -376,8 +376,8 @@ export default function OffenePostenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">{ueberfaellig.length}</span>
+              <AlertCircle className="h-5 w-5 text-status-error" />
+              <span className="text-2xl font-bold text-status-error">{ueberfaellig.length}</span>
             </div>
           </CardContent>
         </Card>

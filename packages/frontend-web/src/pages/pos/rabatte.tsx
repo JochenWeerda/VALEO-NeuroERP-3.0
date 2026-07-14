@@ -157,7 +157,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{aktiv}</span>
+            <span className="text-2xl font-bold text-status-success">{aktiv}</span>
           </CardContent>
         </Card>
 

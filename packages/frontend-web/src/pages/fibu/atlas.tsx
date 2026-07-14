@@ -295,7 +295,7 @@ export default function AtlasPage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <ShieldCheck className="h-5 w-5 text-status-success" />
               Operativer Ablauf
             </CardTitle>
             <CardDescription>Naechste Schritte fuer einen Zoll- oder Exportfall auf Basis des aktuellen Systemzustands.</CardDescription>

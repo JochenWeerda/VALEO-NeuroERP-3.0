@@ -154,7 +154,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-status-success" />
               Gesamtwert
             </CardTitle>
           </CardHeader>
@@ -163,7 +163,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-28" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-green-600">
+                <span className="text-2xl font-bold text-status-success">
                   {hasData 
                     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(bestand.totalValue)
                     : '0 €'}
@@ -194,7 +194,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4 text-orange-600" />
+              <Clock className="h-4 w-4 text-status-warning" />
               Ø Reichweite
             </CardTitle>
           </CardHeader>
@@ -203,7 +203,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-20" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-orange-600">
+                <span className="text-2xl font-bold text-status-warning">
                   {hasData ? `${bestand.totalArticles} Tage` : '0 Tage'}
                 </span>              </div>
             )}
@@ -225,10 +225,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-red-600">
+                <span className="text-2xl font-bold text-status-error">
                   {hasData ? bestand.lowStockCount : 0}
                 </span>
-                <span className="text-sm text-red-600">Artikel unter Mindestbestand</span>
+                <span className="text-sm text-status-error">Artikel unter Mindestbestand</span>
               </div>
             )}
           </CardContent>
@@ -245,7 +245,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-yellow-600">
+                <span className="text-2xl font-bold text-status-warning">
                   {hasData ? Math.round(bestand.lowStockCount * 1.5) : 0}
                 </span>
                 <span className="text-sm text-yellow-800">Artikel in 7 Tagen kritisch</span>
@@ -265,7 +265,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-green-600">
+                <span className="text-2xl font-bold text-status-success">
                   {hasData ? bestand.totalArticles - bestand.lowStockCount : 0}
                 </span>
                 <span className="text-sm text-green-800">Artikel im Sollbereich</span>
@@ -305,10 +305,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold text-orange-600">
+                  <span className="text-2xl font-bold text-status-warning">
                     {(mhdItems ?? []).length}
                   </span>
-                  <span className="text-sm text-orange-600">Artikel mit MHD in den nächsten 90 Tagen</span>
+                  <span className="text-sm text-status-warning">Artikel mit MHD in den nächsten 90 Tagen</span>
                 </div>
                 {(mhdItems ?? []).slice(0, 3).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-orange-200 p-2 bg-white/50 text-sm">
@@ -353,10 +353,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold text-red-600">
+                  <span className="text-2xl font-bold text-status-error">
                     {0}
                   </span>
-                  <span className="text-sm text-red-600">PSM mit endender Abverkaufsfrist</span>
+                  <span className="text-sm text-status-error">PSM mit endender Abverkaufsfrist</span>
                 </div>
                 {EMPTY_PSM_ARTIKEL.map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-red-200 p-2 bg-white/50 text-sm">
@@ -403,7 +403,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-sm text-green-600 mb-3">Artikel mit höchstem Absatz (letzte 30 Tage)</p>
+                <p className="text-sm text-status-success mb-3">Artikel mit höchstem Absatz (letzte 30 Tage)</p>
                 {(rennerItems ?? []).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-green-200 p-2 bg-white/50 text-sm">
                     <div className="flex items-center gap-2">
@@ -456,7 +456,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.absatz} Stk</span>
-                      <Badge variant="secondary" className="text-red-600">{item.trend}</Badge>
+                      <Badge variant="secondary" className="text-status-error">{item.trend}</Badge>
                     </div>
                   </div>
                 ))}              </div>

@@ -207,10 +207,10 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                 let statusBadge: React.ReactNode = <Badge variant="outline">ohne Referenz</Badge>
                 if (pct != null) {
                   if (pct > 0) {
-                    statusIcon = <TrendingUp className="h-4 w-4 text-green-600" />
+                    statusIcon = <TrendingUp className="h-4 w-4 text-status-success" />
                     statusBadge = <Badge variant="default" className="bg-green-600">+{pct} %</Badge>
                   } else if (pct < 0) {
-                    statusIcon = <TrendingDown className="h-4 w-4 text-amber-600" />
+                    statusIcon = <TrendingDown className="h-4 w-4 text-status-warning" />
                     statusBadge = <Badge variant="secondary">{pct} %</Badge>
                   } else {
                     statusBadge = <Badge variant="outline">0 %</Badge>
@@ -248,7 +248,7 @@ export default function BenchmarkCockpitPage(): JSX.Element {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <CircleCheck className="h-5 w-5 text-emerald-600" />
+                    <CircleCheck className="h-5 w-5 text-status-success" />
                     Aktuelle Staerken
                   </CardTitle>
                 </CardHeader>
@@ -270,7 +270,7 @@ export default function BenchmarkCockpitPage(): JSX.Element {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    <AlertTriangle className="h-5 w-5 text-status-warning" />
                     Prioritaere Schwaechen
                   </CardTitle>
                 </CardHeader>

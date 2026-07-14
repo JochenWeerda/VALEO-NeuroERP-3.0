@@ -96,7 +96,7 @@ function ApplyDialog({ template, onClose }: { template: BookingTemplate; onClose
         <CardContent className="space-y-4">
           {result ? (
             <div className="space-y-2 text-sm">
-              <p className="text-green-600 font-medium">Buchung erfolgreich erstellt!</p>
+              <p className="text-status-success font-medium">Buchung erfolgreich erstellt!</p>
               <p>Buchungs-Nr.: <span className="font-mono font-semibold">{result.entry_number}</span></p>
               <p>Soll: <span className="font-semibold">{Number(result.total_debit).toFixed(2)} {template.currency}</span></p>
               <p>Haben: <span className="font-semibold">{Number(result.total_credit).toFixed(2)} {template.currency}</span></p>
@@ -132,7 +132,7 @@ function ApplyDialog({ template, onClose }: { template: BookingTemplate; onClose
                 <Button variant="outline" onClick={onClose}>Abbrechen</Button>
               </div>
               {apply.isError && (
-                <p className="text-red-600 text-sm">Fehler beim Anwenden der Vorlage.</p>
+                <p className="text-status-error text-sm">Fehler beim Anwenden der Vorlage.</p>
               )}
             </>
           )}
@@ -219,7 +219,7 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
             <Button
               size="sm"
               variant="ghost"
-              className="text-red-500 hover:text-red-700"
+              className="text-status-error hover:text-red-700"
               onClick={() => deleteTemplate.mutate(template.id)}
               disabled={deleteTemplate.isPending}
             >

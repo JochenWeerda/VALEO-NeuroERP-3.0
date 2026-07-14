@@ -312,7 +312,7 @@ const SaatgutStammPage: React.FC = () => {
                     className={errors.artikelnummer ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.artikelnummer && (
-                    <p className="text-sm text-red-500">{errors.artikelnummer}</p>
+                    <p className="text-sm text-status-error">{errors.artikelnummer}</p>
                   )}
                 </div>
 
@@ -326,7 +326,7 @@ const SaatgutStammPage: React.FC = () => {
                     className={errors.name ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
+                    <p className="text-sm text-status-error">{errors.name}</p>
                   )}
                 </div>
 
@@ -340,7 +340,7 @@ const SaatgutStammPage: React.FC = () => {
                     className={errors.sorte ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.sorte && (
-                    <p className="text-sm text-red-500">{errors.sorte}</p>
+                    <p className="text-sm text-status-error">{errors.sorte}</p>
                   )}
                 </div>
 
@@ -363,7 +363,7 @@ const SaatgutStammPage: React.FC = () => {
                     ]}
                   />
                   {errors.art && (
-                    <p className="text-sm text-red-500">{errors.art}</p>
+                    <p className="text-sm text-status-error">{errors.art}</p>
                   )}
                 </div>
 
@@ -406,7 +406,7 @@ const SaatgutStammPage: React.FC = () => {
                     />
                     <Label htmlFor="bsa_zulassung" className="flex items-center gap-2">
                       {formData.bsa_zulassung ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-status-success" />
                       ) : (
                         <XCircle className="w-4 h-4 text-gray-400" />
                       )}
@@ -425,7 +425,7 @@ const SaatgutStammPage: React.FC = () => {
                     />
                     <Label htmlFor="eu_zulassung" className="flex items-center gap-2">
                       {formData.eu_zulassung ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-status-success" />
                       ) : (
                         <XCircle className="w-4 h-4 text-gray-400" />
                       )}
@@ -445,7 +445,7 @@ const SaatgutStammPage: React.FC = () => {
                     className={errors.ablauf_zulassung ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.ablauf_zulassung && (
-                    <p className="text-sm text-red-500">{errors.ablauf_zulassung}</p>
+                    <p className="text-sm text-status-error">{errors.ablauf_zulassung}</p>
                   )}
                 </div>
               </div>
@@ -504,7 +504,7 @@ const SaatgutStammPage: React.FC = () => {
                     className={errors.keimfaehigkeit ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.keimfaehigkeit && (
-                    <p className="text-sm text-red-500">{errors.keimfaehigkeit}</p>
+                    <p className="text-sm text-status-error">{errors.keimfaehigkeit}</p>
                   )}
                 </div>
 

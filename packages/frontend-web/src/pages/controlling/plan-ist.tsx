@@ -50,9 +50,9 @@ export default function PlanIstPage(): JSX.Element {
                   <span className="text-sm font-medium">Abweichung:</span>
                   <div className="flex items-center gap-1">
                     {data.abweichung >= 0
-                      ? <TrendingUp className="h-4 w-4 text-green-600" />
-                      : <TrendingDown className="h-4 w-4 text-red-600" />}
-                    <span className={`text-lg font-bold ${data.abweichung >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ? <TrendingUp className="h-4 w-4 text-status-success" />
+                      : <TrendingDown className="h-4 w-4 text-status-error" />}
+                    <span className={`text-lg font-bold ${data.abweichung >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                       {data.abweichung > 0 ? '+' : ''}{data.abweichung}%
                     </span>
                   </div>
@@ -79,13 +79,13 @@ export default function PlanIstPage(): JSX.Element {
                   <div className="flex items-center gap-2">
                     {bereich.abweichung > 0 ? (
                       <>
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span className="font-bold text-green-600">+{bereich.abweichung}%</span>
+                        <TrendingUp className="h-4 w-4 text-status-success" />
+                        <span className="font-bold text-status-success">+{bereich.abweichung}%</span>
                       </>
                     ) : bereich.abweichung < 0 ? (
                       <>
-                        <TrendingDown className="h-4 w-4 text-red-600" />
-                        <span className="font-bold text-red-600">{bereich.abweichung}%</span>
+                        <TrendingDown className="h-4 w-4 text-status-error" />
+                        <span className="font-bold text-status-error">{bereich.abweichung}%</span>
                       </>
                     ) : (
                       <Badge variant="outline">+0%</Badge>

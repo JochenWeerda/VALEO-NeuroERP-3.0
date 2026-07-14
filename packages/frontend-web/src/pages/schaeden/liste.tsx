@@ -94,10 +94,10 @@ export default function SchaedenListePage(): JSX.Element {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Schaeden Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-orange-600" /><span className="text-2xl font-bold">{filteredSchaeden.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Schaeden Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-status-warning" /><span className="text-2xl font-bold">{filteredSchaeden.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt-Schadenhoehe</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtSchaden)}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Reguliert</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{reguliert}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Pruefung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{offenePruefung.length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Reguliert</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{reguliert}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Pruefung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{offenePruefung.length}</span></CardContent></Card>
       </div>
 
       <Card>

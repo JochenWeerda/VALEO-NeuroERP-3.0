@@ -58,7 +58,7 @@ export default function GiftCardsPage(): JSX.Element {
       key: 'restguthaben' as const,
       label: 'Restguthaben',
       render: (gc: GiftCard) => (
-        <span className={`font-bold ${gc.restguthaben === 0 ? 'text-gray-400' : 'text-green-600'}`}>
+        <span className={`font-bold ${gc.restguthaben === 0 ? 'text-gray-400' : 'text-status-success'}`}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gc.restguthaben)}
         </span>
       ),
@@ -75,7 +75,7 @@ export default function GiftCardsPage(): JSX.Element {
         const ablauf = new Date(gc.gueltigBis)
         const bald = ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         return (
-          <span className={bald ? 'font-semibold text-orange-600' : ''}>
+          <span className={bald ? 'font-semibold text-status-warning' : ''}>
             {ablauf.toLocaleDateString('de-DE')}
           </span>
         )
@@ -179,7 +179,7 @@ export default function GiftCardsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offenes Guthaben</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtGuthaben)}</span>
+            <span className="text-2xl font-bold text-status-success">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtGuthaben)}</span>
           </CardContent>
         </Card>
 

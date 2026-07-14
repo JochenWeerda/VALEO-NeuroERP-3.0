@@ -259,7 +259,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
         </Card>
         <Card className="mx-auto max-w-md mt-8">
           <CardContent className="pt-8 pb-8 flex flex-col items-center gap-6 text-center">
-            <CheckCircle className="h-16 w-16 text-green-600" />
+            <CheckCircle className="h-16 w-16 text-status-success" />
             <div>
               <h2 className="text-xl font-bold">Rohware erfolgreich angenommen</h2>
               <p className="text-muted-foreground mt-1">
@@ -473,7 +473,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
       content: (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
-            <CheckCircle className="h-16 w-16 text-emerald-500" />
+            <CheckCircle className="h-16 w-16 text-status-success" />
             <h3 className="text-xl font-bold text-slate-800">Rohware-Annahme prüfen</h3>
           </div>
           <TouchConfirmCard

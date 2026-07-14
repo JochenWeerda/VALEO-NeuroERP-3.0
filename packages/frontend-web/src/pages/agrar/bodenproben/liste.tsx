@@ -116,7 +116,7 @@ export default function BodenprobenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Analysiert</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{analysierteProben.length}</span>
+            <span className="text-2xl font-bold text-status-success">{analysierteProben.length}</span>
           </CardContent>
         </Card>
 

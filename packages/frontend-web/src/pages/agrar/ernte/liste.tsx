@@ -123,7 +123,7 @@ export default function ErnteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{ernten.filter((e) => e.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-status-success">{ernten.filter((e) => e.status === 'abgeschlossen').length}</span>
           </CardContent>
         </Card>
 

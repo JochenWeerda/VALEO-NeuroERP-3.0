@@ -151,7 +151,7 @@ export function ContractSelectionDialog({
             {isLoading ? (
               <div className="p-4 text-center text-muted-foreground">Lade Kontrakte...</div>
             ) : error ? (
-              <div className="p-4 text-center text-red-500">Fehler beim Laden der Kontrakte</div>
+              <div className="p-4 text-center text-status-error">Fehler beim Laden der Kontrakte</div>
             ) : filteredContracts.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 {searchTerm ? 'Keine Kontrakte gefunden' : 'Keine Kontrakte in der Datenbank gefunden'}

@@ -261,11 +261,11 @@ export function MultiTenderPayment({ total, onPaymentsChange }: MultiTenderPayme
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Bereits bezahlt</span>
-            <span className="font-semibold text-green-600">{paid.toFixed(2)} €</span>
+            <span className="font-semibold text-status-success">{paid.toFixed(2)} €</span>
           </div>
           <div className="flex justify-between text-lg font-bold">
             <span>Offen</span>
-            <span className={remaining > 0 ? 'text-orange-600' : 'text-green-600'}>
+            <span className={remaining > 0 ? 'text-status-warning' : 'text-status-success'}>
               {remaining.toFixed(2)} €
             </span>
           </div>

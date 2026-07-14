@@ -250,21 +250,21 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Bar:</span>
-                  <span className={`font-bold ${abschluss.differenzBar !== 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${abschluss.differenzBar !== 0 ? 'text-status-warning' : 'text-status-success'}`}>
                     {abschluss.differenzBar > 0 ? '+' : ''}
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzBar)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>EC:</span>
-                  <span className={`font-bold ${abschluss.differenzEC !== 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${abschluss.differenzEC !== 0 ? 'text-status-warning' : 'text-status-success'}`}>
                     {abschluss.differenzEC > 0 ? '+' : ''}
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzEC)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>PayPal:</span>
-                  <span className={`font-bold ${abschluss.differenzPayPal !== 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${abschluss.differenzPayPal !== 0 ? 'text-status-warning' : 'text-status-success'}`}>
                     {abschluss.differenzPayPal > 0 ? '+' : ''}
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzPayPal)}
                   </span>
@@ -282,7 +282,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Tagesabschluss bereit</h3>
 

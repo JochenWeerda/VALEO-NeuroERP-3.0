@@ -100,7 +100,7 @@ export default function MitarbeiterListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{list.filter((m) => m.status === 'aktiv').length}</span>
+            <span className="text-2xl font-bold text-status-success">{list.filter((m) => m.status === 'aktiv').length}</span>
           </CardContent>
         </Card>
 
@@ -118,7 +118,7 @@ export default function MitarbeiterListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Krank</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{list.filter((m) => m.status === 'krank').length}</span>
+            <span className="text-2xl font-bold text-status-error">{list.filter((m) => m.status === 'krank').length}</span>
           </CardContent>
         </Card>
       </div>

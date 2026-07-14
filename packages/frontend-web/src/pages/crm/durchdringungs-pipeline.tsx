@@ -69,7 +69,7 @@ export default function DurchdringungsPipelinePage(): JSX.Element {
       {/* Summen */}
       <div className="grid gap-3 sm:grid-cols-3">
         <Card><CardContent className="flex items-center gap-3 p-4"><Users className="h-5 w-5 text-blue-600" /><div><p className="text-xs text-muted-foreground">Betriebe</p><p className="text-2xl font-bold">{rows.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-3 p-4"><Target className="h-5 w-5 text-amber-600" /><div><p className="text-xs text-muted-foreground">Realist. Potenzial</p><p className="text-2xl font-bold text-amber-600">{EUR(summe)}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-4"><Target className="h-5 w-5 text-status-warning" /><div><p className="text-xs text-muted-foreground">Realist. Potenzial</p><p className="text-2xl font-bold text-status-warning">{EUR(summe)}</p></div></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Ø realist. Lücke/Betrieb</p><p className="text-2xl font-bold">{rows.length ? EUR(summe / rows.length) : '—'}</p></CardContent></Card>
       </div>
 

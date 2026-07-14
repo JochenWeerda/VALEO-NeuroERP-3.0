@@ -32,7 +32,7 @@ export default function BestandsbewertungPage() {
 
       {isLoading && <p className="text-sm text-gray-500">Lade Bestandswerte…</p>}
       {isError && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-status-error">
           Fehler beim Laden der Bestandsbewertung{error instanceof Error ? `: ${error.message}` : '.'}
         </p>
       )}

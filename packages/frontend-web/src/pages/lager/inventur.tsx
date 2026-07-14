@@ -79,7 +79,7 @@ export default function InventurPage(): JSX.Element {
       key: 'differenz' as const,
       label: 'Differenz',
       render: (pos: InventurPosition) => (
-        <span className={pos.differenz !== 0 ? 'font-semibold text-orange-600' : ''}>
+        <span className={pos.differenz !== 0 ? 'font-semibold text-status-warning' : ''}>
           {pos.differenz > 0 ? '+' : ''}{pos.differenz} t
         </span>
       ),
@@ -192,7 +192,7 @@ export default function InventurPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{positionen.filter((p) => p.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-status-success">{positionen.filter((p) => p.status === 'abgeschlossen').length}</span>
           </CardContent>
         </Card>
       </div>

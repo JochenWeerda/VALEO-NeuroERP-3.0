@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -362,7 +362,7 @@ export default function ProcurementReportsPage(): JSX.Element {
                         <TableCell><code className="text-sm">{stringValue(item.purchaseOrderNumber, '-')}</code></TableCell>
                         <TableCell><Badge variant="outline">{stringValue(item.type, '-')}</Badge></TableCell>
                         <TableCell className="text-right">
-                          <span className={Number(item.deviation || 0) > 0 ? 'text-red-600' : 'text-green-600'}>
+                          <span className={Number(item.deviation || 0) > 0 ? 'text-status-error' : 'text-status-success'}>
                             {Number(item.deviation || 0) > 0 ? '+' : ''}
                             {formatNumber(Number(item.deviation || 0), 2)}%
                           </span>

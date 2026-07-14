@@ -118,8 +118,8 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
     const stateIcons = {
       idle: <ScanLine className="h-8 w-8 text-muted-foreground" />,
       scanning: <ScanLine className="h-8 w-8 text-primary animate-pulse" />,
-      success: <Check className="h-8 w-8 text-emerald-500" />,
-      error: <AlertCircle className="h-8 w-8 text-red-500" />,
+      success: <Check className="h-8 w-8 text-status-success" />,
+      error: <AlertCircle className="h-8 w-8 text-status-error" />,
     }
 
     return (
@@ -139,7 +139,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
           <div className="flex-1 min-w-0">
             {scanState === 'success' ? (
               <div>
-                <p className="text-lg font-bold text-emerald-500 truncate">
+                <p className="text-lg font-bold text-status-success truncate">
                   {lastValue}
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -148,7 +148,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
               </div>
             ) : scanState === 'error' ? (
               <div>
-                <p className="text-lg font-bold text-red-500">Fehler</p>
+                <p className="text-lg font-bold text-status-error">Fehler</p>
                 <p className="text-sm text-muted-foreground">
                   Barcode ungültig
                 </p>

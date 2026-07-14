@@ -1211,7 +1211,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-red-600 hover:text-red-700"
+                          className="h-7 w-7 text-status-error hover:text-red-700"
                           title="Position löschen"
                           onClick={() => handleDeletePosition(idx)}
                         >
@@ -1460,7 +1460,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 text-red-600"
+            className="gap-2 text-status-error"
             onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2 className="h-4 w-4" />

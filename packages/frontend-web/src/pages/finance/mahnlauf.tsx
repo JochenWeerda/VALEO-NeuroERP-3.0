@@ -78,7 +78,7 @@ export default function MahnlaufPage() {
                     <tr key={c.op_id} className="border-b last:border-0">
                       <td className="px-3 py-1.5 font-medium">{c.rechnungsnr}</td>
                       <td className="px-3 py-1.5">{c.partner ?? '—'}</td>
-                      <td className="px-3 py-1.5 text-right text-red-600">{c.tage_ueberfaellig} Tage</td>
+                      <td className="px-3 py-1.5 text-right text-status-error">{c.tage_ueberfaellig} Tage</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.offen)}</td>
                       <td className="px-3 py-1.5 text-center"><Badge variant="outline" className="text-[10px]">{c.aktuelle_stufe} → {c.naechste_stufe}</Badge></td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.dunning_fee)}</td>

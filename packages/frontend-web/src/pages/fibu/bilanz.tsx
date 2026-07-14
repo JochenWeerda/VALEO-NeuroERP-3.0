@@ -214,7 +214,7 @@ export default function BilanzPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Eigenkapital</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{fmt(eigenkapital)}</span>
+            <span className="text-2xl font-bold text-status-success">{fmt(eigenkapital)}</span>
           </CardContent>
         </Card>
         <Card>
@@ -222,7 +222,7 @@ export default function BilanzPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Fremdkapital</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{fmt(fremdkapital)}</span>
+            <span className="text-2xl font-bold text-status-warning">{fmt(fremdkapital)}</span>
           </CardContent>
         </Card>
       </div>
@@ -273,7 +273,7 @@ export default function BilanzPage(): JSX.Element {
           <CardContent className="space-y-4">
             {bilanz.equity.length > 0 && (
               <ItemGroup title="Eigenkapital" items={bilanz.equity}
-                total={eigenkapital} colorClass="text-green-600" />
+                total={eigenkapital} colorClass="text-status-success" />
             )}
             {bilanz.liabilities.length > 0 && (
               <ItemGroup title="Fremdkapital" items={bilanz.liabilities}

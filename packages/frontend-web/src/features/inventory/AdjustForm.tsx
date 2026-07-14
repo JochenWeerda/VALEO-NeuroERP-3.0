@@ -40,7 +40,7 @@ export function AdjustForm({ sku, onSubmit, submitting }: {
           value={deltaInput}
           onChange={(event) => setDeltaInput(event.target.value)}
         />
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-status-error">{error}</p> : null}
       </div>
       <div>
         <Label>Grund</Label>

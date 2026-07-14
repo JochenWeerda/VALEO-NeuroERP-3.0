@@ -317,7 +317,7 @@ function SimulatorPanel(): JSX.Element {
           />
         </div>
         {formError !== null ? (
-          <div className="md:col-span-3 text-sm text-red-600">{formError}</div>
+          <div className="md:col-span-3 text-sm text-status-error">{formError}</div>
         ) : null}
         <div className="text-right md:col-span-3">
           <Button type="submit">Entscheidung simulieren</Button>

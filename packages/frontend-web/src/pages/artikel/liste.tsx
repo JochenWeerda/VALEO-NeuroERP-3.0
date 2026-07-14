@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -140,7 +140,7 @@ export default function ArtikelListePage(): JSX.Element {
             {isLoading ? (
               <Skeleton className="h-8 w-12" />
             ) : (
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-status-success">
                 {artikel.filter((a) => a.status === 'aktiv').length}
               </span>
             )}

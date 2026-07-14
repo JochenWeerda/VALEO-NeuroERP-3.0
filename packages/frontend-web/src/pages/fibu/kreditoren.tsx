@@ -73,7 +73,7 @@ export default function KreditorenPage(): JSX.Element {
         const verfuegbar = bis >= new Date()
         return verfuegbar ? (
           <div>
-            <span className="font-semibold text-green-600">{op.skonto}%</span>
+            <span className="font-semibold text-status-success">{op.skonto}%</span>
             <div className="text-xs text-muted-foreground">bis {bis.toLocaleDateString('de-DE')}</div>
           </div>
         ) : (
@@ -197,7 +197,7 @@ export default function KreditorenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Zahlbar</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{zahlbar}</span>
+            <span className="text-2xl font-bold text-status-success">{zahlbar}</span>
           </CardContent>
         </Card>
 
@@ -206,7 +206,7 @@ export default function KreditorenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Skonto verfuegbar</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{skontoVerfuegbar}</span>
+            <span className="text-2xl font-bold text-status-success">{skontoVerfuegbar}</span>
           </CardContent>
         </Card>
       </div>

@@ -93,7 +93,7 @@ export default function KampagnenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{kampagnen.filter((k) => k.status === 'aktiv').length}</span>
+            <span className="text-2xl font-bold text-status-success">{kampagnen.filter((k) => k.status === 'aktiv').length}</span>
           </CardContent>
         </Card>
 

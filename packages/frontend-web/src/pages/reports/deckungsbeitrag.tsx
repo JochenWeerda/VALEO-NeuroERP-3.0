@@ -57,8 +57,8 @@ export default function DeckungsbeitragPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">+{db.wachstum}%</span>
+              <TrendingUp className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">+{db.wachstum}%</span>
             </div>
           </CardContent>
         </Card>

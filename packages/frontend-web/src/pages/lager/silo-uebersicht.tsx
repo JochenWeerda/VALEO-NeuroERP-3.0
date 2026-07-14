@@ -180,14 +180,14 @@ function SummaryBar({ cells }: SummaryBarProps): JSX.Element {
       </div>
       <div className="flex flex-col rounded-md border border-border bg-card px-4 py-2 min-w-[120px]">
         <span className="text-[11px] text-muted-foreground">Auslastung</span>
-        <span className={`text-xl font-semibold tabular-nums ${pct >= 95 ? 'text-red-600' : pct >= 80 ? 'text-amber-600' : ''}`}>
+        <span className={`text-xl font-semibold tabular-nums ${pct >= 95 ? 'text-status-error' : pct >= 80 ? 'text-status-warning' : ''}`}>
           {totalCap > 0 ? `${pct} %` : '—'}
         </span>
       </div>
       {locked > 0 && (
         <div className="flex flex-col rounded-md border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 px-4 py-2 min-w-[120px]">
-          <span className="text-[11px] text-red-600 dark:text-red-400">QS-gesperrt</span>
-          <span className="text-xl font-semibold text-red-600 dark:text-red-400 tabular-nums">{locked}</span>
+          <span className="text-[11px] text-status-error dark:text-red-400">QS-gesperrt</span>
+          <span className="text-xl font-semibold text-status-error dark:text-red-400 tabular-nums">{locked}</span>
         </div>
       )}
     </div>

@@ -54,7 +54,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingDown className="h-5 w-5 text-orange-600" />
+                <TrendingDown className="h-5 w-5 text-status-warning" />
                 Bestellvorschlag
                 <Badge variant="default" className="ml-auto">KI-Agent</Badge>
               </CardTitle>
@@ -67,19 +67,19 @@ export default function WorkflowTriggerPage(): JSX.Element {
               
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Niedrige Bestände erkennen</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Verkaufstrends analysieren</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Optimale Bestellmenge berechnen</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Human-in-the-Loop Freigabe</span>
                 </div>
               </div>

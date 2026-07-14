@@ -229,7 +229,7 @@ export default function BestandskorrekturPage(): JSX.Element {
       content: (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
-            <AlertTriangle className="h-16 w-16 text-amber-500" />
+            <AlertTriangle className="h-16 w-16 text-status-warning" />
             <h3 className="text-xl font-bold text-slate-800">Korrektur pruefen</h3>
             <p className="text-sm text-slate-500">Die Buchung kann nicht rueckgaengig gemacht werden</p>
           </div>

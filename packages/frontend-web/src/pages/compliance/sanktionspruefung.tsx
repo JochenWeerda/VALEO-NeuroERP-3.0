@@ -51,10 +51,10 @@ export default function SanktionspruefungPage(): JSX.Element {
 
   const resultColor = result
     ? result.ergebnis === 'TREFFER'
-      ? 'text-red-600'
+      ? 'text-status-error'
       : result.ergebnis === 'VERDAECHTIG'
-      ? 'text-orange-600'
-      : 'text-green-600'
+      ? 'text-status-warning'
+      : 'text-status-success'
     : ''
 
   const badgeVariant = result

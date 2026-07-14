@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
@@ -1014,7 +1014,7 @@ export default function LieferantenStammPage(): JSX.Element {
                           <TableCell className="max-w-xs truncate">{doc.dateiname}</TableCell>
                           <TableCell>
                             {doc.gueltigBis ? (
-                              <span className={isExpired ? 'text-destructive font-semibold' : isExpiring ? 'text-orange-600 font-semibold' : ''}>
+                              <span className={isExpired ? 'text-destructive font-semibold' : isExpiring ? 'text-status-warning font-semibold' : ''}>
                                 {formatDate(doc.gueltigBis)}
                               </span>
                             ) : (
@@ -1096,7 +1096,7 @@ export default function LieferantenStammPage(): JSX.Element {
               {lieferant.dokumente && lieferant.dokumente.some(d => d.status === 'abgelaufen' || d.status === 'wird_abgelaufen') && (
                 <div className="mt-4 border border-orange-500 rounded-lg p-4 bg-orange-50">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    <AlertTriangle className="h-5 w-5 text-status-warning" />
                     <Label className="text-orange-800 font-semibold">{t('crud.fields.expiringDocumentsWarning')}</Label>
                   </div>
                   <p className="text-sm text-orange-700 mb-3">
@@ -1313,7 +1313,7 @@ export default function LieferantenStammPage(): JSX.Element {
               </Table>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-status-success">
               <CheckCircle className="h-5 w-5" />
               <p>{t('crud.messages.noDuplicatesFound')}</p>
             </div>

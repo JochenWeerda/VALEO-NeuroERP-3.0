@@ -33,7 +33,7 @@ export default function EnergieverbrauchPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-600" />
+              <Zap className="h-5 w-5 text-status-warning" />
               <span className="text-2xl font-bold">{verbrauch.heute.strom} kWh</span>
             </div>
           </CardContent>
@@ -54,8 +54,8 @@ export default function EnergieverbrauchPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{stromEinsparung}%</span>
+              <TrendingDown className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{stromEinsparung}%</span>
             </div>
           </CardContent>
         </Card>
@@ -66,8 +66,8 @@ export default function EnergieverbrauchPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{gasEinsparung}%</span>
+              <TrendingDown className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{gasEinsparung}%</span>
             </div>
           </CardContent>
         </Card>
@@ -82,7 +82,7 @@ export default function EnergieverbrauchPage(): JSX.Element {
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-lg">Strom</span>
-                <Badge variant="outline" className="text-green-600">-{stromEinsparung}% vs. Ziel</Badge>
+                <Badge variant="outline" className="text-status-success">-{stromEinsparung}% vs. Ziel</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -98,7 +98,7 @@ export default function EnergieverbrauchPage(): JSX.Element {
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-lg">Gas</span>
-                <Badge variant="outline" className="text-green-600">-{gasEinsparung}% vs. Ziel</Badge>
+                <Badge variant="outline" className="text-status-success">-{gasEinsparung}% vs. Ziel</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

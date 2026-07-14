@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useVerladungen, type VerladungItem } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -33,8 +33,8 @@ function LoadingSkeleton(): JSX.Element {
 function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => void }): JSX.Element {
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center">
-      <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-      <h2 className="text-xl font-semibold text-red-600 mb-2">Backend nicht erreichbar</h2>
+      <AlertTriangle className="h-12 w-12 text-status-error mb-4" />
+      <h2 className="text-xl font-semibold text-status-error mb-2">Backend nicht erreichbar</h2>
       <p className="text-muted-foreground mb-4">
         {error?.message || 'Die Verladungs-Daten konnten nicht geladen werden.'}
       </p>
@@ -123,7 +123,7 @@ export default function VerladungenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">In Verladung</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">
+            <span className="text-2xl font-bold text-status-warning">
               {filteredVerladungen.filter((v) => v.status === 'in-verladung').length}
             </span>
           </CardContent>
@@ -133,7 +133,7 @@ export default function VerladungenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Verladen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {filteredVerladungen.filter((v) => v.status === 'verladen').length}
             </span>
           </CardContent>

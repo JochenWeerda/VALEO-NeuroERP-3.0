@@ -85,11 +85,11 @@ export default function TSEJournalPage(): JSX.Element {
       render: (t: TSETransaction) => (
         <div className="flex items-center gap-2">
           {t.fibuStatus === 'gebucht' ? (
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-status-success" />
           ) : t.fibuStatus === 'exportiert' ? (
             <FileDown className="h-4 w-4 text-blue-600" />
           ) : (
-            <XCircle className="h-4 w-4 text-orange-600" />
+            <XCircle className="h-4 w-4 text-status-warning" />
           )}
           <Badge variant={t.fibuStatus === 'gebucht' ? 'outline' : t.fibuStatus === 'exportiert' ? 'secondary' : 'default'}>
             {t.fibuStatus === 'gebucht' ? 'Gebucht' : t.fibuStatus === 'exportiert' ? 'Exportiert' : 'Offen'}
@@ -210,7 +210,7 @@ export default function TSEJournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Noch nicht gebucht</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{offen}</span>
+            <span className="text-2xl font-bold text-status-warning">{offen}</span>
           </CardContent>
         </Card>
 
@@ -219,7 +219,7 @@ export default function TSEJournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offener Betrag</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(offenerBetrag)}</span>
+            <span className="text-2xl font-bold text-status-warning">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(offenerBetrag)}</span>
           </CardContent>
         </Card>
       </div>

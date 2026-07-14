@@ -117,7 +117,7 @@ export function ArticleSearch({ onSelect, placeholder = 'Artikel suchen (Name, E
     }
 
     if (loadError) {
-      return <p className="text-sm text-red-600 py-6">{loadError}</p>
+      return <p className="text-sm text-status-error py-6">{loadError}</p>
     }
 
     return <p className="text-sm text-muted-foreground py-6">Keine Artikel gefunden fuer "{trimmedQuery}"</p>
@@ -166,10 +166,10 @@ export function ArticleSearch({ onSelect, placeholder = 'Artikel suchen (Name, E
                     <div
                       className={`text-xs ${
                         article.lagerbestand > 20
-                          ? 'text-green-600'
+                          ? 'text-status-success'
                           : article.lagerbestand > 5
-                            ? 'text-orange-600'
-                            : 'text-red-600'
+                            ? 'text-status-warning'
+                            : 'text-status-error'
                       }`}
                     >
                       Lager: {article.lagerbestand} Stk

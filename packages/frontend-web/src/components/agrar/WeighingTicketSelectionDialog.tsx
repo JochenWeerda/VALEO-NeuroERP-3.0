@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Wiegeschein-Auswahl-Dialog für Ernte-Annahme
  */
 
@@ -161,7 +161,7 @@ export function WeighingTicketSelectionDialog({
             {isLoading ? (
               <div className="p-4 text-center text-muted-foreground">Lade Wiegescheine...</div>
             ) : error ? (
-              <div className="p-4 text-center text-red-500">Fehler beim Laden der Wiegescheine</div>
+              <div className="p-4 text-center text-status-error">Fehler beim Laden der Wiegescheine</div>
             ) : filteredTickets.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 {searchTerm ? 'Keine Wiegescheine gefunden' : 'Keine Wiegescheine in der Datenbank gefunden'}

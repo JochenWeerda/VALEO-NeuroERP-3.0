@@ -84,7 +84,7 @@ export default function MaschinenauslastungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Im Einsatz</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16" /> : <span className="text-2xl font-bold text-green-600">{stats.im_einsatz ?? 0}</span>}
+            {isLoading ? <Skeleton className="h-8 w-16" /> : <span className="text-2xl font-bold text-status-success">{stats.im_einsatz ?? 0}</span>}
           </CardContent>
         </Card>
 
@@ -93,7 +93,7 @@ export default function MaschinenauslastungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Werkstatt</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16" /> : <span className="text-2xl font-bold text-orange-600">{stats.werkstatt ?? 0}</span>}
+            {isLoading ? <Skeleton className="h-8 w-16" /> : <span className="text-2xl font-bold text-status-warning">{stats.werkstatt ?? 0}</span>}
           </CardContent>
         </Card>
 
@@ -102,7 +102,7 @@ export default function MaschinenauslastungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ø Auslastung</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-20" /> : <div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-600" /><span className="text-2xl font-bold text-green-600">{avgAuslastung.toFixed(1)}%</span></div>}
+            {isLoading ? <Skeleton className="h-8 w-20" /> : <div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-status-success" /><span className="text-2xl font-bold text-status-success">{avgAuslastung.toFixed(1)}%</span></div>}
           </CardContent>
         </Card>
       </div>

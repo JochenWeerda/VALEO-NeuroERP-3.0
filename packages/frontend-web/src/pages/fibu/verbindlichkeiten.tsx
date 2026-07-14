@@ -124,7 +124,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-green-600" />
+              <AlertCircle className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{skontofaehig.length}</span>
             </div>
           </CardContent>

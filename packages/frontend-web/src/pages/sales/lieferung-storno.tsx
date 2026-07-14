@@ -127,7 +127,7 @@ export default function LieferungStornoPage() {
                             <td className="px-3 py-1.5 text-right">
                               {ls.storno_moeglich ? (
                                 <Button size="sm" variant="ghost" onClick={() => { setStorno(ls.lieferschein); setGrund('') }}>
-                                  <Ban size={13} className="text-red-600 mr-1" />Storno
+                                  <Ban size={13} className="text-status-error mr-1" />Storno
                                 </Button>
                               ) : (
                                 <span className="text-[11px] text-muted-foreground" title={ls.storno_sperrgrund ?? ''}>gesperrt</span>

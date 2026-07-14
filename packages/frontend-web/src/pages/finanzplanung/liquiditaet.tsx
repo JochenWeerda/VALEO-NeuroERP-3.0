@@ -94,11 +94,11 @@ export default function LiquiditaetPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               {veraenderung >= 0 ? (
-                <TrendingUp className="h-5 w-5 text-green-600" />
+                <TrendingUp className="h-5 w-5 text-status-success" />
               ) : (
-                <TrendingDown className="h-5 w-5 text-red-600" />
+                <TrendingDown className="h-5 w-5 text-status-error" />
               )}
-              <span className={`text-2xl font-bold ${veraenderung >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className={`text-2xl font-bold ${veraenderung >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                 {veraenderung >= 0 ? '+' : ''}{eurFormat.format(veraenderung)}
               </span>
             </div>
@@ -110,7 +110,7 @@ export default function LiquiditaetPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Reserve gg. Ziel</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className={`text-2xl font-bold ${reserve >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <span className={`text-2xl font-bold ${reserve >= 0 ? 'text-status-success' : 'text-status-error'}`}>
               {reserve >= 0 ? '+' : ''}{eurFormat.format(reserve)}
             </span>
           </CardContent>
@@ -140,11 +140,11 @@ export default function LiquiditaetPage(): JSX.Element {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Einnahmen:</span>
-                    <span className="font-semibold text-green-600">{eurFormat.format(p.einnahmen)}</span>
+                    <span className="font-semibold text-status-success">{eurFormat.format(p.einnahmen)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Ausgaben:</span>
-                    <span className="font-semibold text-red-600">{eurFormat.format(p.ausgaben)}</span>
+                    <span className="font-semibold text-status-error">{eurFormat.format(p.ausgaben)}</span>
                   </div>
                 </div>
               </div>

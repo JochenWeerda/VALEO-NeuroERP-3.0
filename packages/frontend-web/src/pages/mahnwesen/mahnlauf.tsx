@@ -146,7 +146,7 @@ export default function MahnlaufPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Mahnlauf bereit</h3>
             <dl className="grid gap-3">
@@ -166,7 +166,7 @@ export default function MahnlaufPage(): JSX.Element {
               </div>
               <div className="flex justify-between pt-2">
                 <dt className="font-bold">Gesamtbetrag</dt>
-                <dd className="font-bold text-red-600">
+                <dd className="font-bold text-status-error">
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtbetrag)}
                 </dd>
               </div>

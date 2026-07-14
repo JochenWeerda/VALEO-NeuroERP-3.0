@@ -141,10 +141,10 @@ export default function SaatgutListePage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Saatgut Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Sprout className="h-5 w-5 text-green-600" /><span className="text-2xl font-bold">{stats.total}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfuegbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{stats.available}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Saatgut Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Sprout className="h-5 w-5 text-status-success" /><span className="text-2xl font-bold">{stats.total}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfuegbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{stats.available}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Mit Zulassung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{stats.approved}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Niedriger Bestand</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{stats.lowStock}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Niedriger Bestand</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{stats.lowStock}</span></CardContent></Card>
       </div>
 
       <Card>

@@ -88,7 +88,7 @@ export default function AnfrageNeuPage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="kunde">
-                Kunde <span className="text-red-500">*</span>
+                Kunde <span className="text-status-error">*</span>
               </Label>
               <Input
                 id="kunde"
@@ -112,7 +112,7 @@ export default function AnfrageNeuPage(): JSX.Element {
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="betreff">
-                Betreff <span className="text-red-500">*</span>
+                Betreff <span className="text-status-error">*</span>
               </Label>
               <Input
                 id="betreff"

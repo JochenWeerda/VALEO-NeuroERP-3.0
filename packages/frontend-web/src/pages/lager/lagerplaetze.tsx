@@ -416,7 +416,7 @@ export default function LagerplaetzePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Belegt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{lager.belegt}</span>
+            <span className="text-2xl font-bold text-status-warning">{lager.belegt}</span>
           </CardContent>
         </Card>
 
@@ -425,7 +425,7 @@ export default function LagerplaetzePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Frei</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{lager.frei}</span>
+            <span className="text-2xl font-bold text-status-success">{lager.frei}</span>
           </CardContent>
         </Card>
 
@@ -435,8 +435,8 @@ export default function LagerplaetzePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{lager.auslastung}%</span>
+              <Package className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">{lager.auslastung}%</span>
             </div>
           </CardContent>
         </Card>

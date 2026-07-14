@@ -131,7 +131,7 @@ export default function DublettenPage() {
         </div>
       ) : !data || data.groups.length === 0 ? (
         <Card><CardContent className="py-16 text-center text-sm text-muted-foreground">
-          <AlertTriangle className="mx-auto mb-2 text-emerald-600" size={20} />
+          <AlertTriangle className="mx-auto mb-2 text-status-success" size={20} />
           Keine Dubletten gefunden.
         </CardContent></Card>
       ) : (

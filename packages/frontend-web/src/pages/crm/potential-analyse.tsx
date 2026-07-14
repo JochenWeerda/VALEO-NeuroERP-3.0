@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Außendienst — Potential-Analyse / Cross-Sell-Gap-Dashboard
  *
  * Zeigt dem Außendienstler:
@@ -42,8 +42,8 @@ type PotentialResponse = {
 }
 
 const GAP_ICONS: Record<string, React.ReactNode> = {
-  ankauf_kein_kontrakt: <Wheat className="h-5 w-5 text-green-600" />,
-  lohnspritz_kein_auftrag: <Tractor className="h-5 w-5 text-amber-600" />,
+  ankauf_kein_kontrakt: <Wheat className="h-5 w-5 text-status-success" />,
+  lohnspritz_kein_auftrag: <Tractor className="h-5 w-5 text-status-warning" />,
   ration_kein_rohwaren_kontrakt: <Euro className="h-5 w-5 text-blue-600" />,
 }
 

@@ -75,8 +75,8 @@ export default function LagerbestandReportPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{lager.untermindest}</span>
+              <AlertTriangle className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">{lager.untermindest}</span>
             </div>
           </CardContent>
         </Card>
@@ -99,7 +99,7 @@ export default function LagerbestandReportPage(): JSX.Element {
                   <div className="text-xl font-bold">
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(artikel.wert)}
                   </div>
-                  <div className={`text-sm font-semibold ${artikel.tage < 20 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <div className={`text-sm font-semibold ${artikel.tage < 20 ? 'text-status-warning' : 'text-status-success'}`}>
                     {artikel.tage < 20 ? <TrendingDown className="inline h-3 w-3" /> : null}
                     {artikel.tage} Tage Reichweite
                   </div>

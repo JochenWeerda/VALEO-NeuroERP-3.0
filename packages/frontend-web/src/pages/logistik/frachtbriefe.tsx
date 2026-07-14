@@ -332,13 +332,13 @@ export default function FrachtbriefePage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Unterwegs</CardTitle></CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{list.filter((f) => f.status === 'unterwegs').length}</span>
+            <span className="text-2xl font-bold text-status-warning">{list.filter((f) => f.status === 'unterwegs').length}</span>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zugestellt</CardTitle></CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{list.filter((f) => f.status === 'zugestellt').length}</span>
+            <span className="text-2xl font-bold text-status-success">{list.filter((f) => f.status === 'zugestellt').length}</span>
           </CardContent>
         </Card>
       </div>

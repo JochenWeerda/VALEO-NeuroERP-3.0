@@ -99,7 +99,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Sprout className="h-5 w-5 text-green-600" />
+              <Sprout className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{kulturen.length}</span>
             </div>
           </CardContent>
@@ -119,7 +119,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ø Deckungsbeitrag</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {(kulturen.reduce((sum, k) => sum + k.deckungsbeitrag, 0) / Math.max(kulturen.length, 1)).toFixed(0)} EUR / ha
             </span>
           </CardContent>

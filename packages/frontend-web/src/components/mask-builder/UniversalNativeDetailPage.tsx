@@ -331,7 +331,7 @@ export function UniversalNativeDetailPage({
               {pendingAction?.dangerLevel === 'critical' || pendingAction?.dangerLevel === 'high' ? (
                 <ShieldAlert className="h-5 w-5 text-destructive" />
               ) : pendingAction?.dangerLevel === 'moderate' ? (
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <AlertTriangle className="h-5 w-5 text-status-warning" />
               ) : null}
               Aktion bestätigen
             </AlertDialogTitle>

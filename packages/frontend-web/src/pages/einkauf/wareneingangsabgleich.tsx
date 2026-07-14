@@ -245,7 +245,7 @@ export default function WareneingangsabgleichPage() {
                   <CardContent className="space-y-1.5">
                     {(match.data.ausnahmen ?? match.data.luecken ?? []).map((l, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
-                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-amber-600 shrink-0" /> : <Info size={15} className="mt-0.5 text-sky-600 shrink-0" />}
+                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" /> : <Info size={15} className="mt-0.5 text-sky-600 shrink-0" />}
                         <span>{l.text}</span>
                       </div>
                     ))}

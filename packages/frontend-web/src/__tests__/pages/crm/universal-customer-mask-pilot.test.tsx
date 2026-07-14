@@ -1,6 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import UniversalCustomerMaskPilotPage from '@/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage'
+
+// Renderer-Teilbäume (z. B. CalendarRenderer) nutzen useQuery und brauchen im
+// Test-Harness einen QueryClient; retry aus, damit Fehlerpfade sofort greifen.
+function renderPage(): ReturnType<typeof render> {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <UniversalCustomerMaskPilotPage />
+    </QueryClientProvider>,
+  )
+}
 import { useCustomer, useCustomerScreenSummary } from '@/lib/api/crm'
 import { useCustomerTabData } from '@/features/crm-masks/use-customer-tab-data'
 
@@ -112,7 +124,7 @@ describe('UniversalCustomerMaskPilotPage', () => {
       error: null,
     } as ReturnType<typeof useCustomerScreenSummary>)
 
-    render(<UniversalCustomerMaskPilotPage />)
+    renderPage()
 
     expect(screen.getByText('Summary wird geladen...')).toBeInTheDocument()
     expect(mockedUseCustomer).toHaveBeenCalledWith('customer-1', { enabled: false })
@@ -130,7 +142,7 @@ describe('UniversalCustomerMaskPilotPage', () => {
       error: null,
     } as ReturnType<typeof useCustomerScreenSummary>)
 
-    render(<UniversalCustomerMaskPilotPage />)
+    renderPage()
 
     expect(screen.getByTestId('universal-customer-mask-pilot')).toBeInTheDocument()
     expect(screen.getByTestId('screen-crm/customer-360')).toHaveAttribute('data-mobile-layout', 'mobileStack')
@@ -164,7 +176,7 @@ describe('UniversalCustomerMaskPilotPage', () => {
       error: null,
     } as ReturnType<typeof useCustomerScreenSummary>)
 
-    render(<UniversalCustomerMaskPilotPage />)
+    renderPage()
 
     fireEvent.click(screen.getByRole('tab', { name: /ansprechpartner/i }))
 

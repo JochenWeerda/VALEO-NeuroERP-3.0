@@ -64,7 +64,7 @@ export default function KontakteListePage(): JSX.Element {
     return (
       <div className="space-y-4 p-3 md:p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">{t('crud.messages.loadError')}</h1>
+          <h1 className="text-2xl font-bold text-status-error">{t('crud.messages.loadError')}</h1>
           <p className="text-muted-foreground">
             {error instanceof Error ? error.message : t('crud.messages.unknownError')}
           </p>
@@ -114,7 +114,7 @@ export default function KontakteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">{getEntityTypeLabel(t, 'supplier', 'Lieferant')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-status-success">
               {contacts.filter(c => c.type === 'supplier').length}
             </div>
           </CardContent>

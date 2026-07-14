@@ -894,7 +894,7 @@ export default function ArtikelStammPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <AlertTriangle className="h-5 w-5 text-status-warning" />
                 Gefahrgutdaten
               </CardTitle>
             </CardHeader>
@@ -945,7 +945,7 @@ export default function ArtikelStammPage(): JSX.Element {
                       Achtung: Dieser Artikel ist als Gefahrgut klassifiziert
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-orange-600">
+                  <p className="mt-2 text-sm text-status-warning">
                     Bitte beachten Sie die gesetzlichen Vorschriften fuer Lagerung und Transport.
                   </p>
                 </div>
@@ -961,7 +961,7 @@ export default function ArtikelStammPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-green-500" />
+                <Leaf className="h-5 w-5 text-status-success" />
                 Kennzeichnung
               </CardTitle>
             </CardHeader>
@@ -1261,7 +1261,7 @@ export default function ArtikelStammPage(): JSX.Element {
                             <Download className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-status-error" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1334,7 +1334,7 @@ export default function ArtikelStammPage(): JSX.Element {
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-status-error" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1448,7 +1448,7 @@ export default function ArtikelStammPage(): JSX.Element {
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-status-error" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1517,7 +1517,7 @@ export default function ArtikelStammPage(): JSX.Element {
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-status-error" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1698,7 +1698,7 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
               </div>
               <div className="rounded-lg border border-red-200 p-4">
-                <h4 className="font-medium text-red-600 mb-4">Gefahr</h4>
+                <h4 className="font-medium text-status-error mb-4">Gefahr</h4>
                 <div className="space-y-2">
                   <Button variant="destructive">Artikel loeschen</Button>
                   <p className="text-sm text-muted-foreground">

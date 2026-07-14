@@ -105,7 +105,7 @@ export default function KundenumsatzPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Wachstum</CardTitle></CardHeader>
-          <CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-600" /><span className="text-2xl font-bold text-green-600">{analyse.wachstum > 0 ? '+' : ''}{analyse.wachstum}%</span></div></CardContent>
+          <CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-status-success" /><span className="text-2xl font-bold text-status-success">{analyse.wachstum > 0 ? '+' : ''}{analyse.wachstum}%</span></div></CardContent>
         </Card>
       </div>
 

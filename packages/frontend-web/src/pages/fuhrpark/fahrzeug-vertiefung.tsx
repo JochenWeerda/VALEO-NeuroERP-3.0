@@ -357,7 +357,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" /> Neuen Schadensfall anlegen
+                <AlertTriangle className="h-4 w-4 text-status-warning" /> Neuen Schadensfall anlegen
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -421,7 +421,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         </td>
                         <td className="py-2 pr-3">
                           {s.versicherung_gemeldet
-                            ? <Shield className="h-4 w-4 text-green-600" />
+                            ? <Shield className="h-4 w-4 text-status-success" />
                             : <span className="text-muted-foreground text-xs">nein</span>}
                         </td>
                         <td className="py-2 pr-3">
@@ -602,7 +602,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                               <td className="px-3 py-2 text-right tabular-nums">{v.faellig_in_km != null ? v.faellig_in_km.toLocaleString('de-DE') : '—'}</td>
                               <td className="px-3 py-2 text-right tabular-nums">{v.faellig_bei_km != null ? v.faellig_bei_km.toLocaleString('de-DE') : '—'}</td>
                               <td className="px-3 py-2 text-center">
-                                {v.dringend ? <AlertTriangle className="h-4 w-4 text-amber-500 mx-auto" /> : <span className="text-muted-foreground text-xs">—</span>}
+                                {v.dringend ? <AlertTriangle className="h-4 w-4 text-status-warning mx-auto" /> : <span className="text-muted-foreground text-xs">—</span>}
                               </td>
                             </tr>
                           ))}
@@ -623,7 +623,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
           <Card className="border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Clock className="h-4 w-4 text-amber-600" /> Leasing-Rückgabe einleiten
+                <Clock className="h-4 w-4 text-status-warning" /> Leasing-Rückgabe einleiten
               </CardTitle>
               <CardDescription>
                 Setzt das Fahrzeug auf Status <strong>ausgeschieden</strong> und protokolliert den KM-Stand.
@@ -661,7 +661,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
               {lrErgebnis && (
                 <div className="rounded border border-green-200 bg-green-50 p-4 space-y-1 dark:bg-green-950/20">
                   <p className="text-sm font-semibold text-green-700">Rückgabe protokolliert</p>
-                  <pre className="text-xs text-green-600 whitespace-pre-wrap">
+                  <pre className="text-xs text-status-success whitespace-pre-wrap">
                     {JSON.stringify(lrErgebnis, null, 2)}
                   </pre>
                 </div>

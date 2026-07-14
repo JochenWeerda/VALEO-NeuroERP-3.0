@@ -288,7 +288,7 @@ export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
               <CardTitle className="text-sm font-medium">Erledigte Auftraege</CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-status-success">
                 {filtered.filter((f) => f.status === 'erledigt').length}
               </span>
             </CardContent>

@@ -83,8 +83,8 @@ export default function EUDRCompliancePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{eudr.batches_compliant}</span>
+              <CheckCircle className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{eudr.batches_compliant}</span>
             </div>
           </CardContent>
         </Card>
@@ -94,7 +94,7 @@ export default function EUDRCompliancePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Markiert</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{eudr.batches_flagged}</span>
+            <span className="text-2xl font-bold text-status-warning">{eudr.batches_flagged}</span>
           </CardContent>
         </Card>
 
@@ -104,8 +104,8 @@ export default function EUDRCompliancePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{complianceRate}%</span>
+              <CheckCircle className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{complianceRate}%</span>
             </div>
           </CardContent>
         </Card>

@@ -270,7 +270,7 @@ export default function QualitaetsCheckPage(): JSX.Element {
             <TouchCard
               selected={qualitaet.farbe === 'normal'}
               onSelect={() => updateField('farbe', 'normal')}
-              icon={<CheckCircle className="h-5 w-5 text-green-600" />}
+              icon={<CheckCircle className="h-5 w-5 text-status-success" />}
               description="Farbe und Aussehen im Normbereich"
             >
               Normal
@@ -278,7 +278,7 @@ export default function QualitaetsCheckPage(): JSX.Element {
             <TouchCard
               selected={qualitaet.farbe === 'abweichend'}
               onSelect={() => updateField('farbe', 'abweichend')}
-              icon={<AlertTriangle className="h-5 w-5 text-orange-600" />}
+              icon={<AlertTriangle className="h-5 w-5 text-status-warning" />}
               description="Farbe oder Aussehen weicht ab"
             >
               Abweichend
@@ -306,8 +306,8 @@ export default function QualitaetsCheckPage(): JSX.Element {
               required
             />
             <p className="text-sm text-muted-foreground">Ziel: &lt; 14% | Toleranz: &lt; 16%</p>
-            {qualitaet.feuchtigkeit > 16 && <p className="text-sm font-semibold text-red-600">⚠ Kritisch überschritten!</p>}
-            {qualitaet.feuchtigkeit > 14 && qualitaet.feuchtigkeit <= 16 && <p className="text-sm font-semibold text-orange-600">⚠ Toleranz überschritten</p>}
+            {qualitaet.feuchtigkeit > 16 && <p className="text-sm font-semibold text-status-error">⚠ Kritisch überschritten!</p>}
+            {qualitaet.feuchtigkeit > 14 && qualitaet.feuchtigkeit <= 16 && <p className="text-sm font-semibold text-status-warning">⚠ Toleranz überschritten</p>}
           </div>
           <div className="space-y-1">
             <TouchNumericInput
@@ -335,8 +335,8 @@ export default function QualitaetsCheckPage(): JSX.Element {
               required
             />
             <p className="text-sm text-muted-foreground">Ziel: &lt; 2% | Toleranz: &lt; 3%</p>
-            {qualitaet.verunreinigung > 3 && <p className="text-sm font-semibold text-red-600">⚠ Kritisch überschritten!</p>}
-            {qualitaet.verunreinigung > 2 && qualitaet.verunreinigung <= 3 && <p className="text-sm font-semibold text-orange-600">⚠ Toleranz überschritten</p>}
+            {qualitaet.verunreinigung > 3 && <p className="text-sm font-semibold text-status-error">⚠ Kritisch überschritten!</p>}
+            {qualitaet.verunreinigung > 2 && qualitaet.verunreinigung <= 3 && <p className="text-sm font-semibold text-status-warning">⚠ Toleranz überschritten</p>}
           </div>
         </TouchSection>
       ),
@@ -350,12 +350,12 @@ export default function QualitaetsCheckPage(): JSX.Element {
             <CardContent className="pt-6">
               <div className="flex items-center justify-center mb-6">
                 {qualitaet.ergebnis === 'freigegeben' && (
-                  <CheckCircle className="h-20 w-20 text-green-600" />
+                  <CheckCircle className="h-20 w-20 text-status-success" />
                 )}
                 {qualitaet.ergebnis === 'bedingt' && (
-                  <AlertTriangle className="h-20 w-20 text-orange-600" />
+                  <AlertTriangle className="h-20 w-20 text-status-warning" />
                 )}
-                {qualitaet.ergebnis === 'gesperrt' && <XCircle className="h-20 w-20 text-red-600" />}
+                {qualitaet.ergebnis === 'gesperrt' && <XCircle className="h-20 w-20 text-status-error" />}
               </div>
               <div className="text-center mb-6">
                 <Badge

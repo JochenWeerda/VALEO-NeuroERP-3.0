@@ -64,7 +64,7 @@ export default function SchulungenPage(): JSX.Element {
         const ablauf = new Date(s.gueltigBis)
         const isExpiring = ablauf <= new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
         return (
-          <span className={isExpiring ? 'font-semibold text-orange-600' : ''}>
+          <span className={isExpiring ? 'font-semibold text-status-warning' : ''}>
             {ablauf.toLocaleDateString('de-DE')}
           </span>
         )
@@ -146,7 +146,7 @@ export default function SchulungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gültig</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{list.filter((s) => s.status === 'gueltig').length}</span>
+            <span className="text-2xl font-bold text-status-success">{list.filter((s) => s.status === 'gueltig').length}</span>
           </CardContent>
         </Card>
 
@@ -155,7 +155,7 @@ export default function SchulungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Laufen ab (60 Tage)</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{ablaufend}</span>
+            <span className="text-2xl font-bold text-status-warning">{ablaufend}</span>
           </CardContent>
         </Card>
 
@@ -164,7 +164,7 @@ export default function SchulungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgelaufen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{list.filter((s) => s.status === 'abgelaufen').length}</span>
+            <span className="text-2xl font-bold text-status-error">{list.filter((s) => s.status === 'abgelaufen').length}</span>
           </CardContent>
         </Card>
       </div>

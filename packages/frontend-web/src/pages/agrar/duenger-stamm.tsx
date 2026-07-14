@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dünger-Stammdaten Maske
  * ObjectPage für Dünger-Verwaltung mit vollständiger CRUD-Funktionalität
  */
@@ -385,7 +385,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.artikelnummer ? 'border-red-500' : ''}
                   />
                   {errors.artikelnummer && (
-                    <p className="text-sm text-red-500">{errors.artikelnummer}</p>
+                    <p className="text-sm text-status-error">{errors.artikelnummer}</p>
                   )}
                 </div>
 
@@ -398,7 +398,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.name ? 'border-red-500' : ''}
                   />
                   {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
+                    <p className="text-sm text-status-error">{errors.name}</p>
                   )}
                 </div>
 
@@ -413,7 +413,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.typ ? 'border-red-500' : ''}
                   />
                   {errors.typ && (
-                    <p className="text-sm text-red-500">{errors.typ}</p>
+                    <p className="text-sm text-status-error">{errors.typ}</p>
                   )}
                 </div>
 
@@ -444,7 +444,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.n_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.n_gehalt && (
-                    <p className="text-sm text-red-500">{errors.n_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.n_gehalt}</p>
                   )}
                 </div>
 
@@ -461,7 +461,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.p_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.p_gehalt && (
-                    <p className="text-sm text-red-500">{errors.p_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.p_gehalt}</p>
                   )}
                 </div>
 
@@ -478,7 +478,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.k_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.k_gehalt && (
-                    <p className="text-sm text-red-500">{errors.k_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.k_gehalt}</p>
                   )}
                 </div>
 
@@ -495,7 +495,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.s_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.s_gehalt && (
-                    <p className="text-sm text-red-500">{errors.s_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.s_gehalt}</p>
                   )}
                 </div>
 
@@ -512,7 +512,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.mg_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.mg_gehalt && (
-                    <p className="text-sm text-red-500">{errors.mg_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.mg_gehalt}</p>
                   )}
                 </div>
               </div>
@@ -564,7 +564,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.ablauf_zulassung ? 'border-red-500' : ''}
                   />
                   {errors.ablauf_zulassung && (
-                    <p className="text-sm text-red-500">{errors.ablauf_zulassung}</p>
+                    <p className="text-sm text-status-error">{errors.ablauf_zulassung}</p>
                   )}
                 </div>
               </div>
@@ -648,7 +648,7 @@ const DuengerStammPage: React.FC = () => {
                    />
                    <Label htmlFor="ausgangsstoff_explosivstoffe" className="flex items-center gap-2">
                      {formData.ausgangsstoff_explosivstoffe ? (
-                       <AlertTriangle className="w-4 h-4 text-orange-500" />
+                       <AlertTriangle className="w-4 h-4 text-status-warning" />
                      ) : (
                        <AlertTriangle className="w-4 h-4 text-gray-400" />
                      )}
@@ -668,7 +668,7 @@ const DuengerStammPage: React.FC = () => {
                        />
                        <Label htmlFor="erklaerung_landwirt_erforderlich" className="flex items-center gap-2">
                          {formData.erklaerung_landwirt_erforderlich ? (
-                           <CheckCircle className="w-4 h-4 text-green-500" />
+                           <CheckCircle className="w-4 h-4 text-status-success" />
                          ) : (
                            <XCircle className="w-4 h-4 text-gray-400" />
                          )}
@@ -759,7 +759,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.dosierung_min ? 'border-red-500' : ''}
                   />
                   {errors.dosierung_min && (
-                    <p className="text-sm text-red-500">{errors.dosierung_min}</p>
+                    <p className="text-sm text-status-error">{errors.dosierung_min}</p>
                   )}
                 </div>
 

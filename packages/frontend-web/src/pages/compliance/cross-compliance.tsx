@@ -1,4 +1,4 @@
-﻿import { useCrossCompliance, type ComplianceItem } from '@/lib/api/betrieb'
+import { useCrossCompliance, type ComplianceItem } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -44,9 +44,9 @@ export default function CrossCompliancePage(): JSX.Element {
       label: 'Erfuellt',
       render: (c: ComplianceItem) => (
         c.erfuellt ? (
-          <CheckCircle className="h-5 w-5 text-green-600" />
+          <CheckCircle className="h-5 w-5 text-status-success" />
         ) : (
-          <AlertTriangle className="h-5 w-5 text-red-600" />
+          <AlertTriangle className="h-5 w-5 text-status-error" />
         )
       ),
     },
@@ -100,8 +100,8 @@ export default function CrossCompliancePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{erfuellt}</span>
+              <CheckCircle className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{erfuellt}</span>
             </div>
           </CardContent>
         </Card>
@@ -111,7 +111,7 @@ export default function CrossCompliancePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{offen}</span>
+            <span className="text-2xl font-bold text-status-error">{offen}</span>
           </CardContent>
         </Card>
       </div>

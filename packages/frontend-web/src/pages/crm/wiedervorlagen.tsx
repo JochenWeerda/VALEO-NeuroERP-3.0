@@ -84,14 +84,14 @@ export default function WiedervorlagenPage() {
         </div>
       ) : items.length === 0 ? (
         <Card><CardContent className="py-16 text-center text-sm text-muted-foreground">
-          <CheckCircle2 className="mx-auto mb-2 text-emerald-600" size={20} />
+          <CheckCircle2 className="mx-auto mb-2 text-status-success" size={20} />
           Keine offenen Wiedervorlagen.
         </CardContent></Card>
       ) : (
         <Card>
           <CardHeader className="py-3">
             <CardTitle className="text-sm flex items-center gap-2">
-              Offen ({items.length}){overdue > 0 && <span className="text-red-600 inline-flex items-center gap-1"><AlertTriangle size={14} />{overdue} überfällig</span>}
+              Offen ({items.length}){overdue > 0 && <span className="text-status-error inline-flex items-center gap-1"><AlertTriangle size={14} />{overdue} überfällig</span>}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">

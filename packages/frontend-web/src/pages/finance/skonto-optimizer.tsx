@@ -192,7 +192,7 @@ export default function SkontoOptimizerPage(): JSX.Element {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Skonto-Potenzial (€)</CardTitle></CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-status-success">
                 {totalSkonto.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
               </span>
             </CardContent>
@@ -201,8 +201,8 @@ export default function SkontoOptimizerPage(): JSX.Element {
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Heute/Morgen ablaufend</CardTitle></CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                {heuteAblaufend > 0 && <AlertCircle className="h-5 w-5 text-red-600" />}
-                <span className={`text-2xl font-bold ${heuteAblaufend > 0 ? 'text-red-600' : ''}`}>
+                {heuteAblaufend > 0 && <AlertCircle className="h-5 w-5 text-status-error" />}
+                <span className={`text-2xl font-bold ${heuteAblaufend > 0 ? 'text-status-error' : ''}`}>
                   {heuteAblaufend}
                 </span>
               </div>

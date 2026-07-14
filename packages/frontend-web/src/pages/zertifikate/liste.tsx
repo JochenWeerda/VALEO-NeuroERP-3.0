@@ -84,7 +84,7 @@ export default function ZertifikateListePage(): JSX.Element {
       render: (z: Zertifikat) => {
         const datum = new Date(z.gueltigBis)
         const istAblaufend = datum < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-        return <span className={istAblaufend ? 'font-semibold text-orange-600' : ''}>{datum.toLocaleDateString('de-DE')}</span>
+        return <span className={istAblaufend ? 'font-semibold text-status-warning' : ''}>{datum.toLocaleDateString('de-DE')}</span>
       },
     },
     { key: 'audit' as const, label: 'Naechstes Audit', render: (z: Zertifikat) => new Date(z.audit).toLocaleDateString('de-DE') },
@@ -125,8 +125,8 @@ export default function ZertifikateListePage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zertifikate Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Award className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{zertifikate.length}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{zertifikate.filter((z) => z.status === 'gueltig').length}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ablauf in 90 Tagen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{expiringCertificates.length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{zertifikate.filter((z) => z.status === 'gueltig').length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ablauf in 90 Tagen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{expiringCertificates.length}</span></CardContent></Card>
       </div>
 
       <Card>

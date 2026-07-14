@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, FileDown, Plus, Search, Truck } from 'lucide-react'
@@ -43,8 +43,8 @@ function LoadingSkeleton(): JSX.Element {
 function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => void }): JSX.Element {
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center">
-      <AlertTriangle className="mb-4 h-12 w-12 text-red-500" />
-      <h2 className="mb-2 text-xl font-semibold text-red-600">Backend nicht erreichbar</h2>
+      <AlertTriangle className="mb-4 h-12 w-12 text-status-error" />
+      <h2 className="mb-2 text-xl font-semibold text-status-error">Backend nicht erreichbar</h2>
       <p className="mb-4 text-muted-foreground">{error?.message || 'Die Fahrzeug-Daten konnten nicht geladen werden.'}</p>
       <Button onClick={onRetry} variant="outline" className="gap-2"><Truck className="h-4 w-4" />Erneut versuchen</Button>
     </div>
@@ -107,7 +107,7 @@ export default function FahrzeugePage(): JSX.Element {
         if (!f.naechste_inspektion) return '-'
         const datum = new Date(f.naechste_inspektion)
         const faellig = datum < new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-        return <span className={faellig ? 'font-semibold text-orange-600' : ''}>{datum.toLocaleDateString('de-DE')}</span>
+        return <span className={faellig ? 'font-semibold text-status-warning' : ''}>{datum.toLocaleDateString('de-DE')}</span>
       },
     },
     {

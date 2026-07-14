@@ -70,7 +70,7 @@ function CompleteButton({ id }: { id: string }) {
       onSuccess: () => toast({ title: 'Erledigt' }),
       onError: (err) => toast({ title: 'Fehlgeschlagen', description: errDetail(err), variant: 'destructive' }),
     })} disabled={complete.isPending}>
-      {complete.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Check size={13} className="mr-1 text-emerald-600" />}Erledigen
+      {complete.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Check size={13} className="mr-1 text-status-success" />}Erledigen
     </Button>
   )
 }
@@ -80,7 +80,7 @@ function FollowupRow({ f }: { f: Followup }) {
     <tr className="border-b last:border-0">
       <td className="px-3 py-1.5"><Badge className={`text-[10px] ${ART_BADGE[f.art] ?? ''}`}>{f.art}</Badge></td>
       <td className="px-3 py-1.5">{f.betreff}</td>
-      <td className="px-3 py-1.5">{f.faellig_am ? new Date(f.faellig_am).toLocaleDateString('de-DE') : '—'}{f.ueberfaellig && <AlertTriangle size={12} className="inline ml-1 text-red-600" />}</td>
+      <td className="px-3 py-1.5">{f.faellig_am ? new Date(f.faellig_am).toLocaleDateString('de-DE') : '—'}{f.ueberfaellig && <AlertTriangle size={12} className="inline ml-1 text-status-error" />}</td>
       <td className="px-3 py-1.5"><Badge variant={f.status === 'offen' ? 'secondary' : 'outline'} className="text-[10px]">{f.status}</Badge></td>
       <td className="px-3 py-1.5 text-right">{f.status === 'offen' && <CompleteButton id={f.followup_id} />}</td>
     </tr>

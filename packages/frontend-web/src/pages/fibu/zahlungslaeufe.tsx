@@ -239,7 +239,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-center mb-6">
-                <CheckCircle className="h-20 w-20 text-green-600" />
+                <CheckCircle className="h-20 w-20 text-status-success" />
               </div>
               <h3 className="text-center text-2xl font-bold mb-6">Zahlungslauf bereit</h3>
               <dl className="grid gap-4">
@@ -263,7 +263,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
                 </div>
                 <div className="flex justify-between pt-3">
                   <dt className="text-lg font-bold">Gesamtbetrag</dt>
-                  <dd className="text-lg font-bold text-green-600">
+                  <dd className="text-lg font-bold text-status-success">
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtbetrag)}
                   </dd>
                 </div>

@@ -218,7 +218,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
               {statusData && (
                 <Alert className={statusData.status === 'completed' ? 'border-green-500 bg-green-50' : ''}>
                   {statusData.status === 'completed' ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <CheckCircle2 className="h-5 w-5 text-status-success" />
                   ) : (
                     <XCircle className="h-5 w-5" />
                   )}
@@ -243,7 +243,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
           {step === 'download' && statusData && (
             <div className="space-y-4">
               <Alert className="border-green-500 bg-green-50">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle2 className="h-5 w-5 text-status-success" />
                 <AlertDescription>
                   <div className="font-medium mb-2">{t('crud.messages.exportReady')}</div>
                   <Button onClick={handleDownload} className="mt-2">

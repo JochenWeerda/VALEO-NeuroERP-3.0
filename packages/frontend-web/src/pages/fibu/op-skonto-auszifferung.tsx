@@ -97,7 +97,7 @@ export default function OpSkontoAuszifferungPage() {
                             try { await storno.mutateAsync(a.id); toast.success('Storniert.') }
                             catch (e) { toast.error(e instanceof Error ? e.message : 'Stornieren fehlgeschlagen') }
                           }}>
-                          <Ban className="h-4 w-4 text-red-600" />
+                          <Ban className="h-4 w-4 text-status-error" />
                         </Button>
                       )}
                     </TableCell>

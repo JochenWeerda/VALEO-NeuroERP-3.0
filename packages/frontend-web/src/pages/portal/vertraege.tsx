@@ -113,7 +113,7 @@ export default function PortalVertraege() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -126,7 +126,7 @@ export default function PortalVertraege() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>

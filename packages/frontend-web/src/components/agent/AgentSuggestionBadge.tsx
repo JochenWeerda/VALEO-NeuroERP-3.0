@@ -77,7 +77,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
             </Badge>
           )}
           {agent.status === 'error' && (
-            <AlertCircle className="h-3 w-3 text-red-500 shrink-0" />
+            <AlertCircle className="h-3 w-3 text-status-error shrink-0" />
           )}
         </div>
 

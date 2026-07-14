@@ -25,9 +25,9 @@ const typeIcons = {
 
 const typeColors = {
   info: 'text-blue-500',
-  success: 'text-green-500',
-  warning: 'text-amber-500',
-  error: 'text-red-500',
+  success: 'text-status-success',
+  warning: 'text-status-warning',
+  error: 'text-status-error',
 }
 
 const typeBgColors = {

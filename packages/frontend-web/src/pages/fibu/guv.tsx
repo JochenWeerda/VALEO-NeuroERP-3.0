@@ -128,8 +128,8 @@ export default function GuvPage(): JSX.Element {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <span className="text-2xl font-bold text-green-600">{fmt(gesamtertraege)}</span>
+                  <TrendingUp className="h-5 w-5 text-status-success" />
+                  <span className="text-2xl font-bold text-status-success">{fmt(gesamtertraege)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -138,7 +138,7 @@ export default function GuvPage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">Aufwendungen</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-2xl font-bold text-red-600">{fmt(gesamtaufwendungen)}</span>
+                <span className="text-2xl font-bold text-status-error">{fmt(gesamtaufwendungen)}</span>
               </CardContent>
             </Card>
             <Card>
@@ -146,7 +146,7 @@ export default function GuvPage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">Jahresüberschuss</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className={`text-2xl font-bold ${jahresueberschuss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-2xl font-bold ${jahresueberschuss >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                   {fmt(jahresueberschuss)}
                 </span>
               </CardContent>
@@ -157,7 +157,7 @@ export default function GuvPage(): JSX.Element {
             {/* ERTRÄGE */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-green-600">ERTRÄGE</CardTitle>
+                <CardTitle className="text-xl text-status-success">ERTRÄGE</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -169,7 +169,7 @@ export default function GuvPage(): JSX.Element {
                   ))}
                   <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold text-lg">
                     <span>Gesamterträge</span>
-                    <span className="text-green-600">{fmt(gesamtertraege)}</span>
+                    <span className="text-status-success">{fmt(gesamtertraege)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -178,7 +178,7 @@ export default function GuvPage(): JSX.Element {
             {/* AUFWENDUNGEN */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-red-600">AUFWENDUNGEN</CardTitle>
+                <CardTitle className="text-xl text-status-error">AUFWENDUNGEN</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -190,7 +190,7 @@ export default function GuvPage(): JSX.Element {
                   ))}
                   <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold text-lg">
                     <span>Gesamtaufwendungen</span>
-                    <span className="text-red-600">{fmt(gesamtaufwendungen)}</span>
+                    <span className="text-status-error">{fmt(gesamtaufwendungen)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -201,7 +201,7 @@ export default function GuvPage(): JSX.Element {
               <CardContent className="pt-6">
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold">JAHRESÜBERSCHUSS/-FEHLBETRAG</span>
-                  <span className={`text-3xl font-bold ${jahresueberschuss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`text-3xl font-bold ${jahresueberschuss >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                     {fmt(jahresueberschuss)}
                   </span>
                 </div>

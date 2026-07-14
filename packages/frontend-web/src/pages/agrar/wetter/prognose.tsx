@@ -25,10 +25,10 @@ const wetterIcon = (cond?: string) => {
   if (cond.includes('rain') || cond.includes('drizzle') || cond.includes('shower'))
     return <CloudRain className="h-10 w-10 text-blue-500" />
   if (cond.includes('thunder') || cond.includes('lightning'))
-    return <Zap className="h-10 w-10 text-yellow-500" />
+    return <Zap className="h-10 w-10 text-status-warning" />
   if (cond.includes('cloud') || cond.includes('fog') || cond.includes('overcast'))
     return <Cloud className="h-10 w-10 text-gray-500" />
-  return <Sun className="h-10 w-10 text-yellow-500" />
+  return <Sun className="h-10 w-10 text-status-warning" />
 }
 
 const fmt = (n?: number | null, unit = '') =>
@@ -114,7 +114,7 @@ export default function WetterPrognosePage(): JSX.Element {
             <Card key={w.id} className="border-orange-400 bg-orange-50">
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 shrink-0" />
+                  <AlertTriangle className="h-5 w-5 text-status-warning mt-0.5 shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-orange-900">{w.headline}</span>
@@ -144,7 +144,7 @@ export default function WetterPrognosePage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sun className="h-6 w-6 text-yellow-500" />
+              <Sun className="h-6 w-6 text-status-warning" />
               Aktuell
               {aktuell.timestamp && (
                 <span className="text-sm font-normal text-muted-foreground ml-2">
@@ -223,7 +223,7 @@ export default function WetterPrognosePage(): JSX.Element {
                         <div className="my-2">
                           {regen
                             ? <CloudRain className="h-8 w-8 mx-auto text-blue-500" />
-                            : <Sun className="h-8 w-8 mx-auto text-yellow-500" />}
+                            : <Sun className="h-8 w-8 mx-auto text-status-warning" />}
                         </div>
                         <div className="text-lg font-bold">{fmt(tag.temperatur_max, '°')}</div>
                         <div className="text-sm text-muted-foreground">{fmt(tag.temperatur_min, '°')}</div>

@@ -50,12 +50,12 @@ export default function CallbackPage(): JSX.Element {
         <Card className="w-full max-w-md border-red-200">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <XCircle className="h-8 w-8 text-red-600" />
+              <XCircle className="h-8 w-8 text-status-error" />
               <CardTitle className="text-red-900">Anmeldung fehlgeschlagen</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-status-error">{error}</p>
             <div className="mt-4">
               <a href={LOGIN_PATH} className="text-sm text-blue-600 hover:underline">
                 Zurueck zur Anmeldung

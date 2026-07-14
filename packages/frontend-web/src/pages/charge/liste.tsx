@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useCharges, type Charge } from '@/lib/api/charges'
 import { Badge } from '@/components/ui/badge'
@@ -115,7 +115,7 @@ export default function ChargenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Freigegeben</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{chargen.filter((c) => c.status === 'freigegeben').length}</span>
+            <span className="text-2xl font-bold text-status-success">{chargen.filter((c) => c.status === 'freigegeben').length}</span>
           </CardContent>
         </Card>
 
@@ -124,7 +124,7 @@ export default function ChargenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">In Pruefung</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{inPruefung}</span>
+            <span className="text-2xl font-bold text-status-warning">{inPruefung}</span>
           </CardContent>
         </Card>
       </div>

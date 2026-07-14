@@ -97,7 +97,7 @@ export default function AbschlussPage(): JSX.Element {
           {/* Star Rating */}
           <div className="space-y-2">
             <Label>
-              Kundenzufriedenheit <span className="text-red-500">*</span>
+              Kundenzufriedenheit <span className="text-status-error">*</span>
             </Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((rating) => (

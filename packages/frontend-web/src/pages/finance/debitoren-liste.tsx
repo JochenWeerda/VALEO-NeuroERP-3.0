@@ -45,7 +45,7 @@ const createDebitorenListConfig = (t: TFunction): ListConfig => ({
       render: (value, row) => {
         const overdue = row.mahnstufe > 0
         return (
-          <span className={overdue ? 'text-red-600 font-semibold' : ''}>
+          <span className={overdue ? 'text-status-error font-semibold' : ''}>
             {formatCurrency(value || 0)}
           </span>
         )
@@ -62,8 +62,8 @@ const createDebitorenListConfig = (t: TFunction): ListConfig => ({
         const daysUntil = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
         let color = 'text-gray-600'
-        if (daysUntil < 0) color = 'text-red-600'
-        else if (daysUntil <= 7) color = 'text-orange-600'
+        if (daysUntil < 0) color = 'text-status-error'
+        else if (daysUntil <= 7) color = 'text-status-warning'
         else if (daysUntil <= 30) color = 'text-blue-600'
 
         return <span className={color}>{date.toLocaleDateString('de-DE')}</span>

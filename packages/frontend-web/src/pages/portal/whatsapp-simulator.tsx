@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
@@ -195,7 +195,7 @@ export default function WhatsAppSimulator() {
                   <Row label="Lieferdatum" value={partialOrder.lieferdatum} />
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Konfidenz</span>
-                    <span className={partialOrder.konfidenz >= 0.8 ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>{Math.round(partialOrder.konfidenz * 100)} %</span>
+                    <span className={partialOrder.konfidenz >= 0.8 ? 'text-status-success font-medium' : 'text-status-warning font-medium'}>{Math.round(partialOrder.konfidenz * 100)} %</span>
                   </div>
                   {partialOrder.fehlende_felder.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">

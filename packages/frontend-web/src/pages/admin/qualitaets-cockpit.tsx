@@ -42,19 +42,19 @@ const STATUS_CONFIG = {
     label: "OK",
     variant: "default" as const,
     icon: CheckCircle2,
-    className: "text-green-600",
+    className: "text-status-success",
   },
   warn: {
     label: "Warnung",
     variant: "secondary" as const,
     icon: AlertTriangle,
-    className: "text-yellow-600",
+    className: "text-status-warning",
   },
   fail: {
     label: "Fehler",
     variant: "destructive" as const,
     icon: XCircle,
-    className: "text-red-600",
+    className: "text-status-error",
   },
 } as const;
 
@@ -144,15 +144,15 @@ export default function QualitaetsCockpitPage() {
             <div className="text-xs text-muted-foreground">Gesamtstatus</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-green-600">{summary.pass ?? 0}</div>
+            <div className="text-2xl font-bold text-status-success">{summary.pass ?? 0}</div>
             <div className="text-xs text-muted-foreground">OK</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-yellow-600">{summary.warn ?? 0}</div>
+            <div className="text-2xl font-bold text-status-warning">{summary.warn ?? 0}</div>
             <div className="text-xs text-muted-foreground">Warnungen</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-red-600">{summary.fail ?? 0}</div>
+            <div className="text-2xl font-bold text-status-error">{summary.fail ?? 0}</div>
             <div className="text-xs text-muted-foreground">Fehler</div>
           </Card>
         </div>

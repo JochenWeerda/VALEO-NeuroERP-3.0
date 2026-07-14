@@ -174,7 +174,7 @@ export default function SicherheitenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <span className={`text-2xl font-bold ${auslastung > 80 ? 'text-red-600' : auslastung > 60 ? 'text-orange-600' : 'text-green-600'}`}>
+              <span className={`text-2xl font-bold ${auslastung > 80 ? 'text-status-error' : auslastung > 60 ? 'text-status-warning' : 'text-status-success'}`}>
                 {auslastung.toFixed(0)}%
               </span>
             </div>

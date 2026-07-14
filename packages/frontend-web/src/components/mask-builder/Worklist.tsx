@@ -115,7 +115,7 @@ const Worklist: React.FC<WorklistProps> = ({
                 <span>
                   Fällig: {new Date(item.dueDate).toLocaleDateString('de-DE')}
                   {new Date(item.dueDate) < new Date() && item.status !== 'completed' && (
-                    <span className="text-red-600 ml-1">(Überfällig)</span>
+                    <span className="text-status-error ml-1">(Überfällig)</span>
                   )}
                 </span>
               )}
@@ -265,7 +265,7 @@ const Worklist: React.FC<WorklistProps> = ({
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-status-warning">
                 {items.filter(i => i.status === 'pending').length}
               </div>
               <div className="text-sm text-muted-foreground">Ausstehend</div>
@@ -277,13 +277,13 @@ const Worklist: React.FC<WorklistProps> = ({
               <div className="text-sm text-muted-foreground">In Bearbeitung</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-status-success">
                 {items.filter(i => i.status === 'completed').length}
               </div>
               <div className="text-sm text-muted-foreground">Abgeschlossen</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-status-error">
                 {items.filter(i => i.status === 'overdue').length}
               </div>
               <div className="text-sm text-muted-foreground">Überfällig</div>

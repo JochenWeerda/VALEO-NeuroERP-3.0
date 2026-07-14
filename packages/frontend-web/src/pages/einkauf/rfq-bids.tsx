@@ -449,7 +449,7 @@ export default function RfqBidsPage(): JSX.Element {
                     </Card>
                     <Card>
                       <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600">
+                        <div className="text-2xl font-bold text-status-success">
                           {formatNumber(
                             Math.min(...bids.map(bid => bid.totalValue)),
                             2
@@ -460,7 +460,7 @@ export default function RfqBidsPage(): JSX.Element {
                     </Card>
                     <Card>
                       <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-red-600">
+                        <div className="text-2xl font-bold text-status-error">
                           {formatNumber(
                             Math.max(...bids.map(bid => bid.totalValue)),
                             2
@@ -678,7 +678,7 @@ export default function RfqBidsPage(): JSX.Element {
                       return (
                         <TableRow key={bid.id}>
                           <TableCell className="font-medium">{bid.supplierName}</TableCell>
-                          <TableCell className={`text-right ${isLowestPrice ? 'font-bold text-green-600' : ''}`}>
+                          <TableCell className={`text-right ${isLowestPrice ? 'font-bold text-status-success' : ''}`}>
                             {formatNumber(bid.totalValue, 2)} {bid.currency}
                             {isLowestPrice && <Badge variant="outline" className="ml-2">{t('crud.fields.bestPrice')}</Badge>}
                           </TableCell>
@@ -688,7 +688,7 @@ export default function RfqBidsPage(): JSX.Element {
                           <TableCell>
                             {bid.items[0]?.deliveryDate ? formatDate(bid.items[0].deliveryDate) : '-'}
                           </TableCell>
-                          <TableCell className={isShortestLeadTime ? 'font-bold text-green-600' : ''}>
+                          <TableCell className={isShortestLeadTime ? 'font-bold text-status-success' : ''}>
                             {bid.items[0]?.leadTime ? `${bid.items[0].leadTime} ${t('crud.fields.days')}` : '-'}
                             {isShortestLeadTime && <Badge variant="outline" className="ml-2">{t('crud.fields.fastestDelivery')}</Badge>}
                           </TableCell>
@@ -733,10 +733,10 @@ export default function RfqBidsPage(): JSX.Element {
                             .sort((a, b) => a.totalValue - b.totalValue)
                             .map((bid, index) => (
                               <div key={bid.id} className="flex items-center justify-between p-2 border rounded">
-                                <span className={index === 0 ? 'font-bold text-green-600' : ''}>
+                                <span className={index === 0 ? 'font-bold text-status-success' : ''}>
                                   {bid.supplierName}
                                 </span>
-                                <span className={index === 0 ? 'font-bold text-green-600' : ''}>
+                                <span className={index === 0 ? 'font-bold text-status-success' : ''}>
                                   {formatNumber(bid.totalValue, 2)} {bid.currency}
                                 </span>
                               </div>
@@ -755,10 +755,10 @@ export default function RfqBidsPage(): JSX.Element {
                             .sort((a, b) => (a.items[0]?.leadTime || Infinity) - (b.items[0]?.leadTime || Infinity))
                             .map((bid, index) => (
                               <div key={bid.id} className="flex items-center justify-between p-2 border rounded">
-                                <span className={index === 0 ? 'font-bold text-green-600' : ''}>
+                                <span className={index === 0 ? 'font-bold text-status-success' : ''}>
                                   {bid.supplierName}
                                 </span>
-                                <span className={index === 0 ? 'font-bold text-green-600' : ''}>
+                                <span className={index === 0 ? 'font-bold text-status-success' : ''}>
                                   {bid.items[0]?.leadTime ? `${bid.items[0].leadTime} ${t('crud.fields.days')}` : '-'}
                                 </span>
                               </div>

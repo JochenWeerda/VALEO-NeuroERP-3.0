@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useSaatgutNachbau, type SaatgutNachbau } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -85,7 +85,7 @@ export default function SaatgutNachbauPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bezahlt</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-green-600">{nachbau.filter((n) => n.status === 'bezahlt').length}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-success">{nachbau.filter((n) => n.status === 'bezahlt').length}</span></CardContent>
         </Card>
       </div>
 

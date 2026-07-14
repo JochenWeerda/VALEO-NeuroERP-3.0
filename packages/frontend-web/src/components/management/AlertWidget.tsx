@@ -47,12 +47,12 @@ interface AlertWidgetProps {
 const typeStyles = {
   critical: {
     bg: 'bg-red-50 border-red-200',
-    icon: 'text-red-600',
+    icon: 'text-status-error',
     badge: 'bg-red-100 text-red-700',
   },
   warning: {
     bg: 'bg-amber-50 border-amber-200',
-    icon: 'text-amber-600',
+    icon: 'text-status-warning',
     badge: 'bg-amber-100 text-amber-700',
   },
   info: {
@@ -62,7 +62,7 @@ const typeStyles = {
   },
   success: {
     bg: 'bg-emerald-50 border-emerald-200',
-    icon: 'text-emerald-600',
+    icon: 'text-status-success',
     badge: 'bg-emerald-100 text-emerald-700',
   },
 }
@@ -142,7 +142,7 @@ export function AlertWidget({
       <div className="divide-y">
         {displayAlerts.length === 0 ? (
           <div className="px-4 py-8 text-center text-muted-foreground">
-            <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-emerald-500" />
+            <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-status-success" />
             <p>Keine offenen Meldungen</p>
           </div>
         ) : (

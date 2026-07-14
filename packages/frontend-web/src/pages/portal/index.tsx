@@ -148,7 +148,7 @@ function PreisspiegalWidget() {
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <div>
           <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
+            <TrendingUp className="h-5 w-5 text-status-success" />
             Aktuelle Getreidekurse
           </CardTitle>
           <CardDescription>
@@ -257,7 +257,7 @@ function EmpfehlungsBanner() {
             </div>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-amber-600 shrink-0" />
+        <ChevronRight className="h-5 w-5 text-status-warning shrink-0" />
       </div>
     </Link>
   )
@@ -540,8 +540,8 @@ function KPICard({
 }) {
   const colorClasses = {
     blue: 'bg-blue-50 text-blue-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    amber: 'bg-amber-50 text-amber-600',
+    emerald: 'bg-emerald-50 text-status-success',
+    amber: 'bg-amber-50 text-status-warning',
     purple: 'bg-purple-50 text-purple-600',
   }
 

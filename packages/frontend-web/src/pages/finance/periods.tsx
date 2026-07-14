@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Accounting Period Management
  * FIBU-GL-05: Periodensteuerung
  * Verwaltung von Buchungsperioden (Öffnen/Sperren)
@@ -323,7 +323,7 @@ export default function PeriodsPage(): JSX.Element {
       <Card className="border-yellow-200 bg-yellow-50">
         <CardContent className="pt-6">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-status-warning mt-0.5" />
             <div>
               <p className="text-sm font-medium text-yellow-800">{t('finance.periods.infoTitle')}</p>
               <p className="text-sm text-yellow-700 mt-1">{t('finance.periods.infoDescription')}</p>

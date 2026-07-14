@@ -57,9 +57,9 @@ const statusVariantMap: Record<
 }
 
 const statusIconMap: Record<Zahlungseingang['match_status'], JSX.Element> = {
-  MATCHED: <CheckCircle className="h-4 w-4 text-green-600" />,
-  UNMATCHED: <AlertTriangle className="h-4 w-4 text-orange-600" />,
-  PARTIAL: <AlertTriangle className="h-4 w-4 text-yellow-600" />,
+  MATCHED: <CheckCircle className="h-4 w-4 text-status-success" />,
+  UNMATCHED: <AlertTriangle className="h-4 w-4 text-status-warning" />,
+  PARTIAL: <AlertTriangle className="h-4 w-4 text-status-warning" />,
   MANUAL: <Link2 className="h-4 w-4 text-blue-600" />,
 }
 
@@ -311,7 +311,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
         zahlung.confidence !== undefined ? (
           <div className="flex items-center gap-1">
             <span className="text-sm font-medium">{Math.round(zahlung.confidence * 100)}%</span>
-            {zahlung.confidence > 0.8 && <CheckCircle className="h-3 w-3 text-green-600" />}
+            {zahlung.confidence > 0.8 && <CheckCircle className="h-3 w-3 text-status-success" />}
           </div>
         ) : (
           <span className="text-sm text-muted-foreground">-</span>
@@ -431,7 +431,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <AlertTriangle className="h-5 w-5 text-status-warning" />
               <span className="text-2xl font-bold">{offeneZahlungen}</span>
             </div>
           </CardContent>
@@ -454,7 +454,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{matchRate}%</span>
             </div>
           </CardContent>

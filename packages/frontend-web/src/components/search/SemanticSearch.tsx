@@ -128,9 +128,9 @@ export function SemanticSearch() {
       case 'customer':
         return <User className="h-5 w-5 text-blue-600" />
       case 'article':
-        return <Package className="h-5 w-5 text-green-600" />
+        return <Package className="h-5 w-5 text-status-success" />
       case 'document':
-        return <FileText className="h-5 w-5 text-orange-600" />
+        return <FileText className="h-5 w-5 text-status-warning" />
       default:
         return <Search className="h-5 w-5" />
     }

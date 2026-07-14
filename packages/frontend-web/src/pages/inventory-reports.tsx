@@ -149,20 +149,20 @@ export default function InventoryReportsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                <AlertTriangle className="h-4 w-4 text-status-warning" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-600">{stockLevels?.low_stock_count || 0}</div>
+                <div className="text-2xl font-bold text-status-warning">{stockLevels?.low_stock_count || 0}</div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-red-500" />
+                <AlertTriangle className="h-4 w-4 text-status-error" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">{stockLevels?.out_of_stock_count || 0}</div>
+                <div className="text-2xl font-bold text-status-error">{stockLevels?.out_of_stock_count || 0}</div>
               </CardContent>
             </Card>
           </div>
@@ -189,7 +189,7 @@ export default function InventoryReportsPage() {
                       <TableCell>{alert.name}</TableCell>
                       <TableCell>{alert.current_stock}</TableCell>
                       <TableCell>{alert.min_stock}</TableCell>
-                      <TableCell className="text-red-600">-{alert.deficit}</TableCell>
+                      <TableCell className="text-status-error">-{alert.deficit}</TableCell>
                       <TableCell>
                         <Badge variant="destructive">Low Stock</Badge>
                       </TableCell>
@@ -322,17 +322,17 @@ export default function InventoryReportsPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Normal Stock:</span>
-                    <span className="font-medium text-green-600">
+                    <span className="font-medium text-status-success">
                       {stockLevels?.total_articles - (stockLevels?.low_stock_count + stockLevels?.out_of_stock_count) || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Low Stock:</span>
-                    <span className="font-medium text-orange-600">{stockLevels?.low_stock_count || 0}</span>
+                    <span className="font-medium text-status-warning">{stockLevels?.low_stock_count || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Out of Stock:</span>
-                    <span className="font-medium text-red-600">{stockLevels?.out_of_stock_count || 0}</span>
+                    <span className="font-medium text-status-error">{stockLevels?.out_of_stock_count || 0}</span>
                   </div>
                 </div>
               </CardContent>

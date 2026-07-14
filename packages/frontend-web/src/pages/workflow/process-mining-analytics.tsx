@@ -77,7 +77,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
       key: 'p95_duration_sec' as const,
       label: 'P95 Dauer',
       render: (p: ProcessSummary) => (
-        <span className={`font-mono ${p.p95_duration_sec > p.avg_duration_sec * 3 ? 'text-red-600 font-semibold' : ''}`}>
+        <span className={`font-mono ${p.p95_duration_sec > p.avg_duration_sec * 3 ? 'text-status-error font-semibold' : ''}`}>
           {p.p95_duration_sec.toFixed(1)}s
         </span>
       ),
@@ -87,8 +87,8 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
       label: 'Fehlerrate',
       render: (p: ProcessSummary) => (
         <div className="flex items-center gap-1">
-          {p.error_rate_pct > 5 ? <XCircle className="h-4 w-4 text-red-500" /> : <CheckCircle className="h-4 w-4 text-green-500" />}
-          <span className={p.error_rate_pct > 5 ? 'text-red-600 font-semibold' : ''}>{p.error_rate_pct.toFixed(1)}%</span>
+          {p.error_rate_pct > 5 ? <XCircle className="h-4 w-4 text-status-error" /> : <CheckCircle className="h-4 w-4 text-status-success" />}
+          <span className={p.error_rate_pct > 5 ? 'text-status-error font-semibold' : ''}>{p.error_rate_pct.toFixed(1)}%</span>
         </div>
       ),
     },
@@ -119,7 +119,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
       key: 'current_value' as const,
       label: 'Aktuell / Schwelle',
       render: (b: ProcessBottleneck) => (
-        <span className="font-mono text-sm text-red-600">
+        <span className="font-mono text-sm text-status-error">
           {b.current_value.toFixed(1)} / {b.threshold_value.toFixed(1)}
         </span>
       ),
@@ -170,7 +170,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ausführungen gesamt</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+              <TrendingUp className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{processes.reduce((s, p) => s + p.total_executions, 0).toLocaleString('de-DE')}</span>
             </div>
           </CardContent>
@@ -179,15 +179,15 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Engpässe</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{bottlenecks.length}</span>
+              <Clock className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">{bottlenecks.length}</span>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kritische Engpässe</CardTitle></CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{hochBottlenecks}</span>
+            <span className="text-2xl font-bold text-status-error">{hochBottlenecks}</span>
           </CardContent>
         </Card>
       </div>
@@ -209,7 +209,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
               </div>
               <div>
                 <span className="text-muted-foreground">SLA-Einhaltung: </span>
-                <span className={`font-mono font-semibold ${drilldown.sla_compliance_pct < 95 ? 'text-red-600' : 'text-green-600'}`}>
+                <span className={`font-mono font-semibold ${drilldown.sla_compliance_pct < 95 ? 'text-status-error' : 'text-status-success'}`}>
                   {drilldown.sla_compliance_pct.toFixed(1)}%
                 </span>
               </div>
@@ -218,12 +218,12 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
               {drilldown.steps.map((step) => (
                 <div key={step.step_name} className={`flex items-center justify-between rounded p-2 text-sm ${step.is_bottleneck ? 'bg-red-100 border border-red-300' : 'bg-white border'}`}>
                   <div className="flex items-center gap-2">
-                    {step.is_bottleneck && <AlertTriangle className="h-4 w-4 text-red-600" />}
+                    {step.is_bottleneck && <AlertTriangle className="h-4 w-4 text-status-error" />}
                     <span className={step.is_bottleneck ? 'font-semibold text-red-800' : ''}>{step.step_name}</span>
                   </div>
                   <div className="flex gap-4 text-muted-foreground font-mono text-xs">
                     <span>{step.avg_duration_sec.toFixed(1)}s</span>
-                    {step.error_count > 0 && <span className="text-red-600">{step.error_count} Fehler</span>}
+                    {step.error_count > 0 && <span className="text-status-error">{step.error_count} Fehler</span>}
                   </div>
                 </div>
               ))}

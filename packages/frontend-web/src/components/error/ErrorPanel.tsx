@@ -85,12 +85,12 @@ const _categoryIcon: Record<ErrorCategory, React.ReactNode> = {
 
 const _categoryColor: Record<ErrorCategory, string> = {
   NETWORK:       'text-slate-500 bg-slate-50 border-slate-200',
-  VALIDATION:    'text-amber-600 bg-amber-50 border-amber-200',
-  AUTHORIZATION: 'text-red-600 bg-red-50 border-red-200',
+  VALIDATION:    'text-status-warning bg-amber-50 border-amber-200',
+  AUTHORIZATION: 'text-status-error bg-red-50 border-red-200',
   NOT_FOUND:     'text-slate-500 bg-slate-50 border-slate-200',
-  SERVER:        'text-red-600 bg-red-50 border-red-200',
-  CONFLICT:      'text-orange-600 bg-orange-50 border-orange-200',
-  TIMEOUT:       'text-amber-600 bg-amber-50 border-amber-200',
+  SERVER:        'text-status-error bg-red-50 border-red-200',
+  CONFLICT:      'text-status-warning bg-orange-50 border-orange-200',
+  TIMEOUT:       'text-status-warning bg-amber-50 border-amber-200',
   BUSINESS_RULE: 'text-blue-600 bg-blue-50 border-blue-200',
   UNKNOWN:       'text-slate-600 bg-slate-50 border-slate-200',
 }

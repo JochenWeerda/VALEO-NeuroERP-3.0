@@ -81,9 +81,9 @@ export default function PSMResistenzManagementPage(): JSX.Element {
 
   const getRisikoColor = (risiko: string) => {
     switch (risiko) {
-      case 'hoch': return 'text-red-600 bg-red-50'
-      case 'mittel': return 'text-orange-600 bg-orange-50'
-      case 'niedrig': return 'text-green-600 bg-green-50'
+      case 'hoch': return 'text-status-error bg-red-50'
+      case 'mittel': return 'text-status-warning bg-orange-50'
+      case 'niedrig': return 'text-status-success bg-green-50'
       default: return 'text-gray-600 bg-gray-50'
     }
   }

@@ -323,9 +323,9 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {pruefErgebnis.zulaessig ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-status-success" />
               ) : (
-                <XCircle className="h-5 w-5 text-red-600" />
+                <XCircle className="h-5 w-5 text-status-error" />
               )}
               Prüfergebnis
             </CardTitle>

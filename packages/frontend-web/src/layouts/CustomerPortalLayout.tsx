@@ -191,7 +191,7 @@ export default function CustomerPortalLayout() {
               </div>
               <span className="hidden text-xl font-bold sm:block">
                 VALEO{' '}
-                <span className={isTerraAgrar ? 'text-primary' : 'text-emerald-600'}>
+                <span className={isTerraAgrar ? 'text-primary' : 'text-status-success'}>
                   Portal
                 </span>
               </span>
@@ -302,7 +302,7 @@ export default function CustomerPortalLayout() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                    className="mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-status-error hover:bg-red-50"
                   >
                     <LogOut className="h-4 w-4" />
                     Abmelden
@@ -325,7 +325,7 @@ export default function CustomerPortalLayout() {
           <aside className="relative h-full w-80 max-w-[85vw] overflow-y-auto border-r bg-white p-4 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <Leaf className={clsx('h-6 w-6', isTerraAgrar ? 'text-primary' : 'text-emerald-600')} />
+                <Leaf className={clsx('h-6 w-6', isTerraAgrar ? 'text-primary' : 'text-status-success')} />
                 Kundenportal
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
@@ -343,7 +343,7 @@ export default function CustomerPortalLayout() {
                     <ArrowLeft className="h-5 w-5" />
                     Zur Startseite
                   </span>
-                  <ChevronRight className="h-4 w-4 text-emerald-600" />
+                  <ChevronRight className="h-4 w-4 text-status-success" />
                 </Link>
               )}
               {customerNavItems.map((item) => (
@@ -382,7 +382,7 @@ export default function CustomerPortalLayout() {
                   isActivePath(item.path)
                     ? isTerraAgrar
                       ? 'text-primary'
-                      : 'text-emerald-600'
+                      : 'text-status-success'
                     : isTerraAgrar
                       ? 'text-muted-foreground'
                       : 'text-gray-500',

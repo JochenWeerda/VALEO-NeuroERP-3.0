@@ -58,7 +58,7 @@ const renderTrend = (trend: OverviewKpi['trend']): ReactNode => {
   }
 
   const Icon = trend.direction === 'up' ? TrendingUp : TrendingDown
-  const trendClass = trend.direction === 'up' ? 'text-green-600' : 'text-red-600'
+  const trendClass = trend.direction === 'up' ? 'text-status-success' : 'text-status-error'
 
   return (
     <span className={cn('mt-2 flex items-center gap-1 text-sm', trendClass)}>

@@ -310,7 +310,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.balancedAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{summary.balanced_accounts ?? 0}</div>
+              <div className="text-2xl font-bold text-status-success">{summary.balanced_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -318,7 +318,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.unbalancedAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{summary.unbalanced_accounts ?? 0}</div>
+              <div className="text-2xl font-bold text-status-error">{summary.unbalanced_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -405,7 +405,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell className="text-right">
                       {parseFloat(entry.general_ledger_balance).toFixed(2)} €
                     </TableCell>
-                    <TableCell className={`text-right ${Math.abs(parseFloat(entry.difference)) >= 0.01 ? 'text-red-600 font-bold' : ''}`}>
+                    <TableCell className={`text-right ${Math.abs(parseFloat(entry.difference)) >= 0.01 ? 'text-status-error font-bold' : ''}`}>
                       {parseFloat(entry.difference).toFixed(2)} €
                     </TableCell>
                     <TableCell>

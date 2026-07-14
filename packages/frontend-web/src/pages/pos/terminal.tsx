@@ -650,7 +650,7 @@ export default function POSTerminalPage(): JSX.Element {
                     <div className="text-sm font-semibold leading-tight line-clamp-1">{item.bezeichnung}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {item.menge} × {fmt(item.preis)}
-                      {item.rabatt_pct ? <span className="text-orange-500 ml-1">−{item.rabatt_pct}%</span> : null}
+                      {item.rabatt_pct ? <span className="text-status-warning ml-1">−{item.rabatt_pct}%</span> : null}
                       <span className="font-semibold text-foreground ml-1">= {fmt(item.preis * (1 - (item.rabatt_pct ?? 0) / 100) * item.menge)}</span>
                     </div>
                   </div>
@@ -660,7 +660,7 @@ export default function POSTerminalPage(): JSX.Element {
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge + 1)}>+</Button>
                     <Button
                       size="sm" variant="ghost"
-                      className={`h-8 w-8 p-0 ${item.rabatt_pct ? 'text-orange-500' : 'text-muted-foreground'} hover:text-orange-500`}
+                      className={`h-8 w-8 p-0 ${item.rabatt_pct ? 'text-status-warning' : 'text-muted-foreground'} hover:text-status-warning`}
                       onClick={() => { setRabattTargetEan(item.ean); setRabattInput(String(item.rabatt_pct ?? '')); setShowRabattDialog(true) }}
                       title="Rabatt"
                     >

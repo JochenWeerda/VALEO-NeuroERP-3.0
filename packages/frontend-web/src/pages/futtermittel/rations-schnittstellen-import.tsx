@@ -206,8 +206,8 @@ export default function RationsSchnittstellenImport() {
             <div className="space-y-3">
               <div className="flex items-center gap-2 rounded-lg border p-3" style={{ borderColor: result.duplicate ? '#FCD34D' : '#6EE7B7', background: result.duplicate ? '#FFFBEB' : '#ECFDF5' }}>
                 {result.duplicate
-                  ? <AlertTriangle className="h-5 w-5 text-amber-600" />
-                  : <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
+                  ? <AlertTriangle className="h-5 w-5 text-status-warning" />
+                  : <CheckCircle2 className="h-5 w-5 text-status-success" />}
                 <span className="text-sm font-semibold">
                   {result.duplicate ? 'Bereits importiert (idempotent übersprungen)' : 'Import erfolgreich'}
                 </span>
@@ -235,7 +235,7 @@ export default function RationsSchnittstellenImport() {
       <section className="rounded-2xl border bg-white p-4 shadow-sm">
         <h2 className="mb-2 font-bold">Importjournal ({adapter.label})</h2>
         {journal.isLoading && <p className="text-sm text-slate-500">Lade Journal…</p>}
-        {journal.isError && <p className="text-sm text-red-600">Journal konnte nicht geladen werden.</p>}
+        {journal.isError && <p className="text-sm text-status-error">Journal konnte nicht geladen werden.</p>}
         {journal.data && journal.data.length === 0 && <p className="text-sm text-slate-500">Noch keine Importe für diesen Adapter.</p>}
         {journal.data && journal.data.length > 0 && (
           <div className="overflow-x-auto">

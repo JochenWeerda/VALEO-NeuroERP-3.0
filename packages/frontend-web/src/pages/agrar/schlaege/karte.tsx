@@ -59,7 +59,7 @@ export default function SchlagKartePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Sprout className="h-5 w-5 text-green-600" />
+              <Sprout className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{flaeche.toFixed(1)} ha</span>
             </div>
           </CardContent>

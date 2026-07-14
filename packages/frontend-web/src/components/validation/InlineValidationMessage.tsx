@@ -54,9 +54,9 @@ const _iconFor = (severity: ValidationSeverity) => {
 const _colorFor = (severity: ValidationSeverity) => {
   switch (severity) {
     case 'ERROR':
-      return 'text-red-600'
+      return 'text-status-error'
     case 'WARNING':
-      return 'text-amber-600'
+      return 'text-status-warning'
     case 'INFO':
       return 'text-blue-600'
   }
@@ -111,7 +111,7 @@ export function InlineValidationMessage({
   if (result.is_valid && !result.has_warnings && result.messages.length === 0) {
     if (!showSuccessIcon) return null
     return (
-      <div className={cn('flex items-center gap-1 text-xs text-green-600', className)}>
+      <div className={cn('flex items-center gap-1 text-xs text-status-success', className)}>
         <CheckCircle2 className="h-3.5 w-3.5" />
         <span>Gültig</span>
       </div>

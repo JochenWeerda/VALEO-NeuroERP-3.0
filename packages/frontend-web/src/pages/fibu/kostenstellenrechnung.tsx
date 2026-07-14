@@ -733,7 +733,7 @@ function BABTab(): JSX.Element {
   }
 
   const abwColor = (pct: number) =>
-    pct >= 0 ? 'text-green-600' : Math.abs(pct) < 10 ? 'text-amber-600' : 'text-red-600'
+    pct >= 0 ? 'text-status-success' : Math.abs(pct) < 10 ? 'text-status-warning' : 'text-status-error'
 
   return (
     <div className="space-y-4">
@@ -790,7 +790,7 @@ function BABTab(): JSX.Element {
                         <td className="p-2">{z.bezeichnung}</td>
                         <td className="p-2 text-right">{z.primaerkosten_eur.toFixed(2)}</td>
                         <td className="p-2 text-right text-green-700">{z.umlage_eingang_eur > 0 ? `+${z.umlage_eingang_eur.toFixed(2)}` : '—'}</td>
-                        <td className="p-2 text-right text-red-600">{z.umlage_ausgang_eur > 0 ? `-${z.umlage_ausgang_eur.toFixed(2)}` : '—'}</td>
+                        <td className="p-2 text-right text-status-error">{z.umlage_ausgang_eur > 0 ? `-${z.umlage_ausgang_eur.toFixed(2)}` : '—'}</td>
                         <td className="p-2 text-right font-semibold">{z.gesamtkosten_eur.toFixed(2)}</td>
                         <td className="p-2 text-right">{z.budget_eur.toFixed(2)}</td>
                         <td className={`p-2 text-right font-medium ${abwColor(z.abweichung_pct)}`}>

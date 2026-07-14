@@ -81,11 +81,11 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
   const getComplianceIcon = (status: string) => {
     switch (status) {
       case 'ok':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <CheckCircle className="h-4 w-4 text-status-success" />
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-orange-600" />
+        return <AlertTriangle className="h-4 w-4 text-status-warning" />
       case 'critical':
-        return <XCircle className="h-4 w-4 text-red-600" />
+        return <XCircle className="h-4 w-4 text-status-error" />
       default:
         return null
     }
@@ -141,7 +141,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
         const istUeberfaellig = faellig < heute && auflage.status !== 'erfuellt'
 
         return (
-          <span className={istUeberfaellig ? 'font-semibold text-red-600' : ''}>
+          <span className={istUeberfaellig ? 'font-semibold text-status-error' : ''}>
             {faellig.toLocaleDateString('de-DE')}
           </span>
         )
@@ -184,7 +184,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
                   description: `Auflage für ${auflage.psm_name} als erledigt markiert.`,
                 })
               }}
-              className="text-green-600"
+              className="text-status-success"
             >
               <CheckCircle className="h-4 w-4" />
             </Button>
@@ -239,7 +239,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{statistik.offen}</span>
+            <span className="text-2xl font-bold text-status-warning">{statistik.offen}</span>
           </CardContent>
         </Card>
 
@@ -257,7 +257,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Überfällig</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{statistik.ueberfaellig}</span>
+            <span className="text-2xl font-bold text-status-error">{statistik.ueberfaellig}</span>
           </CardContent>
         </Card>
 
@@ -266,7 +266,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Erledigt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{statistik.erledigt}</span>
+            <span className="text-2xl font-bold text-status-success">{statistik.erledigt}</span>
           </CardContent>
         </Card>
       </div>

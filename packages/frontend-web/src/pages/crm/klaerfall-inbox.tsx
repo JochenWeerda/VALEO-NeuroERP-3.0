@@ -176,7 +176,7 @@ export default function KlaerfallInboxPage() {
                       </span>
                       {item.direction === 'aus'
                         ? <ArrowUpRight size={14} className="text-blue-500" aria-label="ausgehend" />
-                        : <ArrowDownLeft size={14} className="text-green-600" aria-label="eingehend" />}
+                        : <ArrowDownLeft size={14} className="text-status-success" aria-label="eingehend" />}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -216,7 +216,7 @@ export default function KlaerfallInboxPage() {
                       <div className="md:w-88 shrink-0 text-xs text-muted-foreground">
                         {item.status === 'zugeordnet' && (
                           <span className="inline-flex items-center gap-1">
-                            <UserCheck size={14} className="text-green-600" />
+                            <UserCheck size={14} className="text-status-success" />
                             {known ? `${known.name} (${item.kunden_nr})` : item.kunden_nr}
                             {item.resolved_by ? ` · ${item.resolved_by}` : ''}
                           </span>

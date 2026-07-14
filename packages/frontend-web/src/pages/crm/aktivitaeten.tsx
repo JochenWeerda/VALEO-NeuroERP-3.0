@@ -117,7 +117,7 @@ export default function AktivitaetenPage(): JSX.Element {
         const today = new Date()
         const isOverdue = dueDate < today && activity.status !== 'completed'
         return (
-          <span className={isOverdue ? 'font-semibold text-red-600' : ''}>
+          <span className={isOverdue ? 'font-semibold text-status-error' : ''}>
             {dueDate.toLocaleDateString('de-DE')}
           </span>
         )
@@ -142,7 +142,7 @@ export default function AktivitaetenPage(): JSX.Element {
     return (
       <div className="space-y-4 p-3 md:p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">{t('crud.messages.loadError')}</h1>
+          <h1 className="text-2xl font-bold text-status-error">{t('crud.messages.loadError')}</h1>
           <p className="text-muted-foreground">
             {error instanceof Error ? error.message : t('common.unknownError')}
           </p>
@@ -190,7 +190,7 @@ export default function AktivitaetenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">{t('status.overdue')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{overdueActivities}</span>
+            <span className="text-2xl font-bold text-status-error">{overdueActivities}</span>
           </CardContent>
         </Card>
 
@@ -199,7 +199,7 @@ export default function AktivitaetenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">{t('status.completed')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{completedActivities}</span>
+            <span className="text-2xl font-bold text-status-success">{completedActivities}</span>
           </CardContent>
         </Card>
       </div>

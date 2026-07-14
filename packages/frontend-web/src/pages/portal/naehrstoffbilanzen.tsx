@@ -111,9 +111,9 @@ export default function PortalNaehrstoffbilanzen() {
 
   const getSaldoColor = (saldo: number, grenzwert: number) => {
     if (saldo < 0) return 'text-blue-600'
-    if (saldo > grenzwert * 0.8) return 'text-amber-600'
-    if (saldo > grenzwert) return 'text-red-600'
-    return 'text-emerald-600'
+    if (saldo > grenzwert * 0.8) return 'text-status-warning'
+    if (saldo > grenzwert) return 'text-status-error'
+    return 'text-status-success'
   }
 
   const getSaldoIcon = (saldo: number) => {
@@ -252,7 +252,7 @@ export default function PortalNaehrstoffbilanzen() {
         </Alert>
       ) : (
         <Alert className="border-emerald-200 bg-emerald-50">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+          <CheckCircle2 className="h-4 w-4 text-status-success" />
           <AlertTitle className="text-emerald-800">Grenzwerte eingehalten</AlertTitle>
           <AlertDescription className="text-emerald-700">
             Der 3-Jahres-Durchschnitt liegt innerhalb der gesetzlichen Grenzwerte.
@@ -286,7 +286,7 @@ export default function PortalNaehrstoffbilanzen() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+                  <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                     <Leaf className="h-5 w-5" />
                   </div>
                   <div>
@@ -325,7 +325,7 @@ export default function PortalNaehrstoffbilanzen() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+                <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
@@ -405,7 +405,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className="font-medium">Kalium (K₂O)</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.zugang} kg/ha</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.abgang} kg/ha</TableCell>
-                  <TableCell className={`text-right font-bold ${currentBilanz.kalium.saldo < 0 ? 'text-blue-600' : 'text-emerald-600'}`}>
+                  <TableCell className={`text-right font-bold ${currentBilanz.kalium.saldo < 0 ? 'text-blue-600' : 'text-status-success'}`}>
                     {currentBilanz.kalium.saldo > 0 ? '+' : ''}{currentBilanz.kalium.saldo} kg/ha
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">-</TableCell>

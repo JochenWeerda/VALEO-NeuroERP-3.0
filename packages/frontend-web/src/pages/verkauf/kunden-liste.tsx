@@ -189,7 +189,7 @@ export default function KundenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktive Kunden</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{customers.filter((c) => c.status === 'active').length}</span>
+            <span className="text-2xl font-bold text-status-success">{customers.filter((c) => c.status === 'active').length}</span>
           </CardContent>
         </Card>
 
@@ -198,7 +198,7 @@ export default function KundenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gesperrt/Inaktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{customers.filter((c) => c.status !== 'active').length}</span>
+            <span className="text-2xl font-bold text-status-warning">{customers.filter((c) => c.status !== 'active').length}</span>
           </CardContent>
         </Card>
       </div>

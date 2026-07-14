@@ -98,7 +98,7 @@ export default function MobileScannerPage(): JSX.Element {
         <Card className="border-green-500">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-4">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+              <CheckCircle className="h-6 w-6 text-status-success" />
               <span className="font-semibold text-lg">Artikel gefunden</span>
             </div>
             <div className="space-y-3">

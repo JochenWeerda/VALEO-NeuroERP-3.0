@@ -90,10 +90,10 @@ const massnahmenRoles = [
 function getMassnahmeIcon(typ: string) {
   switch (typ) {
     case 'Düngung': return <Droplets className="h-4 w-4 text-blue-600" />
-    case 'PSM': return <Bug className="h-4 w-4 text-red-600" />
-    case 'PSM-Behandlung': return <Bug className="h-4 w-4 text-red-600" />
-    case 'Aussaat': return <Wheat className="h-4 w-4 text-amber-600" />
-    case 'Ernte': return <Wheat className="h-4 w-4 text-green-600" />
+    case 'PSM': return <Bug className="h-4 w-4 text-status-error" />
+    case 'PSM-Behandlung': return <Bug className="h-4 w-4 text-status-error" />
+    case 'Aussaat': return <Wheat className="h-4 w-4 text-status-warning" />
+    case 'Ernte': return <Wheat className="h-4 w-4 text-status-success" />
     case 'Bodenbearbeitung': return <Tractor className="h-4 w-4 text-brown-600" />
     default: return <CalendarDays className="h-4 w-4" />
   }
@@ -357,9 +357,9 @@ export default function MassnahmenPage(): JSX.Element {
       render: (m: Massnahme) => (
         <div className="flex items-center gap-2">
           {m.compliant ? (
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-status-success" />
           ) : (
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTriangle className="h-4 w-4 text-status-warning" />
           )}
           {m.exportiert && <FileText className="h-4 w-4 text-blue-600" aria-label="Exportiert" />}
         </div>
@@ -556,24 +556,24 @@ export default function MassnahmenPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Bug className="h-4 w-4 text-red-600" />
+              <Bug className="h-4 w-4 text-status-error" />
               PSM-Anwendungen
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.psmAnwendungen}</div>
+            <div className="text-2xl font-bold text-status-error">{stats.psmAnwendungen}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-status-success" />
               Compliant
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.compliant}</div>
+            <div className="text-2xl font-bold text-status-success">{stats.compliant}</div>
           </CardContent>
         </Card>
 
@@ -585,7 +585,7 @@ export default function MassnahmenPage(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{stats.nichtExportiert}</div>
+            <div className="text-2xl font-bold text-status-warning">{stats.nichtExportiert}</div>
           </CardContent>
         </Card>
 

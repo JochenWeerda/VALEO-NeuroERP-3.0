@@ -118,9 +118,9 @@ export function AgentProcessPanel({
           {activities.map((a) => (
             <li key={a.id} className="flex items-center gap-2 text-xs text-slate-700">
               {a.status === 'done' ? (
-                <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
+                <CheckCircle className="h-3 w-3 text-status-success shrink-0" />
               ) : a.status === 'error' ? (
-                <AlertCircle className="h-3 w-3 text-red-500 shrink-0" />
+                <AlertCircle className="h-3 w-3 text-status-error shrink-0" />
               ) : a.status === 'running' || a.status === 'starting' ? (
                 <Sparkles className="h-3 w-3 text-violet-500 shrink-0 animate-pulse" />
               ) : (

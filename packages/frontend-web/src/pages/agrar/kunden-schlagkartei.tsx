@@ -317,7 +317,7 @@ function AnkaufsangebotDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-amber-500" />
+            <Sparkles className="h-5 w-5 text-status-warning" />
             Ankaufsangebote erstellen
           </DialogTitle>
           <DialogDescription>
@@ -328,7 +328,7 @@ function AnkaufsangebotDialog({
 
         {result ? (
           <div className="py-4 text-center space-y-3">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
+            <CheckCircle2 className="h-12 w-12 text-status-success mx-auto" />
             <p className="font-semibold text-gray-900">
               {result.count} Empfehlung{result.count !== 1 ? 'en' : ''} erstellt
             </p>
@@ -430,7 +430,7 @@ export default function KundenSchlagkarteiPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Map className="h-6 w-6 text-green-600" />
+            <Map className="h-6 w-6 text-status-success" />
             Schlagkartei — Kunde {kundenNr}
           </h1>
           <p className="text-gray-500 text-sm">Innendienst-Sicht: Auftragsvororbereitung Lohnspritz / Mahl+Misch</p>
@@ -472,7 +472,7 @@ export default function KundenSchlagkarteiPage() {
       <Card className="border-amber-200 bg-amber-50">
         <CardContent className="pt-4">
           <div className="flex items-center gap-2 mb-3">
-            <Users className="h-5 w-5 text-amber-600" />
+            <Users className="h-5 w-5 text-status-warning" />
             <span className="font-medium text-amber-900">Auftrag direkt aus Schlagkartei anlegen</span>
           </div>
           <div className="flex gap-2 flex-wrap">

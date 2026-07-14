@@ -2575,6 +2575,26 @@
     {
       "module": "@/pages/portal/feldbuch-auswertungen",
       "path": "portal/feldbuch-auswertungen"
+    },
+    {
+      "module": "@/pages/portal/empfehlungen",
+      "path": "portal/empfehlungen"
+    },
+    {
+      "module": "@/pages/portal/lohndienste",
+      "path": "portal/lohndienste"
+    },
+    {
+      "module": "@/pages/portal/onboarding",
+      "path": "portal/onboarding"
+    },
+    {
+      "module": "@/pages/portal/preisspiegel",
+      "path": "portal/preisspiegel"
+    },
+    {
+      "module": "@/pages/portal/whatsapp-simulator",
+      "path": "portal/whatsapp-simulator"
     }
   ]
 }

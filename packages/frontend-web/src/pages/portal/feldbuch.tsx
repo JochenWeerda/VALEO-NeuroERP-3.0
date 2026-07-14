@@ -332,7 +332,7 @@ function ExportDialog({
 
         {success && (
           <Alert className="border-emerald-200 bg-emerald-50">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <CheckCircle2 className="h-4 w-4 text-status-success" />
             <AlertTitle className="text-emerald-800">Export erfolgreich</AlertTitle>
             <AlertDescription className="text-emerald-700">Die CSV-Datei wurde heruntergeladen.</AlertDescription>
           </Alert>
@@ -423,7 +423,7 @@ function ImportDialog({
         {result ? (
           <div className="space-y-3">
             <Alert className="border-emerald-200 bg-emerald-50">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4 text-status-success" />
               <AlertTitle className="text-emerald-800">Import abgeschlossen</AlertTitle>
               <AlertDescription className="text-emerald-700">
                 {result.created} Maßnahmen importiert, {result.updated} aktualisiert.
@@ -595,7 +595,7 @@ export default function PortalFeldbuch() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
                 <MapPin className="h-5 w-5" />
               </div>
               <div>
@@ -621,7 +621,7 @@ export default function PortalFeldbuch() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
                 <Calendar className="h-5 w-5" />
               </div>
               <div>

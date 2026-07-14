@@ -200,7 +200,7 @@ export default function LKWBeladungPage(): JSX.Element {
       content: (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
-            <CheckCircle className="h-16 w-16 text-emerald-500" />
+            <CheckCircle className="h-16 w-16 text-status-success" />
             <h3 className="text-xl font-bold text-slate-800">Beladung prüfen</h3>
           </div>
           <TouchConfirmCard

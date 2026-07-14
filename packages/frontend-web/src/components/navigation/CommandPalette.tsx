@@ -272,7 +272,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
               data-omnibox-command-kind={commandIntent.kind}
               data-omnibox-confidence={commandIntent.confidence.toFixed(2)}
             >
-              <Zap className="mr-2 h-4 w-4 text-amber-500" />
+              <Zap className="mr-2 h-4 w-4 text-status-warning" />
               <span>{commandIntent.label}</span>
               <span className="ml-2 rounded border border-border bg-muted px-1.5 text-xs text-muted-foreground group-data-[selected=true]:text-accent-foreground">
                 {commandIntent.kind === 'commandDraft' ? 'bestätigen' : 'vorfüllen'}
@@ -387,7 +387,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                       onOpenChange(false)
                     }}
                   >
-                    <Zap className="mr-2 h-4 w-4 text-amber-500" aria-hidden="true" />
+                    <Zap className="mr-2 h-4 w-4 text-status-warning" aria-hidden="true" />
                     {action.label}
                   </CommandItem>
                 ))}

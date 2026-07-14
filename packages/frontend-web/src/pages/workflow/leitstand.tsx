@@ -40,12 +40,12 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
 ]
 
 function StatusIcon({ status }: { status: string }) {
-  if (status === 'completed') return <CheckCircle className="h-4 w-4 text-green-600" />
-  if (status === 'failed') return <XCircle className="h-4 w-4 text-red-600" />
-  if (status === 'blocked_external_gate') return <AlertTriangle className="h-4 w-4 text-orange-500" />
+  if (status === 'completed') return <CheckCircle className="h-4 w-4 text-status-success" />
+  if (status === 'failed') return <XCircle className="h-4 w-4 text-status-error" />
+  if (status === 'blocked_external_gate') return <AlertTriangle className="h-4 w-4 text-status-warning" />
   if (status === 'running') return <Zap className="h-4 w-4 text-blue-600" />
   if (status === 'compensated') return <RotateCcw className="h-4 w-4 text-gray-500" />
-  return <Clock className="h-4 w-4 text-yellow-600" />
+  return <Clock className="h-4 w-4 text-status-warning" />
 }
 
 function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: string; onClose: () => void }) {
@@ -87,7 +87,7 @@ function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: stri
 
       {process.blockers.filter(b => !b.resolved).length > 0 && (
         <div>
-          <h4 className="text-sm font-semibold text-orange-600 mb-2">Aktive Blocker</h4>
+          <h4 className="text-sm font-semibold text-status-warning mb-2">Aktive Blocker</h4>
           <div className="space-y-2">
             {process.blockers.filter(b => !b.resolved).map(blocker => (
               <div key={blocker.blocker_id} className="rounded border border-orange-200 bg-orange-50 p-2 text-sm">
@@ -247,7 +247,7 @@ export default function WorkflowLeitstandPage(): JSX.Element {
               <CardTitle className="text-xs text-muted-foreground">Ext. Gate blockiert</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
-              <div className="text-2xl font-bold text-orange-600">{summary.blocked_external_gate}</div>
+              <div className="text-2xl font-bold text-status-warning">{summary.blocked_external_gate}</div>
             </CardContent>
           </Card>
           <Card>
@@ -255,7 +255,7 @@ export default function WorkflowLeitstandPage(): JSX.Element {
               <CardTitle className="text-xs text-muted-foreground">Replay möglich</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
-              <div className="text-2xl font-bold text-yellow-600">{summary.replayable}</div>
+              <div className="text-2xl font-bold text-status-warning">{summary.replayable}</div>
             </CardContent>
           </Card>
         </div>

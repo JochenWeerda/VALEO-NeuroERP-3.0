@@ -126,7 +126,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
     return (
       <div className="space-y-4 p-3 md:p-6">
         <div className="flex items-center gap-2">
-          <Tractor className="h-8 w-8 text-green-600" />
+          <Tractor className="h-8 w-8 text-status-success" />
           <h1 className="text-3xl font-bold">{getListTitle(t, entityTypeLabel)}</h1>
         </div>
         <Alert variant="destructive">
@@ -145,7 +145,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Tractor className="h-8 w-8 text-green-600" />
+            <Tractor className="h-8 w-8 text-status-success" />
             {getListTitle(t, entityTypeLabel)}
           </h1>
           <div className="text-muted-foreground text-sm">
@@ -187,7 +187,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">{t('crud.fields.totalArea')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{totalArea.toFixed(0)} {t('crud.fields.hectares')}</div>
+                <div className="text-2xl font-bold text-status-success">{totalArea.toFixed(0)} {t('crud.fields.hectares')}</div>
               </CardContent>
             </Card>
 
@@ -205,7 +205,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
                 <CardTitle className="text-sm font-medium">{t('crud.fields.organicCertified')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{bioProfiles}</div>
+                <div className="text-2xl font-bold text-status-success">{bioProfiles}</div>
               </CardContent>
             </Card>
           </>

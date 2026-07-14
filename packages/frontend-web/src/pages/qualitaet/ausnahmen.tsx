@@ -116,9 +116,9 @@ export default function AusnahmenPage(): JSX.Element {
       label: 'Status',
       render: (a: AusnahmeRecord) => (
         <div className="flex items-center gap-1">
-          {a.status === 'eskaliert' && <AlertTriangle className="h-4 w-4 text-red-600" />}
-          {a.status === 'geschlossen' && <CheckCircle className="h-4 w-4 text-green-600" />}
-          {a.status === 'offen' && <AlertCircle className="h-4 w-4 text-orange-600" />}
+          {a.status === 'eskaliert' && <AlertTriangle className="h-4 w-4 text-status-error" />}
+          {a.status === 'geschlossen' && <CheckCircle className="h-4 w-4 text-status-success" />}
+          {a.status === 'offen' && <AlertCircle className="h-4 w-4 text-status-warning" />}
           <span className="capitalize">{a.status.replace('_', ' ')}</span>
         </div>
       ),
@@ -239,11 +239,11 @@ export default function AusnahmenPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-orange-600">{offen}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-warning">{offen}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Eskaliert</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-red-600">{eskaliert}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-error">{eskaliert}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Hohe Priorität</CardTitle></CardHeader>

@@ -78,7 +78,7 @@ export default function KundenZuordnungPage() {
         </div>
       ) : !data || data.items.length === 0 ? (
         <Card><CardContent className="py-16 text-center text-sm text-muted-foreground">
-          <CheckCircle2 className="mx-auto mb-2 text-emerald-600" size={20} />
+          <CheckCircle2 className="mx-auto mb-2 text-status-success" size={20} />
           Alle aktiven Kunden sind zugeordnet.
         </CardContent></Card>
       ) : (

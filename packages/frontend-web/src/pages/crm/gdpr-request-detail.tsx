@@ -281,13 +281,13 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
                 <div className="font-medium">{t(`crud.actions.${action}`, { defaultValue: action })}</div>
                 <div className="text-sm text-muted-foreground mt-1">
                   {oldStatus && (
-                    <span className="line-through text-red-600">
+                    <span className="line-through text-status-error">
                       {getStatusLabel(t, oldStatus, oldStatus)}
                     </span>
                   )}
                   {oldStatus && newStatus && ' → '}
                   {newStatus && (
-                    <span className="text-green-600">
+                    <span className="text-status-success">
                       {getStatusLabel(t, newStatus, newStatus)}
                     </span>
                   )}

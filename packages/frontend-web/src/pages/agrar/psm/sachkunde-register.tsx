@@ -90,7 +90,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
         const ablauf = new Date(s.gueltigBis)
         const isAblaufend = ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         return (
-          <span className={isAblaufend ? 'font-semibold text-orange-600' : ''}>
+          <span className={isAblaufend ? 'font-semibold text-status-warning' : ''}>
             {ablauf.toLocaleDateString('de-DE')}
           </span>
         )
@@ -112,9 +112,9 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       render: (s: PSMSachkundeNachweis) => {
         const status = s.complianceStatus ?? 'warning'
         const statusConfig = {
-          compliant: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', text: 'Compliant' },
-          warning: { icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50', text: 'Warnung' },
-          'non-compliant': { icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', text: 'Nicht compliant' },
+          compliant: { icon: CheckCircle, color: 'text-status-success', bg: 'bg-green-50', text: 'Compliant' },
+          warning: { icon: AlertTriangle, color: 'text-status-warning', bg: 'bg-orange-50', text: 'Warnung' },
+          'non-compliant': { icon: XCircle, color: 'text-status-error', bg: 'bg-red-50', text: 'Nicht compliant' },
         } as const
         const config = statusConfig[status as keyof typeof statusConfig] ?? statusConfig.warning
         const Icon = config.icon
@@ -190,19 +190,19 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-green-600">{nachweise.filter((s) => s.status === 'gueltig').length}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-success">{nachweise.filter((s) => s.status === 'gueltig').length}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laeuft ab (3 Mon.)</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-orange-600">{ablaufend}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-warning">{ablaufend}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgelaufen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-red-600">{nachweise.filter((s) => s.status === 'abgelaufen').length}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-error">{nachweise.filter((s) => s.status === 'abgelaufen').length}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nicht Compliant</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-red-600">{nonCompliant}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-error">{nonCompliant}</span></CardContent>
         </Card>
       </div>
 

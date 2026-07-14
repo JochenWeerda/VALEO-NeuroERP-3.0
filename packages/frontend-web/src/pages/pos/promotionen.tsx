@@ -70,7 +70,7 @@ export default function PosPromotionenPage(): JSX.Element {
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Tag className="h-4 w-4" />Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{promotionen.length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{promotionen.filter((p) => p.aktiv).length}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{promotionen.filter((p) => p.aktiv).length}</span></CardContent></Card>
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Inaktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-muted-foreground">{promotionen.filter((p) => !p.aktiv).length}</span></CardContent></Card>
         </div>
 

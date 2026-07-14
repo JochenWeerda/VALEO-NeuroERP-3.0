@@ -419,14 +419,14 @@ export default function TourenplanungPage(): JSX.Element {
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Unterwegs</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{touren.unterwegs}</span>
+              <Truck className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">{touren.unterwegs}</span>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-green-600">{touren.abgeschlossen}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-success">{touren.abgeschlossen}</span></CardContent>
         </Card>
       </div>
 

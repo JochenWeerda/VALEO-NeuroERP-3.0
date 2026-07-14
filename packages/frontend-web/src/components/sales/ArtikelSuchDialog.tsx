@@ -441,7 +441,7 @@ export function ArtikelSuchDialog({
             {isLoading ? (
               <div className="p-4 text-center text-muted-foreground">Lade Artikel...</div>
             ) : error ? (
-              <div className="p-4 text-center text-red-500">
+              <div className="p-4 text-center text-status-error">
                 Fehler beim Laden der Artikel: {error instanceof Error ? error.message : 'Unbekannter Fehler'}
               </div>
             ) : filteredArticles.length === 0 ? (

@@ -67,7 +67,7 @@ export default function ConsentConfirmPage(): JSX.Element {
 
           {status === 'success' && (
             <Alert className="border-green-500 bg-green-50">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <CheckCircle2 className="h-5 w-5 text-status-success" />
               <AlertDescription className="text-green-800">
                 {message}
               </AlertDescription>
