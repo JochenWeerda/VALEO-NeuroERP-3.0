@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FIN-MAHNLAUF-MUTATION-005 Mahnlauf-Abschluss mit echter Backend-Mutation - in Arbeit (Claim 2026-07-14)
+## FIN-MAHNLAUF-MUTATION-005 Mahnlauf-Mutation + sonner-Toaster global - abgeschlossen 2026-07-14
 
-**Owner:** Claude. **Stand:** geclaimt 2026-07-14. Befund aus DESIGN-ROLLOUT-DENSITY-FIN-004: der Mahnlauf-Wizard (`pages/mahnwesen/mahnlauf.tsx`) suggeriert Versand, sendet aber keine Mutation (`onFinish` navigiert nur). Ziel: POST-Endpoint im Mahnwesen-Router (falls fehlend) + Frontend-Anbindung nach Mutation-Lifecycle-Invariante (Guard, disabled, Toast, Navigation erst nach Erfolg); Roh-Palettenreste der Maske bereinigen.
+**Owner:** Claude. **Stand:** abgeschlossen 2026-07-14. Mahnlauf-Maske lud von nicht existentem `/mahnwesen/faellige-posten` (404) und „versendete" ohne Backend-Aufruf. Jetzt: Kandidaten aus `GET /finance/mahnlauf/candidates` (DOM-FIN-004.2; je Posten naechste Stufe + Gebuehr), Abschluss `POST /finance/mahnlauf/run` mit **additiver Teilmengen-Unterstuetzung `rechnungsnrn`** (Endpoint iteriert bestehenden Service-Vertrag, rueckwaertskompatibel); Guard + Wizard-`loading` + Erfolgs-/Fehler-Toast + Navigation erst nach Erfolg; Stufen-Select und funktionsloses Pflichtfeld „Bezeichnung" entfernt (Backend eskaliert selbst); Roh-Palette bereinigt. **Systemischer Zusatzfund:** sonner-`<Toaster>` war nie gemountet — `toast()`-Feedback von 44 Seiten (Fibu/Stammdaten/Preise/Logistik) unsichtbar (Bugklasse wie shadcn-Toaster 2026-07-02) → global in `ToastBootstrap` gemountet; Toast-System-Konsolidierung als Folgearbeit. **Dateibesitz:** `app/api/v1/endpoints/finance_dunning.py`, `tests/test_finance_dunning_run_subset.py`, `pages/mahnwesen/mahnlauf.tsx`, `app/ToastBootstrap.tsx`, Audit-Doku 7d, Slice-YAML, Workboard. **Abnahme:** pytest Dunning 10/10; Vitest 371/371 (+1 skipped); tsc 0; eslint 0 Fehler; Build 26,4 s; axe 8/8.
 
 ## DESIGN-ROLLOUT-DENSITY-FIN-004 Rollout Prio 4+5: Lager/Dispo-Density dense + Finanzen-Mutation-Audit - abgeschlossen 2026-07-14
 

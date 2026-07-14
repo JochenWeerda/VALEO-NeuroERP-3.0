@@ -1,0 +1,91 @@
+slice_id: FIN-MAHNLAUF-MUTATION-005
+id: FIN-MAHNLAUF-MUTATION-005
+title: Mahnlauf-Abschluss mit echter Backend-Mutation + sonner-Toaster global gemountet
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-14"
+started_at: "2026-07-14"
+completed_at: "2026-07-14"
+goal: >-
+  Befund aus DESIGN-ROLLOUT-DENSITY-FIN-004 beheben: der Mahnlauf-Wizard
+  suggerierte Versand, sendete aber keine Mutation und fragte einen nicht
+  existenten Endpoint (/mahnwesen/faellige-posten) ab. Ziel: Maske auf die
+  echten DOM-FIN-004.2-Endpoints verdrahten und den Abschluss als vollwertige
+  Mutation nach Lifecycle-Invariante ausfuehren. Zusaetzlicher Fund gleich mit:
+  sonner-Toaster war nie gemountet - toast()-Feedback von 44 Seiten unsichtbar.
+scope:
+  - "Backend additiv: DunningRunIn.rechnungsnrn (Teilmenge, Vorrang vor
+    rechnungsnr); Endpoint iteriert je Rechnungsnummer ueber den bestehenden
+    Service-Vertrag run_dunning und aggregiert {ok, erzeugt, mahnungen}.
+    Bestehende Aufrufformen unveraendert."
+  - "Frontend mahnwesen/mahnlauf.tsx: Kandidaten von GET /finance/mahnlauf/candidates
+    (statt totem /mahnwesen/faellige-posten); je Posten naechste Stufe + Gebuehr
+    sichtbar; Abschluss = POST /finance/mahnlauf/run mit rechnungsnrn-Auswahl,
+    Guard/disabled via Wizard-loading, Erfolgs-/Fehler-Toast, Navigation erst
+    nach Erfolg. Stufen-Select und funktionsloses Pflichtfeld Bezeichnung
+    entfernt (Backend eskaliert Stufe je Posten selbst). Roh-Palette bereinigt
+    (border-primary, bg-destructive/10, text-status-*), Zahlen tabular-nums."
+  - "ToastBootstrap: sonner-<Toaster richColors closeButton> global gemountet -
+    Feedback von 44 sonner-Seiten (Fibu/Stammdaten/Preise/Logistik u. a.) wird
+    erstmals sichtbar. Konsolidierung der drei Toast-Systeme bleibt Folgearbeit."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/FIN-MAHNLAUF-MUTATION-005.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "app/api/v1/endpoints/finance_dunning.py"
+  - "tests/test_finance_dunning_run_subset.py"
+  - "packages/frontend-web/src/pages/mahnwesen/mahnlauf.tsx"
+  - "packages/frontend-web/src/app/ToastBootstrap.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/FIN-MAHNLAUF-MUTATION-005.yaml
+  - docs/design/frontend-design-skill-audit.md
+  - app/api/v1/endpoints/finance_dunning.py
+  - tests/test_finance_dunning_run_subset.py
+  - packages/frontend-web/src/pages/mahnwesen/mahnlauf.tsx
+  - packages/frontend-web/src/app/ToastBootstrap.tsx
+progress: >-
+  2026-07-14 umgesetzt und validiert; Details siehe scope. Mahngebuehren/
+  Zinsen kommen unveraendert aus den Mahnstufen-Regeln des Service.
+acceptance:
+  - "Mahnlauf-Maske laedt echte Kandidaten (tenant-scoped) statt 404."
+  - "Fertigstellen erzeugt Mahnungen fuer exakt die gewaehlte Teilmenge und eskaliert Stufen; Doppel-Submit durch Guard+loading verhindert; Fehler ohne Navigation."
+  - "Backend rueckwaertskompatibel (rechnungsnr einzeln und ohne Filter unveraendert)."
+  - "sonner-Toasts sind app-weit sichtbar."
+tests:
+  - "pytest tests/test_finance_dunning_run_subset.py + Bestands-Dunning-Tests -> 10 passed (--noconftest-Muster)."
+  - "tsc --noEmit -> 0; eslint -> 0 Fehler; vite build -> gruen (26.4s)."
+  - "vitest run (voll) -> 88/88 Dateien, 371 passed, 1 skipped."
+  - "npm run test:e2e:accessibility -> 8/8 Kernrouten gruen."
+risks:
+  - "Teilmengen-Lauf iteriert je Rechnung (Service commitet je Lauf); bei sehr grossen Mahnlaeufen spaeter Batch-Transaktion im Service erwaegen."
+  - "Drei parallele Toast-Systeme (Legacy-push, shadcn, sonner) - Konsolidierung als Folgearbeit dokumentiert."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Mahnlauf mahnt die vom Bediener gewaehlte Teilmenge ueberfaelliger
+    Debitoren-OP; Mahnstufe eskaliert je Posten nach Ueberfaelligkeit und
+    bisheriger Stufe (DOM-FIN-004.2); Gebuehren/Zinsen aus Mahnstufen-Regeln;
+    Erfolg und Fehler sind fuer den Bediener sichtbar.
+  architektur_vertrag: >-
+    Backend nur additiv im bestehenden Router (kein neuer Service, kein neues
+    Schema); Frontend nutzt bestehende Patterns (Wizard mit loading-Prop,
+    apiClient, sonner); ToastBootstrap bleibt der einzige Toast-Mount-Punkt.
+  daten_vertrag: >-
+    Keine Schemaaenderung; Persistenz unveraendert ueber domain_erp.dunning_notices
+    + offene_posten.dunning_level (tenant-scoped im Service); Teilmengen-Lauf
+    ist je Rechnung idempotent im Sinne des bestehenden Service-Verhaltens.
+  security_vertrag: >-
+    Tenant-Isolation unveraendert ueber get_tenant_id-Dependency; keine neuen
+    Eingabepfade ausser einer Stringliste von Rechnungsnummern, die nur als
+    gebundene SQL-Parameter verwendet wird.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert; keine neuen Abhaengigkeiten
+    (sonner war bereits im Bundle).
+  dokumentations_vertrag: >-
+    Audit-Doku Abschnitt 7d (Mahnlauf-Mutation + sonner-Fund); Workboard und
+    dieses YAML.
+  test_vertrag: >-
+    Neuer Endpoint-Test (Teilmenge iteriert Service je Rechnungsnr, Aggregat,
+    Rueckwaertskompatibilitaet) + Dunning-Regressionstests gruen; Frontend
+    tsc/eslint/vitest/build/axe vor Push gruen.

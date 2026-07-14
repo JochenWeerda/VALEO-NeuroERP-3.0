@@ -34,6 +34,7 @@ def notices(
 
 class DunningRunIn(BaseModel):
     rechnungsnr: Optional[str] = None      # einzelne OP; sonst alle überfälligen
+    rechnungsnrn: Optional[list[str]] = None  # Teilmenge (Portal-Mahnlauf); hat Vorrang vor rechnungsnr
     bediener: Optional[str] = None
 
 
@@ -43,4 +44,14 @@ def run(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return FinanceDunningService(db, tenant_id).run_dunning(rechnungsnr=body.rechnungsnr, bediener=body.bediener or "KIM")
+    svc = FinanceDunningService(db, tenant_id)
+    bediener = body.bediener or "KIM"
+    if body.rechnungsnrn:
+        erzeugt = 0
+        mahnungen: list[dict[str, Any]] = []
+        for nr in body.rechnungsnrn:
+            res = svc.run_dunning(rechnungsnr=nr, bediener=bediener)
+            erzeugt += int(res.get("erzeugt", 0))
+            mahnungen.extend(res.get("mahnungen", []))
+        return {"ok": True, "erzeugt": erzeugt, "mahnungen": mahnungen}
+    return svc.run_dunning(rechnungsnr=body.rechnungsnr, bediener=bediener)

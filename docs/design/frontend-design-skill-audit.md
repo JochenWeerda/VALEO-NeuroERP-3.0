@@ -225,6 +225,24 @@ Rollout-Plan-Positionen 4 und 5:
   suggeriert — fachliches Gap, braucht einen eigenen Slice mit API-Vertrag
   (hier bewusst keine Geschäftslogik erfunden).
 
+## 7d. Update 2026-07-14 — Mahnlauf-Mutation + sonner-Fund (FIN-MAHNLAUF-MUTATION-005)
+
+- **Mahnlauf ist jetzt eine echte Mutation:** Die Maske lud zuvor von einem nicht
+  existenten Endpoint (`/mahnwesen/faellige-posten` → 404) und „versendete" ohne
+  Backend-Aufruf. Jetzt: Kandidaten aus `GET /finance/mahnlauf/candidates`
+  (DOM-FIN-004.2, je Posten nächste Stufe + Gebühr sichtbar), Abschluss über
+  `POST /finance/mahnlauf/run` mit neuer additiver Teilmengen-Unterstützung
+  (`rechnungsnrn`), Guard + `Wizard loading` + Toast + Navigation erst nach Erfolg.
+  Stufen-Select und funktionsloses Pflichtfeld „Bezeichnung" entfernt — das Backend
+  eskaliert die Stufe je Posten selbst.
+- **Systemischer Fund:** Der sonner-`<Toaster>` war nie gemountet — `toast()`-Feedback
+  von **44 Seiten** (Fibu, Stammdaten, Preise, Logistik, …) blieb unsichtbar; dieselbe
+  Bugklasse wie der shadcn-Toaster-Systembug vom 2026-07-02. Jetzt global in
+  `ToastBootstrap` gemountet (`richColors closeButton`). Die Konsolidierung der drei
+  Toast-Systeme (Legacy-push / shadcn / sonner) bleibt Folgearbeit.
+
+Validierung: pytest Dunning 10/10 ✅ · Vitest 371/371 ✅ · tsc/eslint ✅ · Build 26,4 s ✅ · axe 8/8 ✅.
+
 ## 8. Verbleibende Risiken & Folgearbeiten
 
 > **Stand nach Slices 002–004:** Punkte 1–4 sind erledigt (1 → 7b, 2/3/4 → 7a);
