@@ -336,7 +336,7 @@ export function FeldblockfinderIntegration({
               <div className="space-y-4">
                 {/* Vorschau-Bild / Placeholder */}
                 <div 
-                  className="border rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center"
+                  className="border rounded-lg bg-linear-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center"
                   style={{ height: '300px' }}
                 >
                   <div className="text-center space-y-4">

@@ -227,7 +227,7 @@ export default function Sales(): ReactElement {
             <div className="space-y-4">
               {ordersLoading
                 ? Array.from({ length: LIST_SKELETON_ROWS }).map((_, index) => (
-                    <div key={index} className="rounded-[var(--radius)] border border-border p-4">
+                    <div key={index} className="rounded-(--radius) border border-border p-4">
                       <Skeleton className="h-5 w-40" />
                       <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                         <Skeleton className="h-4 w-24" />
@@ -236,7 +236,7 @@ export default function Sales(): ReactElement {
                     </div>
                   ))
                 : orders.map((order) => (
-                    <div key={order.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
+                    <div key={order.id} className="rounded-(--radius) border border-border p-4 transition-colors hover:bg-primary/5">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
                           <h3 className="text-sm font-semibold text-foreground">{order.orderNumber}</h3>
@@ -253,7 +253,7 @@ export default function Sales(): ReactElement {
                     </div>
                   ))}
               {!ordersLoading && orders.length === 0 ? (
-                <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                <div className="rounded-(--radius) border border-dashed border-border bg-muted p-6 text-center">
                   <p className="text-sm font-medium text-foreground">Keine Auftraege vorhanden</p>
                   <p className="text-xs text-muted-foreground">Sobald Auftraege erfasst sind, erscheinen sie hier.</p>
                 </div>
@@ -271,7 +271,7 @@ export default function Sales(): ReactElement {
             <div className="space-y-4">
               {invoicesLoading
                 ? Array.from({ length: LIST_SKELETON_ROWS }).map((_, index) => (
-                    <div key={index} className="rounded-[var(--radius)] border border-border p-4">
+                    <div key={index} className="rounded-(--radius) border border-border p-4">
                       <Skeleton className="h-5 w-40" />
                       <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                         <Skeleton className="h-4 w-24" />
@@ -280,7 +280,7 @@ export default function Sales(): ReactElement {
                     </div>
                   ))
                 : invoices.map((invoice) => (
-                    <div key={invoice.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
+                    <div key={invoice.id} className="rounded-(--radius) border border-border p-4 transition-colors hover:bg-primary/5">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
                           <h3 className="text-sm font-semibold text-foreground">{invoice.invoiceNumber}</h3>
@@ -297,7 +297,7 @@ export default function Sales(): ReactElement {
                     </div>
                   ))}
               {!invoicesLoading && invoices.length === 0 ? (
-                <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                <div className="rounded-(--radius) border border-dashed border-border bg-muted p-6 text-center">
                   <p className="text-sm font-medium text-foreground">Keine Rechnungen vorhanden</p>
                   <p className="text-xs text-muted-foreground">Sobald Rechnungen gebucht sind, erscheinen sie hier.</p>
                 </div>

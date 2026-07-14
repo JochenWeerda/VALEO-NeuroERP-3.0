@@ -110,7 +110,7 @@ export default function DocumentPanel({ customer }: DocumentPanelProps) {
 
       {/* Compliance banner */}
       <div className="rounded-md border border-[hsl(var(--color-semantic-success-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-success-50-hsl))] p-2.5 flex items-start gap-2 text-sm dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]" id="compliance-banner-file">
-        <ShieldCheck className="text-[hsl(var(--color-semantic-success-700-hsl))] mt-0.5 flex-shrink-0 dark:text-[hsl(var(--color-semantic-success-50-hsl))]" size={16} />
+        <ShieldCheck className="text-[hsl(var(--color-semantic-success-700-hsl))] mt-0.5 shrink-0 dark:text-[hsl(var(--color-semantic-success-50-hsl))]" size={16} />
         <div className="text-[hsl(var(--color-semantic-success-700-hsl))] dark:text-[hsl(var(--color-semantic-success-50-hsl))]">
           <strong className="block">Agrar-Compliance &amp; Pflanzenschutzverordnung gesichert</strong>
           <span className="leading-snug">
@@ -138,7 +138,7 @@ export default function DocumentPanel({ customer }: DocumentPanelProps) {
             attachedFiles.map(file => (
               <div key={file.id} className="p-2.5 flex items-center justify-between gap-2 hover:bg-muted/50 transition" id={`file-row-${file.id}`}>
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-1.5 bg-muted rounded-md border border-border flex-shrink-0">
+                  <div className="p-1.5 bg-muted rounded-md border border-border shrink-0">
                     <FileText size={14} className="text-muted-foreground" />
                   </div>
                   <div className="min-w-0">
@@ -152,7 +152,7 @@ export default function DocumentPanel({ customer }: DocumentPanelProps) {
                   </div>
                 </div>
 
-                <div className="flex gap-1 items-center flex-shrink-0">
+                <div className="flex gap-1 items-center shrink-0">
                   <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => alert(`Anzeige der Datei: ${file.fileName}`)} title="Vorschau">
                     <Eye size={14} />
                   </Button>

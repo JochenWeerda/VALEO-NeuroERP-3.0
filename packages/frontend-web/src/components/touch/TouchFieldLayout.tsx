@@ -67,7 +67,7 @@ export function TouchCard({
       aria-pressed={selected}
     >
       {icon && (
-        <span className="flex-shrink-0 text-slate-500">{icon}</span>
+        <span className="shrink-0 text-slate-500">{icon}</span>
       )}
       <span className="flex-1">
         <span className="block text-base font-semibold leading-tight">{children}</span>
@@ -76,7 +76,7 @@ export function TouchCard({
         )}
       </span>
       {selected && (
-        <Check className="h-5 w-5 flex-shrink-0 text-blue-500" aria-hidden />
+        <Check className="h-5 w-5 shrink-0 text-blue-500" aria-hidden />
       )}
     </button>
   )
@@ -158,7 +158,7 @@ export function TouchNumericInput({
             'flex w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3',
             'min-h-[54px] text-2xl font-bold tabular-nums text-slate-900',
             'placeholder:text-base placeholder:font-normal placeholder:text-slate-400',
-            'focus:border-blue-500 focus:outline-none focus:ring-0',
+            'focus:border-blue-500 focus:outline-hidden focus:ring-0',
             unit && 'pr-16',
           )}
         />
@@ -336,7 +336,7 @@ export function TouchTextInput({
           'flex w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3',
           'min-h-[54px] text-lg text-slate-900',
           'placeholder:text-base placeholder:text-slate-400',
-          'focus:border-blue-500 focus:outline-none focus:ring-0',
+          'focus:border-blue-500 focus:outline-hidden focus:ring-0',
         )}
       />
       {hint && <p className="text-sm text-slate-500">{hint}</p>}

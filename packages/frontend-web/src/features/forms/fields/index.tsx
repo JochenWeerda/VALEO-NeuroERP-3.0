@@ -95,7 +95,7 @@ function LookupField({ value, onChange, field }: LookupProps): JSX.Element {
           />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+      <PopoverContent className="p-0 w-(--radix-popover-trigger-width)">
         <Command>
           <CommandInput placeholder={`Suchen in ${entity}...`} value={query} onValueChange={setQuery} />
           <CommandList>

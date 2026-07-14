@@ -1043,7 +1043,7 @@ function ProductCard({
           )}
         </CardHeader>
         
-        <CardContent className="pb-2 flex-grow">
+        <CardContent className="pb-2 grow">
           <p className="line-clamp-2 text-sm text-muted-foreground">{product.beschreibung}</p>
           {product.zertifikate.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">

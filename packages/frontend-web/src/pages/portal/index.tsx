@@ -257,7 +257,7 @@ function EmpfehlungsBanner() {
             </div>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-amber-600 flex-shrink-0" />
+        <ChevronRight className="h-5 w-5 text-amber-600 shrink-0" />
       </div>
     </Link>
   )
@@ -285,7 +285,7 @@ export default function PortalDashboard() {
   return (
     <div className="space-y-6">
       {/* Willkommens-Header */}
-      <div className="rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-800 p-6 text-white shadow-xl">
+      <div className="rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-800 p-6 text-white shadow-xl">
         <h1 className="text-2xl font-bold">Willkommen, {data.kunde.name}!</h1>
         <p className="mt-1 text-emerald-100">Kundennummer: {data.kunde.kundennummer}</p>
         <div className="mt-4 flex flex-wrap gap-2">

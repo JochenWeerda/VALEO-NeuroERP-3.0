@@ -156,7 +156,7 @@ export function QuickSearch({
           autoFocus={autoFocus}
           className={clsx(
             'h-10 w-full rounded-lg border bg-background pl-9 pr-10 text-sm transition-colors',
-            'placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20',
+            'placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20',
           )}
         />
         {query && (

@@ -177,7 +177,7 @@ function TimelineStep({
   return (
     <div className="flex items-start gap-3">
       <div
-        className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 ${
+        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
           done ? 'border-green-500 bg-green-50 text-green-700' : 'border-muted-foreground/30 bg-muted text-muted-foreground'
         }`}
       >

@@ -685,7 +685,7 @@ export default function ContractsPageV2(): JSX.Element {
             {selectedTemplate?.bodyMarkdown && (
               <div className="space-y-2 rounded-md border bg-muted/30 p-3">
                 <Label className="text-xs text-muted-foreground">Vorlagentext</Label>
-                <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs font-sans">
+                <pre className="max-h-48 overflow-auto whitespace-pre-wrap wrap-break-word text-xs font-sans">
                   {selectedTemplate.bodyMarkdown.slice(0, 2000)}
                   {selectedTemplate.bodyMarkdown.length > 2000 ? '\n…' : ''}
                 </pre>

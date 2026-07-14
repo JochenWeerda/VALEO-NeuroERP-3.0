@@ -269,7 +269,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
   return (
     <div className="space-y-8 p-4 md:p-8">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-(--radius) border border-border bg-card p-6 shadow-sm">
         <div>
           <h1 className="text-xl font-bold tracking-normal text-foreground">{displayTitle}</h1>
           {displaySubtitle && (
@@ -416,7 +416,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto rounded-[var(--radius)] border border-border">
+          <div className="overflow-x-auto rounded-(--radius) border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -559,7 +559,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
 
       {/* Simple Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 rounded-[var(--radius)] border border-border bg-card p-3 shadow-sm">
+        <div className="flex items-center justify-center gap-4 rounded-(--radius) border border-border bg-card p-3 shadow-sm">
           <Button
             variant="outline"
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}

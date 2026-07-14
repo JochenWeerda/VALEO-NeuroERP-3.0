@@ -45,7 +45,7 @@ export default function PortalFeldbuchAuswertungen() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-5 p-5 text-slate-900">
-      <header className="rounded-2xl bg-gradient-to-r from-emerald-800 to-emerald-950 p-5 text-white shadow">
+      <header className="rounded-2xl bg-linear-to-r from-emerald-800 to-emerald-950 p-5 text-white shadow">
         <div className="flex items-center gap-2 text-emerald-200">
           <Scale className="h-5 w-5" />
           <span className="text-xs font-semibold uppercase tracking-wide">Ackerschlagkartei</span>

@@ -192,7 +192,7 @@ export default function KlaerfallInboxPage() {
                     </div>
 
                     {status === 'offen' ? (
-                      <div className="flex flex-col sm:flex-row gap-2 md:w-[22rem] shrink-0">
+                      <div className="flex flex-col sm:flex-row gap-2 md:w-88 shrink-0">
                         <Input
                           list="kim-customer-options"
                           placeholder="Kundennr. …"
@@ -213,7 +213,7 @@ export default function KlaerfallInboxPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="md:w-[22rem] shrink-0 text-xs text-muted-foreground">
+                      <div className="md:w-88 shrink-0 text-xs text-muted-foreground">
                         {item.status === 'zugeordnet' && (
                           <span className="inline-flex items-center gap-1">
                             <UserCheck size={14} className="text-green-600" />

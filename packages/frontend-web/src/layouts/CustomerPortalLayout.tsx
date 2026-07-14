@@ -158,7 +158,7 @@ export default function CustomerPortalLayout() {
         'min-h-screen',
         isTerraAgrar
           ? 'theme-terra bg-background text-foreground'
-          : 'bg-gradient-to-br from-emerald-50 via-white to-amber-50',
+          : 'bg-linear-to-br from-emerald-50 via-white to-amber-50',
       )}
     >
       <header
@@ -184,7 +184,7 @@ export default function CustomerPortalLayout() {
                   'flex h-10 w-10 items-center justify-center rounded-lg shadow-lg',
                   isTerraAgrar
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-gradient-to-br from-emerald-500 to-emerald-700',
+                    : 'bg-linear-to-br from-emerald-500 to-emerald-700',
                 )}
               >
                 <Leaf className="h-6 w-6 text-white" />
@@ -315,7 +315,7 @@ export default function CustomerPortalLayout() {
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
+        <div className="fixed inset-0 z-60 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/40"

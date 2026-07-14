@@ -655,7 +655,7 @@ export default function HrmOperationsGatesPage(): JSX.Element {
             </div>
             <div className={`flex items-center gap-2.5 rounded-sm border-2 px-4 py-2.5 shadow-sm ${isGoLiveAllowed ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-red-500 bg-red-50 text-red-700'}`}>
               <div className={`h-3 w-3 rounded-full ${isGoLiveAllowed ? 'bg-emerald-600' : 'bg-red-600'}`} />
-              <span className="text-sm font-black uppercase tracking-[0.05em]">{isGoLiveAllowed ? 'Produktivstart erlaubt' : 'Produktivstart gestoppt'}</span>
+              <span className="text-sm font-black uppercase tracking-wider">{isGoLiveAllowed ? 'Produktivstart erlaubt' : 'Produktivstart gestoppt'}</span>
             </div>
           </div>
         </div>

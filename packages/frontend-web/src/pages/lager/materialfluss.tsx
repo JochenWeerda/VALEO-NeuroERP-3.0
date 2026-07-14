@@ -86,13 +86,13 @@ const MfProcessNode = memo(function MfProcessNode(props: NodeProps): JSX.Element
     <div
       className={`rounded-md border-2 bg-card text-card-foreground px-2 py-1.5 text-xs shadow-sm min-w-[130px] max-w-[200px] ${border}`}
     >
-      <Handle type="target" position={Position.Left} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="target" position={Position.Left} className="h-2! w-2! bg-muted-foreground!" />
       <div className="font-semibold leading-tight">{data?.label}</div>
       {data?.sub ? (
         <div className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{data.sub}</div>
       ) : null}
       <div className="text-[10px] mt-1 opacity-90">{flowNodeStatusGermanLabel(st)}</div>
-      <Handle type="source" position={Position.Right} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="source" position={Position.Right} className="h-2! w-2! bg-muted-foreground!" />
     </div>
   )
 })
@@ -1740,8 +1740,8 @@ export default function MaterialflussPage(): JSX.Element {
             className="bg-muted/10"
           >
             <Background gap={16} />
-            <MiniMap pannable zoomable className="!bg-card/95 !border-border" />
-            <Controls className="!bg-card !border-border !shadow-md" />
+            <MiniMap pannable zoomable className="bg-card/95! border-border!" />
+            <Controls className="bg-card! border-border! shadow-md!" />
             {warehouseId && graphLoading ? (
               <Panel position="top-center" className="rounded-md bg-card/95 border px-3 py-2 text-sm shadow">
                 Lade Graph …

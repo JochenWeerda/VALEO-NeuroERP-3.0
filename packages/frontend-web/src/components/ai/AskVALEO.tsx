@@ -123,7 +123,7 @@ export function AskVALEO() {
       {/* Floating Action Button */}
       <Button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow z-50 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow z-50 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         size="icon"
         type="button"
         aria-label="Ask VALEO oeffnen"
@@ -178,7 +178,7 @@ export function AskVALEO() {
                   <Card key={i} className={msg.role === 'user' ? 'bg-primary/5' : 'bg-muted/50'}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           {msg.role === 'user' ? (
                             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
                               DU

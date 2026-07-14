@@ -222,7 +222,7 @@ export default function StartDashboardPage(): JSX.Element {
             <Link
               key={tile.key}
               to={tile.path}
-              className="group rounded-[var(--radius)] border border-l-4 border-border border-l-[hsl(var(--accent))] bg-card shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+              className="group rounded-(--radius) border border-l-4 border-border border-l-[hsl(var(--accent))] bg-card shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
             >
               <div className="p-5">
                 <div className="flex items-center justify-between">
@@ -282,7 +282,7 @@ export default function StartDashboardPage(): JSX.Element {
                     key={proc.key}
                     type="button"
                     onClick={() => navigate(proc.route_path)}
-                    className={`group flex flex-col items-start gap-1 rounded-2xl border bg-gradient-to-br p-4 text-left shadow-sm transition-all hover:shadow-md dark:hover:brightness-110 ${gradient}`}
+                    className={`group flex flex-col items-start gap-1 rounded-2xl border bg-linear-to-br p-4 text-left shadow-sm transition-all hover:shadow-md dark:hover:brightness-110 ${gradient}`}
                   >
                     <div className="flex w-full items-center justify-between">
                       <span className="text-sm font-semibold">{proc.label}</span>
@@ -304,7 +304,7 @@ export default function StartDashboardPage(): JSX.Element {
       </section>
 
       {/* Header + Suche */}
-      <section className="rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm">
+      <section className="rounded-(--radius) border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-normal text-foreground">App Starter</h1>
@@ -332,7 +332,7 @@ export default function StartDashboardPage(): JSX.Element {
       </section>
 
       {/* Schnellaktionen */}
-      <section className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-sm">
+      <section className="rounded-(--radius) border border-border bg-card p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-foreground">Schnellaktionen</h2>
         <p className="mb-3 text-sm text-muted-foreground">
           Haeufige Startaktionen fuer Tagesgeschaeft und neue Belege.

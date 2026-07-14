@@ -133,7 +133,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
           )}
         >
           {/* Status Icon */}
-          <div className="flex-shrink-0">{stateIcons[scanState]}</div>
+          <div className="shrink-0">{stateIcons[scanState]}</div>
 
           {/* Input oder Status */}
           <div className="flex-1 min-w-0">
@@ -175,7 +175,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
                 }}
                 placeholder={placeholder}
                 disabled={disabled || scanState !== 'idle'}
-                className="w-full bg-transparent text-xl font-medium placeholder:text-muted-foreground focus:outline-none"
+                className="w-full bg-transparent text-xl font-medium placeholder:text-muted-foreground focus:outline-hidden"
               />
             )}
           </div>
@@ -184,7 +184,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
           {manualInput && scanState === 'idle' && (
             <button
               onClick={() => setManualInput('')}
-              className="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-lg bg-neutral-700 text-white active:bg-neutral-600"
+              className="shrink-0 h-12 w-12 flex items-center justify-center rounded-lg bg-neutral-700 text-white active:bg-neutral-600"
               aria-label="Löschen"
             >
               <X className="h-6 w-6" />

@@ -382,7 +382,7 @@ export default function RueckverfolgbarkeitPage() {
                     <ol className="relative border-l pl-4 space-y-2">
                       {(trace.data.ereignisse ?? []).map((e: ChainEvent) => (
                         <li key={e.id} className="text-sm">
-                          <span className="absolute -left-[5px] mt-1.5 h-2 w-2 rounded-full bg-primary" />
+                          <span className="absolute left-[-5px] mt-1.5 h-2 w-2 rounded-full bg-primary" />
                           <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="outline" className="capitalize">{e.event_type}</Badge>
                             <span className="opacity-60">[{e.stage}]</span>

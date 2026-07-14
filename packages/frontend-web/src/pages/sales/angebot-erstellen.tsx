@@ -803,7 +803,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 </Button>
               </div>
               {customer && (
-                <div className="text-xs text-muted-foreground space-y-0.5 pl-[7.5rem]">
+                <div className="text-xs text-muted-foreground space-y-0.5 pl-30">
                   <div>Kd-Nr.: {customer.customerNumber}</div>
                   {(customer.postalCode || customer.city) && (
                     <div>{[customer.postalCode, customer.city].filter(Boolean).join(' ')}</div>

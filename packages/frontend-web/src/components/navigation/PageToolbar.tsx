@@ -109,13 +109,13 @@ export function PageToolbar({
 
   return (
     <div
-      className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60"
       role="toolbar"
       aria-label={`${title} toolbar`}
       data-mcp-component="page-toolbar"
       data-mcp-page-domain={mcpContext?.pageDomain}
     >
-      <div className="flex min-h-[4.5rem] items-center gap-4 px-4 py-3 sm:px-6">
+      <div className="flex min-h-18 items-center gap-4 px-4 py-3 sm:px-6">
         <div className="flex-1">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           {hasSubtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}

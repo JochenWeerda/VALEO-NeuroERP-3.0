@@ -58,7 +58,7 @@ export default function CustomerHeader({ customer }: CustomerHeaderProps) {
         {/* Address */}
         <FieldGroup title="Standort / Anschrift">
           <div className="flex items-start gap-1.5">
-            <MapPin size={13} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+            <MapPin size={13} className="text-muted-foreground mt-0.5 shrink-0" />
             <div className="leading-tight">
               <span className="font-medium text-foreground block">{customer.street || '—'}</span>
               <span className="font-semibold text-foreground block">{customer.zipCode} {customer.city}</span>
@@ -75,24 +75,24 @@ export default function CustomerHeader({ customer }: CustomerHeaderProps) {
         {/* Telecom */}
         <FieldGroup title="Telekommunikation">
           <div className="flex items-center gap-1.5">
-            <Phone size={12} className="text-muted-foreground flex-shrink-0" />
+            <Phone size={12} className="text-muted-foreground shrink-0" />
             <span className="text-foreground truncate">Tel 1: <strong>{customer.phone1 || '—'}</strong></span>
           </div>
           <div className="flex items-center gap-1.5">
             {customer.fax ? (
               <>
-                <Printer size={12} className="text-muted-foreground flex-shrink-0" />
+                <Printer size={12} className="text-muted-foreground shrink-0" />
                 <span className="text-foreground truncate">Fax: <strong>{customer.fax}</strong></span>
               </>
             ) : (
               <>
-                <Phone size={12} className="text-muted-foreground/50 flex-shrink-0" />
+                <Phone size={12} className="text-muted-foreground/50 shrink-0" />
                 <span className="text-muted-foreground italic">Tel 2: Keine Angabe</span>
               </>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <Mail size={12} className="text-primary flex-shrink-0" />
+            <Mail size={12} className="text-primary shrink-0" />
             {customer.email ? (
               <a href={`mailto:${customer.email}`} className="text-primary hover:underline font-medium truncate max-w-[190px]" title={customer.email}>
                 {customer.email}

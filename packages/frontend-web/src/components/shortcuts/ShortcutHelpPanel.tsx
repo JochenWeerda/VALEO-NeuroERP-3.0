@@ -103,7 +103,7 @@ export function ShortcutHelpPanel({
       <Card
         className={clsx(
           'w-80 max-h-[80vh] overflow-hidden flex flex-col shadow-lg',
-          'bg-white/95 backdrop-blur-sm border-r-0 rounded-l-lg',
+          'bg-white/95 backdrop-blur-xs border-r-0 rounded-l-lg',
           displayMode === 'hover' && 'opacity-90'
         )}
       >

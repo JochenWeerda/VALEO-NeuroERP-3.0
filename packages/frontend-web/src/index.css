@@ -1,9 +1,154 @@
-@import './styles/design-tokens-meridian.css';
-@import './styles/design-tokens-terra.css';
+/* Theme-invariante strukturelle Primitive (einmal an :root) vor den Theme-Dateien —
+   loest 38 der frueher identischen Doppel-Definitionen in Meridian/Terra auf. */
+@import './styles/tokens/primitives.css' layer(base);
+@import './styles/design-tokens-meridian.css' layer(base);
+@import './styles/design-tokens-terra.css' layer(base);
+@import './styles/density.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/* @theme inline: Tailwind referenziert die Runtime-CSS-Tokens (index.css :root,
+   Meridian/Terra), statt sie in :root zu überschreiben. Verhindert Zirkularität bei
+   gleichnamigen Tokens (--text-2xs, --font-sans, --shadow-*) und hält die Utilities
+   theme-reaktiv (data-theme wechselt --primary usw. zur Laufzeit). */
+@theme inline {
+  --font-sans:
+    var(--font-sans), -apple-system, BlinkMacSystemFont, Segoe UI Variable,
+    system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  --text-2xs: var(--text-2xs);
+  --text-2xs--line-height: 1rem;
+  --text-xs: var(--text-xs);
+  --text-xs--line-height: 1rem;
+  --text-sm: var(--text-sm);
+  --text-sm--line-height: 1.25rem;
+  --text-base: var(--text-base);
+  --text-base--line-height: 1.5rem;
+  --text-lg: var(--text-lg);
+  --text-lg--line-height: 1.75rem;
+  --text-xl: var(--text-xl);
+  --text-xl--line-height: 2rem;
+  --text-2xl: var(--text-2xl);
+  --text-2xl--line-height: 2.5rem;
+  --text-3xl: var(--text-3xl);
+  --text-3xl--line-height: 3rem;
+
+  --tracking-tight: var(--tracking-tight);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: var(--tracking-wide);
+  --tracking-widest: var(--tracking-widest);
+
+  --leading-tight: var(--leading-tight);
+  --leading-snug: var(--leading-snug);
+  --leading-normal: var(--leading-normal);
+  --leading-relaxed: var(--leading-relaxed);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow-md);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --transition-duration-instant: var(--duration-instant);
+  --transition-duration-fast: var(--duration-fast);
+  --transition-duration-normal: var(--duration-normal);
+  --transition-duration-slow: var(--duration-slow);
+
+  --ease-spring: var(--ease-spring);
+  --ease-ease-out: var(--ease-out);
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius: var(--radius-lg);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  --min-height-touch: var(--touch-target, 44px);
+
+  --min-width-touch: var(--touch-target, 44px);
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @layer base {
   :root {

@@ -319,7 +319,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
               type="datetime-local"
               value={lkw.ankunftszeit}
               onChange={(e) => updateField('ankunftszeit', e.target.value)}
-              className="flex w-full min-h-[54px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-none"
+              className="flex w-full min-h-[54px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-hidden"
             />
           </div>
         </TouchSection>
@@ -532,7 +532,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
                 value={scanInputValue}
                 onChange={(event) => setScanInputValue(event.target.value)}
                 placeholder={scanDialogField === 'kennzeichen' ? 'z.B. AB-CD 1234' : 'z.B. LS-2026-0042'}
-                className="flex w-full min-h-[52px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-none"
+                className="flex w-full min-h-[52px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-hidden"
                 autoFocus
               />
               <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">

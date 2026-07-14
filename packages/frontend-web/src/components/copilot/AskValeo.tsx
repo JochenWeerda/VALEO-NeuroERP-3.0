@@ -317,7 +317,7 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
           {hasResponse && (
             <div className="rounded-md border border-primary/20 bg-primary/10 p-4">
               <div className="flex items-start gap-2">
-                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
+                <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">Agent-Antwort</Badge>

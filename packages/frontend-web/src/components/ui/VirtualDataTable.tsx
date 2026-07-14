@@ -133,7 +133,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                   <button
                     key={virtualRow.key}
                     type="button"
-                    className="absolute left-0 grid w-full border-b bg-background text-left text-sm hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="absolute left-0 grid w-full border-b bg-background text-left text-sm hover:bg-primary/5 focus:outline-hidden focus:ring-2 focus:ring-primary/40"
                     style={{
                       gridTemplateColumns,
                       height: virtualRow.size,

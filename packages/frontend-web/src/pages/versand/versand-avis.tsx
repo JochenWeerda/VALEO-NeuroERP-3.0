@@ -3,7 +3,7 @@
     <div className="min-h-full bg-[#ececec] text-[11px] text-black">
       <div className="border-b border-[#b9b9b9] bg-[#efefef] px-1 py-[2px] text-[12px] text-[#5e5e5e]">Versand-Avis</div>
 
-      <div className="px-1 pt-[1px]">
+      <div className="px-1 pt-px">
         <div className="border border-[#b6b6b6] bg-white">
           <div className="grid grid-cols-[70px_110px_90px_62px_64px_82px_90px_68px_74px_56px] border-b border-[#cfcfcf] bg-[#f3f3f3] px-1 py-[2px]">
             <span>Kunden-Nr.</span>

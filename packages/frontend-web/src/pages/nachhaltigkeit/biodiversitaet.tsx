@@ -85,7 +85,7 @@ export default function BiodiversitaetPage(): JSX.Element {
 
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
         <div className="flex items-start gap-2">
-          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
           <div className="text-sm text-blue-900">
             <p className="font-semibold">Nachhaltigkeits-Datenquelle: ESG Read-Model ({reportYear})</p>
             <p className="mt-1">

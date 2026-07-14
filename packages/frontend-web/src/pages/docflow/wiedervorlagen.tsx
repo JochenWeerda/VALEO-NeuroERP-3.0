@@ -48,7 +48,7 @@ function CreateForm({ doc }: { doc: string }) {
           <option value="rueckmeldung">Rückmeldung</option>
         </NativeSelect>
       </label>
-      <label className="text-xs text-muted-foreground space-y-1 flex-1 min-w-[12rem]">
+      <label className="text-xs text-muted-foreground space-y-1 flex-1 min-w-48">
         <span>Betreff</span>
         <Input value={betreff} onChange={(e) => setBetreff(e.target.value)} placeholder="Betreff" className="h-8" />
       </label>

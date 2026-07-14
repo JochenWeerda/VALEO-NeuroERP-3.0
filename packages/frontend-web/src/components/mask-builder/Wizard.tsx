@@ -280,7 +280,7 @@ const Wizard: React.FC<WizardProps> = ({
                       : isCompleted
                       ? 'bg-green-100 border-2 border-green-500'
                       : 'bg-gray-100 border-2 border-gray-300'
-                  } ${isClickable ? 'cursor-pointer hover:bg-opacity-80' : 'cursor-not-allowed opacity-50'}`}
+                  } ${isClickable ? 'cursor-pointer hover:brightness-105' : 'cursor-not-allowed opacity-50'}`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-1 ${
                     isCurrent

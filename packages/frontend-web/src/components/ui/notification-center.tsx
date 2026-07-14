@@ -58,7 +58,7 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
         notification.read && 'opacity-70'
       )}
     >
-      <div className={cn('mt-0.5 flex-shrink-0', typeColors[notification.type])}>
+      <div className={cn('mt-0.5 shrink-0', typeColors[notification.type])}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
@@ -69,7 +69,7 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
               e.stopPropagation()
               onClear(notification.id)
             }}
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
             title="Entfernen"
           >
             <Trash2 className="h-3 w-3" />
@@ -148,7 +148,7 @@ export function NotificationCenter() {
         {unreadCount > 0 && (
           <Badge
             variant="destructive"
-            className="absolute -right-1 -top-1 h-5 min-w-[1.25rem] px-1 text-xs"
+            className="absolute -right-1 -top-1 h-5 min-w-5 px-1 text-xs"
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </Badge>

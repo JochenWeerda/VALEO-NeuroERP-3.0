@@ -22,7 +22,7 @@
             <label>Auftrag-Nr bis:</label>
             <input className="h-5 border border-[#a8a8a8] bg-white px-1" />
             <button className="h-5 border border-[#a8a8a8] bg-[#ececec]">...</button>
-            <button className="justify-self-start border border-[#9b9b9b] bg-[#ececec] px-3 py-[1px]">Anzeigen</button>
+            <button className="justify-self-start border border-[#9b9b9b] bg-[#ececec] px-3 py-px">Anzeigen</button>
           </div>
 
           <div className="border border-[#868686] bg-white">

@@ -235,7 +235,7 @@ export default function Contracts(): ReactElement {
           <div className="space-y-4">
             {isPending
               ? Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-                  <div key={index} className="rounded-[var(--radius)] border border-border p-4">
+                  <div key={index} className="rounded-(--radius) border border-border p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-6 w-32" />
@@ -251,7 +251,7 @@ export default function Contracts(): ReactElement {
                   </div>
                 ))
               : contracts.map((contract) => (
-                  <div key={contract.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
+                  <div key={contract.id} className="rounded-(--radius) border border-border p-4 transition-colors hover:bg-primary/5">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -292,7 +292,7 @@ export default function Contracts(): ReactElement {
                   </div>
                 ))}
             {!isPending && contracts.length === 0 ? (
-              <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+              <div className="rounded-(--radius) border border-dashed border-border bg-muted p-6 text-center">
                 <p className="text-sm font-medium text-foreground">Keine Vertraege vorhanden</p>
                 <p className="text-xs text-muted-foreground">Sobald Kontrakte angelegt sind, erscheinen diese hier.</p>
               </div>

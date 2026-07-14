@@ -45,28 +45,17 @@
      11 -> 14 -> 16 -> 20 -> 28 -> 40px  */
   --font-size-2xs:  0.6250rem;   /*  10px -- Keyboard-Hints              */
   --font-size-xs:   0.6875rem;   /*  11px -- Legal, Micro-Labels         */
-  --font-size-sm:   0.875rem;    /*  14px -- Table-Body, Sekundaer-Info  */
-  --font-size-base: 1rem;        /*  16px -- Standard-Body               */
-  --font-size-lg:   1.25rem;     /*  20px -- Sub-Headlines, Card-Titel   */
   --font-size-xl:   1.75rem;     /*  28px -- Seitentitel                 */
   --font-size-2xl:  2.5rem;      /*  40px -- KPI-Werte, Hero-Zahlen      */
 
   /* Gewichte */
-  --font-weight-light:  300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semi:   600;
-  --font-weight-bold:   700;
 
   /* Zeilenhoehen */
-  --line-height-tight:   1.2;
-  --line-height-snug:    1.4;
   --line-height-normal:  1.55;   /* Inter: leicht kompakter als Plus Jakarta */
   --line-height-relaxed: 1.7;
 
   /* Buchstabenabstaende */
   --letter-spacing-tight:   -0.02em;
-  --letter-spacing-normal:   0em;
   --letter-spacing-wide:     0.02em;
   --letter-spacing-wider:    0.06em;  /* Fuer Uppercase-Labels: SORTE, STATUS */
 
@@ -78,8 +67,6 @@
      ABSTANDS-SKALA — Strikt 8px-Basis (DIN-Stil, linear)
      ---------------------------------------------------------------- */
 
-  --space-0:   0.25rem;   /*   4px -- Micro */
-  --space-1:   0.5rem;    /*   8px -- XS    */
   --space-2:   1rem;      /*  16px -- SM    */
   --space-3:   1.5rem;    /*  24px -- MD    */
   --space-4:   2rem;      /*  32px -- LG    */
@@ -93,28 +80,20 @@
   --sidebar-width-expanded:   256px;   /* Etwas breiter als Meridian */
   --sidebar-width-collapsed:   56px;
   --content-max-width:       1440px;
-  --content-padding-x:         32px;
   --header-height:             60px;
   --toolbar-height:            52px;
   --table-row-height:          48px;
   --table-row-compact:         36px;
-  --input-height:              44px;
-  --button-height:             44px;
-  --button-height-sm:          36px;
-  --button-height-lg:          52px;
-  --touch-target-min:          44px;
 
   /* ----------------------------------------------------------------
      BORDER-RADIUS (Terra: praezise 6px — GmbH-Aesthetik)
      ---------------------------------------------------------------- */
 
-  --radius-none: 0px;
   --radius-xs:   2px;    /* Indikatoren, sehr kleine Elemente */
   --radius-sm:   4px;    /* Tags, Chips */
   --radius:      6px;    /* Terra-Standard: praezise, professionell */
   --radius-lg:   8px;    /* Modals, Panels */
   --radius-xl:  12px;    /* Grosse Feature-Cards */
-  --radius-full: 9999px; /* Pills */
 
   /* ----------------------------------------------------------------
      FARBEN — PRIMAER: WALDGRUEN
@@ -172,16 +151,16 @@
      HSL-Referenz: 40 xx% xx%
      ---------------------------------------------------------------- */
 
-  --color-gray-50:    40 15% 96%;    /* #f4f2ee -- Warm-Grau Hintergrund */
-  --color-gray-100:   40 12% 92%;    /* #eceae4 */
-  --color-gray-200:   40 10% 86%;    /* #dcdad4 */
-  --color-gray-300:   40  8% 76%;    /* #c4c2bc */
-  --color-gray-400:   40  6% 62%;    /* #9e9c97 */
-  --color-gray-500:   40  5% 48%;    /* #7b7975 */
-  --color-gray-600:   40  5% 36%;    /* #5c5a56 */
-  --color-gray-700:   40  6% 25%;    /* #403e3a */
-  --color-gray-800:   40  8% 16%;    /* #2a2826 */
-  --color-gray-900:   40 10% 10%;    /* #1a1816 */
+  --palette-gray-50:    40 15% 96%;    /* #f4f2ee -- Warm-Grau Hintergrund */
+  --palette-gray-100:   40 12% 92%;    /* #eceae4 */
+  --palette-gray-200:   40 10% 86%;    /* #dcdad4 */
+  --palette-gray-300:   40  8% 76%;    /* #c4c2bc */
+  --palette-gray-400:   40  6% 62%;    /* #9e9c97 */
+  --palette-gray-500:   40  5% 48%;    /* #7b7975 */
+  --palette-gray-600:   40  5% 36%;    /* #5c5a56 */
+  --palette-gray-700:   40  6% 25%;    /* #403e3a */
+  --palette-gray-800:   40  8% 16%;    /* #2a2826 */
+  --palette-gray-900:   40 10% 10%;    /* #1a1816 */
 
   /* ----------------------------------------------------------------
      FARBEN — SEMANTISCH
@@ -211,12 +190,12 @@
      SEMANTIC ALIASES (shadcn/ui kompatibel)
      ---------------------------------------------------------------- */
 
-  --background:            var(--color-gray-50);      /* 40 15% 96% */
-  --foreground:            var(--color-gray-900);     /* 40 10% 10% */
+  --background:            var(--palette-gray-50);      /* 40 15% 96% */
+  --foreground:            var(--palette-gray-900);     /* 40 10% 10% */
   --card:                  40 20% 99%;                /* Fast weiss */
-  --card-foreground:       var(--color-gray-900);
+  --card-foreground:       var(--palette-gray-900);
   --popover:               0 0% 100%;                 /* Reines Weiss */
-  --popover-foreground:    var(--color-gray-900);
+  --popover-foreground:    var(--palette-gray-900);
 
   --primary:               var(--color-primary-500);  /* 158 64% 28% */
   --primary-foreground:    0 0% 100%;
@@ -224,8 +203,8 @@
   --secondary:             var(--color-harvest-50);   /* 45 93% 94% */
   --secondary-foreground:  var(--color-harvest-700);  /* 45 93% 20% */
 
-  --muted:                 var(--color-gray-100);     /* 40 12% 92% */
-  --muted-foreground:      var(--color-gray-600);     /* 40  5% 36% */
+  --muted:                 var(--palette-gray-100);     /* 40 12% 92% */
+  --muted-foreground:      var(--palette-gray-600);     /* 40  5% 36% */
 
   --accent:                var(--color-harvest-400);  /* 45 93% 47% */
   --accent-foreground:     var(--color-harvest-700);  /* 45 93% 20% */
@@ -233,8 +212,8 @@
   --destructive:           0 70% 48%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:                var(--color-gray-200);     /* 40 10% 86% */
-  --input:                 var(--color-gray-200);
+  --border:                var(--palette-gray-200);     /* 40 10% 86% */
+  --input:                 var(--palette-gray-200);
   --ring:                  var(--color-primary-500);  /* 158 64% 28% */
 
   /* ----------------------------------------------------------------
@@ -273,32 +252,15 @@
      MOTION-TOKENS (Terra: etwas schoenere Dynamics als Meridian)
      ---------------------------------------------------------------- */
 
-  --duration-instant:  50ms;
   --duration-fast:    120ms;   /* Etwas schneller als Meridian */
   --duration-normal:  220ms;
   --duration-slow:    380ms;
-  --duration-slower:  600ms;
 
-  --ease-linear:    linear;
-  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
-  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ----------------------------------------------------------------
      Z-INDEX-SKALA
      ---------------------------------------------------------------- */
 
-  --z-base:     0;
-  --z-raised:   1;
-  --z-dropdown: 10;
-  --z-sticky:   20;
-  --z-overlay:  30;
-  --z-modal:    40;
-  --z-popover:  50;
-  --z-tooltip:  60;
-  --z-toast:    70;
-  --z-top:      9999;
 }
 
 /* =================================================================

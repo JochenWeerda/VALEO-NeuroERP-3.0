@@ -169,7 +169,7 @@ export function AuditTimeline({ title = 'Audit-Zeitleiste', entries }: { title?:
                 <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${toneClasses[tone].dot}`} />
                 <div className="min-w-0">
                   <p className="text-[13px] font-bold text-gray-800">{entry.label}</p>
-                  <p className="break-words text-[12px] text-gray-500">{entry.detail}</p>
+                  <p className="wrap-break-word text-[12px] text-gray-500">{entry.detail}</p>
                 </div>
               </div>
             )
