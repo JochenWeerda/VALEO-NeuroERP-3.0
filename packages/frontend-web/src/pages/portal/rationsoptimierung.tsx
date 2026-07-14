@@ -1,7 +1,7 @@
 /**
  * Kundenportal – Rationsoptimierung
  *
- * Vollständige KLARAGRI-Workbench (Dashboard → Wizard → Workbench → Review).
+ * Vollständige Rationsoptimierungs-Workbench (Dashboard → Wizard → Workbench → Review).
  * Identisch zur internen ERP-Maske; der Portal-Kontext stellt nur das
  * Routing und den Portal-Header bereit.
  */

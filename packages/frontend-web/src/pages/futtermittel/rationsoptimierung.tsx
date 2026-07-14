@@ -1,5 +1,5 @@
 /**
- * Rationsoptimierung — KLARAGRI Design
+ * Rationsoptimierung
  *
  * Design: nutriopt-ai (Google AI Studio) — adaptiert für VALEO NeuroERP
  * Backend: /api/v1/agrar/rations-optimization (GfE-2023, HiGHS-Solver)
@@ -1374,7 +1374,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
       <section className="bg-white p-10 rounded-xl border shadow-sm space-y-8" style={{ borderColor: C.border }}>
         <div className="space-y-3">
           <h1 className="text-3xl font-bold tracking-tight" style={{ color: C.dark }}>
-            Willkommen bei KLAR<span style={{ color: C.accent }}>AGRI</span>
+            Willkommen bei der Rations<span style={{ color: C.accent }}>optimierung</span>
           </h1>
           <p className="text-lg max-w-2xl" style={{ color: C.muted }}>
             Optimieren Sie Ihre Milchviehfütterung. Kosten senken, Leistung steigern und Tiergesundheit sichern mit GfE-2023-basierter Präzisionsoptimierung.
@@ -4785,7 +4785,7 @@ export default function Rationsoptimierung() {
           className="flex items-center gap-1 cursor-pointer font-bold text-lg leading-none tracking-widest uppercase"
           onClick={() => setView('dashboard')}
         >
-          KLAR<span style={{ color: C.accentOnDark }}>AGRI</span>
+          Rations<span style={{ color: C.accentOnDark }}>optimierung</span>
           <span className="ml-3 text-[11px] font-normal opacity-60 normal-case tracking-normal">· VALEO NeuroERP</span>
         </div>
         <div className="flex items-center gap-5 text-[13px] opacity-90 font-medium">

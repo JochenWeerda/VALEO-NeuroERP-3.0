@@ -77,7 +77,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 
 function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
   const pickNumber = (label: string) => {
-    const raw = data.kpis.find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
+    const raw = (data.kpis ?? []).find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
     if (!raw) return 0
     const normalized = raw.replace(',', '.').replace(/[^\d.-]/g, '')
     const num = Number(normalized)
@@ -96,14 +96,14 @@ function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
       offenerBetrag: pickNumber('Letzte Rechnung'),
       verfuegbareDokumente: pickNumber('Neue Dokumente'),
     },
-    letzteBestellungen: data.letzteBestellungen.map((b) => ({
+    letzteBestellungen: (data.letzteBestellungen ?? []).map((b) => ({
       id: b.nummer || b.id,
       datum: b.datum,
       status: b.status === 'geliefert' ? 'abgeschlossen' : b.status === 'bestellt' ? 'in_bearbeitung' : b.status,
       betrag: b.betrag,
       artikel: 'Portal-Bestellung',
     })),
-    neueDokumente: data.neueDokumente.map((d, idx) => ({
+    neueDokumente: (data.neueDokumente ?? []).map((d, idx) => ({
       id: idx + 1,
       name: d.name,
       typ: d.typ,
@@ -177,7 +177,7 @@ function PreisspiegalWidget() {
               ))}
             </div>
             {/* Preiszeilen */}
-            {data.preisspiegel.map((a) => (
+            {(data.preisspiegel ?? []).map((a) => (
               <div
                 key={a.artikel_id}
                 className="grid grid-cols-5 gap-2 items-center rounded-lg px-2 py-2 hover:bg-gray-50"
@@ -203,7 +203,7 @@ function PreisspiegalWidget() {
                 })}
               </div>
             ))}
-            {data.preisspiegel.length === 0 && (
+            {(data.preisspiegel ?? []).length === 0 && (
               <p className="text-sm text-gray-500 text-center py-4">
                 Keine Preise für Ihre Früchte hinterlegt.
               </p>
