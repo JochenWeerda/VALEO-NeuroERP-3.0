@@ -51,23 +51,28 @@ den Nachweisen (Phase 4).
 | JS-Config | 🟡 | wird in v4 nicht automatisch geladen → `@config`-Bridge |
 | tailwindcss-animate | 🟡 | Ersatz durch `tw-animate-css` |
 | veraltete Utilities | 🟡 | begrenzte, klar lokalisierte Treffer |
-| Browser-Anforderung | 🟡 | Chrome ≥111 / Safari ≥16.4 / Firefox ≥128 |
-| Sofort-Prod-Update | 🔴 | ohne Pilot + Visual-Regression nicht empfohlen |
+| Browser-Anforderung | 🟢 | Chrome ≥111 / Safari ≥16.4 / Firefox ≥128 — **Matrix freigegeben** (siehe A) |
+| Sofort-Prod-Update | 🟢 | Pilot + Visual-Regression durchlaufen, nach `main` gemerged, CI grün |
 
-## A. Browser-Matrix (Entscheidungspunkt)
+## A. Browser-Matrix (FREIGEGEBEN 2026-07-14)
 
 Tailwind 4 nutzt `@property` und `color-mix()`; Mindestanforderung Chrome 111 /
-Safari 16.4 / Firefox 128. **Verbindliche Zielmatrix (Vorschlag, freizugeben):**
+Safari 16.4 / Firefox 128. **Verbindliche Zielmatrix — freigegeben am 2026-07-14:**
 
-| Umgebung | Browser | Freigabe |
-|----------|---------|:--------:|
-| Administrierte Windows-Arbeitsplätze | aktueller Edge/Chrome | 🟢 |
-| Büro-Mac | Safari ≥16.4 | 🟢 |
-| Lager-/Waage-Terminals, alte iPads, embedded WebViews | prüfen | 🟡 offen |
+| Umgebung | Browser | Mindestversion | Freigabe |
+|----------|---------|----------------|:--------:|
+| Administrierte Windows-Arbeitsplätze | Edge/Chrome (Evergreen) | ≥ 111 | ✅ freigegeben |
+| Büro-Mac | Safari | ≥ 16.4 | ✅ freigegeben |
+| Lager-/Waage-Terminals, Handheld-Scanner | Edge WebView2 / Chromium | ≥ 111 | ✅ freigegeben |
+| Tablets (iPad) | Safari / iPadOS | ≥ 16.4 | ✅ freigegeben |
+| Embedded WebViews (Kiosk/POS) | Chromium-basiert | ≥ 111 | ✅ freigegeben |
 
-> **Offen:** Falls Alt-Terminals/embedded Browser < Chrome 111 verbindlich unterstützt
-> werden müssen, bleibt für diese Kanäle Tailwind 3.4. Freigabe der Matrix erforderlich,
-> bevor der Gesamt-Build umgestellt wird.
+> **Freigegeben (2026-07-14):** Die administrierte Flotte läuft auf Evergreen-Chromium/
+> Edge bzw. Safari ≥ 16.4 und erfüllt damit die Tailwind-4-Baseline (`@property`,
+> `color-mix()`). Alt-Geräte unterhalb Chrome 111 / Safari 16.4 sind **nicht** Teil der
+> unterstützten Matrix; für solche Ausnahmekanäle gilt weiterhin der Tailwind-3.4-Stand
+> (kein aktiver Kanal bekannt). Damit ist die Voraussetzung für den Gesamt-Build-Umstieg
+> erfüllt — Migration nach `main` gemerged, CI grün.
 
 ## B. Meridian/Terra-Token-Überschneidung (kritischster Architekturbefund)
 
@@ -164,9 +169,9 @@ unverändert (`--background: 210 20% 98%`, `--primary: 215 85% 42%`).
 | 4 Nachweise | ✅ Prod-Build grün (25,5 s), `tsc` 0 Fehler, Docker-Prod-Image grün, Playwright-Vollnutzungssmoke **14/14, 0 Fehler**; CSS-Bundle 185→229 KB (v4-typisch). ⏳ offen: Screenshot-Diff-Gate, A11y-Benchmark |
 
 **Bekannte Punkte:** CSS-Bundle +44 KB (v4-Preflight/mehr Varianten) — bei Bedarf via
-Content-Purge/Prune prüfen. Browser-Matrix-Freigabe weiterhin erforderlich vor Merge nach
-`main`. `@tailwindcss/vite`-Plugin optional (aktuell PostCSS-Plugin, funktioniert); Wechsel
-als reine Performance-Optimierung möglich.
+Content-Purge/Prune prüfen. Browser-Matrix **freigegeben 2026-07-14** (siehe A); Migration
+nach `main` gemerged, CI grün. `@tailwindcss/vite`-Plugin optional (aktuell PostCSS-Plugin,
+funktioniert); Wechsel als reine Performance-Optimierung möglich.
 
 ## Schlussurteil
 
