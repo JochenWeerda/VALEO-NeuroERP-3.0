@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-ADVICE-CONNECTORS-010 Herd-Data-/DDW-Delta-Sync - in Arbeit (Claim 2026-07-14)
+
+**Owner:** Codex. **Ziel:** bestehende Rationsschnittstellen um einen providerneutralen täglichen Herd-Data-Delta-Sync mit DDW-Vertragsprofil erweitern; Gruppen-KPIs, Tiergesundheitsalarme und genetische Profile normalisieren, Idempotenz/Löschung/Gruppenwechsel berücksichtigen und Live-Aufrufe an explizite Zugriffsrechte sowie konfigurierbare Endpunkt-Templates binden. **Dateibesitz:** `app/agrar/rations/integrations/`, `app/api/v1/endpoints/rations_integrations.py`, neue `app/services/rations_*`-Dateien, passende Alembic-Migration/Tests, Agrar-Domain-Pack, `.env.example`, Parity-Doku und Workboard. **Abnahme:** keine erfundenen DDW-Produktivpfade; Mock-Vertrag und Delta-Normalisierung getestet; Tenant-/Consent-/SSRF-Gates; Architektur- und Doku-Gates grün.
+
 ## UIX-P0-PORTAL-RATIONS-006 Portal-API-Prefix-Fixes + Rations-Zeilen-CRUD + Praxis-KPIs - abgeschlossen 2026-07-14
 
 **Owner:** Codex. **Stand:** abgeschlossen nach Übernahme mit ausdrücklicher Nutzerfreigabe. Portal-Fachseiten verwenden `/api/v1/portal`, optionale Listen/Preisstand sind defensiv; die Workbench unterstützt Hinzufügen, Entfernen, Fixieren (Min=Max) und Lösen mit sofortiger Reoptimierung; Praxis-KPIs zeigen `ct/kg ECM` und `g KF-TM/kg ECM`, `€/Kuh/Tag` bleibt im Detail. Eigenständiger Funktionsabgleich samt Folge-Slices: `docs/project-context/fuetterungsberatung-feature-parity-2026-07-14.md`. **Dateibesitz:** sieben Portal-/Rations-TS(X)-Dateien, zwei Regressionstests, Parity-Doku, Workboard. **Abnahme:** focused tsc 0; ESLint 0 Fehler; Vitest 3/3; Playwright Portal-API-Prefix 1/1; Rations-Smoke 1/1; Docs-Governance und `git diff --check` grün.
