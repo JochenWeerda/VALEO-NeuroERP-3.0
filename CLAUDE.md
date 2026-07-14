@@ -119,6 +119,7 @@ packages/frontend-web/src/
 
 **Key patterns:**
 - **Mask Builder Framework** (`components/mask-builder/`): Config-driven ERP screens. Use `ObjectPage` for detail views with tabs, `ListReport` for filterable lists, `Wizard` for multi-step forms. Screens are defined declaratively via config objects, not custom JSX.
+- **Design rules** (details: `docs/design/frontend-design-skill-audit.md`): tab strips are always ARIA tabs via `components/ui/tabs.tsx` — `TabsList variant="register"` for document/file registers, default variant for view switchers; never hand-built `<button>` rows. One `h1` per mask = object identity. Micro labels use `text-2xs tracking-wide uppercase` (no `text-[10px]` arbitraries). Semantic colors only through central variants (Badge/Button), never raw palette classes like `text-green-600` (WCAG AA contrast).
 - Path alias: `@/*` → `src/*`
 - Vite proxy: `/api/v1` → backend (port 8000), `/api/mcp` → BFF (port 4001), `/api/events` → SSE (port 5174)
 - State: Zustand for client state, TanStack React Query for server state

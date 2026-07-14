@@ -21,7 +21,7 @@ interface CustomerHeaderProps {
 function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="md:col-span-4 space-y-1.5 rounded-md border border-border bg-card p-2.5">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground border-b border-border pb-1 mb-1">
+      <div className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border pb-1 mb-1">
         {title}
       </div>
       {children}
@@ -39,15 +39,16 @@ export default function CustomerHeader({ customer }: CustomerHeaderProps) {
           <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-sm">
             {customer.name.slice(0, 1).toUpperCase()}
           </div>
-          <h2 className="font-bold text-base text-foreground leading-tight" id="master-cust-name-header">
+          {/* h1: die Kundenakte selbst ist die Seitenidentität (eine h1 je Maske) */}
+          <h1 className="font-bold text-base text-foreground leading-tight" id="master-cust-name-header">
             {customer.name}
-          </h2>
+          </h1>
           <Badge variant="secondary">Konto-Nr: {customer.debtorNo}</Badge>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>Sprache: DE</span>
-          <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--color-semantic-success-500-hsl))]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-border" aria-hidden="true" />
           <span>Währung: EUR</span>
         </div>
       </div>
@@ -94,7 +95,7 @@ export default function CustomerHeader({ customer }: CustomerHeaderProps) {
           <div className="flex items-center gap-1.5">
             <Mail size={12} className="text-primary shrink-0" />
             {customer.email ? (
-              <a href={`mailto:${customer.email}`} className="text-primary hover:underline font-medium truncate max-w-[190px]" title={customer.email}>
+              <a href={`mailto:${customer.email}`} className="text-primary hover:underline font-medium truncate max-w-48" title={customer.email}>
                 {customer.email}
               </a>
             ) : (
@@ -107,17 +108,17 @@ export default function CustomerHeader({ customer }: CustomerHeaderProps) {
         <FieldGroup title="Verantwortung / Finanzen">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <span className="block text-[10px] uppercase font-semibold text-muted-foreground">Vertreter VB</span>
+              <span className="block text-2xs uppercase font-semibold tracking-wide text-muted-foreground">Vertreter VB</span>
               <span className="block font-semibold text-primary mt-0.5">{customer.salesRepresentative || 'JW'}</span>
             </div>
             <div>
-              <span className="block text-[10px] uppercase font-semibold text-muted-foreground">Disponent</span>
+              <span className="block text-2xs uppercase font-semibold tracking-wide text-muted-foreground">Disponent</span>
               <span className="block font-semibold text-foreground mt-0.5">{customer.dispatcher || 'Disp. 1'}</span>
             </div>
           </div>
           <div className="pt-1 mt-1 border-t border-dashed border-border flex items-center justify-between text-xs">
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase font-semibold text-muted-foreground">KV-Limit</span>
+              <span className="text-2xs uppercase font-semibold tracking-wide text-muted-foreground">KV-Limit</span>
               <strong className="text-foreground">EUR {customer.creditLimit.toLocaleString("de-DE")}</strong>
             </div>
             <div className="flex gap-1">

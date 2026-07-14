@@ -1,0 +1,102 @@
+slice_id: DESIGN-AUDIT-KIM-001
+id: DESIGN-AUDIT-KIM-001
+title: Frontend-Design-Audit + Referenz-Pilot KIM-Cockpit (Register-Tabs)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-14"
+started_at: "2026-07-14"
+completed_at: "2026-07-14"
+goal: >-
+  Die Prinzipien des Frontend-Design-Skills auf das ERP-Frontend uebertragen:
+  Bestandsaufnahme des Designsystems (Tokens/Themes/Density/Mask-Builder/
+  Primitives), verbindliche Design-Regeln ableiten und eine Referenz-
+  implementierung im fachlich dichtesten Pilotbereich (KIM-CRM-360-Cockpit)
+  liefern - barrierearm (WCAG 2.2 AA), ohne Geschaeftslogik-, API- oder
+  Routing-Aenderungen.
+scope:
+  - Zentrale Register-Variante fuer ui/tabs.tsx (Belegregister-Optik, ARIA-Tabs,
+    Pfeiltasten, Fokusring) - rueckwaertskompatibel, Default-Look unveraendert.
+  - KIM-Cockpit als Referenz - 12 Register auf echte Tabs, h1-Objektidentitaet,
+    text-2xs statt text-[10px]-Arbitraries, Semantikfarbe nur mit Bedeutung.
+  - Chef-Anweisungs-Auto-Save nach Mutation-Lifecycle-Invariante (Guard,
+    disabled, aria-live, Erfolgs-Toast, finally-Reset, Unveraendert-Kurzschluss).
+  - Storybook-Story + Vitest-Test fuer die Register-Variante.
+  - Audit-Doku docs/design/frontend-design-skill-audit.md (Ist-Analyse, Regeln,
+    A11y-/Performance-/Testergebnisse, Rollout-Plan); kompakter Design-Regeln-
+    Bullet in CLAUDE.md.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-AUDIT-KIM-001.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "CLAUDE.md"
+  - "packages/frontend-web/src/components/ui/tabs.tsx"
+  - "packages/frontend-web/src/components/ui/__stories__/Tabs.stories.tsx"
+  - "packages/frontend-web/src/__tests__/components/ui/tabs.register.test.tsx"
+  - "packages/frontend-web/src/pages/crm/kim/index.tsx"
+  - "packages/frontend-web/src/pages/crm/kim/components/CustomerHeader.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-AUDIT-KIM-001.yaml
+  - docs/design/frontend-design-skill-audit.md
+  - CLAUDE.md
+  - packages/frontend-web/src/components/ui/tabs.tsx
+  - packages/frontend-web/src/components/ui/__stories__/Tabs.stories.tsx
+  - packages/frontend-web/src/__tests__/components/ui/tabs.register.test.tsx
+  - packages/frontend-web/src/pages/crm/kim/index.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/CustomerHeader.tsx
+progress: >-
+  2026-07-14 umgesetzt: TabsList variant="register" (Context-basiert) plus
+  focus-visible-Ring an allen Tab-Triggern; KIM-Registerleiste (12 Tabs) von
+  rohen Buttons auf Radix-ARIA-Tabs migriert bei erhaltenen Agent-Vertraegen
+  (data-action-id crm360.tab.*, sub-workspace-tab-*-IDs); CustomerHeader h2->h1,
+  Token-Bereinigung; Chef-Anweisungs-Auto-Save mit Pending-Guard und Feedback.
+  Vorbestehende Rot-Staende auf main per git-stash-Gegenprobe abgegrenzt:
+  6 Vitest-Fehler (universal-sales-order-/universal-customer-mask-pilot,
+  "No QueryClient set"), 5 Portal-Alias-Luecken (routing-integrity), axe-Rot auf
+  /agrar /finance /lager (text-green-600, 2.99:1; 154+ Treffer in 40+ Dateien ->
+  eigener Statusfarben-Sweep-Slice laut Rollout-Plan der Audit-Doku).
+acceptance:
+  - "Registerleiste des KIM-Cockpits ist per Tastatur bedienbar (tablist/tab/tabpanel, aria-selected, Pfeiltasten, Fokusring); Optik unveraendert."
+  - "Default-Tabs-Variante visuell unveraendert (rueckwaertskompatibel)."
+  - "Genau eine h1 im Hauptzustand der Maske (Objektidentitaet Kundenname)."
+  - "Chef-Anweisungs-Auto-Save erfuellt die Mutation-Lifecycle-Invariante."
+  - "Keine Aenderung an Geschaeftslogik, API-Vertraegen, Routen oder Tenant-Logik."
+tests:
+  - "vitest run src/__tests__/components/ui/tabs.register.test.tsx -> 2 passed (ARIA-Rollen, Klick, Pfeiltasten)."
+  - "vitest run (voll) -> 365 passed; 6 Fehler vorbestehend (stash-Gegenprobe)."
+  - "tsc --noEmit -> 0; eslint -> 0 Fehler (8 fremde Warnungen); vite build -> gruen (19.8s)."
+  - "check:navigation-targets -> 898 Patterns gruen; check:routing-integrity -> 5 vorbestehende Portal-Luecken."
+  - "test:e2e:accessibility -> 5/8 gruen; 3 vorbestehende color-contrast-Routen (siehe Audit-Doku, Folge-Slice)."
+risks:
+  - "Weitere Eigenbau-Reiterleisten (SalesDocumentsPanel, InformationPanel, Sidebar) noch nicht migriert - Rollout-Plan Prio 1."
+  - "Statusfarben-Sweep (text-status-*-Utilities) muss TW4-Zirkularitaet beachten (keine Kollision mit Meridian --color-success, vgl. 8a6f6b945)."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Sachbearbeiter bedienen die Kundenakte tastatur- und workfloworientiert;
+    Registerwechsel per Pfeiltasten, sichtbarer Fokus, eine h1 je Maske.
+    Gewohnheits-Prinzip (docs/MASKEN.md) wird durch die zentrale Register-
+    Variante technisch vorbereitet. Randfall: 12+ Register scrollen horizontal.
+  architektur_vertrag: >-
+    Aenderungen nur in ui/tabs.tsx (zentral, additiv), KIM-Pilotdateien und
+    Doku; kein neues Paket, keine neue UI-Bibliothek, keine Routen-/API-
+    Aenderung; Mask-Builder unberuehrt (erbt Register-Look in Folge-Slice).
+  daten_vertrag: >-
+    Keine Schema-/Datenaenderung; Chef-Anweisung nutzt bestehenden
+    updateCustomer-Endpoint unveraendert (idempotent bei unveraendertem Text
+    durch Kurzschluss im Client).
+  security_vertrag: >-
+    Keine Auth-/Tenant-Beruehrung; keine neuen Eingabepfade; Toast-Texte ohne
+    PII.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; rein clientseitig; Rollback = Revert des
+    Commits.
+  dokumentations_vertrag: >-
+    docs/design/frontend-design-skill-audit.md (Ist, Regeln, Pilot, Ergebnisse,
+    Rollout-Plan), kompakter Design-Regeln-Bullet in CLAUDE.md, Workboard und
+    dieses YAML.
+  test_vertrag: >-
+    Neuer Vitest fuer Register-Variante (Rollen/Klick/Pfeiltasten); volle
+    Vitest-Suite, tsc, eslint, vite build, Navigation-/Routing-Checks und
+    axe-E2E vor Push ausgefuehrt; vorbestehende Fehler per stash-Gegenprobe
+    abgegrenzt statt unterdrueckt.

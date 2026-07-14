@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Bestehende Fachseiten als Tabs einbetten (Wiederverwendung; Konsolidierung folgt).
 const LeadsPage = lazy(() => import('../leads'));
@@ -88,6 +89,7 @@ export default function KimCockpitPage() {
   // Modals / Overlays triggers
   const [showMasterEditModal, setShowMasterEditModal] = useState(false);
   const [savingMaster, setSavingMaster] = useState(false);
+  const [savingChefNote, setSavingChefNote] = useState(false);
   const [showPresentsModal, setShowPresentsModal] = useState(false);
   const [presentsContact, setPresentsContact] = useState<ContactPerson | null>(null);
   const [showCallLogModal, setShowCallLogModal] = useState(false);
@@ -198,6 +200,26 @@ export default function KimCockpitPage() {
     setEditChefNote(activeCustomer.chefAnweisung);
     setEditAlertMsg(activeCustomer.alertMessages[0] || '');
     setShowMasterEditModal(true);
+  };
+
+  // Blur-Auto-Save der Chef-Anweisung: Duplicate-Guard + Erfolgs-/Fehler-Feedback
+  // (Mutation-Lifecycle-Invariante); unveränderter Text löst keinen Roundtrip aus.
+  const saveChefAnweisung = async (note: string) => {
+    if (!activeCustomer || savingChefNote) return;
+    if (note === (activeCustomer.chefAnweisung || '')) return;
+    setSavingChefNote(true);
+    try {
+      const ret = await kimApi.updateCustomer(activeCustomer.id, { chefAnweisung: note });
+      if (ret.status === 'success') {
+        setCustomers((prev) => prev.map((c) => (c.id === activeCustomer.id ? { ...c, chefAnweisung: note } : c)));
+        toast({ title: 'Chef-Anweisung gespeichert' });
+      }
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Anweisung konnte nicht gespeichert werden', variant: 'destructive' });
+    } finally {
+      setSavingChefNote(false);
+    }
   };
 
   const saveMasterEdit = async (e: React.FormEvent) => {
@@ -597,32 +619,31 @@ export default function KimCockpitPage() {
           {/* MAIN HORIZONTAL SPLIT (Mitte Tabs & Belege | Rechts NeuroAI) */}
           <div className="flex-1 flex overflow-hidden" id="central-split-workspace">
 
-            {/* CENTRAL WORKSPACE (Mitte Tabs) */}
-            <div className="flex-1 flex flex-col overflow-hidden border-r border-border" id="center-tabbed-pane">
-
-              {/* Tab Navigation Strips */}
-              <div className="flex bg-muted/60 border-b border-border text-xs font-medium select-none overflow-x-auto h-10 items-end px-3 gap-1" id="center-pane-tabs">
+            {/* CENTRAL WORKSPACE (Mitte Tabs) — Registerleiste als echte ARIA-Tabs
+                (Pfeiltasten-Navigation, Fokusring) über die zentrale Register-Variante */}
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as KimTab)}
+              className="flex-1 flex flex-col overflow-hidden border-r border-border"
+              id="center-tabbed-pane"
+            >
+              <TabsList variant="register" aria-label="Kundenakte-Register" className="shrink-0" id="center-pane-tabs">
                 {tabs.map(nav => (
-                  <button
+                  <TabsTrigger
                     key={nav.key}
-                    onClick={() => setActiveTab(nav.key)}
+                    value={nav.key}
                     data-action-id={`crm360.tab.${nav.key}`}
-                    className={`whitespace-nowrap px-3 py-2 rounded-t-md border-t border-x transition-colors ${
-                      activeTab === nav.key
-                        ? 'bg-background text-foreground border-border font-semibold translate-y-px'
-                        : 'bg-transparent text-muted-foreground hover:text-foreground border-transparent hover:bg-muted'
-                    }`}
                     id={`sub-workspace-tab-${nav.key}`}
                   >
                     {nav.label}
-                  </button>
+                  </TabsTrigger>
                 ))}
-              </div>
+              </TabsList>
 
               {/* Central contextual render workspace */}
               <div className="flex-1 overflow-y-auto p-4 bg-background" id="center-tab-views">
 
-                {activeTab === 'allgemein' && (
+                <TabsContent value="allgemein" className="mt-0">
                   <div className="space-y-4">
                     <ContactPersonsTable
                       key={`contacts-${workspaceResetKey}`}
@@ -634,17 +655,17 @@ export default function KimCockpitPage() {
                     />
                     <CustomerContactMarketing customer={activeCustomer} contacts={contacts} />
                   </div>
-                )}
+                </TabsContent>
 
-                {activeTab === 'information' && (
+                <TabsContent value="information" className="mt-0">
                   <InformationPanel customer={activeCustomer} section={activeInfoSection} />
-                )}
+                </TabsContent>
 
-                {activeTab === 'praesente' && (
+                <TabsContent value="praesente" className="mt-0">
                   <CustomerGiftsTab customer={activeCustomer} contacts={contacts} initialContactId={giftsContact} />
-                )}
+                </TabsContent>
 
-                {activeTab === 'belege' && (
+                <TabsContent value="belege" className="mt-0">
                   <SalesDocumentsPanel
                     key={`documents-${workspaceResetKey}`}
                     customer={activeCustomer}
@@ -654,39 +675,39 @@ export default function KimCockpitPage() {
                     activeCategory={docCategory}
                     onCategoryChange={setDocCategory}
                   />
-                )}
+                </TabsContent>
 
-                {activeTab === 'kontrakte' && (
+                <TabsContent value="kontrakte" className="mt-0">
                   <ContractsPanel
                     key={`contracts-${workspaceResetKey}`}
                     customer={activeCustomer}
                     documents={documents}
                     onAddContract={handleAddNewDocument}
                   />
-                )}
+                </TabsContent>
 
-                {activeTab === 'finanzen' && (
+                <TabsContent value="finanzen" className="mt-0">
                   <FinancialOpenItemsPanel
                     key={`financials-${workspaceResetKey}`}
                     customer={activeCustomer}
                     openItems={openItems}
                     onAddOpenItem={handleAddNewInvoice}
                   />
-                )}
+                </TabsContent>
 
-                {activeTab === 'audit' && (
+                <TabsContent value="audit" className="mt-0">
                   <DocumentPanel customer={activeCustomer} />
-                )}
+                </TabsContent>
 
-                {activeTab === 'tasks' && (
+                <TabsContent value="tasks" className="mt-0">
                   <FollowUpTaskPanel
                     logs={logs}
                     customer={activeCustomer}
                     onResolveTask={handleResolveTask}
                   />
-                )}
+                </TabsContent>
 
-                {activeTab === 'postfach' && (
+                <TabsContent value="postfach" className="mt-0">
                   <div className="p-4 space-y-3" id="postfach-workspace">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-sm text-foreground">
@@ -721,9 +742,9 @@ export default function KimCockpitPage() {
                       </div>
                     ))}
                   </div>
-                )}
+                </TabsContent>
 
-                {activeTab === 'chef' && (
+                <TabsContent value="chef" className="mt-0">
                   <div className="space-y-3 text-sm" id="chef-instruction-workstation">
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 flex flex-col gap-2">
                       <div className="flex items-center gap-2 text-destructive font-semibold border-b border-destructive/20 pb-2 mb-1">
@@ -741,42 +762,31 @@ export default function KimCockpitPage() {
                     <div className="rounded-lg border border-border bg-card p-4 space-y-2 shadow-sm">
                       <h4 className="font-semibold text-sm text-foreground">Chef-Anweisungsentwurf bearbeiten</h4>
                       <Textarea
-                        onBlur={async (e) => {
-                          if (!activeCustomer) return;
-                          try {
-                            const ret = await kimApi.updateCustomer(activeCustomer.id, { chefAnweisung: e.target.value });
-                            if (ret.status === "success") {
-                              const note = e.target.value;
-                              setCustomers((prev) => prev.map((c) => c.id === activeCustomer.id ? { ...c, chefAnweisung: note } : c));
-                            }
-                          } catch (err) {
-                            console.error(err);
-                            toast({ title: 'Anweisung konnte nicht gespeichert werden', variant: 'destructive' });
-                          }
-                        }}
+                        onBlur={(e) => void saveChefAnweisung(e.target.value)}
                         defaultValue={activeCustomer.chefAnweisung}
+                        disabled={savingChefNote}
                         className="h-24"
                         placeholder="Geben Sie hier die verbindlichen Handlungsanweisungen für alle Vertriebsstellen und das Lager ein…"
                       />
-                      <div className="flex justify-between items-center text-xs text-muted-foreground">
-                        <span>Klicke außerhalb des Feldes zum automatischen Abspeichern.</span>
+                      <div className="flex justify-between items-center text-xs text-muted-foreground" aria-live="polite">
+                        <span>{savingChefNote ? 'Anweisung wird gespeichert…' : 'Klicke außerhalb des Feldes zum automatischen Abspeichern.'}</span>
                         <span>Bediener: JW</span>
                       </div>
                     </div>
                   </div>
-                )}
+                </TabsContent>
 
-                {activeTab === 'leads' && (
+                <TabsContent value="leads" className="mt-0">
                   <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Lead-Management wird geladen…</div>}>
                     <LeadsPage />
                   </Suspense>
-                )}
+                </TabsContent>
 
-                {activeTab === 'geo' && (
+                <TabsContent value="geo" className="mt-0">
                   <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Karte wird geladen…</div>}>
                     <KundenKartePage />
                   </Suspense>
-                )}
+                </TabsContent>
 
               </div>
 
@@ -790,7 +800,7 @@ export default function KimCockpitPage() {
                 />
               </div>
 
-            </div>
+            </Tabs>
 
             {/* COLUMN 3: RIGHT PANEL (rechts NeuroAI/360°-Statuspanel) */}
             <NeuroAISidePanel

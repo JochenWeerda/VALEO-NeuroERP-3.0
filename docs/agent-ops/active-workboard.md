@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DESIGN-AUDIT-KIM-001 Frontend-Design-Audit + Referenz-Pilot KIM-Cockpit (Register-Tabs) - in Arbeit (Claim 2026-07-14)
+## DESIGN-AUDIT-KIM-001 Frontend-Design-Audit + Referenz-Pilot KIM-Cockpit (Register-Tabs) - abgeschlossen 2026-07-14
 
-**Owner:** Claude. **Stand:** geclaimt 2026-07-14. Frontend-Design-Skill-Audit (Tokens/Themes/Density/Mask-Builder/Primitives) + Referenzimplementierung im KIM-CRM-360-Cockpit: zentrale Tabs-`variant="register"` (ARIA/Pfeiltasten/Fokusring), h1-Hierarchie, Token-Bereinigung, Chef-Anweisungs-Auto-Save nach Mutation-Lifecycle-Invariante; Audit-Doku `docs/design/frontend-design-skill-audit.md` + kompakte Design-Regeln in `CLAUDE.md`.
+**Owner:** Claude. **Stand:** abgeschlossen 2026-07-14. Frontend-Design-Skill-Audit (Befund: Token-System reif — φ-Skalen, Meridian/Terra, 3 Density-Modi; Lücken in der Anwendung) + Referenzimplementierung im KIM-CRM-360-Cockpit: (1) zentrale `TabsList variant="register"` in `ui/tabs.tsx` (Belegregister-Optik, Context-basiert, rückwärtskompatibel) + bisher fehlender `focus-visible`-Ring an allen Tab-Triggern; (2) KIM-Registerleiste (12 Tabs) von rohen Buttons auf Radix-ARIA-Tabs (Pfeiltasten, `aria-selected`, `tabpanel`) bei erhaltenen Agent-Verträgen (`data-action-id crm360.tab.*`); (3) CustomerHeader h2→h1, `text-2xs` statt `text-[10px]`, Deko-Grün→neutral; (4) Chef-Anweisungs-Auto-Save mit Guard/`aria-live`/Erfolgs-Toast/`finally`. Story + Vitest neu. Vorbestehende Rot-Stände per stash-Gegenprobe abgegrenzt (6 Vitest „No QueryClient", 5 Portal-Aliase, axe `text-green-600` auf /agrar /finance /lager → eigener Sweep-Slice). **Dateibesitz:** `packages/frontend-web/src/components/ui/tabs.tsx`, `ui/__stories__/Tabs.stories.tsx`, `src/__tests__/components/ui/tabs.register.test.tsx`, `src/pages/crm/kim/index.tsx`, `src/pages/crm/kim/components/CustomerHeader.tsx`, `docs/design/frontend-design-skill-audit.md`, `CLAUDE.md`, Slice-YAML, Workboard. **Abnahme:** Vitest Register-Tests 2/2 + Suite 365 grün (6 vorbestehend rot); tsc 0; eslint 0 Fehler; Build 19,8 s; navigation-targets 898 grün; axe-E2E 5/8 (3 vorbestehend).
 
 ## PORTAL-FIX-001 Portal-Dashboard-Crash + Rations-Rebranding - abgeschlossen 2026-07-14
 
