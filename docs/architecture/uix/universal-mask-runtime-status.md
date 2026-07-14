@@ -225,6 +225,19 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | Doku-Konsistenz | nach UIX-031 synchron |
 | Produktionsreife | noch nicht bewiesen |
 
+## FEED-ADVICE-UX-011 - Cockpits ueber den UniversalMaskRuntime
+
+Seit 2026-07-14 kompiliert `UniversalNativeCockpitPage` nicht mehr direkt am
+Runtime-Vertrag vorbei. Cockpits durchlaufen nun dieselbe Kette wie native
+Objektmasken:
+
+`ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer`.
+
+Erster produktiver Agrar-Anwendungsfall ist `agrar/feed-advice`: ein nativer,
+rollenorientierter Einstieg, der die spezialisierte Solver-Workbench nur fuer eine
+konkrete Planungsaufgabe lazy laedt. Architekturentscheid und Variantenbewertung:
+ADR-041 sowie `docs/design/feed-advice-experience-architecture-2026-07-14.md`.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

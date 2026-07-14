@@ -13,6 +13,9 @@ version: 1.0.0
 ```bash
 pytest tests/test_agri*.py tests/test_agrar*.py tests/test_drying_rule_engine.py
 pytest tests/test_rations_herd_data_connectors.py -q --no-cov
+pytest tests/test_feed_advice_screen_definition.py tests/test_workspace_cockpits_uix061.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`
+
+Fuetterungsberatung UX: `packages/frontend-web/src/__tests__/pages/portal/feed-advice-entry.test.tsx`

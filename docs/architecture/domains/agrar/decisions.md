@@ -16,3 +16,4 @@ version: 1.0.0
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Model |
 | [agrar-event-hook-contracts.md](../../agrar-event-hook-contracts.md) | Event Contracts |
 | [ADR-040](../../../adr/adr-040-contract-gated-herd-data-connectors.md) | Vertragsgebundene Herd-Data-Connectoren |
+| [ADR-041](../../../adr/adr-041-hybrid-feed-advice-experience.md) | Hybride Experience-Architektur der Fuetterungsberatung |

@@ -78,6 +78,23 @@ Betrieb und Tiergruppen
   wird nicht dupliziert. Die Agrar-Spezialmaske bleibt gemäß Domain Pack ein
   bestehender Spezialrenderer und nutzt die vorhandenen API-/Action-Verträge.
 
+## Zielbildkorrektur FEED-ADVICE-UX-011
+
+Die Spezialmaske wurde anschließend ausdrücklich ohne Bestandsschutz neu
+bewertet. ADR-041 ersetzt die bisherige Annahme „Spezialmaske als Portalstart“
+durch eine hybride Aufgabenarchitektur:
+
+- `/portal/rationsoptimierung` startet in der nativen ScreenDefinition
+  `agrar/feed-advice` über RenderPlan, UniversalMaskRuntime und Renderer.
+- Der Solver-Arbeitsplatz wird nur für konkrete Expertentätigkeit lazy geladen.
+- Stallarbeit, Bestand, Analysen, Rationslebenszyklus und Controlling sind
+  eigenständige, rollengerechte Aufgaben statt lokaler Ansichtsmodi.
+- Die Spezialpalette referenziert kein Fremddesign mehr, sondern folgt den aktiven
+  VALEO-Semantiktokens.
+
+Die gewichtete Variantenbewertung und UX-Gates stehen in
+`docs/design/feed-advice-experience-architecture-2026-07-14.md`.
+
 ## Priorisierte Folge-Slices
 
 1. `FEED-ADVICE-LIFECYCLE-007`: persistente Futtergruppen und Rationsversionen,

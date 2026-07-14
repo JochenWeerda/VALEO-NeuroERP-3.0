@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12",
+  "generatedAt": "2026-07-14",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -882,6 +882,26 @@
       ],
       "sensitive_fields": [
         "preis"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feed-advice",
+      "title": "Fuetterungsberatung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feed-advice/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feed-advice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feed-advice/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feed-advice/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "futterkosten",
+        "milchleistung"
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",

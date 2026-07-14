@@ -408,6 +408,7 @@ nav:
           - ADR-038 — Kanonisches Adress-Value-Object: adr/adr-038-address-value-object.md
           - ADR-039 — Repo-Layout und Root-Konsolidierung: adr/adr-039-repo-layout.md
           - ADR-040 Contract-gated Herd-Data Connectors: adr/adr-040-contract-gated-herd-data-connectors.md
+          - ADR-041 Hybride Experience-Architektur der Fuetterungsberatung: adr/adr-041-hybrid-feed-advice-experience.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

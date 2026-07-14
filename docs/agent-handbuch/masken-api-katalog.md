@@ -4,20 +4,21 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-14
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (33 Masken).
+> Generiert aus `app/core/screen_definitions.py` (34 Masken).
 
 ## Übersicht
 
 | mask_id | Titel | Domäne | Risiko | Prozessketten | Agent-Contract |
 |---|---|---|---|---|---|
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
+| `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
@@ -92,6 +93,33 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/feed-advice` — Fuetterungsberatung
+
+**Zweck:** Aufgabenorientierter Einstieg in Planung, Freigabe, Stallausfuehrung und Controlling der Fuetterung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feed-advice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feed-advice/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feed-advice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Ration braucht heute Aufmerksamkeit?
+- Wo fehlen aktuelle Analysen oder ausreichend Bestand?
+- Zeige mir den schnellsten Weg zur heutigen Fuetterung.
+
+**Sensible Felder:** `futterkosten, milchleistung`
 
 ---
 

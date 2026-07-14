@@ -1,7 +1,7 @@
 /**
  * Rationsoptimierung
  *
- * Design: nutriopt-ai (Google AI Studio) — adaptiert für VALEO NeuroERP
+ * Design: eigenstaendiger VALEO-Facharbeitsplatz innerhalb des Meridian-Zielbilds
  * Backend: /api/v1/agrar/rations-optimization (GfE-2023, HiGHS-Solver)
  *
  * Views: dashboard → wizard → workbench → review
@@ -82,26 +82,28 @@ import {
 import { isRecord, numberValue, stringValue } from '@/lib/record-utils'
 
 // ---------------------------------------------------------------------------
-// Design Tokens (nutriopt-ai Palette)
+// Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
+// Keine Produktpalette: Der Portal-Einstieg selbst wird nativ aus der
+// ScreenDefinition gerendert; diese Werte folgen dem aktiven VALEO-Theme.
 // ---------------------------------------------------------------------------
 const C = {
-  dark: '#1B3022',
-  accent: '#557A20',
-  accentOnDark: '#9CCB5B',
-  bg: '#F0F2F5',
-  card: '#FFFFFF',
-  border: '#D1D5DB',
-  muted: '#59616D',
-  aiBg: '#E0F2FE',
-  aiBorder: '#BAE6FD',
-  aiText: '#0369A1',
-  deltaBg: '#FFFBEB',
-  deltaBorder: '#FEF3C7',
-  deltaText: '#92400E',
-  activeBg: '#F0F7ED',
-  error: '#DC2626',
-  success: '#059669',
-  warn: '#D97706',
+  dark: 'hsl(var(--foreground))',
+  accent: 'hsl(var(--primary))',
+  accentOnDark: 'hsl(var(--primary-foreground))',
+  bg: 'hsl(var(--background))',
+  card: 'hsl(var(--card))',
+  border: 'hsl(var(--border))',
+  muted: 'hsl(var(--muted-foreground))',
+  aiBg: 'hsl(var(--muted))',
+  aiBorder: 'hsl(var(--border))',
+  aiText: 'hsl(var(--primary))',
+  deltaBg: 'hsl(var(--muted))',
+  deltaBorder: 'hsl(var(--border))',
+  deltaText: 'hsl(var(--foreground))',
+  activeBg: 'hsl(var(--accent) / 0.12)',
+  error: 'hsl(var(--status-error-hsl))',
+  success: 'hsl(var(--status-success-hsl))',
+  warn: 'hsl(var(--status-warning-hsl))',
 } as const
 
 /** Beratungs-Orientierung: max. Mehr-Menge „Milch aus Protein“ vs. „Milch aus Energie“ (kg Milch ≈ l). */

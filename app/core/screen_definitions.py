@@ -1953,6 +1953,101 @@ def build_workspace_leitung_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_agrar_feed_advice_screen_definition() -> dict[str, Any]:
+    """Native Meridian entry cockpit for feeding advice.
+
+    The cockpit owns orientation and daily task selection. The mathematically
+    dense solver remains a deliberately specialised task workspace reached
+    from here; mobile execution, stock and analyses stay separate role-sized
+    tasks instead of becoming modes in one monolithic page.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/feed-advice",
+        "domain": "agrar",
+        "mode": "cockpit",
+        "title": "Fuetterungsberatung",
+        "subtitle": "Rationen planen, freigeben und im Stall nachhalten",
+        "adapter": {"type": "native", "sourceId": "agrar/feed-advice", "temporary": False},
+        "summary": [
+            {"key": "aktive_rationen", "label": "Aktive Rationen", "value": "–", "tone": "neutral"},
+            {"key": "heute_fuettern", "label": "Heute fuettern", "value": "Taeglicher Ablauf", "tone": "success"},
+            {"key": "pruefbedarf", "label": "Pruefbedarf", "value": "Analysen und Bestand", "tone": "warning"},
+        ],
+        "tiles": [
+            {
+                "key": "ration_planen",
+                "label": "Ration planen oder optimieren",
+                "targetScreenId": "agrar/feed-advice",
+                "targetRoute": "/portal/rationsoptimierung?mode=expert",
+                "tone": "neutral",
+            },
+            {
+                "key": "stallarbeit",
+                "label": "Heutige Fuetterung dokumentieren",
+                "targetScreenId": "agrar/feed-advice",
+                "targetRoute": "/futtermittel/fuetterungsdokumentation-mobil",
+                "tone": "neutral",
+            },
+            {
+                "key": "aktive_rationen",
+                "label": "Rationen und Freigaben",
+                "targetScreenId": "agrar/feed-advice",
+                "targetRoute": "/portal/rationsoptimierung?view=rations",
+                "tone": "warning",
+            },
+            {
+                "key": "futterbestand",
+                "label": "Futterbestand und Reichweite",
+                "targetScreenId": "futtermittel/einzelfuttermittel",
+                "targetRoute": "/futtermittel/einzelfuttermittel-liste",
+                "tone": "warning",
+            },
+            {
+                "key": "analysen",
+                "label": "Grundfutteranalysen pruefen",
+                "targetScreenId": "futtermittel/einzelfuttermittel",
+                "targetRoute": "/futtermittel/grundfutteranalysen",
+                "tone": "neutral",
+            },
+            {
+                "key": "controlling",
+                "label": "Soll-Ist und Effizienz auswerten",
+                "targetScreenId": "agrar/feed-advice",
+                "targetRoute": "/portal/rationsoptimierung?view=controlling",
+                "tone": "neutral",
+            },
+        ],
+        "noWorkflowReason": "Das Cockpit priorisiert Aufgaben; Freigabe- und Fuetterungsstatus gehoeren zur jeweiligen Ration.",
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "floorplan": "cockpit",
+            "density": "comfortable",
+            "contextRail": "copilot",
+            "tableProfile": "standard",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Aufgabenorientierter Einstieg in Planung, Freigabe, Stallausfuehrung und Controlling der Fuetterung.",
+            "examplePrompts": [
+                "Welche Ration braucht heute Aufmerksamkeit?",
+                "Wo fehlen aktuelle Analysen oder ausreichend Bestand?",
+                "Zeige mir den schnellsten Weg zur heutigen Fuetterung.",
+            ],
+            "sensitiveFields": ["futterkosten", "milchleistung"],
+            "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-advice']"},
+        },
+    }
+
+
 def build_lager_leitstand_screen_definition() -> dict[str, Any]:
     """Native cockpit ScreenDefinition fuer UIX-081 Twin-Panel Leitstand."""
 
@@ -2100,6 +2195,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "workspace/lager": build_workspace_lager_screen_definition,
     "workspace/fibu": build_workspace_fibu_screen_definition,
     "workspace/leitung": build_workspace_leitung_screen_definition,
+    "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
     "einkauf/supplier": build_supplier_screen_definition,
@@ -2612,6 +2708,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/duenger": "/agrar/duenger",
     "agrar/harvest-settlement": "/agrar/kontrakt-settlement",
     "agrar/kontrakte": "/kontrakte",

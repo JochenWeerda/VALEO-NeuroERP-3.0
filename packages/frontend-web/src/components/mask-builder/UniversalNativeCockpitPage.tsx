@@ -1,14 +1,14 @@
-import { useMemo } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { UniversalMaskRenderer } from '@/components/mask-builder'
+import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useScreenDefinition } from '@/lib/api/masks'
-import { compileRenderPlanFromScreenDefinition } from './render-plan/schema-compiler'
 
 /**
  * UniversalNativeCockpitPage (UIX-061): rendert einen cockpit-Workspace als
  * rollenbasierte Startseite. Kein Entity — die Seite kompiliert die
- * ScreenDefinition direkt zu einem RenderPlan (KPI-Summary + Kachel-Grid) und
- * navigiert ueber die Kacheln in die jeweiligen Prozessmasken.
+ * ScreenDefinition ueber den zentralen UniversalMaskRuntime zu einem RenderPlan
+ * (KPI-Summary + Kachel-Grid) und navigiert ueber die Kacheln in die jeweiligen
+ * Prozessmasken. Damit gelten Overlays, Berechtigungen und Compiler-Gates auch
+ * fuer Cockpits und nicht nur fuer Objektmasken.
  */
 export function UniversalNativeCockpitPage({
   screenId,
@@ -18,11 +18,12 @@ export function UniversalNativeCockpitPage({
   testId?: string
 }): JSX.Element {
   const schemaQuery = useScreenDefinition(screenId)
-
-  const plan = useMemo(
-    () => (schemaQuery.data ? compileRenderPlanFromScreenDefinition(schemaQuery.data) : null),
-    [schemaQuery.data],
-  )
+  const runtime = useUniversalMaskRuntime({
+    screenId,
+    schema: schemaQuery.data,
+    enabled: Boolean(schemaQuery.data),
+  })
+  const plan = runtime.plan
 
   if (schemaQuery.isLoading) {
     return (
@@ -47,7 +48,17 @@ export function UniversalNativeCockpitPage({
 
   return (
     <div data-testid={testId ?? `native-cockpit-${screenId.replace('/', '-')}`} data-runtime="native-cockpit">
-      <UniversalMaskRenderer plan={plan} />
+      <UniversalMaskRenderer
+        plan={plan}
+        data={runtime.entityData}
+        tables={runtime.tableRows}
+        tableQueryStates={runtime.tableQueryStates}
+        tableTotals={runtime.tableTotals}
+        onTableQueryChange={runtime.setTableQuery}
+        onOverlayChange={runtime.updateUserOverlay}
+        onOverlayReset={runtime.resetUserOverlay}
+        lookupBindings={runtime.lookupBindings}
+      />
     </div>
   )
 }
