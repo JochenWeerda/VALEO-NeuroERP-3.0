@@ -1,0 +1,98 @@
+slice_id: DESIGN-ROLLOUT-REGISTER-003
+id: DESIGN-ROLLOUT-REGISTER-003
+title: Register-Rollout — KIM-Restumschalter, ObjectPage/Runtime-Standard-Look, Belegketten-Koepfe
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-14"
+started_at: "2026-07-14"
+completed_at: "2026-07-14"
+goal: >-
+  Rollout-Plan aus docs/design/frontend-design-skill-audit.md umsetzen: die
+  Register-Variante als Standard-Tab-Look der Belegwelt etablieren (Mask-Builder
+  ObjectPage + Universal Mask Runtime), Belegkopf-Register der Verkaufs-/
+  Einkaufs-/Agrar-Belegketten vereinheitlichen (Gewohnheits-Prinzip) und die
+  restlichen KIM-Umschalter semantisch korrekt auszeichnen.
+scope:
+  - LazyTabs erhaelt variant-Durchleitung; UniversalMaskRenderer nutzt
+    variant="register" -> alle nativen SD-Masken erben den Belegregister-Look.
+  - Mask-Builder ObjectPage TabsList auf variant="register" (das starre
+    grid-cols-4 brach bei ungleich 4 Tabs).
+  - Belegkoepfe auf eine Register-Leiste konsolidiert (statt zwei getrennter
+    TabsLists, die die Pfeiltasten-Navigation zerschnitten) in
+    verkauf/lieferschein-erfassung, sales/OrderEditorLegacyPage,
+    einkauf/lieferschein-erfassung, agrar/ernte-annahme-erfassung.
+  - KIM SalesDocumentsPanel-Kategorien als aria-pressed-Toggle-Gruppe (bewusst
+    KEIN Register - Filter ueber einer gemeinsamen Tabelle); Forderungsspalte
+    tabular-nums.
+  - Ansichtsumschalter regulaerer Seiten (compliance, fibu, pos u. a.) bewusst
+    im Default-Look belassen (Regel R1: Struktur ist Information).
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-ROLLOUT-REGISTER-003.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "packages/frontend-web/src/components/ui/LazyTabs.tsx"
+  - "packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx"
+  - "packages/frontend-web/src/components/mask-builder/ObjectPage.tsx"
+  - "packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx"
+  - "packages/frontend-web/src/pages/sales/OrderEditorLegacyPage.tsx"
+  - "packages/frontend-web/src/pages/einkauf/lieferschein-erfassung.tsx"
+  - "packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx"
+  - "packages/frontend-web/src/pages/crm/kim/components/SalesDocumentsPanel.tsx"
+  - "packages/frontend-web/src/pages/crm/kim/components/FinancialOpenItemsPanel.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-ROLLOUT-REGISTER-003.yaml
+  - docs/design/frontend-design-skill-audit.md
+  - packages/frontend-web/src/components/ui/LazyTabs.tsx
+  - packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/ObjectPage.tsx
+  - packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx
+  - packages/frontend-web/src/pages/sales/OrderEditorLegacyPage.tsx
+  - packages/frontend-web/src/pages/einkauf/lieferschein-erfassung.tsx
+  - packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/SalesDocumentsPanel.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/FinancialOpenItemsPanel.tsx
+progress: >-
+  2026-07-14 umgesetzt. Auftrag, Lieferschein (VK+EK) und Annahmebeleg tragen
+  jetzt dieselbe Belegkopf-Registerleiste; die Doppel-TabsList-Konstruktion
+  (Pfeiltasten nur je 4er-Reihe) ist beseitigt. Alle nativen Universal-Masken
+  und alle ObjectPage-Konfigmasken erben den Register-Look ohne
+  Konfigurationsaenderung. InformationPanel-Sektionen werden nur programmatisch
+  gesetzt (kein Umschalter zu migrieren).
+acceptance:
+  - "Auftrag -> Lieferschein -> (EK-)Lieferschein -> Annahmebeleg: identisches Belegkopf-Register, eine Tabliste, Pfeiltasten ueber alle Reiter."
+  - "ObjectPage-/Universal-Masken zeigen Register-Look ohne Config-Aenderung."
+  - "SalesDocumentsPanel-Filter mit aria-pressed + role=group (kein falsches Tablist-Pattern)."
+  - "Keine Geschaeftslogik-/Routen-/API-Aenderung."
+tests:
+  - "vitest run (voll) -> 88/88 Dateien, 371 passed, 1 skipped."
+  - "tsc --noEmit -> 0; eslint -> 0 Fehler (8 vorbestehende fremde Warnungen)."
+  - "vite build -> gruen (19.0s)."
+  - "npm run test:e2e:accessibility -> 8/8 Kernrouten gruen."
+risks:
+  - "Register-Look aendert die Optik aller ObjectPage-/Universal-Masken (bewusster Rollout); Screenshot-basierte Handbuch-Bilder veralten schrittweise."
+  - "Weitere Legacy-Belegmasken (kunden-stamm.tsx u. a.) koennen noch Eigenbau-Reiter enthalten - bei Sichtung nachziehen."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Gewohnheits-Prinzip (docs/MASKEN.md): Belege einer Kette teilen Layout und
+    Bedienung; Registerwechsel per Pfeiltasten ueber ALLE Reiter eines
+    Belegkopfs; Filter sind als Filter erkennbar (aria-pressed), nicht als
+    Pseudo-Tabs.
+  architektur_vertrag: >-
+    Nur zentrale Komponenten (LazyTabs, UniversalMaskRenderer, ObjectPage) und
+    vier Belegmasken + zwei KIM-Panels; keine neuen Abhaengigkeiten, keine
+    API-/Routing-Aenderung; Default-Tabs-Variante bleibt unveraendert verfuegbar.
+  daten_vertrag: >-
+    Keine Daten-/Schemaaenderung.
+  security_vertrag: >-
+    Keine Auth-/Tenant-/Eingabepfad-Beruehrung.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert des Commits.
+  dokumentations_vertrag: >-
+    Audit-Doku um Abschnitt 7b (Rollout-Stand) ergaenzt; Workboard + dieses
+    YAML; CLAUDE.md-Regeln aus Slice 001 gelten unveraendert.
+  test_vertrag: >-
+    Volle Batterie vor Push: Vitest 371/371, tsc, eslint, Build, axe-E2E 8/8;
+    bestehende UniversalMaskRenderer-/LazyTabs-Tests unveraendert gruen
+    (Semantik-Erhalt), keine Tests gelockert.

@@ -187,6 +187,27 @@ Restrisiko des Sweeps: `text-red-500` u. ä. auf lokal dunklen Flächen im Light
 (seltene Spezialpanels) wird minimal dunkler dargestellt; `dark:`-Overrides blieben
 unangetastet und greifen weiterhin.
 
+## 7b. Update 2026-07-14 — Register-Rollout (DESIGN-ROLLOUT-REGISTER-003)
+
+Rollout-Plan-Positionen 1, 2, 3 und 6 sind umgesetzt:
+
+- **Universal Mask Runtime + ObjectPage:** `LazyTabs` reicht die Tab-Variante durch;
+  `UniversalMaskRenderer` und die Mask-Builder-`ObjectPage` rendern `variant="register"` —
+  **alle nativen SD-Masken und alle Konfigmasken erben den Belegregister-Look** ohne
+  Konfigurationsänderung (das starre `grid-cols-4` der ObjectPage entfiel).
+- **Belegketten-Köpfe vereinheitlicht:** Auftrag (`OrderEditorLegacyPage`), VK-Lieferschein,
+  EK-Lieferschein und Ernte-Annahmebeleg tragen dieselbe Belegkopf-Registerleiste.
+  Dabei behoben: zwei getrennte `TabsList`-Reihen pro Belegkopf zerschnitten die
+  Pfeiltasten-Navigation (Arrow-Keys wechselten nur innerhalb je einer 4er-Reihe).
+- **KIM-Rest:** SalesDocumentsPanel-Kategorien sind bewusst **kein** Register, sondern eine
+  `aria-pressed`-Toggle-Gruppe (Filter über einer gemeinsamen Tabelle — Struktur ist
+  Information); Forderungsspalte mit `tabular-nums`. InformationPanel-Sektionen werden nur
+  programmatisch gesetzt (kein Umschalter vorhanden).
+- **Bewusst unverändert:** Ansichtsumschalter regulärer Seiten (compliance, fibu, pos,
+  inventory-reports u. a.) behalten den Segmented-Look gemäß Regel R1.
+
+Validierung: Vitest 371/371 ✅ · tsc ✅ · eslint 0 Fehler ✅ · Build 19,0 s ✅ · axe-E2E 8/8 ✅.
+
 ## 8. Verbleibende Risiken & Folgearbeiten
 
 1. **Weitere Eigenbau-Reiterleisten** (z. B. `SalesDocumentsPanel`-Kategorien,

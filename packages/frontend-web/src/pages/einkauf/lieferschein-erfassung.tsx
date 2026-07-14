@@ -988,7 +988,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 value={lieferantTab}
                 onValueChange={(v) => setLieferantTab(v as typeof lieferantTab)}
               >
-                <TabsList className="grid w-full grid-cols-4 h-auto">
+                {/* Belegkopf-Register wie in der Verkaufskette (Gewohnheits-Prinzip) */}
+                <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Lieferantenbereich-Register">
                   <TabsTrigger value="lieferant" className="text-xs py-1">LIEFERANT</TabsTrigger>
                   <TabsTrigger value="zahlungsbed" className="text-xs py-1">ZAHLUNGSBED.</TabsTrigger>
                   <TabsTrigger value="texte" className="text-xs py-1">TEXTE</TabsTrigger>

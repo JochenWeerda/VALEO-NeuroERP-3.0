@@ -189,6 +189,7 @@ function RenderFromPlan({
 
       {plan.visibleTabs.length > 0 && (
         <LazyTabs
+          variant="register"
           onValueChange={onTabChange}
           tabs={plan.visibleTabs.map((tab) => ({
             key: tab.key,

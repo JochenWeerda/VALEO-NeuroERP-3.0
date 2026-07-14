@@ -251,7 +251,7 @@ export default function FinancialOpenItemsPanel({ customer, openItems, onAddOpen
                       <Badge variant={item.isDropShipment ? 'info' : 'muted'}>{item.isDropShipment ? 'Strecke' : 'Silo'}</Badge>
                     </td>
                     <td className="p-2 text-center">{statusBadge(item.status)}</td>
-                    <td className="p-2 text-right font-semibold text-foreground">EUR {item.amount.toLocaleString("de-DE", { minimumFractionDigits: 2 })}</td>
+                    <td className="p-2 text-right font-semibold text-foreground tabular-nums">EUR {item.amount.toLocaleString("de-DE", { minimumFractionDigits: 2 })}</td>
                   </tr>
                 ))
               )}

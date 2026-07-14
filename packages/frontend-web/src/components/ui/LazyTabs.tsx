@@ -14,9 +14,11 @@ interface LazyTabsProps {
   defaultValue?: string
   onValueChange?: (_value: string) => void
   className?: string
+  /** "register" = Belegregister-Optik (Akten/Belege); "default" = Segmented-Control. */
+  variant?: 'default' | 'register'
 }
 
-export function LazyTabs({ tabs, defaultValue, onValueChange, className }: LazyTabsProps): JSX.Element {
+export function LazyTabs({ tabs, defaultValue, onValueChange, className, variant = 'default' }: LazyTabsProps): JSX.Element {
   const firstKey = tabs[0]?.key ?? ''
   const [activeTab, setActiveTab] = useState(defaultValue ?? firstKey)
   const [visited, setVisited] = useState<Set<string>>(() => new Set(activeTab ? [activeTab] : []))
@@ -39,7 +41,11 @@ export function LazyTabs({ tabs, defaultValue, onValueChange, className }: LazyT
 
   return (
     <Tabs value={activeTab} onValueChange={handleChange} className={className}>
-      <TabsList className="grid w-full" style={{ gridTemplateColumns: columnsClass }}>
+      <TabsList
+        variant={variant}
+        className={variant === 'register' ? undefined : 'grid w-full'}
+        style={variant === 'register' ? undefined : { gridTemplateColumns: columnsClass }}
+      >
         {tabs.map((tab) => (
           <TabsTrigger key={tab.key} value={tab.key}>
             {tab.label}

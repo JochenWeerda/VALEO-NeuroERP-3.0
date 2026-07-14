@@ -2104,13 +2104,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             {/* Rechte Spalte - Kunde */}
             <div className="space-y-2">
               <Tabs value={customerTab} onValueChange={(v) => setCustomerTab(v as typeof customerTab)}>
-                <TabsList className="grid w-full grid-cols-4 h-auto">
+                {/* Eine Registerleiste statt zwei getrennter TabsLists — sonst
+                    navigieren Pfeiltasten nur innerhalb je einer 4er-Reihe. */}
+                <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Kundenbereich-Register">
                   <TabsTrigger value="kunde" className="text-xs py-1">KUNDE</TabsTrigger>
                   <TabsTrigger value="lieferanschr" className="text-xs py-1">LIEFER-ANSCHR.</TabsTrigger>
                   <TabsTrigger value="rechnanschrift" className="text-xs py-1">RECHN.-ANSCHRIFT</TabsTrigger>
                   <TabsTrigger value="bestellung" className="text-xs py-1">BESTELLUNG</TabsTrigger>
-                </TabsList>
-                <TabsList className="grid w-full grid-cols-4 h-auto mt-1">
                   <TabsTrigger value="rechnung" className="text-xs py-1">RECHNUNG/ZAHLUNGSBED.</TabsTrigger>
                   <TabsTrigger value="texte" className="text-xs py-1">TEXTE</TabsTrigger>
                   <TabsTrigger value="spediteur" className="text-xs py-1">SPEDITEUR</TabsTrigger>

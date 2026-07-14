@@ -1283,7 +1283,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           {/* Tabs: KUNDE, RECHNUNG, KONTRAKT, etc. */}
           <Card className="p-4">
             <Tabs value={customerTab} onValueChange={(v) => setCustomerTab(v as typeof customerTab)}>
-              <TabsList className="grid w-full grid-cols-6 h-auto">
+              {/* Belegkopf-Register wie in Verkauf/Einkauf (Gewohnheits-Prinzip) */}
+              <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Annahmebeleg-Register">
                 <TabsTrigger value="kunde" className="text-xs py-1">KUNDE</TabsTrigger>
                 <TabsTrigger value="rechnung" className="text-xs py-1">RECHNUNG</TabsTrigger>
                 <TabsTrigger value="kontrakt" className="text-xs py-1">KONTRAKT</TabsTrigger>

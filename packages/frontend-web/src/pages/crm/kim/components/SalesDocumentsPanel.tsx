@@ -57,7 +57,9 @@ export default function SalesDocumentsPanel({
 
   return (
     <div className="space-y-4" id="sales-documents-panel-component" data-customer-id={customer.id}>
-      <div className="flex flex-wrap items-end border-b border-border gap-1">
+      {/* Kategorie-Filter über einer gemeinsamen Tabelle — bewusst Toggle-Gruppe
+          (aria-pressed), kein Register: es wechselt kein Panel, nur der Filter. */}
+      <div className="flex flex-wrap items-end border-b border-border gap-1" role="group" aria-label="Belegkategorie filtern">
         {categories.map((category) => (
           <button
             key={category.key}
@@ -65,6 +67,7 @@ export default function SalesDocumentsPanel({
               onCategoryChange(category.key);
               setSelectedDocumentId('');
             }}
+            aria-pressed={activeCategory === category.key}
             className={`px-3 py-1.5 text-xs font-medium transition rounded-t-md border-b-2 ${
               activeCategory === category.key
                 ? 'border-primary text-primary bg-primary/5 font-semibold'

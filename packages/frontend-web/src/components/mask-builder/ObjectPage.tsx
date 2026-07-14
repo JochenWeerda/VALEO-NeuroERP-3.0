@@ -529,7 +529,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-4">
+          {/* Register-Look als Standard der ObjectPage (Gewohnheits-Prinzip);
+              das starre grid-cols-4 brach bei ≠4 Tabs. */}
+          <TabsList variant="register">
             {config.tabs.map(tab => (
               <TabsTrigger key={tab.key} value={tab.key}>
                 {tab.label}
