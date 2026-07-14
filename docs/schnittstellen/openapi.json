@@ -39483,6 +39483,20 @@
               }
             ],
             "title": "Rechnungsnr"
+          },
+          "rechnungsnrn": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungsnrn"
           }
         },
         "title": "DunningRunIn",
