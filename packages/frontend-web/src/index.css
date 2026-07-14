@@ -1,3 +1,6 @@
+/* Theme-invariante strukturelle Primitive (einmal an :root) vor den Theme-Dateien —
+   loest 38 der frueher identischen Doppel-Definitionen in Meridian/Terra auf. */
+@import './styles/tokens/primitives.css' layer(base);
 @import './styles/design-tokens-meridian.css' layer(base);
 @import './styles/design-tokens-terra.css' layer(base);
 @import './styles/density.css' layer(base);

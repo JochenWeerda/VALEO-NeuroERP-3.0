@@ -47,31 +47,20 @@
      Basis: 16px. Schritte: 12 -> 14 -> 16 -> 20 -> 26 -> 33 -> 42px */
   --font-size-2xs:  0.625rem;    /*  10px — Keyboard-Hints, Micro-Labels     */
   --font-size-xs:   0.75rem;     /*  12px — Captions, Timestamps             */
-  --font-size-sm:   0.875rem;    /*  14px — Table-Body, Labels               */
-  --font-size-base: 1rem;        /*  16px — Standard-Body                    */
-  --font-size-lg:   1.25rem;     /*  20px — Card-Titel, Sub-Headlines        */
   --font-size-xl:   1.625rem;    /*  26px — Seitentitel, Modul-Ueberschriften*/
   --font-size-2xl:  2.0625rem;   /*  33px — Display-Elemente                 */
   --font-size-3xl:  2.625rem;    /*  42px — Hero-KPI-Zahlen                  */
 
   /* Font-Gewichte */
-  --font-weight-light:  300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semi:   600;
-  --font-weight-bold:   700;
 
   /* Zeilenhoehen */
   --line-height-none:    1;
-  --line-height-tight:   1.2;    /* Headlines */
-  --line-height-snug:    1.4;    /* Labels, kompakte Listen */
   --line-height-normal:  1.6;    /* Body-Text Standard */
   --line-height-relaxed: 1.75;   /* Beschreibungen, Hilfstexte */
 
   /* Buchstabenabstaende */
   --letter-spacing-tight:    0em;
   --letter-spacing-snug:     0em;
-  --letter-spacing-normal:   0em;
   --letter-spacing-wide:     0.025em;  /* Small Uppercase Labels */
   --letter-spacing-wider:    0.05em;   /* Sehr kleine Uppercase Labels */
   --letter-spacing-widest:   0.08em;   /* Micro-Text Uppercase */
@@ -81,8 +70,6 @@
      Fibonacci-Approximation: 8 -> 13 -> 21 -> 34 -> 55 -> 89
      ---------------------------------------------------------------- */
 
-  --space-0:   0.25rem;    /*   4px — Micro: Icon-Innen-Padding             */
-  --space-1:   0.5rem;     /*   8px — XS: Badge-Padding, Icon-Gap           */
   --space-2:   0.8125rem;  /*  13px — SM: Button-H-Padding, Input-Padding   */
   --space-3:   1.3125rem;  /*  21px — MD: Card-Padding, Formular-Gap        */
   --space-4:   2.125rem;   /*  34px — LG: Section-Abstand                   */
@@ -102,28 +89,20 @@
   --sidebar-width-expanded:   240px;
   --sidebar-width-collapsed:   64px;
   --content-max-width:       1400px;
-  --content-padding-x:         32px;  /* = --space-4 + 0.5 — rund */
   --header-height:             64px;
   --toolbar-height:            56px;
   --table-row-height:          52px;
   --table-row-compact:         40px;
-  --input-height:              44px;  /* WCAG 2.5.5 */
-  --button-height:             44px;  /* WCAG 2.5.5 */
-  --button-height-sm:          36px;
-  --button-height-lg:          52px;
-  --touch-target-min:          44px;
 
   /* ----------------------------------------------------------------
      BORDER-RADIUS
      ---------------------------------------------------------------- */
 
-  --radius-none: 0px;
   --radius-xs:   4px;
   --radius-sm:   6px;
   --radius:     12px;    /* Meridian-Standard: modern, weich */
   --radius-lg:  16px;    /* Modals, grosse Panels */
   --radius-xl:  24px;    /* Hero-Cards, Feature-Bereiche */
-  --radius-full: 9999px; /* Pills, Avatar */
 
   /* ----------------------------------------------------------------
      FARBEN — PRIMAER: OZEANBLAU
@@ -270,33 +249,16 @@
      MOTION-TOKENS
      ---------------------------------------------------------------- */
 
-  --duration-instant:  50ms;
   --duration-fast:    150ms;
   --duration-normal:  250ms;
   --duration-slow:    400ms;
-  --duration-slower:  600ms;
 
-  --ease-linear:    linear;
-  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
-  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);   /* Overshoot (Dialoge) */
   --ease-bounce:    cubic-bezier(0.68, -0.55, 0.27, 1.55);
 
   /* ----------------------------------------------------------------
      Z-INDEX-SKALA
      ---------------------------------------------------------------- */
 
-  --z-base:     0;
-  --z-raised:   1;
-  --z-dropdown: 10;
-  --z-sticky:   20;
-  --z-overlay:  30;
-  --z-modal:    40;
-  --z-popover:  50;
-  --z-tooltip:  60;
-  --z-toast:    70;
-  --z-top:      9999;
 }
 
 /* =================================================================

@@ -135,7 +135,26 @@ Rationsoptimierung, Ackerschlagkartei-Auswertungen.
 |-------|----------|
 | 1 Vorprüfung | ✅ Baseline-Build (185 KB CSS), Analyse, dieses Dokument |
 | 2 Technischer Pilot | ✅ tailwindcss 4.3.2, `@tailwindcss/postcss`, `@import 'tailwindcss'`, `@plugin 'tailwindcss-animate'`, deprecated Utilities migriert, Codemod-Fehlrename `outline`→`outline-solid` (381 Stellen) korrigiert |
-| 3 Token-Migration | ✅ teilw.: `tailwind.config.js` → `@theme inline` (Zirkularität vermieden); **Density-Modi** `density.css` (comfortable/compact/dense). ⏳ offen: vollständige primitives/semantic/themes-Trennung der 150 Duplikate (bewusst nach visueller Absicherung, hohes Risiko) |
+| 3 Token-Migration | ✅ `tailwind.config.js` → `@theme inline`; **Density-Modi** `density.css`; **Token-Duplikat-Auflösung** (siehe unten): 38 strukturelle Primitive nach `tokens/primitives.css` extrahiert |
+
+### Token-Duplikat-Auflösung (150 gemeinsame Tokens Meridian∩Terra)
+
+Wertvergleich der 150 gleichnamigen Tokens:
+
+| Gruppe | Anzahl | Behandlung |
+|--------|:------:|-----------|
+| **Wertgleich, strukturell** (Font-Gewichte, Basis-Schriftgrößen, Zeilenhöhen, Spacing-Basis, Steuerhöhen, Radius-Grenzen, Motion, Z-Index) | **38** | ✅ nach `src/styles/tokens/primitives.css` (`:root`) extrahiert, aus beiden Theme-Dateien entfernt — **echte Duplikate eliminiert** |
+| **Wertgleich, semantisch** (`--background`, `--muted`, `--border`, `--accent`, `--secondary`, Foregrounds …) | 15 | bleiben in den Theme-Dateien — referenzieren die theme-eigene `--color-gray-*`-Palette, die **namentlich mit Tailwind v4s eingebauter Palette kollidiert**; eine hoch-spezifische Neudefinition an `:root[data-theme]` würde Tailwinds (unlayered) `oklch`-Werte ziehen und `hsl(var(--background))` ungültig machen |
+| **Wertverschieden** (Paletten `--color-primary-*`/`--color-harvest-*`/`--color-gray-*`, `--primary`, `--radius`, `--font-family-*`, Schatten, Sidebar, abweichende Schriftgrößen/Spacing/Motion …) | 97 | **keine Duplikate** — intentionale Theme-Varianten, bleiben je Theme |
+
+Verifikation: Prod-Build grün; Meridian-Vollnutzungssmoke **14/14, 0 Fehler** (Default unverändert `--background: 210 20% 98%`); Theme-Kaskade intakt (`data-theme="terra"` schaltet kollisionsfreies `--primary` auf Waldgrün `158 64% 28%`).
+
+> **Bekannter Folgepunkt (migrationsbedingt, unabhängig von der Dedup):** Die Theme-
+> Paletten nutzen `--color-gray-*`, was mit Tailwind v4s eingebauter `--color-gray-*`
+> (oklch, unlayered) kollidiert. Unter aktivem Terra ziehen `--background`/`--muted`/
+> `--border` dadurch Tailwind-Werte. Das aktive Default-System (`index.css`) umgeht das
+> bereits über nicht-kollidierende Namen (`--color-neutral-*-hsl`). Saubere Lösung:
+> Theme-Paletten auf `--palette-*`/`--color-neutral-*` umbenennen (eigener Slice).
 | 4 Nachweise | ✅ Prod-Build grün (25,5 s), `tsc` 0 Fehler, Docker-Prod-Image grün, Playwright-Vollnutzungssmoke **14/14, 0 Fehler**; CSS-Bundle 185→229 KB (v4-typisch). ⏳ offen: Screenshot-Diff-Gate, A11y-Benchmark |
 
 **Bekannte Punkte:** CSS-Bundle +44 KB (v4-Preflight/mehr Varianten) — bei Bedarf via
