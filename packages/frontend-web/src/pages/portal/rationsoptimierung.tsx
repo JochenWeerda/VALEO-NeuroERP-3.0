@@ -34,6 +34,20 @@ export default function PortalFeedAdvicePage(): JSX.Element {
     return <RationLifecycleDetail rationId={routeState.rationId} />
   }
 
+  if (routeState.view === 'readiness') {
+    return (
+      <UniversalNativeCockpitPage
+        screenId="agrar/feed-readiness"
+        testId="feed-readiness-worklist"
+        permissions={['futtermittel.rations.update']}
+        onAction={(actionKey) => {
+          if (actionKey === 'open_inventory') window.location.assign('/futtermittel/einzelfuttermittel-liste')
+          if (actionKey === 'open_analyses') window.location.assign('/futtermittel/grundfutteranalysen')
+        }}
+      />
+    )
+  }
+
   if (!routeState.expert) {
     return <UniversalNativeCockpitPage screenId="agrar/feed-advice" testId="feed-advice-cockpit" />
   }

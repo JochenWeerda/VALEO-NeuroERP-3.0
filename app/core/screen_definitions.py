@@ -1999,8 +1999,8 @@ def build_agrar_feed_advice_screen_definition() -> dict[str, Any]:
             {
                 "key": "futterbestand",
                 "label": "Futterbestand und Reichweite",
-                "targetScreenId": "futtermittel/einzelfuttermittel",
-                "targetRoute": "/futtermittel/einzelfuttermittel-liste",
+                "targetScreenId": "agrar/feed-readiness",
+                "targetRoute": "/portal/rationsoptimierung?view=readiness",
                 "tone": "warning",
             },
             {
@@ -2109,6 +2109,40 @@ def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
+    """Native worklist for inventory, lab-analysis and price readiness."""
+    return {
+        "schemaVersion": 1, "id": "agrar/feed-readiness", "domain": "agrar", "mode": "list",
+        "title": "Futter-Einsatzbereitschaft",
+        "subtitle": "Reichweite, Laboranalyse und Preisstand der aktiven Rationen",
+        "adapter": {"type": "native", "sourceId": "agrar/feed-readiness", "temporary": False},
+        "dataSources": [{"key": "materials", "endpoint": "/api/v1/agrar/rations-optimization/readiness/materials", "pageSize": 100, "staleTimeMs": 30_000}],
+        "tables": [{
+            "key": "materials", "label": "Eingesetzte Futtermittel", "dataSourceKey": "materials",
+            "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+            "columns": [
+                {"key": "name", "label": "Futtermittel", "sortable": True, "filterable": True, "width": 220},
+                {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
+                {"key": "daily_kg", "label": "Soll kg/Tag", "numeric": True, "width": 120},
+                {"key": "stock_kg", "label": "Bestand kg", "numeric": True, "width": 120},
+                {"key": "reach_days", "label": "Reichweite Tage", "numeric": True, "sortable": True, "width": 140},
+                {"key": "analysis_date", "label": "Analyse", "renderKind": "date", "width": 130},
+                {"key": "price_eur_t", "label": "EUR/t", "renderKind": "currency", "numeric": True, "width": 120},
+                {"key": "price_valid_to", "label": "Preis gueltig bis", "renderKind": "date", "width": 150},
+                {"key": "issue_summary", "label": "Handlungsbedarf", "width": 360},
+            ],
+        }],
+        "actions": [
+            {"key": "open_inventory", "label": "Bestaende pflegen", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+            {"key": "open_analyses", "label": "Analysen pruefen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+        ],
+        "noWorkflowReason": "Das Read-Model bewertet vorhandene Stamm-, Bestands-, Labor- und Preisdaten ohne sie zu duplizieren.",
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "copilot", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
+        "agentContract": {"businessPurpose": "Engpaesse und Datenluecken vor Freigabe oder Fuetterungsstart erklaerbar erkennen.", "examplePrompts": ["Welche Futtermittel reichen weniger als 14 Tage?", "Welche Analyse oder welcher Preis ist abgelaufen?"], "sensitiveFields": ["price_eur_t"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-readiness']"}},
+    }
+
+
 def build_agrar_ration_detail_screen_definition() -> dict[str, Any]:
     """Native object page for one ration and its immutable versions."""
     return {
@@ -2130,6 +2164,9 @@ def build_agrar_ration_detail_screen_definition() -> dict[str, Any]:
             {"key": "latest_version_no", "label": "Aktuelle Version", "type": "number", "readOnly": True},
             {"key": "latest_status", "label": "Status", "type": "text", "readOnly": True},
             {"key": "latest_feeding_start", "label": "Fuetterungsbeginn", "type": "datetime", "readOnly": True},
+            {"key": "latest_readiness_status", "label": "Bestandsreife", "type": "text", "readOnly": True},
+            {"key": "latest_readiness_blockers", "label": "Blockierende Befunde", "type": "number", "readOnly": True},
+            {"key": "latest_readiness_warnings", "label": "Hinweise", "type": "number", "readOnly": True},
         ],
         "tabs": [
             {
@@ -2338,6 +2375,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "workspace/leitung": build_workspace_leitung_screen_definition,
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
+    "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
@@ -2853,6 +2891,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
+    "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
     "agrar/ration": "/portal/rationsoptimierung?view=rations",
     "agrar/duenger": "/agrar/duenger",
     "agrar/harvest-settlement": "/agrar/kontrakt-settlement",

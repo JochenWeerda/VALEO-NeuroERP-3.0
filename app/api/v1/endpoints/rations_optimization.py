@@ -7185,3 +7185,5 @@ from app.api.v1.endpoints.rations_integrations import router as _rations_integra
 router.include_router(_rations_integrations_router)
 from app.api.v1.endpoints.rations_lifecycle import router as _rations_lifecycle_router
 router.include_router(_rations_lifecycle_router)
+from app.api.v1.endpoints.rations_readiness import router as _rations_readiness_router
+router.include_router(_rations_readiness_router)

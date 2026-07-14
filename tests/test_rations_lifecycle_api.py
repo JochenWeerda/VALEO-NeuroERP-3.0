@@ -178,3 +178,20 @@ def test_due_scheduled_ration_is_activated_by_worker() -> None:
     detail = client.get(f"{BASE}/rations/{ration['id']}", headers=HEADERS)
     assert detail.status_code == 200
     assert detail.json()["latest_status"] == "active"
+
+
+def test_readiness_blocker_requires_audited_override() -> None:
+    group = _group()
+    response = client.post(f"{BASE}/rations", headers=HEADERS, json={
+        "group_id": group["id"], "name": "Blockierte Ration", "source": "solver",
+        "snapshot": {"readiness": {"status": "blocked", "blocker_count": 1, "warning_count": 0, "materials": []}},
+    })
+    assert response.status_code == 201
+    version_id = response.json()["latest_version_id"]
+    _transition(version_id, "draft", "in_review")
+    blocked = client.post(f"{BASE}/versions/{version_id}/transitions", headers=HEADERS,
+        json={"expected_status": "in_review", "target_status": "approved", "reason": "Trotzdem"})
+    assert blocked.status_code == 409
+    approved = client.post(f"{BASE}/versions/{version_id}/transitions", headers=HEADERS,
+        json={"expected_status": "in_review", "target_status": "approved", "reason": "OVERRIDE: Ersatzlieferung zugesagt"})
+    assert approved.status_code == 200

@@ -277,6 +277,10 @@ class RationLifecycleService:
             result["latest_version_no"] = latest["version_no"]
             result["latest_status"] = latest["status"]
             result["latest_feeding_start"] = latest["feeding_start"]
+            readiness = latest.get("snapshot", {}).get("readiness", {}) if isinstance(latest.get("snapshot"), dict) else {}
+            result["latest_readiness_status"] = readiness.get("status", "not_checked")
+            result["latest_readiness_blockers"] = int(readiness.get("blocker_count", 0) or 0)
+            result["latest_readiness_warnings"] = int(readiness.get("warning_count", 0) or 0)
         return result
 
     def list_versions(self, ration_id: str) -> list[dict[str, Any]]:
@@ -293,7 +297,7 @@ class RationLifecycleService:
         feeding_start: datetime | None,
     ) -> dict[str, Any]:
         row = self.db.execute(text("""
-          SELECT rv.id AS version_id,rv.ration_id,rv.version_no,rv.snapshot_checksum,
+          SELECT rv.id AS version_id,rv.ration_id,rv.version_no,rv.snapshot_checksum,rv.snapshot,
                  lc.group_id,lc.status,lc.feeding_start
           FROM domain_agrar.ration_versions rv
           JOIN domain_agrar.ration_version_lifecycle lc ON lc.version_id=rv.id AND lc.tenant_id=rv.tenant_id
@@ -307,6 +311,12 @@ class RationLifecycleService:
             )
         effective_start = feeding_start or row["feeding_start"]
         validate_transition(row["status"], target, reason=reason, feeding_start=effective_start)
+        readiness = row["snapshot"].get("readiness", {}) if isinstance(row["snapshot"], dict) else {}
+        blockers = int(readiness.get("blocker_count", 0) or 0)
+        if target in {RationStatus.APPROVED, RationStatus.ACTIVE} and blockers > 0 and not (reason or "").startswith("OVERRIDE:"):
+            raise RationLifecycleConflict(
+                f"Readiness blockiert diesen Schritt ({blockers} Befund(e)). Begruendete Ausnahme mit 'OVERRIDE:' erforderlich."
+            )
         superseded: list[dict[str, Any]] = []
         if target is RationStatus.ACTIVE:
             if effective_start is None:

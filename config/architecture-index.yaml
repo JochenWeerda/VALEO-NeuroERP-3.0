@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-14
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-14T20:39:49Z'
+generated_at: '2026-07-14T20:57:07Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -401,6 +401,7 @@ domains:
     - docs/adr/adr-040-contract-gated-herd-data-connectors.md
     - docs/adr/adr-041-hybrid-feed-advice-experience.md
     - docs/adr/adr-042-immutable-ration-lifecycle.md
+    - docs/adr/adr-043-feed-readiness-read-model.md
     status: active
   crm:
     owner: domain/crm
@@ -1345,6 +1346,7 @@ domains:
     - docs/adr/adr-038-address-value-object.md
     - docs/adr/adr-039-repo-layout.md
     - docs/adr/adr-040-contract-gated-herd-data-connectors.md
+    - docs/adr/adr-043-feed-readiness-read-model.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1831,6 +1833,7 @@ domains:
     - supplier_portal
     decisions:
     - docs/adr/adr-014-service-layer-pattern.md
+    - docs/adr/adr-043-feed-readiness-read-model.md
 mapping_stats:
   frontend_routes_total: 898
   frontend_routes_mapped: 898

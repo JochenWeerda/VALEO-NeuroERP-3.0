@@ -49,8 +49,8 @@ Betrieb und Tiergruppen
 |---|---|---|---|
 | Betrieb und Rollen | Betriebe, Berater, Fütterer und Freigaberechte | Portal-/Rationszugang vorhanden | Rollen in jeder Mutation serverseitig erzwingen |
 | Futtergruppen | Tiergruppe, Tierzahl, Laktation, Leistung, Lebendmasse, Fütterungssystem | persistenter, tenantisolierter Gruppenstamm und native Worklist | fachliche Gruppenhistorie aus Herd-Deltas verdichten |
-| Futterbestand | Eigene Futtermittel, Preise, Mengen, Chargen und Reichweite | Stamm-, Wareneingangs- und Analysepfade vorhanden | Solver direkt mit verfügbarem Bestand und Reichweitenwarnung koppeln |
-| Laboranalysen | Atteste importieren, Werte prüfen, für neue Futterversion übernehmen | Grundfutteranalyse und Dokumentimport vorhanden | Analysewechsel als versionierten Rationshinweis anzeigen |
+| Futterbestand | Eigene Futtermittel, Preise, Mengen, Chargen und Reichweite | aktive Rationen werden gegen vorhandenen Bestand und deterministische Reichweite geprüft | Chargen-FIFO und reservierte Mischmengen ergänzen |
+| Laboranalysen | Atteste importieren, Werte prüfen, für neue Futterversion übernehmen | verifizierte Analysen, Alter und Analysewechsel fließen in den versionierten Readiness-Befund | Labor-Material-Mapping interaktiv auflösen |
 | Bedarfsprofil | Erhaltung, Leistung, Mineralstoffe und Inhaltsstoffkorridore | GfE-/DLG-Profile und Constraints vorhanden | verständliche gruppenbezogene Override-Historie |
 | Futtermittelgrenzen | Min/Max je Komponente und Fütterungsweg | Wizard plus Zeilen-Fixierung Min=Max | Grenzvorlagen je Gruppe und Saison speichern |
 | Rationsentwurf | Komponenten in FM/TM bearbeiten, hinzufügen und entfernen | Zeilen-CRUD in der Workbench umgesetzt | Mischreihenfolge per Tastatur/Drag-and-drop pflegen |
@@ -100,8 +100,9 @@ Die gewichtete Variantenbewertung und UX-Gates stehen in
 1. `FEED-ADVICE-LIFECYCLE-007`: **abgeschlossen 2026-07-14** — persistente
    Futtergruppen, unveränderliche Rationsversionen, auditierter Statusautomat,
    geplante Aktivierung und serverseitige aktive Ausführungssnapshots.
-2. `FEED-ADVICE-INVENTORY-008`: Bestands-/Reichweitenprüfung im Solver-Request,
-   Analysewechsel und Preisgültigkeit.
+2. `FEED-ADVICE-INVENTORY-008`: **abgeschlossen 2026-07-14** — Bestands- und
+   Reichweitenprüfung, Analysealter/-wechsel, Preisgültigkeit, native Readiness-
+   Worklist sowie auditierte Ausnahme bei blockierter Freigabe/Aktivierung.
 3. `FEED-ADVICE-CONTROLLING-009`: gruppenbezogene Soll-Ist-Zeitreihen für
    Aufnahme, Mischgenauigkeit, Kosten, ECM, Stickstoff und Methan.
 4. `FEED-ADVICE-CONNECTORS-010`: Labor-, Mischwagen-, MLP-, Milchgüte- und

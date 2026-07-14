@@ -48,3 +48,11 @@ def test_ration_lifecycle_worklist_and_detail_are_native_and_ready() -> None:
     assert detail["workflow"]["processKey"] == "ration-version-lifecycle"
     assert _check_readiness(worklist)["generatorReady"] is True
     assert _check_readiness(detail)["generatorReady"] is True
+
+
+def test_feed_readiness_is_native_inventory_worklist() -> None:
+    definition = get_screen_definition("agrar/feed-readiness")
+    assert definition is not None
+    assert definition["layout"]["tableProfile"] == "inventory"
+    assert definition["dataSources"][0]["endpoint"].endswith("/readiness/materials")
+    assert _check_readiness(definition)["generatorReady"] is True

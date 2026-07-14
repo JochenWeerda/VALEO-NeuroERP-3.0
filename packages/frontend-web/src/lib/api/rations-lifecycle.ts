@@ -1,6 +1,19 @@
 import { apiClient } from '@/lib/api-client'
 
 const BASE = '/api/v1/agrar/rations-optimization/lifecycle'
+const READINESS_BASE = '/api/v1/agrar/rations-optimization/readiness'
+
+export interface FeedReadiness {
+  as_of: string
+  status: 'ready' | 'warning' | 'blocked'
+  blocker_count: number
+  warning_count: number
+  materials: Array<Record<string, unknown>>
+}
+
+export async function evaluateFeedReadiness(snapshot: Record<string, unknown>): Promise<FeedReadiness> {
+  return apiClient.post<FeedReadiness>(`${READINESS_BASE}/evaluate`, { snapshot })
+}
 
 export type RationStatus = 'draft' | 'in_review' | 'approved' | 'scheduled' | 'active' | 'retired' | 'archived'
 
@@ -37,6 +50,9 @@ export interface RationDetail {
   latest_version_no: number
   latest_status: RationStatus
   latest_feeding_start?: string | null
+  latest_readiness_status?: 'ready' | 'warning' | 'blocked' | 'not_checked'
+  latest_readiness_blockers?: number
+  latest_readiness_warnings?: number
   versions: RationVersion[]
   audit: Array<Record<string, unknown>>
 }

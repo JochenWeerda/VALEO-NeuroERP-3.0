@@ -86,5 +86,9 @@ test.describe('Fuetterungsberatung — nativer Rationslebenszyklus', () => {
     expect(active.ok()).toBeTruthy()
     const activeRations = await active.json() as Array<{ ration_id: string }>
     expect(activeRations.some((item) => item.ration_id === ration.id)).toBeTruthy()
+
+    await page.goto('/portal/rationsoptimierung?view=readiness', { waitUntil: 'domcontentloaded' })
+    await waitForDashboardShell(page)
+    await expect(page.getByText('Futter-Einsatzbereitschaft')).toBeVisible()
   })
 })

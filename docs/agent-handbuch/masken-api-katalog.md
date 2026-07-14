@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (36 Masken).
+> Generiert aus `app/core/screen_definitions.py` (37 Masken).
 
 ## Übersicht
 
@@ -19,6 +19,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|---|
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
+| `agrar/feed-readiness` | Futter-Einsatzbereitschaft | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
@@ -122,6 +123,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige mir den schnellsten Weg zur heutigen Fuetterung.
 
 **Sensible Felder:** `futterkosten, milchleistung`
+
+---
+
+### `agrar/feed-readiness` — Futter-Einsatzbereitschaft
+
+**Zweck:** Engpaesse und Datenluecken vor Freigabe oder Fuetterungsstart erklaerbar erkennen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feed-readiness/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feed-readiness/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feed-readiness/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `materials` → `/api/v1/agrar/rations-optimization/readiness/materials`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Futtermittel reichen weniger als 14 Tage?
+- Welche Analyse oder welcher Preis ist abgelaufen?
+
+**Sensible Felder:** `price_eur_t`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `open_inventory` | Bestaende pflegen | safe | nein | `—` |
+| `open_analyses` | Analysen pruefen | safe | nein | `—` |
 
 ---
 

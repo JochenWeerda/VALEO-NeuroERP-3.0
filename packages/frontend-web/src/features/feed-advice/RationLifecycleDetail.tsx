@@ -44,6 +44,7 @@ export function RationLifecycleDetail({ rationId }: { rationId: string }): JSX.E
   const [feedback, setFeedback] = useState<string | null>(null)
 
   const action = pendingAction ? ACTIONS[pendingAction] : undefined
+  const readinessBlocked = Number((detail as Partial<RationDetail> & { latest_readiness_blockers?: number }).latest_readiness_blockers ?? 0) > 0
 
   async function execute(): Promise<void> {
     if (!action || !detail.latest_version_id || !currentStatus) return
@@ -54,7 +55,9 @@ export function RationLifecycleDetail({ rationId }: { rationId: string }): JSX.E
         versionId: detail.latest_version_id,
         expectedStatus: currentStatus,
         targetStatus: action.to,
-        reason: reason.trim() || undefined,
+        reason: readinessBlocked && ['approved', 'active'].includes(action.to)
+          ? `OVERRIDE: ${reason.trim()}`
+          : reason.trim() || undefined,
         feedingStart: feedingStart ? new Date(feedingStart).toISOString() : undefined,
       })
       setPendingAction(null)
@@ -118,12 +121,12 @@ export function RationLifecycleDetail({ rationId }: { rationId: string }): JSX.E
             </div>
           ) : null}
           <div className="grid gap-2">
-            <Label htmlFor="ration-transition-reason">Grund {action?.reason ? '(Pflicht)' : '(optional)'}</Label>
+            <Label htmlFor="ration-transition-reason">Grund {action?.reason || (readinessBlocked && ['approved', 'active'].includes(action?.to ?? '')) ? '(Pflicht)' : '(optional)'}</Label>
             <Textarea id="ration-transition-reason" value={reason} onChange={(event) => setReason(event.target.value)} />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPendingAction(null)}>Abbrechen</Button>
-            <Button disabled={saving || Boolean(action?.reason && !reason.trim()) || Boolean(action?.schedule && !feedingStart)} onClick={() => { void execute() }}>
+            <Button disabled={saving || Boolean((action?.reason || (readinessBlocked && ['approved', 'active'].includes(action?.to ?? ''))) && !reason.trim()) || Boolean(action?.schedule && !feedingStart)} onClick={() => { void execute() }}>
               {saving ? 'Verarbeitet…' : 'Status wechseln'}
             </Button>
           </DialogFooter>

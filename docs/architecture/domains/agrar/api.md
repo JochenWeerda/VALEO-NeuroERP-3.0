@@ -47,3 +47,12 @@ Entscheidung: [ADR-040](../../../adr/adr-040-contract-gated-herd-data-connectors
   - aktuelle, freigegebene Ausfuehrungssnapshots fuer Stall und Mobilansicht.
 
 Entscheidung: [ADR-042](../../../adr/adr-042-immutable-ration-lifecycle.md).
+
+## Fütterungsberatung / Einsatzbereitschaft
+
+- `POST /api/v1/agrar/rations-optimization/readiness/evaluate` — prüft einen
+  Entwurfssnapshot gegen Bestand, Analyse und Preisgültigkeit.
+- `GET /api/v1/agrar/rations-optimization/readiness/materials` — Read-Model der
+  aktuell eingesetzten Futtermittel mit Reichweite und Handlungsbedarf.
+
+Entscheidung: [ADR-043](../../../adr/adr-043-feed-readiness-read-model.md).

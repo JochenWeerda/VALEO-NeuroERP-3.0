@@ -80,7 +80,7 @@ import {
   type FeedingSystemConfig,
 } from '@/lib/api/rations-optimization'
 import { isRecord, numberValue, stringValue } from '@/lib/record-utils'
-import { createRationDraft, ensureFeedingGroup, transitionRationVersion } from '@/lib/api/rations-lifecycle'
+import { createRationDraft, ensureFeedingGroup, evaluateFeedReadiness, transitionRationVersion } from '@/lib/api/rations-lifecycle'
 
 // ---------------------------------------------------------------------------
 // Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
@@ -4770,6 +4770,7 @@ export default function Rationsoptimierung() {
         ndfProxyGKgdm: result.dlg_indicators?.andfom_gf_kgdm ?? null,
         components,
       }
+      const readiness = await evaluateFeedReadiness({ mobile })
       const ration = await createRationDraft({
         group_id: group.id,
         name: `${wizardData.group.name} · ${new Date().toLocaleDateString('de-DE')}`,
@@ -4784,6 +4785,7 @@ export default function Rationsoptimierung() {
           },
           optimization_result: result,
           mobile,
+          readiness,
         },
       })
       await transitionRationVersion({
