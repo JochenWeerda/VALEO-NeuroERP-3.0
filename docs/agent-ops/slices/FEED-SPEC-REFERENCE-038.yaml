@@ -35,7 +35,9 @@ progress: >-
   Golden-/Property-Testvertrag erstellt; Formeln bleiben Code-SSOT. Tranche 6:
   10 UI/UX mit Aufgabenmodi, Rations-Workbench, Warnungs-/Provenienzdesign,
   Accessibility, Research und Metriken sowie 11 Agenten mit sechs Fachagenten,
-  Tool-/Human-Gates, Security, Audit und Evaluation erstellt.
+  Tool-/Human-Gates, Security, Audit und Evaluation erstellt. Tranche 7: 12
+  Integrationen mit Provider-ACL, Labor, Herd-Data/DDW-Klasse, ICAR, agrirouter,
+  Mixer, ERP-Events, Quarantaene, Resilienz, Security und Live-Gates erstellt.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
