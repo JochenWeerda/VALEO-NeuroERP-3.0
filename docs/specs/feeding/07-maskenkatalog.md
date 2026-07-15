@@ -488,3 +488,12 @@ Interaktionsdetails oder visuelle Signaturen. Zulässig ist ausschließlich die
 abstrakte Erkenntnis, dass ein fachlicher Anwendungsfall benötigt wird. Seine
 Lösung folgt VALEO-Tokens, Meridian-Floorplans, eigener Informationsarchitektur
 und dokumentierten Nutzerzielen.
+
+## 12. Ausgelieferte Maske FEED-CORE-017
+
+`agrar/feeding-reference-data` ist ein nativer Meridian-ListReport mit zwei
+virtuellen Tabellen fuer Naehrstoffe und Einheiten. Er zeigt Code, Bezugsbasis,
+Dimension, Wertebereich, Herkunft und Revision statt eine weitere freie
+Agrar-Spezialmaske einzufuehren. Route:
+`/portal/rationsoptimierung?view=reference-data`. Der Screen ist read-only;
+Aenderungen werden erst nach einem eigenen Governance-Workflow freigeschaltet.

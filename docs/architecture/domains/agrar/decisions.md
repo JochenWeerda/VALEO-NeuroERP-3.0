@@ -21,3 +21,4 @@ version: 1.0.0
 | [ADR-043](../../../adr/adr-043-feed-readiness-read-model.md) | Futter-Readiness als domänenübergreifendes Read-Model |
 | [ADR-044](../../../adr/adr-044-feeding-controlling-observations.md) | Kanonische Tagesbeobachtungen für das Fütterungscontrolling |
 | [ADR-045](../../../adr/adr-045-versioned-feeding-groups.md) | Versionierte Fuetterungsgruppen und betrieblicher Zugriffsscope |
+| [ADR-046](../../../adr/adr-046-feeding-reference-data-and-unit-conversion.md) | Versionierte Fuetterungsreferenzdaten und explizite FM-TM-Semantik |

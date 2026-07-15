@@ -351,3 +351,16 @@ Zählprotokoll, Query-Plan-Nachweis und aktualisierte Traceability.
 - Freigegebene Rationen und Analysen sind reproduzierbar.
 - Importe sind idempotent, beobachtbar und quarantänefähig.
 - Daten-, API-, DDD- und Traceability-Begriffe stimmen überein.
+
+## 11. Ist-Ausbau FEED-CORE-017
+
+| Tabelle | Scope/Schluessel | Invarianten |
+|---|---|---|
+| `domain_agrar.feeding_unit_definitions` | global (`tenant_id NULL`) oder Tenant + `code` | Faktor > 0, Praezision 0..12, Revision > 0 |
+| `domain_agrar.feeding_nutrient_definitions` | global oder Tenant + `code` | kontrollierte FM/TM-Basis und ValueKind; max >= min |
+| `domain_agrar.feeding_reference_revisions` | Scope + Typ + Entitaet + Revision | append-only Trigger, JSONB-Snapshot, Grund/Akteur/Zeit |
+
+Die Migration `feed_core_reference_data_20260715` seeded Einheiten und einen
+erweiterbaren DLG-/VALEO-Ausgangskatalog idempotent. Der effektive Read-Pfad
+bevorzugt eine tenantgebundene Definition vor dem globalen Code. Bestehende
+Solver-Tabellen bleiben unveraendert.

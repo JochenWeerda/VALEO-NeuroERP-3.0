@@ -2288,6 +2288,80 @@ def build_agrar_feeding_group_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_feeding_reference_data_screen_definition() -> dict[str, Any]:
+    """Native read model for canonical nutrient and unit definitions (FEED-CORE-017)."""
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/feeding-reference-data",
+        "domain": "agrar",
+        "mode": "list",
+        "title": "Naehrstoffe und Einheiten",
+        "subtitle": "Verbindliche Bezugsbasis, Dimension, Herkunft und Rundung",
+        "adapter": {
+            "type": "native", "sourceId": "agrar/feeding-reference-data", "temporary": False,
+        },
+        "dataSources": [
+            {
+                "key": "nutrients",
+                "endpoint": "/api/v1/agrar/rations-optimization/reference-data/nutrients",
+                "pageSize": 100,
+                "staleTimeMs": 60_000,
+            },
+            {
+                "key": "units",
+                "endpoint": "/api/v1/agrar/rations-optimization/reference-data/units",
+                "pageSize": 100,
+                "staleTimeMs": 60_000,
+            },
+        ],
+        "tables": [
+            {
+                "key": "nutrients", "label": "Naehrstoffdefinitionen", "dataSourceKey": "nutrients",
+                "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                "columns": [
+                    {"key": "display_name", "label": "Naehrstoff", "sortable": True, "filterable": True, "width": 240},
+                    {"key": "code", "label": "Code", "filterable": True, "width": 190},
+                    {"key": "canonical_unit_code", "label": "Einheit", "filterable": True, "width": 140},
+                    {"key": "default_basis", "label": "Bezugsbasis", "filterable": True, "width": 150},
+                    {"key": "minimum_value", "label": "Minimum", "numeric": True, "width": 110},
+                    {"key": "maximum_value", "label": "Maximum", "numeric": True, "width": 110},
+                    {"key": "source", "label": "Herkunft", "filterable": True, "width": 180},
+                    {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
+                ],
+            },
+            {
+                "key": "units", "label": "Einheitendefinitionen", "dataSourceKey": "units",
+                "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                "columns": [
+                    {"key": "display_name", "label": "Einheit", "sortable": True, "filterable": True, "width": 220},
+                    {"key": "code", "label": "Code", "filterable": True, "width": 150},
+                    {"key": "dimension", "label": "Dimension", "filterable": True, "width": 190},
+                    {"key": "factor_to_base", "label": "Basisfaktor", "numeric": True, "width": 140},
+                    {"key": "precision", "label": "Nachkommastellen", "numeric": True, "width": 150},
+                    {"key": "source", "label": "Herkunft", "filterable": True, "width": 180},
+                    {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
+                ],
+            },
+        ],
+        "actions": [],
+        "noWorkflowReason": "Referenzdaten werden hier revisionssicher gelesen; Aenderungen folgen einem separaten Governance-Prozess.",
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "listReport", "density": "compact", "contextRail": "audit", "tableProfile": "standard",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 28, "requiresLazyTabs": True,
+            "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Einheiten, Bezugsbasen und Naehrstoffherkunft fuer Berechnung und Beratung erklaerbar machen.",
+            "examplePrompts": ["In welcher Einheit wird Rohprotein bewertet?", "Welche Naehrstoffe sind auf TM bezogen?"],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feeding-reference-data']"},
+        },
+    }
+
+
 def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
     """Native worklist for inventory, lab-analysis and price readiness."""
     return {
@@ -2586,6 +2660,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
     "agrar/feeding-businesses": build_agrar_feeding_businesses_screen_definition,
     "agrar/feeding-group": build_agrar_feeding_group_screen_definition,
+    "agrar/feeding-reference-data": build_agrar_feeding_reference_data_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
     "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
@@ -3105,6 +3180,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
     "agrar/feeding-businesses": "/portal/rationsoptimierung?view=businesses",
     "agrar/feeding-group": "/portal/rationsoptimierung?view=rations",
+    "agrar/feeding-reference-data": "/portal/rationsoptimierung?view=reference-data",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
     "agrar/feed-controlling": "/portal/rationsoptimierung?view=controlling",
     "agrar/ration": "/portal/rationsoptimierung?view=rations",

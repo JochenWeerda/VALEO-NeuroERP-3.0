@@ -7,6 +7,7 @@ import { RationLifecycleDetail } from '@/features/feed-advice/RationLifecycleDet
 import { FeedControllingPage } from '@/features/feed-advice/FeedControllingPage'
 import { FeedingBusinessWorklist } from '@/features/feed-advice/FeedingBusinessWorklist'
 import { FeedingGroupDetail } from '@/features/feed-advice/FeedingGroupDetail'
+import { FeedingReferenceData } from '@/features/feed-advice/FeedingReferenceData'
 
 const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsoptimierung'))
 
@@ -62,6 +63,10 @@ export default function PortalFeedAdvicePage(): JSX.Element {
 
   if (routeState.view === 'businesses') {
     return <FeedingBusinessWorklist />
+  }
+
+  if (routeState.view === 'reference-data') {
+    return <FeedingReferenceData />
   }
 
   if (!routeState.expert) {

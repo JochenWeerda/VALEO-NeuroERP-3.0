@@ -34,6 +34,10 @@ vi.mock('@/features/feed-advice/FeedingGroupDetail', () => ({
   FeedingGroupDetail: ({ groupId }: { groupId: string }) => <div data-testid="feeding-group-detail">{groupId}</div>,
 }))
 
+vi.mock('@/features/feed-advice/FeedingReferenceData', () => ({
+  FeedingReferenceData: () => <div data-testid="feeding-reference-data">Referenzdaten</div>,
+}))
+
 describe('Portal Fuetterungsberatung entry architecture', () => {
   beforeEach(() => {
     locationState.search = ''
@@ -93,6 +97,13 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
     locationState.search = '?view=group&group_id=group-42'
     render(<PortalFeedAdvicePage />)
     expect(screen.getByTestId('feeding-group-detail')).toHaveTextContent('group-42')
+    expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
+  })
+
+  it('routes nutrient and unit definitions through the native reference view', () => {
+    locationState.search = '?view=reference-data'
+    render(<PortalFeedAdvicePage />)
+    expect(screen.getByTestId('feeding-reference-data')).toBeInTheDocument()
     expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
   })
 })

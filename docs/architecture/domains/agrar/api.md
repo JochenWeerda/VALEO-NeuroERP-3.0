@@ -53,6 +53,19 @@ Entscheidung: [ADR-040](../../../adr/adr-040-contract-gated-herd-data-connectors
 Entscheidung: [ADR-042](../../../adr/adr-042-immutable-ration-lifecycle.md).
 Gruppenentscheidung: [ADR-045](../../../adr/adr-045-versioned-feeding-groups.md).
 
+## Fuetterungsberatung / Referenzdaten und Einheiten
+
+- `GET /api/v1/agrar/rations-optimization/reference-data/nutrients` — effektiver
+  globaler/tenantgebundener Naehrstoffkatalog mit Basis, Einheit, Wertebereich,
+  Herkunft und Revision.
+- `GET /api/v1/agrar/rations-optimization/reference-data/units` —
+  dimensionsgebundene Einheiten mit Basisfaktor und Ausgabe-Praezision.
+- `POST /api/v1/agrar/rations-optimization/reference-data/convert-basis` —
+  Decimal-basierte FM/TM-Konvertierung mit expliziter Mengen- oder
+  Konzentrationssemantik und Rundungsmodus.
+
+Entscheidung: [ADR-046](../../../adr/adr-046-feeding-reference-data-and-unit-conversion.md).
+
 ## Fütterungsberatung / Einsatzbereitschaft
 
 - `POST /api/v1/agrar/rations-optimization/readiness/evaluate` — prüft einen

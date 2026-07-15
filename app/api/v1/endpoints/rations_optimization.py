@@ -7191,3 +7191,5 @@ from app.api.v1.endpoints.rations_controlling import router as _rations_controll
 router.include_router(_rations_controlling_router)
 from app.api.v1.endpoints.feeding_core import router as _feeding_core_router
 router.include_router(_feeding_core_router)
+from app.api.v1.endpoints.rations_reference_data import router as _rations_reference_data_router
+router.include_router(_rations_reference_data_router)

@@ -449,3 +449,15 @@ Schemaversion und minimierter `data`-Block. Zustellung ist at-least-once;
 - Solver-, Report- und Exportläufe sind reproduzierbare Jobs.
 - Bestands- und Zielpfade sind eindeutig gekennzeichnet.
 - Contract-, Tenant-, Idempotenz- und OpenAPI-Drifttests sind grün.
+
+## 12. Implementierter Referenzdatenvertrag
+
+| Methode/Pfad | Ergebnis |
+|---|---|
+| `GET /api/v1/agrar/rations-optimization/reference-data/nutrients` | effektive Naehrstoffdefinitionen mit Basis, Wertebereich, Herkunft und Revision |
+| `GET /api/v1/agrar/rations-optimization/reference-data/units` | Einheiten mit Dimension, Basisfaktor und Praezision |
+| `POST /api/v1/agrar/rations-optimization/reference-data/convert-basis` | gerundeter und ungerundeter Decimal-Wert samt vollstaendiger FM/TM-Provenienz |
+
+Alle drei Pfade verlangen eine Feed-Read-Rolle und einen Tenantkontext. Ungueltige
+TM-Prozente oder Vertragswerte liefern 422; Autorisierungsfehler 403. Die API
+deutet einen Wert nie implizit als Menge oder Konzentration.

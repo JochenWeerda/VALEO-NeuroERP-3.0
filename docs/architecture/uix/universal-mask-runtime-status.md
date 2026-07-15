@@ -238,6 +238,16 @@ rollenorientierter Einstieg, der die spezialisierte Solver-Workbench nur fuer ei
 konkrete Planungsaufgabe lazy laedt. Architekturentscheid und Variantenbewertung:
 ADR-041 sowie `docs/design/feed-advice-experience-architecture-2026-07-14.md`.
 
+## Feeding-Kernausbau 2026-07-15
+
+FEED-CORE-015 bis 017 ergaenzen drei weitere native Agrar-Screens ueber dieselbe
+Runtime-Kette: `agrar/feeding-businesses`, `agrar/feeding-group` und den
+read-only ListReport `agrar/feeding-reference-data`. Das generierte Agent-
+Handbuch inventarisiert damit 41 Masken. Alle drei Screens sind
+`temporary=False` und generator-ready; fachliche Dialoge bleiben schmale
+Domain-Overlays. Das globale Command-Inventar hat unabhaengig davon fuenf offene
+High-Risk-Aktionen auf `agrar/ration`, dokumentiert unter Open Gaps.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

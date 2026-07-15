@@ -18,6 +18,12 @@ append-only Snapshot. Stale Revisionen liefern 409; fremde Betriebsscope-IDs 404
 Die native ObjectPage zeigt aktuellen Stand und Historie ueber dieselbe
 ScreenDefinition-/RenderPlan-Runtime.
 
+Referenzdaten: Naehrstoff oder Einheit ueber den effektiven Katalog lesen ->
+Dimension, Bezugsbasis und Herkunft pruefen -> FM/TM-Wert mit explizitem Typ
+`quantity` oder `concentration` konvertieren -> erst anschliessend mit expliziter
+Praezision und Modus runden. Unpassende Dimensionen sowie TM <= 0 oder > 100
+werden vor einer Berechnung abgewiesen.
+
 Rationslebenszyklus: Gruppe waehlen -> Entwurf im Solver -> unveraenderlichen
 Snapshot anlegen -> fachliche Pruefung -> Freigabe -> sofortige oder geplante
 Aktivierung -> Fuetterung -> Abloesung/Archivierung. Jede Transition ist rollen-

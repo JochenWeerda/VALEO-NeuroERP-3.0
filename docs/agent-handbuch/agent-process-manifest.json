@@ -1047,6 +1047,23 @@
       ]
     },
     {
+      "mask_id": "agrar/feeding-reference-data",
+      "title": "Naehrstoffe und Einheiten",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-reference-data/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-reference-data/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-reference-data/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-reference-data/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "agrar/harvest-settlement",
       "title": "Ernte-Abrechnung",
       "domain": "agrar",

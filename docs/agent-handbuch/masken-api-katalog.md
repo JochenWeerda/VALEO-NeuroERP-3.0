@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (40 Masken).
+> Generiert aus `app/core/screen_definitions.py` (41 Masken).
 
 ## Übersicht
 
@@ -23,6 +23,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feed-readiness` | Futter-Einsatzbereitschaft | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
+| `agrar/feeding-reference-data` | Naehrstoffe und Einheiten | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
@@ -272,6 +273,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit_group` | Tiergruppe bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-reference-data` — Naehrstoffe und Einheiten
+
+**Zweck:** Einheiten, Bezugsbasen und Naehrstoffherkunft fuer Berechnung und Beratung erklaerbar machen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-reference-data/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-reference-data/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-reference-data/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `nutrients` → `/api/v1/agrar/rations-optimization/reference-data/nutrients`
+- `units` → `/api/v1/agrar/rations-optimization/reference-data/units`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- In welcher Einheit wird Rohprotein bewertet?
+- Welche Naehrstoffe sind auf TM bezogen?
 
 ---
 

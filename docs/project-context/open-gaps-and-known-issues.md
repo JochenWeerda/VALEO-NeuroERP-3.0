@@ -288,7 +288,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 
 | Thema | Beschreibung | Priorität |
 |-------|-------------|-----------|
-| commandEndpoints | Alle nativen SD-Actions verdrahtet (SPEC-P1-04 ✅); execute simuliert Status-Mutation + Outbox/Audit — volle Domain-Services folgen bei Bedarf | erledigt |
+| commandEndpoints | Inventur 2026-07-15: `agrar/ration` besitzt fuer `approve`, `schedule`, `activate`, `retire`, `archive` noch keinen `commandEndpoint`; die Domain-API existiert, die zentrale ActionRuntime-Verdrahtung folgt im Rationseditor-/Lifecycle-Ausbau | P1 |
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
 | Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
 | UIX-054 Route Inventory | Generierte Route-Wahrheit (`route-inventory.gen.json`) | P1 | ✅ |
@@ -305,6 +305,11 @@ Nachzug 2026-07-06 (SPEC-P1-04/08, Prompt A8): Gemeinsamer `MaskActionRuntime`-S
 alle nativen ScreenDefinitions ohne `stubReason`; Inventur-Skript + pytest
 (`test_spec_p1_04_mask_commands.py`, `test_spec_p1_08_lot_fefo_pick.py`).
 Chargen-FEFO beruecksichtigt MHD vor Eingangsdatum.
+
+Nachzug 2026-07-15 (FEED-CORE-017): `agrar/feeding-reference-data` ist eine
+read-only native ScreenDefinition und besteht die Generator-Readiness. Das
+Command-Inventar bleibt ausschliesslich wegen der oben benannten fuenf
+Bestandsaktionen rot; die Referenzdatenmaske erzeugt keine neue Action-Luecke.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 

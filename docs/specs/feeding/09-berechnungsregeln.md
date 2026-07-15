@@ -397,3 +397,21 @@ Anforderungen und Regeln zu.
 8. Migrations-/Kompatibilitätsentscheidung für bestehende Versionen.
 9. Performance- und Determinismusnachweis.
 10. Traceability, Workboard und Referenzwerk aktualisiert.
+
+## 18. Kanonische FM/TM- und Rundungsregeln (FEED-CORE-017)
+
+| Regel-ID | Eingabe | Ergebnis |
+|---|---|---|
+| FEED-UNIT-001 | Menge FM -> TM | `Wert * TM-Prozent / 100` |
+| FEED-UNIT-002 | Menge TM -> FM | `Wert / (TM-Prozent / 100)` |
+| FEED-UNIT-003 | Konzentration FM -> TM | `Wert / (TM-Prozent / 100)` |
+| FEED-UNIT-004 | Konzentration TM -> FM | `Wert * TM-Prozent / 100` |
+| FEED-UNIT-005 | TM-Prozent | strikt `> 0` und `<= 100` |
+| FEED-UNIT-006 | Einheitenumrechnung | nur gleiche Dimension; `value * from.factor / to.factor` |
+| FEED-UNIT-007 | Rundung | Decimal-Quantisierung mit Praezision und `half_up`, `half_even`, `down` oder `up` |
+
+Kernkonvertierung rundet nicht implizit. Die API gibt deshalb neben dem explizit
+gerundeten auch den ungerundeten Wert aus. Property-Tests pruefen die FM/TM-
+Rueckrichtung ueber kleine, extreme und typische TM-/Wertkombinationen; bei
+periodischen Dezimalbruechen gilt ein Residuum von hoechstens `1e-24` vor der
+expliziten Ausgaberundung.

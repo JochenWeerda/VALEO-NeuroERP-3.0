@@ -2,9 +2,10 @@ slice_id: FEED-CORE-017
 id: FEED-CORE-017
 title: Naehrstoffdefinitionen Einheiten FM-TM und Rundung
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-15"
 started_at: "2026-07-15"
+completed_at: "2026-07-15"
 goal: >-
   Erweiterbare Naehrstoff- und Einheitendefinitionen als versionierte Daten sowie
   dimensionssichere, deterministische FM-/TM-Umrechnung und Rundung als zentrale
@@ -18,7 +19,7 @@ file_ownership:
   - app/agrar/rations/reference_data.py
   - app/services/rations_reference_data_service.py
   - app/api/v1/endpoints/rations_reference_data.py
-  - app/api/v1/api.py
+  - app/api/v1/endpoints/rations_optimization.py
   - tests/test_feeding_reference_data.py
   - tests/test_rations_reference_data_api.py
   - app/core/screen_definitions.py
@@ -36,6 +37,8 @@ file_ownership:
   - docs/specs/feeding/09-berechnungsregeln.md
   - docs/specs/feeding/requirements-traceability.md
   - docs/agent-handbuch/
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
   - config/architecture-index.yaml
   - docs/agent-ops/slices/FEED-CORE-017.yaml
   - docs/agent-ops/active-workboard.md
@@ -60,3 +63,21 @@ tests:
 risks:
   - Bestehende Solver-Felder bleiben bis FEED-CORE-018 ueber einen expliziten Adapter kompatibel.
   - Kundenspezifische Definitionen duerfen Systemcodes nicht unbemerkt ueberschreiben.
+  - Fuenf bestehende High-Risk-Aktionen der Rations-ObjectPage benoetigen weiterhin echte commandEndpoints; die read-only Referenzmaske erweitert diese Luecke nicht.
+evidence:
+  tdd:
+    - Red 1: 5/5 fehlende Domain-, Migration-, API- und Screen-Vertraege.
+    - Red 2: produktive API 500 vor Migration, RBAC bereits gruen.
+    - Red 3: fehlende Frontend-Komponente und Portalroute.
+    - Focused backend: 13 passed; Feeding regression: 80 passed, 1 skipped.
+  frontend:
+    - Focused route/component: 9 passed.
+    - Gesamtsuite: 93 files, 388 passed, 1 skipped.
+    - TypeScript type-check passed.
+  governance:
+    - Alembic single head und current feed_core_reference_data_20260715.
+    - docs check 127 Markdown/126 Governance files passed.
+    - architecture validate und strict drift passed; mapping 898/898 routes.
+    - Agent-Handbuch auf 41 Masken regeneriert und check passed.
+  known_gap:
+    - Mask command inventory bleibt nur wegen fuenf vorbestehender agrar/ration-Aktionen rot; in Open Gaps als P1 dokumentiert.

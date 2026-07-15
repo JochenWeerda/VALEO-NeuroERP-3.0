@@ -401,3 +401,13 @@ Hotspots fuer Detailentscheidungen:
    RationVersion, bis ein Mensch eine Variante speichert.
 5. Notification bleibt Nachbarkontext; Feeding definiert Ereignis und fachliche
    Empfaengerregel, nicht den Versandkanal selbst.
+
+## 13. Implementierter Referenzdatenkern (FEED-CORE-017)
+
+`NutrientDefinition` und `UnitDefinition` sind versionierte Referenzaggregate im
+Requirements-/Reference-Data-Kontext. `UnitConversionService` akzeptiert nur
+gleiche Dimensionen. `MatterBasis`, `BasisValueKind` und `RoundingMode` sind
+Value Objects; eine FM/TM-Konvertierung ohne Mengen-/Konzentrationssemantik ist
+ungueltig. Globale Definitionen sind lesbar, tenantgebundene Definitionen duerfen
+spaeter denselben Code kontrolliert ueberschreiben. Historische Revisionen sind
+append-only. Der Solver-Adapter folgt explizit in FEED-CORE-018.
