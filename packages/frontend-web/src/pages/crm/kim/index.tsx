@@ -10,7 +10,6 @@ import { getAxiosErrorMessage } from '@/lib/api-client';
 import { Customer, ContactPerson, ContactLog, OpenItem, BusinessDocument } from './types';
 import * as kimApi from './kim-api';
 import { useToast } from '@/hooks/use-toast';
-import { Toaster } from '@/components/ui/toaster';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1138,8 +1137,6 @@ export default function KimCockpitPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Toaster />
     </div>
     {activeCustomer && (
       <section className="hidden print:block bg-white p-8 text-black" data-testid="crm360-print-view">

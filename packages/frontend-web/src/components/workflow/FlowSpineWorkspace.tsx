@@ -1599,7 +1599,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       </SelectContent>
                     </Select>
                     {!lifecycleDialog.reasonCategory && (
-                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                      <p className="text-2xs text-rose-400">Pflichtfeld</p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -1617,7 +1617,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       )}
                     />
                     {!lifecycleDialog.reasonCode.trim() && (
-                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                      <p className="text-2xs text-rose-400">Pflichtfeld</p>
                     )}
                   </div>
                 </div>

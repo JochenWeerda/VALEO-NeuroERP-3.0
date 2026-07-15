@@ -186,8 +186,8 @@ function SummaryBar({ cells }: SummaryBarProps): JSX.Element {
       </div>
       {locked > 0 && (
         <div className="flex flex-col rounded-md border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 px-4 py-2 min-w-[120px]">
-          <span className="text-[11px] text-status-error dark:text-red-400">QS-gesperrt</span>
-          <span className="text-xl font-semibold text-status-error dark:text-red-400 tabular-nums">{locked}</span>
+          <span className="text-2xs tracking-wide text-status-error">QS-gesperrt</span>
+          <span className="text-xl font-semibold text-status-error tabular-nums">{locked}</span>
         </div>
       )}
     </div>

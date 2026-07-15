@@ -277,14 +277,50 @@ Punkt 5 aus Abschnitt 8 ist geschlossen — Chart-Farben sind jetzt tokenbasiert
 Validierung: tsc ✅ · eslint 0 Fehler ✅ · Vitest 90 Dateien / 379 grün (+1 skipped) ✅ ·
 Build 19,1 s ✅.
 
+## 7f. Update 2026-07-15 — §8-Nachzug: Toast-Konsolidierung, text-\*-400, patterns-Teilschritt (DESIGN-GAPS-FOLLOWUP-013)
+
+- **Toast-Konsolidierung — ein Renderer statt drei:** sonner ist jetzt der
+  einzige Toast-Renderer der App. `@/hooks/use-toast` (shadcn-API, 255
+  Aufrufer) und der Legacy-`push()`-Vertrag (`ui/toast-provider`, 42 Aufrufer)
+  bleiben als API erhalten, delegieren aber intern an sonner — kein Aufrufer
+  musste angefasst werden, alle bestehenden Modul-Mocks in Tests bleiben
+  gültig. Gewinne: `toast.warning` ist erstmals eine echte Warnung (war
+  fälschlich destructive), Toasts stapeln (das alte `TOAST_LIMIT 1` verschluckte
+  parallele Meldungen), `action`-ReactNodes werden durchgereicht. Entfernt:
+  `ui/toaster.tsx`, `ui/toast.tsx`, `ui/ToastHost.tsx` (referenzlos) und der
+  doppelte lokale `<Toaster />`-Mount im KIM-Cockpit.
+- **`text-*-400`-Nachzug (gezielt, 19 Treffer bewertet):** Behoben wurden ein
+  echter Kontrastbug (gelöschte Kontrakte `text-red-400` auf `bg-red-50`
+  ≈ 2,5:1 → `bg-muted text-muted-foreground line-through`), redundante
+  `dark:text-*-400`-Overrides über bereits theme-flippenden `text-status-*`
+  (system.tsx, silo-uebersicht, FeldblockfinderIntegration) und
+  `text-[11px]`-Arbitraries im FlowSpineWorkspace (→ `text-2xs`). **Bewusst
+  belassen:** `rose-400`/`green-400`/`red-400` auf lokal dunklen Spezialflächen
+  (FlowSpine slate-950, Solver-Darkflächen) — dort ist die 400er-Stufe die
+  kontrastrichtige Wahl, `text-status-*` (700er hell) wäre falsch; sowie
+  Rating-Sterne `fill-yellow-400` (Zustand über fill, nicht Farbe allein) und
+  theme-korrekte Chip-Paare `text-*-700 dark:text-*-400`.
+- **`patterns/`-Konsolidierung, sicherer Teilschritt:** `patterns/OverviewPage`
+  (+Story) entfernt — einziger Referent war die eigene Story; alle Seiten
+  nutzen längst `mask-builder/OverviewPage`. **Rest-Inventar des
+  Großvorhabens:** `patterns/Wizard` 22 Seiten, `patterns/PageSurface` ~10,
+  `patterns/ListReport` 3, `patterns/ObjectPage` 2 — Migration je Maske mit
+  Einzelverifikation im Zuge der Universal-Mask-Promotion (eigenes Programm,
+  nicht mechanisch machbar).
+
+Validierung: tsc ✅ · eslint 0 Fehler ✅ · Vitest 91/91 Dateien, 382 grün (+1 skipped) ✅ ·
+Build 17,9 s ✅.
+
 ## 8. Verbleibende Risiken & Folgearbeiten
 
-> **Stand nach Slices 002–006:** Punkte 1–5 sind erledigt (1 → 7b, 2/3/4 → 7a,
-> 5 → 7e); Rollout-Prios 1/2/3/6 → 7b, Prios 4/5 → 7c; Mahnlauf → 7d.
-> **Offen bleiben:** Punkt 6 (`patterns/`-Konsolidierung — Großvorhaben im Zuge
-> der Universal-Mask-Promotion), Punkt 7 (Token-Quellen — Koordination mit
-> Codex/TW4-Dateibesitz nötig), der `text-*-400`-Nachzug (dunkle Spezialflächen,
-> gezielt statt mechanisch) sowie die Toast-System-Konsolidierung (7d).
+> **Stand nach Slices 002–013:** Punkte 1–5 sind erledigt (1 → 7b, 2/3/4 → 7a,
+> 5 → 7e); Rollout-Prios 1/2/3/6 → 7b, Prios 4/5 → 7c; Mahnlauf → 7d;
+> Toast-Konsolidierung, `text-*-400`-Nachzug und der sichere patterns-Teilschritt
+> → 7f. **Offen bleiben:** Punkt 6 (`patterns/`-Restmigration: Wizard 22 /
+> PageSurface ~10 / ListReport 3 / ObjectPage 2 Seiten — Großvorhaben im Zuge
+> der Universal-Mask-Promotion, je Maske einzeln zu verifizieren) und Punkt 7
+> (Token-Quellen-Konsolidierung — **blockiert auf Koordination mit Codex**,
+> dessen TW4-PILOT den Dateibesitz an `index.css`/`src/styles/**` hält).
 
 1. **Weitere Eigenbau-Reiterleisten** (z. B. `SalesDocumentsPanel`-Kategorien,
    `InformationPanel`-Sektionen, Sidebar-Alphabetregister) auf die Register-/Default-Variante

@@ -340,7 +340,7 @@ export function FeldblockfinderIntegration({
                   style={{ height: '300px' }}
                 >
                   <div className="text-center space-y-4">
-                    <MapPin className="h-16 w-16 mx-auto text-status-success dark:text-green-400" />
+                    <MapPin className="h-16 w-16 mx-auto text-status-success" />
                     <div>
                       <h3 className="text-lg font-semibold">Feldblockfinder {bundeslandInfo.name}</h3>
                       <p className="text-sm text-muted-foreground mt-1">

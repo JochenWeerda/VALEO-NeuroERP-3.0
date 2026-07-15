@@ -1,0 +1,91 @@
+slice_id: DESIGN-GAPS-FOLLOWUP-013
+id: DESIGN-GAPS-FOLLOWUP-013
+title: "§8-Nachzug: Toast-Konsolidierung auf sonner, gezielter text-*-400-Sweep, patterns-Teilschritt"
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Die nach DESIGN-CHARTS-TOKEN-006 verbliebenen autonom machbaren Punkte aus
+  docs/design/frontend-design-skill-audit.md Abschnitt 8 schliessen:
+  (a) drei koexistierende Toast-Systeme auf einen Renderer konsolidieren,
+  (b) den bewusst zurueckgestellten text-*-400-Nachzug gezielt (nicht
+  mechanisch) durchfuehren, (c) den gefahrlos moeglichen Teil der
+  patterns/-Konsolidierung umsetzen und das Rest-Inventar dokumentieren.
+scope:
+  - "Toast: sonner ist einziger Renderer (ToastBootstrap mountet nur noch
+    SonnerToaster). hooks/use-toast (shadcn-API, 255 Aufrufer) und
+    ui/toast-provider push() (42 Aufrufer) delegieren intern an sonner —
+    API unveraendert, Modul-Mocks in Tests bleiben gueltig. toast.warning ist
+    jetzt echte Warnung (war destructive), Toasts stapeln (TOAST_LIMIT 1
+    entfiel), action-ReactNode wird durchgereicht (payment-matching).
+    Geloescht: ui/toaster.tsx, ui/toast.tsx, ui/ToastHost.tsx (referenzlos),
+    doppelter lokaler Toaster-Mount im KIM-Cockpit."
+  - "text-*-400: 19 Treffer einzeln bewertet. Fixes: Kontrastbug
+    LstKontraktUebersicht GELOESCHT (red-400 auf red-50 ~2,5:1 -> muted +
+    line-through); redundante dark:text-*-400-Overrides ueber text-status-*
+    entfernt (einstellungen/system, lager/silo-uebersicht,
+    FeldblockfinderIntegration); text-[11px] -> text-2xs (FlowSpineWorkspace).
+    Bewusst belassen: 400er auf lokal dunklen Spezialflaechen (FlowSpine
+    slate-950, Solver), Rating-Sterne (Zustand via fill), theme-korrekte
+    Chip-Paare *-700/dark:*-400."
+  - "patterns: patterns/OverviewPage + Story entfernt (einziger Referent war
+    die eigene Story; Seiten nutzen mask-builder/OverviewPage). Rest-Inventar
+    dokumentiert (Wizard 22, PageSurface ~10, ListReport 3, ObjectPage 2
+    Seiten) — Migration je Maske bleibt Grossvorhaben der
+    Universal-Mask-Promotion."
+  - "Token-Quellen-Konsolidierung (Punkt 7) bewusst NICHT angefasst:
+    blockiert auf Codex-Koordination (TW4-PILOT-Dateibesitz an
+    index.css/src/styles)."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-GAPS-FOLLOWUP-013.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "packages/frontend-web/src/hooks/use-toast.ts"
+  - "packages/frontend-web/src/components/ui/toast-provider.tsx"
+  - "packages/frontend-web/src/app/ToastBootstrap.tsx"
+  - "geloescht: ui/toaster.tsx, ui/toast.tsx, ui/ToastHost.tsx,
+    patterns/OverviewPage.tsx (+Story)"
+  - "packages/frontend-web/src/pages/crm/kim/index.tsx"
+  - "text-*-400-Dateien: FlowSpineWorkspace, einstellungen/system,
+    lager/silo-uebersicht, kontrakte/LstKontraktUebersicht,
+    agrar/FeldblockfinderIntegration"
+progress: >-
+  2026-07-15 umgesetzt und validiert.
+acceptance:
+  - "Genau ein Toast-Renderer im DOM; toast()/toast.success|error|info|warning
+    und push() aller Bestandsaufrufer sichtbar ueber sonner."
+  - "Kein text-*-400 mehr auf hellen Flaechen; dunkle Spezialflaechen
+    dokumentiert belassen."
+  - "patterns/OverviewPage entfernt, kein Import bricht."
+tests:
+  - "tsc --noEmit -> 0; eslint (geaenderte Dateien) -> 0 Fehler."
+  - "vitest voll -> 91/91 Dateien, 382 passed, 1 skipped (use-toast-Mocks
+    unveraendert gueltig)."
+  - "vite build -> 17,9 s gruen."
+risks:
+  - "Sonner-Optik ersetzt die shadcn-Toast-Optik (bewusst: einheitliches
+    System, richColors + closeButton); Positions-/Styling-Feintuning ggf.
+    nachziehen."
+  - "useToast().toasts liefert jetzt immer [] (sonner haelt den Zustand);
+    einziger bisheriger Konsument war der geloeschte ui/toaster."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Benutzeraktion mit toast()-Feedback zeigt dieses sichtbar und
+    gestapelt an; Warnungen erscheinen als Warnung, Fehler als Fehler.
+  architektur_vertrag: >-
+    Ein Toast-Renderer (sonner in ToastBootstrap); Alt-APIs bleiben als
+    Delegationsschicht erhalten statt 297 Aufrufer zu migrieren; keine neuen
+    Abhaengigkeiten.
+  daten_vertrag: not_applicable
+  security_vertrag: not_applicable
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert.
+  dokumentations_vertrag: >-
+    Audit-Doku Abschnitt 7f + Abschnitt-8-Restliste (nur noch patterns-
+    Restmigration und Codex-blockierte Token-Quellen); Workboard; dieses YAML.
+  test_vertrag: >-
+    Volle Vitest-Suite, tsc, eslint, Build vor Push gruen; bestehende
+    use-toast-Mocks decken die API-Kompatibilitaet ab.

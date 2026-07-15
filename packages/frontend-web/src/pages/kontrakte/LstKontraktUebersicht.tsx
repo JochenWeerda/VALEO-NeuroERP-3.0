@@ -20,7 +20,7 @@ function statusBadge(status: string): JSX.Element {
     OFFEN: 'bg-green-100 text-green-800',
     ERLEDIGT: 'bg-slate-100 text-slate-600',
     STORNIERT: 'bg-red-100 text-red-700',
-    GELOESCHT: 'bg-red-50 text-red-400 line-through',
+    GELOESCHT: 'bg-muted text-muted-foreground line-through',
   }
   return <Badge className={variants[status] ?? 'bg-slate-50'}>{status}</Badge>
 }
