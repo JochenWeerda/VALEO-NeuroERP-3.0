@@ -2493,6 +2493,10 @@
       "path": "futtermittel/einzelfuttermittel/:id"
     },
     {
+      "module": "@/pages/futtermittel/rationseditor",
+      "path": "futtermittel/rationseditor"
+    },
+    {
       "module": "@/pages/futtermittel/grundfutteranalysen-native",
       "path": "futtermittel/grundfutteranalysen"
     },

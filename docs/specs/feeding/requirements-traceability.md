@@ -80,7 +80,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | FEED-RAT-001 | Zeilen-CRUD, FM/TM, Fixierung, Min/Max in der Ration | MUSS | Workbench (UIX-P0-PORTAL-RATIONS-006): add/remove/fix=Min=Max | VERIFIED | — | vorhanden | Vitest `rationsoptimierung-workbench.test.ts`, Playwright Rations-Smoke | Slice 006 |
 | FEED-RAT-002 | Versionierung, Status, Gültigkeit, unveränderliche Freigabe | MUSS | `lifecycle/domain.py`, `ration_versions` (snapshot_checksum) | VERIFIED | Gültig-bis fehlt (nur feeding_start + Ein-Aktiv) | Feld in Inkrement 3 | `test_rations_lifecycle_{domain,api}.py` | Slice 007 |
 | FEED-RAT-003 | Kopieren/Vorlagen | MUSS | `based_on_version_id` bei Versionen | PARTIAL | Vorlagenkatalog fehlt | Inkrement 2 | `test_rations_lifecycle_api.py` | — |
-| FEED-RAT-004 | Undo/Redo, Mischreihenfolge-Sortierung, Tastatur | MUSS | Mischreihenfolge im Solver (`solver/mixing.py`), UI-Sortierung fehlt | PARTIAL | Editor-Bedienkomfort | **Inkrement 2 (Rationseditor)** | `test_rations_solver_mixing.py` | Paritätsmatrix |
+| FEED-RAT-004 | Undo/Redo, Mischreihenfolge-Sortierung, Tastatur | MUSS | Rationseditor-Kernjourney live (`features/feed-advice/RationEditor.tsx`): Zeilen-CRUD, Inline-Mengen mit sofort sichtbarer Wirkung (entprellte deterministische Live-Bewertung), append-only Speichern mit optimistischer Revision; Mischreihenfolge im Solver | PARTIAL | Undo/Redo, Mischreihenfolge-Sortierung in der UI, volle Tastatur-Journey (FEED-WP-072ff) | Inkrement 2 Folgepakete | `ration-editor.test.tsx` (3), `test_rations_solver_mixing.py` | FEED-EDITOR-021 |
 | FEED-RAT-005 | Kosten je Tier/Tag, ct/kg ECM, Versionsdiff | MUSS | Praxis-KPIs (ct/kg ECM, KF-TM/kg ECM, €/Kuh/Tag) | VERIFIED | Versionsdiff-Ansicht offen | Inkrement 2 | Vitest Workbench | Slice 006 |
 
 ## Kapitel 6.7 — Optimierung
@@ -99,7 +99,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-EVAL-001 | Kennzahl+Ist+Ziel+Bedeutung+Empfehlung | MUSS | Diagnose/Warnungen + Erklärschicht; DLG-Kontrollregelkreis | PARTIAL | strukturierte RationEvaluation-Entität mit Ursache/Folge/Quelle je Kennzahl | Inkrement 1/2 | `test_rations_feeding_control_dlg2025.py` | DLG 01/2025 |
+| FEED-EVAL-001 | Kennzahl+Ist+Ziel+Bedeutung+Empfehlung | MUSS | Draft-Bewertung `ration_draft.evaluate_draft` liefert strukturierte Befunde (Code, Schweregrad, Ist, Ziel, verständlicher Text — nie nur Farbe) + Deltas + Abdeckungsstatus je Kennzahl (fehlende Werte nie als 0 summiert); Herkunft (Bedarfsprofil) sichtbar; dazu Diagnose/Erklärschicht des Solvers | PARTIAL | persistente RationEvaluation je Version, Ursache/Folge/Empfehlung je Kennzahl (FEED-EDITOR-022) | Inkrement 2 | `test_feeding_ration_editor.py` (4), DLG-Golden-Tests | FEED-EDITOR-021 |
 | FEED-EVAL-002 | Warnungs-Priorisierung, nicht nur Farbe | MUSS | Warnungsanpassung vorhanden; text-status-Utilities + Icons | PARTIAL | 4-stufige Priorität als Datenmodell | Inkrement 2 | axe-E2E 8/8 | Design-Audit 7a |
 | FEED-EVAL-003 | Freigabe trotz Warnung nur mit Begründung | MUSS | Readiness-Blocker + `OVERRIDE:`-Begründung im Lifecycle-Audit | VERIFIED | — | vorhanden | `test_rations_readiness.py` | Slice 008 |
 
@@ -174,7 +174,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-UI-001 | Mask-Builder-Muster, Design-Tokens, WCAG 2.2 AA | MUSS | native SDs, Token-System, axe 8/8, Chart-Palette validiert | VERIFIED | — | laufend | axe-E2E, Vitest | Design-Audit (alle 8 Punkte) |
-| FEED-UI-002 | Betriebsakte/Fütterungsübersicht/Rationseditor-Seiten | MUSS | Cockpit `agrar/feed-advice` + Aufgabenkacheln | PARTIAL | Kernseiten 1/3/7/8/13/14 des Kap. 10 | Inkremente 1–5 | `feed-advice-entry.test.tsx` | ADR-041 |
+| FEED-UI-002 | Betriebsakte/Fütterungsübersicht/Rationseditor-Seiten | MUSS | Cockpit `agrar/feed-advice` + Aufgabenkacheln; Rationseditor-Kernseite (FEED-MASK-009 Split-Layout: Positionsfläche + sticky Bewertung) unter `futtermittel/rationseditor?ration_id=…` | PARTIAL | Betriebsakte, Fütterungsübersicht, Variantenvergleich, Berichte, Integrationsmonitor (Kap. 10) | Inkremente 2–5 | `feed-advice-entry.test.tsx`, `ration-editor.test.tsx` | ADR-041, FEED-EDITOR-021 |
 | FEED-MOB-001 | Mobile MUSS-Fälle (Plan, Istmengen, Beobachtung, Foto) | MUSS | Mobil-Protokoll (Plan+Istmengen) | PARTIAL | Beobachtung/Foto/Maßnahme | Inkrement 5 | Playwright | Slice 007 |
 
 ## Kapitel 6.19 — Schnittstellen
