@@ -1,0 +1,63 @@
+slice_id: FEED-CORE-019
+id: FEED-CORE-019
+title: Futteranalyse Provenienz Freigabe und aktive Version
+owner: Codex
+status: reserviert
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+goal: >-
+  Das bestehende Grundfutteranalyse-Inkrement ohne Doppelwelt zu einem tenant-sicheren,
+  versionierten FeedAnalysis-Aggregat mit Originalbeleg, flexiblen Messwerten,
+  Plausibilitaet, bewusster Freigabe und aktiver Analyse ausbauen.
+requirements: [FEED-LAB-001, FEED-LAB-002, FEED-LAB-004]
+work_packages: [FEED-WP-041, FEED-WP-042, FEED-WP-043, FEED-WP-044, FEED-WP-045, FEED-WP-046, FEED-WP-047, FEED-WP-048, FEED-WP-049, FEED-WP-050]
+decision_level: significant
+dependencies: [FEED-CORE-017, FEED-CORE-018]
+file_ownership:
+  - alembic/versions/feed_core_feed_analyses_20260715.py
+  - app/agrar/rations/feed_analysis.py
+  - app/services/feeding_feed_analysis_service.py
+  - app/api/v1/endpoints/feeding_feed_analyses.py
+  - app/api/v1/endpoints/grundfutter_analysen.py
+  - app/api/v1/schemas/grundfutter_analysen_schemas.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_feed_analysis.py
+  - tests/test_feeding_feed_analysis_api.py
+  - tests/test_grundfutteranalysen.py
+  - packages/frontend-web/src/features/feed-advice/FeedingAnalysisDetail.tsx
+  - packages/frontend-web/src/lib/api/feeding-feed-analyses.ts
+  - packages/frontend-web/src/pages/futtermittel/grundfutteranalysen.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-analysis-detail.test.tsx
+  - docs/adr/adr-048-feeding-analysis-provenance.md
+  - docs/architecture/domains/agrar/
+  - docs/architecture/agents/impact-notes/FEED-CORE-019.md
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - docs/agent-ops/slices/FEED-CORE-019.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - FeedAnalysis ist einem kanonischen Feed zugeordnet und historisiert Probe, Labor, Methode, Gueltigkeit und Originalbelegreferenz.
+  - Messwerte bewahren Originalwert/-einheit und tragen kanonischen Decimal-Wert, Basis, Qualitaet, Herkunft und Schaetzstatus.
+  - Statuswechsel uploaded, mapped, draft, validated, released, superseded oder rejected sind serverseitig validiert.
+  - Je Feed und fachlichem Gueltigkeitsscope ist hoechstens eine freigegebene Analyse aktiv; Aktivierung ersetzt keine alte Rationsversion.
+  - Plausibilitaetsbefunde unterscheiden Blocker und Warnungen; fehlende Werte werden nie als Null interpretiert.
+  - API und Originalbelegzugriff sind tenant-/rollen-sicher; Mutationen sind optimistisch versioniert und auditierbar.
+  - Analyse-Worklist und Pruefung laufen durch die zentrale Meridian-Runtime; fachliche Dialoge bleiben schmale Overlays.
+  - Bestandsdaten und bestehende Grundfutteranalyse-Konsumenten bleiben additiv kompatibel; Migration bleibt Single-Head.
+tdd:
+  red:
+    - Aggregate-, Status-, Einheiten-, Plausibilitaets- und Aktivierungsvertraege zuerst als fehlschlagende Tests.
+    - API-Lifecycle, Konflikt, Tenant, RBAC, Belegreferenz und Legacy-Kompatibilitaet zuerst rot.
+    - Native Worklist/ObjectPage, Accessibility und Importvorschau zuerst rot.
+  green: kleinste durchgaengige manuelle Analyse- und Freigabestrecke auf dem kanonischen Feed
+  refactor: bestehende Grundfutteranalyse-Daten additiv adaptieren und keine zweite UI-Architektur schaffen
+tests:
+  - tests/test_feeding_feed_analysis.py
+  - tests/test_feeding_feed_analysis_api.py
+  - tests/test_grundfutteranalysen.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-analysis-detail.test.tsx
+risks:
+  - Alte Grundfutteranalysefelder und flexible Messwerte brauchen eine eindeutige Prioritaet ohne stille Nullwerte.
+  - Freigabe und Aktivierung duerfen ohne atomare Sperre keine zwei aktiven Analysen erzeugen.
+  - DMS-Belege werden referenziert; Dateispeicherung und Virenscan duerfen nicht als fertig vorgetaeuscht werden.
