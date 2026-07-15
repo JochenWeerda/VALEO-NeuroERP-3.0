@@ -1,0 +1,62 @@
+slice_id: FEED-CORE-017
+id: FEED-CORE-017
+title: Naehrstoffdefinitionen Einheiten FM-TM und Rundung
+owner: Codex
+status: reserviert
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+goal: >-
+  Erweiterbare Naehrstoff- und Einheitendefinitionen als versionierte Daten sowie
+  dimensionssichere, deterministische FM-/TM-Umrechnung und Rundung als zentrale
+  fachliche Referenzstrecke liefern.
+requirements: [FEED-MAT-003, FEED-LAB-003]
+work_packages: [FEED-WP-021, FEED-WP-022, FEED-WP-023, FEED-WP-024, FEED-WP-025, FEED-WP-026, FEED-WP-027, FEED-WP-028, FEED-WP-029, FEED-WP-030]
+decision_level: significant
+dependencies: []
+file_ownership:
+  - alembic/versions/feed_core_reference_data_20260715.py
+  - app/agrar/rations/reference_data.py
+  - app/services/rations_reference_data_service.py
+  - app/api/v1/endpoints/rations_reference_data.py
+  - app/api/v1/api.py
+  - tests/test_feeding_reference_data.py
+  - tests/test_rations_reference_data_api.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/features/feed-advice/FeedingReferenceData.tsx
+  - packages/frontend-web/src/lib/api/feeding-reference-data.ts
+  - packages/frontend-web/src/pages/portal/rationsoptimierung.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-reference-data.test.tsx
+  - docs/adr/adr-046-feeding-reference-data-and-unit-conversion.md
+  - docs/architecture/domains/agrar/
+  - docs/architecture/agents/impact-notes/FEED-CORE-017.md
+  - docs/specs/feeding/04-domaenenmodell.md
+  - docs/specs/feeding/05-datenmodell.md
+  - docs/specs/feeding/06-api.md
+  - docs/specs/feeding/07-maskenkatalog.md
+  - docs/specs/feeding/09-berechnungsregeln.md
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-handbuch/
+  - config/architecture-index.yaml
+  - docs/agent-ops/slices/FEED-CORE-017.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Naehrstoffe und Einheiten sind persistierte, versionierte Referenzdaten statt Codefelder.
+  - Dimension und Bezugsbasis verhindern fachlich unzulaessige Umrechnungen.
+  - FM-/TM-Konvertierung ist mit Decimal deterministisch, umkehrbar und property-getestet.
+  - Rundungsregeln sind explizit, reproduzierbar und nicht von Float-/Locale-Verhalten abhaengig.
+  - Read-API und native Meridian-Referenzansicht sind typisiert, tenant-sicher und zugaenglich.
+  - Migration ist additiv, idempotent geseedet und Alembic bleibt Single-Head.
+tdd:
+  red:
+    - Property- und Boundary-Tests fuer FM-/TM-Umkehrbarkeit, Dimension und Rundung.
+    - Migrations-/Seed-/Versionsvertraege fuer UnitDefinition und NutrientDefinition.
+    - API-/RBAC-/Tenant- und native ScreenDefinition-Vertraege.
+  green: kleinste Domain-, Migrations-, Service-, API- und Meridian-Implementierung
+  refactor: eine zentrale Decimal-Konvertierung ohne parallele Berechnungslogik
+tests:
+  - tests/test_feeding_reference_data.py
+  - tests/test_rations_reference_data_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-reference-data.test.tsx
+risks:
+  - Bestehende Solver-Felder bleiben bis FEED-CORE-018 ueber einen expliziten Adapter kompatibel.
+  - Kundenspezifische Definitionen duerfen Systemcodes nicht unbemerkt ueberschreiben.
