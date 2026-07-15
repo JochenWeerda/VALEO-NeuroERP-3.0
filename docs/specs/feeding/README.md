@@ -28,8 +28,8 @@ verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 | 07 | Maskenkatalog | ✅ Referenzkapitel | `07-maskenkatalog.md` (22 Masken, Rollen, Felder, Zustände, Aktionen, Mockups, Meridian-Vertrag) |
 | 08 | Workflows | ✅ Referenzkapitel | `08-workflows.md` (15 E2E-Workflows, States, Guards, Kompensation, Audit, Tests) |
 | 09 | Berechnungsregeln | ✅ Referenzkapitel | `09-berechnungsregeln.md` (GfE/DLG/NRC-Status, Grenzen, Prioritäten, Plausibilität, Tests; Formeln bleiben Code-SSOT) |
-| 10 | UI/UX | ✅ | `docs/design/frontend-design-skill-audit.md` + ADR-041 |
-| 11 | Agenten | 🔜 Release C | Leitplanken: Lastenheft Kap. 6.20 (verbindlich) |
+| 10 | UI/UX | ✅ Referenzkapitel | `10-ui-ux.md` (Aufgabenmodi, Editor, Warnungen, Provenienz, Responsive, Research, Metriken) |
+| 11 | Agenten | ✅ Referenzkapitel | `11-agenten.md` (6 Fachagenten, Tools, Human Gates, Security, Audit, Evals) |
 | 12 | Integrationen | ✅ Kern | `target-architecture.md` §3–4; Connector-Verträge Slice 010 |
 | 13 | Tests | ✅ Strategie | `target-architecture.md` §8; Bestand `ist-audit.md` §3 |
 | 14 | Migration | ✅ Konzept | `target-architecture.md` §6 |
