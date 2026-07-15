@@ -216,7 +216,7 @@ Credentialtest und Provider-Smoke aktiviert.
 
 ## 5. Kern-API Zielbild
 
-### 5.1 Betriebe (`/feeding/businesses`) — IN ARBEIT, FEED-CORE-015
+### 5.1 Betriebe (`/feeding/businesses`) — BESTAND
 
 | Methode | Pfad | Zweck |
 |---|---|---|
@@ -232,8 +232,11 @@ Credentialtest und Provider-Smoke aktiviert.
 | DELETE | `/businesses/{business_id}/grants` | Zugriff widerrufen |
 | GET | `/businesses/{business_id}/grants` | Zugriffe lesen |
 
-Der parallele Slice wird erst nach Commit, Tests und Workboard-Abnahme BESTAND.
-`activate-from-partner` erzeugt eine fachliche Projektion mit Herkunftsreferenz.
+Quelle: `app/api/v1/endpoints/feeding_core.py`; Einbindung unter
+`/api/v1/agrar/rations-optimization/feeding`. Alle Antworten besitzen explizite
+Pydantic-Verträge. `activate-from-partner` erzeugt idempotent eine fachliche
+Projektion mit Herkunftsreferenz. Domänenrollen und aktive Betriebs-Grants werden
+serverseitig kombiniert; Grant-Widerrufe bleiben auditiert.
 
 ### 5.2 Futtermittel (`/feeding`) — GEPLANT
 

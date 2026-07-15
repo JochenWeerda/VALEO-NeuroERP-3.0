@@ -27,12 +27,14 @@ def test_feed_advice_cockpit_separates_role_sized_tasks() -> None:
         "ration_planen",
         "stallarbeit",
         "aktive_rationen",
+        "betriebe",
         "futterbestand",
         "analysen",
         "controlling",
     }
     assert tiles["ration_planen"]["targetRoute"].endswith("mode=expert")
     assert tiles["stallarbeit"]["targetRoute"].endswith("fuetterungsdokumentation-mobil")
+    assert tiles["betriebe"]["targetRoute"].endswith("view=businesses")
     assert tiles["analysen"]["targetRoute"].endswith("grundfutteranalysen")
     assert all(tile["targetRoute"].startswith("/") for tile in tiles.values())
 
@@ -63,4 +65,25 @@ def test_feed_controlling_is_native_time_series_worklist() -> None:
     assert definition is not None
     assert definition["dataSources"][0]["endpoint"].endswith("/controlling/series")
     assert any(column["key"] == "actual_ecm_kg_cow" for column in definition["tables"][0]["columns"])
+    assert _check_readiness(definition)["generatorReady"] is True
+
+
+def test_feeding_businesses_are_a_native_grant_aware_worklist() -> None:
+    definition = get_screen_definition("agrar/feeding-businesses")
+
+    assert definition is not None
+    assert definition["adapter"]["temporary"] is False
+    assert definition["layout"] == {
+        "preferredMode": "desktopDense",
+        "mobileMode": "mobileStack",
+        "touchTargetPx": 44,
+        "floorplan": "worklist",
+        "density": "compact",
+        "contextRail": "audit",
+        "tableProfile": "standard",
+    }
+    assert definition["dataSources"][0]["endpoint"].endswith("/feeding/businesses")
+    assert {column["key"] for column in definition["tables"][0]["columns"]} >= {
+        "name", "production_type", "feeding_system", "advisory_status", "herd_count", "group_count"
+    }
     assert _check_readiness(definition)["generatorReady"] is True

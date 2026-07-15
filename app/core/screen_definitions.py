@@ -1997,6 +1997,13 @@ def build_agrar_feed_advice_screen_definition() -> dict[str, Any]:
                 "tone": "warning",
             },
             {
+                "key": "betriebe",
+                "label": "Betriebe und Herden",
+                "targetScreenId": "agrar/feeding-businesses",
+                "targetRoute": "/portal/rationsoptimierung?view=businesses",
+                "tone": "neutral",
+            },
+            {
                 "key": "futterbestand",
                 "label": "Futterbestand und Reichweite",
                 "targetScreenId": "agrar/feed-readiness",
@@ -2105,6 +2112,76 @@ def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
             "examplePrompts": ["Welche Rationen warten auf Freigabe?", "Welche Ration ist je Tiergruppe aktiv?"],
             "sensitiveFields": ["snapshot_checksum"],
             "testSelectors": {"screenRoot": "[data-testid='screen-agrar/rations-lifecycle']", "primaryAction": "[data-action-kind='primary']"},
+        },
+    }
+
+
+def build_agrar_feeding_businesses_screen_definition() -> dict[str, Any]:
+    """Native worklist for grant-aware feeding businesses (FEED-CORE-015)."""
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/feeding-businesses",
+        "domain": "agrar",
+        "mode": "list",
+        "title": "Fuetterungsbetriebe",
+        "subtitle": "Betriebe, Herden und Tiergruppen im erlaubten Beratungsscope",
+        "adapter": {"type": "native", "sourceId": "agrar/feeding-businesses", "temporary": False},
+        "dataSources": [{
+            "key": "businesses",
+            "endpoint": "/api/v1/agrar/rations-optimization/feeding/businesses",
+            "pageSize": 100,
+            "staleTimeMs": 15_000,
+        }],
+        "tables": [{
+            "key": "businesses",
+            "label": "Betriebe im Zugriff",
+            "dataSourceKey": "businesses",
+            "serverPagination": False,
+            "pageSize": 100,
+            "virtualized": True,
+            "rowHeight": 48,
+            "columns": [
+                {"key": "name", "label": "Betrieb", "sortable": True, "filterable": True, "width": 260},
+                {"key": "production_type", "label": "Produktionsrichtung", "filterable": True, "width": 180},
+                {"key": "feeding_system", "label": "Fuetterungssystem", "filterable": True, "width": 160},
+                {"key": "advisory_status", "label": "Beratungsstatus", "renderKind": "status", "filterable": True, "width": 150},
+                {"key": "herd_count", "label": "Herden", "numeric": True, "sortable": True, "width": 90},
+                {"key": "group_count", "label": "Gruppen", "numeric": True, "sortable": True, "width": 100},
+                {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 170},
+            ],
+        }],
+        "actions": [{
+            "key": "create_business",
+            "label": "Betrieb anlegen",
+            "kind": "primary",
+            "dangerLevel": "safe",
+            "permission": "futtermittel.rations.update",
+        }],
+        "noWorkflowReason": "Betriebe sind Stammdaten; Beratung und Rationsfreigabe besitzen eigene Workflows.",
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "audit",
+            "tableProfile": "standard",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 36,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Autorisierte Fuetterungsbetriebe und ihre Beratungsreife steuern.",
+            "examplePrompts": ["Welche Betriebe betreue ich?", "Wo fehlen Herden oder Tiergruppen?"],
+            "sensitiveFields": ["business_partner_id", "preferences"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-agrar/feeding-businesses']",
+                "primaryAction": "[data-action-kind='primary']",
+            },
         },
     }
 
@@ -2405,6 +2482,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "workspace/leitung": build_workspace_leitung_screen_definition,
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
+    "agrar/feeding-businesses": build_agrar_feeding_businesses_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
     "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
@@ -2922,6 +3000,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
+    "agrar/feeding-businesses": "/portal/rationsoptimierung?view=businesses",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
     "agrar/feed-controlling": "/portal/rationsoptimierung?view=controlling",
     "agrar/ration": "/portal/rationsoptimierung?view=rations",

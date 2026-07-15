@@ -26,6 +26,10 @@ vi.mock('@/features/feed-advice/RationLifecycleDetail', () => ({
   RationLifecycleDetail: ({ rationId }: { rationId: string }) => <div data-testid="ration-lifecycle-detail">{rationId}</div>,
 }))
 
+vi.mock('@/features/feed-advice/FeedingBusinessWorklist', () => ({
+  FeedingBusinessWorklist: () => <div data-testid="feeding-business-list">Betriebe</div>,
+}))
+
 describe('Portal Fuetterungsberatung entry architecture', () => {
   beforeEach(() => {
     locationState.search = ''
@@ -71,6 +75,13 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
     locationState.search = '?view=controlling'
     render(<PortalFeedAdvicePage />)
     expect(screen.getByTestId('native-feed-cockpit')).toHaveTextContent('agrar/feed-controlling')
+    expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
+  })
+
+  it('routes feeding businesses through the native worklist', () => {
+    locationState.search = '?view=businesses'
+    render(<PortalFeedAdvicePage />)
+    expect(screen.getByTestId('feeding-business-list')).toBeInTheDocument()
     expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
   })
 })

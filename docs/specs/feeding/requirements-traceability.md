@@ -23,16 +23,16 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 |---|---|---|---|---|---|---|---|---|
 | FEED-RBAC-001 | Mandantentrennung | MUSS | `app/core/tenant.py`, alle Rations-Services tenant-scoped | VERIFIED | — | vorhanden | `test_rations_controlling.py` (Tenant-Isolation), `test_rations_lifecycle_api.py` | Slice 009/013 |
 | FEED-RBAC-002 | Rollenbasierte Zugriffe (Lesen/Bearbeiten/Freigabe/Admin) | MUSS | `app/agrar/rations/authz.py` + 4 Router | VERIFIED | Rollen nur auf Domänenebene | IdP-Rollout betriebsindividuell | `test_rations_authz.py` (24) | FEED-ADVICE-ROLES-013 |
-| FEED-RBAC-003 | Rechte je Betrieb/Standort/Herde/Beratungsfall | MUSS | — | NOT_IMPLEMENTED | Ressourcen-Scoping fehlt (setzt Betriebs-Aggregat voraus) | Inkrement 1 (Betriebsakte) + Policy-Schicht | — | — |
-| FEED-RBAC-004 | Externe Berater je Betrieb, zeitlich begrenzt | SOLL | — | NOT_IMPLEMENTED | — | nach FEED-RBAC-003 | — | — |
+| FEED-RBAC-003 | Rechte je Betrieb/Standort/Herde/Beratungsfall | MUSS | `feeding_business_service.py`, `feeding_core.py` | VERIFIED | Beratungsfall-Scoping folgt mit FEED-CASE-030 | Betriebs-Grants zusätzlich zu Domänenrollen; tenant- und hierarchiesichere Verknüpfung | `test_feeding_business_core.py` | FEED-CORE-015 |
+| FEED-RBAC-004 | Externe Berater je Betrieb, zeitlich begrenzt | SOLL | `feeding_business_grants.valid_until` + append-only Widerruf | VERIFIED | — | aktive Grants mit Scope-Hierarchie und Gültigkeitsfenster | `test_feeding_business_core.py` | FEED-CORE-015 |
 | FEED-RBAC-005 | Änderungsprotokoll fachlicher Änderungen | MUSS | Lifecycle-Audit (`rations_lifecycle_service.py`), Controlling recorded_by | PARTIAL | Audit nur Lifecycle/Controlling, nicht Stammdaten | AuditEvent je Aggregat in Inkrement 1 | `test_rations_lifecycle_domain.py` | Slice 007 |
 
 ## Kapitel 6.1 — Betriebs-/Kundenverwaltung
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-BUS-001 | CRM-Partner als Fütterungsbetrieb aktivieren | MUSS | CRM `business_partner_id`-Standard vorhanden; keine Feeding-Verknüpfung | NOT_IMPLEMENTED | FeedingBusiness-Aggregat fehlt | Inkrement 1 | — | — |
-| FEED-BUS-002 | Betriebsstätten/Herden/Ställe je Betrieb | MUSS | `feeding_groups` flach am Tenant | PARTIAL | Hierarchie Betrieb→Standort→Herde fehlt | Inkrement 1 | `test_rations_lifecycle_api.py` | Migration `feed_advice_lifecycle_20260714` |
+| FEED-BUS-001 | CRM-Partner als Fütterungsbetrieb aktivieren | MUSS | `POST /feeding/businesses/activate-from-partner`, `business_partner_id` | VERIFIED | — | idempotente fachliche Projektion ohne Partnerduplikat | `test_feeding_business_core.py` | FEED-CORE-015 |
+| FEED-BUS-002 | Betriebsstätten/Herden/Ställe je Betrieb | MUSS | `feeding_businesses` → `farm_sites` → `herds` → `feeding_groups` | VERIFIED | Stall als Standort-/Herdenmerkmal, kein eigenes Aggregat | tenant- und betriebsgebundene Hierarchie | `test_feeding_business_core.py` + DB-Integration | Migration `feed_core_business_20260715` |
 | FEED-BUS-003 | Betriebsakte (Analysen/Rationen/Aufgaben/Berichte gebündelt) | MUSS | Einzelseiten vorhanden, keine Akte | NOT_IMPLEMENTED | zentrale ObjectPage fehlt | Inkrement 2 (UI) | — | — |
 | FEED-BUS-004 | Beratungsstatus/Risiko-Filter | SOLL | — | NOT_IMPLEMENTED | — | Release C | — | — |
 

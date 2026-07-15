@@ -97,7 +97,7 @@ erDiagram
 
 ### 5.1 Organisation und Berechtigung
 
-#### `feeding_businesses` — IN ARBEIT, FEED-CORE-015
+#### `feeding_businesses` — BESTAND
 
 Fütterungsfachliche Sicht auf einen Betrieb; Partnerstammdaten werden referenziert,
 nicht dupliziert.
@@ -106,26 +106,29 @@ nicht dupliziert.
 |---|---|---:|---|
 | id | VARCHAR PK | ja | opake Betriebs-ID |
 | tenant_id | VARCHAR FK | ja | Tenant |
-| partner_id | VARCHAR | nein | Link zum Partnerstamm |
+| business_partner_id | VARCHAR(64) | nein | Link zum Partnerstamm |
 | name | VARCHAR(240) | ja | fachlicher Anzeigename |
-| country_code | CHAR(2) | ja | Regel-/Berichtsregion |
-| timezone | VARCHAR(64) | ja | betriebliche Tagesgrenze |
-| status | VARCHAR(24) | ja | draft, active, suspended, archived |
+| production_type/husbandry_form | VARCHAR(80) | nein | Produktions- und Haltungsprofil |
+| feeding_system/milking_system | VARCHAR | nein | betriebliche Systeme |
+| advisory_status | VARCHAR(40) | ja | Beratungsstatus |
+| preferences | JSONB | ja | additive betriebliche Einstellungen |
+| active | BOOLEAN | ja | aktive fachliche Projektion |
 | created_by/at | VARCHAR/TIMESTAMPTZ | ja | Anlageaudit |
 | updated_by/at | VARCHAR/TIMESTAMPTZ | ja | Änderungsaudit |
 
-Indizes: `(tenant_id,status,name)` und unique `(tenant_id,partner_id)` bei gesetztem
-Partner. Archivierte Betriebe bleiben referenzierbar.
+Quelle: `feed_core_business_20260715.py`. Indizes: `(tenant_id,active,name)` und
+unique `(tenant_id,business_partner_id)`. Deaktivierte Betriebe bleiben referenzierbar.
 
-#### `farm_sites`, `herds`, `business_grants` — IN ARBEIT, FEED-CORE-015
+#### `farm_sites`, `herds`, `feeding_business_grants` — BESTAND
 
-`farm_sites` hält Standort, Zeitzone und optionale Stall-/Lagermerkmale. `herds`
-hält stabile Herdenidentität, Tierart und Produktionsrichtung. Eine Herde verweist
-nur auf Standort desselben Betriebs und Tenants.
+`farm_sites` hält Standortname, Adresse und Aktivstatus. `herds` hält stabile
+Herdenidentität, Tierart und optionale Standortzuordnung. Der Service erzwingt,
+dass eine Herde nur auf einen Standort desselben Betriebs und Tenants verweist.
 
-Ein Grant enthält `tenant_id`, `business_id`, Principaltyp/-ID, Scope (`read`,
-`advise`, `approve`, `execute`, `administer`), Gültigkeit, Vergabe- und
-Widerrufsnachweis. Widerrufene Grants werden nicht gelöscht.
+Ein Grant enthält `tenant_id`, `business_id`, `subject`, Scope (`read`, `write`,
+`approve`, `admin`), Gültigkeit, Vergabe- und Widerrufsnachweis. Widerrufene
+Grants werden nicht gelöscht; ein partieller Unique-Index verhindert doppelte
+aktive Grants und erlaubt revisionssichere Neuvergabe.
 
 ### 5.2 Tierbestand und Gruppen
 
@@ -133,9 +136,9 @@ Widerrufsnachweis. Widerrufene Grants werden nicht gelöscht.
 
 Quelle: `feed_advice_lifecycle_20260714.py`. Gruppe, Tierart, Tierzahl,
 Körpermasse, Laktationsparameter, Milchziel, Fütterungssystem und Ort.
-`animal_count >= 0`; `external_ref` ist tenantweit eindeutig. Die vorhandene
-Migration besitzt noch keinen Business-/Herd-FK; FEED-CORE-015 führt die
-kontrollierte Zuordnung ein.
+`animal_count >= 0`; `external_ref` ist tenantweit eindeutig. Die additive
+Migration `feed_core_business_20260715.py` ergänzt nullable Business-/Herd-FKs;
+der administrative Backfill ordnet Bestandsgruppen kontrolliert zu.
 
 #### `animal_group_memberships` — GEPLANT
 

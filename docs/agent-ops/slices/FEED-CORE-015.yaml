@@ -2,9 +2,10 @@ slice_id: FEED-CORE-015
 id: FEED-CORE-015
 title: Fuetterungsbetriebe Standorte Herden und Betriebs-Grants
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-15"
 started_at: "2026-07-15"
+completed_at: "2026-07-15"
 takeover: >-
   Vom pausierten Claude-Code-Chat auf ausdruecklichen Auftrag uebernommen.
 goal: >-
@@ -18,8 +19,16 @@ file_ownership:
   - app/api/v1/endpoints/rations_optimization.py
   - app/agrar/rations/authz.py
   - tests/test_feeding_business_core.py
-  - lib/api/feeding-business.ts
-  - pages/futtermittel/fuetterungsbetriebe.tsx
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/lib/api/feeding-business.ts
+  - packages/frontend-web/src/features/feed-advice/FeedingBusinessWorklist.tsx
+  - packages/frontend-web/src/pages/portal/rationsoptimierung.tsx
+  - packages/frontend-web/src/__tests__/pages/portal/feed-advice-entry.test.tsx
+  - tests/test_feed_advice_screen_definition.py
+  - docs/specs/feeding/05-datenmodell.md
+  - docs/specs/feeding/06-api.md
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-handbuch/
   - docs/agent-ops/slices/FEED-CORE-015.yaml
   - docs/agent-ops/active-workboard.md
 acceptance:
@@ -38,6 +47,15 @@ tdd:
   green: kleinste Service-, Migrations- und API-Haertung
   refactor: typisierte Modelle und zentrale Access-Dependency
 tests:
-  - tests/test_feeding_business_core.py
+  - "Red: 5 Isolation-/Hierarchie-/Grant-Fehler, danach 3 Access-/Historienfehler."
+  - "Green: test_feeding_business_core.py -> 21 passed; Dev-DB-Integration -> 1 passed."
+  - "Regression: Authz + Lifecycle + Feeding Core -> 53 passed, 1 deselected."
+  - "Meridian: test_feed_advice_screen_definition.py -> 6 passed."
+  - "Frontend: Vitest-Gesamtsuite -> 91 Dateien, 384 passed, 1 skipped; TypeScript gruen."
+progress: >-
+  Tenant-sichere Betriebsprojektion, Standort-/Herdenhierarchie, additive
+  Gruppenzuordnung, zeitbegrenzte append-only Grants, typisierte API und native
+  Meridian-Worklist umgesetzt. Lokale Dev-Datenbank auf die Migration gehoben;
+  Agent-Handbuch aus 39 ScreenDefinitions neu generiert.
 risks:
-  - Dev-DB-Integration erfordert migriertes Schema.
+  - Reale OIDC-Subjects und Betriebs-Grants muessen beim Rollout organisatorisch zugewiesen werden.

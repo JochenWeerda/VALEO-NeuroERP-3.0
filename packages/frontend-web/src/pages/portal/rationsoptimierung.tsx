@@ -5,6 +5,7 @@ import { useLocation } from '@/app/routing/typed-router'
 import { RationLifecycleWorklist } from '@/features/feed-advice/RationLifecycleWorklist'
 import { RationLifecycleDetail } from '@/features/feed-advice/RationLifecycleDetail'
 import { FeedControllingPage } from '@/features/feed-advice/FeedControllingPage'
+import { FeedingBusinessWorklist } from '@/features/feed-advice/FeedingBusinessWorklist'
 
 const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsoptimierung'))
 
@@ -51,6 +52,10 @@ export default function PortalFeedAdvicePage(): JSX.Element {
 
   if (routeState.view === 'controlling') {
     return <FeedControllingPage />
+  }
+
+  if (routeState.view === 'businesses') {
+    return <FeedingBusinessWorklist />
   }
 
   if (!routeState.expert) {
