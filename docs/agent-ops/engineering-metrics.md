@@ -4,24 +4,24 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-15
 version: 3.0.0
-generated: 2026-07-14
+generated: 2026-07-15
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-15` · Stand: `2026-07-14`
+> **Automatisch generiert** · Daten seit: `2026-04-16` · Stand: `2026-07-15`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **75** |
-| Slices abgeschlossen | **56** (75 %) |
-| Mit externen Gates | 59 |
+| Slices gesamt | **82** |
+| Slices abgeschlossen | **63** (77 %) |
+| Mit externen Gates | 66 |
 | Ohne Doku-Dateien | 30 |
-| Slices ohne Cycle-Time (kein Claim-Commit) | 69 |
+| Slices ohne Cycle-Time (kein Claim-Commit) | 71 |
 
 ## Cycle Time
 
@@ -36,18 +36,19 @@ generated: 2026-07-14
 
 ## Rework-Rate
 
-**65.3 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**64.1 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
 | Slice | fix-Commits | Owner |
 |---|---|---|
-| — | — | — |
+| `DESIGN-GAPS-SWEEP-002` | 1 | Claude |
 
 ## Langläufer (≥ P90)
 
 | Slice | Cycle Time | Owner |
 |---|---|---|
+| `DESIGN-CHARTS-TOKEN-006` | 0.2 h | Claude |
 | `RATIONS-INT-UI-018` | 0.2 h | Codex |
 
 ## Agent-Produktivität (Slices je Owner)
@@ -55,8 +56,8 @@ generated: 2026-07-14
 | Owner | Slices | Anteil |
 |---|---|---|
 | Codex | 41 | `████████████████████` |
+| Claude | 18 | `█████████░░░░░░░░░░░` |
 | Cursor | 15 | `███████░░░░░░░░░░░░░` |
-| Claude | 11 | `█████░░░░░░░░░░░░░░░` |
 | offen | 6 | `███░░░░░░░░░░░░░░░░░` |
 | unclaimed | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | Claude Code | 1 | `░░░░░░░░░░░░░░░░░░░░` |
