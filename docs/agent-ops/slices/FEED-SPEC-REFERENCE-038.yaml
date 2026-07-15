@@ -13,6 +13,7 @@ scope:
   - DDD, Daten, API, Masken, Workflows, Regeln, Agenten, Integrationen und Tests.
   - Migration, Rollout, Traceability und 240 vertikale Arbeitspakete.
   - Pflegeprozess gegen Doku-, Code-, OpenAPI- und Migrationsdrift.
+  - Verbindlicher Red-Green-Refactor-TDD-Nachweis je produktivem Arbeitspaket.
 file_ownership:
   - docs/specs/feeding/00-*.md bis 17-*.md
   - docs/specs/feeding/reference-maintenance.md
@@ -46,8 +47,11 @@ acceptance:
   - API-/Daten-/Regelkataloge erfinden keine Laufzeitvertraege oder Formeln.
   - Masken folgen Meridian und der zentralen ScreenDefinition-Renderkette.
   - 200-300 Pakete nennen Abnahme, Abhaengigkeit, DoD, Test und Aufwand.
+  - Jedes produktive Paket benennt Red-Test, minimale Green-Implementierung,
+    Refactoring und relevante Regression; Bugfixes beginnen mit Regressionstest.
 tests:
   - Markdown- und Docs-Governance je Tranche.
+  - Produktive Folgeslices liefern TDD-Evidenz gemaess Pflegevertrag Kapitel 9.
 risks:
   - Umfang erfordert mehrere reviewbare Tranches; der Slice bleibt bis zur
     vollstaendigen Kapitel- und Paketabdeckung in_arbeit.

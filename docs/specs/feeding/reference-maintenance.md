@@ -86,7 +86,71 @@ Indizes, Tenant- und Historisierungsregeln; die physische Wahrheit bleibt Alembi
 - 300–500 Seiten sind Zielumfang, kein Qualitaetsmass: Duplikate werden entfernt,
   nicht durch Seitenzahl gerechtfertigt.
 
-## 9. Status des Aufbaus
+## 9. Verbindlicher TDD-Vertrag
+
+Jede produktive Aenderung folgt **Red → Green → Refactor**. Dokumentation oder ein
+nachtraeglich hinzugefuegter Happy-Path-Test ersetzt diesen Ablauf nicht.
+
+1. **Test-ID waehlen:** Requirement, Invariante und betroffene Schicht benennen.
+2. **Red:** kleinsten aussagekraeftigen Test zuerst schreiben und den erwarteten
+   Fehler nachweisen. Ein Test, der vor der Implementierung bereits gruen ist,
+   beweist die neue Anforderung nicht und muss geschaerft werden.
+3. **Green:** kleinste fachlich korrekte Implementierung erstellen, die den Test
+   bestehen laesst. Keine vorgezogene Nebenfunktion oder spekulative Abstraktion.
+4. **Refactor:** Duplikate, Benennung, Grenzen und Architektur verbessern, waehrend
+   der neue Test und die relevante Regression gruen bleiben.
+5. **Regression:** fokussierte Tests, betroffene Domain-/Contract-/UI-Suite und die
+   risikogerechten Repo-Gates ausfuehren.
+6. **Nachweis:** Red-Fehler, Green-Befehl, Ergebnis, Test-ID und Artefakt im Slice
+   oder Commit dokumentieren.
+
+### 9.1 TDD je Aenderungsklasse
+
+| Aenderung | Zuerst fehlschlagender Test |
+|---|---|
+| Domainregel/Invariante | Unit-, Boundary- oder Property-Test |
+| GfE-/DLG-Regel | Golden- plus Boundary-Test gegen versionierte Quelle |
+| API | Contract-/Auth-/ProblemDetails-Test vor Endpointcode |
+| Migration/Repository | Schema-, Tenant-, Constraint- und Backfill-Test |
+| ScreenDefinition/Maske | Compiler-/Component-Test; danach Playwright/A11y |
+| Workflow | verbotener und erlaubter Zustandsuebergang samt Audit/Event |
+| Connector | Contract-Fixture, Idempotenz, Delete/Move und Fehlerfall |
+| Agent/Tool | Policy-/Schema-/Injection-Eval vor Prompt-/Toolfreigabe |
+| Performancefix | reproduzierbarer Benchmark, der das Budget zunaechst verletzt |
+| Bugfix | Regressionstest, der exakt den beobachteten Fehler reproduziert |
+
+### 9.2 Ausnahmen
+
+Reine Prosa-, Kommentar- oder Formatkorrekturen benoetigen keinen Red-Test, muessen
+aber Markdown-/Governance-Gates bestehen. Explorative Spikes duerfen ohne TDD auf
+einem wegwerfbaren Pfad arbeiten; kein Spike-Code wird produktiv uebernommen, bevor
+der Vertrag durch Tests neu umgesetzt wurde. Externe Live-Gates koennen durch Mocks
+nicht als gruen gelten.
+
+### 9.3 Commit- und Reviewnachweis
+
+Ein Arbeitspaket gilt nur dann als implementiert, wenn sein Nachweis mindestens
+enthaelt:
+
+```yaml
+tdd_evidence:
+  test_ids: [FEED-T...]
+  red:
+    command: "..."
+    expected_failure: "..."
+  green:
+    command: "..."
+    result: passed
+  regression:
+    commands: ["..."]
+    result: passed
+  refactor_notes: "..."
+```
+
+Der Red-Nachweis darf als lokaler Testlauf, CI-Artefakt oder bewusst separater
+Testcommit vorliegen. Er muss keine absichtlich rote Hauptbranch-Pipeline erzeugen.
+
+## 10. Status des Aufbaus
 
 `FEED-SPEC-REFERENCE-038` baut die Kapitel in fachlich abhaengiger Reihenfolge auf:
 Grundlagen -> DDD/Daten/API -> Masken/Workflows/Regeln -> Agenten/Integrationen/

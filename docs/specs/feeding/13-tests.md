@@ -38,6 +38,18 @@ nennt Datei, Testname, Umgebung, Ergebnis und relevante Artefakte.
 | Performance/Resilience | SLO, Last, Ausfall | Release/Pilot |
 | Security/Privacy | Tenant, Grants, Injection, Secrets | PR + Release |
 
+### 2.1 TDD-Ausfuehrungsreihenfolge
+
+Fuer jede Codeaenderung wird zuerst eine ID aus diesem Katalog oder eine neue
+stabile `FEED-T*`-ID einem fehlschlagenden Test zugeordnet. Danach folgt die
+kleinste Implementierung und erst anschliessend das Refactoring. Bugfixes beginnen
+mit einem Regressionstest, der den Fehler vor dem Fix reproduziert. Goldenwerte
+werden nicht passend zur Implementierung umgeschrieben, sondern nur nach
+fachlichem Quellenreview geaendert.
+
+Pflichtnachweis je Arbeitspaket: Red-Fehler, Green-Lauf, Regression, Testdatei,
+Testname und gegebenenfalls Playwright-/A11y-/Benchmarkartefakt.
+
 ## 3. Testdatenregeln
 
 - synthetische Tenants `alpha`, `beta` und bewusst gleichnamige Objekte;
