@@ -43901,6 +43901,82 @@
         "title": "EvaluateSLARequest",
         "type": "object"
       },
+      "EvaluationSystemOut": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationSystemVersionOut"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "versions"
+        ],
+        "title": "EvaluationSystemOut",
+        "type": "object"
+      },
+      "EvaluationSystemVersionOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_current": {
+            "title": "Is Current",
+            "type": "boolean"
+          },
+          "module_ref": {
+            "title": "Module Ref",
+            "type": "string"
+          },
+          "system_id": {
+            "title": "System Id",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date-time",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "version_label": {
+            "title": "Version Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "system_id",
+          "version_label",
+          "module_ref",
+          "is_current",
+          "valid_from"
+        ],
+        "title": "EvaluationSystemVersionOut",
+        "type": "object"
+      },
       "EventAreaOut": {
         "properties": {
           "description": {
@@ -80166,6 +80242,142 @@
         "title": "OpportunityUpdate",
         "type": "object"
       },
+      "OptimizationRunIn": {
+        "properties": {
+          "duration_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "objective": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Objective",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          },
+          "ration_version_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Ration Version Id",
+            "type": "string"
+          },
+          "solver_version": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Solver Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "optimal",
+              "infeasible",
+              "unbounded",
+              "error",
+              "timeout"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ration_version_id",
+          "solver_version",
+          "objective",
+          "status"
+        ],
+        "title": "OptimizationRunIn",
+        "type": "object"
+      },
+      "OptimizationRunOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "objective": {
+            "title": "Objective",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          },
+          "ration_id": {
+            "title": "Ration Id",
+            "type": "string"
+          },
+          "ration_version_id": {
+            "title": "Ration Version Id",
+            "type": "string"
+          },
+          "solver_version": {
+            "title": "Solver Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "optimal",
+              "infeasible",
+              "unbounded",
+              "error",
+              "timeout"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "ration_id",
+          "ration_version_id",
+          "solver_version",
+          "objective",
+          "status",
+          "parameters",
+          "created_by",
+          "created_at"
+        ],
+        "title": "OptimizationRunOut",
+        "type": "object"
+      },
       "OrderCreate": {
         "description": "Bestellung erstellen",
         "properties": {
@@ -98264,6 +98476,85 @@
           "sources"
         ],
         "title": "ReprojectOut",
+        "type": "object"
+      },
+      "RequirementProfileIn": {
+        "properties": {
+          "group_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Group Id",
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": true,
+            "title": "Inputs",
+            "type": "object"
+          }
+        },
+        "required": [
+          "group_id"
+        ],
+        "title": "RequirementProfileIn",
+        "type": "object"
+      },
+      "RequirementProfileOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "estimated_inputs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Estimated Inputs",
+            "type": "array"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": true,
+            "title": "Inputs",
+            "type": "object"
+          },
+          "requirements": {
+            "additionalProperties": true,
+            "title": "Requirements",
+            "type": "object"
+          },
+          "system_version_id": {
+            "title": "System Version Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "group_id",
+          "system_version_id",
+          "inputs",
+          "estimated_inputs",
+          "requirements",
+          "created_by",
+          "created_at"
+        ],
+        "title": "RequirementProfileOut",
         "type": "object"
       },
       "RestoreRequest": {
@@ -158951,6 +159242,347 @@
           "agrar",
           "rations-optimization",
           "feeding-core"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/evaluation-systems": {
+      "get": {
+        "operationId": "list_evaluation_systems_api_v1_agrar_rations_optimization_feeding_evaluation_systems_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EvaluationSystemOut"
+                  },
+                  "title": "Response List Evaluation Systems Api V1 Agrar Rations Optimization Feeding Evaluation Systems Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Registrierte Bedarfs-/Bewertungssysteme mit Versionen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-requirements"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/optimization-runs": {
+      "get": {
+        "operationId": "list_optimization_runs_api_v1_agrar_rations_optimization_feeding_optimization_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ration_id",
+            "required": true,
+            "schema": {
+              "title": "Ration Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OptimizationRunOut"
+                  },
+                  "title": "Response List Optimization Runs Api V1 Agrar Rations Optimization Feeding Optimization Runs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dokumentierte Solverlaeufe einer Ration (neueste zuerst)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-requirements"
+        ]
+      },
+      "post": {
+        "operationId": "record_optimization_run_api_v1_agrar_rations_optimization_feeding_optimization_runs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizationRunIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptimizationRunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Solverlauf reproduzierbar zu einer Rationsversion dokumentieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-requirements"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/requirement-profiles": {
+      "get": {
+        "operationId": "list_requirement_profiles_api_v1_agrar_rations_optimization_feeding_requirement_profiles_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementProfileOut"
+                  },
+                  "title": "Response List Requirement Profiles Api V1 Agrar Rations Optimization Feeding Requirement Profiles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bedarfsprofile einer Fuetterungsgruppe (neueste zuerst)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-requirements"
+        ]
+      },
+      "post": {
+        "operationId": "create_requirement_profile_api_v1_agrar_rations_optimization_feeding_requirement_profiles_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementProfileIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bedarfsprofil regelversioniert berechnen und persistieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-requirements"
         ]
       }
     },
