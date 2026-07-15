@@ -1,0 +1,87 @@
+slice_id: FEED-SPEC-FOUNDATION-014
+id: FEED-SPEC-FOUNDATION-014
+title: Lastenheft Fuetterungsberatung eingecheckt + IST-Audit + Traceability + Zielarchitektur + Umsetzungsplan
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Der Auftraggeber hat ein verbindliches Lastenheft fuer das integrierte
+  Fuetterungsberatungs- und Rationsmanagement-System uebergeben. Gemaess dessen
+  Phasen 0-3 werden vor jeder Implementierung die Analyse- und
+  Planungsdokumente erstellt und als Single Source of Truth eingecheckt.
+scope:
+  - "docs/specs/feeding/lastenheft-fuetterungsberatung.md: Lastenheft des
+    Auftraggebers inhaltsgetreu eingecheckt (Governance-Frontmatter ergaenzt,
+    beim Transport zerbrochene Markdown-Struktur der Kap. 15-18 wiederhergestellt,
+    Inhalt unveraendert; MUSS-Anforderungen unangetastet)."
+  - "ist-audit.md: datei-evidenzbasierte Landkarte (Fachkern app/agrar/rations
+    mit Solver/GfE2023/DLG2025/FAN, 6 Router, 4 Services, 7+ Migrationen,
+    ~60 Backend-Testdateien, Frontend-/SD-/Portal-Bestand) + 10 benannte
+    technische Schulden/Risiken."
+  - "requirements-traceability.md: stabile Requirement-IDs je Lastenheft-
+    Kapitel (FEED-RBAC/BUS/HERD/MAT/LAB/REQ/RAT/OPT/EVAL/CMP/PLAN/ACT/PERF/
+    CONS/SUP/REP/COLLAB/UI/MOB/INT/AI/NFR), ehrliche Statusverteilung:
+    20 VERIFIED / 30 PARTIAL / 9 NOT_IMPLEMENTED / 1 BLOCKED (DDW-Livepfade,
+    Partnervertrag) mit Test-/Slice-Nachweisen."
+  - "target-architecture.md: Bounded Context Feeding, Aggregat-Zuordnung
+    IST->SOLL (additiv, kein Solver-Ersatz), API-Zielbild /api/v1/feeding/*
+    mit Alias statt Duplikat, Eventmodell, zweistufiges Rechtekonzept
+    (Domaenenrollen + Betriebs-Grants), additive Migrationsstrategie,
+    Frontend-Seitenlandkarte, Teststrategie."
+  - "implementation-plan.md: Release A/B/C in 6 Inkrementen, 22 geschnittene
+    Slices (FEED-CORE-015 ... FEED-INT-036) mit Requirements-Bezug und DoD;
+    Feature-Flag feeding_advisory + Pilotabnahme; 3 offene Auftraggeber-Punkte
+    benannt (Fodjan-Abgleich, Branch-Strategie, IdP-Rollen)."
+  - "README.md: Dokumentlandkarte nach der vorgeschlagenen Fachkonzept-Struktur
+    00-17 mit Fuellstand; begruendete Entscheidung fuer inkrementell wachsende
+    Spezifikation statt 300-500-Seiten-Vorabwerk (Doku-Drift-Gates des Repos)."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/FEED-SPEC-FOUNDATION-014.yaml"
+  - "docs/specs/feeding/** (6 Dokumente, neu)"
+progress: >-
+  2026-07-15 erstellt. Naechster Schritt laut Plan: Claim FEED-CORE-015
+  (FeedingBusiness/Herd-Aggregat + CRM-Bruecke + Grants) als erstes Slice von
+  Inkrement 1.
+acceptance:
+  - "Alle vier vom Lastenheft geforderten Phase-1-3-Dokumente existieren und
+    tragen Dateinachweise statt Pauschalaussagen."
+  - "Jede Lastenheft-Anforderungsgruppe hat eine stabile ID und einen der
+    sieben Statuswerte; kein Status VERIFIED ohne Testnachweis."
+  - "Keine MUSS-Anforderung wurde abgeschwaecht oder entfernt."
+tests:
+  - "Docs-Governance-Check (pre-commit) fuer alle 6 Dokumente gruen."
+  - "Kein Code geaendert — Implementierung beginnt erst mit FEED-CORE-015
+    (Lastenheft Kap. 14 Punkt 16)."
+risks:
+  - "Fodjan-Quelle nicht abrufbar — Traceability gegen die Hilfe steht aus
+    (Lastenheft Kap. 17); Lastenheft selbst als Referenzrahmen verwendet."
+  - "Branch-Strategie des Lastenhefts (Feature-Branch) weicht von der
+    etablierten Trunk-Praxis ab — als offener Auftraggeber-Punkt dokumentiert."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Spezifikation bildet den durchgaengigen Prozess Betrieb->Analyse->
+    Ration->Freigabe->Fuetterung->Controlling->Beratung->Bericht ab; bestehende
+    fachlich korrekte Berechnungen bleiben unangetastet.
+  architektur_vertrag: >-
+    Kein Big-Bang: neue Aggregate docken additiv an den bestehenden Fachkern;
+    /feeding-API als Alias-Schicht statt Duplikat; Schichtenregel
+    patterns/mask-builder gilt; kein Solver-Ersatz ohne belegten Bedarf.
+  daten_vertrag: >-
+    Nur additive Migrationen; freigegebene Versionen unveraenderlich; neue
+    Geldwerte Decimal; Einheiten als Daten.
+  security_vertrag: >-
+    Zweistufiges Rechtemodell (Domaenenrollen serverseitig, Betriebs-Grants
+    geplant); Tenant-Isolation unveraendert.
+  betriebs_vertrag: >-
+    Feature-Flag feeding_advisory + Pilotmandant vor Breitenaktivierung;
+    Rollback je Slice = Revert.
+  dokumentations_vertrag: >-
+    docs/specs/feeding/ ist Single Source of Truth; Traceability wird je Slice
+    fortgeschrieben; Paritaetsmatrix bleibt Betriebs-Sicht.
+  test_vertrag: >-
+    VERIFIED nur mit Code- und Testnachweis; je Inkrement Golden-/Property-/
+    RBAC-/axe-/Playwright-Nachweise gemaess Teststrategie.
