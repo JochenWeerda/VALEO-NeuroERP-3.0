@@ -38401,6 +38401,55 @@
         "title": "DokumenteOut",
         "type": "object"
       },
+      "DraftComponentIn": {
+        "properties": {
+          "feed_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Feed Id",
+            "type": "string"
+          },
+          "kg_fm": {
+            "exclusiveMinimum": 0.0,
+            "title": "Kg Fm",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feed_id",
+          "kg_fm"
+        ],
+        "title": "DraftComponentIn",
+        "type": "object"
+      },
+      "DraftDeltaOut": {
+        "properties": {
+          "actual": {
+            "title": "Actual",
+            "type": "number"
+          },
+          "delta": {
+            "title": "Delta",
+            "type": "number"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "number"
+          }
+        },
+        "required": [
+          "metric",
+          "actual",
+          "target",
+          "delta"
+        ],
+        "title": "DraftDeltaOut",
+        "type": "object"
+      },
       "DraftEmailIn": {
         "properties": {
           "customerId": {
@@ -38438,6 +38487,84 @@
           }
         },
         "title": "DraftEmailOut",
+        "type": "object"
+      },
+      "DraftFindingOut": {
+        "properties": {
+          "actual": {
+            "title": "Actual",
+            "type": "number"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "severity": {
+            "title": "Severity",
+            "type": "string"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "metric",
+          "actual",
+          "message"
+        ],
+        "title": "DraftFindingOut",
+        "type": "object"
+      },
+      "DraftPositionOut": {
+        "additionalProperties": true,
+        "properties": {
+          "cost_eur": {
+            "title": "Cost Eur",
+            "type": "number"
+          },
+          "feed_id": {
+            "title": "Feed Id",
+            "type": "string"
+          },
+          "kg_fm": {
+            "title": "Kg Fm",
+            "type": "number"
+          },
+          "kg_tm": {
+            "title": "Kg Tm",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "feed_id",
+          "name",
+          "kg_fm",
+          "kg_tm",
+          "cost_eur"
+        ],
+        "title": "DraftPositionOut",
         "type": "object"
       },
       "DrilldownResponse": {
@@ -96585,6 +96712,101 @@
           "snapshot"
         ],
         "title": "RationCreateIn",
+        "type": "object"
+      },
+      "RationDraftEvaluateIn": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/DraftComponentIn"
+            },
+            "minItems": 1,
+            "title": "Components",
+            "type": "array"
+          },
+          "group_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Group Id",
+            "type": "string"
+          },
+          "requirement_profile_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirement Profile Id"
+          }
+        },
+        "required": [
+          "group_id",
+          "components"
+        ],
+        "title": "RationDraftEvaluateIn",
+        "type": "object"
+      },
+      "RationDraftEvaluationOut": {
+        "properties": {
+          "coverage": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Coverage",
+            "type": "object"
+          },
+          "deltas": {
+            "items": {
+              "$ref": "#/components/schemas/DraftDeltaOut"
+            },
+            "title": "Deltas",
+            "type": "array"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/DraftFindingOut"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/DraftPositionOut"
+            },
+            "title": "Positions",
+            "type": "array"
+          },
+          "requirement_profile_id": {
+            "title": "Requirement Profile Id",
+            "type": "string"
+          },
+          "totals": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Totals",
+            "type": "object"
+          }
+        },
+        "required": [
+          "group_id",
+          "requirement_profile_id",
+          "positions",
+          "totals",
+          "coverage",
+          "deltas",
+          "findings"
+        ],
+        "title": "RationDraftEvaluationOut",
         "type": "object"
       },
       "RationStatus": {
@@ -159444,6 +159666,75 @@
           "agrar",
           "rations-optimization",
           "feeding-requirements"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/ration-drafts/evaluate": {
+      "post": {
+        "operationId": "evaluate_ration_draft_api_v1_agrar_rations_optimization_feeding_ration_drafts_evaluate_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RationDraftEvaluateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RationDraftEvaluationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsentwurf deterministisch bewerten (ohne Persistenz, ohne Solverlauf)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-ration-editor"
         ]
       }
     },
