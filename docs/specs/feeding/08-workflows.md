@@ -470,3 +470,12 @@ Für jeden Workflow sind mindestens nachzuweisen:
   Payloaddaten.
 - Dokumentation verweist auf implementierte Source-of-Truth-Dateien und wird bei
   Vertragsänderung im selben Slice aktualisiert.
+
+## 18. Implementierter Analysefluss FEED-CORE-019
+
+PDF/CSV-Vorschau -> Feed-Mapping -> Draft mit Original-/Rechenwerten ->
+DMS-Belegreferenz -> Plausibilitaet -> menschliche Freigabe -> aktive Analyse.
+Ein Blocker oder fehlender DMS-Beleg verhindert Release. Die neue aktive
+Version ersetzt innerhalb desselben Feed-/Scopes die alte Version atomar durch
+`superseded`; bereits gespeicherte Rationsversionen bleiben unveraendert.
+Legacy-Loeschen wird als auditiertes `rejected` historisiert.

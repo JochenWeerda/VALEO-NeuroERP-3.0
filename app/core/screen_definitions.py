@@ -1716,6 +1716,130 @@ def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_futtermittel_analysen_screen_definition() -> dict[str, Any]:
+    """Native Analyse-Worklist; Import/Freigabe stay explicit domain commands."""
+    return {
+        "schemaVersion": 1, "id": "futtermittel/analysen", "domain": "futtermittel", "mode": "list",
+        "title": "Futteranalysen", "subtitle": "Laborwerte, Provenienz und Freigabe",
+        "adapter": {"type": "native", "sourceId": "futtermittel/analysen", "temporary": False},
+        "dataSources": [
+            {"key": "list", "endpoint": "/api/v1/agrar/rations-optimization/feed-analyses", "pageSize": 50},
+        ],
+        "tabs": [
+            {"key": "analysen", "label": "Analysen", "lazy": False, "keepAlive": True,
+             "tables": [{"key": "list", "label": "Futteranalysen", "dataSourceKey": "list",
+                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                         "rowRouteTemplate": "/futtermittel/grundfutteranalysen/{id}",
+                         "columns": [
+                             {"key": "probe_nr", "label": "Probe", "sortable": True, "width": 120},
+                             {"key": "bezeichnung", "label": "Material", "sortable": True, "filterable": True, "width": 240},
+                             {"key": "labor", "label": "Labor", "filterable": True, "width": 180},
+                             {"key": "analyse_datum", "label": "Analysedatum", "renderKind": "date", "sortable": True, "width": 130},
+                             {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
+                             {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "width": 80},
+                             {"key": "revision", "label": "Revision", "numeric": True, "width": 90},
+                         ]}]},
+        ],
+        "actions": [
+            {"key": "import_analysis", "label": "Analyse erfassen", "kind": "primary",
+             "dangerLevel": "safe", "permission": "futtermittel.analyse.create"},
+        ],
+        "noWorkflowReason": "Die Worklist priorisiert Analysen; Statuswechsel erfolgen auf der Analyse-ObjectPage.",
+        "agentContract": {
+            "businessPurpose": "Futteranalysen nach Plausibilitaet, Freigabe und Aktualitaet priorisieren.",
+            "examplePrompts": ["Welche Analysen warten auf Pruefung?", "Welche aktiven Analysen sind veraltet?"],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='futtermittel-analysen']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "none",
+                   "tableProfile": "standard", "preferredMode": "desktopDense",
+                   "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
+    }
+
+
+def build_futtermittel_analyse_screen_definition() -> dict[str, Any]:
+    """Native analysis ObjectPage with provenance, findings and immutable history."""
+    base = "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}"
+    return {
+        "schemaVersion": 1, "id": "futtermittel/analyse", "domain": "futtermittel", "mode": "detail",
+        "title": "Futteranalyse", "subtitle": "Pruefung, Provenienz und aktive Version",
+        "adapter": {"type": "native", "sourceId": "futtermittel/analyse", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": base},
+            {"key": "values", "endpoint": base + "/values", "pageSize": 100},
+            {"key": "findings", "endpoint": base + "/findings", "pageSize": 50},
+            {"key": "history", "endpoint": base + "/history", "pageSize": 50},
+        ],
+        "tabs": [
+            {"key": "overview", "label": "Probe & Freigabe", "lazy": False, "keepAlive": True,
+             "dataSourceKey": "entity", "fields": [
+                 {"key": "probe_nr", "label": "Probe", "type": "text", "readOnly": True},
+                 {"key": "bezeichnung", "label": "Material", "type": "text", "readOnly": True},
+                 {"key": "labor", "label": "Labor", "type": "text", "readOnly": True},
+                 {"key": "method", "label": "Methode", "type": "text", "readOnly": True},
+                 {"key": "analyse_datum", "label": "Analysedatum", "type": "date", "readOnly": True},
+                 {"key": "status", "label": "Status", "type": "text", "readOnly": True},
+                 {"key": "is_active", "label": "Aktive Analyse", "type": "boolean", "readOnly": True},
+                 {"key": "revision", "label": "Revision", "type": "number", "readOnly": True},
+                 {"key": "original_document_id", "label": "Originalbeleg", "type": "text", "readOnly": True},
+             ]},
+            {"key": "values", "label": "Messwerte", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "values", "label": "Labor- und Rechenwerte", "dataSourceKey": "values",
+                         "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "nutrient_code", "label": "Naehrstoff", "sortable": True, "filterable": True, "width": 190},
+                             {"key": "original_value", "label": "Original", "numeric": True, "renderKind": "number"},
+                             {"key": "original_unit_code", "label": "Orig.-Einheit", "width": 120},
+                             {"key": "canonical_value", "label": "Rechenwert", "numeric": True, "renderKind": "number"},
+                             {"key": "canonical_unit_code", "label": "Einheit", "width": 110},
+                             {"key": "basis", "label": "Basis", "filterable": True, "width": 120},
+                             {"key": "value_status", "label": "Provenienz", "renderKind": "status", "width": 120},
+                         ]}]},
+            {"key": "findings", "label": "Plausibilitaet", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "findings", "label": "Befunde", "dataSourceKey": "findings",
+                         "serverPagination": False, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "severity", "label": "Prioritaet", "renderKind": "status", "filterable": True, "width": 110},
+                             {"key": "code", "label": "Regel", "width": 190},
+                             {"key": "message", "label": "Befund", "width": 420},
+                             {"key": "observed_value", "label": "Wert", "numeric": True, "renderKind": "number"},
+                         ]}]},
+            {"key": "history", "label": "Audit", "lazy": True, "keepAlive": False,
+             "tables": [{"key": "history", "label": "Unveraenderliche Revisionen", "dataSourceKey": "history",
+                         "serverPagination": False, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                         "columns": [
+                             {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
+                             {"key": "changed_at", "label": "Zeitpunkt", "renderKind": "datetime", "sortable": True, "width": 180},
+                             {"key": "changed_by", "label": "Akteur", "filterable": True, "width": 180},
+                             {"key": "reason", "label": "Grund", "width": 360},
+                         ]}]},
+        ],
+        "actions": [
+            {"key": "validate", "label": "Plausibilitaet pruefen", "kind": "primary", "dangerLevel": "safe",
+             "permission": "futtermittel.analyse.validate"},
+            {"key": "release", "label": "Analyse freigeben", "kind": "primary", "dangerLevel": "high",
+             "permission": "futtermittel.analyse.release", "requiresConfirmation": True,
+             "humanApprovalRequired": True, "auditReasonRequired": True,
+             "commandEndpoint": base + "/actions/release", "method": "POST"},
+            {"key": "reject", "label": "Zurueckweisen", "kind": "secondary", "dangerLevel": "moderate",
+             "permission": "futtermittel.analyse.reject", "requiresConfirmation": True,
+             "auditReasonRequired": True, "commandEndpoint": base + "/actions/reject", "method": "POST"},
+        ],
+        "noWorkflowReason": "Der Analyse-Lifecycle wird durch serverseitig validierte Status-Commands gesteuert.",
+        "agentContract": {
+            "businessPurpose": "Laborbefund nachvollziehbar pruefen und genau eine Analyseversion bewusst aktivieren.",
+            "examplePrompts": ["Welche Blocker verhindern die Freigabe?", "Zeige Original- und Rechenwerte dieser Analyse."],
+            "sensitiveFields": ["original_document_id", "original_sha256"],
+            "testSelectors": {"screenRoot": "[data-testid='futtermittel-analyse']", "primaryAction": "[data-testid='action-validate']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"floorplan": "objectPage", "density": "expertDense", "contextRail": "audit",
+                   "tableProfile": "audit", "preferredMode": "desktopDense",
+                   "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
+    }
+
+
 def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
     """Native SD fuer futtermittel/mischfuttermittel."""
     return {
@@ -2704,6 +2828,8 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "einkauf/auftragsbestaetigung": build_einkauf_auftragsbestaetigung_screen_definition,
     "qualitaet/reklamation": build_qualitaet_reklamation_screen_definition,
     "futtermittel/einzelfuttermittel": build_futtermittel_einzelfuttermittel_screen_definition,
+    "futtermittel/analysen": build_futtermittel_analysen_screen_definition,
+    "futtermittel/analyse": build_futtermittel_analyse_screen_definition,
     "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
     "crm/lead": build_crm_lead_screen_definition,
 }
@@ -3167,6 +3293,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "finance/kreditor": ["kreditor", "kreditorenstamm", "lieferantenkonto"],
     "finance/payment-run": ["zahlungslauf", "zahllauf", "sepa-lauf", "zahlungsvorschlag"],
     "futtermittel/einzelfuttermittel": ["einzelfuttermittel", "futtermittel", "efm"],
+    "futtermittel/analysen": ["futteranalyse", "laboranalyse", "grundfutteranalyse", "lufa"],
+    "futtermittel/analyse": ["analysepruefung", "laborbefund", "probe"],
     "futtermittel/mischfuttermittel": ["mischfutter", "mischfuttermittel", "mfm"],
     "lager/article-stock": ["artikelbestand", "lagerbestand", "bestand"],
     "lager/leitstand": ["lager leitstand", "silo twin", "silozellen", "hofplan", "silo belegung"],
@@ -3220,6 +3348,8 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "finance/kreditor": "/finance/kreditoren",
     "finance/payment-run": "/fibu/zahlungslaeufe",
     "futtermittel/einzelfuttermittel": "/futtermittel/einzelfuttermittel-liste",
+    "futtermittel/analysen": "/futtermittel/grundfutteranalysen",
+    "futtermittel/analyse": "/futtermittel/grundfutteranalysen",
     "futtermittel/mischfuttermittel": "/futtermittel/mischfuttermittel-liste",
     "lager/article-stock": "/lager/bestandsuebersicht",
     "lager/leitstand": "/lager/materialfluss-visualisierung",

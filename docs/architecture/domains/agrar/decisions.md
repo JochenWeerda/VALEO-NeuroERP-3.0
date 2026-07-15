@@ -23,3 +23,4 @@ version: 1.0.0
 | [ADR-045](../../../adr/adr-045-versioned-feeding-groups.md) | Versionierte Fuetterungsgruppen und betrieblicher Zugriffsscope |
 | [ADR-046](../../../adr/adr-046-feeding-reference-data-and-unit-conversion.md) | Versionierte Fuetterungsreferenzdaten und explizite FM-TM-Semantik |
 | [ADR-047](../../../adr/adr-047-canonical-feeding-feed-catalog.md) | Kanonischer Fuetterungs-Futtermittelkatalog auf bestehendem Stamm |
+| [ADR-048](../../../adr/adr-048-feeding-analysis-provenance.md) | Versionierte Futteranalyse, Provenienz und scope-spezifisch aktive Version |

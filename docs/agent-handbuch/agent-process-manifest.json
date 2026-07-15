@@ -1861,6 +1861,83 @@
       ]
     },
     {
+      "mask_id": "futtermittel/analyse",
+      "title": "Futteranalyse",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__analyse/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/analyse/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/analyse/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/analyse/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "validate",
+          "label": "Plausibilitaet pruefen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.analyse.validate",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "release",
+          "label": "Analyse freigeben",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.analyse.release",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "reject",
+          "label": "Zurueckweisen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.analyse.reject",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "original_document_id",
+        "original_sha256"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futtermittel/analysen",
+      "title": "Futteranalysen",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__analysen/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/analysen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/analysen/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/analysen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "import_analysis",
+          "label": "Analyse erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.analyse.create",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "futtermittel/einzelfuttermittel",
       "title": "Einzelfuttermittel",
       "domain": "futtermittel",

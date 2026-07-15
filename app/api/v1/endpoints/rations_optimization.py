@@ -7195,3 +7195,5 @@ from app.api.v1.endpoints.rations_reference_data import router as _rations_refer
 router.include_router(_rations_reference_data_router)
 from app.api.v1.endpoints.feeding_feed_catalog import router as _feeding_feed_catalog_router
 router.include_router(_feeding_feed_catalog_router)
+from app.api.v1.endpoints.feeding_feed_analyses import router as _feeding_feed_analyses_router
+router.include_router(_feeding_feed_analyses_router)

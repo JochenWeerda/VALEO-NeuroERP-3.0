@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (41 Masken).
+> Generiert aus `app/core/screen_definitions.py` (43 Masken).
 
 ## Übersicht
 
@@ -44,6 +44,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/debitor` | Debitor | finance | niedrig | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
+| `futtermittel/analyse` | Futteranalyse | futtermittel | hoch | — | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
+| `futtermittel/analysen` | Futteranalysen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
@@ -1155,6 +1157,71 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: futtermittel
+
+### `futtermittel/analyse` — Futteranalyse
+
+**Zweck:** Laborbefund nachvollziehbar pruefen und genau eine Analyseversion bewusst aktivieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futtermittel/analyse/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
+| Readiness | `GET /api/v1/masks/futtermittel/analyse/readiness` |
+| Rollout-Route | `/mask-rollout/futtermittel__analyse/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}`
+- `values` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/values`
+- `findings` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/findings`
+- `history` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/history`
+
+**Beispiel-Prompts:**
+
+- Welche Blocker verhindern die Freigabe?
+- Zeige Original- und Rechenwerte dieser Analyse.
+
+**Sensible Felder:** `original_document_id, original_sha256`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `validate` | Plausibilitaet pruefen | safe | nein | `—` |
+| `release` | Analyse freigeben | high | ja | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release` |
+| `reject` | Zurueckweisen | moderate | nein | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject` |
+
+---
+
+### `futtermittel/analysen` — Futteranalysen
+
+**Zweck:** Futteranalysen nach Plausibilitaet, Freigabe und Aktualitaet priorisieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futtermittel/analysen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
+| Readiness | `GET /api/v1/masks/futtermittel/analysen/readiness` |
+| Rollout-Route | `/mask-rollout/futtermittel__analysen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/rations-optimization/feed-analyses`
+
+**Beispiel-Prompts:**
+
+- Welche Analysen warten auf Pruefung?
+- Welche aktiven Analysen sind veraltet?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `import_analysis` | Analyse erfassen | safe | nein | `—` |
+
+---
 
 ### `futtermittel/einzelfuttermittel` — Einzelfuttermittel
 

@@ -96,3 +96,19 @@ Entscheidung: [ADR-043](../../../adr/adr-043-feed-readiness-read-model.md).
   zeitraumfilterbare Soll-Ist-Serie.
 
 Entscheidung: [ADR-044](../../../adr/adr-044-feeding-controlling-observations.md).
+
+## Fütterungsberatung / Futteranalysen
+
+- `GET|POST /api/v1/agrar/rations-optimization/feed-analyses`
+- `POST /api/v1/agrar/rations-optimization/feed-analyses/import-preview`
+- `GET /api/v1/agrar/rations-optimization/feed-analyses/{id}`
+- `GET|POST .../feed-analyses/{id}/values`
+- `GET .../feed-analyses/{id}/findings` und `/history`
+- `POST .../feed-analyses/{id}/validate`, `/transition` und `/document-reference`
+- `POST .../feed-analyses/{id}/actions/release|reject` für
+  `validate`, `dryRun`, `propose` und `execute` der Mask ActionRuntime.
+
+Original-/Rechenwerte, Basis, Methode und Schätzstatus bleiben getrennt.
+Release erfordert Approver-Rolle, blockierungsfreie Validierung und bei Importen
+eine DMS-ID mit SHA-256. Entscheidung:
+[ADR-048](../../../adr/adr-048-feeding-analysis-provenance.md).

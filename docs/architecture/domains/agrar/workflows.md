@@ -55,3 +55,14 @@ vollständiger Datengrundlage berechnet; Methanschätzungen bleiben gekennzeichn
   providerneutral normalisieren → idempotent speichern → Fütterungsberatung.
   Gruppenwechsel und Lösch-/Abgangsereignisse werden explizit erhalten;
   Live-Zugriff bleibt ohne Vertrag und Betriebseinwilligung blockiert.
+
+### Futteranalyse und Provenienz
+
+1. Bericht manuell erfassen oder PDF/CSV nebenwirkungsfrei vorprüfen.
+2. Material/Feed und Messwerte mit Originaleinheit, Rechenwert, Basis und
+   Wertstatus zuordnen.
+3. Importierten Originalbeleg revisionssicher im DMS referenzieren.
+4. Plausibilität ausführen; Blocker verhindern die Freigabe.
+5. Approver aktiviert die Analyse mit Auditgrund. Eine aktive Analyse desselben
+   Feed-/Scopes wird atomar `superseded`; bestehende Rationsversionen bleiben
+   unverändert.

@@ -462,3 +462,14 @@ Tests als erledigt markiert.
 - Tenant, Grants, Idempotenz, Migration und Resilienz sind Negativtests.
 - Externe Gates bleiben sichtbar.
 - Ergebnisse sind reproduzierbar und im CI/Pilot archiviert.
+
+## 17. FEED-CORE-019-Nachweise
+
+- `tests/test_feeding_feed_analysis.py`: Statusmaschine, Einheiten/Provenienz,
+  Nullsemantik, Migration und native ScreenDefinitions.
+- `tests/test_feeding_feed_analysis_api.py`: vollständiger Lifecycle,
+  scope-spezifische Ersetzung, History, Tenant/RBAC, ActionRuntime,
+  PDF/CSV-Vorschauvertrag, DMS-Blocker und Legacy-Auditadapter.
+- `tests/test_grundfutteranalysen.py`: 56 Parser-/VDLUFA-Regressionen.
+- `packages/frontend-web/src/__tests__/features/feed-advice/feeding-analysis-detail.test.tsx`:
+  Meridian-Worklist, Erfassung, Validierung und begruendete Freigabe.

@@ -421,3 +421,13 @@ NutrientDefinition, UnitDefinition, FM/TM-Basis, Wertstatus, Quelle und
 Gueltigkeit. `FeedRevision` ist append-only. Der `SolverFeedAdapter` ist ein
 Anti-Corruption-Layer: flexible gueltige Werte gewinnen, feste Legacyfelder
 dienen nur als golden-getesteter Fallback.
+
+## 15. Realisierter FeedAnalysis-Kern FEED-CORE-019
+
+`domain_shared.grundfutter_analysen` ist der bestehende und kanonische
+Aggregate Root. `FeedAnalysisValue` bewahrt Originalwert/-einheit und den
+separaten kanonischen Decimal-Rechenwert samt Basis, Methode und Provenienz.
+`FeedAnalysisFinding` ist ein reproduzierbarer Plausibilitaetsbefund;
+`FeedAnalysisRevision` ist append-only. Der Lifecycle und die atomare
+Aktivierung gelten pro Tenant, Feed und `scope_code`. Fehlende Werte sind
+unbekannt und niemals implizit Null.

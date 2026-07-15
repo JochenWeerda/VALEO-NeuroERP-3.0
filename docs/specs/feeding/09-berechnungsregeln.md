@@ -427,3 +427,14 @@ expliziten Ausgaberundung.
 5. Fehlende optionale Solverwerte bleiben im bestehenden `Feed.from_dict`-
    Vertrag definiert; unbekannte Naehrstoffcodes werden nicht als Nullmessung
    erfunden.
+
+## 16. Analysewerte und Plausibilitaet FEED-CORE-019
+
+1. Originalwert und Originaleinheit werden nie ueberschrieben.
+2. Kanonische Werte entstehen Decimal-basiert und dimensionssicher; Prozent
+   wird fuer Massenkonzentrationen zu `g/kg * 10`.
+3. `measured`, `calculated` und `estimated` bleiben je Kennzahl sichtbar.
+4. Fehlende Trockenmasse ist ein Blocker und kein Nullwert; Werte ausserhalb
+   physikalischer Massenanteile erzeugen reproduzierbare Findings.
+5. Importierte Dateien ohne revisionssichere DMS-ID/SHA-256 blockieren Release.
+6. Nur eine validierte, blockerfreie Analyse kann scope-spezifisch aktiv werden.

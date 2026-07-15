@@ -59,10 +59,10 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-LAB-001 | Analyse manuell erfassen + historisieren + aktive Analyse | MUSS | `grundfutteranalysen.tsx`, verifizierte Analysen in Readiness (Alter/Wechsel) | PARTIAL | eigenes FeedAnalysis-Aggregat, Versionswahl, Datei-Anhang fehlen | **Inkrement 1 (Kernstück)** | `test_rations_readiness.py` | Slice 008 |
-| FEED-LAB-002 | Labor-Import (Datei/API) mit Vorschau/Validierung | MUSS | Labor-Adapter `integrations/adapters.py` (idempotent, payload_hash) | PARTIAL | Vorschau/Zuordnungs-UI, Originaldatei | Inkrement 1 + `rations-schnittstellen-import.tsx`-Ausbau | `test_rations_integrations_f5.py` | Migration `rations_integrations_20260712` |
+| FEED-LAB-001 | Analyse manuell erfassen + historisieren + aktive Analyse | MUSS | kanonischer FeedAnalysis-Kopf, flexible Werte, append-only History und scope-spezifisch aktive Version | VERIFIED | — | native Meridian-Worklist/ObjectPage und optimistischer Lifecycle | `test_feeding_feed_analysis.py`, `test_feeding_feed_analysis_api.py`, Frontend-Komponententest | FEED-CORE-019 |
+| FEED-LAB-002 | Labor-Import (Datei/API) mit Vorschau/Validierung | MUSS | nebenwirkungsfreie PDF/CSV-Vorschau, SHA-256, Materialzuordnung, DMS-Belegblocker und Labor-Adapter | VERIFIED | produktiver DMS-Upload/Virenscan bleibt Connector-Betriebsvertrag, nicht Analysepersistenz | Import-Overlay und typisierte Preview-/Document-Reference-API | Import-/DMS-Integrationstest in `test_feeding_feed_analysis_api.py` | FEED-CORE-019; FEED-INT-034 vertieft Provider-Mappings |
 | FEED-LAB-003 | FM/TM-Bezug, Einheitenumrechnung, Plausibilität | MUSS | versionierte UnitDefinition, dimensionssichere Decimal-Konvertierung, explizite Mengen-/Konzentrationssemantik und Wertebereiche | VERIFIED | Konsumentenadapter werden inkrementell auf den Vertrag umgestellt | zentrale Domain-/API-Regeln und native Referenzansicht | Property-/Boundary-/API-Tests in `test_feeding_reference_data.py` und `test_rations_reference_data_api.py` | FEED-CORE-017 |
-| FEED-LAB-004 | Schätzwerte eindeutig kennzeichnen | MUSS | Methan `methane_estimated`; Readiness warnt statt 0 | PARTIAL | durchgängig je Kennzahl | Inkrement 1 | `test_rations_controlling.py` | Slices 008/009 |
+| FEED-LAB-004 | Schätzwerte eindeutig kennzeichnen | MUSS | jeder Analysewert trägt `measured`, `calculated` oder `estimated`; API und UI zeigen Provenienz | VERIFIED | — | kanonischer Analysewertvertrag | Domain-, API- und UI-Test FEED-CORE-019 | FEED-CORE-019 |
 
 ## Kapitel 6.5 — Bedarf
 

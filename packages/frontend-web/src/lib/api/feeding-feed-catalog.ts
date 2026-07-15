@@ -33,6 +33,10 @@ export interface FeedingFeedUpdate {
   trockensubstanz?: string | null
 }
 
+export async function listFeedingFeeds(): Promise<FeedingFeedDetail[]> {
+  return (await apiClient.get<FeedingFeedDetail[]>(`${BASE}/feeds`)).data
+}
+
 export async function updateFeedingFeed(feedId: string, input: FeedingFeedUpdate): Promise<FeedingFeedDetail> {
   return (await apiClient.patch<FeedingFeedDetail>(`${BASE}/feeds/${feedId}`, input)).data
 }

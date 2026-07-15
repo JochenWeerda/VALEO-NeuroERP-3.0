@@ -2493,6 +2493,14 @@
       "path": "futtermittel/einzelfuttermittel/:id"
     },
     {
+      "module": "@/pages/futtermittel/grundfutteranalysen-native",
+      "path": "futtermittel/grundfutteranalysen"
+    },
+    {
+      "module": "@/pages/futtermittel/grundfutteranalyse-native",
+      "path": "futtermittel/grundfutteranalysen/:id"
+    },
+    {
       "module": "@/pages/futtermittel/mischfuttermittel-native",
       "path": "futtermittel/mischfuttermittel/:id"
     },

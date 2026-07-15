@@ -378,3 +378,19 @@ Solver-Tabellen bleiben unveraendert.
 
 Migration und Backfill sind additiv; vorhandene Feed-/Artikel-/Bestands-IDs
 bleiben stabil.
+
+## 19. FeedAnalysis-Persistenz FEED-CORE-019
+
+- Der bestehende Kopf `domain_shared.grundfutter_analysen` traegt Feed- und
+  Scope-Bezug, Status, Aktivflag, Methode, Gueltigkeit, DMS-ID/SHA-256,
+  optimistische Revision und Freigabeaudit.
+- `feeding_feed_analysis_values` speichert Original- und Rechenwert,
+  Original-/Recheneinheit, FM/TM-Basis, Methode, Konfidenz und Wertstatus.
+- `feeding_feed_analysis_findings` speichert Info, Warnung oder Blocker ohne
+  fehlende Werte in Null umzudeuten.
+- `feeding_feed_analysis_revisions` ist triggergeschuetzt append-only.
+- Ein partieller Unique-Index erlaubt hoechstens eine aktive `released` Analyse
+  pro Tenant, Feed und `scope_code`.
+
+Migration `feed_core_feed_analyses_20260715` ist linear, additiv und bewahrt
+alle vorhandenen Analyse-IDs und Legacy-Messspalten.

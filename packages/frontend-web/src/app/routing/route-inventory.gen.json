@@ -2766,9 +2766,14 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/futtermittel/grundfutteranalysen",
+      "module": "@/pages/futtermittel/grundfutteranalysen-native",
       "path": "futtermittel/grundfutteranalysen",
-      "source": "auto"
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/futtermittel/grundfutteranalyse-native",
+      "path": "futtermittel/grundfutteranalysen/:id",
+      "source": "alias"
     },
     {
       "module": "@/pages/futtermittel/mischfuttermittel-liste",

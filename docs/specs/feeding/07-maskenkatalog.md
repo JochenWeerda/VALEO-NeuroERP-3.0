@@ -506,3 +506,13 @@ Feed-Catalog. Die bestehende native Route
 `/futtermittel/einzelfuttermittel/{id}` rendert die zentrale Runtime; nur der
 begruendete Revisionsdialog ist ein Domain-Overlay. Die Liste navigiert fuer
 bestehende Datensaetze auf diese ObjectPage statt in die freie Legacy-Maske.
+
+## 14. Analyse-Worklist und -ObjectPage FEED-CORE-019
+
+`futtermittel/analysen` ist die expertendichte Worklist mit Suche, Status,
+Aktivkennzeichen und direkter Navigation. `futtermittel/analyse` ist eine
+ObjectPage mit Probe/Freigabe, Original-/Rechenwerten, Plausibilitaetsbefunden
+und unveraenderlichem Audit. Beide laufen durch ScreenDefinition -> RenderPlan
+-> useUniversalMaskRuntime -> UniversalMaskRenderer. Datei-Vorschau,
+Validierung und begruendete Freigabe sind schmale fachliche Overlays; die
+produktive Route lautet `/futtermittel/grundfutteranalysen[/{id}]`.

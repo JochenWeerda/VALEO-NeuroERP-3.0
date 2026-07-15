@@ -474,3 +474,16 @@ Revisionen 409.
 
 Die bestehende `/api/v1/futter/einzelfuttermittel`-Kompatibilitaetsstrecke bleibt
 verfuegbar, delegiert Mutationen aber an denselben Rollen-/Versionsservice.
+
+## 18. FeedAnalysis-API FEED-CORE-019
+
+Unter `/api/v1/agrar/rations-optimization/feed-analyses` stehen List/Create,
+Detail, Werte, Findings, History, Validate, Transition und Document-Reference
+typisiert bereit. `import-preview` parst PDF/CSV ohne Persistenz, liefert
+SHA-256 sowie Original-/Rechenwerte und kennzeichnet den Zustand ehrlich als
+`preview_only`. Importierte Dateien bleiben ohne DMS-ID blockiert.
+
+Release ist Approver-gebunden, optimistisch versioniert und ueber
+`actions/release|reject` auch im ActionRuntime-Vertrag `validate`, `dryRun`,
+`propose`, `execute` verfuegbar. Cross-Tenant-Zugriffe liefern 404,
+Versions-/Lifecyclekonflikte 409 und Rollenfehler 403.
