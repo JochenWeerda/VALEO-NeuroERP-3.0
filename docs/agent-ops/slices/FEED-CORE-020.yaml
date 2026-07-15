@@ -1,0 +1,106 @@
+slice_id: FEED-CORE-020
+id: FEED-CORE-020
+title: Bewertungssysteme als Daten, Bedarfsprofile und Solverlauf-Dokumentation
+owner: Claude (Fortfuehrung der Kette nach Codex-Token-Stopp)
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+requirements: [FEED-REQ-002, FEED-OPT-005]
+work_packages: [FEED-WP-051, FEED-WP-054]
+decision_level: significant
+dependencies: [FEED-CORE-016, FEED-CORE-017]
+goal: >-
+  Letzter Baustein von Inkrement 1: Normsystem-Auswahl und -Version als Daten
+  (Formeln bleiben golden-getesteter Code), Bedarfsprofile reproduzierbar und
+  append-only je Fuetterungsgruppe mit explizit gekennzeichneten Schaetzwerten,
+  Solverlaeufe als dokumentierte, reproduzierbare Metadaten mit Pflichtbezug
+  auf eine Rationsversion.
+scope:
+  - "Migration feed_core_requirements_20260715: evaluation_systems +
+    evaluation_system_versions (UNIQUE system+label, genau eine current-Version
+    je System), requirement_profiles (append-only per DB-Trigger, JSONB inputs/
+    estimated_inputs/requirements), optimization_runs (Status-CHECK, Pflicht-FKs
+    auf rations/ration_versions)."
+  - "app/agrar/rations/evaluation_systems.py: Seed-Registry gfe2023/dlg2025 mit
+    module_ref auf die tragenden Konstantenmodule."
+  - "feeding_requirements_service.py: idempotentes Seeding, list_systems,
+    create/list_requirement_profiles (Defaults nur mit Schaetzwert-Kennzeichnung,
+    Adapter auf bestehendes _gfe_requirements per Lazy-Import — bewusste
+    Bestandsschuld, Extraktion im Editor-Inkrement), record/list_optimization_runs
+    (LookupError bei unbekannter Version, kein Waisen-Run)."
+  - "feeding_requirements.py-Router unter /feeding/* mit typisierten Out-Modellen
+    (extra=ignore-Muster aus FEED-CORE-015), READ/WRITE-Rollen aus authz.py;
+    Include im kanonischen Rations-Praefix."
+file_ownership:
+  - alembic/versions/feed_core_requirements_20260715.py
+  - app/agrar/rations/evaluation_systems.py
+  - app/services/feeding_requirements_service.py
+  - app/api/v1/endpoints/feeding_requirements.py
+  - app/api/v1/endpoints/rations_optimization.py (nur Router-Include)
+  - tests/test_feeding_requirements.py
+  - tests/test_feeding_requirements_api.py
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-CORE-020.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    Tests vor Implementierung geschrieben; Lauf 2026-07-15:
+    "python -m pytest tests/test_feeding_requirements.py
+    tests/test_feeding_requirements_api.py --noconftest ..." -> 4 failed,
+    5 errors (ModuleNotFoundError app.services.feeding_requirements_service
+    bzw. app.api.v1.endpoints.feeding_requirements).
+  green: >-
+    Kleinste Journey implementiert (Seed -> Profil -> Run); 9/9 gruen.
+    Zwischenschritt dokumentiert: Gruppen-Helper musste auf die echte
+    Lifecycle-API wechseln, weil create_group seit FEED-CORE-016 die
+    vollstaendige, vom Endpoint-Modell gefuellte Profil-Payload erwartet.
+  refactor: >-
+    Helper auf API-Pfad vereinheitlicht; keine spekulativen Endpunkte
+    (kein POST evaluation-systems — neue Normstaende kommen als Code+Seed).
+acceptance:
+  - "gfe2023/dlg2025 sind versionierte, idempotent geseedete Referenzdaten mit
+    genau einer current-Version und Modulreferenz."
+  - "Bedarfsprofile sind reproduzierbar (gleiche Inputs -> gleiches Ergebnis,
+    gleiche Systemversion), append-only und kennzeichnen jeden Default als
+    Schaetzwert; nie stille Ergaenzung."
+  - "Solverlaeufe sind nur mit existierender Rationsversion dokumentierbar;
+    Parameter kommen unveraendert zurueck."
+  - "Alle 5 Endpoints verweigern ohne FUTTERMITTEL-Rolle serverseitig 403;
+    Tenant-Isolation nachgewiesen."
+tests:
+  - "pytest test_feeding_requirements{,_api}.py -> 9/9 (nach Red-Welle)."
+  - "Feeding-Regression (11 Suiten inkl. Lifecycle/Analyse/Authz/Wizard-
+    Requirements-Golden) -> 85 passed, 1 skipped."
+  - "Alembic Single-Head + upgrade auf feed_core_requirements_20260715;
+    Architecture Validate/Drift gruen (Index + Container-Inventar regeneriert)."
+  - "Kein Frontend-Diff in diesem Slice — Meridian-Flaeche folgt gemaess
+    FEED-WP-056 mit dem Rationseditor (FEED-EDITOR-021)."
+risks:
+  - "_gfe_requirements lebt noch im Endpoint-Monolithen; der Service importiert
+    lazy (dokumentierte Schuld, Extraktion im Editor-Inkrement)."
+  - "OptimizationRun wird heute explizit per API dokumentiert; der automatische
+    Hook im Optimize-Pfad folgt mit dem Editor, damit der Hot Path dieses
+    Slices unangetastet bleibt."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Bedarf ist regelversioniert, reproduzierbar und mit sichtbarer Herkunft;
+    Schaetzwerte sind als solche gekennzeichnet; Solverlaeufe sind
+    nachvollziehbar dokumentiert.
+  architektur_vertrag: >-
+    Formeln bleiben Code-SSOT; Registry/Profile/Runs docken additiv an; kein
+    Monolith-Umbau; typisierte Vertraege; Rollen aus zentralem authz.
+  daten_vertrag: >-
+    Nur additive Migration; requirement_profiles append-only per Trigger;
+    optimization_runs mit referenzieller Pflicht auf Version.
+  security_vertrag: >-
+    Tenant-Scope auf Profilen/Runs; READ/WRITE-Rollen serverseitig; keine
+    neuen Secret-/Egress-Pfade.
+  betriebs_vertrag: >-
+    Rollback = Revert + downgrade(); keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Traceability FEED-REQ-002/FEED-OPT-005 -> VERIFIED; Workboard; dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz (Red-Befehl+Fehlerbild im YAML), Green 9/9, Regression 85,
+    Gates gruen.

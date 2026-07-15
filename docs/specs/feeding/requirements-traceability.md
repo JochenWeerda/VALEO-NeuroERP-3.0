@@ -69,7 +69,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-REQ-001 | Bedarf nach Tiergruppe/Leistung/Stadium (GfE 2023) | MUSS | `constants/gfe2023.py`, Wizard-Requirements | VERIFIED | — | vorhanden | `test_rations_wizard_requirements.py`, `test_process_kernel_wave74_rations_optimization.py` | Fodjan-/DLG-Abgleich 2026-07 (Memory: Formeln korrekt) |
-| FEED-REQ-002 | Normsystem-Versionierung als Daten (EvaluationSystemVersion) | MUSS | Konstanten versioniert im Code (gfe2023/dlg2025-Module) | PARTIAL | Auswahl/Versionierung als Entität | Inkrement 1 | Golden-Tests | — |
+| FEED-REQ-002 | Normsystem-Versionierung als Daten (EvaluationSystemVersion) | MUSS | `evaluation_systems`/`evaluation_system_versions` (idempotent geseedet, append-only, `module_ref` auf golden-getesteten Code) + `requirement_profiles` (Eingaben, gekennzeichnete Schätzwerte, Systemversion, reproduzierbares Ergebnis) | VERIFIED | Formeln bleiben bewusst Code-SSOT | `feeding_requirements_service.py` + `/feeding/evaluation-systems`, `/feeding/requirement-profiles` | `test_feeding_requirements.py`, `test_feeding_requirements_api.py` | FEED-CORE-020 |
 | FEED-REQ-003 | Hitzestress/Weide/Übergangsphasen | SOLL | Weide-/Saisonprofile im Solver | PARTIAL | Hitzestress fehlt | Release C | `test_rations_optimization_{pasture,seasonal_profiles,spring_pasture_case}.py` | — |
 | FEED-REQ-004 | Trockensteher-Bedarf | MUSS | DLG-2025-Konstanten | VERIFIED | — | vorhanden | `test_rations_dcab_dlg2025.py` | DLG 01/2025 |
 
@@ -91,7 +91,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | FEED-OPT-002 | Mehrstufige Ziele (Kosten/IOFC/Leistung/Gesundheit/Umwelt) | MUSS | `lp_stage2.py`, lexikografisch Milch, Zielstrategie-Kalibrierung | VERIFIED | — | vorhanden | `test_rations_{milk_lexicographic,objective_strategy_calibration}.py` | — |
 | FEED-OPT-003 | Weiche Nebenbedingungen/Penalties, SARA-Reopt, peNDF-Demotion | MUSS | FAN-Modus 005 Penalties, SARA-Reopt | VERIFIED | — | vorhanden | `test_rations_optimization_{fan_mode_005_penalties,sara_reopt,pendf_demotion}.py` | — |
 | FEED-OPT-004 | Unlösbarkeit erklären, Konfliktgrenzen benennen | MUSS | Erklärschicht `response/aggregator.py` | PARTIAL | IIS-artige Konfliktbenennung ausbaufähig | Inkrement 2 | `test_rations_aggregator.py` | — |
-| FEED-OPT-005 | Ergebnis reproduzierbar speichern (OptimizationRun) | MUSS | Snapshot in `ration_versions.snapshot` + checksum | PARTIAL | eigenes Run-Aggregat mit Solverparametern | Inkrement 1 | `test_rations_lifecycle_api.py` | Slice 007 |
+| FEED-OPT-005 | Ergebnis reproduzierbar speichern (OptimizationRun) | MUSS | Snapshot+Checksum (007) plus `optimization_runs` (solver_version, Ziel, Parameter, Status, Dauer, Pflichtbezug auf `ration_version`) | VERIFIED | Automatischer Hook im Optimize-Pfad folgt mit dem Rationseditor (FEED-EDITOR-021), Aufruf heute explizit via API | `/feeding/optimization-runs` | `test_feeding_requirements.py::test_optimization_run_documents_solver_metadata_reproducibly`, API-Journey | FEED-CORE-020 |
 | FEED-OPT-006 | Pareto-Katalog, Sensitivität, Shadow Prices | SOLL | — | NOT_IMPLEMENTED | Paritätsmatrix „Nächster Ausbau" | Release C | — | — |
 | FEED-OPT-007 | Keine ungefragte Aktivierung | MUSS | Solver übergibt nur Entwurfssnapshots (ADR-041) | VERIFIED | — | vorhanden | `test_rations_lifecycle_api.py` | Slice 007 |
 
