@@ -30,6 +30,9 @@ progress: >-
   Navigation, Zustaenden, Responsive/A11y-Regeln und Low-Fidelity-Mockups erstellt.
   Tranche 4: 08 Workflowkatalog mit 15 E2E-Ablaeufen, State Machines, Guards,
   Kompensationen, Blocking Reasons, Benachrichtigungen und Testmustern erstellt.
+  Tranche 5: 09 Berechnungsregeln mit GfE-/DLG-Inventar, NRC-Gate,
+  Grenzwerten, Prioritaeten, Readiness/Plausibilitaet, Regelupdate und
+  Golden-/Property-Testvertrag erstellt; Formeln bleiben Code-SSOT.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
