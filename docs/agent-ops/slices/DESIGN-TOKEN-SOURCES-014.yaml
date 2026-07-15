@@ -1,0 +1,75 @@
+slice_id: DESIGN-TOKEN-SOURCES-014
+id: DESIGN-TOKEN-SOURCES-014
+title: Token-Quellen-Konsolidierung (palette.css) + patterns/mask-builder-Schichtenentscheidung
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Die letzten beiden offenen Punkte des Frontend-Design-Audits schliessen:
+  Punkt 7 (drei Token-Quellen — Farb-Rohwerte lagen in index.css statt in der
+  Token-Architektur) und Punkt 6 (patterns/ vs. mask-builder/ —
+  Konsistenzrisiko gleichnamiger Komponentenfamilien).
+scope:
+  - "styles/tokens/palette.css (neu): einzige Quelle der Farb-Rohwerte —
+    Brand-/Neutral-/Semantik-HSL-Skalen, Status-Textfarben, Chart-Palette,
+    Warehouse-Farben, je :root/.dark/.theme-warehouse. index.css behaelt nur
+    die Tailwind-Bridge-Aliase (--background usw.), deren Kaskadenposition
+    nach den Theme-Importen tragend ist (TW4-Zirkularitaetsfalle 8a6f6b945).
+    Arbeitsteilung final: primitives=Struktur, palette=Farbe,
+    Meridian/Terra=Theme-Semantik, index.css=Bridge."
+  - "Blocker-Neubewertung: TW4-PILOT (Codex) ist seit 2026-07-14 nach main
+    gemerged — Dateibesitz war ein aktiver Slice-Claim, kein dauerhaftes Lock;
+    Konsolidierung daher ohne Koordinationsbedarf durchfuehrbar."
+  - "patterns-Entscheidung statt Merge: patterns/Wizard (22 Seiten, freie
+    JSX-Steps) und mask-builder/Wizard (2 Seiten, react-hook-form-Config)
+    koennen einander nicht ausdruecken; dito ListReport/ObjectPage.
+    Verbindliche Schichtenregel in Audit-Doku 7g + CLAUDE.md: config-getrieben
+    -> mask-builder/*, freie Prozess-/Schrittmasken -> patterns/*; Migrationen
+    nur im Zuge der ScreenDefinition-Promotion je Maske."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-TOKEN-SOURCES-014.yaml"
+  - "docs/design/frontend-design-skill-audit.md (7g + 8)"
+  - "CLAUDE.md (Design rules: Chart-Palette, palette.css, Schichtenregel, Toast)"
+  - "packages/frontend-web/src/styles/tokens/palette.css (neu)"
+  - "packages/frontend-web/src/index.css"
+progress: >-
+  2026-07-15 umgesetzt und validiert. Damit sind alle acht Punkte des
+  Frontend-Design-Audits geschlossen (Endstand in Abschnitt 8).
+acceptance:
+  - "Jedes Farb-Token existiert genau einmal im gebauten CSS-Bundle."
+  - "Light/Dark/Warehouse liefern unveraenderte Farben (Status-Utilities,
+    Chart-Slots) — axe-E2E als Kontrast-Regressionsgate."
+  - "Schichtenregel dokumentiert in Audit 7g und CLAUDE.md."
+tests:
+  - "vite build -> 29,1 s gruen; chart-1-hsl und brand-primary-500-hsl je
+    genau 1x im CSS-Bundle."
+  - "npm run test:e2e:accessibility -> 8/8 Kernrouten gruen (WCAG 2.2 AA)."
+  - "tsc --noEmit -> 0; vitest voll -> gruen (siehe Abschlusscommit)."
+risks:
+  - "Import-Reihenfolge in index.css ist tragend (primitives -> palette ->
+    Meridian -> Terra -> density); palette.css-Namen sind kollisionsfrei
+    (…-hsl/status-*/chart-*/warehouse-*), Aenderungen an der Reihenfolge
+    brauchen erneut Build+axe."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Farbdarstellung aller Themes unveraendert; eine einzige, auditierbare
+    Quelle fuer Farb-Rohwerte.
+  architektur_vertrag: >-
+    Token-Schichten: primitives (Struktur) / palette (Farbe) / Themes
+    (Semantik) / index.css (Tailwind-Bridge). patterns- und mask-builder-
+    Familien sind sanktionierte Ausdrucksebenen mit dokumentiertem
+    Auswahlkriterium.
+  daten_vertrag: not_applicable
+  security_vertrag: not_applicable
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert.
+  dokumentations_vertrag: >-
+    Audit-Doku 7g + Endstand-Abschnitt 8; CLAUDE.md-Designregeln; Workboard;
+    dieses YAML.
+  test_vertrag: >-
+    Build + Bundle-Eindeutigkeitspruefung + axe-E2E 8/8 + tsc + volle
+    Vitest-Suite vor Push gruen.

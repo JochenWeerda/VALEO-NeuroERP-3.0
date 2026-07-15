@@ -311,16 +311,51 @@ Build 19,1 s ✅.
 Validierung: tsc ✅ · eslint 0 Fehler ✅ · Vitest 91/91 Dateien, 382 grün (+1 skipped) ✅ ·
 Build 17,9 s ✅.
 
+## 7g. Update 2026-07-15 — Token-Quellen + patterns-Schichtenentscheidung (DESIGN-TOKEN-SOURCES-014)
+
+Die letzten beiden §8-Punkte sind geschlossen:
+
+- **Punkt 7 — Token-Quellen konsolidiert:** Alle Farb-Rohwerte (Brand-/Neutral-/
+  Semantik-HSL-Skalen, Status- und Chart-Tokens, Warehouse-Farben) liegen jetzt
+  in **einer** Quelle: `styles/tokens/palette.css` (`:root`/`.dark`/
+  `.theme-warehouse`), als Schwester von `tokens/primitives.css` (Struktur).
+  Arbeitsteilung final: primitives = Struktur · palette = Farb-Rohwerte ·
+  Meridian/Terra = Theme-Semantik · `index.css` = Tailwind-Bridge-Aliase
+  (`--background`, `--primary`, …). Die Bridge-Aliase bleiben **bewusst** in
+  `index.css`, weil ihre Kaskadenposition nach den Theme-Importen tragend ist
+  (TW4-Zirkularitätsfalle, vgl. `8a6f6b945`). Der frühere Blocker
+  (TW4-PILOT-Dateibesitz Codex) ist entfallen — der Pilot ist seit 2026-07-14
+  nach `main` gemerged, kein aktiver Claim. Verifikation im echten Build:
+  Tokens genau 1× im CSS-Bundle, axe-E2E 8/8 Kernrouten grün.
+- **Punkt 6 — patterns/ vs. mask-builder/ ist entschieden, kein Merge:**
+  Untersuchungsergebnis: die gleichnamigen Komponenten sind **keine Duplikate,
+  sondern zwei Ausdrucksebenen**, die einander nicht darstellen können —
+  `patterns/Wizard` (22 Seiten) trägt freie JSX-Steps (Kamera, Tabellen,
+  Custom-Komponenten), `mask-builder/Wizard` (2 Seiten) ist react-hook-form-
+  Config mit typisierten Feldern; dito ListReport (TanStack-`ColumnDef` mit
+  JSX-Zellen vs. `ListConfig`) und ObjectPage. Ein „Merge" würde entweder 22
+  Prozessmasken entkernen oder mask-builder zu einem zweiten Kompositions-
+  system aufblasen. **Verbindliche Schichtenregel** (ersetzt das
+  „Konsistenzrisiko"): config-getriebene Stamm-/Belegmasken → `mask-builder/*`
+  (Zielpfad Universal-Mask-Promotion); freie Prozess-/Schrittmasken mit
+  Custom-JSX → `patterns/*`. Neue Masken wählen die Ebene nach diesem
+  Kriterium, nie nach Gewohnheit. Tote Duplikate wurden entfernt
+  (`patterns/OverviewPage`, 7f); echte Seitenmigrationen passieren dort, wo
+  eine Maske ohnehin zur ScreenDefinition promoted wird — nicht als
+  mechanischer Sweep.
+
+Validierung: Build 29,1 s ✅ · Bundle enthält jedes Token genau 1× ✅ ·
+axe-E2E 8/8 ✅ · tsc ✅ · Vitest 91/91 ✅.
+
 ## 8. Verbleibende Risiken & Folgearbeiten
 
-> **Stand nach Slices 002–013:** Punkte 1–5 sind erledigt (1 → 7b, 2/3/4 → 7a,
-> 5 → 7e); Rollout-Prios 1/2/3/6 → 7b, Prios 4/5 → 7c; Mahnlauf → 7d;
-> Toast-Konsolidierung, `text-*-400`-Nachzug und der sichere patterns-Teilschritt
-> → 7f. **Offen bleiben:** Punkt 6 (`patterns/`-Restmigration: Wizard 22 /
-> PageSurface ~10 / ListReport 3 / ObjectPage 2 Seiten — Großvorhaben im Zuge
-> der Universal-Mask-Promotion, je Maske einzeln zu verifizieren) und Punkt 7
-> (Token-Quellen-Konsolidierung — **blockiert auf Koordination mit Codex**,
-> dessen TW4-PILOT den Dateibesitz an `index.css`/`src/styles/**` hält).
+> **Endstand 2026-07-15 (Slices 002–014):** Alle acht Punkte dieses Audits
+> sind geschlossen: 1 → 7b · 2/3/4 → 7a · 5 → 7e · 6 → 7g
+> (Schichtenentscheidung) · 7 → 7g (palette.css) · Rollout-Prios 1–6 → 7b/7c ·
+> Mahnlauf → 7d · Toast/`text-*-400`/patterns-Teilschritt → 7f.
+> Seitenmigrationen `patterns/*` → ScreenDefinition laufen fortan als Teil der
+> Universal-Mask-Promotion je Maske weiter (kein offener Audit-Punkt, sondern
+> Regelbetrieb nach der Schichtenregel in 7g).
 
 1. **Weitere Eigenbau-Reiterleisten** (z. B. `SalesDocumentsPanel`-Kategorien,
    `InformationPanel`-Sektionen, Sidebar-Alphabetregister) auf die Register-/Default-Variante
