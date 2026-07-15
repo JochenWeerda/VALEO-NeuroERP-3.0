@@ -11,17 +11,18 @@ description: Single Source of Truth für das Fütterungsberatungs-Programm — D
 
 # Spezifikation Fütterungsberatung — Index
 
-Zielstruktur folgt dem Fachkonzept-Vorschlag des Auftraggebers (00–17). Die
-Dokumente wachsen **inkrementell mit den Inkrementen** (Entscheidung siehe unten),
-damit Spezifikation und Code nicht auseinanderlaufen.
+Zielstruktur folgt dem Fachkonzept-Auftrag (00–17). Mit Auftraggeberentscheidung
+vom 15.07.2026 wird sie zu einem vollstaendigen Architektur-Referenzwerk mit
+300–500 Seiten Zielumfang und 200–300 vertikalen Arbeitspaketen ausgebaut. Der
+verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 
 | Nr. | Dokument | Status | Heutiger Ort |
 |---|---|---|---|
-| 00 | Vision | ✅ enthalten | `lastenheft-fuetterungsberatung.md` Kap. 3 |
-| 01 | Glossar | 🔜 mit Inkrement 1 | — (Begriffe derzeit im Lastenheft/Traceability) |
+| 00 | Vision | ✅ Referenzkapitel | `00-vision.md` |
+| 01 | Glossar | ✅ Referenzkapitel | `01-glossar.md` |
 | 02 | Lastenheft | ✅ | `lastenheft-fuetterungsberatung.md` |
 | 03 | Fachkonzept | ✅ Kern | `ist-audit.md` + `target-architecture.md` |
-| 04 | Domänenmodell | ✅ Kern | `target-architecture.md` §2 (Aggregat-Tabelle); Detail-UML je Inkrement |
+| 04 | Domänenmodell | ✅ Referenzkapitel | `04-domaenenmodell.md` (Context Map, Aggregate, VOs, Events, UML, Event Storming) |
 | 05 | Datenmodell | 🔜 je Inkrement | Migrationsdateien + `ist-audit.md` §1.4 |
 | 06 | API | ✅ Zielbild | `target-architecture.md` §3; OpenAPI ist generiert (Repo-Gate) |
 | 07 | Maskenkatalog | ✅ Landkarte | `target-architecture.md` §7; Detail je Editor-Slice |
@@ -36,11 +37,13 @@ damit Spezifikation und Code nicht auseinanderlaufen.
 | 16 | Traceability | ✅ | `requirements-traceability.md` |
 | 17 | Roadmap | ✅ | `implementation-plan.md` (Inkremente 1–6, Slices 015–036) |
 | — | Fodjan-Abgleich | ✅ | `fodjan-help-traceability.md` (Funktions-Traceability, Stand 2026-07-15) |
+| — | Pflegevertrag | ✅ | `reference-maintenance.md` |
 
-## Entscheidung zum Umfang (Empfehlung, umgesetzt)
+## Entscheidung zum Umfang (historisch, am 2026-07-15 aufgehoben)
 
-Der Vorschlag eines 300–500-Seiten-Referenzwerks vorab wurde bewusst **nicht als
-Big-Bang-Dokumentation** umgesetzt, sondern als wachsende Struktur:
+Die Foundation-Empfehlung war zunaechst eine wachsende Struktur statt eines
+vollstaendigen Vorabwerks. Der Auftraggeber hat diese Empfehlung am 15.07.2026
+explizit aufgehoben. Die damaligen Risiken bleiben als Pflegeanforderungen erhalten:
 
 1. **Doku-Drift ist das Hauptrisiko** dieses Repos (eigene Gates: docs-code-sync,
    Drift-Check). Ein vorab vollständig ausgeschriebener Masken-/Test-/Datenkatalog
@@ -53,7 +56,7 @@ Big-Bang-Dokumentation** umgesetzt, sondern als wachsende Struktur:
    Spezifikationsteil (Masken, Tabellen, Tests) mit dem Claim — die Struktur oben
    füllt sich, IDs und Kapitel bleiben stabil.
 
-Damit arbeitet Claude Code mit derselben Single Source of Truth, ohne dass die
-Spezifikation dem Code je 6 Inkremente vorauslaufen und veralten muss. Wünscht der
-Auftraggeber dennoch das vollständige Vorab-Referenzwerk, ist das eine explizite
-Entscheidung gegen die Drift-Gates und braucht einen eigenen Pflege-Prozess.
+Das Referenzwerk wird deshalb nicht als freie Prosa gepflegt: normative Aussagen
+tragen stabile IDs und eine Code-/OpenAPI-/Migrationsquelle; Formeln verweisen auf
+versionierten Code und Golden-Tests; Kapitel besitzen Stand, Owner und Driftstatus.
+Details und Konfliktregeln: `reference-maintenance.md`.

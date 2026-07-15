@@ -1,0 +1,50 @@
+slice_id: FEED-SPEC-REFERENCE-038
+id: FEED-SPEC-REFERENCE-038
+title: Architektur-Referenzwerk 00-17 und 240-Pakete-Arbeitsprogramm
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+goal: >-
+  Ein vollstaendiges, querverlinktes Feeding-Fachkonzept auf Architektenniveau
+  mit 300-500 Seiten Zielumfang und 200-300 vertikalen Arbeitspaketen erstellen.
+scope:
+  - Nummerierte Kapitel 00 bis 17 mit stabilen IDs und Quellenvertrag.
+  - DDD, Daten, API, Masken, Workflows, Regeln, Agenten, Integrationen und Tests.
+  - Migration, Rollout, Traceability und 240 vertikale Arbeitspakete.
+  - Pflegeprozess gegen Doku-, Code-, OpenAPI- und Migrationsdrift.
+file_ownership:
+  - docs/specs/feeding/00-*.md bis 17-*.md
+  - docs/specs/feeding/reference-maintenance.md
+  - docs/specs/feeding/work-packages/*.md
+  - docs/specs/feeding/README.md
+  - docs/agent-ops/slices/FEED-SPEC-REFERENCE-038.yaml
+  - docs/agent-ops/active-workboard.md
+progress: >-
+  Tranche 1: Pflegevertrag, 00 Vision, 01 Glossar und 04 Domaenenmodell mit
+  Context Map, Aggregaten, Value Objects, Services, Repositories, Domain Events,
+  UML-Klassensicht und Event-Storming-Happy-Path erstellt. Weitere Kapitel und
+  Arbeitspaketkatalog folgen im selben Slice.
+acceptance:
+  - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
+  - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
+  - API-/Daten-/Regelkataloge erfinden keine Laufzeitvertraege oder Formeln.
+  - Masken folgen Meridian und der zentralen ScreenDefinition-Renderkette.
+  - 200-300 Pakete nennen Abnahme, Abhaengigkeit, DoD, Test und Aufwand.
+tests:
+  - Markdown- und Docs-Governance je Tranche.
+risks:
+  - Umfang erfordert mehrere reviewbare Tranches; der Slice bleibt bis zur
+    vollstaendigen Kapitel- und Paketabdeckung in_arbeit.
+  - FEED-CORE-015 arbeitet parallel; dessen Dateien und Traceability bleiben
+    ausserhalb dieses Dokumentations-Slice.
+external_gates:
+  - Fachreview GfE/DLG und Live-Providervertraege bleiben externe Gates.
+ai_harness:
+  fachlicher_vertrag: Vollstaendige Produkt-, Prozess- und Regelabdeckung.
+  architektur_vertrag: DDD und Meridian ohne parallele Laufzeit-/UI-Architektur.
+  daten_vertrag: Physische Aussagen sind an Alembic und Tenantregeln gebunden.
+  security_vertrag: RBAC, Business-Grants, Audit und Connector-Gates durchgaengig.
+  betriebs_vertrag: Feature-Flag, Pilot, Rollback und Observability im Rollout.
+  dokumentations_vertrag: 00-17, Pflegevertrag, Pakete, README, Slice, Workboard.
+  test_vertrag: Akzeptanz-, Golden-, Property-, API-, E2E-, A11y- und Performancekatalog.
