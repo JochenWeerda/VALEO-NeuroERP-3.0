@@ -23,8 +23,8 @@ verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 | 02 | Lastenheft | ✅ | `lastenheft-fuetterungsberatung.md` |
 | 03 | Fachkonzept | ✅ Kern | `ist-audit.md` + `target-architecture.md` |
 | 04 | Domänenmodell | ✅ Referenzkapitel | `04-domaenenmodell.md` (Context Map, Aggregate, VOs, Events, UML, Event Storming) |
-| 05 | Datenmodell | 🔜 je Inkrement | Migrationsdateien + `ist-audit.md` §1.4 |
-| 06 | API | ✅ Zielbild | `target-architecture.md` §3; OpenAPI ist generiert (Repo-Gate) |
+| 05 | Datenmodell | ✅ Referenzkapitel | `05-datenmodell.md` (Tabellen, Relationen, Tenant, Historisierung, Audit, Indizes) |
+| 06 | API | ✅ Referenzkapitel | `06-api.md` (Bestand/Zielbild, Schemas, Fehler, OpenAPI- und Contract-Governance) |
 | 07 | Maskenkatalog | ✅ Landkarte | `target-architecture.md` §7; Detail je Editor-Slice |
 | 08 | Workflows | ✅ Kern | Lastenheft Kap. 5/11; Lifecycle in `app/agrar/rations/lifecycle/domain.py` |
 | 09 | Berechnungsregeln | ✅ im Code+Tests | `app/agrar/rations/constants/` + Golden-Tests (Single Source: Code, nicht Doku-Kopie) |
