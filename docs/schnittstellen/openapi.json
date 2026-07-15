@@ -96809,6 +96809,83 @@
         "title": "RationDraftEvaluationOut",
         "type": "object"
       },
+      "RationEvaluationOut": {
+        "properties": {
+          "coverage": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Coverage",
+            "type": "object"
+          },
+          "deltas": {
+            "items": {
+              "$ref": "#/components/schemas/DraftDeltaOut"
+            },
+            "title": "Deltas",
+            "type": "array"
+          },
+          "evaluated_at": {
+            "format": "date-time",
+            "title": "Evaluated At",
+            "type": "string"
+          },
+          "evaluated_by": {
+            "title": "Evaluated By",
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/DraftFindingOut"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ration_id": {
+            "title": "Ration Id",
+            "type": "string"
+          },
+          "ration_version_id": {
+            "title": "Ration Version Id",
+            "type": "string"
+          },
+          "requirement_profile_id": {
+            "title": "Requirement Profile Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "totals": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Totals",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "ration_id",
+          "ration_version_id",
+          "requirement_profile_id",
+          "totals",
+          "deltas",
+          "findings",
+          "coverage",
+          "evaluated_by",
+          "evaluated_at"
+        ],
+        "title": "RationEvaluationOut",
+        "type": "object"
+      },
       "RationStatus": {
         "enum": [
           "draft",
@@ -118762,6 +118839,13 @@
         "description": "Response schema for versicherungen endpoints.",
         "properties": {},
         "title": "VersicherungenOut",
+        "type": "object"
+      },
+      "VersionEvaluateIn": {
+        "additionalProperties": false,
+        "description": "Bewusst leer: die Komponenten kommen ausschliesslich aus dem\nunveraenderlichen Versions-Snapshot (keine Client-Payload).",
+        "properties": {},
+        "title": "VersionEvaluateIn",
         "type": "object"
       },
       "VertraegeOut": {
@@ -159728,6 +159812,152 @@
           }
         ],
         "summary": "Rationsentwurf deterministisch bewerten (ohne Persistenz, ohne Solverlauf)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-ration-editor"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/ration-versions/{version_id}/evaluate": {
+      "post": {
+        "operationId": "evaluate_ration_version_api_v1_agrar_rations_optimization_feeding_ration_versions__version_id__evaluate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionEvaluateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RationEvaluationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsversion aus ihrem Snapshot bewerten und append-only persistieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-ration-editor"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/ration-versions/{version_id}/evaluation": {
+      "get": {
+        "operationId": "get_ration_version_evaluation_api_v1_agrar_rations_optimization_feeding_ration_versions__version_id__evaluation_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RationEvaluationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Juengste persistierte Bewertung einer Rationsversion",
         "tags": [
           "agrar",
           "futtermittel",
