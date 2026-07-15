@@ -1,0 +1,58 @@
+slice_id: FEED-CORE-018
+id: FEED-CORE-018
+title: Kanonischer Futtermittelstamm Produkte Referenzwerte und Solveradapter
+owner: Codex
+status: reserviert
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+goal: >-
+  Den bestehenden Einzelfuttermittelstamm ohne Doppelmodell zu einem versionierten,
+  solverfaehigen Feed-Aggregat mit Produkten, flexiblen Referenzwerten, Herkunft
+  und nativer ObjectPage ausbauen.
+requirements: [FEED-MAT-001, FEED-MAT-002]
+work_packages: [FEED-WP-031, FEED-WP-032, FEED-WP-033, FEED-WP-034, FEED-WP-035, FEED-WP-036, FEED-WP-037, FEED-WP-038, FEED-WP-039, FEED-WP-040]
+decision_level: significant
+dependencies: [FEED-CORE-017]
+file_ownership:
+  - alembic/versions/feed_core_feed_catalog_20260715.py
+  - app/agrar/rations/feed_catalog.py
+  - app/services/feeding_feed_catalog_service.py
+  - app/api/v1/endpoints/feeding_feed_catalog.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - app/agrar/rations/solver/feed.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_feed_catalog.py
+  - tests/test_feeding_feed_catalog_api.py
+  - packages/frontend-web/src/features/feed-advice/FeedingFeedDetail.tsx
+  - packages/frontend-web/src/lib/api/feeding-feed-catalog.ts
+  - packages/frontend-web/src/pages/portal/rationsoptimierung.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-feed-detail.test.tsx
+  - docs/adr/adr-047-canonical-feeding-feed-catalog.md
+  - docs/architecture/domains/agrar/
+  - docs/architecture/agents/impact-notes/FEED-CORE-018.md
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - docs/agent-ops/slices/FEED-CORE-018.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Bestehendes futtermittel_einzelfutter ist der Feed-Kopf; keine parallele Stammdatenwelt.
+  - Flexible Referenzwerte verweisen auf NutrientDefinition, Einheit, Basis, Herkunft und Gueltigkeit.
+  - Produkte bilden Lieferant, Gebinde, Preis, Mindestabnahme und Gueltigkeit ab.
+  - Aenderungen sind optimistisch versioniert und append-only auditierbar.
+  - Adapter erzeugt aus persistierten Werten einen zum bestehenden Solver-Feed aequivalenten Vertrag.
+  - API ist tenant-/rollen-sicher; native ObjectPage nutzt ausschliesslich die Meridian-Runtime.
+  - Migration backfillt vorhandene Feed-Zeilen additiv und bleibt Single-Head.
+tdd:
+  red:
+    - Domain-/Migrationsvertrag und Golden-Aequivalenz des Solveradapters.
+    - Create/Get/Update/History/Product/ReferenceValue und Tenant-/RBAC-Tests.
+    - Native ObjectPage-, Component- und Route-Vertraege.
+  green: kleinste additive Feed-Katalogstrecke auf dem vorhandenen Stamm
+  refactor: Legacyfelder nur im Adapter kapseln und keine zweite UI-Architektur
+tests:
+  - tests/test_feeding_feed_catalog.py
+  - tests/test_feeding_feed_catalog_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-feed-detail.test.tsx
+risks:
+  - Bestehende CRUD-Konsumenten duerfen durch additive Felder nicht brechen.
+  - Legacy-Naehrstofffelder und flexible Werte muessen bis zur Vollmigration deterministisch priorisiert werden.
