@@ -30344,6 +30344,153 @@
         "title": "DMSImageOut",
         "type": "object"
       },
+      "DailyObservationIn": {
+        "properties": {
+          "actual_cost_eur_cow": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Cost Eur Cow"
+          },
+          "actual_dmi_kg_cow": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Dmi Kg Cow"
+          },
+          "actual_fat_pct": {
+            "anyOf": [
+              {
+                "maximum": 20.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Fat Pct"
+          },
+          "actual_methane_kg_cow": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Methane Kg Cow"
+          },
+          "actual_milk_kg_cow": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Milk Kg Cow"
+          },
+          "actual_protein_pct": {
+            "anyOf": [
+              {
+                "maximum": 20.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Protein Pct"
+          },
+          "cow_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cow Count"
+          },
+          "feed_n_kg_cow": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed N Kg Cow"
+          },
+          "group_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Group Id",
+            "type": "string"
+          },
+          "methane_estimated": {
+            "default": false,
+            "title": "Methane Estimated",
+            "type": "boolean"
+          },
+          "observation_date": {
+            "format": "date",
+            "title": "Observation Date",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "source": {
+            "default": "manual",
+            "enum": [
+              "manual",
+              "mixing_wagon",
+              "herd_data",
+              "import"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "source_ref": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id",
+          "observation_date",
+          "source_ref"
+        ],
+        "title": "DailyObservationIn",
+        "type": "object"
+      },
       "DailyPriceBulkCreateIn": {
         "description": "Input-Model für Bulk-Import.",
         "properties": {
@@ -43713,6 +43860,126 @@
         "title": "FeedBlockAssignment",
         "type": "object"
       },
+      "FeedingGroupIn": {
+        "properties": {
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "animal_count": {
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Animal Count",
+            "type": "integer"
+          },
+          "animal_type": {
+            "default": "dairy_cow",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Animal Type",
+            "type": "string"
+          },
+          "body_mass_kg": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 3000.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Mass Kg"
+          },
+          "days_in_milk": {
+            "anyOf": [
+              {
+                "maximum": 1500.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days In Milk"
+          },
+          "external_ref": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Ref"
+          },
+          "feeding_system": {
+            "default": "TMR",
+            "enum": [
+              "TMR",
+              "PMR",
+              "PMR+Weide"
+            ],
+            "title": "Feeding System",
+            "type": "string"
+          },
+          "lactation_number": {
+            "anyOf": [
+              {
+                "maximum": 30.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lactation Number"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "target_milk_kg": {
+            "anyOf": [
+              {
+                "maximum": 150.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Milk Kg"
+          }
+        },
+        "required": [
+          "name",
+          "animal_count"
+        ],
+        "title": "FeedingGroupIn",
+        "type": "object"
+      },
       "FeedingSystemConfig": {
         "description": "Fuetterungssystem-Konfiguration (steuert Block-Aufteilung + Limits).\n\n- system: TMR (alles im Mischwagen), PMR_stall (Stall + Kraftfutter-\n  Staffelung), PMR_pasture (Weide + ergaenzende Stallfuetterung).\n- concentrate_distribution: wie Kraftfutter zugeteilt wird.\n- Praxisgrenzen werden aus System + Verteilung + Parity + Rezeptur abgeleitet.",
         "properties": {
@@ -52076,6 +52343,147 @@
           "id"
         ],
         "title": "HedgeOut",
+        "type": "object"
+      },
+      "HerdDataConnectionIn": {
+        "properties": {
+          "base_url": {
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Base Url",
+            "type": "string"
+          },
+          "consent_ref": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Consent Ref",
+            "type": "string"
+          },
+          "contract_ref": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Contract Ref",
+            "type": "string"
+          },
+          "credential_env_key": {
+            "default": "DDW_HERD_DATA_TOKEN",
+            "maxLength": 80,
+            "minLength": 3,
+            "title": "Credential Env Key",
+            "type": "string"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "endpoint_templates": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "enum": [
+                "group_kpi",
+                "health_alert",
+                "genetic_profile"
+              ]
+            },
+            "title": "Endpoint Templates",
+            "type": "object"
+          },
+          "herd_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Herd Id",
+            "type": "string"
+          },
+          "live_enabled": {
+            "default": false,
+            "title": "Live Enabled",
+            "type": "boolean"
+          },
+          "provider": {
+            "const": "ddw",
+            "default": "ddw",
+            "title": "Provider",
+            "type": "string"
+          },
+          "query_parameters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "enum": [
+                "group_kpi",
+                "health_alert",
+                "genetic_profile"
+              ]
+            },
+            "title": "Query Parameters",
+            "type": "object"
+          }
+        },
+        "required": [
+          "herd_id",
+          "base_url",
+          "endpoint_templates",
+          "contract_ref",
+          "consent_ref"
+        ],
+        "title": "HerdDataConnectionIn",
+        "type": "object"
+      },
+      "HerdDataMockImport": {
+        "properties": {
+          "connection_id": {
+            "minLength": 1,
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "group_kpi",
+              "health_alert",
+              "genetic_profile"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "persist": {
+            "default": true,
+            "title": "Persist",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "connection_id",
+          "kind",
+          "payload"
+        ],
+        "title": "HerdDataMockImport",
+        "type": "object"
+      },
+      "HerdDataSyncRequest": {
+        "properties": {
+          "updated_since": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated Since"
+          }
+        },
+        "title": "HerdDataSyncRequest",
         "type": "object"
       },
       "HistoryResponse": {
@@ -91731,6 +92139,177 @@
         "title": "RationContext",
         "type": "object"
       },
+      "RationCreateIn": {
+        "properties": {
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "group_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Group Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "snapshot": {
+            "additionalProperties": true,
+            "minProperties": 1,
+            "title": "Snapshot",
+            "type": "object"
+          },
+          "source": {
+            "default": "solver",
+            "enum": [
+              "solver",
+              "manual",
+              "import"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id",
+          "name",
+          "snapshot"
+        ],
+        "title": "RationCreateIn",
+        "type": "object"
+      },
+      "RationStatus": {
+        "enum": [
+          "draft",
+          "in_review",
+          "approved",
+          "scheduled",
+          "active",
+          "retired",
+          "archived"
+        ],
+        "title": "RationStatus",
+        "type": "string"
+      },
+      "RationTransitionIn": {
+        "properties": {
+          "expected_status": {
+            "$ref": "#/components/schemas/RationStatus"
+          },
+          "feeding_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding Start"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "target_status": {
+            "$ref": "#/components/schemas/RationStatus"
+          }
+        },
+        "required": [
+          "target_status",
+          "expected_status"
+        ],
+        "title": "RationTransitionIn",
+        "type": "object"
+      },
+      "RationVersionCreateIn": {
+        "properties": {
+          "based_on_version_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Based On Version Id"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "expected_latest_version_no": {
+            "minimum": 1.0,
+            "title": "Expected Latest Version No",
+            "type": "integer"
+          },
+          "snapshot": {
+            "additionalProperties": true,
+            "minProperties": 1,
+            "title": "Snapshot",
+            "type": "object"
+          },
+          "source": {
+            "default": "solver",
+            "enum": [
+              "solver",
+              "manual",
+              "import"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "snapshot",
+          "expected_latest_version_no"
+        ],
+        "title": "RationVersionCreateIn",
+        "type": "object"
+      },
       "RationsOptimizationOut": {
         "additionalProperties": true,
         "description": "Typed response schema for RationsOptimizationOut endpoints (extra fields forwarded).",
@@ -91743,6 +92322,33 @@
         "description": "Response schema for read model snapshots endpoints.",
         "properties": {},
         "title": "ReadModelSnapshotsOut",
+        "type": "object"
+      },
+      "ReadinessEvaluateIn": {
+        "properties": {
+          "as_of": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of"
+          },
+          "snapshot": {
+            "additionalProperties": true,
+            "minProperties": 1,
+            "title": "Snapshot",
+            "type": "object"
+          }
+        },
+        "required": [
+          "snapshot"
+        ],
+        "title": "ReadinessEvaluateIn",
         "type": "object"
       },
       "ReadinessEvidence": {
@@ -151031,6 +151637,191 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/controlling/observations": {
+      "post": {
+        "operationId": "record_observation_api_v1_agrar_rations_optimization_controlling_observations_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DailyObservationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Observation Api V1 Agrar Rations Optimization Controlling Observations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Taegliche Soll-Ist-Beobachtung erfassen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-controlling"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/controlling/series": {
+      "get": {
+        "operationId": "get_series_api_v1_agrar_rations_optimization_controlling_series_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Group Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Get Series Api V1 Agrar Rations Optimization Controlling Series Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Soll-Ist-Zeitreihe lesen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-controlling"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/dlg/info": {
       "get": {
         "description": "DLG-Futterdatenbank-Status: Anzahl Einträge, Quelle, Aktualität.",
@@ -151599,6 +152390,403 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/integrations/herd-data/connections": {
+      "get": {
+        "operationId": "list_herd_data_connections_api_v1_agrar_rations_optimization_integrations_herd_data_connections_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Herd Data Connections Api V1 Agrar Rations Optimization Integrations Herd Data Connections Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Herd-Data-Verbindungen auflisten",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
+        ]
+      },
+      "post": {
+        "operationId": "upsert_herd_data_connection_api_v1_agrar_rations_optimization_integrations_herd_data_connections_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HerdDataConnectionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upsert Herd Data Connection Api V1 Agrar Rations Optimization Integrations Herd Data Connections Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Herd-Data-Verbindung anlegen/aktualisieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/integrations/herd-data/connections/{connection_id}/sync": {
+      "post": {
+        "operationId": "sync_herd_data_connection_api_v1_agrar_rations_optimization_integrations_herd_data_connections__connection_id__sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HerdDataSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Sync Herd Data Connection Api V1 Agrar Rations Optimization Integrations Herd Data Connections  Connection Id  Sync Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Herd-Data-Delta-Sync ausfuehren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/integrations/herd-data/mock-import": {
+      "post": {
+        "operationId": "import_herd_data_mock_api_v1_agrar_rations_optimization_integrations_herd_data_mock_import_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HerdDataMockImport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Import Herd Data Mock Api V1 Agrar Rations Optimization Integrations Herd Data Mock Import Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Herd-Data-Mockvertrag normalisieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/integrations/herd-data/observations": {
+      "get": {
+        "operationId": "list_herd_data_observations_api_v1_agrar_rations_optimization_integrations_herd_data_observations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "group_kpi",
+                    "health_alert",
+                    "genetic_profile"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "herd_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Herd Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Herd Data Observations Api V1 Agrar Rations Optimization Integrations Herd Data Observations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Normalisierte Herd-Data-Beobachtungen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-integrations"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/integrations/imports": {
       "get": {
         "operationId": "list_rations_imports_api_v1_agrar_rations_optimization_integrations_imports_get",
@@ -151778,6 +152966,764 @@
           "agrar",
           "rations-optimization",
           "rations-integrations"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/active-rations": {
+      "get": {
+        "operationId": "list_active_rations_api_v1_agrar_rations_optimization_lifecycle_active_rations_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Active Rations Api V1 Agrar Rations Optimization Lifecycle Active Rations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktive Rationen fuer die Stallausfuehrung",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/groups": {
+      "get": {
+        "operationId": "list_feeding_groups_api_v1_agrar_rations_optimization_lifecycle_groups_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active_only",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Active Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Feeding Groups Api V1 Agrar Rations Optimization Lifecycle Groups Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fuetterungsgruppen auflisten",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      },
+      "post": {
+        "operationId": "create_feeding_group_api_v1_agrar_rations_optimization_lifecycle_groups_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedingGroupIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Feeding Group Api V1 Agrar Rations Optimization Lifecycle Groups Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fuetterungsgruppe anlegen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/rations": {
+      "get": {
+        "operationId": "list_rations_api_v1_agrar_rations_optimization_lifecycle_rations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Group Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Rations Api V1 Agrar Rations Optimization Lifecycle Rations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationen als Worklist auflisten",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      },
+      "post": {
+        "operationId": "create_ration_api_v1_agrar_rations_optimization_lifecycle_rations_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RationCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Ration Api V1 Agrar Rations Optimization Lifecycle Rations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ration mit Version 1 anlegen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/rations/{ration_id}": {
+      "get": {
+        "operationId": "get_ration_api_v1_agrar_rations_optimization_lifecycle_rations__ration_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ration_id",
+            "required": true,
+            "schema": {
+              "title": "Ration Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Ration Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ration mit Versionen und Audit lesen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/rations/{ration_id}/audit": {
+      "get": {
+        "operationId": "list_ration_audit_api_v1_agrar_rations_optimization_lifecycle_rations__ration_id__audit_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ration_id",
+            "required": true,
+            "schema": {
+              "title": "Ration Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Ration Audit Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Audit Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rations-Audit lesen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/rations/{ration_id}/versions": {
+      "get": {
+        "operationId": "list_ration_versions_api_v1_agrar_rations_optimization_lifecycle_rations__ration_id__versions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ration_id",
+            "required": true,
+            "schema": {
+              "title": "Ration Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Ration Versions Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Versions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsversionen auflisten",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      },
+      "post": {
+        "operationId": "create_ration_version_api_v1_agrar_rations_optimization_lifecycle_rations__ration_id__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ration_id",
+            "required": true,
+            "schema": {
+              "title": "Ration Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RationVersionCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Ration Version Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Versions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neue unveraenderliche Rationsversion anlegen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/lifecycle/versions/{version_id}/transitions": {
+      "post": {
+        "operationId": "transition_ration_version_api_v1_agrar_rations_optimization_lifecycle_versions__version_id__transitions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RationTransitionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transition Ration Version Api V1 Agrar Rations Optimization Lifecycle Versions  Version Id  Transitions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsstatus kontrolliert wechseln",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-lifecycle"
         ]
       }
     },
@@ -151962,6 +153908,141 @@
           "rations-optimization",
           "agrar",
           "rations-optimization"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/readiness/evaluate": {
+      "post": {
+        "operationId": "evaluate_readiness_api_v1_agrar_rations_optimization_readiness_evaluate_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadinessEvaluateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Readiness Api V1 Agrar Rations Optimization Readiness Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsentwurf auf Bestand, Analyse und Preis pruefen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-readiness"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/readiness/materials": {
+      "get": {
+        "operationId": "active_material_readiness_api_v1_agrar_rations_optimization_readiness_materials_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Active Material Readiness Api V1 Agrar Rations Optimization Readiness Materials Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Readiness der aktuell eingesetzten Futtermittel",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "rations-readiness"
         ]
       }
     },
