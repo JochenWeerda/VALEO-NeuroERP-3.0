@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-REF-037 Oeffentliche Fodjan-Hilfe als eigenstaendige Funktions-Traceability - in Arbeit 2026-07-15
+## FEED-REF-037 Oeffentliche Fodjan-Hilfe als eigenstaendige Funktions-Traceability - abgeschlossen 2026-07-15
 
-**Owner:** Codex. **Stand:** in Arbeit (Claim). Der Foundation-Slice FEED-SPEC-FOUNDATION-014 markiert den vom Auftraggeber verlangten Quellenabgleich noch als offen, weil die Hilfe dort nicht abrufbar war. Ziel: oeffentliche Hilfe-Startseite, Kategorien und erreichbare Unterseiten inventarisieren; ausschliesslich Funktionen, Prozesshinweise und Integrationsanforderungen paraphrasieren; jede Erkenntnis auf stabile FEED-Requirement-IDs und vorhandene/kommende Slices mappen; keine geschuetzten Texte, Screens oder Produktgestaltung kopieren. **Dateibesitz:** `docs/specs/feeding/fodjan-help-traceability.md` (neu), `docs/specs/feeding/README.md`, `docs/specs/feeding/implementation-plan.md` (nur offenen Punkt schliessen), `docs/agent-ops/slices/FEED-REF-037.yaml` (neu), Workboard. Keine Code-, Migration-, API- oder bestehende Requirements-Traceability-Datei im Scope; dadurch konfliktfrei zu FEED-CORE-015.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-07-15. Oeffentliche Hilfe-Hubs, 31 Rationsplanungsthemen sowie die Themencluster Einstieg/Zusammenarbeit, Futterbestand/Analyse, Dokumentation/Mobil, Auswertungen und Schnittstellen sind inventarisiert. Erreichbare Detailseiten wurden zu eigenstaendigen Funktionsanforderungen paraphrasiert und auf FEED-IDs/Slices gemappt; konkrete Abnahmen fuer Leistungsfutterwege, Tastatur-Mischfolge, Warnungssemantik, Ausgabeprofile, komponentenklassenspezifische Mischschwellen, Mapping-Quarantaene, idempotente Maschinenrueckmeldung und farmbezogene Benachrichtigungen wurden geschaerft. Keine Texte, Screens oder Designs uebernommen; oeffentliche UI-Texte werden ausdruecklich nicht als API-Vertrag interpretiert. **Dateibesitz:** `docs/specs/feeding/fodjan-help-traceability.md`, README, Umsetzungsplan, Slice-YAML, Workboard. **Abnahme:** Markdown- und Doku-Governance-Gates im Abschlusscommit.
 
 ## FEED-CORE-015 Fuetterungsbetriebe, Standorte, Herden + Betriebs-Grants (Inkrement 1, Slice 1) - in Arbeit 2026-07-15
 

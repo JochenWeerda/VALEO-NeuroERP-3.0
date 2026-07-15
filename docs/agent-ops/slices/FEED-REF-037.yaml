@@ -1,0 +1,45 @@
+slice_id: FEED-REF-037
+id: FEED-REF-037
+title: Oeffentliche Fodjan-Hilfe als eigenstaendige Funktions-Traceability
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Den in FEED-SPEC-FOUNDATION-014 offen gebliebenen Quellenabgleich nachholen,
+  ohne geschuetzte Hilfetexte, Screens oder Produktgestaltung zu kopieren.
+scope:
+  - Oeffentliche Hilfe-Hubs und verlinkte Fachthemen inventarisieren.
+  - Erreichbare Detailseiten funktionsbezogen auswerten.
+  - Erkenntnisse auf stabile FEED-Requirement-IDs und bestehende Slices mappen.
+file_ownership:
+  - docs/specs/feeding/fodjan-help-traceability.md
+  - docs/specs/feeding/README.md
+  - docs/specs/feeding/implementation-plan.md
+  - docs/agent-ops/slices/FEED-REF-037.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Oeffentliche Hauptkategorien und deren Fachthemen sind inventarisiert.
+  - Funktionen sind paraphrasiert und auf FEED-IDs/Slices gemappt.
+  - Nicht ableitbare API-, Formel- und Rechteaussagen sind ausgeschlossen.
+  - Eigenstaendige VALEO-Architektur und Meridian-UI bleiben verbindlich.
+tests:
+  - docs markdown check fuer alle geaenderten Dokumente.
+  - docs governance check fuer alle geaenderten Dokumente.
+risks:
+  - Einzelne Detailseiten lieferten Cache-Fehler und sind nur ueber die
+    oeffentlichen Hub-Listen nachgewiesen.
+  - Oeffentliche Produkttexte sind kein technischer Providervertrag.
+external_gates:
+  - Reale Connectorpfade bleiben bis zum jeweiligen Partnervertrag blockiert.
+ai_harness:
+  fachlicher_vertrag: >-
+    Funktionsmotive werden fuer die Produktplanung erfasst; fachliche Normen
+    bleiben GfE/DLG/VALEO-Golden-Tests.
+  architektur_vertrag: Keine Code- oder Architekturmutation.
+  daten_vertrag: Keine Datenmodell- oder API-Aenderung.
+  security_vertrag: Keine Secrets, personenbezogenen Daten oder Livezugriffe.
+  betriebs_vertrag: Kein Deploy- oder Laufzeitimpact.
+  dokumentations_vertrag: Quelleninventar, Mapping, README, Plan, Slice, Workboard.
+  test_vertrag: Markdown- und Doku-Governance-Gates muessen gruen sein.

@@ -90,8 +90,10 @@ kein Float für Geld — neue Geld-Spalten Numeric/Decimal).
 
 ## Offene Auftraggeber-Punkte
 
-1. **Fodjan-Traceability (Kap. 17):** Quelle war nicht abrufbar; Abgleich wird
-   nachgeholt, sobald erreichbar → `fodjan-help-traceability.md`.
+1. **Fodjan-Traceability (Kap. 17): abgeschlossen 2026-07-15.** Oeffentliche
+   Hilfe-Hubs, Themen und erreichbare Detailseiten sind in
+   `fodjan-help-traceability.md` auf FEED-IDs und Slices gemappt; Texte, Screens
+   und Produktdesign wurden nicht uebernommen.
 2. **Feature-Branch-Vorgabe (Phase 0.6)** kollidiert mit der etablierten
    Trunk-Praxis dieses Repos (Slices auf `main`, Parallel-Agenten, CI als
    Schiedsrichter). Empfehlung: Slices weiter auf `main` hinter Modul-Flag

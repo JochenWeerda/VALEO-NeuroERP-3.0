@@ -35,7 +35,7 @@ damit Spezifikation und Code nicht auseinanderlaufen.
 | 15 | Rollout | ✅ Konzept | `implementation-plan.md` (Flag `feeding_advisory`, Pilot) |
 | 16 | Traceability | ✅ | `requirements-traceability.md` |
 | 17 | Roadmap | ✅ | `implementation-plan.md` (Inkremente 1–6, Slices 015–036) |
-| — | Fodjan-Abgleich | ⏳ blockiert | `fodjan-help-traceability.md` sobald Quelle abrufbar (Lastenheft Kap. 17) |
+| — | Fodjan-Abgleich | ✅ | `fodjan-help-traceability.md` (Funktions-Traceability, Stand 2026-07-15) |
 
 ## Entscheidung zum Umfang (Empfehlung, umgesetzt)
 
