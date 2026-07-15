@@ -2071,7 +2071,13 @@ def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
                 "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations",
                 "pageSize": 100,
                 "staleTimeMs": 10_000,
-            }
+            },
+            {
+                "key": "groups",
+                "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/groups",
+                "pageSize": 100,
+                "staleTimeMs": 15_000,
+            },
         ],
         "tables": [
             {
@@ -2092,7 +2098,20 @@ def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
                     {"key": "animal_count", "label": "Tiere", "numeric": True, "width": 80},
                     {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 170},
                 ],
-            }
+            },
+            {
+                "key": "groups", "label": "Tiergruppen", "dataSourceKey": "groups",
+                "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                "rowRouteTemplate": "/portal/rationsoptimierung?view=group&group_id={id}",
+                "columns": [
+                    {"key": "name", "label": "Tiergruppe", "sortable": True, "filterable": True, "width": 230},
+                    {"key": "profile_code", "label": "Profil", "filterable": True, "width": 170},
+                    {"key": "animal_count", "label": "Tiere", "numeric": True, "sortable": True, "width": 90},
+                    {"key": "risk_level", "label": "Risiko", "renderKind": "status", "filterable": True, "width": 110},
+                    {"key": "valid_from", "label": "Gueltig ab", "renderKind": "date", "sortable": True, "width": 120},
+                    {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
+                ],
+            },
         ],
         "actions": [
             {"key": "plan_ration", "label": "Neue Ration planen", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
@@ -2180,6 +2199,89 @@ def build_agrar_feeding_businesses_screen_definition() -> dict[str, Any]:
             "sensitiveFields": ["business_partner_id", "preferences"],
             "testSelectors": {
                 "screenRoot": "[data-testid='screen-agrar/feeding-businesses']",
+                "primaryAction": "[data-action-kind='primary']",
+            },
+        },
+    }
+
+
+def build_agrar_feeding_group_screen_definition() -> dict[str, Any]:
+    """Native object page for versioned feeding-group parameters (FEED-CORE-016)."""
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/feeding-group",
+        "domain": "agrar",
+        "mode": "detail",
+        "title": "Tiergruppe",
+        "subtitle": "Leistung, Traechtigkeit, Gueltigkeit und Parameterhistorie",
+        "adapter": {"type": "native", "sourceId": "agrar/feeding-group", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}"},
+            {"key": "history", "endpoint": "/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}/history", "pageSize": 50},
+        ],
+        "tabs": [
+            {
+                "key": "masterdata", "label": "Stammdaten", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "name", "label": "Gruppenname", "type": "text", "required": True},
+                    {"key": "profile_code", "label": "Gruppenprofil", "type": "text", "required": True},
+                    {"key": "animal_type", "label": "Tierart", "type": "text", "required": True},
+                    {"key": "animal_count", "label": "Tierzahl", "type": "number", "required": True},
+                    {"key": "feeding_system", "label": "Fuetterungssystem", "type": "text", "required": True},
+                    {"key": "location", "label": "Standort/Stall", "type": "text"},
+                    {"key": "active", "label": "Aktiv", "type": "boolean"},
+                ],
+            },
+            {
+                "key": "parameters", "label": "Leistung und Bedarf", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "body_mass_kg", "label": "Lebendmasse kg", "type": "number"},
+                    {"key": "days_in_milk", "label": "Laktationstag", "type": "number"},
+                    {"key": "lactation_number", "label": "Laktationsnummer", "type": "number"},
+                    {"key": "target_milk_kg", "label": "Milchziel kg", "type": "number"},
+                    {"key": "milk_fat_pct", "label": "Milchfett %", "type": "number"},
+                    {"key": "milk_protein_pct", "label": "Milchprotein %", "type": "number"},
+                    {"key": "milk_urea_mg_dl", "label": "Milchharnstoff mg/dl", "type": "number"},
+                    {"key": "pregnancy_status", "label": "Traechtigkeitsstatus", "type": "text"},
+                    {"key": "gestation_day", "label": "Traechtigkeitstag", "type": "number"},
+                    {"key": "risk_level", "label": "Risikostufe", "type": "text"},
+                    {"key": "valid_from", "label": "Gueltig ab", "type": "date"},
+                    {"key": "valid_until", "label": "Gueltig bis", "type": "date"},
+                ],
+            },
+            {
+                "key": "history", "label": "Parameterhistorie", "lazy": True, "keepAlive": True,
+                "tables": [{
+                    "key": "history", "label": "Revisionen", "dataSourceKey": "history",
+                    "serverPagination": False, "pageSize": 50, "virtualized": True, "rowHeight": 48,
+                    "columns": [
+                        {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
+                        {"key": "changed_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 180},
+                        {"key": "changed_by", "label": "Bearbeiter", "filterable": True, "width": 180},
+                        {"key": "reason", "label": "Aenderungsgrund", "width": 360},
+                    ],
+                }],
+            },
+        ],
+        "actions": [{
+            "key": "edit_group", "label": "Tiergruppe bearbeiten", "kind": "primary",
+            "dangerLevel": "safe", "permission": "futtermittel.rations.update",
+        }],
+        "noWorkflowReason": "Parameter werden versioniert; Rationsfreigaben besitzen einen eigenen Lifecycle.",
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "audit", "tableProfile": "audit",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 40, "requiresLazyTabs": True,
+            "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Tiergruppenparameter und ihre zeitliche Herkunft sicher pflegen.",
+            "examplePrompts": ["Zeige die aktuelle Leistung der Tiergruppe.", "Welche Parameter wurden zuletzt geaendert?"],
+            "sensitiveFields": ["business_id", "herd_id", "external_ref"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-agrar/feeding-group']",
                 "primaryAction": "[data-action-kind='primary']",
             },
         },
@@ -2483,6 +2585,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
     "agrar/feeding-businesses": build_agrar_feeding_businesses_screen_definition,
+    "agrar/feeding-group": build_agrar_feeding_group_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
     "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
@@ -3001,6 +3104,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
     "agrar/feeding-businesses": "/portal/rationsoptimierung?view=businesses",
+    "agrar/feeding-group": "/portal/rationsoptimierung?view=rations",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
     "agrar/feed-controlling": "/portal/rationsoptimierung?view=controlling",
     "agrar/ration": "/portal/rationsoptimierung?view=rations",

@@ -30,6 +30,10 @@ vi.mock('@/features/feed-advice/FeedingBusinessWorklist', () => ({
   FeedingBusinessWorklist: () => <div data-testid="feeding-business-list">Betriebe</div>,
 }))
 
+vi.mock('@/features/feed-advice/FeedingGroupDetail', () => ({
+  FeedingGroupDetail: ({ groupId }: { groupId: string }) => <div data-testid="feeding-group-detail">{groupId}</div>,
+}))
+
 describe('Portal Fuetterungsberatung entry architecture', () => {
   beforeEach(() => {
     locationState.search = ''
@@ -82,6 +86,13 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
     locationState.search = '?view=businesses'
     render(<PortalFeedAdvicePage />)
     expect(screen.getByTestId('feeding-business-list')).toBeInTheDocument()
+    expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
+  })
+
+  it('routes a feeding group through the native object page', () => {
+    locationState.search = '?view=group&group_id=group-42'
+    render(<PortalFeedAdvicePage />)
+    expect(screen.getByTestId('feeding-group-detail')).toHaveTextContent('group-42')
     expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
   })
 })

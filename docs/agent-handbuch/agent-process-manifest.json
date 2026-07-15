@@ -1014,6 +1014,39 @@
       ]
     },
     {
+      "mask_id": "agrar/feeding-group",
+      "title": "Tiergruppe",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-group/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-group/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-group/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-group/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit_group",
+          "label": "Tiergruppe bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "business_id",
+        "herd_id",
+        "external_ref"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "agrar/harvest-settlement",
       "title": "Ernte-Abrechnung",
       "domain": "agrar",

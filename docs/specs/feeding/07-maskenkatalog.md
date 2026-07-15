@@ -180,6 +180,11 @@ erhalten. Ein sichtbarer Scope-Chip verhindert Bearbeitung im falschen Betrieb.
 | Zustände | keine Tiere, Syncabweichung, fehlende Leistungsdaten, vollständig. |
 | Context Rail | aktive Ration, letzte Provideraktualität, Datenqualitätsfindings. |
 
+**Lieferstand FEED-CORE-016:** native ScreenDefinition `agrar/feeding-group`
+mit ObjectPage-Floorplan, Audit-Rail, Stammdaten-/Leistungs-/Historien-Tabs und
+optimistischem Revisionsdialog. Die Rations-Worklist zeigt eine grant-gefilterte
+Tiergruppentabelle und öffnet die ObjectPage per stabiler Deep-Link-Route.
+
 ### FEED-MASK-004/005 — Futtermittel-Worklist und Detail
 
 | Aspekt | Worklist | Detail |

@@ -40,9 +40,9 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-HERD-001 | Tiergruppen-Stamm (Tierzahl, LM, Laktation, Leistung, System) | MUSS | `feeding_groups` (animal_count, body_mass, days_in_milk, lactation_number, target_milk, feeding_system, location) | VERIFIED | Trächtigkeit, Milchinhaltsstoffe, Risiko, Gültigkeitszeitraum fehlen | Feldausbau Inkrement 1 | `test_rations_lifecycle_api.py` | Slice 007 |
-| FEED-HERD-002 | Milchvieh-Gruppentypen (Frischmelker…Jungvieh) | MUSS | Freitext `name`/Wizard-Profile (`constants/gfe2023.py`) | PARTIAL | typisiertes Gruppenprofil fehlt | Inkrement 1 | `test_rations_wizard_requirements.py` | — |
-| FEED-HERD-003 | Gruppenwechsel + Parameterhistorie | SOLL | Herd-Data-Deltas erfassen Gruppenwechsel (`integrations/herd_data.py`) | PARTIAL | Verdichtung zu AnimalGroupSnapshot offen (Paritätsmatrix) | Inkrement 5/6 | `test_rations_herd_data_connectors.py` | Slice 010 |
+| FEED-HERD-001 | Tiergruppen-Stamm (Tierzahl, LM, Laktation, Leistung, System) | MUSS | `feeding_groups` inkl. Trächtigkeit, Inhaltsstoffe, Risiko, Gültigkeit und Revision | VERIFIED | — | typisierte Domain-/API-/DB-Regeln plus native ObjectPage | `test_feeding_groups_core.py`, `test_rations_lifecycle_api.py` | FEED-CORE-016 |
+| FEED-HERD-002 | Milchvieh-Gruppentypen (Frischmelker…Jungvieh) | MUSS | `GroupProfile` + `profile_code` mit zehn kontrollierten Profilen | VERIFIED | — | zentraler Enumvertrag und Legacyprofil `custom` | `test_feeding_groups_core.py` | FEED-CORE-016 |
+| FEED-HERD-003 | Gruppenwechsel + Parameterhistorie | SOLL | append-only `feeding_group_revisions`; Herd-Data-Deltas erfassen Gruppenwechsel | PARTIAL | zeitliche Tiermitgliedschaften/überlappungsfreie Providerwechsel offen | `animal_group_memberships` in Integrationsinkrement | Core-/Connector-Tests | FEED-CORE-016 + Slice 010 |
 | FEED-HERD-004 | Import aus Herdenmanagement | SOLL | Herd-Data-Delta-Sync (DDW-neutral) | PARTIAL | reale Providerpfade | BLOCKED bis Partnervertrag | dito | Slice 010 |
 
 ## Kapitel 6.3 — Futtermittel-Stammdaten

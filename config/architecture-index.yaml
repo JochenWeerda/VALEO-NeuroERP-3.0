@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-07-14
+# Architecture Index — generiert 2026-07-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-14T21:11:33Z'
+generated_at: '2026-07-15T15:57:59Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -403,6 +403,7 @@ domains:
     - docs/adr/adr-042-immutable-ration-lifecycle.md
     - docs/adr/adr-043-feed-readiness-read-model.md
     - docs/adr/adr-044-feeding-controlling-observations.md
+    - docs/adr/adr-045-versioned-feeding-groups.md
     status: active
   crm:
     owner: domain/crm

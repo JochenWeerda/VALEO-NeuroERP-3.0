@@ -2,9 +2,10 @@ slice_id: FEED-CORE-016
 id: FEED-CORE-016
 title: Tiergruppenprofile Gueltigkeit Historie und native ObjectPage
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-15"
 started_at: "2026-07-15"
+completed_at: "2026-07-15"
 goal: >-
   Tiergruppen fachlich vollstaendig, zeitlich nachvollziehbar und innerhalb von
   Tenant plus Betriebs-Grant sicher als vertikale API-/Meridian-Strecke liefern.
@@ -60,3 +61,17 @@ tests:
 risks:
   - Bestehende Gruppen benoetigen sichere Defaultprofile und Revision-1-Backfill.
   - Businesslose Legacygruppen bleiben nur fuer Admin/Backfill sichtbar.
+evidence:
+  tdd:
+    - Zwei dokumentierte Red-Wellen fuer Domain/API/Migration/Screen sowie Zugriffsschutz.
+    - tests/test_feeding_groups_core.py: 6 passed.
+    - tests/test_rations_lifecycle_api.py: 5 passed.
+  frontend:
+    - Feeding-Detail und Portal-Route: 8 focused tests passed.
+    - Frontend-Gesamtsuite: 92 files passed, 386 tests passed, 1 skipped.
+    - TypeScript typecheck passed.
+  governance:
+    - docs governance: 125 files passed.
+    - architecture validate und strict drift passed; mapping 898/898 routes.
+    - Agent-Handbuch auf 40 native Masken regeneriert und check passed.
+    - Alembic single head feed_core_groups_20260715.

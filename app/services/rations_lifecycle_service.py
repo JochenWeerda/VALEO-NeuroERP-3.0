@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.agrar.rations.lifecycle import RationStatus, TransitionError, snapshot_checksum, validate_transition
+from app.agrar.rations.groups import validate_group_parameters
 from app.core.uuid7 import uuid7
 
 
@@ -34,35 +35,191 @@ class RationLifecycleService:
 
     def create_group(self, payload: dict[str, Any]) -> dict[str, Any]:
         group_id = str(uuid7())
+        self._validate_group_parent(payload.get("business_id"), payload.get("herd_id"))
+        validate_group_parameters(
+            profile=payload["profile_code"], pregnancy_status=payload["pregnancy_status"],
+            gestation_day=payload.get("gestation_day"), milk_fat_pct=payload.get("milk_fat_pct"),
+            milk_protein_pct=payload.get("milk_protein_pct"), valid_from=payload["valid_from"],
+            valid_until=payload.get("valid_until"),
+        )
         try:
             row = self.db.execute(text("""
               INSERT INTO domain_agrar.feeding_groups
                 (id,tenant_id,external_ref,name,animal_type,animal_count,body_mass_kg,
                  days_in_milk,lactation_number,target_milk_kg,feeding_system,location,
-                 active,created_by,updated_by)
+                 business_id,herd_id,profile_code,pregnancy_status,gestation_day,
+                 milk_fat_pct,milk_protein_pct,milk_urea_mg_dl,risk_level,
+                 valid_from,valid_until,active,created_by,updated_by)
               VALUES
                 (:id,:tenant_id,:external_ref,:name,:animal_type,:animal_count,:body_mass_kg,
                  :days_in_milk,:lactation_number,:target_milk_kg,:feeding_system,:location,
-                 :active,:actor,:actor)
+                 :business_id,:herd_id,:profile_code,:pregnancy_status,:gestation_day,
+                 :milk_fat_pct,:milk_protein_pct,:milk_urea_mg_dl,:risk_level,
+                 :valid_from,:valid_until,:active,:actor,:actor)
               RETURNING *
             """), {"id": group_id, "tenant_id": self.tenant_id, "actor": self.actor, **payload}).mappings().one()
+            self._record_group_revision(_dict(row), "Anlage")
             self.db.commit()
             return _dict(row)
         except IntegrityError as exc:
             self.db.rollback()
             raise RationLifecycleConflict("Eine Fuetterungsgruppe mit dieser externen Referenz existiert bereits.") from exc
 
-    def list_groups(self, *, active_only: bool = True) -> list[dict[str, Any]]:
+    def list_groups(self, *, active_only: bool = True, subject: str = "",
+                    unrestricted: bool = False) -> list[dict[str, Any]]:
         rows = self.db.execute(text("""
           SELECT g.*,
             COUNT(DISTINCT r.id)::int AS ration_count,
             COUNT(DISTINCT lc.version_id) FILTER (WHERE lc.status='active')::int AS active_ration_count
           FROM domain_agrar.feeding_groups g
+          LEFT JOIN domain_agrar.feeding_businesses b
+            ON b.tenant_id=g.tenant_id AND b.id=g.business_id
           LEFT JOIN domain_agrar.rations r ON r.tenant_id=g.tenant_id AND r.group_id=g.id
           LEFT JOIN domain_agrar.ration_version_lifecycle lc ON lc.tenant_id=g.tenant_id AND lc.group_id=g.id
           WHERE g.tenant_id=:tenant_id AND (:active_only=FALSE OR g.active=TRUE)
+            AND (:unrestricted OR g.created_by=:subject OR b.created_by=:subject OR EXISTS (
+              SELECT 1 FROM domain_agrar.feeding_business_grants grant_row
+              WHERE grant_row.tenant_id=g.tenant_id AND grant_row.business_id=g.business_id
+                AND grant_row.subject=:subject AND grant_row.revoked_at IS NULL
+                AND grant_row.valid_from <= now()
+                AND (grant_row.valid_until IS NULL OR grant_row.valid_until > now())
+                AND grant_row.scope IN ('read','write','approve','admin')
+            ))
           GROUP BY g.id ORDER BY g.active DESC,g.name
-        """), {"tenant_id": self.tenant_id, "active_only": active_only}).mappings().all()
+        """), {"tenant_id": self.tenant_id, "active_only": active_only,
+                 "subject": subject, "unrestricted": unrestricted}).mappings().all()
+        return [_dict(row) for row in rows]
+
+    def has_business_access(self, business_id: str, subject: str, scope: str) -> bool:
+        scopes = {"read": ["read", "write", "approve", "admin"],
+                  "write": ["write", "approve", "admin"]}[scope]
+        row = self.db.execute(text("""
+          SELECT 1 FROM domain_agrar.feeding_businesses b
+          WHERE b.tenant_id=:tenant_id AND b.id=:business_id
+            AND (b.created_by=:subject OR EXISTS (
+              SELECT 1 FROM domain_agrar.feeding_business_grants grant_row
+              WHERE grant_row.tenant_id=b.tenant_id AND grant_row.business_id=b.id
+                AND grant_row.subject=:subject AND grant_row.scope = ANY(:scopes)
+                AND grant_row.revoked_at IS NULL AND grant_row.valid_from <= now()
+                AND (grant_row.valid_until IS NULL OR grant_row.valid_until > now())
+            )) LIMIT 1
+        """), {"tenant_id": self.tenant_id, "business_id": business_id,
+                 "subject": subject, "scopes": scopes}).first()
+        return row is not None
+
+    def has_group_access(self, group_id: str, subject: str, scope: str) -> bool:
+        scopes = {"read": ["read", "write", "approve", "admin"],
+                  "write": ["write", "approve", "admin"]}[scope]
+        row = self.db.execute(text("""
+          SELECT 1 FROM domain_agrar.feeding_groups g
+          LEFT JOIN domain_agrar.feeding_businesses b
+            ON b.tenant_id=g.tenant_id AND b.id=g.business_id
+          WHERE g.tenant_id=:tenant_id AND g.id=:group_id
+            AND (g.created_by=:subject OR b.created_by=:subject OR EXISTS (
+              SELECT 1 FROM domain_agrar.feeding_business_grants grant_row
+              WHERE grant_row.tenant_id=g.tenant_id AND grant_row.business_id=g.business_id
+                AND grant_row.subject=:subject AND grant_row.scope = ANY(:scopes)
+                AND grant_row.revoked_at IS NULL AND grant_row.valid_from <= now()
+                AND (grant_row.valid_until IS NULL OR grant_row.valid_until > now())
+            )) LIMIT 1
+        """), {"tenant_id": self.tenant_id, "group_id": group_id,
+                 "subject": subject, "scopes": scopes}).first()
+        return row is not None
+
+    def _validate_group_parent(self, business_id: str | None, herd_id: str | None) -> None:
+        if herd_id and not business_id:
+            raise RationLifecycleConflict("Eine Herde erfordert einen Fuetterungsbetrieb.")
+        if business_id:
+            business = self.db.execute(text("""
+              SELECT id FROM domain_agrar.feeding_businesses
+              WHERE tenant_id=:tenant_id AND id=:business_id AND active=TRUE
+            """), {"tenant_id": self.tenant_id, "business_id": business_id}).first()
+            if not business:
+                raise RationLifecycleNotFound("Aktiver Fuetterungsbetrieb nicht gefunden.")
+        if herd_id:
+            herd = self.db.execute(text("""
+              SELECT id FROM domain_agrar.herds
+              WHERE tenant_id=:tenant_id AND business_id=:business_id AND id=:herd_id AND active=TRUE
+            """), {"tenant_id": self.tenant_id, "business_id": business_id, "herd_id": herd_id}).first()
+            if not herd:
+                raise RationLifecycleNotFound("Aktive Herde im Fuetterungsbetrieb nicht gefunden.")
+
+    def get_group(self, group_id: str, *, for_update: bool = False) -> dict[str, Any]:
+        lock = " FOR UPDATE" if for_update else ""
+        row = self.db.execute(text("""
+          SELECT * FROM domain_agrar.feeding_groups
+          WHERE tenant_id=:tenant_id AND id=:group_id
+        """ + lock), {"tenant_id": self.tenant_id, "group_id": group_id}).mappings().first()
+        if not row:
+            raise RationLifecycleNotFound("Fuetterungsgruppe nicht gefunden.")
+        return _dict(row)
+
+    def update_group(self, group_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+        expected_revision = int(patch.pop("expected_revision"))
+        reason = str(patch.pop("reason"))
+        current = self.get_group(group_id, for_update=True)
+        if int(current["revision"]) != expected_revision:
+            raise RationLifecycleConflict(
+                f"Die Fuetterungsgruppe wurde zwischenzeitlich geaendert (erwartet Revision {expected_revision}, aktuell {current['revision']})."
+            )
+        mutable = {
+            "external_ref", "name", "animal_type", "animal_count", "body_mass_kg",
+            "days_in_milk", "lactation_number", "target_milk_kg", "feeding_system",
+            "location", "herd_id", "profile_code", "pregnancy_status", "gestation_day",
+            "milk_fat_pct", "milk_protein_pct", "milk_urea_mg_dl", "risk_level",
+            "valid_from", "valid_until", "active",
+        }
+        unknown = set(patch) - mutable
+        if unknown:
+            raise RationLifecycleConflict(f"Unbekannte Gruppenfelder: {', '.join(sorted(unknown))}")
+        values = {key: patch.get(key, current.get(key)) for key in mutable}
+        self._validate_group_parent(current.get("business_id"), values.get("herd_id"))
+        validate_group_parameters(
+            profile=values["profile_code"], pregnancy_status=values["pregnancy_status"],
+            gestation_day=values.get("gestation_day"), milk_fat_pct=values.get("milk_fat_pct"),
+            milk_protein_pct=values.get("milk_protein_pct"), valid_from=values["valid_from"],
+            valid_until=values.get("valid_until"),
+        )
+        row = self.db.execute(text("""
+          UPDATE domain_agrar.feeding_groups SET
+            external_ref=:external_ref,name=:name,animal_type=:animal_type,
+            animal_count=:animal_count,body_mass_kg=:body_mass_kg,days_in_milk=:days_in_milk,
+            lactation_number=:lactation_number,target_milk_kg=:target_milk_kg,
+            feeding_system=:feeding_system,location=:location,herd_id=:herd_id,
+            profile_code=:profile_code,pregnancy_status=:pregnancy_status,
+            gestation_day=:gestation_day,milk_fat_pct=:milk_fat_pct,
+            milk_protein_pct=:milk_protein_pct,milk_urea_mg_dl=:milk_urea_mg_dl,
+            risk_level=:risk_level,valid_from=:valid_from,valid_until=:valid_until,
+            active=:active,revision=revision+1,updated_by=:actor,updated_at=now()
+          WHERE tenant_id=:tenant_id AND id=:group_id AND revision=:expected_revision
+          RETURNING *
+        """), {**values, "tenant_id": self.tenant_id, "group_id": group_id,
+                 "expected_revision": expected_revision, "actor": self.actor}).mappings().first()
+        if not row:
+            raise RationLifecycleConflict("Revision der Fuetterungsgruppe ist nicht mehr aktuell.")
+        result = _dict(row)
+        self._record_group_revision(result, reason)
+        self.db.commit()
+        return result
+
+    def _record_group_revision(self, group: dict[str, Any], reason: str) -> None:
+        self.db.execute(text("""
+          INSERT INTO domain_agrar.feeding_group_revisions
+            (id,tenant_id,group_id,revision,snapshot,reason,changed_by)
+          VALUES (:id,:tenant_id,:group_id,:revision,CAST(:snapshot AS jsonb),:reason,:actor)
+        """), {
+            "id": str(uuid7()), "tenant_id": self.tenant_id, "group_id": group["id"],
+            "revision": group.get("revision", 1),
+            "snapshot": json.dumps(group, ensure_ascii=False, default=str),
+            "reason": reason, "actor": self.actor,
+        })
+
+    def list_group_history(self, group_id: str) -> list[dict[str, Any]]:
+        self.get_group(group_id)
+        rows = self.db.execute(text("""
+          SELECT * FROM domain_agrar.feeding_group_revisions
+          WHERE tenant_id=:tenant_id AND group_id=:group_id ORDER BY revision DESC
+        """), {"tenant_id": self.tenant_id, "group_id": group_id}).mappings().all()
         return [_dict(row) for row in rows]
 
     def create_ration(

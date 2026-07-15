@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (39 Masken).
+> Generiert aus `app/core/screen_definitions.py` (40 Masken).
 
 ## Übersicht
 
@@ -22,6 +22,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
 | `agrar/feed-readiness` | Futter-Einsatzbereitschaft | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
+| `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
@@ -237,6 +238,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/feeding-group` — Tiergruppe
+
+**Zweck:** Tiergruppenparameter und ihre zeitliche Herkunft sicher pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-group/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-group/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-group/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}`
+- `history` → `/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}/history`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige die aktuelle Leistung der Tiergruppe.
+- Welche Parameter wurden zuletzt geaendert?
+
+**Sensible Felder:** `business_id, herd_id, external_ref`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit_group` | Tiergruppe bearbeiten | safe | nein | `—` |
+
+---
+
 ### `agrar/harvest-settlement` — Ernte-Abrechnung
 
 **Zweck:** Ernte-Abrechnung: Erzeuger-Abrechnung mit Lieferschein-Positionen, Qualitaets-Abzuegen und Gesamtbetrag fuer Agrar-Buchhalter.
@@ -376,6 +414,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `rations` → `/api/v1/agrar/rations-optimization/lifecycle/rations`
+- `groups` → `/api/v1/agrar/rations-optimization/lifecycle/groups`
 
 **MCP-Tools (Domäne):**
 

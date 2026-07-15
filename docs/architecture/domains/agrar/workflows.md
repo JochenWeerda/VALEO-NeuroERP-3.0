@@ -12,6 +12,12 @@ version: 1.0.0
 
 ## Fuetterungsberatung
 
+Tiergruppenpflege: berechtigten Betrieb waehlen -> Profil/Leistungsparameter
+erfassen -> Revision 1 -> Aenderung mit erwarteter Revision und Pflichtgrund ->
+append-only Snapshot. Stale Revisionen liefern 409; fremde Betriebsscope-IDs 404.
+Die native ObjectPage zeigt aktuellen Stand und Historie ueber dieselbe
+ScreenDefinition-/RenderPlan-Runtime.
+
 Rationslebenszyklus: Gruppe waehlen -> Entwurf im Solver -> unveraenderlichen
 Snapshot anlegen -> fachliche Pruefung -> Freigabe -> sofortige oder geplante
 Aktivierung -> Fuetterung -> Abloesung/Archivierung. Jede Transition ist rollen-

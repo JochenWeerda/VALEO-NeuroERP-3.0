@@ -19,6 +19,8 @@ export type RationStatus = 'draft' | 'in_review' | 'approved' | 'scheduled' | 'a
 
 export interface FeedingGroup {
   id: string
+  business_id?: string | null
+  herd_id?: string | null
   external_ref?: string | null
   name: string
   animal_count: number

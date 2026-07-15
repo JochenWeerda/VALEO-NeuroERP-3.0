@@ -180,6 +180,60 @@ def test_due_scheduled_ration_is_activated_by_worker() -> None:
     assert detail.json()["latest_status"] == "active"
 
 
+def test_group_profile_update_is_optimistic_and_append_only() -> None:
+    created = client.post(
+        f"{BASE}/groups",
+        headers=HEADERS,
+        json={
+            "external_ref": f"profile-{uuid4()}",
+            "name": f"Frischmelker {str(uuid4())[:8]}",
+            "animal_count": 36,
+            "profile_code": "fresh_cow",
+            "pregnancy_status": "unknown",
+            "milk_fat_pct": 4.1,
+            "milk_protein_pct": 3.45,
+            "risk_level": "medium",
+        },
+    )
+    assert created.status_code == 201, created.text
+    group = created.json()
+    assert group["revision"] == 1
+    assert group["profile_code"] == "fresh_cow"
+
+    updated = client.patch(
+        f"{BASE}/groups/{group['id']}",
+        headers=HEADERS,
+        json={
+            "expected_revision": 1,
+            "reason": "Traechtigkeit bestaetigt",
+            "pregnancy_status": "pregnant",
+            "gestation_day": 120,
+            "risk_level": "low",
+        },
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["revision"] == 2
+    assert updated.json()["gestation_day"] == 120
+
+    stale = client.patch(
+        f"{BASE}/groups/{group['id']}",
+        headers=HEADERS,
+        json={"expected_revision": 1, "reason": "Veralteter Stand", "animal_count": 37},
+    )
+    assert stale.status_code == 409
+
+    history = client.get(f"{BASE}/groups/{group['id']}/history", headers=HEADERS)
+    assert history.status_code == 200, history.text
+    assert [item["revision"] for item in history.json()] == [2, 1]
+    assert history.json()[0]["reason"] == "Traechtigkeit bestaetigt"
+
+    other_tenant = client.get(
+        f"{BASE}/groups/{group['id']}",
+        headers={"Authorization": "Bearer dev-token", "X-Tenant-Id": str(uuid4())},
+    )
+    assert other_tenant.status_code == 404
+
+
 def test_readiness_blocker_requires_audited_override() -> None:
     group = _group()
     response = client.post(f"{BASE}/rations", headers=HEADERS, json={

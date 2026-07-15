@@ -17,6 +17,7 @@ pytest tests/test_feed_advice_screen_definition.py tests/test_workspace_cockpits
 pytest tests/test_rations_lifecycle_domain.py tests/test_rations_lifecycle_api.py -q --no-cov
 pytest tests/test_rations_readiness.py -q --no-cov
 pytest tests/test_rations_controlling.py -q --no-cov
+pytest tests/test_feeding_groups_core.py tests/test_rations_lifecycle_api.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`

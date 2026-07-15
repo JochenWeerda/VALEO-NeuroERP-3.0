@@ -92,6 +92,13 @@ Invarianten:
 - Tierzahl ist null oder nichtnegativ; null bedeutet unbekannt, nicht null Tiere;
 - importierte Gruppenwechsel bleiben durch externe Referenz idempotent.
 
+Lieferstand FEED-CORE-016: `feeding_groups` ist der aktuelle Gruppenkopf mit
+optimistischer `revision`; jede Anlage/Aenderung erzeugt einen unveraenderlichen
+Snapshot in `feeding_group_revisions`. Profile, Traechtigkeitsstatus,
+Milchinhaltsstoffe, Risiko und Gueltigkeit sind typisiert. Zeitliche
+Tiermitgliedschaften und ueberlappungsfreie Provider-Gruppenwechsel bleiben im
+geplanten `animal_group_memberships`-Teil von FEED-HERD-003.
+
 ### 4.3 Feed
 
 **Root:** `Feed`; **Entities:** FeedProduct, FeedReferenceValue.

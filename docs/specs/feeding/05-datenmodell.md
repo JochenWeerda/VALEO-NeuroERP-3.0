@@ -134,11 +134,22 @@ aktive Grants und erlaubt revisionssichere Neuvergabe.
 
 #### `feeding_groups` — BESTAND
 
-Quelle: `feed_advice_lifecycle_20260714.py`. Gruppe, Tierart, Tierzahl,
-Körpermasse, Laktationsparameter, Milchziel, Fütterungssystem und Ort.
+Quellen: `feed_advice_lifecycle_20260714.py`, `feed_core_business_20260715.py`
+und `feed_core_groups_20260715.py`. Gruppe, Tierart, typisiertes Profil,
+Tierzahl, Körpermasse, Laktationsparameter, Milchziel/-fett/-protein/-harnstoff,
+Trächtigkeitstag, Risiko, Gültigkeit, Fütterungssystem und Ort.
 `animal_count >= 0`; `external_ref` ist tenantweit eindeutig. Die additive
 Migration `feed_core_business_20260715.py` ergänzt nullable Business-/Herd-FKs;
-der administrative Backfill ordnet Bestandsgruppen kontrolliert zu.
+der administrative Backfill ordnet Bestandsgruppen kontrolliert zu. `revision`
+schuetzt optimistische Updates; Wertebereiche und Cross-Field-Regeln liegen als
+API-/Domainvalidierung und DB-Checks vor.
+
+#### `feeding_group_revisions` — BESTAND
+
+Append-only Snapshot jeder Anlage/Aenderung: Tenant, Gruppe, Revision, JSONB-
+Snapshot, Pflichtgrund, Actor und Zeitpunkt. Unique `(tenant_id,group_id,revision)`;
+ein Trigger verbietet Update und Delete. Legacygruppen erhalten idempotent
+Revision 1 mit Grund `Bestandsuebernahme`.
 
 #### `animal_group_memberships` — GEPLANT
 

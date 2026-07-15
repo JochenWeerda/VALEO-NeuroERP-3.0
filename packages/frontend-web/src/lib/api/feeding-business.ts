@@ -27,3 +27,8 @@ export async function createFeedingBusiness(input: CreateFeedingBusiness): Promi
   const response = await apiClient.post<FeedingBusiness>(`${BASE}/businesses`, input)
   return response.data
 }
+
+export async function fetchFeedingBusinesses(): Promise<FeedingBusiness[]> {
+  const response = await apiClient.get<FeedingBusiness[]>(`${BASE}/businesses`)
+  return response.data
+}

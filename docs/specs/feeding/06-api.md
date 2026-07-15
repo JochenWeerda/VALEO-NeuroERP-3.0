@@ -109,6 +109,9 @@ Human-in-the-loop.
 |---|---|---|---:|
 | POST | `/groups` | Fütterungsgruppe anlegen | 201 |
 | GET | `/groups` | Gruppen auflisten | 200 |
+| GET | `/groups/{group_id}` | typisiertes Gruppendetail | 200 |
+| PATCH | `/groups/{group_id}` | optimistisches Update mit Pflichtgrund | 200 |
+| GET | `/groups/{group_id}/history` | append-only Parameterhistorie | 200 |
 | POST | `/rations` | Ration mit Version 1 anlegen | 201 |
 | GET | `/rations` | Rations-Worklist | 200 |
 | GET | `/active-rations` | aktive Stallrationen | 200 |
@@ -149,6 +152,9 @@ Statuswechsel:
 
 Die Snapshot-Prüfsumme wird serverseitig berechnet; Versionen werden nicht
 gepatcht; Aktivierung setzt Freigabe voraus; pro Gruppe ist eine Version aktiv.
+Gruppen-Updates erwarten `expected_revision`; stale Stände liefern 409. Listen
+und Details kombinieren Domainrolle mit Ersteller oder aktivem Business-Grant;
+verweigerte Einzelobjekte liefern 404 ohne Existenzsignal.
 
 ### 4.2 Optimierung und Regeln (`/rations`) — BESTAND
 

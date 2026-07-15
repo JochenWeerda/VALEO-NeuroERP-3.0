@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createFeedingGroup } from '@/lib/api/rations-lifecycle'
+import { fetchFeedingBusinesses, type FeedingBusiness } from '@/lib/api/feeding-business'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useNavigate } from '@/app/routing/typed-router'
 
@@ -14,6 +15,8 @@ export function RationLifecycleWorklist(): JSX.Element {
   const [name, setName] = useState('')
   const [animalCount, setAnimalCount] = useState('')
   const [location, setLocation] = useState('')
+  const [businesses, setBusinesses] = useState<FeedingBusiness[]>([])
+  const [businessId, setBusinessId] = useState('')
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
 
@@ -23,6 +26,7 @@ export function RationLifecycleWorklist(): JSX.Element {
     setFeedback(null)
     try {
       await createFeedingGroup({
+        business_id: businessId,
         name: name.trim(),
         animal_count: Number(animalCount),
         feeding_system: 'TMR',
@@ -32,11 +36,24 @@ export function RationLifecycleWorklist(): JSX.Element {
       setName('')
       setAnimalCount('')
       setLocation('')
+      setBusinessId('')
       setFeedback('Tiergruppe wurde angelegt und steht im Planungswerkzeug bereit.')
     } catch (error) {
       setFeedback(getAxiosErrorMessage(error))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function openGroupDialog(): Promise<void> {
+    setFeedback(null)
+    try {
+      const rows = await fetchFeedingBusinesses()
+      setBusinesses(rows)
+      setBusinessId((current) => current || rows[0]?.id || '')
+      setGroupOpen(true)
+    } catch (error) {
+      setFeedback(getAxiosErrorMessage(error))
     }
   }
 
@@ -51,7 +68,7 @@ export function RationLifecycleWorklist(): JSX.Element {
         permissions={['futtermittel.rations.update']}
         onAction={(actionKey) => {
           if (actionKey === 'plan_ration') navigate('/portal/rationsoptimierung?mode=expert')
-          if (actionKey === 'create_group') setGroupOpen(true)
+          if (actionKey === 'create_group') void openGroupDialog()
         }}
       />
 
@@ -62,6 +79,13 @@ export function RationLifecycleWorklist(): JSX.Element {
             <DialogDescription>Stammdaten fuer Bedarf, Versionen und Fuetterungsbeginn.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="feeding-group-business">Fuetterungsbetrieb</Label>
+              <select id="feeding-group-business" className="h-10 rounded-md border bg-background px-3 text-sm" value={businessId} onChange={(event) => setBusinessId(event.target.value)}>
+                {businesses.map((business) => <option key={business.id} value={business.id}>{business.name}</option>)}
+              </select>
+              {businesses.length === 0 ? <p className="text-sm text-muted-foreground">Zuerst einen Fuetterungsbetrieb anlegen.</p> : null}
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="feeding-group-name">Bezeichnung</Label>
               <Input id="feeding-group-name" value={name} onChange={(event) => setName(event.target.value)} autoFocus />
@@ -79,7 +103,7 @@ export function RationLifecycleWorklist(): JSX.Element {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setGroupOpen(false)}>Abbrechen</Button>
-            <Button disabled={saving || !name.trim() || !animalCount.trim()} onClick={() => { void saveGroup() }}>
+            <Button disabled={saving || !businessId || !name.trim() || !animalCount.trim()} onClick={() => { void saveGroup() }}>
               {saving ? 'Speichert…' : 'Tiergruppe anlegen'}
             </Button>
           </DialogFooter>

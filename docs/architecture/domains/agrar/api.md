@@ -33,7 +33,11 @@ Entscheidung: [ADR-040](../../../adr/adr-040-contract-gated-herd-data-connectors
 ## Fuetterungsberatung / Rationslebenszyklus
 
 - `POST|GET /api/v1/agrar/rations-optimization/lifecycle/groups`
-  - tenantisolierter Fuetterungsgruppenstamm.
+  - tenant- und Business-Grant-isolierter Fuetterungsgruppenstamm mit typisierten Profilen.
+- `GET|PATCH /api/v1/agrar/rations-optimization/lifecycle/groups/{id}`
+  - Detail bzw. optimistisch versioniertes Update mit Pflichtgrund.
+- `GET /api/v1/agrar/rations-optimization/lifecycle/groups/{id}/history`
+  - append-only Parameterrevisionen.
 - `POST|GET /api/v1/agrar/rations-optimization/lifecycle/rations`
   - Rationskopf mit unveraenderlicher erster Version bzw. Worklist.
 - `GET /api/v1/agrar/rations-optimization/lifecycle/rations/{id}` und
@@ -47,6 +51,7 @@ Entscheidung: [ADR-040](../../../adr/adr-040-contract-gated-herd-data-connectors
   - aktuelle, freigegebene Ausfuehrungssnapshots fuer Stall und Mobilansicht.
 
 Entscheidung: [ADR-042](../../../adr/adr-042-immutable-ration-lifecycle.md).
+Gruppenentscheidung: [ADR-045](../../../adr/adr-045-versioned-feeding-groups.md).
 
 ## Fütterungsberatung / Einsatzbereitschaft
 
