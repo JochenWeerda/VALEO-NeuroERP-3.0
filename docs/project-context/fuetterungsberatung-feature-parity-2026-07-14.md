@@ -62,7 +62,7 @@ Betrieb und Tiergruppen
 | Zusammenarbeit | Kommentare, Beschreibung, Freigabe und nachvollziehbare Änderung | persistente Reviewgründe, Rollenprüfung und Änderungsaudit | Benachrichtigungskanäle anbinden |
 | Ausgabe | Rezept, Auswertung, Vergleich, Teilen und Maschinenexport | PDF-/Review-Pfad und Importseite vorhanden | profilierte Landwirt-/Berater-/Fütterer-Ausgaben |
 | Fütterung | Mischfolge, Sollmengen, Restfutter und tatsächlich geladene Mengen | mobiles Protokoll liest die freigegebene aktive Serverversion; Browsercache bleibt Offline-Fallback | Mischwagen-Rückmeldung und Sync-Konflikte |
-| Controlling | Aufnahme, Kosten, Effizienz, Stickstoff, Methan und Milchbezug | idempotente Gruppen-/Versions-Tagesreihe, Soll-Ist-Abweichung, ECM, N-Effizienz und gekennzeichnetes Methan umgesetzt | grafische Langfristtrends und Benchmarking |
+| Controlling | Aufnahme, Kosten, Effizienz, Stickstoff, Methan und Milchbezug | Tagesreihe (009) plus Langfristtrend-Charts (Soll-Ist je KPI, Lücken statt Nullfabrikation, Methan-Schätzkennzeichnung) und betriebsinterner Gruppen-Benchmark | anonymisierter Betriebsvergleich und Preisszenarien |
 | Externe Daten | Labor, Mischwagen, MLP, Milchgüte und AMS | Integrationsimport angelegt | Connector-Readiness, Mapping und Fehlerquarantäne je Betrieb |
 
 ## Gelieferter Slice UIX-P0-PORTAL-RATIONS-006
@@ -112,6 +112,15 @@ Die gewichtete Variantenbewertung und UX-Gates stehen in
    2026-07-14:** providerneutraler Herd-Data-/DDW-Vertrag, Delta-Sync,
    Consent-/Contract-/Secret-/Egress-Gates und kanonische Beobachtungen. Reale
    DDW-Pfade/Auth bleiben bis zum lizenzierten Partnervertrag bewusst offen.
+5. `FEED-ADVICE-TRENDS-012`: **abgeschlossen 2026-07-15** — Langfristtrend-
+   Ansicht im Controlling (TM-Aufnahme, Futterkosten, Milch/ECM, N-Effizienz,
+   Methan als Soll-Ist-Liniencharts mit rezessiver Soll-Linie; unbekannte
+   Werte als Lücke, geschätztes Methan gekennzeichnet) plus betriebsinterner
+   Gruppen-Benchmark (Periodenmittel je Fütterungsgruppe, wählbare Kennzahl).
+   Baut auf der validierten Token-Chart-Palette (DESIGN-CHARTS-TOKEN-006) und
+   konsumiert ausschließlich den bestehenden Serien-Endpoint aus 009 — kein
+   neuer API-Vertrag. Anonymisiertes betriebsübergreifendes Benchmarking
+   bleibt bewusst offen.
 
 Jeder Folgeslice braucht einen eigenen Workboard-Claim. Neue API-Verträge sind
 nach dem Architecture Agent Protocol mit Domain-Pack-, ADR- und Drift-Nachweis

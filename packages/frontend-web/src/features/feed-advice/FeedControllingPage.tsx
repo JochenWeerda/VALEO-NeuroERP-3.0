@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fetchFeedingGroups, type FeedingGroup } from '@/lib/api/rations-lifecycle'
 import { recordDailyFeedingObservation } from '@/lib/api/feed-controlling'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+
+const FeedControllingTrends = lazy(() =>
+  import('@/features/feed-advice/FeedControllingTrends').then((module) => ({ default: module.FeedControllingTrends })),
+)
 
 const today = new Date().toISOString().slice(0, 10)
 
@@ -57,8 +62,21 @@ export function FeedControllingPage(): JSX.Element {
   return (
     <div data-testid="feed-controlling-page">
       {feedback ? <p className="mb-3 rounded-md border bg-muted px-3 py-2 text-sm" role="status">{feedback}</p> : null}
-      <UniversalNativeCockpitPage key={refreshKey} screenId="agrar/feed-controlling" testId="feed-controlling-worklist"
-        permissions={['futtermittel.rations.update']} onAction={(key) => { if (key === 'record_observation') setOpen(true) }} />
+      <Tabs defaultValue="tagesliste">
+        <TabsList className="mb-3">
+          <TabsTrigger value="tagesliste">Tagesliste</TabsTrigger>
+          <TabsTrigger value="trends">Langfristtrends</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tagesliste">
+          <UniversalNativeCockpitPage key={refreshKey} screenId="agrar/feed-controlling" testId="feed-controlling-worklist"
+            permissions={['futtermittel.rations.update']} onAction={(key) => { if (key === 'record_observation') setOpen(true) }} />
+        </TabsContent>
+        <TabsContent value="trends">
+          <Suspense fallback={<div className="h-64 animate-pulse rounded-lg bg-muted/40" aria-hidden />}>
+            <FeedControllingTrends />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Tageswerte erfassen</DialogTitle><DialogDescription>Istwerte pro Kuh; leere Felder bleiben fachlich unbekannt.</DialogDescription></DialogHeader>

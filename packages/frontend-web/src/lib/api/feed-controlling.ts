@@ -22,3 +22,41 @@ export async function recordDailyFeedingObservation(input: DailyFeedingObservati
   const response = await apiClient.post<Record<string, unknown>>(`${BASE}/observations`, input)
   return response.data
 }
+
+/** Ein Tagespunkt der Soll-Ist-Reihe; unbekannte Messwerte sind fachlich `null`, nie 0. */
+export interface ControllingSeriesPoint {
+  group_id: string
+  group_name: string
+  observation_date: string
+  version_no?: number | null
+  cow_count?: number | null
+  target_dmi_kg_cow?: number | null
+  actual_dmi_kg_cow?: number | null
+  target_cost_eur_cow?: number | null
+  actual_cost_eur_cow?: number | null
+  target_milk_kg_cow?: number | null
+  actual_milk_kg_cow?: number | null
+  actual_ecm_kg_cow?: number | null
+  nitrogen_efficiency_pct?: number | null
+  target_methane_kg_cow?: number | null
+  actual_methane_kg_cow?: number | null
+  methane_estimated?: boolean
+  dmi_deviation_kg?: number | null
+  cost_deviation_eur?: number | null
+  milk_deviation_kg?: number | null
+}
+
+export interface ControllingSeriesQuery {
+  groupId?: string
+  dateFrom?: string
+  dateTo?: string
+}
+
+export async function fetchControllingSeries(query: ControllingSeriesQuery = {}): Promise<ControllingSeriesPoint[]> {
+  const params: Record<string, string> = {}
+  if (query.groupId) params.group_id = query.groupId
+  if (query.dateFrom) params.date_from = query.dateFrom
+  if (query.dateTo) params.date_to = query.dateTo
+  const response = await apiClient.get<ControllingSeriesPoint[]>(`${BASE}/series`, { params })
+  return response.data ?? []
+}
