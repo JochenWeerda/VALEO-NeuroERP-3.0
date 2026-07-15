@@ -24,6 +24,12 @@ Dimension, Bezugsbasis und Herkunft pruefen -> FM/TM-Wert mit explizitem Typ
 Praezision und Modus runden. Unpassende Dimensionen sowie TM <= 0 oder > 100
 werden vor einer Berechnung abgewiesen.
 
+Futtermittelkatalog: vorhandenen Feed-Kopf suchen/anlegen -> Klassifikation und
+Freigabe pflegen -> Referenzwerte mit Einheit/Basis/Herkunft erfassen ->
+Lieferprodukt mit Gebinde, Mindestabnahme, Preis und Fracht zuordnen ->
+Solveradapter erzeugt den stabilen Rechenvertrag. Kopfupdates erwarten Revision
+und Pflichtgrund; Legacy-CRUD laeuft ueber denselben Rollen-/Auditpfad.
+
 Rationslebenszyklus: Gruppe waehlen -> Entwurf im Solver -> unveraenderlichen
 Snapshot anlegen -> fachliche Pruefung -> Freigabe -> sofortige oder geplante
 Aktivierung -> Fuetterung -> Abloesung/Archivierung. Jede Transition ist rollen-

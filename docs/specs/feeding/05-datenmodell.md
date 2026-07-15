@@ -364,3 +364,17 @@ Die Migration `feed_core_reference_data_20260715` seeded Einheiten und einen
 erweiterbaren DLG-/VALEO-Ausgangskatalog idempotent. Der effektive Read-Pfad
 bevorzugt eine tenantgebundene Definition vor dem globalen Code. Bestehende
 Solver-Tabellen bleiben unveraendert.
+
+## 12. Ist-Ausbau FEED-CORE-018
+
+- `domain_shared.futtermittel_einzelfutter` bleibt der Feed-Kopf und traegt
+  additiv `feed_kind`, Tierartscope, Konservierung, Freigabe, Gueltigkeit und
+  optimistische Revision.
+- `domain_agrar.feeding_feed_reference_values` speichert beliebige
+  Naehrstoffwerte mit Einheit, Basis, Status, Quelle, Prioritaet und Zeitbezug.
+- `domain_agrar.feeding_feed_products` speichert Liefer-SKU, Gebinde,
+  Mindestabnahme, Preis, Fracht und Zeitbezug.
+- `domain_agrar.feeding_feed_revisions` bewahrt jeden Kopfstand append-only.
+
+Migration und Backfill sind additiv; vorhandene Feed-/Artikel-/Bestands-IDs
+bleiben stabil.

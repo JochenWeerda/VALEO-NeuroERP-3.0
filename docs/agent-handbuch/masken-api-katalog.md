@@ -1168,13 +1168,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/futtermittel__einzelfuttermittel/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/futtermittel/einzelfuttermittel/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}`
-- `naehrstoffe` → `/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}/tabs/naehrstoffe`
-- `preise` → `/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}/tabs/preise`
+- `entity` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}`
+- `naehrstoffe` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/reference-values`
+- `preise` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/products`
+- `history` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/history`
 
 **Beispiel-Prompts:**
 

@@ -16,6 +16,10 @@ from sqlalchemy import and_
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
+from app.agrar.rations.authz import READ_ROLES, WRITE_ROLES, require_roles
+from app.agrar.rations.feed_catalog import infer_feed_kind
+from app.auth.deps import User, get_current_user
+from app.services.feeding_feed_catalog_service import FeedCatalogNotFound, FeedingFeedCatalogService
 from app.infrastructure.models.futtermittel_models import (
     Einzelfuttermittel,
     Mischfuttermittel,
@@ -132,7 +136,9 @@ async def list_einzelfuttermittel(
     aktiv: bool = Query(True, description="Nur aktive"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
+    require_roles(user, READ_ROLES)
     try:
         q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
         if aktiv:
@@ -151,7 +157,9 @@ async def get_einzelfuttermittel(
     futter_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
+    require_roles(user, READ_ROLES)
     item = db.query(Einzelfuttermittel).filter(
         and_(Einzelfuttermittel.id == futter_id, Einzelfuttermittel.tenant_id == tenant_id)
     ).first()
@@ -166,12 +174,15 @@ async def create_einzelfuttermittel(
     payload: EinzelfuttermittelIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    item = Einzelfuttermittel(id=uuid7(), tenant_id=tenant_id, **payload.model_dump())
-    db.add(item)
-    db.commit()
-    db.refresh(item)
-    return item
+    require_roles(user, WRITE_ROLES)
+    data = payload.model_dump()
+    data.update({
+        "feed_kind": infer_feed_kind(payload.art).value,
+        "approval_status": "approved",
+    })
+    return FeedingFeedCatalogService(db, tenant_id, str(user.get("sub") or "unknown")).create_feed(data)
 
 
 @router.put("/einzelfuttermittel/{futter_id}", response_model=EinzelfuttermittelOut,
@@ -181,17 +192,21 @@ async def update_einzelfuttermittel(
     payload: EinzelfuttermittelIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    item = db.query(Einzelfuttermittel).filter(
-        and_(Einzelfuttermittel.id == futter_id, Einzelfuttermittel.tenant_id == tenant_id)
-    ).first()
-    if not item:
-        raise HTTPException(status_code=404, detail=f"Einzelfuttermittel '{futter_id}' nicht gefunden")
-    for k, v in payload.model_dump().items():
-        setattr(item, k, v)
-    db.commit()
-    db.refresh(item)
-    return item
+    require_roles(user, WRITE_ROLES)
+    service = FeedingFeedCatalogService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        current = service.get_feed(futter_id)
+    except FeedCatalogNotFound as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    data = payload.model_dump()
+    data.update({
+        "expected_revision": current["revision"],
+        "reason": "Legacy-API-Kompatibilitaet",
+        "feed_kind": infer_feed_kind(payload.art).value,
+    })
+    return service.update_feed(futter_id, data)
 
 
 @router.delete("/einzelfuttermittel/{futter_id}", status_code=204,
@@ -200,14 +215,18 @@ async def delete_einzelfuttermittel(
     futter_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    item = db.query(Einzelfuttermittel).filter(
-        and_(Einzelfuttermittel.id == futter_id, Einzelfuttermittel.tenant_id == tenant_id)
-    ).first()
-    if not item:
-        raise HTTPException(status_code=404, detail=f"Einzelfuttermittel '{futter_id}' nicht gefunden")
-    item.aktiv = False
-    db.commit()
+    require_roles(user, WRITE_ROLES)
+    service = FeedingFeedCatalogService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        current = service.get_feed(futter_id)
+        service.update_feed(futter_id, {
+            "expected_revision": current["revision"], "reason": "Legacy-API-Deaktivierung",
+            "aktiv": False, "approval_status": "retired",
+        })
+    except FeedCatalogNotFound as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     return Response(status_code=204)
 
 

@@ -461,3 +461,16 @@ Schemaversion und minimierter `data`-Block. Zustellung ist at-least-once;
 Alle drei Pfade verlangen eine Feed-Read-Rolle und einen Tenantkontext. Ungueltige
 TM-Prozente oder Vertragswerte liefern 422; Autorisierungsfehler 403. Die API
 deutet einen Wert nie implizit als Menge oder Konzentration.
+
+## 13. Implementierter Feed-Catalog-Vertrag
+
+`/api/v1/agrar/rations-optimization/feed-catalog/feeds` stellt Suche/Anlage,
+Detail und optimistisch versioniertes Patch bereit. Unterressourcen
+`reference-values`, `products` und `history` liefern die echte ObjectPage.
+Flexible Werte werden gegen den Naehrstoffkatalog, kanonische Einheit und
+Wertebereich validiert. SKU-Wiederholung ist idempotent und erhoeht die
+Produktrevision. Fremde Tenant-IDs liefern 404; fehlende Rollen 403; stale
+Revisionen 409.
+
+Die bestehende `/api/v1/futter/einzelfuttermittel`-Kompatibilitaetsstrecke bleibt
+verfuegbar, delegiert Mutationen aber an denselben Rollen-/Versionsservice.

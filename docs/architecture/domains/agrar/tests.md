@@ -19,6 +19,7 @@ pytest tests/test_rations_readiness.py -q --no-cov
 pytest tests/test_rations_controlling.py -q --no-cov
 pytest tests/test_feeding_groups_core.py tests/test_rations_lifecycle_api.py -q --no-cov
 pytest tests/test_feeding_reference_data.py tests/test_rations_reference_data_api.py -q --no-cov
+pytest tests/test_feeding_feed_catalog.py tests/test_feeding_feed_catalog_api.py tests/test_futter_stamm.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`

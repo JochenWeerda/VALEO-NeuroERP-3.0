@@ -497,3 +497,12 @@ Dimension, Wertebereich, Herkunft und Revision statt eine weitere freie
 Agrar-Spezialmaske einzufuehren. Route:
 `/portal/rationsoptimierung?view=reference-data`. Der Screen ist read-only;
 Aenderungen werden erst nach einem eigenen Governance-Workflow freigeschaltet.
+
+## 13. Futtermittel-ObjectPage FEED-CORE-018
+
+`futtermittel/einzelfuttermittel` verwendet keine generischen Masken-Stubs mehr.
+Kopf, Naehrstoffwerte, Lieferprodukte/Preise und Revisionen kommen aus dem echten
+Feed-Catalog. Die bestehende native Route
+`/futtermittel/einzelfuttermittel/{id}` rendert die zentrale Runtime; nur der
+begruendete Revisionsdialog ist ein Domain-Overlay. Die Liste navigiert fuer
+bestehende Datensaetze auf diese ObjectPage statt in die freie Legacy-Maske.

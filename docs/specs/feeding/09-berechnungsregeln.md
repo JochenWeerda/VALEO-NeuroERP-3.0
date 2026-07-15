@@ -415,3 +415,15 @@ gerundeten auch den ungerundeten Wert aus. Property-Tests pruefen die FM/TM-
 Rueckrichtung ueber kleine, extreme und typische TM-/Wertkombinationen; bei
 periodischen Dezimalbruechen gilt ein Residuum von hoechstens `1e-24` vor der
 expliziten Ausgaberundung.
+
+## 19. Solver-Feed-Adapter (FEED-CORE-018)
+
+1. Je Naehrstoff gewinnt der aktuell gueltige flexible Wert mit hoechster
+   Prioritaet; Legacyfelder sind nur Fallback.
+2. Trockenmasse `percent` wird zu Anteil `/ 100`.
+3. Legacy-Rohprotein in Prozent wird fuer den Solver zu `g/kg TM * 10`.
+4. Lieferpreis wird inklusive Fracht als
+   `(price_eur_t + freight_eur_t) / 1000 / dm_frac` in EUR/kg TM uebergeben.
+5. Fehlende optionale Solverwerte bleiben im bestehenden `Feed.from_dict`-
+   Vertrag definiert; unbekannte Naehrstoffcodes werden nicht als Nullmessung
+   erfunden.

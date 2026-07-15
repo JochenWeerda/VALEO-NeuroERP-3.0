@@ -66,6 +66,19 @@ Gruppenentscheidung: [ADR-045](../../../adr/adr-045-versioned-feeding-groups.md)
 
 Entscheidung: [ADR-046](../../../adr/adr-046-feeding-reference-data-and-unit-conversion.md).
 
+## Fuetterungsberatung / Futtermittelkatalog
+
+- `GET|POST /api/v1/agrar/rations-optimization/feed-catalog/feeds`
+- `GET|PATCH /api/v1/agrar/rations-optimization/feed-catalog/feeds/{id}`
+- `GET /api/v1/agrar/rations-optimization/feed-catalog/feeds/{id}/history`
+- `GET|POST .../feeds/{id}/reference-values`
+- `GET|POST .../feeds/{id}/products`
+
+Alle Pfade sind tenant- und Feed-Rollen-gebunden. Kopfupdates verlangen
+`expected_revision` und Grund; Werte tragen Basis/Einheit/Herkunft, Produkte
+Gebinde/Mindestabnahme/Preis/Fracht/Gueltigkeit. Entscheidung:
+[ADR-047](../../../adr/adr-047-canonical-feeding-feed-catalog.md).
+
 ## Fütterungsberatung / Einsatzbereitschaft
 
 - `POST /api/v1/agrar/rations-optimization/readiness/evaluate` — prüft einen

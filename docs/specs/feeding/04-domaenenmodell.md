@@ -411,3 +411,13 @@ Value Objects; eine FM/TM-Konvertierung ohne Mengen-/Konzentrationssemantik ist
 ungueltig. Globale Definitionen sind lesbar, tenantgebundene Definitionen duerfen
 spaeter denselben Code kontrolliert ueberschreiben. Historische Revisionen sind
 append-only. Der Solver-Adapter folgt explizit in FEED-CORE-018.
+
+## 14. Implementierter Feed-Katalog (FEED-CORE-018)
+
+Der vorhandene Einzelfuttermittelstamm ist der Aggregate Root `Feed`.
+`FeedProduct` bildet die lieferbare SKU samt Gebinde, Mindestabnahme, Preis,
+Fracht und Gueltigkeit. `FeedReferenceValue` verbindet Feed,
+NutrientDefinition, UnitDefinition, FM/TM-Basis, Wertstatus, Quelle und
+Gueltigkeit. `FeedRevision` ist append-only. Der `SolverFeedAdapter` ist ein
+Anti-Corruption-Layer: flexible gueltige Werte gewinnen, feste Legacyfelder
+dienen nur als golden-getesteter Fallback.
