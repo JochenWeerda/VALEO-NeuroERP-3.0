@@ -97,7 +97,7 @@ export function FeedControllingTrends(): JSX.Element {
   useEffect(() => { void load() }, [load])
 
   const hasEstimatedMethane = useMemo(
-    () => points.some((point) => point.methane_estimated && point.actual_methane_kg_cow !== null && point.actual_methane_kg_cow !== undefined),
+    () => points.some((point) => point.methane_estimated && point.actual_methane_kg_cow !== undefined),
     [points],
   )
 
