@@ -31,7 +31,7 @@ verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 | 10 | UI/UX | ✅ Referenzkapitel | `10-ui-ux.md` (Aufgabenmodi, Editor, Warnungen, Provenienz, Responsive, Research, Metriken) |
 | 11 | Agenten | ✅ Referenzkapitel | `11-agenten.md` (6 Fachagenten, Tools, Human Gates, Security, Audit, Evals) |
 | 12 | Integrationen | ✅ Referenzkapitel | `12-integrationen.md` (Labor, Herd-Data/DDW-Klasse, ICAR, agrirouter, Mixer, ERP, Security, Resilienz) |
-| 13 | Tests | ✅ Strategie | `target-architecture.md` §8; Bestand `ist-audit.md` §3 |
+| 13 | Tests | ✅ Referenzkapitel | `13-tests.md` (200 stabile Abnahmetests plus Golden, Property, Playwright, A11y, Performance, Security) |
 | 14 | Migration | ✅ Konzept | `target-architecture.md` §6 |
 | 15 | Rollout | ✅ Konzept | `implementation-plan.md` (Flag `feeding_advisory`, Pilot) |
 | 16 | Traceability | ✅ | `requirements-traceability.md` |

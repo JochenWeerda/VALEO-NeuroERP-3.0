@@ -38,6 +38,8 @@ progress: >-
   Tool-/Human-Gates, Security, Audit und Evaluation erstellt. Tranche 7: 12
   Integrationen mit Provider-ACL, Labor, Herd-Data/DDW-Klasse, ICAR, agrirouter,
   Mixer, ERP-Events, Quarantaene, Resilienz, Security und Live-Gates erstellt.
+  Tranche 8: 13 Testkatalog mit 200 stabilen Akzeptanztests sowie Golden-,
+  Property-, Playwright-, A11y-, Performance-, Security- und Release-Gates erstellt.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
