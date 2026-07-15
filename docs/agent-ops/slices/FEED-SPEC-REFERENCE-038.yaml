@@ -25,7 +25,9 @@ progress: >-
   Tranche 2: 05 Datenmodell mit Gesamt-Tabellenkatalog, ERD, Tenant-, Historien-,
   Audit- und Indexregeln sowie 06 API mit Bestands-/Zielendpunkten, Schemas,
   Fehlern, Autorisierung, Jobs und Contract-Tests erstellt. Weitere Kapitel und
-  Arbeitspaketkatalog folgen im selben Slice.
+  Arbeitspaketkatalog folgen im selben Slice. Tranche 3: 07 Maskenkatalog mit
+  22 eigenstaendigen Meridian-Masken, Feldern, Validierungen, Actions, Rollen,
+  Navigation, Zustaenden, Responsive/A11y-Regeln und Low-Fidelity-Mockups erstellt.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
