@@ -7,11 +7,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from app.agrar.rations.authz import READ_ROLES, require_roles
+from datetime import datetime
+
+from app.agrar.rations.authz import READ_ROLES, WRITE_ROLES, require_roles
 from app.auth.deps import User, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.feeding_ration_editor_service import FeedingRationEditorService
+from app.services.feeding_ration_editor_service import (
+    EmptyRationVersionError,
+    FeedingRationEditorService,
+)
 
 router = APIRouter(prefix="/feeding", tags=["feeding-ration-editor"])
 
@@ -63,6 +68,59 @@ class RationDraftEvaluationOut(BaseModel):
     coverage: dict[str, dict[str, Any]]
     deltas: list[DraftDeltaOut]
     findings: list[DraftFindingOut]
+
+
+class RationEvaluationOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    tenant_id: str
+    ration_id: str
+    ration_version_id: str
+    requirement_profile_id: str
+    totals: dict[str, float]
+    deltas: list[DraftDeltaOut]
+    findings: list[DraftFindingOut]
+    coverage: dict[str, dict[str, Any]]
+    evaluated_by: str
+    evaluated_at: datetime
+
+
+class VersionEvaluateIn(BaseModel):
+    """Bewusst leer: die Komponenten kommen ausschliesslich aus dem
+    unveraenderlichen Versions-Snapshot (keine Client-Payload)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+@router.post("/ration-versions/{version_id}/evaluate", response_model=RationEvaluationOut,
+             status_code=201,
+             summary="Rationsversion aus ihrem Snapshot bewerten und append-only persistieren")
+async def evaluate_ration_version(version_id: str, body: VersionEvaluateIn,
+                                  db: Session = Depends(get_db),
+                                  tenant_id: str = Depends(get_tenant_id),
+                                  user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer die Versionsbewertung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.evaluate_version(version_id)
+    except EmptyRationVersionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/ration-versions/{version_id}/evaluation", response_model=RationEvaluationOut,
+            summary="Juengste persistierte Bewertung einer Rationsversion")
+async def get_ration_version_evaluation(version_id: str, db: Session = Depends(get_db),
+                                        tenant_id: str = Depends(get_tenant_id),
+                                        user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer die Versionsbewertung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.latest_evaluation(version_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/ration-drafts/evaluate", response_model=RationDraftEvaluationOut,

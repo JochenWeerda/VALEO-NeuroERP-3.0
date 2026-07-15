@@ -60,7 +60,8 @@ def test_draft_evaluation_compares_against_requirements_with_textual_findings() 
 
     codes = {f["code"]: f for f in result["findings"]}
     assert "dmi_below_band" in codes
-    assert codes["dmi_below_band"]["severity"] in {"warning", "blocker"}
+    # Vertragsschaerfung FEED-EDITOR-022: 4-stufige Prioritaet
+    assert codes["dmi_below_band"]["severity"] in {"high", "critical"}
     assert "energy_deficit" in codes
     assert codes["energy_deficit"]["message"], "Befund braucht verstaendlichen Text"
     assert codes["energy_deficit"]["actual"] < codes["energy_deficit"]["target"]
@@ -95,3 +96,26 @@ def test_unknown_feed_raises_lookup_error() -> None:
 
     with pytest.raises(LookupError):
         evaluate_draft([{"feed_id": "fehlt", "kg_fm": 5.0}], {}, REQUIREMENTS)
+
+
+def test_findings_carry_four_level_priority_and_are_ordered() -> None:
+    """FEED-EDITOR-022: Befunde tragen eine der vier Stufen critical/high/medium/info
+    und kommen nach Prioritaet geordnet zurueck (TDD-Red-Welle 2)."""
+    from app.agrar.rations.ration_draft import SEVERITY_ORDER, evaluate_draft
+
+    assert SEVERITY_ORDER == ("critical", "high", "medium", "info")
+
+    feed_without_sidp = _feed("mineral", dm_frac=0.90, me=0.0)
+    del feed_without_sidp["sidp"]
+    feeds = {"gras": _feed("gras"), "mineral": feed_without_sidp}
+    # Unterdeckung (high) + Abdeckungsluecke (info) in einem Bild
+    result = evaluate_draft([
+        {"feed_id": "gras", "kg_fm": 10.0},
+        {"feed_id": "mineral", "kg_fm": 0.2},
+    ], feeds, REQUIREMENTS)
+
+    severities = [f["severity"] for f in result["findings"]]
+    assert set(severities) <= {"critical", "high", "medium", "info"}
+    assert "high" in severities, "Unterdeckung muss Stufe high tragen"
+    ranks = [SEVERITY_ORDER.index(s) for s in severities]
+    assert ranks == sorted(ranks), "Befunde muessen nach Prioritaet geordnet sein"

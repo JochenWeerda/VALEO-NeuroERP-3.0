@@ -107,3 +107,55 @@ describe('RationEditor', () => {
     expect(await screen.findByRole('heading', { name: /Sommerration/ })).toBeInTheDocument()
   })
 })
+
+describe('RationEditor Befund-Navigation (FEED-EDITOR-022)', () => {
+  beforeEach(() => {
+    fetchRationDetailMock.mockReset()
+    evaluateRationDraftMock.mockReset()
+    createRationVersionMock.mockReset()
+    listFeedingFeedsMock.mockReset()
+    listFeedingFeedsMock.mockResolvedValue([])
+    fetchRationDetailMock.mockResolvedValue({
+      ...ration,
+      versions: [{
+        id: 'v-3', version_no: 3, status: 'draft', snapshot: {
+          components: [
+            { feed_id: 'f-gras', name: 'Grassilage', kg_fm: 24 },
+            { feed_id: 'f-min', name: 'Mineral', kg_fm: 0.2 },
+          ],
+        }, snapshot_checksum: 'c',
+      }],
+    })
+    evaluateRationDraftMock.mockResolvedValue({
+      ...evaluation,
+      positions: [
+        ...evaluation.positions,
+        { feed_id: 'f-min', name: 'Mineral', kg_fm: 0.2, kg_tm: 0.18, cost_eur: 0.09 },
+      ],
+      coverage: { sidp_g: { complete: false, missing_feed_ids: ['f-min'] } },
+      findings: [
+        { code: 'energy_deficit', severity: 'high', metric: 'me_mj', actual: 88.2, target: 210, message: 'Energie: Unterdeckung.' },
+        { code: 'sidp_g_incomplete', severity: 'info', metric: 'sidp_g', actual: 588, target: null, message: 'sidP: Summe unvollstaendig.' },
+      ],
+    })
+  })
+
+  it('fokussiert per Befund-Klick die verursachende Position (Warnung -> Ursache)', async () => {
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByRole('heading', { name: /Sommerration/ })
+    await screen.findByText(/Summe unvollstaendig/)
+
+    await userEvent.click(screen.getByRole('button', { name: /sidP: Summe unvollstaendig/ }))
+    expect(screen.getByLabelText(/Menge Mineral/)).toHaveFocus()
+
+    await userEvent.click(screen.getByRole('button', { name: /Energie: Unterdeckung/ }))
+    expect(screen.getByLabelText(/Menge Grassilage/)).toHaveFocus()
+  })
+
+  it('zeigt die vier Prioritaetsstufen mit Textlabel', async () => {
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByText(/Summe unvollstaendig/)
+    expect(screen.getByText('Hoch')).toBeInTheDocument()
+    expect(screen.getByText('Hinweis')).toBeInTheDocument()
+  })
+})

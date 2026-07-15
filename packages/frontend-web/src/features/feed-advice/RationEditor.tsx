@@ -34,10 +34,19 @@ function snapshotComponents(detail: RationDetail): DraftComponent[] {
     .filter((item) => item.feed_id !== '')
 }
 
+/** Vier Prioritaetsstufen (FEED-EDITOR-022, Maskenvertrag FEED-MASK-009). */
 const SEVERITY_LABEL: Record<string, string> = {
-  blocker: 'Blocker',
-  warning: 'Warnung',
+  critical: 'Kritisch',
+  high: 'Hoch',
+  medium: 'Mittel',
   info: 'Hinweis',
+}
+
+const SEVERITY_BADGE: Record<string, 'destructive' | 'default' | 'secondary'> = {
+  critical: 'destructive',
+  high: 'destructive',
+  medium: 'default',
+  info: 'secondary',
 }
 
 /**
@@ -59,6 +68,7 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const debounceRef = useRef<number | null>(null)
+  const amountInputRefs = useRef(new Map<string, HTMLInputElement>())
 
   const load = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -156,6 +166,17 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
     return map
   }, [evaluation])
 
+  /** Warnung → Ursache: Befund fokussiert die verursachende Position
+   * (fehlender Analysewert → betroffenes Futter, Kennzahl → erste Position). */
+  function focusFindingCause(finding: { code: string; metric: string }): void {
+    const missing = evaluation?.coverage?.[finding.metric]?.missing_feed_ids ?? []
+    const targetFeedId = finding.code.endsWith('_incomplete') && missing.length > 0
+      ? missing[0]
+      : components[0]?.feed_id
+    if (!targetFeedId) return
+    amountInputRefs.current.get(targetFeedId)?.focus()
+  }
+
   if (loading) {
     return <div className="h-64 animate-pulse rounded-lg bg-muted/40" aria-hidden data-testid="ration-editor-loading" />
   }
@@ -219,6 +240,10 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                         step="0.1"
                         value={String(component.kg_fm)}
                         onChange={(event) => updateAmount(component.feed_id, event.target.value)}
+                        ref={(element) => {
+                          if (element) amountInputRefs.current.set(component.feed_id, element)
+                          else amountInputRefs.current.delete(component.feed_id)
+                        }}
                       />
                     </td>
                     <td className="py-1.5 pr-2 text-right font-mono tabular-nums">
@@ -287,11 +312,18 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
               </dl>
               <ul className="space-y-2">
                 {evaluation.findings.map((finding) => (
-                  <li key={finding.code} className="rounded-md border p-2 text-sm">
-                    <Badge variant={finding.severity === 'info' ? 'secondary' : 'destructive'}>
-                      {SEVERITY_LABEL[finding.severity] ?? finding.severity}
-                    </Badge>
-                    <p className="mt-1 text-muted-foreground">{finding.message}</p>
+                  <li key={finding.code}>
+                    <button
+                      type="button"
+                      className="w-full rounded-md border p-2 text-left text-sm hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label={finding.message}
+                      onClick={() => focusFindingCause(finding)}
+                    >
+                      <Badge variant={SEVERITY_BADGE[finding.severity] ?? 'secondary'}>
+                        {SEVERITY_LABEL[finding.severity] ?? finding.severity}
+                      </Badge>
+                      <span className="mt-1 block text-muted-foreground">{finding.message}</span>
+                    </button>
                   </li>
                 ))}
                 {evaluation.findings.length === 0 ? (

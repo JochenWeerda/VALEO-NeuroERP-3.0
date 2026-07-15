@@ -101,3 +101,64 @@ def test_editor_journey_evaluate_draft_against_profile() -> None:
                           json={"group_id": group_id, "requirement_profile_id": profile_id,
                                 "components": [{"feed_id": feed_id, "kg_fm": 5.0}]})
     assert foreign.status_code == 404
+
+
+def test_version_evaluation_is_persisted_from_snapshot_and_retrievable() -> None:
+    """FEED-EDITOR-022: Bewertung einer Version wird serverseitig aus dem
+    unveraenderlichen Snapshot abgeleitet, append-only persistiert und ist
+    als juengste Bewertung abrufbar (TDD-Red-Welle 2)."""
+    suffix = uuid4().hex[:8]
+    feed_id = _create_feed(suffix)
+
+    group = client.post(f"{ROOT}/lifecycle/groups", headers=HEADERS, json={
+        "name": f"EvalPersist {suffix}", "animal_count": 8, "feeding_system": "TMR",
+        "profile_code": "fresh_cow", "pregnancy_status": "unknown"})
+    assert group.status_code == 201, group.text
+    group_id = group.json()["id"]
+
+    profile = client.post(f"{ROOT}/feeding/requirement-profiles", headers=HEADERS, json={
+        "group_id": group_id, "inputs": {"milk_kg_day": 30}})
+    assert profile.status_code == 201, profile.text
+
+    ration = client.post(f"{ROOT}/lifecycle/rations", headers=HEADERS, json={
+        "group_id": group_id, "name": f"EvalRation {suffix}",
+        "snapshot": {"components": [{"feed_id": feed_id, "kg_fm": 28.0}]}})
+    assert ration.status_code == 201, ration.text
+    version_id = ration.json()["latest_version_id"]
+
+    # Persistieren: keine Client-Komponenten - Server liest den Snapshot
+    evaluated = client.post(f"{ROOT}/feeding/ration-versions/{version_id}/evaluate",
+                            headers=HEADERS, json={})
+    assert evaluated.status_code == 201, evaluated.text
+    payload = evaluated.json()
+    assert payload["ration_version_id"] == version_id
+    assert payload["totals"]["dm_kg"] > 0
+    assert payload["requirement_profile_id"]
+
+    latest = client.get(f"{ROOT}/feeding/ration-versions/{version_id}/evaluation",
+                        headers=HEADERS)
+    assert latest.status_code == 200, latest.text
+    assert latest.json()["id"] == payload["id"]
+
+    # Version ohne Komponenten-Snapshot -> 422 statt leerer Schein-Bewertung
+    empty_ration = client.post(f"{ROOT}/lifecycle/rations", headers=HEADERS, json={
+        "group_id": group_id, "name": f"Leer {suffix}", "snapshot": {"components": []}})
+    assert empty_ration.status_code == 201
+    empty_eval = client.post(
+        f"{ROOT}/feeding/ration-versions/{empty_ration.json()['latest_version_id']}/evaluate",
+        headers=HEADERS, json={})
+    assert empty_eval.status_code == 422
+
+    # Unbekannte Version -> 404; fehlende Rolle -> 403 (isolierte App unten)
+    missing = client.post(f"{ROOT}/feeding/ration-versions/{uuid4()}/evaluate",
+                          headers=HEADERS, json={})
+    assert missing.status_code == 404
+
+
+def test_version_evaluation_endpoints_reject_user_without_role() -> None:
+    _CONTEXT["roles"] = []
+    with TestClient(_build_role_app()) as role_client:
+        post = role_client.post("/feeding/ration-versions/v-1/evaluate", json={})
+        get = role_client.get("/feeding/ration-versions/v-1/evaluation")
+    assert post.status_code == 403
+    assert get.status_code == 403

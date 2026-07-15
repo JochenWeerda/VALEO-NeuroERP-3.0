@@ -1,0 +1,97 @@
+slice_id: FEED-EDITOR-022
+id: FEED-EDITOR-022
+title: Persistente Versionsbewertung, 4-stufige Prioritaet und Befund-zu-Ursache-Navigation
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+requirements: [FEED-EVAL-001, FEED-EVAL-002]
+work_packages: [FEED-WP-072, FEED-WP-074]
+decision_level: normal
+dependencies: [FEED-EDITOR-021]
+goal: >-
+  Bewertungen werden je unveraenderlicher Rationsversion nachvollziehbar
+  persistiert (Datenquelle: der Versions-Snapshot selbst), Befunde tragen die
+  vier Prioritaetsstufen des Maskenvertrags und fuehren den Benutzer direkt
+  zur verursachenden Position.
+scope:
+  - "Migration feed_editor_evaluations_20260715: ration_evaluations
+    (append-only per DB-Trigger; totals/deltas/findings/coverage JSONB;
+    Pflichtbezug auf Version + Bedarfsprofil)."
+  - "ration_draft.py: SEVERITY_ORDER (critical/high/medium/info),
+    Unterdeckung/Bandverletzung=high, Ueberschuss=medium,
+    Datenqualitaet=info; Befunde nach Prioritaet geordnet. 021-Tests als
+    dokumentierte Vertragsschaerfung angepasst."
+  - "Service: evaluate_version leitet Komponenten serverseitig aus dem
+    Snapshot ab (leerer Snapshot -> EmptyRationVersionError/422, unbekannte
+    Version -> 404) und persistiert; latest_evaluation liefert die juengste
+    Bewertung."
+  - "API: POST /feeding/ration-versions/{id}/evaluate (WRITE, Body bewusst
+    leer/extra=forbid — keine Client-Payload) + GET .../evaluation (READ)."
+  - "RationEditor: Befunde als fokusfaehige Buttons — _incomplete-Befunde
+    fokussieren das Futter mit fehlendem Analysewert, Kennzahl-Befunde die
+    erste Position; 4-stufige Textlabels (Kritisch/Hoch/Mittel/Hinweis)."
+file_ownership:
+  - alembic/versions/feed_editor_evaluations_20260715.py
+  - app/agrar/rations/ration_draft.py
+  - app/services/feeding_ration_editor_service.py
+  - app/api/v1/endpoints/feeding_ration_editor.py
+  - tests/test_feeding_ration_editor.py
+  - tests/test_feeding_ration_editor_api.py
+  - packages/frontend-web/src/features/feed-advice/RationEditor.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/ration-editor.test.tsx
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-EDITOR-022.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    Backend: 3 failed (ImportError SEVERITY_ORDER; 404 auf
+    /ration-versions/{id}/evaluate und .../evaluation vor Implementierung).
+    Frontend: 2 failed (Befund-Buttons und 4-Stufen-Labels nicht vorhanden).
+    Befehle und Fehlerbilder im Workboard-Verlauf dokumentiert.
+  green: >-
+    Backend 9/9 nach Migration+Service+Endpoints; Frontend 5/5 (ein
+    Testfix dokumentiert: doppeltes .default beim dynamischen
+    user-event-Import — auf Modul-Import vereinheitlicht).
+  refactor: >-
+    Severity-Badge-/Label-Maps zentralisiert; Fokus-Registry ueber
+    Input-Refs statt DOM-Queries.
+acceptance:
+  - "Bewertung einer Version ist ohne Client-Payload reproduzierbar aus dem
+    Snapshot ableitbar, append-only persistiert und als juengste Bewertung
+    abrufbar; leere Snapshots liefern 422 statt Schein-Bewertung."
+  - "Befunde tragen genau eine der vier Stufen und kommen priorisiert
+    geordnet; Klick fuehrt zur verursachenden Position."
+  - "RBAC 403 ohne Rolle auf beiden neuen Endpoints."
+tests:
+  - "pytest test_feeding_ration_editor{,_api}.py -> 9/9 (nach Red-Welle 2)."
+  - "Fokusregression Editor+Requirements+Lifecycle+Authz -> 47 passed."
+  - "Vitest ration-editor.test.tsx -> 5/5; tsc 0; eslint 0."
+  - "Alembic Single-Head feed_editor_evaluations_20260715; Architecture
+    Validate/Drift 900/900."
+risks:
+  - "Bewertungskategorien decken die Kernkennzahlen; Mineralstoff-/Struktur-
+    Regeln und Ursache/Folge-Felder folgen in weiteren Editor-Paketen."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Version traegt eine nachvollziehbare, priorisierte Bewertung mit
+    sichtbarer Datenherkunft; Benutzer gelangen vom Befund direkt zur Ursache.
+  architektur_vertrag: >-
+    Bewertung bleibt Code-SSOT; Persistenz append-only; Endpoint-Body bewusst
+    leer, damit Snapshot die einzige Wahrheit ist.
+  daten_vertrag: >-
+    Additive Migration; Unveraenderlichkeit per Trigger wie bei
+    ration_versions/requirement_profiles.
+  security_vertrag: >-
+    WRITE fuer persistierende Bewertung, READ fuer Abruf; Tenant-Scope auf
+    Version und Profil.
+  betriebs_vertrag: >-
+    Rollback = Revert + downgrade(); keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Traceability EVAL-001 fortgeschrieben, EVAL-002 VERIFIED; Workboard;
+    dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz beider Wellen; Determinismus ueber Snapshot-Ableitung;
+    Regression + Gates gruen.

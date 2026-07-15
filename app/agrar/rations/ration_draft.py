@@ -28,6 +28,11 @@ NUTRIENT_KEYS: dict[str, tuple[str, str]] = {
 DEFICIT_TOLERANCE = 0.98
 SURPLUS_FACTOR = 1.10
 
+# Vier Prioritaetsstufen (FEED-EDITOR-022, Maskenvertrag FEED-MASK-009):
+# critical = fachlicher Blocker, high = Unterdeckung/Bandverletzung,
+# medium = Auffaelligkeit (z. B. Ueberschuss), info = Hinweis/Datenqualitaet.
+SEVERITY_ORDER: tuple[str, ...] = ("critical", "high", "medium", "info")
+
 METRIC_LABELS = {
     "me_mj": "Energie (ME)",
     "sidp_g": "Protein (sidP)",
@@ -131,13 +136,13 @@ def _build_findings(
     dm_kg = totals["dm_kg"]
     if dmi_min is not None and dm_kg < float(dmi_min):
         findings.append(_finding(
-            "dmi_below_band", "warning", "dm_kg", dm_kg, float(dmi_min),
+            "dmi_below_band", "high", "dm_kg", dm_kg, float(dmi_min),
             f"TM-Aufnahme {dm_kg:.1f} kg liegt unter dem Band ({float(dmi_min):.1f}–{float(dmi_max or 0):.1f} kg): "
             "Ration traegt die Zielaufnahme nicht.",
         ))
     elif dmi_max is not None and dm_kg > float(dmi_max):
         findings.append(_finding(
-            "dmi_above_band", "warning", "dm_kg", dm_kg, float(dmi_max),
+            "dmi_above_band", "high", "dm_kg", dm_kg, float(dmi_max),
             f"TM-Aufnahme {dm_kg:.1f} kg liegt ueber dem Band (max. {float(dmi_max):.1f} kg): "
             "Menge reduzieren oder Band pruefen.",
         ))
@@ -154,13 +159,13 @@ def _build_findings(
         label = METRIC_LABELS[metric]
         if actual < target_f * DEFICIT_TOLERANCE:
             findings.append(_finding(
-                deficit_code, "warning", metric, actual, target_f,
+                deficit_code, "high", metric, actual, target_f,
                 f"{label}: {actual:.0f} deckt den Bedarf von {target_f:.0f} nicht — Unterdeckung "
                 f"{target_f - actual:.0f}.",
             ))
         elif actual > target_f * SURPLUS_FACTOR:
             findings.append(_finding(
-                surplus_code, "info", metric, actual, target_f,
+                surplus_code, "medium", metric, actual, target_f,
                 f"{label}: {actual:.0f} liegt deutlich ueber dem Bedarf von {target_f:.0f} — "
                 "Kosten und Stoffwechselbelastung pruefen.",
             ))
@@ -174,6 +179,7 @@ def _build_findings(
                 "fehlt der Analysewert (Teilsumme nur aus bekannten Beitraegen).",
             ))
 
+    findings.sort(key=lambda finding: SEVERITY_ORDER.index(finding["severity"]))
     return findings
 
 
