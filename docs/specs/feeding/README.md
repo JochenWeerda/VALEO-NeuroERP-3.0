@@ -20,8 +20,8 @@ verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 |---|---|---|---|
 | 00 | Vision | ✅ Referenzkapitel | `00-vision.md` |
 | 01 | Glossar | ✅ Referenzkapitel | `01-glossar.md` |
-| 02 | Lastenheft | ✅ | `lastenheft-fuetterungsberatung.md` |
-| 03 | Fachkonzept | ✅ Kern | `ist-audit.md` + `target-architecture.md` |
+| 02 | Lastenheft | ✅ Referenzkapitel | `02-lastenheft.md` (normativer Index) + `lastenheft-fuetterungsberatung.md` (Vollquelle) |
+| 03 | Fachkonzept | ✅ Referenzkapitel | `03-fachkonzept.md` (Gesamtprozess) + `ist-audit.md` + `target-architecture.md` |
 | 04 | Domänenmodell | ✅ Referenzkapitel | `04-domaenenmodell.md` (Context Map, Aggregate, VOs, Events, UML, Event Storming) |
 | 05 | Datenmodell | ✅ Referenzkapitel | `05-datenmodell.md` (Tabellen, Relationen, Tenant, Historisierung, Audit, Indizes) |
 | 06 | API | ✅ Referenzkapitel | `06-api.md` (Bestand/Zielbild, Schemas, Fehler, OpenAPI- und Contract-Governance) |
