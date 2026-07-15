@@ -1,0 +1,62 @@
+slice_id: FEED-CORE-016
+id: FEED-CORE-016
+title: Tiergruppenprofile Gueltigkeit Historie und native ObjectPage
+owner: Codex
+status: reserviert
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+goal: >-
+  Tiergruppen fachlich vollstaendig, zeitlich nachvollziehbar und innerhalb von
+  Tenant plus Betriebs-Grant sicher als vertikale API-/Meridian-Strecke liefern.
+requirements: [FEED-HERD-001, FEED-HERD-002, FEED-RBAC-003]
+work_packages: [FEED-WP-011, FEED-WP-012, FEED-WP-013, FEED-WP-014, FEED-WP-015, FEED-WP-016, FEED-WP-017, FEED-WP-018, FEED-WP-019, FEED-WP-020]
+decision_level: significant
+dependencies: [FEED-CORE-015]
+file_ownership:
+  - alembic/versions/feed_core_groups_20260715.py
+  - app/agrar/rations/groups.py
+  - app/services/rations_lifecycle_service.py
+  - app/api/v1/endpoints/rations_lifecycle.py
+  - tests/test_feeding_groups_core.py
+  - tests/test_rations_lifecycle_api.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/features/feed-advice/FeedingGroupDetail.tsx
+  - packages/frontend-web/src/lib/api/feeding-groups.ts
+  - packages/frontend-web/src/pages/portal/rationsoptimierung.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-group-detail.test.tsx
+  - tests/test_feed_advice_screen_definition.py
+  - docs/adr/adr-045-versioned-feeding-groups.md
+  - docs/architecture/domains/agrar/
+  - docs/architecture/agents/impact-notes/FEED-CORE-016.md
+  - docs/specs/feeding/04-domaenenmodell.md
+  - docs/specs/feeding/05-datenmodell.md
+  - docs/specs/feeding/06-api.md
+  - docs/specs/feeding/07-maskenkatalog.md
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-handbuch/
+  - docs/agent-ops/slices/FEED-CORE-016.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Profile und Parametergrenzen sind zentral typisiert und property-/boundary-getestet.
+  - Create List Get Update und History sind explizit typisiert und tenant-/grant-sicher.
+  - Updates verlangen expected_revision und erzeugen append-only Historie mit Grund.
+  - Gueltigkeitsintervalle und Traechtigkeitsparameter sind plausibel.
+  - Native ObjectPage besteht Meridian-Readiness, Component-, A11y- und Route-Tests.
+  - Migration ist additiv, backfill-sicher und Alembic bleibt Single-Head.
+tdd:
+  red:
+    - Profil-/Parametergrenzen und Cross-Field-Invarianten
+    - Optimistic-Revision und append-only History
+    - Tenant-/Business-Grant-Scoping
+    - typisierte API-Vertraege
+    - native ObjectPage/Route
+  green: kleinste Domain-, Migrations-, Service-, API- und Meridian-Implementierung
+  refactor: zentrale Gruppenregeln und Access-Policy ohne zweite UI-Architektur
+tests:
+  - tests/test_feeding_groups_core.py
+  - tests/test_rations_lifecycle_api.py
+  - tests/test_feed_advice_screen_definition.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-group-detail.test.tsx
+risks:
+  - Bestehende Gruppen benoetigen sichere Defaultprofile und Revision-1-Backfill.
+  - Businesslose Legacygruppen bleiben nur fuer Admin/Backfill sichtbar.
