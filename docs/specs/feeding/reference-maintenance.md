@@ -157,3 +157,19 @@ Grundlagen -> DDD/Daten/API -> Masken/Workflows/Regeln -> Agenten/Integrationen/
 Tests -> Migration/Rollout/Traceability/Roadmap. Jedes Kapitel wird erst als
 `aktiv` markiert, wenn Quellen, IDs und mindestens ein Abnahmemechanismus vorhanden
 sind; vorher bleibt es `in_arbeit`, nicht scheinbar abgeschlossen.
+
+## 11. Maschinenpruefung des Arbeitsprogramms
+
+Der 240-Pakete-Katalog wird deterministisch erzeugt und eingecheckt:
+
+```powershell
+python scripts/generate_feeding_work_packages.py
+python scripts/generate_feeding_work_packages.py --check
+pytest -q tests/test_feeding_reference_catalog.py
+```
+
+Der Check erkennt Generator-Drift; der Test verlangt alle Kapitel 00–17, exakt
+240 eindeutige Pakete, die TDD-/DoD-Pflichtfelder und ausschliesslich bekannte
+Akzeptanztest-IDs aus Kapitel 13. Paketstatus und reale Laufnachweise bleiben im
+Workboard und Slice-YAML, damit generierte Liefervertraege nicht ueberschrieben
+werden muessen.

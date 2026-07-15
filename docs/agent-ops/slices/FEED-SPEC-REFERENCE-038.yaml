@@ -2,9 +2,10 @@ slice_id: FEED-SPEC-REFERENCE-038
 id: FEED-SPEC-REFERENCE-038
 title: Architektur-Referenzwerk 00-17 und 240-Pakete-Arbeitsprogramm
 owner: Codex
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-07-15"
 started_at: "2026-07-15"
+completed_at: "2026-07-15"
 goal: >-
   Ein vollstaendiges, querverlinktes Feeding-Fachkonzept auf Architektenniveau
   mit 300-500 Seiten Zielumfang und 200-300 vertikalen Arbeitspaketen erstellen.
@@ -47,6 +48,9 @@ progress: >-
   Tranche 10: 14 Migrationskonzept mit Expand/Backfill/Validate/Switch/Contract,
   Aequivalenz und Schuldentriage sowie 15 Rollout mit R0-R4, Gate-Matrix,
   Feature-Flags, SLO, Cutover, Rollback und Hypercare erstellt.
+  Tranche 11: 16 Traceability-Evidenzmodell und 17 Roadmap erstellt; exakt 240
+  vertikale, einzeln claimbare TDD-Pakete in 24 Capability-Katalogen deterministisch
+  generiert und durch Generator-Drift- sowie Katalogtests abgesichert.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
@@ -56,13 +60,14 @@ acceptance:
   - Jedes produktive Paket benennt Red-Test, minimale Green-Implementierung,
     Refactoring und relevante Regression; Bugfixes beginnen mit Regressionstest.
 tests:
-  - Markdown- und Docs-Governance je Tranche.
-  - Produktive Folgeslices liefern TDD-Evidenz gemaess Pflegevertrag Kapitel 9.
+  - "Red: test_feeding_reference_catalog.py -> 3 Fehler (Kapitel 16/17 und Pakete fehlten)."
+  - "Green: test_feeding_reference_catalog.py -> 3 passed."
+  - "python scripts/generate_feeding_work_packages.py --check -> gruen."
+  - "Markdown -> 127 Dateien; Docs-Governance -> 124 Dateien, gruen."
+  - "Inventar: 51 Feeding-Markdowndateien, 8.558 Zeilen, exakt 240 Pakete."
 risks:
-  - Umfang erfordert mehrere reviewbare Tranches; der Slice bleibt bis zur
-    vollstaendigen Kapitel- und Paketabdeckung in_arbeit.
-  - FEED-CORE-015 arbeitet parallel; dessen Dateien und Traceability bleiben
-    ausserhalb dieses Dokumentations-Slice.
+  - Fachreview GfE/DLG und Live-Providervertraege bleiben externe Gates der
+    betroffenen produktiven Pakete, nicht dieses Referenzwerks.
 external_gates:
   - Fachreview GfE/DLG und Live-Providervertraege bleiben externe Gates.
 ai_harness:

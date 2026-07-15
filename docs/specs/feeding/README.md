@@ -34,8 +34,8 @@ verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 | 13 | Tests | ✅ Referenzkapitel | `13-tests.md` (200 stabile Abnahmetests plus Golden, Property, Playwright, A11y, Performance, Security) |
 | 14 | Migration | ✅ Referenzkapitel | `14-migration.md` (Ist→Soll, Daten/API/Regeln/UI, Schulden, Rollback) |
 | 15 | Rollout | ✅ Referenzkapitel | `15-rollout.md` (R0–R4, Gates, Flags, SLO, Cutover, Hypercare) |
-| 16 | Traceability | ✅ | `requirements-traceability.md` |
-| 17 | Roadmap | ✅ | `implementation-plan.md` (Inkremente 1–6, Slices 015–036) |
+| 16 | Traceability | ✅ Referenzkapitel | `16-traceability.md` (Evidenzmodell) + `requirements-traceability.md` (Lieferstatus) |
+| 17 | Roadmap | ✅ Referenzkapitel | `17-roadmap.md` + `work-packages/README.md` (240 vertikale TDD-Pakete) |
 | — | Fodjan-Abgleich | ✅ | `fodjan-help-traceability.md` (Funktions-Traceability, Stand 2026-07-15) |
 | — | Pflegevertrag | ✅ | `reference-maintenance.md` |
 
