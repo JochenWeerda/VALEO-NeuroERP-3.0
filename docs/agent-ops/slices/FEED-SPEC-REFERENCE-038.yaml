@@ -44,6 +44,9 @@ progress: >-
   Mixer, ERP-Events, Quarantaene, Resilienz, Security und Live-Gates erstellt.
   Tranche 8: 13 Testkatalog mit 200 stabilen Akzeptanztests sowie Golden-,
   Property-, Playwright-, A11y-, Performance-, Security- und Release-Gates erstellt.
+  Tranche 10: 14 Migrationskonzept mit Expand/Backfill/Validate/Switch/Contract,
+  Aequivalenz und Schuldentriage sowie 15 Rollout mit R0-R4, Gate-Matrix,
+  Feature-Flags, SLO, Cutover, Rollback und Hypercare erstellt.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
