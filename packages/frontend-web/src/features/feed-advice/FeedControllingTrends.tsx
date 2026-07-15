@@ -40,15 +40,23 @@ function shortDate(iso: string): string {
   return `${day}.${month}.`
 }
 
-/** Mittelwert der bekannten Werte; kein Wert bekannt -> null (Luecke, nie 0). */
-function meanOrNull(values: Array<number | null | undefined>): number | null {
-  const known = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+/**
+ * Mittelwert bekannter Gruppenwerte. Sind fuer alle Werte Kuhzahlen vorhanden,
+ * wird fachlich korrekt nach Kuhzahl gewichtet; andernfalls gleichgewichtet.
+ */
+export function weightedMeanOrNull(points: ControllingSeriesPoint[], key: NumericKey): number | null {
+  const known = points.filter((point) => typeof point[key] === 'number' && Number.isFinite(point[key]))
   if (known.length === 0) return null
-  return known.reduce((sum, value) => sum + value, 0) / known.length
+  const hasCompleteWeights = known.every((point) => typeof point.cow_count === 'number' && point.cow_count > 0)
+  if (!hasCompleteWeights) {
+    return known.reduce((sum, point) => sum + (point[key] as number), 0) / known.length
+  }
+  const totalCows = known.reduce((sum, point) => sum + (point.cow_count as number), 0)
+  return known.reduce((sum, point) => sum + (point[key] as number) * (point.cow_count as number), 0) / totalCows
 }
 
 /** Punkte je Tag verdichten (bei "Alle Gruppen" Mittel ueber die Gruppen desselben Tages). */
-function dailySeries(points: ControllingSeriesPoint[], keys: NumericKey[]): Array<{ label: string;[key: string]: string | number | null }> {
+export function dailySeries(points: ControllingSeriesPoint[], keys: NumericKey[]): Array<{ label: string;[key: string]: string | number | null }> {
   const byDate = new Map<string, ControllingSeriesPoint[]>()
   for (const point of points) {
     const existing = byDate.get(point.observation_date)
@@ -59,7 +67,7 @@ function dailySeries(points: ControllingSeriesPoint[], keys: NumericKey[]): Arra
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, dayPoints]) => {
       const row: { label: string;[key: string]: string | number | null } = { label: shortDate(date) }
-      for (const key of keys) row[key] = meanOrNull(dayPoints.map((point) => point[key]))
+      for (const key of keys) row[key] = weightedMeanOrNull(dayPoints, key)
       return row
     })
 }
@@ -115,7 +123,7 @@ export function FeedControllingTrends(): JSX.Element {
       else byGroup.set(point.group_name, [point])
     }
     return [...byGroup.entries()]
-      .map(([name, groupPoints]) => ({ name, value: meanOrNull(groupPoints.map((point) => point[benchmarkKpi])) }))
+      .map(([name, groupPoints]) => ({ name, value: weightedMeanOrNull(groupPoints, benchmarkKpi) }))
       .filter((entry): entry is { name: string; value: number } => entry.value !== null)
       .sort((a, b) => b.value - a.value)
   }, [points, benchmarkKpi])

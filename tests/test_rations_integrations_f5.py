@@ -46,6 +46,7 @@ class _ExistingDb:
 
 def test_import_endpoint_returns_idempotent_duplicate():
     body = ImportBody(payload={"event_id": "mlp-1", "milkYield": 30})
-    result = asyncio.run(import_rations_data("icar-ade", body, tenant_id="tenant-a", db=_ExistingDb()))
+    user = {"sub": "test-user", "roles": ["FUTTERMITTEL_BEARBEITEN"]}
+    result = asyncio.run(import_rations_data("icar-ade", body, tenant_id="tenant-a", db=_ExistingDb(), user=user))
     assert result["duplicate"] is True
     assert result["external_id"] == "mlp-1"

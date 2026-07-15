@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.agrar.rations.authz import APPROVE_ROLES, READ_ROLES, WRITE_ROLES, require_roles
 from app.agrar.rations.lifecycle import RationStatus, TransitionError
 from app.auth.deps import User, get_current_user
 from app.core.database import get_db
@@ -20,10 +21,6 @@ from app.services.rations_lifecycle_service import (
 )
 
 router = APIRouter(prefix="/lifecycle", tags=["rations-lifecycle"])
-
-READ_ROLES = {"FUTTERMITTEL_LESEN", "FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN", "admin", "manager"}
-WRITE_ROLES = {"FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN", "admin", "manager"}
-APPROVE_ROLES = {"FUTTERMITTEL_ADMIN", "admin", "manager"}
 
 
 class FeedingGroupIn(BaseModel):
@@ -65,8 +62,7 @@ class RationTransitionIn(BaseModel):
 
 
 def _require(user: User, allowed: set[str]) -> None:
-    if not set(user.get("roles") or []).intersection(allowed):
-        raise HTTPException(status_code=403, detail="Keine Berechtigung fuer diesen Rations-Lifecycle-Schritt.")
+    require_roles(user, allowed, detail="Keine Berechtigung fuer diesen Rations-Lifecycle-Schritt.")
 
 
 def _service(db: Session, tenant_id: str, user: User) -> RationLifecycleService:

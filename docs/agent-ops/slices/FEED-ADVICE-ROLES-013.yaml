@@ -1,0 +1,82 @@
+slice_id: FEED-ADVICE-ROLES-013
+id: FEED-ADVICE-ROLES-013
+title: Serverseitige Rollenpruefung aller Feed-Advice-Router + kuhzahl-gewichtete Trend-Mittel
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Funktionsmatrix-Zeile "Betrieb und Rollen" (Naechster Ausbau: "Rollen in
+  jeder Mutation serverseitig erzwingen"): Nur der Lifecycle-Router prueft
+  Rollen; Controlling (Mutation!), Readiness und Integrations nicht —
+  Integrations-Endpoints hatten nicht einmal eine User-Dependency. Dazu das
+  dokumentierte Folgerisiko aus FEED-ADVICE-TRENDS-012 (ungewichtete
+  Tagesmittel) schliessen.
+scope:
+  - "app/agrar/rations/authz.py (neu): eine Quelle fuer READ/WRITE/APPROVE/
+    CONNECTOR_ADMIN-Rollensets + require_roles(); Lifecycle nutzt sie statt
+    lokaler Kopien."
+  - "rations_controlling: observations -> WRITE, series -> READ.
+    rations_readiness: evaluate/materials -> READ. rations_integrations:
+    User-Dependency ergaenzt; adapter-import/sync/mock-import -> WRITE,
+    Journal/Listen -> READ, Herd-Data-Connection-Upsert (Vertrags-/Consent-/
+    Secret-Konfig) -> CONNECTOR_ADMIN (Admin-Level, strenger als WRITE)."
+  - "tests/test_rations_authz.py (neu): isolierte Router-App mit
+    dependency_overrides — 10 Mutations- und 11 Lese-Endpoints geben 403 ohne
+    Domaenenrolle; Positivtests LESEN->readiness, BEARBEITEN->observation,
+    ADMIN-Grenze der Connection-Verwaltung."
+  - "FeedControllingTrends: weightedMeanOrNull — Tages- und Benchmark-Mittel
+    kuhzahl-gewichtet, sobald alle beitragenden Punkte eine Kuhzahl tragen
+    (Betriebsmittel statt Gruppenmittel); sonst gleichgewichtet. Vitest fuer
+    beide Zweige."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/FEED-ADVICE-ROLES-013.yaml"
+  - "docs/project-context/fuetterungsberatung-feature-parity-2026-07-14.md"
+  - "app/agrar/rations/authz.py"
+  - "app/api/v1/endpoints/rations_{lifecycle,controlling,readiness,integrations}.py"
+  - "tests/test_rations_authz.py"
+  - "tests/test_rations_integrations_f5.py (User-Signatur)"
+  - "packages/frontend-web/src/features/feed-advice/FeedControllingTrends.tsx"
+  - "packages/frontend-web/src/__tests__/features/feed-advice/feed-controlling-trends.test.tsx"
+progress: >-
+  2026-07-15 umgesetzt und validiert (Gewichtung in Zusammenarbeit mit dem
+  parallelen Worker im geteilten Working Tree).
+acceptance:
+  - "Jeder Feed-Advice-Endpoint verweigert Benutzern ohne FUTTERMITTEL-Rolle
+    serverseitig mit 403 — unabhaengig vom Frontend."
+  - "Herd-Data-Verbindungsverwaltung erfordert Admin-Level."
+  - "Bestehende Funktionspfade (Dev-Token, Portal) unveraendert gruen."
+  - "Trend-/Benchmark-Mittel sind kuhzahl-gewichtet, sobald Kuhzahlen
+    vollstaendig vorliegen."
+tests:
+  - "pytest test_rations_authz.py -> 24 passed (--noconftest-Muster)."
+  - "pytest controlling/readiness/lifecycle/herd-data/integrations-Regression
+    -> 31 + 14 passed."
+  - "Vitest feed-controlling-trends (inkl. Gewichtungszweige) + tsc gruen."
+risks:
+  - "Reale OIDC-Clients brauchen die FUTTERMITTEL_*-Rollen im Token; bis zur
+    Rollenzuweisung im IdP tragen admin/manager weiter den Betrieb."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Nur berechtigte Rollen erfassen Tageswerte, fuehren Importe/Syncs aus oder
+    verwalten Herd-Data-Verbindungen; Leserechte erfordern mindestens
+    FUTTERMITTEL_LESEN. Betriebsmittel in Trends sind kuhzahl-gewichtet.
+  architektur_vertrag: >-
+    Ein Authz-Modul je Domaene statt Rollensets je Router; Endpoints behalten
+    ihre Vertraege (nur additive User-Dependency + 403-Pfad).
+  daten_vertrag: not_applicable
+  security_vertrag: >-
+    Serverseitige Autorisierung unabhaengig von Frontend-permissions-Props;
+    Vertrags-/Consent-/Secret-Konfiguration nur fuer Admin-Level; Tenant-
+    Isolation unveraendert.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert; Dev-Token unveraendert.
+  dokumentations_vertrag: >-
+    Paritaetsmatrix-Zeile Betrieb und Rollen aktualisiert; Workboard; dieses
+    YAML.
+  test_vertrag: >-
+    403-Regression fuer jeden Endpoint der vier Router + Positivtests der
+    Rollenstufen; Bestandstests der Router gruen.

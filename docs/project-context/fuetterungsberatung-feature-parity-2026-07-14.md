@@ -47,7 +47,7 @@ Betrieb und Tiergruppen
 
 | Arbeitsbereich | Zielbild | Stand 2026-07-14 | Nächster Ausbau |
 |---|---|---|---|
-| Betrieb und Rollen | Betriebe, Berater, Fütterer und Freigaberechte | Portal-/Rationszugang vorhanden | Rollen in jeder Mutation serverseitig erzwingen |
+| Betrieb und Rollen | Betriebe, Berater, Fütterer und Freigaberechte | alle vier Rations-Router erzwingen Rollen serverseitig (READ/WRITE/APPROVE, Connector-Verwaltung = Admin-Level) | betriebsindividuelle Rollenzuweisung im IdP ausrollen |
 | Futtergruppen | Tiergruppe, Tierzahl, Laktation, Leistung, Lebendmasse, Fütterungssystem | persistenter, tenantisolierter Gruppenstamm und native Worklist | fachliche Gruppenhistorie aus Herd-Deltas verdichten |
 | Futterbestand | Eigene Futtermittel, Preise, Mengen, Chargen und Reichweite | aktive Rationen werden gegen vorhandenen Bestand und deterministische Reichweite geprüft | Chargen-FIFO und reservierte Mischmengen ergänzen |
 | Laboranalysen | Atteste importieren, Werte prüfen, für neue Futterversion übernehmen | verifizierte Analysen, Alter und Analysewechsel fließen in den versionierten Readiness-Befund | Labor-Material-Mapping interaktiv auflösen |

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { FeedControllingTrends } from '@/features/feed-advice/FeedControllingTrends'
+import { dailySeries, FeedControllingTrends, weightedMeanOrNull } from '@/features/feed-advice/FeedControllingTrends'
 import type { ControllingSeriesPoint } from '@/lib/api/feed-controlling'
 
 const fetchFeedingGroupsMock = vi.hoisted(() => vi.fn())
@@ -25,6 +25,7 @@ function point(overrides: Partial<ControllingSeriesPoint>): ControllingSeriesPoi
     group_id: 'g-1',
     group_name: 'Hochleistung',
     observation_date: '2026-07-10',
+    cow_count: 120,
     actual_dmi_kg_cow: 22.5,
     target_dmi_kg_cow: 23,
     actual_cost_eur_cow: 7.8,
@@ -44,6 +45,19 @@ describe('FeedControllingTrends', () => {
     fetchFeedingGroupsMock.mockReset()
     fetchControllingSeriesMock.mockReset()
     fetchFeedingGroupsMock.mockResolvedValue(groups)
+  })
+
+  it('gewichtet Tages- und Periodenmittel nach dokumentierter Kuhzahl', () => {
+    const largeGroup = point({ cow_count: 120, actual_dmi_kg_cow: 24 })
+    const smallGroup = point({ group_id: 'g-2', group_name: 'Trockensteher', cow_count: 40, actual_dmi_kg_cow: 12 })
+
+    expect(weightedMeanOrNull([largeGroup, smallGroup], 'actual_dmi_kg_cow')).toBe(21)
+    expect(dailySeries([largeGroup, smallGroup], ['actual_dmi_kg_cow'])).toEqual([
+      { label: '10.07.', actual_dmi_kg_cow: 21 },
+    ])
+
+    const missingWeight = point({ cow_count: null, actual_dmi_kg_cow: 12 })
+    expect(weightedMeanOrNull([largeGroup, missingWeight], 'actual_dmi_kg_cow')).toBe(18)
   })
 
   it('rendert Soll-Ist-Trendcharts und Gruppen-Benchmark aus der Tagesreihe', async () => {

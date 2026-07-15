@@ -7,9 +7,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.agrar.rations.authz import CONNECTOR_ADMIN_ROLES, READ_ROLES, WRITE_ROLES, require_roles
 from app.agrar.rations.control.feeding_control import LoadedComponent, compute_feeding_control
 from app.agrar.rations.integrations.adapters import agrirouter_to_feeding_log, icar_ade_to_cow_profile, laboratory_to_feed_ingredient, payload_hash
 from app.agrar.rations.integrations.herd_data import HerdDataKind, normalize_herd_data_bundle
+from app.auth.deps import User, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -81,7 +83,8 @@ def _persist_feeding_log(db: Session, tenant_id: str, mapped: dict[str, Any]) ->
     return result
 
 @router.post("/{adapter}/import", summary="Rationsdaten aus externem Standard importieren", response_model=dict)
-async def import_rations_data(adapter: AdapterName, body: ImportBody, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+async def import_rations_data(adapter: AdapterName, body: ImportBody, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer Rations-Datenimporte.")
     try:
         mapped = _ADAPTERS[adapter](body.payload)
     except ValueError as exc:
@@ -107,7 +110,9 @@ async def import_rations_data(adapter: AdapterName, body: ImportBody, tenant_id:
 
 @router.get("/imports", summary="Importjournal der Rationsschnittstellen", response_model=list[dict])
 async def list_rations_imports(adapter: AdapterName | None = None, limit: int = Query(default=50, ge=1, le=250),
-                               tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+                               tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+                               user: User = Depends(get_current_user)):
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer das Importjournal.")
     rows = db.execute(text("""SELECT id,adapter,external_id,source_version,target_model,result,imported_at
       FROM domain_agrar.rations_integration_imports WHERE tenant_id=:tenant_id
         AND (:adapter IS NULL OR adapter=:adapter) ORDER BY imported_at DESC LIMIT :limit"""),
@@ -117,7 +122,8 @@ async def list_rations_imports(adapter: AdapterName | None = None, limit: int = 
 
 @router.post("/herd-data/connections", summary="Herd-Data-Verbindung anlegen/aktualisieren", response_model=dict)
 async def upsert_herd_data_connection(body: HerdDataConnectionIn, tenant_id: str = Depends(get_tenant_id),
-                                      db: Session = Depends(get_db)):
+                                      db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    require_roles(user, CONNECTOR_ADMIN_ROLES, detail="Nur Futtermittel-Administratoren duerfen Herd-Data-Verbindungen verwalten.")
     row = db.execute(text("""INSERT INTO domain_agrar.herd_data_connections
       (id,tenant_id,provider,herd_id,base_url,endpoint_templates,query_parameters,credential_env_key,
        contract_ref,consent_ref,enabled,live_enabled)
@@ -137,7 +143,9 @@ async def upsert_herd_data_connection(body: HerdDataConnectionIn, tenant_id: str
 
 
 @router.get("/herd-data/connections", summary="Herd-Data-Verbindungen auflisten", response_model=list[dict])
-async def list_herd_data_connections(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+async def list_herd_data_connections(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+                                     user: User = Depends(get_current_user)):
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer Herd-Data-Verbindungen.")
     rows = db.execute(text("""SELECT id,provider,herd_id,base_url,endpoint_templates,query_parameters,
       credential_env_key,contract_ref,consent_ref,enabled,live_enabled,created_at,updated_at
       FROM domain_agrar.herd_data_connections WHERE tenant_id=:tenant_id ORDER BY provider,herd_id"""),
@@ -147,7 +155,9 @@ async def list_herd_data_connections(tenant_id: str = Depends(get_tenant_id), db
 
 @router.post("/herd-data/connections/{connection_id}/sync", summary="Herd-Data-Delta-Sync ausfuehren", response_model=dict)
 async def sync_herd_data_connection(connection_id: str, body: HerdDataSyncRequest,
-                                    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+                                    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+                                    user: User = Depends(get_current_user)):
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer den Herd-Data-Sync.")
     service = HerdDataSyncService(db)
     try:
         connection = service.load_connection(tenant_id=tenant_id, connection_id=connection_id)
@@ -162,7 +172,8 @@ async def sync_herd_data_connection(connection_id: str, body: HerdDataSyncReques
 
 @router.post("/herd-data/mock-import", summary="Herd-Data-Mockvertrag normalisieren", response_model=dict)
 async def import_herd_data_mock(body: HerdDataMockImport, tenant_id: str = Depends(get_tenant_id),
-                                db: Session = Depends(get_db)):
+                                db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer Herd-Data-Importe.")
     service = HerdDataSyncService(db)
     try:
         connection = service.load_connection(tenant_id=tenant_id, connection_id=body.connection_id)
@@ -181,7 +192,9 @@ async def import_herd_data_mock(body: HerdDataMockImport, tenant_id: str = Depen
 @router.get("/herd-data/observations", summary="Normalisierte Herd-Data-Beobachtungen", response_model=list[dict])
 async def list_herd_data_observations(kind: HerdDataKind | None = None, herd_id: str | None = None,
                                       limit: int = Query(default=100, ge=1, le=500),
-                                      tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+                                      tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+                                      user: User = Depends(get_current_user)):
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer Herd-Data-Beobachtungen.")
     rows = db.execute(text("""SELECT id,provider,herd_id,kind,entity_id,effective_at,provider_updated_at,
       group_id,previous_group_id,is_deleted,payload,imported_at FROM domain_agrar.herd_data_observations
       WHERE tenant_id=:tenant_id AND (:kind IS NULL OR kind=:kind) AND (:herd_id IS NULL OR herd_id=:herd_id)
