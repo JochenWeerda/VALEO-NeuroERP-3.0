@@ -10,7 +10,6 @@ type OpportunitiesForecastChartsProps = {
   chartData: ChartPoint[]
   stageDistributionData: StageDistributionPoint[]
   viewMode: ViewMode
-  colors: string[]
 }
 
 const ExpectedRevenueLineChart = lazy(() => import('@/pages/crm/charts/opportunities-forecast/ExpectedRevenueLineChart'))
@@ -24,7 +23,7 @@ function ChartFallback(): JSX.Element {
   return <div className="h-[300px] animate-pulse rounded bg-muted/30" />
 }
 
-export default function OpportunitiesForecastCharts({ chartData, stageDistributionData, viewMode, colors }: OpportunitiesForecastChartsProps): JSX.Element {
+export default function OpportunitiesForecastCharts({ chartData, stageDistributionData, viewMode }: OpportunitiesForecastChartsProps): JSX.Element {
   const { t } = useTranslation()
   const xAxisKey = viewMode === 'period' ? 'period' : viewMode === 'stage' ? 'stage' : 'owner'
 
@@ -40,7 +39,7 @@ export default function OpportunitiesForecastCharts({ chartData, stageDistributi
       </Card>
       <Card>
         <CardHeader><CardTitle>{t('crud.forecast.stageDistribution')}</CardTitle></CardHeader>
-        <CardContent><Suspense fallback={<ChartFallback />}><StageDistributionDonut data={stageDistributionData} colors={colors} /></Suspense></CardContent>
+        <CardContent><Suspense fallback={<ChartFallback />}><StageDistributionDonut data={stageDistributionData} /></Suspense></CardContent>
       </Card>
       <Card>
         <CardHeader><CardTitle>{t('crud.forecast.opportunityCountChart')}</CardTitle></CardHeader>

@@ -243,15 +243,48 @@ Rollout-Plan-Positionen 4 und 5:
 
 Validierung: pytest Dunning 10/10 ✅ · Vitest 371/371 ✅ · tsc/eslint ✅ · Build 26,4 s ✅ · axe 8/8 ✅.
 
+## 7e. Update 2026-07-15 — Chart-Palette aus Tokens (DESIGN-CHARTS-TOKEN-006)
+
+Punkt 5 aus Abschnitt 8 ist geschlossen — Chart-Farben sind jetzt tokenbasiert:
+
+- **Tokens:** `--chart-1..6-hsl` + `--chart-other/-target/-grid/-axis-text-hsl`
+  in `index.css` (`:root` hell, `.dark`/`.theme-warehouse` dunkel) mit
+  `@theme inline`-Bridge `--color-chart-*`. Hues aus dem System: Ozeanblau 215,
+  Bernstein 38, Petrol 187 (Warehouse-Umlagerung), Violett 263 (Warehouse-
+  Inventur), Beere 330, Erdbraun 25 (Warehouse-Ausgang-Familie). Grün/Rot
+  bleiben den Statusfarben vorbehalten — eine Serie, die fachlich gut/schlecht
+  bedeutet, trägt Status-Tokens; eine bloße „Serie 4" nie.
+- **Validiert statt geschätzt:** beide Modi bestehen die sechs Checks des
+  dataviz-Palette-Validators (Lightness-Band OKLCH, Chroma-Floor ≥ 0,1,
+  CVD-Adjazenz Machado ΔE — light worst pair 42,6 / dark 29,0 —, Kontrast
+  ≥ 3:1 auf der Systemfläche). Paletten-Änderungen erfordern einen erneuten
+  Validator-Lauf beider Modi.
+- **Zentrales Modul** `components/charts/chart-palette.ts`: `CHART_SERIES`
+  (feste Slot-Reihenfolge, nie zyklisch — Index ≥ 6 liefert den neutralen
+  Sonstige-Slot), `CHART_TARGET` (rezessive Soll-Linien), `CHART_POSITIVE/
+  NEGATIVE/WARNING/INFO`, `CHART_GRID`/`CHART_AXIS_TEXT`, `chartSeriesFill()`.
+- **Primitives theme-fähig:** die vier `Simple*`-SVG-Charts rendern Flächen/
+  Achsen/Text aus Tokens (vorher Slate-Hardcodes — Dark Mode brach);
+  `SimpleLineChart` zusätzlich: `null` = Lücke statt 0-Fabrikation (Segmente),
+  gestrichelte Soll-Serien (`dashed`), Y-Ticks mit Werten, Hover-Crosshair +
+  Tooltip, Legende nur ab 2 Serien, 2px-Linien, X-Label-Ausdünnung.
+- **Sweep:** alle 19 Chart-Konsumenten (`pages/**/charts/`, Dashboard,
+  TrendChart, Cashflow, Bilanz-Donut, Opportunities-Forecast) beziehen Farben
+  nur noch aus dem Modul; `**/charts/**` ist hex-frei (Grep leer).
+  Kennzahl-Identität bleibt über Chart-Typen stabil (ExpectedRevenue = Slot 1
+  in Bar- und Line-Variante), Aging-Reihen eskalieren über Status-Töne.
+
+Validierung: tsc ✅ · eslint 0 Fehler ✅ · Vitest 90 Dateien / 379 grün (+1 skipped) ✅ ·
+Build 19,1 s ✅.
+
 ## 8. Verbleibende Risiken & Folgearbeiten
 
-> **Stand nach Slices 002–004:** Punkte 1–4 sind erledigt (1 → 7b, 2/3/4 → 7a);
-> Rollout-Prios 1/2/3/6 → 7b, Prios 4/5 → 7c. **Offen bleiben:** Punkt 5
-> (Chart-Palette aus Tokens — eigener Slice mit visueller QA je Chart), Punkt 6
-> (`patterns/`-Konsolidierung — Großvorhaben im Zuge der Universal-Mask-Promotion),
-> Punkt 7 (Token-Quellen — Koordination mit Codex/TW4-Dateibesitz nötig), der
-> `text-*-400`-Nachzug (dunkle Spezialflächen, gezielt statt mechanisch) sowie neu:
-> **Mahnlauf ohne Backend-Mutation** (fachlicher Slice mit API-Vertrag, siehe 7c).
+> **Stand nach Slices 002–006:** Punkte 1–5 sind erledigt (1 → 7b, 2/3/4 → 7a,
+> 5 → 7e); Rollout-Prios 1/2/3/6 → 7b, Prios 4/5 → 7c; Mahnlauf → 7d.
+> **Offen bleiben:** Punkt 6 (`patterns/`-Konsolidierung — Großvorhaben im Zuge
+> der Universal-Mask-Promotion), Punkt 7 (Token-Quellen — Koordination mit
+> Codex/TW4-Dateibesitz nötig), der `text-*-400`-Nachzug (dunkle Spezialflächen,
+> gezielt statt mechanisch) sowie die Toast-System-Konsolidierung (7d).
 
 1. **Weitere Eigenbau-Reiterleisten** (z. B. `SalesDocumentsPanel`-Kategorien,
    `InformationPanel`-Sektionen, Sidebar-Alphabetregister) auf die Register-/Default-Variante

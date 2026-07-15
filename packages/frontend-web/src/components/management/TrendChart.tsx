@@ -30,20 +30,20 @@ interface TrendChartProps {
 
 const colorMap = {
   primary: {
-    stroke: '#3b82f6',
-    fill: 'rgba(59, 130, 246, 0.1)',
+    stroke: 'hsl(var(--chart-1-hsl))',
+    fill: 'hsl(var(--chart-1-hsl) / 0.1)',
   },
   success: {
-    stroke: '#10b981',
-    fill: 'rgba(16, 185, 129, 0.1)',
+    stroke: 'hsl(var(--status-success-hsl))',
+    fill: 'hsl(var(--status-success-hsl) / 0.1)',
   },
   warning: {
-    stroke: '#f59e0b',
-    fill: 'rgba(245, 158, 11, 0.1)',
+    stroke: 'hsl(var(--status-warning-hsl))',
+    fill: 'hsl(var(--status-warning-hsl) / 0.1)',
   },
   danger: {
-    stroke: '#ef4444',
-    fill: 'rgba(239, 68, 68, 0.1)',
+    stroke: 'hsl(var(--status-error-hsl))',
+    fill: 'hsl(var(--status-error-hsl) / 0.1)',
   },
 }
 
@@ -107,10 +107,10 @@ export function TrendChart({
             className={cn(
               'flex items-center gap-1 px-2 py-1 rounded text-sm font-medium',
               trend.direction === 'up'
-                ? 'bg-emerald-100 text-emerald-700'
+                ? 'bg-status-success/10 text-status-success'
                 : trend.direction === 'down'
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-gray-100 text-gray-700'
+                  ? 'bg-status-error/10 text-status-error'
+                  : 'bg-muted text-muted-foreground'
             )}
           >
             {trend.direction === 'up' && <TrendingUp className="h-4 w-4" />}

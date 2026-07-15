@@ -1,4 +1,5 @@
 import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
+import { chartSeriesColor } from '@/components/charts/chart-palette'
 import { formatCurrency } from '@/components/mask-builder/utils/formatting'
 
 type ChartPoint = { period?: string; total_expected_revenue: number }
@@ -7,7 +8,7 @@ export default function ExpectedRevenueLineChart({ chartData, label }: { chartDa
   return (
     <SimpleLineChart
       data={chartData.map((item) => ({ label: item.period ?? '', total_expected_revenue: item.total_expected_revenue }))}
-      series={[{ key: 'total_expected_revenue', color: '#0088FE', label }]}
+      series={[{ key: 'total_expected_revenue', color: chartSeriesColor(0), label }]}
       height={300}
     />
   )

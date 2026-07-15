@@ -109,6 +109,19 @@
   --color-status-error: hsl(var(--status-error-hsl));
   --color-status-info: hsl(var(--status-info-hsl));
 
+  /* Chart-Serienfarben (kategorial, feste Slot-Reihenfolge 1..6, nie zyklisch).
+     Theme-bewusst über --chart-*-hsl (:root=hell, .dark/.theme-warehouse=dunkel).
+     Beide Modi mit dataviz-Sechs-Checks validiert (Lightness-Band, Chroma-Floor,
+     CVD-Adjazenz ΔE≥12, Kontrast ≥3:1 auf Systemfläche). Eigener Namensraum
+     "chart-*" — keine Kollision mit Meridian/Terra (vgl. status-*). */
+  --color-chart-1: hsl(var(--chart-1-hsl));
+  --color-chart-2: hsl(var(--chart-2-hsl));
+  --color-chart-3: hsl(var(--chart-3-hsl));
+  --color-chart-4: hsl(var(--chart-4-hsl));
+  --color-chart-5: hsl(var(--chart-5-hsl));
+  --color-chart-6: hsl(var(--chart-6-hsl));
+  --color-chart-other: hsl(var(--chart-other-hsl));
+
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
@@ -215,6 +228,22 @@
     --status-warning-hsl: var(--color-semantic-warning-700-hsl);
     --status-error-hsl: var(--color-semantic-error-700-hsl);
     --status-info-hsl: var(--color-semantic-info-700-hsl);
+
+    /* Chart-Palette hell — Hues aus dem System (Ozeanblau 215, Bernstein 38,
+       Petrol 187 = Warehouse-Umlagerung, Violett 263 = Warehouse-Inventur,
+       Beere 330, Erdbraun 25 = Warehouse-Ausgang-Familie). Grün/Rot bleiben
+       den Statusfarben vorbehalten (Serie darf nie "gut/schlecht" imitieren). */
+    --chart-1-hsl: 215 85% 46%;   /* #1265d9 Ozeanblau  */
+    --chart-2-hsl: 38 92% 40%;    /* #c47f08 Bernstein  */
+    --chart-3-hsl: 187 90% 36%;   /* #099bae Petrol     */
+    --chart-4-hsl: 263 60% 55%;   /* #7c47d1 Violett    */
+    --chart-5-hsl: 330 60% 45%;   /* #b82e73 Beere      */
+    --chart-6-hsl: 25 70% 38%;    /* #a5561d Erdbraun   */
+    --chart-other-hsl: 210 10% 50%; /* neutraler Sonstige-/Überlauf-Slot */
+    /* Chart-Anatomie: Referenzlinien (Soll), Gitter, Achsentext */
+    --chart-target-hsl: 210 10% 50%;
+    --chart-grid-hsl: var(--border);
+    --chart-axis-text-hsl: var(--muted-foreground);
 
     /* ── Typography ─────────────────────────────────────────────────────────── */
     /* Primary: Plus Jakarta Sans — humanist grotesque, warm, excellent screen readability */
@@ -356,6 +385,17 @@
     --status-warning-hsl: var(--color-semantic-warning-500-hsl);
     --status-error-hsl: var(--color-semantic-error-500-hsl);
     --status-info-hsl: var(--color-semantic-info-500-hsl);
+
+    /* Chart-Palette dunkel — hellere Stufen derselben Hues, gegen dunkle
+       Systemfläche validiert (kein automatischer Flip). */
+    --chart-1-hsl: 215 75% 62%;   /* #5592e7 */
+    --chart-2-hsl: 38 85% 42%;    /* #c68310 */
+    --chart-3-hsl: 187 100% 36%;  /* #00a2b8 */
+    --chart-4-hsl: 263 60% 62%;   /* #9164d8 */
+    --chart-5-hsl: 330 55% 58%;   /* #cf5994 */
+    --chart-6-hsl: 25 60% 52%;    /* #ce783b */
+    --chart-other-hsl: 210 12% 65%;
+    --chart-target-hsl: 210 12% 65%;
   }
 
   /* Warehouse High-Contrast Theme - Optimiert für Lager-Terminals */
@@ -386,6 +426,16 @@
     --status-warning-hsl: var(--color-semantic-warning-500-hsl);
     --status-error-hsl: var(--color-semantic-error-500-hsl);
     --status-info-hsl: var(--color-semantic-info-500-hsl);
+
+    /* Chart-Palette wie Dark Mode (dunkler Terminal-Grund) */
+    --chart-1-hsl: 215 75% 62%;
+    --chart-2-hsl: 38 85% 42%;
+    --chart-3-hsl: 187 100% 36%;
+    --chart-4-hsl: 263 60% 62%;
+    --chart-5-hsl: 330 55% 58%;
+    --chart-6-hsl: 25 60% 52%;
+    --chart-other-hsl: 210 12% 65%;
+    --chart-target-hsl: 210 12% 65%;
 
     /* Warehouse-spezifische Farben */
     --warehouse-eingang: 142 71% 45%;

@@ -6,7 +6,7 @@ export default function SalesTrendLineChart({ trends }: { trends: TrendPoint[] }
   return (
     <SimpleLineChart
       data={trends.map((item) => ({ label: item.date, sales: item.sales }))}
-      series={[{ key: 'sales', color: '#10B981' }]}
+      series={[{ key: 'sales', label: 'Umsatz' }]}
       height={250}
     />
   )

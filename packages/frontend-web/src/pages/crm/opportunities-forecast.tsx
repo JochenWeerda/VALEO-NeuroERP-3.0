@@ -39,7 +39,6 @@ type ForecastGrouped = {
   total_expected_revenue: number
 }
 type StageDistItem = { name: string; value: number }
-const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300']
 
 export default function OpportunitiesForecastPage(): JSX.Element {
   const { t } = useTranslation()
@@ -238,7 +237,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
 
       <div className="grid grid-cols-2 gap-4">
         <Suspense fallback={<><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card></>}>
-          <OpportunitiesForecastCharts chartData={chartData} stageDistributionData={stageDistributionData} viewMode={viewMode} colors={CHART_COLORS} />
+          <OpportunitiesForecastCharts chartData={chartData} stageDistributionData={stageDistributionData} viewMode={viewMode} />
         </Suspense>
       </div>
 

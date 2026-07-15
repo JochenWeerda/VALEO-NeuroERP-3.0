@@ -1,0 +1,93 @@
+slice_id: DESIGN-CHARTS-TOKEN-006
+id: DESIGN-CHARTS-TOKEN-006
+title: Zentrale Chart-Palette aus Design-Tokens + Theming der SVG-Chart-Primitives
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Offener Punkt 5 aus docs/design/frontend-design-skill-audit.md Abschnitt 8:
+  Chart-Farben lagen als rohe Hex-Werte in 17+ Seiten-Chart-Dateien und als
+  Recharts-Default-Palette (#0088FE...) in SimpleDonutChart; die vier
+  Simple*-SVG-Chart-Primitives waren mit Slate-Hardcodes nicht theme-faehig
+  (Dark Mode/Warehouse brachen). Ziel: eine validierte kategoriale Chart-Palette
+  als Design-Tokens, ein zentrales TS-Modul als einzige Farbquelle fuer Charts
+  und theme-faehige Chart-Primitives.
+scope:
+  - "index.css: Chart-Tokens --chart-1..6-hsl + --chart-other/-target/-grid/-axis-text
+    (:root hell, .dark und .theme-warehouse dunkel) + @theme-inline-Bridge
+    --color-chart-*. Palette aus System-Hues (Ozeanblau 215, Bernstein 38,
+    Petrol 187, Violett 263, Beere 330, Erdbraun 25); Gruen/Rot bleiben den
+    Statusfarben vorbehalten. Beide Modi mit dem dataviz-Sechs-Checks-Validator
+    bestanden (Lightness-Band, Chroma-Floor >= 0.1, CVD-Adjazenz light dE 42.6 /
+    dark dE 29.0, Kontrast >= 3:1 auf Systemflaeche)."
+  - "components/charts/chart-palette.ts: CHART_SERIES (feste Slot-Reihenfolge,
+    nie zyklisch - chartSeriesColor(i>=6) liefert neutralen Sonstige-Slot),
+    CHART_TARGET (rezessive Soll-Linien), CHART_POSITIVE/NEGATIVE/WARNING/INFO
+    (nur fuer fachlich wertende Serien), CHART_GRID/AXIS_TEXT, chartSeriesFill."
+  - "SimpleLineChart: Tokens statt Slate; null/undefined = Luecke statt
+    0-Fabrikation (Segmente); optionale gestrichelte Soll-Serien (dashed);
+    Y-Ticks mit Wertlabels; Hover-Crosshair + Tooltip; Legende nur ab 2 Serien;
+    2px-Linien; Labels-Ausduennung ab 8 Punkten. SimpleVerticalBars/DonutChart/
+    ComparisonBars: Tokens, Palette-Defaults, title-Tooltips, tabular-nums."
+  - "Sweep aller Chart-Konsumenten auf das Modul: Kampagnen-Charts (4 Metriken =
+    Slots 1-4), Opportunities-Forecast (Kennzahl-Identitaet ueber Bar+Line),
+    Reports (Bezahlt/Ausstehend = Status, Konversionsraten = 1 Hue),
+    Cashflow (Zufluss/Abfluss = Polaritaet), Bilanz-Donut (3 Slots),
+    Dashboard/Analytics (Single-Series = Slot 1), TrendChart-colorMap +
+    Trend-Badge auf Status-Utilities, AreaTrendChart auf bg-card."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-CHARTS-TOKEN-006.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "packages/frontend-web/src/index.css"
+  - "packages/frontend-web/src/components/charts/*"
+  - "packages/frontend-web/src/components/ui/lazy-charts/AreaTrendChart.tsx"
+  - "packages/frontend-web/src/components/management/TrendChart.tsx"
+  - "packages/frontend-web/src/pages/crm/charts/**"
+  - "packages/frontend-web/src/pages/reports/charts/*"
+  - "packages/frontend-web/src/pages/analytics/charts/*"
+  - "packages/frontend-web/src/pages/finance/reports/**"
+  - "packages/frontend-web/src/features/dashboard/charts/*"
+  - "packages/frontend-web/src/pages/crm/opportunities-forecast.tsx"
+progress: >-
+  2026-07-15 umgesetzt und validiert. Palette-Herleitung dokumentiert in der
+  Audit-Doku Abschnitt 7e; Validator-Laeufe im Scratchpad reproduzierbar
+  (hsl2hex + validate_palette.js light/dark).
+acceptance:
+  - "Keine #hex-Farben mehr unter **/charts/** (Grep leer)."
+  - "Beide Paletten-Modi bestehen alle sechs Checks des dataviz-Validators."
+  - "Simple*-Charts rendern in Light/Dark/Warehouse aus denselben Tokens."
+  - "Unbekannte Werte (null) erscheinen als Luecke, nie als 0-Linie."
+tests:
+  - "tsc --noEmit -> 0 Fehler (898 Routen generiert)."
+  - "eslint auf allen geaenderten Chart-Dateien -> 0 Fehler."
+  - "vitest run (voll) -> 90/90 Dateien, 379 passed, 1 skipped."
+  - "vite build -> gruen; axe-E2E 8/8 (siehe Abschlusscommit)."
+risks:
+  - "Farbzuordnung bestehender Charts aendert sich sichtbar (gewollt:
+    einheitliche Slots statt Zufalls-Hex); fachliche Bedeutung blieb erhalten
+    (Bezahlt weiterhin gruen ueber Status-Token, Abfluss rot)."
+  - "SimpleLineChart-Legende erscheint nur noch ab 2 Serien (dataviz-Regel:
+    Einzelserie wird vom Titel benannt)."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Diagramme in Berichten/Cockpits nutzen eine einheitliche, farbfehlsichtig
+    unterscheidbare Serienpalette; Gruen/Rot kennzeichnen ausschliesslich
+    fachlich Gutes/Schlechtes; unbekannte Messwerte werden nie als 0 gezeichnet.
+  architektur_vertrag: >-
+    Eine Token-Quelle (index.css) + ein TS-Modul (chart-palette.ts) als einzige
+    Chart-Farbquelle; Simple*-Primitives bleiben die einzigen SVG-Chart-Renderer;
+    keine neue Chart-Bibliothek, keine lokalen Farb-Arrays in Seiten.
+  daten_vertrag: not_applicable
+  security_vertrag: not_applicable
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert; keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Audit-Doku Abschnitt 7e (Palette-Herleitung + Validator-Ergebnisse),
+    Workboard und dieses YAML.
+  test_vertrag: >-
+    tsc/eslint/vitest/build vor Push gruen; Palette-Aenderungen erfordern
+    erneuten Validator-Lauf beider Modi (dataviz validate_palette.js).

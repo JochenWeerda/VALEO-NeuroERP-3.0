@@ -1,6 +1,9 @@
+import { CHART_AXIS_TEXT, CHART_GRID, CHART_SERIES } from './chart-palette'
+
 interface BarDatum {
   label: string
   value: number
+  /** Ohne Angabe: Slot 1 der Chart-Palette (eine Serie = eine Farbe). */
   color?: string
 }
 
@@ -9,8 +12,6 @@ interface SimpleVerticalBarsProps {
   height?: number
   valueFormatter?: (value: number) => string
 }
-
-const DEFAULT_BAR_COLOR = '#2563EB'
 
 export function SimpleVerticalBars({ data, height = 300, valueFormatter = (value) => value.toLocaleString('de-DE') }: SimpleVerticalBarsProps): JSX.Element {
   const width = 640
@@ -23,17 +24,19 @@ export function SimpleVerticalBars({ data, height = 300, valueFormatter = (value
 
   return (
     <div className="space-y-3">
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full rounded-lg bg-slate-50">
-        <line x1={padding.left} y1={padding.top + chartHeight} x2={width - padding.right} y2={padding.top + chartHeight} stroke="#CBD5E1" />
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full rounded-lg bg-muted/30" role="img">
+        <line x1={padding.left} y1={padding.top + chartHeight} x2={width - padding.right} y2={padding.top + chartHeight} style={{ stroke: CHART_GRID }} />
         {data.map((item, index) => {
           const x = padding.left + index * (barWidth + barGap)
           const barHeight = (item.value / maxValue) * chartHeight
           const y = padding.top + chartHeight - barHeight
           return (
             <g key={item.label}>
-              <rect x={x} y={y} width={barWidth} height={barHeight} rx="8" fill={item.color ?? DEFAULT_BAR_COLOR} />
-              <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" className="fill-slate-700 text-[11px]">{valueFormatter(item.value)}</text>
-              <text x={x + barWidth / 2} y={height - 6} textAnchor="middle" className="fill-slate-500 text-[11px]">{item.label}</text>
+              <rect x={x} y={y} width={barWidth} height={barHeight} rx="4" style={{ fill: item.color ?? CHART_SERIES[0] }}>
+                <title>{`${item.label}: ${valueFormatter(item.value)}`}</title>
+              </rect>
+              <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" className="text-xs" style={{ fill: CHART_AXIS_TEXT }}>{valueFormatter(item.value)}</text>
+              <text x={x + barWidth / 2} y={height - 6} textAnchor="middle" className="text-xs" style={{ fill: CHART_AXIS_TEXT }}>{item.label}</text>
             </g>
           )
         })}

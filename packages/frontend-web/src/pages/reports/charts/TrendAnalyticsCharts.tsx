@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card'
+﻿import { Card } from '@/components/ui/card'
 import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
 import type { ReportDashboardData } from '@/pages/reports/report-chart-types'
 
@@ -12,7 +12,7 @@ export default function TrendAnalyticsCharts({ data }: { data: ReportDashboardDa
         <h4 className="mb-2 font-semibold">Umsatztrend</h4>
         <SimpleLineChart
           data={Object.entries(data?.revenueTrends ?? {}).map(([period, value]) => ({ label: period, value: Number(value) }))}
-          series={[{ key: 'value', color: '#EF4444', label: 'Wert' }]}
+          series={[{ key: 'value', label: 'Wert' }]}
           height={CHART_HEIGHT}
           showLegend={false}
         />
@@ -21,7 +21,7 @@ export default function TrendAnalyticsCharts({ data }: { data: ReportDashboardDa
         <h4 className="mb-2 font-semibold">Auftragsvolumen</h4>
         <SimpleLineChart
           data={Object.entries(data?.orderVolumeTrends ?? {}).map(([period, value]) => ({ label: period, value: Number(value) }))}
-          series={[{ key: 'value', color: '#EF4444', label: 'Aufträge' }]}
+          series={[{ key: 'value', label: 'AuftrÃ¤ge' }]}
           height={CHART_HEIGHT}
           showLegend={false}
         />
