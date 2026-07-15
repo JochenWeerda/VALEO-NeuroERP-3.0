@@ -28,6 +28,8 @@ progress: >-
   Arbeitspaketkatalog folgen im selben Slice. Tranche 3: 07 Maskenkatalog mit
   22 eigenstaendigen Meridian-Masken, Feldern, Validierungen, Actions, Rollen,
   Navigation, Zustaenden, Responsive/A11y-Regeln und Low-Fidelity-Mockups erstellt.
+  Tranche 4: 08 Workflowkatalog mit 15 E2E-Ablaeufen, State Machines, Guards,
+  Kompensationen, Blocking Reasons, Benachrichtigungen und Testmustern erstellt.
 acceptance:
   - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
   - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.

@@ -26,7 +26,7 @@ verbindliche Pflege- und Driftvertrag steht in `reference-maintenance.md`.
 | 05 | Datenmodell | ✅ Referenzkapitel | `05-datenmodell.md` (Tabellen, Relationen, Tenant, Historisierung, Audit, Indizes) |
 | 06 | API | ✅ Referenzkapitel | `06-api.md` (Bestand/Zielbild, Schemas, Fehler, OpenAPI- und Contract-Governance) |
 | 07 | Maskenkatalog | ✅ Referenzkapitel | `07-maskenkatalog.md` (22 Masken, Rollen, Felder, Zustände, Aktionen, Mockups, Meridian-Vertrag) |
-| 08 | Workflows | ✅ Kern | Lastenheft Kap. 5/11; Lifecycle in `app/agrar/rations/lifecycle/domain.py` |
+| 08 | Workflows | ✅ Referenzkapitel | `08-workflows.md` (15 E2E-Workflows, States, Guards, Kompensation, Audit, Tests) |
 | 09 | Berechnungsregeln | ✅ im Code+Tests | `app/agrar/rations/constants/` + Golden-Tests (Single Source: Code, nicht Doku-Kopie) |
 | 10 | UI/UX | ✅ | `docs/design/frontend-design-skill-audit.md` + ADR-041 |
 | 11 | Agenten | 🔜 Release C | Leitplanken: Lastenheft Kap. 6.20 (verbindlich) |
