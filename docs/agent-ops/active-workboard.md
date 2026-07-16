@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-PLAN-027 Plan-ObjectPage, Druck, Mobilroute und Veraltet-Kennzeichnung - reserviert 2026-07-16
+
+**Owner:** Codex. **Stand:** reserviert (Claim). Publizierte Planversionen erhalten eine native Meridian-ObjectPage mit Herkunft, Gueltigkeit, Dosierprofil, Mischanweisungen und serverseitig abgeleitetem aktuell/veraltet-Status. Eine sichere Druckansicht ist ueber Browserdruck als PDF speicherbar. Die mobile Stallroute konsumiert kuenftig aktuelle FeedingPlanVersions und bindet ihren Offline-Cache an die Planversions-ID statt an die alte `active-rations.snapshot.mobile`-Nebenwahrheit. **TDD:** Current/Stale-API, Screen-/Print-Vertrag und Mobile-Planvertrag zuerst rot.
+
 ## FEED-PLAN-026 FeedingPlanVersion, Mischanweisung und Publication Event - abgeschlossen 2026-07-16
 
 **Owner:** Codex. **Stand:** abgeschlossen. Approved/active Rationsversionen lassen sich tenant-/grant-sicher als unveraenderliche FeedingPlanVersion publizieren. Tierzahl, Gueltigkeit, Decimal-Dosierschritt, Rundungsmodus und Auditgrund sind Teil der Version; geordnete MixingInstructions zeigen FM je Tier, rohe Chargenmenge, dosierbares Ziel und Delta, waehrend fehlende FM unbekannt bleibt. Request-Hash und Advisory Locks sichern Idempotenz und parallele Versionsvergabe. Planversion, Instructions und `feeding.plan.published` (`schema_version=1.0`) entstehen atomar. **TDD-Abnahme:** 13 neue Tests, Feeding-/Rations-Regression 605 gruen/1 skipped, Ruff/Compile, Alembic, Doku 127/130, Architektur 902/902 (210 Services, 406 Endpoints) und Handbuch gruen. **Requirements:** FEED-RAT-002 VERIFIED; FEED-PLAN-001 PARTIAL nur wegen der bewusst nach FEED-PLAN-027 verschobenen ObjectPage/PDF-/Mobil-Journey.

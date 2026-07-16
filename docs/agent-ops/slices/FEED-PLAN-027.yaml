@@ -1,0 +1,64 @@
+slice_id: FEED-PLAN-027
+id: FEED-PLAN-027
+title: Plan ObjectPage Druck Mobilroute und Veraltet Kennzeichnung
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Publizierte FeedingPlanVersions als native Meridian-ObjectPage, sichere
+  druck-/PDF-faehige Ansicht und aktuelle mobile Stallanweisung ausliefern;
+  abgelaufene oder durch neuere Versionen ersetzte Plaene ehrlich als veraltet
+  kennzeichnen.
+requirements: [FEED-PLAN-001, FEED-PLAN-002, FEED-REP-001]
+work_packages: [FEED-WP-115, FEED-WP-116, FEED-WP-119, FEED-WP-120]
+decision_level: significant
+dependencies: [FEED-PLAN-026]
+file_ownership:
+  - app/services/feeding_plan_service.py
+  - app/api/v1/endpoints/feeding_plans.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_plan.py
+  - tests/test_feeding_plan_api.py
+  - packages/frontend-web/src/lib/api/feeding-plans.ts
+  - packages/frontend-web/src/features/feed-advice/FeedingPlanDetail.tsx
+  - packages/frontend-web/src/pages/futtermittel/fuetterungsplan-native.tsx
+  - packages/frontend-web/src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/app/routing/route-inventory.gen.json
+  - packages/frontend-web/src/app/routing/route-tree.gen.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-plan-detail.test.tsx
+  - packages/frontend-web/src/__tests__/pages/futtermittel/feeding-plan-mobile.test.tsx
+  - docs/adr/adr-050-feeding-plan-version-and-publication.md
+  - docs/architecture/agents/impact-notes/FEED-PLAN-027.md
+  - docs/architecture/domains/agrar/
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - config/architecture-index.yaml
+  - docs/entwickler/container-inventory.md
+  - docs/agent-ops/slices/FEED-PLAN-027.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Native ObjectPage laeuft ueber ScreenDefinition, RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer.
+  - Kopf zeigt Herkunft, Version, Tierzahl, Gueltigkeit, Dosierprofil und aktuellen/veralteten Zustand als Text.
+  - Mischanweisungen zeigen Reihenfolge, FM je Tier, rohe Charge, Zielcharge und Rundungsdelta mit Einheiten.
+  - Druckansicht enthaelt Plan-ID, Quellversion, Gueltigkeit, Zeitstempel und Mischfolge und ist browserseitig als PDF speicherbar.
+  - Mobile Route liest aktuelle Planversionen statt Rations-Snapshot-Mobile-Payload; Cache ist planversionsgebunden.
+  - Abgelaufene und durch neuere Versionen ersetzte Plaene sind veraltet und werden mobil nicht als aktuell angeboten.
+  - Empty, Loading, Offline-Cache, unbekannte Menge und Fehler bleiben handlungsorientiert.
+tdd:
+  red:
+    - API-/Service-Vertrag fuer current/stale und grant-sichere aktuelle Plaene.
+    - ScreenDefinition-/Component-Vertrag fuer native ObjectPage, Druck und Status.
+    - Mobile Component-Vertrag fuer Planversion statt active-rations-Legacypayload.
+  green: kleinste ObjectPage-/Print-/Mobile-Journey auf FEED-PLAN-026-Vertrag
+  refactor: keine Planberechnung im Frontend; mobile Cache- und Druckprojektion teilen denselben API-Typ
+tests:
+  - tests/test_feeding_plan.py
+  - tests/test_feeding_plan_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-plan-detail.test.tsx
+  - packages/frontend-web/src/__tests__/pages/futtermittel/feeding-plan-mobile.test.tsx
+risks:
+  - Legacy-Mobile-Daten duerfen nicht parallel als zweite aktuelle Planwahrheit fortbestehen.
+  - Browserdruck darf keine unmaskierten oder fremden Betriebsdaten nachladen.
+  - Veraltet darf nie allein aus Clientzeit oder Farbe abgeleitet werden.
