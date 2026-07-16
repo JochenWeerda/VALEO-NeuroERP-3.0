@@ -1,0 +1,54 @@
+slice_id: FEED-PLAN-026
+id: FEED-PLAN-026
+title: FeedingPlanVersion Mischanweisung und Publication Event
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Eine freigegebene Rationsversion als unveraenderliche, zeitlich gueltige und
+  fuer Tierzahl sowie Dosiertechnik skalierte FeedingPlanVersion publizieren;
+  geordnete MixingInstructions und ein idempotentes feeding.plan.published-
+  Outbox-Ereignis machen die Ausfuehrung reproduzierbar.
+requirements: [FEED-PLAN-001, FEED-RAT-002]
+work_packages: [FEED-WP-111, FEED-WP-112, FEED-WP-113, FEED-WP-114, FEED-WP-117]
+decision_level: significant
+dependencies: [FEED-EDITOR-025]
+file_ownership:
+  - alembic/versions/feed_plan_versions_20260716.py
+  - app/agrar/rations/feeding_plan.py
+  - app/services/feeding_plan_service.py
+  - app/api/v1/endpoints/feeding_plans.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - tests/test_feeding_plan.py
+  - tests/test_feeding_plan_api.py
+  - docs/adr/adr-050-feeding-plan-version-and-publication.md
+  - docs/architecture/agents/impact-notes/FEED-PLAN-026.md
+  - docs/architecture/domains/agrar/
+  - docs/specs/feeding/
+  - config/architecture-index.yaml
+  - docs/entwickler/container-inventory.md
+  - docs/agent-ops/slices/FEED-PLAN-026.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Nur eine approved oder active Rationsversion kann publiziert werden.
+  - Planversion, Quell-Rationsversion, Tierzahl, Gueltigkeit und Rundungsprofil sind unveraenderlich verbunden.
+  - MixingInstructions bewahren Reihenfolge, FM-Menge je Tier, skalierten Chargen-Sollwert und Rundungsabweichung.
+  - Dosierschritt und Rundungsmodus werden explizit validiert; fehlende Mengen bleiben unbekannt statt Null.
+  - valid_until liegt nicht vor valid_from; derselbe Idempotency-Key publiziert nie doppelt.
+  - Tenant, Business-Grant und WRITE-Rolle werden serverseitig erzwungen.
+  - Publication schreibt im selben Commit genau ein schemafestes feeding.plan.published-Outbox-Event.
+tdd:
+  red:
+    - Domain-Property-/Boundary-Tests fuer Skalierung, Rundung, Gueltigkeit und unbekannte Mengen.
+    - Migration-/Service-Test fuer Immutable Planversion und genau ein Outbox-Ereignis.
+    - API-Journey fuer Publish/Get/List, RBAC, Grant, Tenant, Idempotenz und Lifecycle-Guard.
+  green: kleinster reproduzierbarer Publication-Pfad aus bestehender RationVersion
+  refactor: Berechnung rein halten; Persistenz, Autorisierung und Outbox im Application Service koordinieren
+tests:
+  - tests/test_feeding_plan.py
+  - tests/test_feeding_plan_api.py
+risks:
+  - Rundung darf Gesamtmengen nicht still als exakte Futtermengen ausgeben.
+  - Event darf weder vor Commit sichtbar sein noch bei Retry dupliziert werden.
+  - Planpublikation darf Rationssnapshot oder Analyseprovenienz nicht nachtraeglich veraendern.
