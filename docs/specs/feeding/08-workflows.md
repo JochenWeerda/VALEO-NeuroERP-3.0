@@ -514,3 +514,19 @@ Zeilenbedarf und Auditgrund bestaetigen -> append-only Handoff und
 Vorschlag pruefen. Unbekannter Bestand oder unbekannte Handelseinheit beendet
 den Agrar-Command ohne Persistenz. Bestellung und Freigabe bleiben separate
 Einkaufsentscheidungen.
+
+## 29. Abweichung bewerten und Massnahme anlegen FEED-ACT-030
+
+1. Ist-Komponente und ihre Planversion grant-sicher laden.
+2. Feed-Klasse und am Fuetterungstag gueltige Policyversion bestimmen.
+3. Absolute prozentuale Abweichung gegen Warn- und Kritischgrenze bewerten.
+4. Ohne Policy eine Konfigurationsluecke anzeigen; keine Defaultschwelle raten.
+5. Finding mit Soll/Ist/Delta, Schwelle, Prioritaet und Abhilfe anzeigen.
+6. Mensch waehlt ein actionable Finding und bestaetigt Titel, Owner, Termin und
+   Grund in einem expliziten Command.
+7. Server prueft Rolle, Grant, Faelligkeit, Finding und Idempotenz und speichert
+   den unveraenderlichen Nachweis.
+
+Ein Reload, Retry oder technischer Befund allein erzeugt keine weitere
+Massnahme. IOFC und Planversionsmarker sind unabhaengige, read-only
+Tagesprojektionen.

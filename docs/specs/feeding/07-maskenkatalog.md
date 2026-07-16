@@ -572,3 +572,17 @@ Bestaetigungs-Overlay zeigt Unterdeckung, gerundeten Vorschlag und
 Rundungsaufschlag, fordert einen Auditgrund und erklaert, dass keine Bestellung
 entsteht. Die Maske bleibt in der Kette ScreenDefinition -> RenderPlan ->
 UniversalMaskRuntime -> UniversalMaskRenderer.
+
+## 20. Abweichungsbefunde und Massnahmen FEED-ACT-030
+
+Die bestehende native Maske `agrar/feeding-actuals` erhaelt neben dem
+Komponentennachweis zwei auditdichte Tabellen: Befunde inklusive expliziter
+Konfigurationsluecken sowie offene Massnahmen. Ein Massnahmendialog verlangt
+bewusste Auswahl, Titel, Owner, Termin und Begruendung. Ein separater
+Policy-Dialog legt eine neue klassenspezifische Version an und weist darauf hin,
+dass es keinen stillen universellen Grenzwert gibt.
+
+Das Controlling zeigt IOFC nur bei vollstaendiger Basis. Planversionswechsel
+erscheinen als datierte Textmarker mit Versionsnummer. Layout, Tabellen,
+Actions und Statussemantik verbleiben in der zentralen Meridian-Laufzeitkette;
+die Dialoge sind begruendete Domain-Overlays.

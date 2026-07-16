@@ -33,6 +33,9 @@ function point(overrides: Partial<ControllingSeriesPoint>): ControllingSeriesPoi
     actual_milk_kg_cow: 34,
     actual_ecm_kg_cow: 33.1,
     nitrogen_efficiency_pct: 29.4,
+    iofc_eur_cow: 8.5,
+    plan_version_no: 1,
+    feeding_plan_version_id: 'plan-v1',
     actual_methane_kg_cow: null,
     target_methane_kg_cow: 0.42,
     methane_estimated: false,
@@ -63,7 +66,8 @@ describe('FeedControllingTrends', () => {
   it('rendert Soll-Ist-Trendcharts und Gruppen-Benchmark aus der Tagesreihe', async () => {
     fetchControllingSeriesMock.mockResolvedValue([
       point({ observation_date: '2026-07-10' }),
-      point({ observation_date: '2026-07-11', actual_dmi_kg_cow: 21.9 }),
+      point({ observation_date: '2026-07-11', actual_dmi_kg_cow: 21.9,
+              plan_version_no: 2, feeding_plan_version_id: 'plan-v2' }),
       point({ group_id: 'g-2', group_name: 'Trockensteher', observation_date: '2026-07-10', actual_dmi_kg_cow: 13.2 }),
     ])
 
@@ -73,6 +77,8 @@ describe('FeedControllingTrends', () => {
     expect(screen.getByRole('heading', { name: 'Futterkosten (EUR/Kuh/Tag)' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Milch-N-Effizienz (%)' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Methan (kg/Kuh/Tag)' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'IOFC (EUR/Kuh/Tag)' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Planversionswechsel' })).toHaveTextContent('Plan v2')
 
     // Soll-Linien sind als rezessive Referenz beschriftet
     expect(screen.getAllByText('Soll (aktive Ration)').length).toBeGreaterThanOrEqual(2)

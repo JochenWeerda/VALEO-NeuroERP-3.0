@@ -19,6 +19,7 @@ type NumericKey =
   | 'actual_cost_eur_cow' | 'target_cost_eur_cow'
   | 'actual_milk_kg_cow' | 'target_milk_kg_cow' | 'actual_ecm_kg_cow'
   | 'nitrogen_efficiency_pct'
+  | 'iofc_eur_cow'
   | 'actual_methane_kg_cow' | 'target_methane_kg_cow'
 
 const BENCHMARK_KPIS: Array<{ key: NumericKey; label: string; unit: string; digits: number }> = [
@@ -26,6 +27,7 @@ const BENCHMARK_KPIS: Array<{ key: NumericKey; label: string; unit: string; digi
   { key: 'actual_cost_eur_cow', label: 'Futterkosten', unit: 'EUR/Kuh', digits: 2 },
   { key: 'actual_ecm_kg_cow', label: 'ECM', unit: 'kg/Kuh', digits: 1 },
   { key: 'nitrogen_efficiency_pct', label: 'N-Effizienz', unit: '%', digits: 1 },
+  { key: 'iofc_eur_cow', label: 'IOFC', unit: 'EUR/Kuh', digits: 2 },
   { key: 'actual_methane_kg_cow', label: 'Methan', unit: 'kg/Kuh', digits: 2 },
 ]
 
@@ -114,6 +116,23 @@ export function FeedControllingTrends(): JSX.Element {
   const milkData = useMemo(() => dailySeries(points, ['actual_milk_kg_cow', 'actual_ecm_kg_cow', 'target_milk_kg_cow']), [points])
   const nitrogenData = useMemo(() => dailySeries(points, ['nitrogen_efficiency_pct']), [points])
   const methaneData = useMemo(() => dailySeries(points, ['actual_methane_kg_cow', 'target_methane_kg_cow']), [points])
+  const iofcData = useMemo(() => dailySeries(points, ['iofc_eur_cow']), [points])
+  const versionMarkers = useMemo(() => {
+    const byGroup = new Map<string, ControllingSeriesPoint[]>()
+    for (const point of points) {
+      const rows = byGroup.get(point.group_name) ?? []
+      rows.push(point)
+      byGroup.set(point.group_name, rows)
+    }
+    return [...byGroup.entries()].flatMap(([groupName, rows]) => {
+      const sorted = [...rows].sort((a, b) => a.observation_date.localeCompare(b.observation_date))
+      return sorted.flatMap((point, index) => {
+        const previous = sorted[index - 1]
+        if (!point.plan_version_no || (previous?.plan_version_no === point.plan_version_no)) return []
+        return [{ groupName, date: point.observation_date, versionNo: point.plan_version_no }]
+      })
+    })
+  }, [points])
 
   const benchmark = useMemo(() => {
     const byGroup = new Map<string, ControllingSeriesPoint[]>()
@@ -245,6 +264,20 @@ export function FeedControllingTrends(): JSX.Element {
                 height={220}
                 valueFormatter={(value) => formatNumber(value, 2)}
               />
+            </section>
+            <section className="rounded-lg border bg-card p-4">
+              <h3 className="mb-1 font-semibold">IOFC (EUR/Kuh/Tag)</h3>
+              <p className="mb-3 text-xs text-muted-foreground">Nur bei vollstaendiger Milchmenge, Milchpreis- und Futterkostenbasis.</p>
+              <SimpleLineChart data={iofcData}
+                series={[{ key: 'iofc_eur_cow', label: 'Milcherloes minus Futterkosten', color: chartSeriesColor(1) }]}
+                height={220} valueFormatter={(value) => formatNumber(value, 2)} />
+            </section>
+            <section className="rounded-lg border bg-card p-4" aria-label="Planversionswechsel">
+              <h3 className="mb-3 font-semibold">Planversionswechsel</h3>
+              {versionMarkers.length === 0 ? <p className="text-sm text-muted-foreground">Keine Planversionsmarke im Zeitraum.</p>
+                : <ul className="space-y-2 text-sm">{versionMarkers.map((marker) => <li key={`${marker.groupName}-${marker.date}-${marker.versionNo}`}>
+                  {shortDate(marker.date)} · {marker.groupName} · Plan v{marker.versionNo}
+                </li>)}</ul>}
             </section>
           </div>
 

@@ -10,6 +10,7 @@ export interface DailyFeedingObservationInput {
   cow_count?: number
   actual_dmi_kg_cow?: number
   actual_cost_eur_cow?: number
+  milk_price_eur_kg?: number
   actual_milk_kg_cow?: number
   actual_fat_pct?: number
   actual_protein_pct?: number
@@ -29,6 +30,8 @@ export interface ControllingSeriesPoint {
   group_name: string
   observation_date: string
   version_no?: number | null
+  feeding_plan_version_id?: string | null
+  plan_version_no?: number | null
   cow_count?: number | null
   target_dmi_kg_cow?: number | null
   actual_dmi_kg_cow?: number | null
@@ -37,6 +40,9 @@ export interface ControllingSeriesPoint {
   target_milk_kg_cow?: number | null
   actual_milk_kg_cow?: number | null
   actual_ecm_kg_cow?: number | null
+  milk_price_eur_kg?: number | null
+  milk_revenue_eur_cow?: number | null
+  iofc_eur_cow?: number | null
   nitrogen_efficiency_pct?: number | null
   target_methane_kg_cow?: number | null
   actual_methane_kg_cow?: number | null

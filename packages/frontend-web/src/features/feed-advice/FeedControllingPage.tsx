@@ -21,7 +21,7 @@ export function FeedControllingPage(): JSX.Element {
   const [groups, setGroups] = useState<FeedingGroup[]>([])
   const [groupId, setGroupId] = useState('')
   const [date, setDate] = useState(today)
-  const [values, setValues] = useState({ dmi: '', cost: '', milk: '', fat: '', protein: '', feedN: '', methane: '' })
+  const [values, setValues] = useState({ dmi: '', cost: '', milk: '', milkPrice: '', fat: '', protein: '', feedN: '', methane: '' })
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
@@ -46,6 +46,7 @@ export function FeedControllingPage(): JSX.Element {
       await recordDailyFeedingObservation({
         group_id: groupId, observation_date: date, source: 'manual', source_ref: 'daily-entry',
         actual_dmi_kg_cow: optionalNumber(values.dmi), actual_cost_eur_cow: optionalNumber(values.cost),
+        milk_price_eur_kg: optionalNumber(values.milkPrice),
         actual_milk_kg_cow: optionalNumber(values.milk), actual_fat_pct: optionalNumber(values.fat),
         actual_protein_pct: optionalNumber(values.protein), feed_n_kg_cow: optionalNumber(values.feedN),
         actual_methane_kg_cow: optionalNumber(values.methane), methane_estimated: false,
@@ -87,7 +88,7 @@ export function FeedControllingPage(): JSX.Element {
             <div className="grid gap-2"><Label htmlFor="ctrl-group">Tiergruppe</Label><select id="ctrl-group" className="h-10 rounded-md border bg-background px-3" value={groupId} onChange={(e) => setGroupId(e.target.value)}>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></div>
             <div className="grid gap-2"><Label htmlFor="ctrl-date">Tag</Label><Input id="ctrl-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
             {[
-              ['dmi', 'TM-Aufnahme kg'], ['cost', 'Futterkosten EUR'], ['milk', 'Milch kg'],
+              ['dmi', 'TM-Aufnahme kg'], ['cost', 'Futterkosten EUR'], ['milk', 'Milch kg'], ['milkPrice', 'Milchpreis EUR/kg'],
               ['fat', 'Fett %'], ['protein', 'Eiweiss %'], ['feedN', 'Futter-N kg'], ['methane', 'Methan kg'],
             ].map(([key, label]) => <div className="grid gap-2" key={key}><Label htmlFor={`ctrl-${key}`}>{label}</Label><Input id={`ctrl-${key}`} type="number" min="0" step="0.001" value={values[key as keyof typeof values]} onChange={(e) => setValues((state) => ({ ...state, [key]: e.target.value }))} /></div>)}
           </div>

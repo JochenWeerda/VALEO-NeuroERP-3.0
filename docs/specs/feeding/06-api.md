@@ -531,3 +531,19 @@ Einkaufsauftrag.
   Delta, Prozent, Kosten-/Naehrstofffolge und Datenluecken.
 - `GET /feeding/actuals/export.csv`: UTF-8/Excel-kompatibler, grant-gefilterter
   Nachweis. Rollenfehler 403, Scope/Plan 404, Fachkonflikte 409.
+
+## 23. Abweichungs- und Massnahmenvertrag FEED-ACT-030
+
+- `POST /feeding/actuals/deviation-policies`: APPROVE-Command fuer eine neue
+  Feed-Klassen-Version mit Warn-/Kritischgrenze, Gueltigkeit und Pflichtgrund.
+- `GET /feeding/actuals/deviation-policies`: tenant-sichere Policyhistorie.
+- `GET /feeding/actuals/findings`: grant-gefilterte Projektion mit Planversion,
+  Feed, Soll/Ist/Delta, Policyversion, Prioritaet und Abhilfe; fehlende Policy
+  erscheint als `unconfigured`.
+- `POST /feeding/actuals/measures`: WRITE-Command mit Komponente, Titel, Owner,
+  Termin, Grund und Idempotency-Key. Nur Warning/Critical ist zulaessig.
+- `GET /feeding/actuals/measures`: grant-gefilterter append-only Nachweis.
+
+`POST /feeding/controlling/observations` akzeptiert optional den Milchpreis.
+`GET /feeding/controlling/series` liefert IOFC-Basis und Planversions-ID/-Nummer;
+bei unvollstaendiger Basis ist IOFC `null`.

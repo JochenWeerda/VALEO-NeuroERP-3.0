@@ -223,6 +223,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `actuals` → `/api/v1/agrar/rations-optimization/feeding/actuals/components`
+- `findings` → `/api/v1/agrar/rations-optimization/feeding/actuals/findings`
+- `measures` → `/api/v1/agrar/rations-optimization/feeding/actuals/measures`
 
 **MCP-Tools (Domäne):**
 
@@ -241,6 +243,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export_csv` | CSV exportieren | safe | nein | `—` |
+| `create_measure` | Massnahme aus Abweichung | confirm | nein | `—` |
+| `configure_threshold` | Schwellen konfigurieren | confirm | nein | `—` |
 | `open_mobile` | Ist-Fuetterung erfassen | safe | nein | `—` |
 
 ---

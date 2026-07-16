@@ -433,3 +433,16 @@ revisionssicheren Uebergabenachweis. Ein Unique-Constraint verhindert doppelte
 Keys je Tenant; ein Trigger verhindert Update/Delete. Das zugehoerige
 `feeding.supply.procurement_handoff.created` wird in derselben Transaktion in
 `public.outbox_events` geschrieben. Einkaufsbestellungen werden nicht beruehrt.
+
+## 24. Abweichungspolicies, Massnahmen und Controlling FEED-ACT-030
+
+- `feeding_deviation_policies`: Tenant, Feed-Klasse, fortlaufende Version,
+  Warn-/Kritisch-Prozent, `valid_from`, Pflichtgrund und Akteur; eindeutig je
+  Tenant/Klasse/Version und durch Trigger append-only.
+- `feeding_actual_measures`: Tenant, Actual-Komponente, eingefrorenes Finding,
+  Titel, Owner, Termin, Grund, initiale Version 1, Status, Idempotency-Key/Hash
+  und Akteur; eindeutig je Tenant/Key und durch Trigger append-only. Spaetere
+  Statusaenderungen erzeugen Nachfolgeversionen im Massnahmen-Lifecycle.
+- `feeding_controlling_daily` erhaelt `feeding_plan_version_id`,
+  `milk_price_eur_kg`, `milk_revenue_eur_cow` und `iofc_eur_cow`. Unvollstaendige
+  IOFC-Basis bleibt fachlich nachvollziehbar nullable.

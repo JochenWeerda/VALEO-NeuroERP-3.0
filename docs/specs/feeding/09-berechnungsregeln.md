@@ -450,3 +450,20 @@ expliziten Ausgaberundung.
 5. Die Pruefung ist deterministisch und laeuft vor jedem Solverlauf; sie wird
    nicht faelschlich als mathematische LP-IIS bezeichnet.
 6. Entwuerfe ohne Grenzen bleiben zum bisherigen Bewertungsvertrag aequivalent.
+
+## 20. Abweichungsschwellen und IOFC FEED-ACT-030
+
+1. Die Bewertung verwendet `abs((Ist - Soll) / Soll * 100)` Decimal-basiert.
+   Bei Soll null ist die Prozentabweichung unbekannt.
+2. `warning_pct > 0`, `critical_pct > warning_pct` und
+   `critical_pct <= 100`; die Grenzen gelten nur fuer ihre Feed-Klasse und
+   Policyversion.
+3. `abs(delta_pct) >= critical_pct` ergibt `critical`, andernfalls
+   `>= warning_pct` ergibt `warning`; darunter entsteht kein actionable
+   Finding. Ohne gueltige Policy entsteht `unconfigured`.
+4. Eine Policyversion wirkt nicht rueckwirkend: massgeblich ist ihr
+   `valid_from` relativ zum Fuetterungstag.
+5. IOFC = `Milchmenge kg/Kuh * Milchpreis EUR/kg - Futterkosten EUR/Kuh`.
+   Fehlt einer der drei Werte, bleiben Milchumsatz und IOFC unbekannt statt `0`.
+6. Jeder IOFC-Punkt nennt die Planversions-ID/-Nummer, damit ein Wechsel vor
+   und nach der Ration textuell und reproduzierbar abgegrenzt werden kann.

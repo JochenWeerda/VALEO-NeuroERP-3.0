@@ -2,9 +2,10 @@ slice_id: FEED-ACT-030
 id: FEED-ACT-030
 title: Abweichungsschwellen Massnahmen IOFC und Versionsmarker
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-16"
 started_at: "2026-07-16"
+completed_at: "2026-07-16"
 goal: >-
   Konfigurierbare komponentenbezogene Abweichungsschwellen auswerten,
   begruendete Massnahmen minimal und revisionssicher ableiten sowie IOFC und
@@ -22,18 +23,20 @@ file_ownership:
   - app/api/v1/endpoints/rations_controlling.py
   - app/core/screen_definitions.py
   - tests/test_feeding_actual_measures.py
-  - tests/test_feeding_actual_measures_api.py
+  - tests/test_feeding_actual_api.py
   - tests/test_rations_controlling.py
+  - tests/test_feed_advice_screen_definition.py
   - packages/frontend-web/src/lib/api/feeding-actual.ts
   - packages/frontend-web/src/lib/api/feed-controlling.ts
   - packages/frontend-web/src/features/feed-advice/FeedingActualPage.tsx
   - packages/frontend-web/src/features/feed-advice/FeedControllingTrends.tsx
-  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-measures.test.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-page.test.tsx
   - packages/frontend-web/src/__tests__/features/feed-advice/feed-controlling-trends.test.tsx
   - docs/adr/adr-053-feeding-deviation-measures.md
   - docs/architecture/agents/impact-notes/FEED-ACT-030.md
   - docs/specs/feeding/
   - docs/agent-handbuch/
+  - docs/schnittstellen/openapi.json
   - config/architecture-index.yaml
   - docs/agent-ops/slices/FEED-ACT-030.yaml
   - docs/agent-ops/active-workboard.md
@@ -54,10 +57,16 @@ tdd:
   refactor: Schwellenbewertung, Massnahmen-Command und Trendprojektion getrennt halten
 tests:
   - tests/test_feeding_actual_measures.py
-  - tests/test_feeding_actual_measures_api.py
+  - tests/test_feeding_actual_api.py
   - tests/test_rations_controlling.py
-  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-measures.test.tsx
+  - tests/test_feed_advice_screen_definition.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-page.test.tsx
   - packages/frontend-web/src/__tests__/features/feed-advice/feed-controlling-trends.test.tsx
+evidence:
+  focused_backend: 21_passed
+  backend_regression: 742_passed_1_skipped
+  frontend_regression: 415_passed_1_skipped
+  quality_gates: typescript_eslint_ruff_compile_docs_architecture_openapi_handbuch_alembic_green
 risks:
   - Eine 5-Prozent-Regel darf nicht still fuer jede Komponentenklasse gelten.
   - Fehlende IOFC-Eingaben duerfen keinen Nullwert erzeugen.

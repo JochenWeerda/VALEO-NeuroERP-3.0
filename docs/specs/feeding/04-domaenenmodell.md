@@ -454,3 +454,14 @@ separaten kanonischen Decimal-Rechenwert samt Basis, Methode und Provenienz.
 `FeedAnalysisRevision` ist append-only. Der Lifecycle und die atomare
 Aktivierung gelten pro Tenant, Feed und `scope_code`. Fehlende Werte sind
 unbekannt und niemals implizit Null.
+
+## 16. Abweichungspolicy und ActualMeasure FEED-ACT-030
+
+`FeedingDeviationPolicy` ist ein append-only Policy-Aggregat je Tenant und
+Komponentenklasse. Jede Version besitzt Warn-/Kritischgrenze,
+Gueltigkeitsbeginn und Pflichtgrund. Das Finding bleibt eine reproduzierbare
+Projektion aus Policyversion und `ActualFeedingComponent`, kein Task-Aggregat.
+
+`FeedingActualMeasure` entsteht ausschliesslich durch einen menschlichen
+Command und friert Actual-Komponente, Finding, Owner, Termin, Grund, Akteur und
+Idempotenz ein. Ein Agent oder Finding darf keine Massnahme still erzeugen.
