@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-EDITOR-025 Rationsvorlagen, Kopieren, Betriebsakte und Fuetterungsuebersicht - reserviert 2026-07-16
+
+**Owner:** Codex. **Stand:** reserviert (Claim). Persistente Vorlagen referenzieren unveraenderliche Rationsversionen; Anwenden erzeugt eine neue Draft-Version mit `based_on_version_id`, optimistischer Latest-Version und Auditgrund. Parallel wird der vorhandene Fuetterungsbetrieb von der Worklistzeile zur nativen Betriebsakte ausgebaut: Gruppen, Rationen, Analyse-/Datenreife und priorisierte Handlungsbedarfe werden grant-/tenant-sicher projiziert. Die UI bleibt in der zentralen Meridian-Kette; nur die Vorlage-/Kopieren-Aktion ist ein schmales Domain-Overlay. **TDD:** Domain/Migration/API/Isolation/Screen zuerst rot.
+
 ## FEED-EDITOR-024 Min/Max-Grenzen in der Ration + benannte Grenzkonflikte - abgeschlossen 2026-07-16
 
 **Owner:** Claude → Codex (ausdruecklich uebernommen). **Stand:** abgeschlossen. Draft-Komponenten, typisierte API, Versionssnapshot und native Editor-Journey bewahren optionale `min_kg_fm`/`max_kg_fm`. Die deterministische Vorpruefung benennt vor jedem Solverlauf `bounds_conflict` (min>max, critical), `amount_outside_bounds` (high) und `min_sum_exceeds_dmi_band` (critical) mit Feed-Ursache und strukturierter Abhilfe; negative Grenzen enden als 422. Min/Max stehen als kompakte numerische Spalten neben kg FM; Befundklick fokussiert die verursachende Position. Entwuerfe ohne Grenzen bleiben kompatibel. **TDD-Abnahme:** uebernommene Domain-Red-Welle plus API-/UI-Vertrag; fokussiert Backend 12/12 und Frontend 6/6, breite Feeding-/Rations-Suite 672 gruen/1 skipped, Frontend 97 Dateien/399 Tests gruen (1 skipped), TypeScript und fokussiertes ESLint gruen; Doku 127/128, Architecture Validate/Strict Drift 901/901, Handbuch, Python-Compile und Alembic Single-Head/current gruen. **Requirements:** FEED-RAT-001 und FEED-OPT-004 VERIFIED; echte LP-IIS/Shadow-Prices bleiben der separate SOLL-Ausbau FEED-OPT-006.

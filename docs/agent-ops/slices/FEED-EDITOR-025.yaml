@@ -1,0 +1,59 @@
+slice_id: FEED-EDITOR-025
+id: FEED-EDITOR-025
+title: Rationsvorlagen Kopieren Betriebsakte und Fuetterungsuebersicht
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Wiederverwendbare Rationsvorlagen und begruendetes Kopieren als neue
+  unveraenderliche Draft-Version liefern und die vorhandenen Betriebs-, Gruppen-,
+  Futter-, Analyse- und Rationsdaten in einer nativen Betriebsakte priorisieren.
+requirements: [FEED-RAT-003, FEED-BUS-003]
+work_packages: [FEED-WP-073, FEED-WP-075, FEED-WP-076]
+decision_level: significant
+dependencies: [FEED-CORE-015, FEED-EDITOR-024]
+file_ownership:
+  - alembic/versions/feed_editor_templates_20260716.py
+  - app/agrar/rations/ration_templates.py
+  - app/services/feeding_ration_template_service.py
+  - app/api/v1/endpoints/feeding_ration_templates.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_ration_templates.py
+  - tests/test_feeding_ration_templates_api.py
+  - packages/frontend-web/src/features/feed-advice/FeedingBusinessDetail.tsx
+  - packages/frontend-web/src/lib/api/feeding-ration-templates.ts
+  - packages/frontend-web/src/lib/api/feeding-business.ts
+  - packages/frontend-web/src/pages/futtermittel/fuetterungsbetrieb-native.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-business-detail.test.tsx
+  - docs/adr/adr-049-feeding-business-file-and-ration-templates.md
+  - docs/architecture/domains/agrar/
+  - docs/architecture/agents/impact-notes/FEED-EDITOR-025.md
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - docs/agent-ops/slices/FEED-EDITOR-025.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Vorlage referenziert eine unveraenderliche Rationsversion und dupliziert keinen Feed-/Analyseinhalt.
+  - Anwenden erzeugt eine neue Draft-Version mit based_on_version_id, erwarteter Latest-Version und Auditgrund.
+  - Tenant, Business-Grant und READ/WRITE-Rollen werden serverseitig erzwungen.
+  - Betriebsakte zeigt priorisiert Gruppen, aktive/veraltete Rationen, Analysereife und offene Findings statt Datensilos.
+  - Native ObjectPage laeuft ueber ScreenDefinition, RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer.
+  - Leere, teilweise und veraltete Betriebsdaten bleiben ehrlich sichtbar und werden nie als Null-KPI erfunden.
+tdd:
+  red:
+    - Domain-/Migrationstest fuer unveraenderliche Vorlagen und Copy-Provenienz.
+    - API-Journey fuer Create/List/Apply, Tenant, Grant, RBAC und Versionskonflikt.
+    - Screen-/Component-Vertrag fuer Betriebsakte und Vorlagenaktion.
+  green: kleinster vertikaler Vorlagen- und Betriebsaktenpfad auf bestehenden Aggregaten
+  refactor: read-only Betriebsaktenprojektion und Commands klar trennen; keine zweite Spezialmaskenwelt
+tests:
+  - tests/test_feeding_ration_templates.py
+  - tests/test_feeding_ration_templates_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-business-detail.test.tsx
+risks:
+  - Vorlagen duerfen historische Snapshots nicht nachtraeglich veraendern.
+  - Betriebsakte darf Business-Grant und Tenant-Grenzen nicht durch Aggregation umgehen.
+  - Readiness-Kennzahlen duerfen fehlende Daten nicht als Null oder gesund darstellen.
