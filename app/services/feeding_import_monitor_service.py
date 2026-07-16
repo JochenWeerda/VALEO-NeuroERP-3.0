@@ -74,6 +74,25 @@ class FeedingImportMonitorService:
         self.db.commit()
         return dict(row)
 
+    def quarantine_external(self, *, adapter: str, payload: dict[str, Any],
+                            findings: list[dict[str, Any]]) -> dict[str, Any]:
+        """Extern erkannten Konflikt (z. B. Mischwagen-Rueckmeldung auf veraltete
+        Planversion, FEED-INT-035) sichtbar in die Quarantaene stellen —
+        nichts geht verloren, Entscheidung faellt im Monitor."""
+        row = self.db.execute(text("""
+          INSERT INTO domain_agrar.feeding_import_jobs
+            (id,tenant_id,adapter,payload,payload_hash,status,findings,mapped_excerpt,created_by)
+          VALUES (:id,:tenant_id,:adapter,CAST(:payload AS jsonb),:payload_hash,'quarantined',
+                  CAST(:findings AS jsonb),'{}'::jsonb,:actor)
+          RETURNING *
+        """), {"id": str(uuid7()), "tenant_id": self.tenant_id, "adapter": adapter,
+               "payload": json.dumps(payload, ensure_ascii=False),
+               "payload_hash": payload_hash(payload),
+               "findings": json.dumps(findings, ensure_ascii=False),
+               "actor": self.actor}).mappings().one()
+        self.db.commit()
+        return dict(row)
+
     def list_jobs(self, *, status: str | None = None) -> list[dict[str, Any]]:
         rows = self.db.execute(text("""
           SELECT id,tenant_id,adapter,status,findings,mapped_excerpt,result_ref,

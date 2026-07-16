@@ -7213,3 +7213,5 @@ from app.api.v1.endpoints.feeding_consulting import router as _feeding_consultin
 router.include_router(_feeding_consulting_router)
 from app.api.v1.endpoints.feeding_import_monitor import router as _feeding_import_monitor_router
 router.include_router(_feeding_import_monitor_router)
+from app.api.v1.endpoints.feeding_mixer import router as _feeding_mixer_router
+router.include_router(_feeding_mixer_router)

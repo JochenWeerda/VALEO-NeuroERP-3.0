@@ -1,0 +1,95 @@
+slice_id: FEED-INT-035
+id: FEED-INT-035
+title: Mischtechnik bidirektional — Planexport und idempotente Rueckmeldung mit Konflikt-Quarantaene
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+requirements: [FEED-PLAN-003]
+work_packages: [FEED-WP-231, FEED-WP-232]
+decision_level: significant
+dependencies: [FEED-PLAN-026, FEED-INT-034]
+goal: >-
+  Der Fuetterungsplan erreicht die Mischtechnik als deterministisches
+  Maschinen-Dokument mit stabiler Versionsreferenz, und tatsaechlich geladene
+  Mengen kommen verlustfrei und idempotent zurueck — Konflikte (veraltete
+  Planversion) werden sichtbar entschieden statt still verworfen.
+scope:
+  - "Export GET /feeding/plans/versions/{id}/mixer-export: Format
+    agrirouter-feeding-plan-v1 aus der unveraenderlichen Planversion
+    (Mischinstruktionen in Reihenfolge, Referenz=plan_version_id,
+    Gueltigkeitsfenster); stale-Versionen sind nicht exportierbar (409)."
+  - "Rueckmeldung POST /feeding/mixer-feedback: feeding_mixer_feedback
+    (append-only per Trigger, UNIQUE tenant+plan_version+client_ref) mit
+    Soll/Ist-Abgleich je Instruktion (delta_kg) und Gesamt-Mischgenauigkeit;
+    unbekanntes Futter -> 422; Duplikat -> dieselbe Rueckmeldung mit
+    duplicate=true."
+  - "Konfliktpfad: Rueckmeldung auf stale-Version erzeugt via
+    quarantine_external einen Quarantaene-Job (Adapter-Label mixer-feedback)
+    im 034-Integrationsmonitor (HTTP 202 + import_job_id) — nichts geht
+    verloren, Entscheidung faellt auditiert im Monitor."
+  - "FEED-SUP-002 (Chargen-FIFO/Reservierung) bleibt expliziter 035-Rest —
+    braucht die Lagerbestands-Integration und wird separat geclaimt."
+file_ownership:
+  - alembic/versions/feed_mixer_feedback_20260716.py
+  - app/services/feeding_mixer_service.py
+  - app/api/v1/endpoints/feeding_mixer.py
+  - app/services/feeding_import_monitor_service.py (additiv quarantine_external)
+  - app/api/v1/endpoints/feeding_import_monitor.py (Adapter-Label additiv)
+  - app/api/v1/endpoints/rations_optimization.py (nur Router-Include)
+  - tests/test_feeding_mixer_api.py
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-INT-035.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    3 failed vor Implementierung (ImportError
+    app.api.v1.endpoints.feeding_mixer; RBAC-Matrix + Journey).
+  green: >-
+    3/3 im ersten Lauf nach Implementierung — Journey deckt Export,
+    idempotente Rueckmeldung, stale-409 (Export), stale-202-Quarantaene
+    (Rueckmeldung) inkl. Monitor-Sichtbarkeit, 404/422-Pfade ab.
+  refactor: >-
+    Konfliktpfad als wiederverwendbares quarantine_external im
+    Monitor-Service statt Mixer-eigener Jobanlage.
+acceptance:
+  - "Export und Rueckmeldung teilen die stabile Referenz plan_version_id."
+  - "Rueckmeldung ist idempotent; Abweichungs-kg je Komponente und
+    Mischgenauigkeit werden persistiert."
+  - "Veraltete Planversionen: kein Export (409); Rueckmeldung landet als
+    begruendeter Quarantaene-Job im Integrationsmonitor (202)."
+tests:
+  - "pytest test_feeding_mixer_api.py -> 3/3 (nach Red-Welle)."
+  - "Regression Mixer+Monitor+Consulting+Authz -> 40 passed."
+  - "Architecture Validate/Drift 905/905; Alembic Single-Head
+    feed_mixer_feedback_20260716."
+risks:
+  - "Reale Transportanbindung (agrirouter-Zertifikate/Endpunkte) bleibt Teil
+    des externen Partnervertrags-Gates; das Dokumentformat ist providerneutral
+    versioniert (agrirouter-feeding-plan-v1)."
+  - "Chargen-FIFO/Reservierung als 035-Rest offen (eigener Claim)."
+external_gates: >-
+  Reale Mischtechnik-Transportanbindung erst nach Partnervertrag
+  (FEED-INT-003-Familie).
+ai_harness:
+  fachlicher_vertrag: >-
+    Geladene Mengen sind der Planversion eindeutig zugeordnet; Konflikte sind
+    sichtbar und entscheidbar; keine stille Zuordnung auf falsche Versionen.
+  architektur_vertrag: >-
+    Export ist reine Ableitung der unveraenderlichen Planversion; Konfliktpfad
+    nutzt den bestehenden Quarantaene-Mechanismus statt eines Parallelwegs.
+  daten_vertrag: >-
+    Additive Migration; Rueckmeldungen append-only; Idempotenz per
+    UNIQUE-Constraint.
+  security_vertrag: >-
+    READ fuer Export, WRITE fuer Rueckmeldung; Tenant-Scope ueber
+    Plan-/Monitor-Services.
+  betriebs_vertrag: >-
+    Rollback = Revert + downgrade(); keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Traceability FEED-PLAN-003 VERIFIED (mit externem Transport-Gate);
+    Workboard; dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz im YAML; Konflikt-, Idempotenz-, Berechtigungs- und
+    Fehlerpfade in einer Journey nachgewiesen.

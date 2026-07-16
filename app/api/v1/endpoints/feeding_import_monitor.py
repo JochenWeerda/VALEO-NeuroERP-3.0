@@ -20,6 +20,8 @@ from app.services.feeding_import_monitor_service import (
 router = APIRouter(prefix="/feeding", tags=["feeding-import-monitor"])
 
 AdapterName = Literal["agrirouter", "icar-ade", "laboratory"]
+# Anzeige-Label umfasst auch extern quarantinierte Quellen (FEED-INT-035).
+JobAdapterLabel = Literal["agrirouter", "icar-ade", "laboratory", "mixer-feedback"]
 JobStatus = Literal["validated", "quarantined", "accepted", "rejected"]
 
 
@@ -47,7 +49,7 @@ class ImportJobOut(BaseModel):
 
     id: str
     tenant_id: str
-    adapter: AdapterName
+    adapter: JobAdapterLabel
     status: JobStatus
     findings: list[ImportFindingOut]
     mapped_excerpt: dict[str, Any]
