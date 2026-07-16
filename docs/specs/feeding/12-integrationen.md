@@ -249,12 +249,18 @@ Consumer deduplizieren `event_id`.
 | `feeding.analysis.released.v1` | Readiness, Rationshinweis, Reporting |
 | `feeding.ration.version.approved.v1` | Planung, Workflow, Reporting |
 | `feeding.ration.version.activated.v1` | Stall, Controlling, Notification |
+| `feeding.plan.published` (`schema_version=1.0`) | Stall, Versorgung, Mixer, Reporting |
 | `feeding.plan.exported.v1` | Gerätejournal, Operations |
 | `feeding.execution.completed.v1` | Inventory, Controlling, Beratung |
 | `feeding.controlling.deviation.detected.v1` | Workflow, Agenten, Notification |
 
 PII-/Gesundheitsdetails werden nicht in breit publizierte Events eingebettet;
 Konsumenten laden autorisiert über Referenzen nach.
+
+FEED-PLAN-026 publiziert `feeding.plan.published` atomar mit Plan-,
+Planversions-, Quell-Rationsversions- und Gruppen-ID, Versionsnummer sowie
+Gueltigkeitsintervall. Das Ereignis enthaelt keine Mengen- oder Tierdetails;
+Konsumenten laden die Planversion autorisiert und deduplizieren `event_id`.
 
 ## 13. Quarantäne
 
@@ -373,4 +379,3 @@ Alerts:
 6. Metrics, Logs, Alerts, Runbook, Retry und Circuit Breaker vorhanden.
 7. Live-Gate, Pilot, Reconciliation und Rollback abgenommen.
 8. API, Datenmodell, Workflow und Traceability aktualisiert.
-

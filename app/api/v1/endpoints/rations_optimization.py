@@ -7203,3 +7203,5 @@ from app.api.v1.endpoints.feeding_ration_editor import router as _feeding_ration
 router.include_router(_feeding_ration_editor_router)
 from app.api.v1.endpoints.feeding_ration_templates import router as _feeding_ration_templates_router
 router.include_router(_feeding_ration_templates_router)
+from app.api.v1.endpoints.feeding_plans import router as _feeding_plans_router
+router.include_router(_feeding_plans_router)

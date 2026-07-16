@@ -125,3 +125,14 @@ optimistischer Zielversion und Auditgrund eine neue Draft-Version; Quelle und
 Ziel muessen dieselbe Fuetterungsgruppe besitzen. Alle Pfade erzwingen Tenant,
 Feed-Rolle und Business-Grant. Entscheidung:
 [ADR-049](../../../adr/adr-049-feeding-business-file-and-ration-templates.md).
+
+## Fuetterungsberatung / Planpublikation
+
+- `POST /api/v1/agrar/rations-optimization/feeding/plans/publish`
+- `GET /api/v1/agrar/rations-optimization/feeding/plans?group_id=...`
+- `GET /api/v1/agrar/rations-optimization/feeding/plans/{version_id}`
+
+Publish verlangt freigegebene/aktive Quellversion, Tierzahl, Dosierschritt,
+Rundungsmodus, Gueltigkeit, Auditgrund und Idempotency-Key. Die Antwort enthaelt
+geordnete MixingInstructions mit ungerundeter und dosierbarer Chargenmenge samt
+Delta. Entscheidung: [ADR-050](../../../adr/adr-050-feeding-plan-version-and-publication.md).

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-PLAN-026 FeedingPlanVersion, Mischanweisung und Publication Event - reserviert 2026-07-16
+## FEED-PLAN-026 FeedingPlanVersion, Mischanweisung und Publication Event - abgeschlossen 2026-07-16
 
-**Owner:** Codex. **Stand:** reserviert (Claim). Eine freigegebene/aktive Rationsversion wird in eine unveraenderliche, tierzahlskalierte Planversion mit expliziter Gueltigkeit, Dosierschritt, Rundungsmodus und geordneten MixingInstructions publiziert. Fehlende Mengen bleiben unbekannt; Rundungsdeltas werden sichtbar. Tenant/RBAC/Business-Grant, Idempotenz und ein atomisches `feeding.plan.published`-Outbox-Ereignis werden testgetrieben erzwungen. **TDD:** Domain-Boundaries, Immutable-/Outbox-Vertrag und API-Journey zuerst rot.
+**Owner:** Codex. **Stand:** abgeschlossen. Approved/active Rationsversionen lassen sich tenant-/grant-sicher als unveraenderliche FeedingPlanVersion publizieren. Tierzahl, Gueltigkeit, Decimal-Dosierschritt, Rundungsmodus und Auditgrund sind Teil der Version; geordnete MixingInstructions zeigen FM je Tier, rohe Chargenmenge, dosierbares Ziel und Delta, waehrend fehlende FM unbekannt bleibt. Request-Hash und Advisory Locks sichern Idempotenz und parallele Versionsvergabe. Planversion, Instructions und `feeding.plan.published` (`schema_version=1.0`) entstehen atomar. **TDD-Abnahme:** 13 neue Tests, Feeding-/Rations-Regression 605 gruen/1 skipped, Ruff/Compile, Alembic, Doku 127/130, Architektur 902/902 (210 Services, 406 Endpoints) und Handbuch gruen. **Requirements:** FEED-RAT-002 VERIFIED; FEED-PLAN-001 PARTIAL nur wegen der bewusst nach FEED-PLAN-027 verschobenen ObjectPage/PDF-/Mobil-Journey.
 
 ## FEED-EDITOR-025 Rationsvorlagen, Kopieren, Betriebsakte und Fuetterungsuebersicht - abgeschlossen 2026-07-16
 

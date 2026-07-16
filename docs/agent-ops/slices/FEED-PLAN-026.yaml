@@ -2,9 +2,10 @@ slice_id: FEED-PLAN-026
 id: FEED-PLAN-026
 title: FeedingPlanVersion Mischanweisung und Publication Event
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-16"
 started_at: "2026-07-16"
+completed_at: "2026-07-16"
 goal: >-
   Eine freigegebene Rationsversion als unveraenderliche, zeitlich gueltige und
   fuer Tierzahl sowie Dosiertechnik skalierte FeedingPlanVersion publizieren;
@@ -52,3 +53,18 @@ risks:
   - Rundung darf Gesamtmengen nicht still als exakte Futtermengen ausgeben.
   - Event darf weder vor Commit sichtbar sein noch bei Retry dupliziert werden.
   - Planpublikation darf Rationssnapshot oder Analyseprovenienz nicht nachtraeglich veraendern.
+evidence:
+  red:
+    - Domain-Boundary-Vertraege fuer Decimal-Rundung, Reihenfolge, unbekannte Mengen und ungueltige Dosierprofile wurden vor dem Persistenzpfad festgelegt.
+    - API-Journey belegte Lifecycle-, Idempotenz-, Immutable-, Outbox-, Tenant-, Rollen- und Grant-Grenzen.
+  green:
+    - Dreizehn neue Domain-/API-/DB-Integrationstests gruen.
+    - Feeding-/Rations-Regression 605 bestanden und 1 bewusst uebersprungen.
+    - Ruff und Python-Compile fuer alle neuen Module gruen.
+    - Alembic Single-Head/current auf feed_plan_versions_20260716.
+    - Markdown 127 und Governance 130 Dateien gruen.
+    - Architecture Validate/Strict Drift 902/902 Routen, 210 Services und 406 Endpoints gruen; Handbuch driftfrei.
+  refactor:
+    - Reine Decimal-Domainfunktion ist von Persistenz, Autorisierung und Outbox getrennt.
+    - Advisory Locks serialisieren Idempotency-Key und Gruppenversionsvergabe ohne zweite Queue.
+    - Planversion, Instructions und schemafestes Event werden in genau einer DB-Transaktion geschrieben.

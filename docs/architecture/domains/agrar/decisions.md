@@ -25,3 +25,4 @@ version: 1.0.0
 | [ADR-047](../../../adr/adr-047-canonical-feeding-feed-catalog.md) | Kanonischer Fuetterungs-Futtermittelkatalog auf bestehendem Stamm |
 | [ADR-048](../../../adr/adr-048-feeding-analysis-provenance.md) | Versionierte Futteranalyse, Provenienz und scope-spezifisch aktive Version |
 | [ADR-049](../../../adr/adr-049-feeding-business-file-and-ration-templates.md) | Betriebsakte und unveraenderliche Rationsvorlagen |
+| [ADR-050](../../../adr/adr-050-feeding-plan-version-and-publication.md) | Unveraenderliche FeedingPlanVersion und atomare Publikation |

@@ -497,3 +497,12 @@ Zielration, `expected_latest_version_no` und mindestens zehn Zeichen Auditgrund;
 es antwortet mit einer neuen Draft-Version oder 409 bei Versions-/Gruppenkonflikt.
 Die Read-Endpunkte `overview`, `groups`, `rations` und `findings` beliefern die
 Betriebsakte und kennzeichnen fehlende Readiness ausdruecklich als ungeprueft.
+
+## 20. FeedingPlan-Publikation FEED-PLAN-026
+
+`POST /feeding/plans/publish` verlangt Quell-Rationsversion, Tierzahl,
+Dosierschritt, Rundungsmodus, Gueltigkeit, Auditgrund und Idempotency-Key. Nur
+`approved`/`active` ist publizierbar. Gleiches Key/Request liefert dieselbe
+Planversion, gleicher Key mit anderem Request 409. `GET /feeding/plans` und
+`GET /feeding/plans/{id}` sind tenant-/grant-gefiltert. Alle Mengenfelder sind
+Decimal-basiert; unbekannte FM-Mengen erscheinen als `null`, nicht `0`.

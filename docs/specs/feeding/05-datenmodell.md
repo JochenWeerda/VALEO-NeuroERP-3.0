@@ -402,3 +402,15 @@ Gruppe und unveraenderliche `source_ration_version_id` und dupliziert keinen
 Snapshot. Unique-Constraint und Trigger schuetzen Name und Append-only-Regel.
 Kopien bleiben normale `ration_versions` mit gruppensicherer
 `based_on_version_id`-Provenienz.
+
+## 21. FeedingPlan-Persistenz FEED-PLAN-026
+
+- `feeding_plans` ist der tenantgebundene Kopf je Fuetterungsgruppe.
+- `feeding_plan_versions` referenziert genau eine Rationsversion und speichert
+  Tierzahl, Decimal-Dosierschritt, Rundungsmodus, Gueltigkeit, Auditgrund,
+  Idempotency-Key und Request-Hash.
+- `feeding_mixing_instructions` bewahrt eindeutige Reihenfolge, FM je Tier,
+  rohe und dosierbare Chargenmenge sowie Rundungsdelta; unbekannte Werte bleiben
+  nullable.
+- Trigger verhindern Update/Delete an Planversion und Anweisungen. Planversion,
+  Instructions und `public.outbox_events` entstehen in derselben Transaktion.

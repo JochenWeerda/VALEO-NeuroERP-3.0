@@ -486,3 +486,11 @@ Quellversion waehlen -> unveraenderliche Vorlage benennen -> Zielration derselbe
 Gruppe waehlen -> aktuellen Zielversionsstand und Auditgrund bestaetigen -> neue
 Draft-Version mit kopiertem Snapshot und `based_on_version_id`. Ein veralteter
 Zielstand oder Gruppenwechsel endet ohne Teilpersistenz mit 409.
+
+## 26. Implementierte Planpublikation FEED-PLAN-026
+
+Approved/active Rationsversion waehlen -> Tierzahl, Gueltigkeit und Dosierprofil
+angeben -> MixingInstructions serverseitig skalieren und runden -> Planversion,
+Anweisungen und `feeding.plan.published` atomar speichern. Retry mit identischem
+Idempotency-Key ist wirkungslos; widerspruechlicher Retry endet 409. Bereits
+publizierte Daten koennen nicht mutiert oder geloescht werden.
