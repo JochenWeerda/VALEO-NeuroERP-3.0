@@ -6,6 +6,8 @@ export interface DraftComponent {
   feed_id: string
   name?: string
   kg_fm: number
+  min_kg_fm?: number | null
+  max_kg_fm?: number | null
 }
 
 export interface DraftDelta {
@@ -17,11 +19,13 @@ export interface DraftDelta {
 
 export interface DraftFinding {
   code: string
-  severity: 'blocker' | 'warning' | 'info'
+  severity: 'critical' | 'high' | 'medium' | 'info'
   metric: string
   actual: number
   target?: number | null
   message: string
+  feed_id?: string | null
+  remediation?: string | null
 }
 
 export interface DraftPosition {
@@ -30,6 +34,8 @@ export interface DraftPosition {
   kg_fm: number
   kg_tm: number
   cost_eur: number
+  min_kg_fm?: number | null
+  max_kg_fm?: number | null
   [nutrient: string]: string | number | null | undefined
 }
 
@@ -46,7 +52,7 @@ export interface RationDraftEvaluation {
 export async function evaluateRationDraft(input: {
   group_id: string
   requirement_profile_id?: string
-  components: Array<{ feed_id: string; kg_fm: number }>
+  components: Array<{ feed_id: string; kg_fm: number; min_kg_fm?: number | null; max_kg_fm?: number | null }>
 }): Promise<RationDraftEvaluation> {
   const response = await apiClient.post<RationDraftEvaluation>(`${BASE}/feeding/ration-drafts/evaluate`, input)
   return response.data

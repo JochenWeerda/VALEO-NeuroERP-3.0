@@ -516,3 +516,12 @@ und unveraenderlichem Audit. Beide laufen durch ScreenDefinition -> RenderPlan
 -> useUniversalMaskRuntime -> UniversalMaskRenderer. Datei-Vorschau,
 Validierung und begruendete Freigabe sind schmale fachliche Overlays; die
 produktive Route lautet `/futtermittel/grundfutteranalysen[/{id}]`.
+
+## 15. Rationseditor-Grenzen FEED-EDITOR-024
+
+Die Positionsflaeche des Rationseditors zeigt Menge, Minimum und Maximum in
+kompakten numerischen Spalten. Grenzbefunde erscheinen in der permanenten
+Bewertungsleiste mit vierstufiger Prioritaet, verursachendem Futtermittel und
+konkreter Abhilfe. Ein Klick fokussiert die Mengenposition; Speichern bewahrt
+die Grenzen im append-only Versionssnapshot. Die bestehende Split-Workbench
+bleibt die zentrale Editor-Journey und fuehrt keine neue Maskenarchitektur ein.

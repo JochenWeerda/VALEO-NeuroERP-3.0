@@ -438,3 +438,15 @@ expliziten Ausgaberundung.
    physikalischer Massenanteile erzeugen reproduzierbare Findings.
 5. Importierte Dateien ohne revisionssichere DMS-ID/SHA-256 blockieren Release.
 6. Nur eine validierte, blockerfreie Analyse kann scope-spezifisch aktiv werden.
+
+## 17. Rationsgrenzen und Unloesbarkeit FEED-EDITOR-024
+
+1. `min_kg_fm` und `max_kg_fm` sind optionale, nichtnegative Positionswerte.
+2. `min > max` ist `critical`; eine Istmenge ausserhalb eigener Grenzen ist
+   `high`. Beide Befunde tragen die verursachende Feed-ID.
+3. Die Summe `min_kg_fm * dm_frac` aller begrenzten Positionen wird gegen
+   `dmi_max_kg` geprueft. Eine Ueberschreitung benennt alle beteiligten Futter.
+4. Jeder Grenzkonflikt liefert neben dem Befund eine konkrete `remediation`.
+5. Die Pruefung ist deterministisch und laeuft vor jedem Solverlauf; sie wird
+   nicht faelschlich als mathematische LP-IIS bezeichnet.
+6. Entwuerfe ohne Grenzen bleiben zum bisherigen Bewertungsvertrag aequivalent.

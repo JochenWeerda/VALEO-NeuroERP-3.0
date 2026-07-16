@@ -30,6 +30,8 @@ function snapshotComponents(detail: RationDetail): DraftComponent[] {
       feed_id: String(item.feed_id ?? ''),
       name: typeof item.name === 'string' ? item.name : undefined,
       kg_fm: Number(item.kg_fm ?? 0),
+      min_kg_fm: item.min_kg_fm == null ? null : Number(item.min_kg_fm),
+      max_kg_fm: item.max_kg_fm == null ? null : Number(item.max_kg_fm),
     }))
     .filter((item) => item.feed_id !== '')
 }
@@ -99,7 +101,10 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
     try {
       const result = await evaluateRationDraft({
         group_id: groupId,
-        components: draft.map((component) => ({ feed_id: component.feed_id, kg_fm: component.kg_fm })),
+        components: draft.map((component) => ({
+          feed_id: component.feed_id, kg_fm: component.kg_fm,
+          min_kg_fm: component.min_kg_fm, max_kg_fm: component.max_kg_fm,
+        })),
       })
       setEvaluation(result)
     } catch (error) {
@@ -117,13 +122,20 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
     return () => {
       if (debounceRef.current !== null) window.clearTimeout(debounceRef.current)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [components, detail])
 
   function updateAmount(feedId: string, value: string): void {
     const amount = Number(value)
     setComponents((current) => current.map((component) =>
       component.feed_id === feedId ? { ...component, kg_fm: Number.isFinite(amount) ? amount : 0 } : component))
+    setSaveMessage(null)
+  }
+
+  function updateBound(feedId: string, key: 'min_kg_fm' | 'max_kg_fm', rawValue: string): void {
+    const value = rawValue === '' ? null : Number(rawValue)
+    if (value !== null && (!Number.isFinite(value) || value < 0)) return
+    setComponents((current) => current.map((component) =>
+      component.feed_id === feedId ? { ...component, [key]: value } : component))
     setSaveMessage(null)
   }
 
@@ -168,11 +180,10 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
 
   /** Warnung → Ursache: Befund fokussiert die verursachende Position
    * (fehlender Analysewert → betroffenes Futter, Kennzahl → erste Position). */
-  function focusFindingCause(finding: { code: string; metric: string }): void {
+  function focusFindingCause(finding: { code: string; metric: string; feed_id?: string | null }): void {
     const missing = evaluation?.coverage?.[finding.metric]?.missing_feed_ids ?? []
-    const targetFeedId = finding.code.endsWith('_incomplete') && missing.length > 0
-      ? missing[0]
-      : components[0]?.feed_id
+    const targetFeedId = finding.feed_id
+      ?? (finding.code.endsWith('_incomplete') && missing.length > 0 ? missing[0] : components[0]?.feed_id)
     if (!targetFeedId) return
     amountInputRefs.current.get(targetFeedId)?.focus()
   }
@@ -219,6 +230,8 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
               <tr className="border-b text-left text-muted-foreground">
                 <th className="py-1.5 pr-2 font-medium">Futtermittel</th>
                 <th className="py-1.5 pr-2 font-medium text-right">kg FM</th>
+                <th className="py-1.5 pr-2 font-medium text-right">Min kg FM</th>
+                <th className="py-1.5 pr-2 font-medium text-right">Max kg FM</th>
                 <th className="py-1.5 pr-2 font-medium text-right">kg TM</th>
                 <th className="py-1.5 pr-2 font-medium text-right">EUR</th>
                 <th className="py-1.5" aria-hidden />
@@ -246,6 +259,16 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                         }}
                       />
                     </td>
+                    <td className="py-1.5 pr-2 text-right">
+                      <Input aria-label={`Minimum ${label} (kg FM)`} className="ml-auto h-8 w-20 text-right tabular-nums"
+                        type="number" min="0" step="0.1" value={component.min_kg_fm == null ? '' : String(component.min_kg_fm)}
+                        onChange={(event) => updateBound(component.feed_id, 'min_kg_fm', event.target.value)} />
+                    </td>
+                    <td className="py-1.5 pr-2 text-right">
+                      <Input aria-label={`Maximum ${label} (kg FM)`} className="ml-auto h-8 w-20 text-right tabular-nums"
+                        type="number" min="0" step="0.1" value={component.max_kg_fm == null ? '' : String(component.max_kg_fm)}
+                        onChange={(event) => updateBound(component.feed_id, 'max_kg_fm', event.target.value)} />
+                    </td>
                     <td className="py-1.5 pr-2 text-right font-mono tabular-nums">
                       {formatNumber(position?.kg_tm as number | undefined)}
                     </td>
@@ -263,7 +286,7 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
               })}
               {components.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-4 text-center text-muted-foreground" role="status">
+                  <td colSpan={7} className="py-4 text-center text-muted-foreground" role="status">
                     Noch keine Positionen — unten ein Futtermittel hinzufügen.
                   </td>
                 </tr>
@@ -323,6 +346,7 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                         {SEVERITY_LABEL[finding.severity] ?? finding.severity}
                       </Badge>
                       <span className="mt-1 block text-muted-foreground">{finding.message}</span>
+                      {finding.remediation ? <span className="mt-1 block font-medium">Abhilfe: {finding.remediation}</span> : null}
                     </button>
                   </li>
                 ))}

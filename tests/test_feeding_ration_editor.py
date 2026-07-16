@@ -155,3 +155,48 @@ def test_compare_drafts_diffs_components_and_metrics() -> None:
     assert metric_rows["me_mj"]["base"] == base_eval["totals"]["me_mj"]
     # Reihenfolge deterministisch (Basisreihenfolge, dann Neuzugaenge)
     assert [row["feed_id"] for row in comparison["component_diff"]] == ["gras", "mais", "soja"]
+
+
+def test_bound_conflicts_are_named_with_causes_before_any_solver_run() -> None:
+    """FEED-EDITOR-024 (TDD-Red-Welle 4): Min/Max je Position werden geprueft;
+    Konflikte benennen die verursachenden Grenzen und Futtermittel."""
+    from app.agrar.rations.ration_draft import evaluate_draft
+
+    feeds = {"gras": _feed("gras"), "mais": _feed("mais", dm_frac=0.33)}
+
+    # min > max an derselben Position -> critical mit Positionsbezug
+    result = evaluate_draft([
+        {"feed_id": "gras", "kg_fm": 20.0, "min_kg_fm": 25.0, "max_kg_fm": 18.0},
+    ], feeds, REQUIREMENTS)
+    codes = {f["code"]: f for f in result["findings"]}
+    assert "bounds_conflict" in codes
+    conflict = codes["bounds_conflict"]
+    assert conflict["severity"] == "critical"
+    assert "gras" in conflict["message"] or "Feed gras" in conflict["message"]
+    assert conflict.get("feed_id") == "gras"
+    assert "Minimum" in conflict["remediation"]
+
+    # Menge verletzt die eigene Grenze -> high
+    result = evaluate_draft([
+        {"feed_id": "gras", "kg_fm": 30.0, "max_kg_fm": 25.0},
+    ], feeds, REQUIREMENTS)
+    codes = {f["code"]: f for f in result["findings"]}
+    assert "amount_outside_bounds" in codes
+    assert codes["amount_outside_bounds"]["severity"] == "high"
+
+    # Summe der TM-Minima sprengt das TM-Band -> critical, Verursacher benannt
+    result = evaluate_draft([
+        {"feed_id": "gras", "kg_fm": 40.0, "min_kg_fm": 40.0},   # 14 kg TM min
+        {"feed_id": "mais", "kg_fm": 40.0, "min_kg_fm": 40.0},   # 13.2 kg TM min
+    ], feeds, REQUIREMENTS)  # dmi_max = 24
+    codes = {f["code"]: f for f in result["findings"]}
+    assert "min_sum_exceeds_dmi_band" in codes
+    finding = codes["min_sum_exceeds_dmi_band"]
+    assert finding["severity"] == "critical"
+    assert "gras" in finding["message"] and "mais" in finding["message"]
+    assert "reduzieren" in finding["remediation"]
+
+    # Ohne Grenzen keine Grenzbefunde (Rueckwaertskompatibilitaet)
+    result = evaluate_draft([{"feed_id": "gras", "kg_fm": 20.0}], feeds, REQUIREMENTS)
+    assert not any(f["code"] in {"bounds_conflict", "amount_outside_bounds",
+                                 "min_sum_exceeds_dmi_band"} for f in result["findings"])

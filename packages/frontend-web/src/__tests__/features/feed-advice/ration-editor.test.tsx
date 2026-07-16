@@ -106,6 +106,34 @@ describe('RationEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /Erneut laden/ }))
     expect(await screen.findByRole('heading', { name: /Sommerration/ })).toBeInTheDocument()
   })
+
+  it('bewahrt Min/Max im Draft, zeigt Grenzkonflikte und fokussiert die verursachende Position', async () => {
+    evaluateRationDraftMock.mockResolvedValue({
+      ...evaluation,
+      findings: [{ code: 'bounds_conflict', severity: 'critical', metric: 'bounds',
+        actual: 28, target: 20, feed_id: 'f-gras', message: 'Grassilage: Mindestmenge liegt ueber Hoechstmenge.',
+        remediation: 'Minimum auf 20 kg senken.' }],
+    })
+    createRationVersionMock.mockResolvedValue({ id: 'v-4', version_no: 4 })
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByRole('heading', { name: /Sommerration/ })
+
+    await userEvent.type(screen.getByLabelText(/Minimum Grassilage/), '28')
+    await userEvent.type(screen.getByLabelText(/Maximum Grassilage/), '20')
+    await waitFor(() => expect(evaluateRationDraftMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      components: [expect.objectContaining({ feed_id: 'f-gras', min_kg_fm: 28, max_kg_fm: 20 })],
+    })))
+
+    await userEvent.click(await screen.findByRole('button', { name: /Mindestmenge liegt ueber/ }))
+    expect(screen.getByText(/Abhilfe: Minimum auf 20 kg senken/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Menge Grassilage/)).toHaveFocus()
+    await userEvent.click(screen.getByRole('button', { name: /Als neue Version speichern/ }))
+    await waitFor(() => expect(createRationVersionMock).toHaveBeenCalledWith('r-1', expect.objectContaining({
+      snapshot: expect.objectContaining({ components: [expect.objectContaining({
+        min_kg_fm: 28, max_kg_fm: 20,
+      })] }),
+    })))
+  })
 })
 
 describe('RationEditor Befund-Navigation (FEED-EDITOR-022)', () => {

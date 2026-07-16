@@ -25,6 +25,8 @@ router = APIRouter(prefix="/feeding", tags=["feeding-ration-editor"])
 class DraftComponentIn(BaseModel):
     feed_id: str = Field(min_length=1, max_length=80)
     kg_fm: float = Field(gt=0)
+    min_kg_fm: float | None = Field(default=None, ge=0)
+    max_kg_fm: float | None = Field(default=None, ge=0)
 
 
 class RationDraftEvaluateIn(BaseModel):
@@ -41,6 +43,8 @@ class DraftPositionOut(BaseModel):
     kg_fm: float
     kg_tm: float
     cost_eur: float
+    min_kg_fm: float | None = None
+    max_kg_fm: float | None = None
 
 
 class DraftDeltaOut(BaseModel):
@@ -51,12 +55,16 @@ class DraftDeltaOut(BaseModel):
 
 
 class DraftFindingOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     code: str
     severity: str
     metric: str
     actual: float
     target: float | None = None
     message: str
+    feed_id: str | None = None
+    remediation: str | None = None
 
 
 class RationDraftEvaluationOut(BaseModel):

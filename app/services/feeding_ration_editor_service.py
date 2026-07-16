@@ -77,11 +77,16 @@ class FeedingRationEditorService:
             raise LookupError("Rationsversion nicht gefunden.")
         snapshot = version["snapshot"] or {}
         raw = snapshot.get("components") if isinstance(snapshot, dict) else None
-        components = [
-            {"feed_id": str(item.get("feed_id")), "kg_fm": float(item.get("kg_fm") or 0)}
-            for item in (raw or [])
-            if isinstance(item, dict) and item.get("feed_id")
-        ]
+        components = []
+        for item in (raw or []):
+            if not isinstance(item, dict) or not item.get("feed_id"):
+                continue
+            component = {"feed_id": str(item["feed_id"]), "kg_fm": float(item.get("kg_fm") or 0)}
+            if item.get("min_kg_fm") is not None:
+                component["min_kg_fm"] = float(item["min_kg_fm"])
+            if item.get("max_kg_fm") is not None:
+                component["max_kg_fm"] = float(item["max_kg_fm"])
+            components.append(component)
         if not components:
             raise EmptyRationVersionError(
                 "Diese Version enthaelt keine bewertbaren Komponenten (leerer Snapshot).")

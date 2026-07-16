@@ -89,6 +89,22 @@ def test_editor_journey_evaluate_draft_against_profile() -> None:
     metrics = {d["metric"] for d in payload["deltas"]}
     assert {"me_mj", "dm_kg"} <= metrics
 
+    bounded = client.post(f"{ROOT}/feeding/ration-drafts/evaluate", headers=HEADERS, json={
+        "group_id": group_id, "requirement_profile_id": profile_id,
+        "components": [{"feed_id": feed_id, "kg_fm": 30.0,
+                        "min_kg_fm": 31.0, "max_kg_fm": 40.0}]})
+    assert bounded.status_code == 200, bounded.text
+    bounded_payload = bounded.json()
+    assert bounded_payload["positions"][0]["min_kg_fm"] == 31.0
+    finding = next(item for item in bounded_payload["findings"]
+                   if item["code"] == "amount_outside_bounds")
+    assert finding["feed_id"] == feed_id
+
+    negative = client.post(f"{ROOT}/feeding/ration-drafts/evaluate", headers=HEADERS, json={
+        "group_id": group_id, "requirement_profile_id": profile_id,
+        "components": [{"feed_id": feed_id, "kg_fm": 30.0, "min_kg_fm": -1.0}]})
+    assert negative.status_code == 422
+
     # Unbekanntes Futter -> 404 statt stiller Nullposition
     missing = client.post(f"{ROOT}/feeding/ration-drafts/evaluate", headers=HEADERS, json={
         "group_id": group_id, "requirement_profile_id": profile_id,
@@ -122,7 +138,8 @@ def test_version_evaluation_is_persisted_from_snapshot_and_retrievable() -> None
 
     ration = client.post(f"{ROOT}/lifecycle/rations", headers=HEADERS, json={
         "group_id": group_id, "name": f"EvalRation {suffix}",
-        "snapshot": {"components": [{"feed_id": feed_id, "kg_fm": 28.0}]}})
+        "snapshot": {"components": [{"feed_id": feed_id, "kg_fm": 28.0,
+                                      "min_kg_fm": 31.0, "max_kg_fm": 20.0}]}})
     assert ration.status_code == 201, ration.text
     version_id = ration.json()["latest_version_id"]
 
@@ -134,6 +151,8 @@ def test_version_evaluation_is_persisted_from_snapshot_and_retrievable() -> None
     assert payload["ration_version_id"] == version_id
     assert payload["totals"]["dm_kg"] > 0
     assert payload["requirement_profile_id"]
+    assert any(item["code"] == "bounds_conflict" and item["feed_id"] == feed_id
+               for item in payload["findings"])
 
     latest = client.get(f"{ROOT}/feeding/ration-versions/{version_id}/evaluation",
                         headers=HEADERS)

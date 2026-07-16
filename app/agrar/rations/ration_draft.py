@@ -67,12 +67,17 @@ def evaluate_draft(
         kg_tm = kg_fm * dm_frac
         cost_eur = kg_tm * float(feed.get("price") or 0.0)
 
+        min_kg_fm = component.get("min_kg_fm")
+        max_kg_fm = component.get("max_kg_fm")
         position: dict[str, Any] = {
             "feed_id": feed_id,
             "name": str(feed.get("name") or feed_id),
             "kg_fm": kg_fm,
             "kg_tm": kg_tm,
             "cost_eur": cost_eur,
+            "min_kg_fm": float(min_kg_fm) if min_kg_fm is not None else None,
+            "max_kg_fm": float(max_kg_fm) if max_kg_fm is not None else None,
+            "dm_frac": dm_frac,
         }
         totals["fm_kg"] += kg_fm
         totals["dm_kg"] += kg_tm
@@ -92,7 +97,9 @@ def evaluate_draft(
         positions.append(position)
 
     deltas = _build_deltas(totals, requirements)
-    findings = _build_findings(totals, requirements, coverage)
+    findings = _build_bound_findings(positions, requirements)
+    findings += _build_findings(totals, requirements, coverage)
+    findings.sort(key=lambda finding: SEVERITY_ORDER.index(finding["severity"]))
     return {
         "positions": positions,
         "totals": totals,
@@ -122,6 +129,62 @@ def _build_deltas(totals: Mapping[str, float], requirements: Mapping[str, Any]) 
             "delta": totals["dm_kg"] - float(dmi_target),
         })
     return deltas
+
+
+def _build_bound_findings(
+    positions: list[Mapping[str, Any]],
+    requirements: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Strukturelle Grenzkonflikte VOR jedem Solverlauf benennen (FEED-EDITOR-024,
+    Lastenheft 6.7: konfliktverursachende Grenzen benennen)."""
+    findings: list[dict[str, Any]] = []
+
+    for position in positions:
+        name = position["name"]
+        min_kg = position.get("min_kg_fm")
+        max_kg = position.get("max_kg_fm")
+        kg_fm = float(position["kg_fm"])
+        if min_kg is not None and max_kg is not None and min_kg > max_kg:
+            findings.append(_finding(
+                "bounds_conflict", "critical", "bounds", min_kg, max_kg,
+                f"{name}: Mindestmenge {min_kg:.1f} kg FM liegt ueber der Hoechstmenge "
+                f"{max_kg:.1f} kg FM — Grenzen an dieser Position widersprechen sich.",
+                feed_id=str(position["feed_id"]),
+                remediation=f"Minimum fuer {name} auf hoechstens {max_kg:.1f} kg senken oder Maximum anheben.",
+            ))
+            continue
+        if min_kg is not None and kg_fm < float(min_kg):
+            findings.append(_finding(
+                "amount_outside_bounds", "high", "bounds", kg_fm, float(min_kg),
+                f"{name}: Menge {kg_fm:.1f} kg FM unterschreitet die Mindestmenge "
+                f"{float(min_kg):.1f} kg FM.",
+                feed_id=str(position["feed_id"]),
+                remediation=f"Menge von {name} auf mindestens {float(min_kg):.1f} kg FM anheben oder Minimum lockern.",
+            ))
+        elif max_kg is not None and kg_fm > float(max_kg):
+            findings.append(_finding(
+                "amount_outside_bounds", "high", "bounds", kg_fm, float(max_kg),
+                f"{name}: Menge {kg_fm:.1f} kg FM ueberschreitet die Hoechstmenge "
+                f"{float(max_kg):.1f} kg FM.",
+                feed_id=str(position["feed_id"]),
+                remediation=f"Menge von {name} auf hoechstens {float(max_kg):.1f} kg FM senken oder Maximum anheben.",
+            ))
+
+    dmi_max = requirements.get("dmi_max_kg")
+    if dmi_max is not None:
+        bounded = [p for p in positions if p.get("min_kg_fm") is not None]
+        min_dm_sum = sum(float(p["min_kg_fm"]) * float(p.get("dm_frac") or 0.0) for p in bounded)
+        if bounded and min_dm_sum > float(dmi_max):
+            names = ", ".join(str(p["name"]) for p in bounded)
+            findings.append(_finding(
+                "min_sum_exceeds_dmi_band", "critical", "dm_kg", min_dm_sum, float(dmi_max),
+                f"Die Mindestmengen ({names}) ergeben zusammen {min_dm_sum:.1f} kg TM und "
+                f"sprengen das TM-Band (max. {float(dmi_max):.1f} kg) — keine Loesung moeglich, "
+                "Mindestgrenzen dieser Positionen lockern.",
+                remediation=f"TM-wirksame Mindestgrenzen fuer {names} zusammen um mindestens {min_dm_sum - float(dmi_max):.1f} kg TM reduzieren.",
+            ))
+
+    return findings
 
 
 def _build_findings(
@@ -184,9 +247,15 @@ def _build_findings(
 
 
 def _finding(code: str, severity: str, metric: str, actual: float,
-             target: float | None, message: str) -> dict[str, Any]:
-    return {"code": code, "severity": severity, "metric": metric,
-            "actual": actual, "target": target, "message": message}
+             target: float | None, message: str, *, feed_id: str | None = None,
+             remediation: str | None = None) -> dict[str, Any]:
+    finding: dict[str, Any] = {"code": code, "severity": severity, "metric": metric,
+                               "actual": actual, "target": target, "message": message}
+    if feed_id is not None:
+        finding["feed_id"] = feed_id
+    if remediation is not None:
+        finding["remediation"] = remediation
+    return finding
 
 
 # ── Variantenvergleich (FEED-EDITOR-023) ────────────────────────────────────
