@@ -1,0 +1,64 @@
+slice_id: FEED-ACT-030
+id: FEED-ACT-030
+title: Abweichungsschwellen Massnahmen IOFC und Versionsmarker
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Konfigurierbare komponentenbezogene Abweichungsschwellen auswerten,
+  begruendete Massnahmen minimal und revisionssicher ableiten sowie IOFC und
+  Planversionswechsel in den Controlling-Trends sichtbar machen.
+requirements: [FEED-ACT-004, FEED-PERF-002, FEED-PERF-003]
+work_packages: [FEED-WP-151, FEED-WP-152, FEED-WP-153, FEED-WP-154, FEED-WP-155, FEED-WP-156, FEED-WP-171, FEED-WP-172, FEED-WP-173, FEED-WP-174, FEED-WP-175]
+decision_level: significant
+dependencies: [FEED-ACT-029]
+file_ownership:
+  - alembic/versions/feed_actual_measures_20260716.py
+  - app/agrar/rations/actual_measures.py
+  - app/services/feeding_actual_measure_service.py
+  - app/services/rations_controlling_service.py
+  - app/api/v1/endpoints/feeding_actual.py
+  - app/api/v1/endpoints/rations_controlling.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_actual_measures.py
+  - tests/test_feeding_actual_measures_api.py
+  - tests/test_rations_controlling.py
+  - packages/frontend-web/src/lib/api/feeding-actual.ts
+  - packages/frontend-web/src/lib/api/feed-controlling.ts
+  - packages/frontend-web/src/features/feed-advice/FeedingActualPage.tsx
+  - packages/frontend-web/src/features/feed-advice/FeedControllingTrends.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-measures.test.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feed-controlling-trends.test.tsx
+  - docs/adr/adr-053-feeding-deviation-measures.md
+  - docs/architecture/agents/impact-notes/FEED-ACT-030.md
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - config/architecture-index.yaml
+  - docs/agent-ops/slices/FEED-ACT-030.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Schwellen sind tenant- und Komponentenklasse-spezifisch, versioniert und nie als universeller stiller Default getarnt.
+  - Befund nennt Planversion, Feed, Soll/Ist/Delta, ausgeloeste Schwelle, Prioritaet und Abhilfe.
+  - Massnahme entsteht nur nach explizitem Command mit Owner, Termin, Grund und Idempotency-Key; keine stille Auto-Aufgabe.
+  - Massnahme ist append-only/versioniert und referenziert ActualRecord/Komponente/Befund.
+  - Tenant, Business-Grant und READ/WRITE-Rollen werden serverseitig erzwungen.
+  - IOFC bleibt unbekannt, wenn Milchmenge, Milchpreis oder Futterkosten fehlen; sonst ist Formel und Herkunft sichtbar.
+  - Trendpunkte tragen Planversions-ID/-Nummer; die UI markiert Versionswechsel als Text und nicht nur durch Farbe.
+tdd:
+  red:
+    - Boundary-/Property-Tests fuer klassenspezifische Schwelle und unbekannte IOFC-Basis.
+    - API-/DB-Journey fuer Befund, Massnahmen-Command, Idempotenz, Tenant/Grant/RBAC und Audit.
+    - Component-Vertraege fuer Massnahme und Planversionsmarker in Trends.
+  green: kleinster ActualFinding-to-Measure- und IOFC/Version-Trend-Pfad
+  refactor: Schwellenbewertung, Massnahmen-Command und Trendprojektion getrennt halten
+tests:
+  - tests/test_feeding_actual_measures.py
+  - tests/test_feeding_actual_measures_api.py
+  - tests/test_rations_controlling.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-measures.test.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feed-controlling-trends.test.tsx
+risks:
+  - Eine 5-Prozent-Regel darf nicht still fuer jede Komponentenklasse gelten.
+  - Fehlende IOFC-Eingaben duerfen keinen Nullwert erzeugen.
+  - Automatisch erkannter Befund darf keine Aufgabe ohne menschlichen Command erzeugen.
