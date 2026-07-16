@@ -11,9 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ACKER-OPEN-GAPS-009 Ackerschlagkartei restliche Lastenheft-Gaps TDD - abgeschlossen 2026-07-16
+
+**Owner:** Claude. **Stand:** abgeschlossen. Domain-Module Stammdaten/Aussaat/Beregnung/AUM/QS/Lagerverbrauch/Schlaginfo-Export/Offline-Queue/Betrieb; Migration `feldbuch_open_gaps_20260716`; Portal-Endpoints + UI (Typen beregnung/aum, Sachkunde-Felder, Text-Druck). **TDD:** `tests/test_feldbuch_open_gaps.py` 13/13. Traceability aktualisiert; ASK-INT-001 NÄON/ENNI und Precision-Farming bleiben ehrlich BLOCKED (externe Gates). **Dateibesitz:** `app/agrar/feldbuch/*`, `portal_feldbuch.py`, Migration, Portal-UI/API, Specs, Workboard.
+
 ## ACKER-INK1-GAPS-008 Ackerschlagkartei Inkrement-1 Gaps TDD - abgeschlossen 2026-07-16
 
 **Owner:** Claude. **Stand:** abgeschlossen. Lastenheft-Soll/Ist-Gaps priorisiert; Inkrement 1 testgetrieben: Domain `arbeitskontext`/`schlaginfo`/`jahreswechsel`/`sammelbuchung`, Migration `wirtschaftsjahr`, Portal-Endpoints + UI (WJ-Kontext, Sammeldüngung, Jahreswechsel, Schlaginfo). Zusätzlich ASK-PPP-002 Domain-Gate `sachkunde.py` in `psm_compliance`. Specs unter `docs/specs/agrar/`. **TDD-Abnahme:** Red→Green Ink1 8/8; Sachkunde+PSM+Ink1 18/18; Alembic Single-Head `feldbuch_inkrement1_20260716`. Rest (Mobile/Offline, NÄON/ENNI, Stammdaten-UI, Sachkunde-Persistenz) Folgeinkremente — kein Schein-„alle Gaps geschlossen“. **Dateibesitz:** Slice-YAML, Domain-Module, `portal_feldbuch.py`, Migration, Portal-UI/API-Client, Specs, Workboard, open-gaps.
+
+## FEED-PERF-033 MLP-/Milchguete-Kennzahlen und Vorher/Nachher-Auswertung - in Arbeit 2026-07-16
+
+**Owner:** Claude (dieser Chat; disjunkt zum parallelen Feldbuch-WIP). **Stand:** in Arbeit (Claim). Abschluss Inkrement 5 gemaess Slice-Spec 049 (Requirements FEED-PERF-003/004; IOFC bereits in 030): Tagesreihe additiv um `milk_urea_mg_dl` und `somatic_cell_count_k` (Provenienz weiterhin ueber das source-Feld je Beobachtung); Fett-Eiweiss-Quotient als deterministisch berechnete Kennzahl (None-sicher, nie 0-fabriziert) in `controlling.py` + `_decorate`; **Vorher/Nachher-Auswertung** `GET /feeding/performance/version-impact?group_id=` je aktivierter Rationsversion (Mittelwerte ECM/DMI/IOFC n Tage vor/nach `activated_at`, ehrliche Unsicherheit: n je Seite, Zeitraum, `insufficient_data` statt Scheinsignifikanz). Versionsmarker in den Trend-Charts bleiben expliziter FE-Rest. **TDD:** Vertraege zuerst rot. **Dateibesitz:** Migration `feed_perf_mlp_20260716`, `app/agrar/rations/controlling.py` (additiv fpq), `rations_controlling_service.py`/`rations_controlling.py` (additiv), `app/api/v1/endpoints/feeding_performance.py` + Include (neu), `tests/test_feeding_performance_api.py` (neu), Traceability, Slice-YAML, Workboard.
 
 ## FEED-CONS-032 Massnahmen-Lifecycle, Benachrichtigung und Beratungsbericht-Kern - abgeschlossen 2026-07-16
 
