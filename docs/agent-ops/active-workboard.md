@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-ACT-029 Komponentenbezogene Ist-Fuetterung gegen Planversion - reserviert 2026-07-16
+## FEED-ACT-029 Komponentenbezogene Ist-Fuetterung gegen Planversion - abgeschlossen 2026-07-16
 
-**Owner:** Codex. **Stand:** reserviert (Claim). Die mobile Ist-Erfassung wird von der Legacy-`ration_ref`-Dokumentation auf einen eigenstaendigen, append-only ActualFeeding-Command je aktueller Planversion umgestellt. Soll/Ist, absolute/prozentuale Abweichung, Ursachenklassifikation sowie Naehrstoff-/Kostenfolge bleiben je Komponente nachvollziehbar; fehlende Wertabdeckung bleibt unbekannt. Tenant, Business-Grant, Rolle, Idempotenz, Audit, Outbox und CSV-Export werden serverseitig geschlossen. **TDD:** Domain-Boundaries, API-/DB-/CSV-Journey und mobile/native Component-Vertraege zuerst rot.
+**Owner:** Codex. **Stand:** abgeschlossen. Die mobile Ist-Erfassung schreibt statt der Legacy-`ration_ref`-Dokumentation einen eigenstaendigen, append-only ActualFeeding-Command je aktueller Planversion. Servergeladene Instructions sichern den Sollwert; Decimal Soll/Ist/Delta/%, kontrollierte Ursache und zeitpunktbezogene Preis-/Naehrstoffprovenienz bleiben je Komponente nachvollziehbar, fehlende Abdeckung unbekannt. Tenant, Business-Grant, Rolle, Idempotenz, Immutable-Korrektur, Outbox und UTF-8-CSV sind geschlossen. `agrar/feeding-actuals` ist eine native Meridian-Audit-Worklist im Controlling; mobil erzeugt Retry keine Doppelwirkung. **TDD-Abnahme:** fokussiert 18 Backend-/Screen- und 2 Frontend-Tests; Feeding-/Rations-Regression 631 gruen/1 skipped; Frontend 102 Dateien/407 gruen/1 skipped; TypeScript, ESLint, Ruff, Compile und Alembic; Doku 127/132, Architektur 903/903 (210 Services, 406 Endpoints) und Handbuch 46 Masken gruen. **Requirements:** FEED-ACT-002 und FEED-REP-003 VERIFIED; Schwellen/Aufgaben folgen FEED-ACT-030.
 
 ## FEED-SUP-028 Planbedarf, Reichweite, Sicherheitszuschlag und Einkaufsuebergabe - abgeschlossen 2026-07-16
 

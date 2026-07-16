@@ -397,6 +397,16 @@ Idempotenzvertrag. Das Domain Event
 `feeding.supply.procurement_handoff.created` signalisiert einen zu pruefenden
 Bedarf. Die Einkaufsdomaene allein entscheidet ueber Bestellvorschlag,
 Lieferant, Kontrakt und Freigabe.
+
+## 15. ActualFeeding FEED-ACT-029
+
+`ActualFeedingRecord` ist ein append-only Root mit Planversion, Zeitpunkt,
+Quelle, Ursache, Kommentar, Idempotenz und optionalem Korrekturvorgaenger.
+`ActualFeedingComponent` referenziert genau eine MixingInstruction und bewahrt
+Soll, Ist, absolutes/prozentuales Delta sowie die zum Zeitpunkt aufgeloeste
+Kosten-/Naehrstofffolge samt Provenienz. `feeding.actual.recorded` ist das
+atomare Folgeereignis. Tages-KPI und Massnahmen konsumieren diese Evidenz, sind
+aber keine Verantwortung des Aggregats.
 - Controlling: `app/agrar/rations/controlling.py`
 - Integrations-ACL: `app/agrar/rations/integrations/`
 - Zielentscheidungen: `target-architecture.md`

@@ -415,6 +415,15 @@ Kopien bleiben normale `ration_versions` mit gruppensicherer
 - Trigger verhindern Update/Delete an Planversion und Anweisungen. Planversion,
   Instructions und `public.outbox_events` entstehen in derselben Transaktion.
 
+## 23. ActualFeeding-Persistenz FEED-ACT-029
+
+`feeding_actual_records` referenziert Planversion und Gruppe und enthaelt
+Zeitpunkt, Quelle, Ursachenklasse, Kommentar, Korrekturvorgaenger,
+Stallmesskontext, Idempotency-Key/Hash und Akteur. `feeding_actual_components` referenziert Record
+und MixingInstruction und speichert Feed, Soll/Ist/Delta sowie JSONB-
+Wertfolgen inklusive verwendeter Quellen. Trigger verhindern Update/Delete;
+Record, Komponenten und Outbox entstehen in einer Transaktion.
+
 ## 22. FeedingSupplyHandoff FEED-SUP-028
 
 `domain_agrar.feeding_supply_handoffs` referenziert Tenant, Planversion und

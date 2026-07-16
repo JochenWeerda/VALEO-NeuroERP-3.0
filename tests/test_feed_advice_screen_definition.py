@@ -70,6 +70,15 @@ def test_feed_controlling_is_native_time_series_worklist() -> None:
     assert _check_readiness(definition)["generatorReady"] is True
 
 
+def test_feeding_actuals_is_native_audit_worklist() -> None:
+    definition = get_screen_definition("agrar/feeding-actuals")
+    assert definition is not None
+    assert definition["layout"]["tableProfile"] == "audit"
+    assert definition["dataSources"][0]["endpoint"].endswith("/feeding/actuals/components")
+    assert any(action["key"] == "export_csv" for action in definition["actions"])
+    assert _check_readiness(definition)["generatorReady"] is True
+
+
 def test_feeding_businesses_are_a_native_grant_aware_worklist() -> None:
     definition = get_screen_definition("agrar/feeding-businesses")
 

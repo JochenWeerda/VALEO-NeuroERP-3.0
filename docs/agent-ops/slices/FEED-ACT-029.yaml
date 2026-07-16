@@ -2,9 +2,10 @@ slice_id: FEED-ACT-029
 id: FEED-ACT-029
 title: Komponentenbezogene Ist-Fuetterung gegen Planversion
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-16"
 started_at: "2026-07-16"
+completed_at: "2026-07-16"
 goal: >-
   Ist-Mengen je Planinstruction idempotent und revisionssicher erfassen,
   Mengen-, Naehrstoff- und Kostenfolgen nachvollziehbar berechnen,
@@ -59,3 +60,18 @@ risks:
   - Legacy-FeedingControl darf nicht parallel dieselbe mobile Aktion als zweite Wahrheit persistieren.
   - Fehlende Naehrstoff-/Preisdaten duerfen keine scheinbar guenstige Nullfolge erzeugen.
   - Korrektur darf Historie nicht ueberschreiben; neuer Command referenziert den Vorgaenger.
+evidence:
+  red:
+    - Acht Decimal-/Boundary-Vertraege fuer Soll/Ist/Prozent, negativen Input, Kosten-/Naehrstofffolge, Einheiten und Komponentensatz.
+    - API-/DB-/CSV-Journey fuer Planbindung, Wertprovenienz, Idempotenz, Immutable-Trigger, Outbox, Tenant/Grant und RBAC.
+    - Mobile und native Component-Vertraege fuer Planversions-Command und Meridian-CSV-Auswertung.
+  green:
+    - Fokussiert 18 Backend-/Screen- und 2 Frontend-Tests gruen.
+    - Feeding-/Rations-Regression 631 gruen und 1 bewusst uebersprungen.
+    - Frontend-Gesamtsuite 102 Dateien, 407 Tests gruen und 1 bewusst uebersprungen.
+    - TypeScript, ESLint, Ruff, Python-Compile und Alembic-Head gruen.
+    - Markdown 127 und Governance 132 Dateien gruen; Architecture Validate/Strict Drift 903/903 Routen, 210 Services und 406 Endpoints; Handbuch 46 Masken driftfrei.
+  refactor:
+    - Sollwerte stammen nur aus MixingInstructions; Client sendet keine Soll-Nebenwahrheit.
+    - Reine Decimal-Regeln, append-only Command und flache Komponentenprojektion sind getrennt.
+    - Desktopauswertung bleibt zentral Meridian; mobile Journey schreibt nur noch ActualFeeding statt Legacy-FeedingControl.

@@ -495,6 +495,15 @@ Anweisungen und `feeding.plan.published` atomar speichern. Retry mit identischem
 Idempotency-Key ist wirkungslos; widerspruechlicher Retry endet 409. Bereits
 publizierte Daten koennen nicht mutiert oder geloescht werden.
 
+## 28. Ist-Fuetterung gegen Planversion FEED-ACT-029
+
+Aktuellen Plan mobil laden -> alle Instruction-Sollmengen anzeigen -> Ist je
+Komponente und Ursache erfassen -> Plan/Grant/Komponentensatz serverseitig
+pruefen -> Decimal-Abweichung und zeitpunktbezogene Wertfolgen berechnen ->
+Record, Komponenten und Event atomar speichern -> Komponentenprojektion/CSV
+auswerten. Retry mit identischem Key bleibt wirkungslos; Korrektur erzeugt einen
+neuen Record mit `supersedes_id`, niemals ein Update der Historie.
+
 ## 27. Planbedarf an Einkauf uebergeben FEED-SUP-028
 
 Aktuelle Planversionen lesen -> Tagesbedarf je Mischanweisung bestimmen ->

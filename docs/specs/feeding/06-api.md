@@ -520,3 +520,14 @@ Decimal-basiert; unbekannte FM-Mengen erscheinen als `null`, nicht `0`.
 
 Der POST erzeugt ausschliesslich Handoff und Outbox-Ereignis; niemals einen
 Einkaufsauftrag.
+
+## 22. Komponentenbezogene Ist-Fuetterung FEED-ACT-029
+
+- `POST /feeding/actuals`: aktuelle Planversions-ID, Zeitpunkt, Quelle,
+  Quellreferenz, Ursache, Kommentar, Korrekturbezug, Idempotency-Key und je Feed
+  nur Istmenge. Sollwerte werden serverseitig aus Instructions geladen.
+- `GET /feeding/actuals`: grant-sichere append-only Erfassungen.
+- `GET /feeding/actuals/components`: flache Meridian-Projektion mit Soll, Ist,
+  Delta, Prozent, Kosten-/Naehrstofffolge und Datenluecken.
+- `GET /feeding/actuals/export.csv`: UTF-8/Excel-kompatibler, grant-gefilterter
+  Nachweis. Rollenfehler 403, Scope/Plan 404, Fachkonflikte 409.

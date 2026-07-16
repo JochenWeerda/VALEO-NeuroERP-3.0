@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (45 Masken).
+> Generiert aus `app/core/screen_definitions.py` (46 Masken).
 
 ## Übersicht
 
@@ -21,6 +21,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
 | `agrar/feed-readiness` | Futterversorgung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| `agrar/feeding-actuals` | Komponentenbezogene Ist-Fuetterung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-actuals/agent-contract` |
 | `agrar/feeding-business` | Fuetterungsbetrieb | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
@@ -204,6 +205,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `create_handoff` | An Einkauf uebergeben | confirm | nein | `—` |
 | `open_inventory` | Bestaende pflegen | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-actuals` — Komponentenbezogene Ist-Fuetterung
+
+**Zweck:** Komponentenabweichungen und ihre Kosten-/Naehrstofffolgen planversionsgebunden erklaeren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-actuals/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-actuals/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-actuals/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-actuals/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `actuals` → `/api/v1/agrar/rations-optimization/feeding/actuals/components`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Komponenten wurden heute ueberdosiert?
+- Bei welchen Ist-Fuetterungen fehlen Preise oder Naehrstoffwerte?
+
+**Sensible Felder:** `comment, value_consequences`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export_csv` | CSV exportieren | safe | nein | `—` |
+| `open_mobile` | Ist-Fuetterung erfassen | safe | nein | `—` |
 
 ---
 

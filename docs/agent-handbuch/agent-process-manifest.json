@@ -982,6 +982,49 @@
       ]
     },
     {
+      "mask_id": "agrar/feeding-actuals",
+      "title": "Komponentenbezogene Ist-Fuetterung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-actuals/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-actuals/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-actuals/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-actuals/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export_csv",
+          "label": "CSV exportieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "open_mobile",
+          "label": "Ist-Fuetterung erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "comment",
+        "value_consequences"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "agrar/feeding-business",
       "title": "Fuetterungsbetrieb",
       "domain": "agrar",

@@ -2769,6 +2769,44 @@ def build_agrar_feed_controlling_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_feeding_actuals_screen_definition() -> dict[str, Any]:
+    """Native component variance and value-consequence worklist."""
+    return {
+        "schemaVersion": 1, "id": "agrar/feeding-actuals", "domain": "agrar", "mode": "list",
+        "title": "Komponentenbezogene Ist-Fuetterung",
+        "subtitle": "Planversion, Mischabweichung, Ursache und Wertfolgen revisionssicher auswerten",
+        "adapter": {"type": "native", "sourceId": "agrar/feeding-actuals", "temporary": False},
+        "dataSources": [{"key": "actuals", "endpoint": "/api/v1/agrar/rations-optimization/feeding/actuals/components", "pageSize": 100, "staleTimeMs": 30_000}],
+        "tables": [{
+            "key": "actuals", "label": "Ist-Fuetterungen", "dataSourceKey": "actuals",
+            "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+            "columns": [
+                {"key": "feeding_at", "label": "Zeitpunkt", "renderKind": "dateTime", "sortable": True, "width": 170},
+                {"key": "group_name", "label": "Tiergruppe", "sortable": True, "filterable": True, "width": 190},
+                {"key": "feed_name", "label": "Futtermittel", "sortable": True, "filterable": True, "width": 210},
+                {"key": "plan_version_no", "label": "Planversion", "numeric": True, "width": 110},
+                {"key": "cause_class", "label": "Ursache", "renderKind": "status", "filterable": True, "width": 170},
+                {"key": "target_kg", "label": "Soll kg", "numeric": True, "width": 110},
+                {"key": "actual_kg", "label": "Ist kg", "numeric": True, "width": 110},
+                {"key": "delta_kg", "label": "Abweichung kg", "numeric": True, "sortable": True, "width": 130},
+                {"key": "delta_pct", "label": "Abweichung %", "numeric": True, "sortable": True, "width": 130},
+                {"key": "cost_delta_eur", "label": "Kostenfolge EUR", "renderKind": "currency", "numeric": True, "width": 150},
+                {"key": "nutrient_delta_summary", "label": "Naehrstofffolge", "width": 280},
+                {"key": "missing_value_summary", "label": "Fehlende Werte", "width": 240},
+                {"key": "comment", "label": "Kommentar", "width": 260},
+            ],
+        }],
+        "actions": [
+            {"key": "export_csv", "label": "CSV exportieren", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.read"},
+            {"key": "open_mobile", "label": "Ist-Fuetterung erfassen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+        ],
+        "noWorkflowReason": "Ist-Fuetterungen sind append-only Nachweise; Korrekturen erzeugen einen neuen Stand mit Vorgaengerreferenz.",
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "listReport", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
+        "agentContract": {"businessPurpose": "Komponentenabweichungen und ihre Kosten-/Naehrstofffolgen planversionsgebunden erklaeren.", "examplePrompts": ["Welche Komponenten wurden heute ueberdosiert?", "Bei welchen Ist-Fuetterungen fehlen Preise oder Naehrstoffwerte?"], "sensitiveFields": ["comment", "value_consequences"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feeding-actuals']"}},
+    }
+
+
 def build_agrar_ration_detail_screen_definition() -> dict[str, Any]:
     """Native object page for one ration and its immutable versions."""
     return {
@@ -3008,6 +3046,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/feeding-reference-data": build_agrar_feeding_reference_data_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
     "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
+    "agrar/feeding-actuals": build_agrar_feeding_actuals_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
     "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
@@ -3534,6 +3573,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feeding-reference-data": "/portal/rationsoptimierung?view=reference-data",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
     "agrar/feed-controlling": "/portal/rationsoptimierung?view=controlling",
+    "agrar/feeding-actuals": "/portal/rationsoptimierung?view=controlling",
     "agrar/ration": "/portal/rationsoptimierung?view=rations",
     "agrar/duenger": "/agrar/duenger",
     "agrar/harvest-settlement": "/agrar/kontrakt-settlement",

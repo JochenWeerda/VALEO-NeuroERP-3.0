@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fetchFeedingGroups, type FeedingGroup } from '@/lib/api/rations-lifecycle'
 import { recordDailyFeedingObservation } from '@/lib/api/feed-controlling'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+import { FeedingActualPage } from '@/features/feed-advice/FeedingActualPage'
 
 const FeedControllingTrends = lazy(() =>
   import('@/features/feed-advice/FeedControllingTrends').then((module) => ({ default: module.FeedControllingTrends })),
@@ -66,6 +67,7 @@ export function FeedControllingPage(): JSX.Element {
         <TabsList className="mb-3">
           <TabsTrigger value="tagesliste">Tagesliste</TabsTrigger>
           <TabsTrigger value="trends">Langfristtrends</TabsTrigger>
+          <TabsTrigger value="components">Komponenten</TabsTrigger>
         </TabsList>
         <TabsContent value="tagesliste">
           <UniversalNativeCockpitPage key={refreshKey} screenId="agrar/feed-controlling" testId="feed-controlling-worklist"
@@ -76,6 +78,7 @@ export function FeedControllingPage(): JSX.Element {
             <FeedControllingTrends />
           </Suspense>
         </TabsContent>
+        <TabsContent value="components"><FeedingActualPage /></TabsContent>
       </Tabs>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">

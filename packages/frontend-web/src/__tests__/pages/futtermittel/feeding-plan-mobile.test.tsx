@@ -32,6 +32,12 @@ describe('mobile feeding plan', () => {
     expect(screen.getByText('525.0 kg')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Jetzt füttern' }))
     expect(screen.getByText('Ist-Mengen dokumentieren')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Ist-Fütterung speichern' }))
+    expect(mocks.mutation.mutate).toHaveBeenCalledWith(expect.objectContaining({
+      plan_version_id: 'plan-version-2',
+      cause_class: 'normal',
+      components: [{ feed_id: 'mais', actual_kg: 525 }],
+    }))
     const cached = JSON.parse(localStorage.getItem('valeo.feeding-plan.mobile.v2') ?? '{}')
     expect(cached.planVersionId).toBe('plan-version-2')
   })

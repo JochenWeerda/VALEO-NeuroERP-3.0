@@ -123,7 +123,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-ACT-001 | Istmengen erfassen (manuell/Schnittstelle), idempotent | MUSS | `rations_controlling.py` observations + Quellen manual/mixing_wagon/herd_data/import | VERIFIED | — | vorhanden | `test_rations_controlling.py` | Slice 009 |
-| FEED-ACT-002 | Abweichung absolut/%, Nährstoff-/Kostenfolge, Verlauf | MUSS | deviations + Trends (5 Soll-Ist-Charts) | VERIFIED | Nährstofffolge je Komponente offen | Inkrement 4 | `feed-controlling-trends.test.tsx` (4) | Slice 012 |
+| FEED-ACT-002 | Abweichung absolut/%, Nährstoff-/Kostenfolge, Verlauf | MUSS | append-only ActualFeeding je Planinstruction mit Decimal Soll/Ist/Delta/%, eingefrorener Preis-/Naehrstofffolge und nativer Komponentenprojektion; Tagestrends vorhanden | VERIFIED | Schwellen/Aufgaben siehe FEED-ACT-030 | FEED-ACT-029 | `test_feeding_actual.py`, `test_feeding_actual_api.py`, `feeding-plan-mobile.test.tsx` | ADR-052, FEED-ACT-029 |
 | FEED-ACT-003 | Mischgenauigkeit, Restfutter, Lade-/Mischzeiten | SOLL | `control/feeding_control.py` (<5%-Regelkreis) | VERIFIED | UI-Verlauf offen | Inkrement 4 | `test_rations_{feeding_control_dlg2025,mixing_protocol}.py` | DLG 01/2025 |
 | FEED-ACT-004 | Aufgaben aus Abweichungen, Ursachenklassifikation | MUSS | — | NOT_IMPLEMENTED | Measure/Task-Aggregat | **Inkrement 4/5** | — | Paritätsmatrix Tiergesundheit |
 
@@ -159,7 +159,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 |---|---|---|---|---|---|---|---|---|
 | FEED-REP-001 | Rations-PDF mit Version/Freigabe | MUSS | druckfaehige Planprojektion mit Plan-/Quellversion, Gueltigkeit, Druckstand und Mischfolge; Browserdialog speichert PDF | VERIFIED | signiertes Archiv-PDF und profilierte Ausgaben sind REP-Folgeausbau | sicherer Print-Zweig aus grant-geladener Planversion | `feeding-plan-detail.test.tsx` | FEED-PLAN-027 |
 | FEED-REP-002 | Beratungsbericht, Soll-Ist-, Verlaufsbericht | MUSS | — | NOT_IMPLEMENTED | Report-Aggregat | Inkrement 5 | — | — |
-| FEED-REP-003 | CSV/Excel-Export | MUSS | Serien-API liefert strukturierte Daten | PARTIAL | Export-Buttons | Inkrement 4 | — | — |
+| FEED-REP-003 | CSV/Excel-Export | MUSS | grant-gefilterter UTF-8-CSV-Export der komponentenbezogenen Ist-Fuetterung mit Plan-/Record-ID, Soll/Ist/Delta, Ursache und Wertfolge; native Exportaktion | VERIFIED | weitere Berichtstypen bleiben eigene Requirements | FEED-ACT-029 | `test_feeding_actual_api.py`, `feeding-actual-page.test.tsx` | ADR-052, FEED-ACT-029 |
 
 ## Kapitel 6.16 — Zusammenarbeit/Freigaben
 

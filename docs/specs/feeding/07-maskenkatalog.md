@@ -548,6 +548,16 @@ druckt Plan-ID, Quellversion, Gueltigkeit, Druckzeitpunkt und Rundungsdelta.
 Cachevertrag v2 gebunden. Unbekannte Zielmengen bleiben sichtbar und blockieren
 die Ist-Erfassung; geplante/veraltete Versionen werden nicht angeboten.
 
+## 19. Komponentenbezogene Ist-Auswertung FEED-ACT-029
+
+`agrar/feeding-actuals` ist eine native Meridian-ListReport-Maske im
+Controlling-Tab `Komponenten`. Audit-Tabelle zeigt Zeitpunkt, Gruppe, Plan,
+Feed, Soll/Ist/Delta, Ursache, Kosten-/Naehrstofffolge und fehlende Werte.
+Aktionen exportieren die berechtigte Projektion oder wechseln zur mobilen
+Erfassung. Die mobile Journey zeigt die Mischfolge, erfasst Istmenge und
+kontrollierte Ursache, speichert idempotent und legt Korrekturen als neuen Stand
+mit Vorgaengerreferenz an.
+
 ## 18. Planbasierte Futterversorgung FEED-SUP-028
 
 `agrar/feed-readiness` ist eine native Meridian-ListReport-Maske unter
