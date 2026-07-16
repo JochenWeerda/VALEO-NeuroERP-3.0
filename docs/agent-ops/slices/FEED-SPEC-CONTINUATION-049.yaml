@@ -1,0 +1,80 @@
+slice_id: FEED-SPEC-CONTINUATION-049
+id: FEED-SPEC-CONTINUATION-049
+title: Slice-Specs fuer die vollstaendige Restumsetzung nach FEED-ACT-030
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+decision_level: significant
+dependencies: [FEED-SPEC-FOUNDATION-014, FEED-SPEC-REFERENCE-038]
+goal: >-
+  Auftrag des Auftraggebers: die nach FEED-ACT-030 noch noetigen Specs zur
+  vollstaendigen Umsetzung planen (Slices bis 030 sind durch Codex umgesetzt
+  bzw. in Arbeit). Der kanonische Umsetzungsplan wird von groben
+  Inkrement-Zeilen auf verbindliche Slice-Specs verfeinert.
+scope:
+  - "Inkrement 5 detailliert: FEED-CONS-031 (Beratungsfall/Beobachtung mit
+    DMS-Fotos + mobiler Pfad), FEED-CONS-032 (Massnahmen-Vollausbau +
+    Benachrichtigungs-Events + Beratungsbericht-Kern), FEED-PERF-033
+    (MLP/Milchguete-Kennzahlen mit Provenienz, IOFC, Versionsmarker,
+    ehrliche Vorher/Nachher-Auswertung)."
+  - "Inkrement 6 detailliert: FEED-INT-034 (Integrationsmonitor mit Vorschau/
+    Validierung/Quarantaene/Mapping), FEED-INT-035 (Mischtechnik bidirektional
+    + Chargen-FIFO/Reservierung), FEED-INT-036 (schemafeste Feeding-Events +
+    Konsumenten; DDW-Live weiterhin BLOCKED bis Partnervertrag)."
+  - "Neues Inkrement 7 (Vervollstaendigung der Lastenheft-Reste):
+    FEED-REP-039/040 (Report-Entitaet, profilierte PDFs, Beratungs-/Soll-Ist-/
+    Verlaufsberichte), FEED-EDITOR-041 (Undo/Redo, Tastatur, Mischreihenfolge),
+    FEED-OPT-042 (Optimieren-im-Editor als Candidate + automatischer
+    OptimizationRun-Hook + _gfe_requirements-Extraktion = Schuldenabbau aus
+    020/021), FEED-HERD-043 (AnimalGroupSnapshots aus Herd-Deltas +
+    Veraltet-Warnung), FEED-PERF-044 (Benchmark-Vertiefung; Betriebsvergleich
+    BLOCKED auf Opt-in-Entscheidung), FEED-MOB-045 (Offline-Queue ohne zweiten
+    Datenpfad), FEED-AI-046 (Assistenz nach Kap. 6.20/11, bestaetigungspflichtig),
+    FEED-RBAC-048 (Audit-Vereinheitlichung + Vier-Augen-Konfiguration)."
+  - "Inkrement 8: FEED-REL-047 (Modul-Flag feeding_advisory, Playwright-
+    Release-Journeys A/B/C gegen Docker-Prod, Referenzbetriebs-Vergleich,
+    Pilotabnahme als Auftraggeber-Gate)."
+  - "Abhaengigkeitsgraph + vier explizit externe Gates (Partnervertrag,
+    Benchmark-Opt-in, IdP-Rollen, Pilotabnahme)."
+file_ownership:
+  - docs/specs/feeding/implementation-plan.md
+  - docs/agent-ops/slices/FEED-SPEC-CONTINUATION-049.yaml
+  - docs/agent-ops/active-workboard.md
+progress: >-
+  2026-07-16 geplant und eingecheckt. Naechster Umsetzungs-Claim nach
+  Abschluss von FEED-ACT-030: FEED-CONS-031 (oder 034, falls Integrations-
+  strang priorisiert wird).
+acceptance:
+  - "Jede offene Lastenheft-Anforderungsgruppe der Traceability ist genau
+    einem Folge-Slice oder einem explizit externen Gate zugeordnet."
+  - "Slice-IDs kollisionsfrei zur bestehenden Nummernserie (007-038 belegt;
+    039-049 vergeben)."
+  - "Codex-WIP (FEED-ACT-030) unangetastet: Commit enthaelt ausschliesslich
+    Plan, YAML und Workboard."
+tests:
+  - "Docs-Governance-/Markdown-Gates im Commit; kein Code geaendert."
+risks:
+  - "FEED-AI-046 und FEED-PERF-044 haengen fachlich an Datengrundlagen aus
+    032/033/035 — Reihenfolge im Graph verbindlich."
+external_gates: >-
+  DDW-Partnervertrag (FEED-INT-003), Benchmark-Opt-in (FEED-PERF-044),
+  IdP-Rollenzuweisung, Pilotabnahme durch Fuetterungsberater (FEED-REL-047).
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Restplanung deckt den kompletten Lastenheft-Prozess bis Bericht,
+    Beratung, Integration und Pilot ab; nichts wird als erfuellt geplant,
+    was ein externes Gate braucht.
+  architektur_vertrag: >-
+    Alle Folge-Slices bauen additiv auf den Aggregaten aus Inkrement 1-4 auf;
+    keine neuen Parallelwelten; Meridian-Kette und Schichtenregel gelten.
+  daten_vertrag: not_applicable
+  security_vertrag: not_applicable
+  betriebs_vertrag: >-
+    Rollout ausschliesslich ueber Inkrement 8 (Flag + Pilot).
+  dokumentations_vertrag: >-
+    implementation-plan.md ist die kanonische Slice-Spec-Quelle; Traceability
+    wird je Umsetzungs-Slice fortgeschrieben.
+  test_vertrag: >-
+    TDD-Pflicht und DoD (Lastenheft Kap. 15) gelten unveraendert je Slice.
