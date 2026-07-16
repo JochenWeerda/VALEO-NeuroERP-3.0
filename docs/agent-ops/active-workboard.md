@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-SUP-028 Planbedarf, Reichweite, Sicherheitszuschlag und Einkaufsuebergabe - reserviert 2026-07-16
+
+**Owner:** Codex. **Stand:** reserviert (Claim). Die Versorgung wechselt von `ration.snapshot.mobile` auf aktuelle FeedingPlanInstructions. Reine Decimal-Regeln berechnen Tages-/Horizontbedarf, expliziten Sicherheitszuschlag, bekannte Reichweite und auf Handelseinheiten gerundete Unterdeckung; unbekannter Bestand bleibt unbekannt. Kritische Unterdeckung erzeugt nur eine idempotente, begruendete Einkaufsuebergabe mit Outbox-Ereignis, niemals automatisch eine Bestellung. Die Meridian-Ansicht priorisiert Abhilfe und Datenluecken. **TDD:** Supply-Boundaries, API/Isolation/Outbox und Screen-Vertrag zuerst rot.
+
 ## FEED-PLAN-027 Plan-ObjectPage, Druck, Mobilroute und Veraltet-Kennzeichnung - abgeschlossen 2026-07-16
 
 **Owner:** Codex. **Stand:** abgeschlossen. Der Server leitet `scheduled/current/stale` aus Gueltigkeit und wirksam gewordenen neueren Versionen ab; `/current` liefert nur grant-sichere aktuelle Planversionen samt Instructions. `agrar/feeding-plan` ist eine native Meridian-ObjectPage mit Plan, Mischanweisung und Provenienz. Der Print-Zweig erzeugt ohne Raw-HTML-Sink einen Browserdruck/PDF-Nachweis mit IDs, Quelle, Gueltigkeit, Druckstand und Rundungsdelta. Die mobile Stallroute konsumiert Planversionen, nutzt Cache v2 mit Planversions-ID und ignoriert die alte Snapshot-Nebenwahrheit. **TDD-Abnahme:** 14 Backend-/Screen-Tests, 3 Component-Tests, Playwright 1/1 plus Visual Tour 0 Probleme; Feeding-/Rations-Regression 606 gruen/1 skipped; Frontend 100 Dateien/404 Tests gruen/1 skipped; TypeScript, ESLint, Ruff, Routing, Doku 127/130, Architektur 903/903 (210 Services, 406 Endpoints), Handbuch 45 Masken und Alembic gruen. **Requirements:** FEED-PLAN-001/002 und FEED-REP-001 VERIFIED; signierter Server-PDF-Job bleibt bewusst Berichts-Ausbau.

@@ -1,0 +1,66 @@
+slice_id: FEED-SUP-028
+id: FEED-SUP-028
+title: Planbedarf Reichweite Sicherheitszuschlag und Einkaufsuebergabe
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Bedarf und Reichweite aus aktuellen FeedingPlanVersions statt Legacy-Mobile-
+  Snapshots ableiten, Sicherheitszuschlag und Handelseinheit transparent
+  beruecksichtigen und Unterdeckungen als kontrollierte, auditierbare
+  Einkaufsuebergabe bereitstellen.
+requirements: [FEED-SUP-001, FEED-SUP-003]
+work_packages: [FEED-WP-131, FEED-WP-132, FEED-WP-133, FEED-WP-134, FEED-WP-135, FEED-WP-141, FEED-WP-142, FEED-WP-143, FEED-WP-144, FEED-WP-145]
+decision_level: significant
+dependencies: [FEED-PLAN-027]
+file_ownership:
+  - alembic/versions/feed_supply_handoffs_20260716.py
+  - app/agrar/rations/supply.py
+  - app/agrar/rations/readiness.py
+  - app/services/feeding_supply_service.py
+  - app/services/rations_readiness_service.py
+  - app/api/v1/endpoints/feeding_supply.py
+  - app/api/v1/endpoints/rations_readiness.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_supply.py
+  - tests/test_feeding_supply_api.py
+  - tests/test_rations_readiness.py
+  - packages/frontend-web/src/lib/api/feeding-supply.ts
+  - packages/frontend-web/src/features/feed-advice/FeedingSupplyPage.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-supply.test.tsx
+  - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
+  - docs/architecture/agents/impact-notes/FEED-SUP-028.md
+  - docs/architecture/domains/agrar/
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - config/architecture-index.yaml
+  - docs/entwickler/container-inventory.md
+  - docs/agent-ops/slices/FEED-SUP-028.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Tagesbedarf stammt aus aktuellen Plan-Instructions und nie aus `snapshot.mobile`.
+  - Sicherheitszuschlag ist expliziter Prozentsatz; Netto-/Bruttobedarf und Zuschlagsmenge bleiben sichtbar.
+  - Bestand fehlt bleibt unbekannt; Reichweite und Unterdeckung werden dann nicht als Null berechnet.
+  - Bestellmenge wird nur bei bekannter Unterdeckung auf positive Handelseinheit aufgerundet; Rundungsdelta bleibt sichtbar.
+  - Reichweitenwarnung nennt Planversion, Feed, Bedarfshorizont, Bestand, Unterdeckung und Abhilfe.
+  - Einkaufsuebergabe ist Vorschlag/Command mit Idempotency-Key, Auditgrund, Tenant, Grant und Rollenpruefung; keine automatische Bestellung.
+  - Handoff und `feeding.supply.procurement_handoff.created` entstehen atomar und verweisen auf Planversion.
+  - Meridian-Readiness-/Versorgungsansicht zeigt unbekannt, ausreichend, Warnung und kritisch als Text.
+tdd:
+  red:
+    - Property-/Boundary-Tests fuer Zuschlag, unbekannten Bestand, Reichweite und Handelseinheitsrundung.
+    - API-/DB-Journey fuer Current-Plan-Bedarf, Tenant/Grant/RBAC, Idempotenz, Audit und Outbox.
+    - Screen-/Component-Vertrag fuer handlungsorientierte Versorgungsansicht und kontrollierte Uebergabe.
+  green: kleinster Plan-to-Supply-to-Procurement-Handoff-Pfad ohne Bestellautomatik
+  refactor: pure Supply-Berechnung, Read-Projektion und Command-Persistenz klar trennen
+tests:
+  - tests/test_feeding_supply.py
+  - tests/test_feeding_supply_api.py
+  - tests/test_rations_readiness.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-supply.test.tsx
+risks:
+  - Bestandseinheiten und Plan-FM duerfen nicht ohne explizite Konvertierung vermischt werden.
+  - Unbekannter Bestand darf keinen Null-Bestellvorschlag erzeugen.
+  - Einkaufsuebergabe darf eine Bestellung weder erzeugen noch freigeben.
