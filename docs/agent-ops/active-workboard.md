@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-CONS-032 Massnahmen-Lifecycle, Benachrichtigung und Beratungsbericht-Kern - reserviert 2026-07-16
+
+**Owner:** Codex. **Stand:** reserviert (Claim). Der minimale append-only ActualMeasure-Kern wird um explizite Statusversionen, Wiedervorlage, Eskalation und verpflichtende Wirksamkeitskontrolle erweitert. Faelligkeitslauf und menschliche Commands emittieren `feeding.measure.overdue/completed` genau einmal ueber den schemafesten FEED-INT-036-Vertrag; ein In-App-Read-Model zeigt relevante Hinweise mit Deep Link. Beratungsfaelle erhalten einen reproduzierbaren, versionierten Berichtentwurf aus Fall, Beobachtungen und Massnahmen; PDF bleibt FEED-REP-039/040. **TDD:** Domain-, DB-/API- und UI-Vertraege zuerst rot. **Dateibesitz:** siehe `FEED-CONS-032.yaml`.
+
 ## FEED-INT-036 Schemafeste Feeding-Events auf der Outbox - abgeschlossen 2026-07-16
 
 **Owner:** Codex (Uebernahme nach Session-Limit von Claude; Red-Welle bewahrt). **Stand:** abgeschlossen. `app/agrar/rations/events.py` erzwingt Schema 1.0, geschlossene Typliste und einen commit-freien Transactional-Outbox-Emitter. Aktivierung, Analysefreigabe und Quarantaene emittieren nun atomar; Plan, Actual, Abweichung, Massnahme und Einkaufsuebergabe nutzen denselben Vertrag statt Inline-Huellen. Retry erzeugt aufgrund der fachlichen Idempotenz keine Dublette, ein Rollback entfernt auch das Event. AsyncAPI und Agent-Handbuch katalogisieren acht tatsaechlich emittierte Topics; `measure.completed/overdue` sind fuer FEED-CONS-032 reserviert. Keine erfundenen Konsumenten oder Liveprovider: FEED-INT-003 bleibt bis Partnervertrag BLOCKED. **TDD-Abnahme:** Red 3/3 reproduziert, fokussiert 27 gruen; Feeding-/Rations-Regression 749 gruen/1 skipped; Ruff, Compile, Doku 127/134, Architektur/Drift 905/905, AsyncAPI 74 Events, Handbuch 46 Masken und Alembic Single-Head gruen. **Requirement:** FEED-INT-004 VERIFIED. **Entscheidung:** ADR-054 Proposed.

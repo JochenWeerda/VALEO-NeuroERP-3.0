@@ -1,0 +1,59 @@
+slice_id: FEED-CONS-032
+id: FEED-CONS-032
+title: Massnahmen-Lifecycle Benachrichtigung und Beratungsbericht-Kern
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Massnahmen revisionssicher bis zur Wirksamkeitskontrolle fuehren,
+  ueberfaellige Verantwortliche idempotent benachrichtigen und einen
+  reproduzierbaren Beratungsbericht-Entwurf aus Falldaten erzeugen.
+requirements: [FEED-CONS-002, FEED-COLLAB-002, FEED-REP-002]
+dependencies: [FEED-ACT-030, FEED-CONS-031, FEED-INT-036]
+decision_level: significant
+file_ownership:
+  - alembic/versions/feed_consulting_measures_20260716.py
+  - app/agrar/rations/measure_lifecycle.py
+  - app/services/feeding_measure_lifecycle_service.py
+  - app/services/feeding_consulting_report_service.py
+  - app/api/v1/endpoints/feeding_measures.py
+  - app/api/v1/endpoints/feeding_consulting.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - app/agrar/rations/events.py
+  - tests/test_feeding_measure_lifecycle.py
+  - tests/test_feeding_measure_lifecycle_api.py
+  - tests/test_feeding_consulting_report_api.py
+  - packages/frontend-web/src/lib/api/feeding-consulting.ts
+  - packages/frontend-web/src/features/feed-advice/ConsultingCases.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/consulting-cases.test.tsx
+  - docs/adr/adr-055-feeding-measure-lifecycle.md
+  - docs/architecture/agents/impact-notes/FEED-CONS-032.md
+  - docs/architecture/domains/agrar/
+  - docs/specs/feeding/
+  - docs/agent-ops/slices/FEED-CONS-032.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Jeder Statuswechsel erzeugt eine append-only Version mit Akteur Zeit Grund und erwarteter Version.
+  - Abschluss ist ohne dokumentierte Wirksamkeitskontrolle und Ergebnis unzulaessig.
+  - Owner Termin Wiedervorlage Eskalationsstatus und Ergebnis bleiben historisch nachvollziehbar.
+  - Ueberfaelligkeitslauf ist idempotent und emittiert je Massnahme und Faelligkeitsstand genau ein Event.
+  - In-App-Hinweise sind tenant grant und empfaengersicher und enthalten einen stabilen Deep Link.
+  - Berichtentwurf ist aus Fall Beobachtungen und Massnahmen reproduzierbar und versioniert.
+  - Agenten duerfen weder Massnahmen still abschliessen noch Wirksamkeit erfinden.
+tdd:
+  red:
+    - Statusautomat und Abschlussguard als reine Domain-Tests.
+    - API-Journey fuer Revision Idempotenz RBAC Tenant Grant und Overdue-Event.
+    - Component-Vertrag fuer Massnahme und Berichtentwurf.
+  green: kleinster Open-to-Completed-Lifecycle und Report-Draft
+  refactor: Statusregeln Eventemission und Reportprojektion getrennt halten
+tests:
+  - tests/test_feeding_measure_lifecycle.py
+  - tests/test_feeding_measure_lifecycle_api.py
+  - tests/test_feeding_consulting_report_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/consulting-cases.test.tsx
+risks:
+  - Automatischer Abschluss oder erfundene Wirksamkeit.
+  - Mehrfachbenachrichtigung bei wiederholtem Schedulerlauf.
+  - Vermischung von Actual-Massnahme und generischem Workflow-Task.
