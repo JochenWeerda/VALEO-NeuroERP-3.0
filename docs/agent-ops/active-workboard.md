@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-SPEC-CONTINUATION-049 Slice-Specs fuer die Restumsetzung nach FEED-ACT-030 - in Arbeit 2026-07-16
+
+**Owner:** Claude (Doku-Slice auf Auftrag; Codex-WIP FEED-ACT-030 unangetastet). **Stand:** in Arbeit (Claim). Der Umsetzungsplan erhaelt verbindliche Slice-Specs fuer alles nach FEED-ACT-030: Inkrement 5 (FEED-CONS-031/032, FEED-PERF-033) und Inkrement 6 (FEED-INT-034/035/036) detailliert ausformuliert; neu geschnittenes **Inkrement 7 „Vervollstaendigung"** fuer die Lastenheft-Reste (FEED-REP-039/040 Berichte+Report-Entitaet, FEED-EDITOR-041 Undo/Redo+Tastatur+Mischreihenfolge, FEED-OPT-042 Optimieren-im-Editor + Requirements-Extraktion + Run-Hook, FEED-HERD-043 Gruppenhistorie, FEED-PERF-044 Benchmarking, FEED-MOB-045 Offline, FEED-AI-046 Assistenz, FEED-RBAC-048 Audit+Vier-Augen) sowie **Inkrement 8 FEED-REL-047** (Flag, Release-Journeys A/B/C, Pilotabnahme). Je Slice: Requirements-, Paket-, Abhaengigkeits-, Scope- und Akzeptanzvertrag; Abhaengigkeitsgraph; explizite externe Gates (DDW-Partnervertrag, Benchmark-Opt-in, IdP-Rollen, Pilot-Abnahme). **Dateibesitz:** `docs/specs/feeding/implementation-plan.md`, Slice-YAML, Workboard.
+
 ## FEED-ACT-030 Abweichungsschwellen, Massnahmen, IOFC und Versionsmarker - reserviert 2026-07-16
 
 **Owner:** Codex. **Stand:** reserviert (Claim). Komponentenklassen erhalten explizit versionierte Tenant-Schwellen statt eines stillen Universalwerts. Findings bleiben plan-/feed-/schwellenbezogen; eine Massnahme entsteht nur per begruendetem, idempotentem Human-Command mit Owner und Termin. IOFC bleibt bei unvollstaendiger Basis unbekannt, Planversionswechsel werden in Trends textuell markiert. **TDD:** Schwellen-/IOFC-Boundaries, Massnahmen-API/Isolation/Audit und UI-Vertraege zuerst rot.
