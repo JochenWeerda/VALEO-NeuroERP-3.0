@@ -21626,6 +21626,21 @@
         "title": "CaseManagementOut",
         "type": "object"
       },
+      "CaseMeasureIn": {
+        "properties": {
+          "measure_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Measure Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "measure_id"
+        ],
+        "title": "CaseMeasureIn",
+        "type": "object"
+      },
       "CaseUpdate": {
         "description": "Schema for updating service cases",
         "properties": {
@@ -75440,6 +75455,119 @@
         "title": "MatterBasis",
         "type": "string"
       },
+      "MeasureTransitionIn": {
+        "properties": {
+          "due_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "effectiveness": {
+            "anyOf": [
+              {
+                "enum": [
+                  "effective",
+                  "partial",
+                  "ineffective"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effectiveness"
+          },
+          "effectiveness_result": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effectiveness Result"
+          },
+          "escalation_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "attention",
+                  "escalated"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escalation Status"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "owner_subject": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Subject"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "reminder_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reminder Date"
+          },
+          "target_status": {
+            "enum": [
+              "in_progress",
+              "review_due",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Target Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "target_status",
+          "reason"
+        ],
+        "title": "MeasureTransitionIn",
+        "type": "object"
+      },
       "MeldungCreateRequest": {
         "properties": {
           "betrag_eur": {
@@ -82574,6 +82702,20 @@
           "created_at"
         ],
         "title": "OutboxMessageResponse",
+        "type": "object"
+      },
+      "OverdueRunIn": {
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          }
+        },
+        "required": [
+          "as_of"
+        ],
+        "title": "OverdueRunIn",
         "type": "object"
       },
       "OverlayOut": {
@@ -100065,6 +100207,21 @@
           "grund"
         ],
         "title": "ReopenIn",
+        "type": "object"
+      },
+      "ReportDraftIn": {
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ReportDraftIn",
         "type": "object"
       },
       "ReportIn": {
@@ -162813,6 +162970,157 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/feeding/consulting-cases/{case_id}/measures": {
+      "get": {
+        "operationId": "list_case_measures_api_v1_agrar_rations_optimization_feeding_consulting_cases__case_id__measures_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Case Measures Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Measures Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Case Measures",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-consulting"
+        ]
+      },
+      "post": {
+        "operationId": "link_measure_api_v1_agrar_rations_optimization_feeding_consulting_cases__case_id__measures_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseMeasureIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Link Measure Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Measures Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Measure",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-consulting"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/feeding/consulting-cases/{case_id}/observations": {
       "post": {
         "operationId": "add_observation_api_v1_agrar_rations_optimization_feeding_consulting_cases__case_id__observations_post",
@@ -162881,6 +163189,157 @@
           }
         ],
         "summary": "Beobachtung idempotent anfuegen (mobiler Erfassungspfad via client_ref)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-consulting"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/consulting-cases/{case_id}/report-drafts": {
+      "get": {
+        "operationId": "list_report_drafts_api_v1_agrar_rations_optimization_feeding_consulting_cases__case_id__report_drafts_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Report Drafts Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Report Drafts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Report Drafts",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-consulting"
+        ]
+      },
+      "post": {
+        "operationId": "create_report_draft_api_v1_agrar_rations_optimization_feeding_consulting_cases__case_id__report_drafts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDraftIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Report Draft Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Report Drafts Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Report Draft",
         "tags": [
           "agrar",
           "futtermittel",
@@ -163331,6 +163790,232 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/feeding/measures/process-overdue": {
+      "post": {
+        "operationId": "process_overdue_api_v1_agrar_rations_optimization_feeding_measures_process_overdue_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverdueRunIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Process Overdue Api V1 Agrar Rations Optimization Feeding Measures Process Overdue Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Process Overdue",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-measures"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/measures/{measure_id}/history": {
+      "get": {
+        "operationId": "measure_history_api_v1_agrar_rations_optimization_feeding_measures__measure_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "measure_id",
+            "required": true,
+            "schema": {
+              "title": "Measure Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Measure History Api V1 Agrar Rations Optimization Feeding Measures  Measure Id  History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Measure History",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-measures"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/measures/{measure_id}/transitions": {
+      "post": {
+        "operationId": "transition_measure_api_v1_agrar_rations_optimization_feeding_measures__measure_id__transitions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "measure_id",
+            "required": true,
+            "schema": {
+              "title": "Measure Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeasureTransitionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transition Measure Api V1 Agrar Rations Optimization Feeding Measures  Measure Id  Transitions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transition Measure",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-measures"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/feeding/mixer-feedback": {
       "post": {
         "operationId": "mixer_feedback_api_v1_agrar_rations_optimization_feeding_mixer_feedback_post",
@@ -163415,6 +164100,70 @@
           "agrar",
           "rations-optimization",
           "feeding-mixer"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/notifications": {
+      "get": {
+        "operationId": "notifications_api_v1_agrar_rations_optimization_feeding_notifications_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Notifications Api V1 Agrar Rations Optimization Feeding Notifications Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notifications",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-measures"
         ]
       }
     },

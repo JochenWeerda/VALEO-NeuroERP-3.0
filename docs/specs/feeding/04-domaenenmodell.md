@@ -465,3 +465,18 @@ Projektion aus Policyversion und `ActualFeedingComponent`, kein Task-Aggregat.
 `FeedingActualMeasure` entsteht ausschliesslich durch einen menschlichen
 Command und friert Actual-Komponente, Finding, Owner, Termin, Grund, Akteur und
 Idempotenz ein. Ein Agent oder Finding darf keine Massnahme still erzeugen.
+
+## 17. Massnahmen-Lifecycle und Beratungsentwurf FEED-CONS-032
+
+`FeedingMeasureVersion` ist die append-only Historie der aus einem Befund
+entstandenen Massnahme. Das Aggregat erzwingt den Pfad `open -> in_progress ->
+review_due -> completed`, optimistische Versionen und eine dokumentierte
+Wirksamkeit vor Abschluss. Owner, Termin, Wiedervorlage und Eskalationsstatus
+werden je Stand eingefroren. `FeedingNotification` ist ein empfaengersicheres
+Read-Model aus einem fachlichen Faelligkeitsstand, kein Versandversprechen.
+
+`ConsultingReportDraft` friert eine kanonische Projektion aus Fall,
+Beobachtungen und jeweils neuesten verknuepften Massnahmen ein. Gleicher
+Content-Hash bezeichnet denselben Entwurf; veraenderter Inhalt erzeugt eine neue
+Version. Ein Agent darf weder Status noch Wirksamkeit oder Berichtsbefunde ohne
+menschlichen Command erfinden. Entscheidung: ADR-055.

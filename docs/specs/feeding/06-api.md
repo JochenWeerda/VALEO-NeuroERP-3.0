@@ -547,3 +547,22 @@ Einkaufsauftrag.
 `POST /feeding/controlling/observations` akzeptiert optional den Milchpreis.
 `GET /feeding/controlling/series` liefert IOFC-Basis und Planversions-ID/-Nummer;
 bei unvollstaendiger Basis ist IOFC `null`.
+
+## 24. Massnahmen-Lifecycle und Beratungsentwurf FEED-CONS-032
+
+- `POST /feeding/measures/{id}/transitions`: WRITE, `expected_version`, Ziel,
+  Pflichtgrund und optionale Owner-/Termin-/Wiedervorlage-/Eskalationsdaten;
+  Abschluss zusaetzlich mit Wirksamkeit und Ergebnis.
+- `GET /feeding/measures/{id}/history`: READ, neueste Version zuerst.
+- `POST /feeding/measures/process-overdue`: APPROVE, wiederholbarer
+  Faelligkeitslauf mit `examined` und `created`.
+- `GET /feeding/notifications`: READ, strikt auf den angemeldeten Empfaenger
+  begrenzt und mit stabilem Deep-Link.
+- `POST|GET /feeding/consulting-cases/{id}/measures`: grant-sichere,
+  unveraenderliche Fallverknuepfung.
+- `POST|GET /feeding/consulting-cases/{id}/report-drafts`: strukturierter,
+  hash-idempotenter und versionierter Entwurf aus Fall, Beobachtungen und
+  Massnahmen. Die Antwort enthaelt bewusst keine behauptete PDF-/DMS-ID.
+
+Rollenfehler liefern 403, nicht sichtbare Ressourcenscopes 404 und ungueltige
+Transitions-/Versionsstaende 409.

@@ -446,3 +446,18 @@ Keys je Tenant; ein Trigger verhindert Update/Delete. Das zugehoerige
 - `feeding_controlling_daily` erhaelt `feeding_plan_version_id`,
   `milk_price_eur_kg`, `milk_revenue_eur_cow` und `iofc_eur_cow`. Unvollstaendige
   IOFC-Basis bleibt fachlich nachvollziehbar nullable.
+
+## 25. Massnahmen- und Beratungsbericht-Persistenz FEED-CONS-032
+
+- `feeding_measure_versions`: Tenant/Massnahme, fortlaufende Version, Status,
+  Owner, Termin, Wiedervorlage, Eskalation, Wirksamkeit, Ergebnis, Pflichtgrund,
+  Akteur und Zeit; Unique `(tenant_id, measure_id, version)`, append-only.
+- `feeding_notifications`: Empfaenger, Eventtyp, Aggregatreferenz, Text,
+  Deep-Link und eindeutiger Dedupe-Key; nur `read_at` darf sich aendern.
+- `consulting_case_measures`: unveraenderliche, tenantgebundene Fall-/Massnahme-
+  Zuordnung; Gruppenbezug wird beim Command geprueft.
+- `consulting_report_drafts`: Fall, Version, kanonischer JSONB-Inhalt,
+  SHA-256-Hash, Grund, Akteur und Zeit; Entwuerfe sind append-only.
+
+Die Migration `feed_consulting_measures_20260716` legt fuer bestehende
+`feeding_actual_measures` eine Version 1 an. Sie veraendert keine vorhandene ID.

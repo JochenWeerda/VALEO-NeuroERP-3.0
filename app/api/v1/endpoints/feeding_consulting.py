@@ -1,4 +1,5 @@
 """Consulting cases and observations API (FEED-CONS-031)."""
+
 from __future__ import annotations
 
 from datetime import date, datetime
@@ -15,6 +16,10 @@ from app.core.tenant import get_tenant_id
 from app.services.feeding_consulting_service import (
     ConsultingCaseClosedError,
     FeedingConsultingService,
+)
+from app.services.feeding_consulting_report_service import (
+    ConsultingReportConflict,
+    FeedingConsultingReportService,
 )
 
 router = APIRouter(prefix="/feeding", tags=["feeding-consulting"])
@@ -34,8 +39,11 @@ class ConsultingCaseIn(BaseModel):
 class ObservationIn(BaseModel):
     category: str = Field(min_length=1, max_length=60)
     text: str = Field(min_length=1, max_length=8000)
-    client_ref: str = Field(min_length=1, max_length=120,
-                            description="Idempotenzschluessel des (mobilen) Clients")
+    client_ref: str = Field(
+        min_length=1,
+        max_length=120,
+        description="Idempotenzschluessel des (mobilen) Clients",
+    )
     photo_document_refs: list[str] = Field(default_factory=list, max_length=20)
     ration_id: str | None = Field(default=None, max_length=80)
     analysis_ref: str | None = Field(default=None, max_length=80)
@@ -44,6 +52,14 @@ class ObservationIn(BaseModel):
 
 class CaseCloseIn(BaseModel):
     summary: str = Field(min_length=1, max_length=4000)
+
+
+class CaseMeasureIn(BaseModel):
+    measure_id: str = Field(min_length=1, max_length=80)
+
+
+class ReportDraftIn(BaseModel):
+    reason: str = Field(min_length=10, max_length=2000)
 
 
 class ConsultingCaseOut(BaseModel):
@@ -91,11 +107,30 @@ def _service(db: Session, tenant_id: str, user: User) -> FeedingConsultingServic
     return FeedingConsultingService(db, tenant_id, str(user.get("sub") or "unknown"))
 
 
-@router.post("/consulting-cases", response_model=ConsultingCaseOut, status_code=201,
-             summary="Beratungsfall anlegen (Besuch oder Remote)")
-async def create_case(body: ConsultingCaseIn, db: Session = Depends(get_db),
-                      tenant_id: str = Depends(get_tenant_id),
-                      user: User = Depends(get_current_user)) -> dict[str, Any]:
+def _report_service(
+    db: Session, tenant_id: str, user: User
+) -> FeedingConsultingReportService:
+    roles = set(user.get("roles") or [])
+    return FeedingConsultingReportService(
+        db,
+        tenant_id,
+        str(user.get("sub") or "unknown"),
+        unrestricted=bool(roles.intersection({"admin", "ADMIN", "FUTTERMITTEL_ADMIN"})),
+    )
+
+
+@router.post(
+    "/consulting-cases",
+    response_model=ConsultingCaseOut,
+    status_code=201,
+    summary="Beratungsfall anlegen (Besuch oder Remote)",
+)
+async def create_case(
+    body: ConsultingCaseIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer Beratungsfaelle.")
     try:
         return _service(db, tenant_id, user).create_case(body.model_dump())
@@ -103,20 +138,32 @@ async def create_case(body: ConsultingCaseIn, db: Session = Depends(get_db),
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/consulting-cases", response_model=list[ConsultingCaseOut],
-            summary="Beratungsfaelle auflisten (Worklist)")
-async def list_cases(status: CaseStatus | None = None, db: Session = Depends(get_db),
-                     tenant_id: str = Depends(get_tenant_id),
-                     user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
+@router.get(
+    "/consulting-cases",
+    response_model=list[ConsultingCaseOut],
+    summary="Beratungsfaelle auflisten (Worklist)",
+)
+async def list_cases(
+    status: CaseStatus | None = None,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer Beratungsfaelle.")
     return _service(db, tenant_id, user).list_cases(status=status)
 
 
-@router.get("/consulting-cases/{case_id}", response_model=ConsultingCaseDetailOut,
-            summary="Beratungsfall mit chronologischen Beobachtungen")
-async def get_case(case_id: str, db: Session = Depends(get_db),
-                   tenant_id: str = Depends(get_tenant_id),
-                   user: User = Depends(get_current_user)) -> dict[str, Any]:
+@router.get(
+    "/consulting-cases/{case_id}",
+    response_model=ConsultingCaseDetailOut,
+    summary="Beratungsfall mit chronologischen Beobachtungen",
+)
+async def get_case(
+    case_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
     require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer Beratungsfaelle.")
     try:
         return _service(db, tenant_id, user).get_case(case_id)
@@ -124,12 +171,19 @@ async def get_case(case_id: str, db: Session = Depends(get_db),
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/consulting-cases/{case_id}/observations", response_model=ObservationOut,
-             status_code=201,
-             summary="Beobachtung idempotent anfuegen (mobiler Erfassungspfad via client_ref)")
-async def add_observation(case_id: str, body: ObservationIn, db: Session = Depends(get_db),
-                          tenant_id: str = Depends(get_tenant_id),
-                          user: User = Depends(get_current_user)) -> dict[str, Any]:
+@router.post(
+    "/consulting-cases/{case_id}/observations",
+    response_model=ObservationOut,
+    status_code=201,
+    summary="Beobachtung idempotent anfuegen (mobiler Erfassungspfad via client_ref)",
+)
+async def add_observation(
+    case_id: str,
+    body: ObservationIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer Beobachtungen.")
     try:
         return _service(db, tenant_id, user).add_observation(case_id, body.model_dump())
@@ -139,13 +193,95 @@ async def add_observation(case_id: str, body: ObservationIn, db: Session = Depen
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/consulting-cases/{case_id}/close", response_model=ConsultingCaseOut,
-             summary="Beratungsfall mit Abschlussbewertung schliessen")
-async def close_case(case_id: str, body: CaseCloseIn, db: Session = Depends(get_db),
-                     tenant_id: str = Depends(get_tenant_id),
-                     user: User = Depends(get_current_user)) -> dict[str, Any]:
+@router.post(
+    "/consulting-cases/{case_id}/close",
+    response_model=ConsultingCaseOut,
+    summary="Beratungsfall mit Abschlussbewertung schliessen",
+)
+async def close_case(
+    case_id: str,
+    body: CaseCloseIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer Beratungsfaelle.")
     try:
         return _service(db, tenant_id, user).close_case(case_id, body.summary)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post(
+    "/consulting-cases/{case_id}/measures",
+    response_model=dict[str, Any],
+    status_code=201,
+)
+async def link_measure(
+    case_id: str,
+    body: CaseMeasureIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    require_roles(
+        user, WRITE_ROLES, detail="Keine Berechtigung fuer Beratungsmassnahmen."
+    )
+    service = _report_service(db, tenant_id, user)
+    try:
+        return service.link_measure(case_id, body.measure_id)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ConsultingReportConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@router.post(
+    "/consulting-cases/{case_id}/report-drafts",
+    response_model=dict[str, Any],
+    status_code=201,
+)
+async def create_report_draft(
+    case_id: str,
+    body: ReportDraftIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer Berichtentwuerfe.")
+    try:
+        return _report_service(db, tenant_id, user).create_draft(case_id, body.reason)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@router.get("/consulting-cases/{case_id}/measures", response_model=list[dict[str, Any]])
+async def list_case_measures(
+    case_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> list[dict[str, Any]]:
+    require_roles(
+        user, READ_ROLES, detail="Keine Berechtigung fuer Beratungsmassnahmen."
+    )
+    try:
+        return _report_service(db, tenant_id, user).list_measures(case_id)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@router.get(
+    "/consulting-cases/{case_id}/report-drafts", response_model=list[dict[str, Any]]
+)
+async def list_report_drafts(
+    case_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> list[dict[str, Any]]:
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer Berichtentwuerfe.")
+    try:
+        return _report_service(db, tenant_id, user).list_drafts(case_id)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc

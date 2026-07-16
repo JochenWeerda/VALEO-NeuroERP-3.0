@@ -530,3 +530,20 @@ Einkaufsentscheidungen.
 Ein Reload, Retry oder technischer Befund allein erzeugt keine weitere
 Massnahme. IOFC und Planversionsmarker sind unabhaengige, read-only
 Tagesprojektionen.
+
+## 30. Massnahme bis zur Wirksamkeit verfolgen FEED-CONS-032
+
+1. Mensch startet eine offene Massnahme mit aktueller `expected_version`.
+2. Nach Umsetzung setzt er `review_due` und dokumentiert die Wiedervorlage.
+3. Der taegliche Lauf findet nicht-terminale, ueberfaellige neueste Versionen.
+4. Je Massnahme, Version und Termin entstehen hoechstens ein Empfaengerhinweis
+   und ein `feeding.measure.overdue`-Event.
+5. Der Mensch bewertet wirksam, teilweise wirksam oder nicht wirksam und
+   dokumentiert das messbare oder beobachtete Ergebnis.
+6. Erst dann erzeugt der Server `completed` als neue Version und emittiert
+   `feeding.measure.completed` atomar.
+7. Ein Beratungsentwurf friert Fall, Beobachtungen und aktuelle Massnahmen ein;
+   identischer Stand bleibt idempotent, neuer Stand erhaelt eine neue Version.
+
+Stale Commands, direkte Abschluesse, fremde Grants und erfundene Agentenwerte
+werden abgewiesen.

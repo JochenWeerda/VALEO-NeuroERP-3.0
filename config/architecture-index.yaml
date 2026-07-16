@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-16
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-16T16:02:03Z'
+generated_at: '2026-07-16T17:07:29Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -420,6 +420,7 @@ domains:
     - docs/adr/adr-052-component-actual-feeding.md
     - docs/adr/adr-053-feeding-deviation-measures.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
+    - docs/adr/adr-055-feeding-measure-lifecycle.md
     status: active
   crm:
     owner: domain/crm
@@ -881,6 +882,7 @@ domains:
     - docs/adr/adr-036-architecture-documentation-stack.md
     - docs/adr/adr-039-repo-layout.md
     - docs/adr/adr-048-feeding-analysis-provenance.md
+    - docs/adr/adr-055-feeding-measure-lifecycle.md
     status: active
   finance:
     owner: domain/finance

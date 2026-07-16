@@ -27,3 +27,4 @@ version: 1.0.0
 | [ADR-049](../../../adr/adr-049-feeding-business-file-and-ration-templates.md) | Betriebsakte und unveraenderliche Rationsvorlagen |
 | [ADR-050](../../../adr/adr-050-feeding-plan-version-and-publication.md) | Unveraenderliche FeedingPlanVersion und atomare Publikation |
 | [ADR-054](../../../adr/adr-054-schemafeste-feeding-events.md) | Schemafeste Feeding-Events auf der Transactional Outbox |
+| [ADR-055](../../../adr/adr-055-feeding-measure-lifecycle.md) | Versionierter Massnahmen-Lifecycle und reproduzierbare Beratungsentwuerfe |

@@ -39,6 +39,27 @@ export interface ConsultingCaseDetail extends ConsultingCase {
   observations: ConsultingObservation[]
 }
 
+export interface ConsultingMeasure {
+  measure_id: string
+  title: string
+  version: number
+  status: 'open' | 'in_progress' | 'review_due' | 'completed' | 'cancelled'
+  owner_subject: string
+  due_date: string
+  reminder_date?: string | null
+  escalation_status: 'none' | 'attention' | 'escalated'
+  effectiveness?: 'effective' | 'partial' | 'ineffective' | null
+  effectiveness_result?: string | null
+}
+
+export interface ConsultingReportDraft {
+  id: string
+  case_id: string
+  version: number
+  content_hash: string
+  content: Record<string, unknown>
+}
+
 export async function listConsultingCases(status?: CaseStatus): Promise<ConsultingCase[]> {
   const response = await apiClient.get<ConsultingCase[]>(`${BASE}/consulting-cases`, {
     params: status ? { status } : undefined,
@@ -79,5 +100,32 @@ export async function addConsultingObservation(caseId: string, input: {
 export async function closeConsultingCase(caseId: string, summary: string): Promise<ConsultingCase> {
   const response = await apiClient.post<ConsultingCase>(
     `${BASE}/consulting-cases/${encodeURIComponent(caseId)}/close`, { summary })
+  return response.data
+}
+
+export async function listCaseMeasures(caseId: string): Promise<ConsultingMeasure[]> {
+  const response = await apiClient.get<ConsultingMeasure[]>(
+    `${BASE}/consulting-cases/${encodeURIComponent(caseId)}/measures`)
+  return response.data
+}
+
+export async function transitionFeedingMeasure(measureId: string, input: {
+  expected_version: number
+  target_status: 'in_progress' | 'review_due' | 'completed' | 'cancelled'
+  reason: string
+  effectiveness?: 'effective' | 'partial' | 'ineffective'
+  effectiveness_result?: string
+}): Promise<ConsultingMeasure> {
+  const response = await apiClient.post<ConsultingMeasure>(
+    `${BASE}/measures/${encodeURIComponent(measureId)}/transitions`, input)
+  return response.data
+}
+
+export async function createConsultingReportDraft(
+  caseId: string,
+  reason: string,
+): Promise<ConsultingReportDraft> {
+  const response = await apiClient.post<ConsultingReportDraft>(
+    `${BASE}/consulting-cases/${encodeURIComponent(caseId)}/report-drafts`, { reason })
   return response.data
 }

@@ -205,6 +205,20 @@ class FeedingActualMeasureService:
             .one()
         )
         result_row = dict(row)
+        self.db.execute(
+            text("""INSERT INTO domain_agrar.feeding_measure_versions
+              (id,tenant_id,measure_id,version,status,owner_subject,due_date,reason,changed_by,changed_at)
+              VALUES (:id,:tenant_id,:measure_id,1,'open',:owner_subject,:due_date,:reason,:actor,now())"""),
+            {
+                "id": str(uuid7()),
+                "tenant_id": self.tenant_id,
+                "measure_id": result_row["id"],
+                "owner_subject": result_row["owner_subject"],
+                "due_date": result_row["due_date"],
+                "reason": result_row["reason"],
+                "actor": self.actor,
+            },
+        )
         emit_feeding_event(
             self.db,
             tenant_id=self.tenant_id,
@@ -243,9 +257,15 @@ class FeedingActualMeasureService:
         return [
             dict(row)
             for row in self.db.execute(
-                text("""SELECT * FROM
-          domain_agrar.feeding_actual_measures WHERE tenant_id=:tenant_id
-          AND group_id=ANY(:group_ids) ORDER BY due_date,created_at"""),
+                text("""SELECT m.*,v.version,v.status,v.owner_subject,v.due_date,
+          v.reminder_date,v.escalation_status,v.effectiveness,v.effectiveness_result,
+          v.changed_by,v.changed_at
+          FROM domain_agrar.feeding_actual_measures m
+          JOIN LATERAL (SELECT mv.* FROM domain_agrar.feeding_measure_versions mv
+            WHERE mv.tenant_id=m.tenant_id AND mv.measure_id=m.id
+            ORDER BY mv.version DESC LIMIT 1) v ON TRUE
+          WHERE m.tenant_id=:tenant_id AND m.group_id=ANY(:group_ids)
+          ORDER BY v.due_date,m.created_at"""),
                 {"tenant_id": self.tenant_id, "group_ids": group_ids},
             )
             .mappings()

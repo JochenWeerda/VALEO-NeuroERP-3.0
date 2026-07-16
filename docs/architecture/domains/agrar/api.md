@@ -151,3 +151,16 @@ Die Huelle besteht aus `schema_version=1.0`, `event_id`, `event_type`,
 `app/agrar/rations/events.py`. Zustellung ist at-least-once, Konsumenten
 deduplizieren `event_id`. Entscheidung:
 [ADR-054](../../../adr/adr-054-schemafeste-feeding-events.md).
+
+## Fuetterungsberatung / Massnahmen und Beratungsentwuerfe
+
+- `POST /api/v1/agrar/rations-optimization/feeding/measures/{id}/transitions`
+- `GET /api/v1/agrar/rations-optimization/feeding/measures/{id}/history`
+- `POST /api/v1/agrar/rations-optimization/feeding/measures/process-overdue`
+- `GET /api/v1/agrar/rations-optimization/feeding/notifications`
+- `POST|GET .../feeding/consulting-cases/{id}/measures`
+- `POST|GET .../feeding/consulting-cases/{id}/report-drafts`
+
+Alle Ressourcen sind rollen-, tenant- und Business-Grant-gebunden. Transitionen
+sind optimistisch versioniert; Entwuerfe sind strukturiert und keine PDF-
+Behauptung. Entscheidung: [ADR-055](../../../adr/adr-055-feeding-measure-lifecycle.md).

@@ -6,10 +6,14 @@ import { Label } from '@/components/ui/label'
 import {
   addConsultingObservation,
   closeConsultingCase,
+  createConsultingReportDraft,
   getConsultingCase,
+  listCaseMeasures,
   listConsultingCases,
+  transitionFeedingMeasure,
   type ConsultingCase,
   type ConsultingCaseDetail,
+  type ConsultingMeasure,
 } from '@/lib/api/feeding-consulting'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
@@ -40,6 +44,12 @@ export function ConsultingCases({ initialCaseId }: { initialCaseId?: string }): 
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [closing, setClosing] = useState(false)
+  const [measures, setMeasures] = useState<ConsultingMeasure[]>([])
+  const [reporting, setReporting] = useState(false)
+  const [reportMessage, setReportMessage] = useState<string | null>(null)
+  const [reviewingMeasure, setReviewingMeasure] = useState<ConsultingMeasure | null>(null)
+  const [effectiveness, setEffectiveness] = useState<'effective' | 'partial' | 'ineffective'>('effective')
+  const [effectivenessResult, setEffectivenessResult] = useState('')
 
   const loadList = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -56,11 +66,86 @@ export function ConsultingCases({ initialCaseId }: { initialCaseId?: string }): 
   const loadDetail = useCallback(async (caseId: string): Promise<void> => {
     setDetailError(null)
     try {
-      setDetail(await getConsultingCase(caseId))
+      const [caseDetail, caseMeasures] = await Promise.all([
+        getConsultingCase(caseId), listCaseMeasures(caseId),
+      ])
+      setDetail(caseDetail)
+      setMeasures(caseMeasures)
     } catch (error) {
       setDetailError(getAxiosErrorMessage(error))
     }
   }, [])
+
+  function openEffectivenessReview(measure: ConsultingMeasure): void {
+    setReviewingMeasure(measure)
+    setEffectiveness('effective')
+    setEffectivenessResult('')
+    setSaveError(null)
+  }
+
+  async function confirmEffectiveness(): Promise<void> {
+    if (!reviewingMeasure || effectivenessResult.trim().length < 10) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await transitionFeedingMeasure(reviewingMeasure.measure_id, {
+        expected_version: reviewingMeasure.version,
+        target_status: 'completed',
+        reason: 'Wirksamkeitskontrolle im Beratungsfall abgeschlossen',
+        effectiveness,
+        effectiveness_result: effectivenessResult.trim(),
+      })
+      setSaveMessage('Maßnahme mit Wirksamkeitskontrolle abgeschlossen.')
+      setReviewingMeasure(null)
+      setEffectivenessResult('')
+      if (detail) setMeasures(await listCaseMeasures(detail.id))
+    } catch (error) {
+      setSaveError(getAxiosErrorMessage(error))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function advanceMeasure(
+    measure: ConsultingMeasure,
+    targetStatus: 'in_progress' | 'review_due',
+    reason: string,
+  ): Promise<void> {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await transitionFeedingMeasure(measure.measure_id, {
+        expected_version: measure.version,
+        target_status: targetStatus,
+        reason,
+      })
+      setSaveMessage(
+        targetStatus === 'in_progress'
+          ? 'Maßnahme ist jetzt in Bearbeitung.'
+          : 'Wirksamkeitskontrolle ist eingeplant.',
+      )
+      if (detail) setMeasures(await listCaseMeasures(detail.id))
+    } catch (error) {
+      setSaveError(getAxiosErrorMessage(error))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function createReportDraft(): Promise<void> {
+    if (!detail || reporting) return
+    setReporting(true)
+    setSaveError(null)
+    try {
+      const draft = await createConsultingReportDraft(
+        detail.id, 'Aktuellen Beratungsstand reproduzierbar festhalten')
+      setReportMessage(`Berichtentwurf v${draft.version} gespeichert · noch kein PDF`)
+    } catch (error) {
+      setSaveError(getAxiosErrorMessage(error))
+    } finally {
+      setReporting(false)
+    }
+  }
 
   useEffect(() => { void loadList() }, [loadList])
   useEffect(() => {
@@ -180,6 +265,10 @@ export function ConsultingCases({ initialCaseId }: { initialCaseId?: string }): 
               <div className="flex items-center gap-3">
                 {saveMessage ? <p className="text-sm text-status-success" role="status">{saveMessage}</p> : null}
                 {saveError ? <p className="text-sm text-status-error" role="alert">{saveError}</p> : null}
+                <Button type="button" variant="outline" disabled={reporting}
+                        onClick={() => { void createReportDraft() }}>
+                  {reporting ? 'Erzeugt…' : 'Berichtentwurf erzeugen'}
+                </Button>
                 {detail.status === 'open' ? (
                   <Button type="button" variant="outline" disabled={closing} onClick={() => { void closeCase() }}>
                     {closing ? 'Schließt…' : 'Fall abschließen'}
@@ -195,6 +284,121 @@ export function ConsultingCases({ initialCaseId }: { initialCaseId?: string }): 
                 <span className="font-medium">Abschluss: </span>{detail.closing_summary}
               </p>
             ) : null}
+            {reportMessage ? (
+              <p className="text-sm text-status-success" role="status">{reportMessage}</p>
+            ) : null}
+
+            <section className="space-y-2 rounded-lg border bg-card p-4" aria-label="Maßnahmen">
+              <h2 className="font-medium">Maßnahmen und Wirksamkeit</h2>
+              {measures.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Noch keine Maßnahme mit diesem Fall verknüpft.
+                </p>
+              ) : measures.map((measure) => (
+                <div key={measure.measure_id}
+                     className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3 text-sm">
+                  <div>
+                    <p className="font-medium">{measure.title}</p>
+                    <p className="text-muted-foreground">
+                      {measure.owner_subject} · fällig {new Date(measure.due_date).toLocaleDateString('de-DE')} · {measure.status}
+                    </p>
+                  </div>
+                  {measure.status === 'open' ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={saving}
+                      onClick={() => { void advanceMeasure(
+                        measure, 'in_progress', 'Bearbeitung im Beratungsfall gestartet') }}
+                    >
+                      Bearbeitung starten
+                    </Button>
+                  ) : measure.status === 'in_progress' ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={saving}
+                      onClick={() => { void advanceMeasure(
+                        measure,
+                        'review_due',
+                        'Umsetzung erfolgt und Wirksamkeitskontrolle eingeplant',
+                      ) }}
+                    >
+                      Wirksamkeitskontrolle einplanen
+                    </Button>
+                  ) : measure.status === 'review_due' ? (
+                    <Button type="button" variant="outline" disabled={saving}
+                            onClick={() => openEffectivenessReview(measure)}>
+                      Wirksamkeit bestätigen
+                    </Button>
+                  ) : <Badge variant="secondary">{measure.status}</Badge>}
+                </div>
+              ))}
+              {reviewingMeasure ? (
+                <div
+                  className="space-y-3 rounded-md border bg-muted/20 p-3"
+                  role="dialog"
+                  aria-labelledby="effectiveness-review-title"
+                >
+                  <div>
+                    <h3 id="effectiveness-review-title" className="font-medium">
+                      Wirksamkeitskontrolle: {reviewingMeasure.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Die Maßnahme wird erst nach einer nachvollziehbaren Bewertung abgeschlossen.
+                    </p>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-[14rem_1fr]">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="measure-effectiveness">Bewertung der Wirksamkeit</Label>
+                      <select
+                        id="measure-effectiveness"
+                        className="h-9 rounded-md border bg-background px-3 text-sm"
+                        value={effectiveness}
+                        onChange={(event) => setEffectiveness(
+                          event.target.value as 'effective' | 'partial' | 'ineffective')}
+                      >
+                        <option value="effective">Wirksam</option>
+                        <option value="partial">Teilweise wirksam</option>
+                        <option value="ineffective">Nicht wirksam</option>
+                      </select>
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="measure-effectiveness-result">
+                        Ergebnis der Wirksamkeitskontrolle
+                      </Label>
+                      <Input
+                        id="measure-effectiveness-result"
+                        value={effectivenessResult}
+                        onChange={(event) => setEffectivenessResult(event.target.value)}
+                        placeholder="Messbares Ergebnis oder Beobachtung dokumentieren"
+                        aria-describedby="measure-effectiveness-result-help"
+                      />
+                      <p id="measure-effectiveness-result-help" className="text-xs text-muted-foreground">
+                        Mindestens 10 Zeichen; die Angabe wird revisionsfest versioniert.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={saving}
+                      onClick={() => setReviewingMeasure(null)}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={saving || effectivenessResult.trim().length < 10}
+                      onClick={() => { void confirmEffectiveness() }}
+                    >
+                      {saving ? 'Wird abgeschlossen…' : 'Maßnahme abschließen'}
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </section>
 
             <section className="space-y-2 rounded-lg border bg-card p-4" aria-label="Beobachtungen">
               <h2 className="font-medium">Beobachtungen</h2>

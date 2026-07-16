@@ -192,7 +192,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `feeding.analysis.released` | outbox | `app/services/feeding_feed_analysis_service.py` |
 | `feeding.deviation.exceeded` | outbox | `app/services/feeding_actual_measure_service.py` |
 | `feeding.import.quarantined` | outbox | `app/services/feeding_import_monitor_service.py` |
+| `feeding.measure.completed` | outbox | `app/services/feeding_measure_lifecycle_service.py` |
 | `feeding.measure.created` | outbox | `app/services/feeding_actual_measure_service.py` |
+| `feeding.measure.overdue` | outbox | `app/services/feeding_measure_lifecycle_service.py` |
 | `feeding.plan.published` | outbox | `app/services/feeding_plan_service.py` |
 | `feeding.ration.version.activated` | outbox | `app/services/rations_lifecycle_service.py` |
 | `feeding.supply.procurement_handoff.created` | outbox | `app/services/feeding_supply_service.py` |

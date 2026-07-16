@@ -142,7 +142,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-CONS-001 | Beratungsfall (Besuch, Beobachtung, Foto, Bewertung, Bericht) | MUSS | `consulting_cases` (Besuch/Remote, Betrieb-/Gruppenbezug, Ausgangssituation, Abschlussbewertung; geschlossen = keine neuen Beobachtungen → 409) + `consulting_observations` (append-only per Trigger, Kategorien+Freitext, DMS-Fotoreferenzen, **idempotenter Mobil-Vertrag via client_ref**); Worklist+Falldetail `futtermittel/beratung` | PARTIAL | strukturierte fachliche Bewertung/Empfehlung (032) + Beratungsbericht (040) | Inkrement 5 Folgeslices | `test_feeding_consulting_api.py` (6), `consulting-cases.test.tsx` (3) | FEED-CONS-031 |
-| FEED-CONS-002 | Maßnahmen (Verantwortlicher, Fälligkeit, Status, Wirksamkeit) | MUSS | — | NOT_IMPLEMENTED | Measure-Aggregat | Inkrement 5 | — | Paritätsmatrix |
+| FEED-CONS-002 | Maßnahmen (Verantwortlicher, Fälligkeit, Status, Wirksamkeit) | MUSS | append-only Lifecycle mit Owner, Termin, Wiedervorlage, Eskalation, Optimistic Concurrency und verpflichtender Wirksamkeitskontrolle; Business-Grant-sichere Historie und zugänglicher Abschluss im Beratungsfall | VERIFIED | — | FEED-CONS-032 | `test_feeding_measure_lifecycle.py`, `test_feeding_measure_lifecycle_api.py`, `consulting-cases.test.tsx` | ADR-055, FEED-CONS-032 |
 | FEED-CONS-003 | Workflow-/CRM-Aufgabenintegration | SOLL | flow_spines/CRM-Aktivitäten existieren systemweit | PARTIAL | Verknüpfung | Inkrement 5/6 | — | — |
 
 ## Kapitel 6.14 — Bedarf/Bestand/Einkauf
@@ -158,7 +158,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-REP-001 | Rations-PDF mit Version/Freigabe | MUSS | druckfaehige Planprojektion mit Plan-/Quellversion, Gueltigkeit, Druckstand und Mischfolge; Browserdialog speichert PDF | VERIFIED | signiertes Archiv-PDF und profilierte Ausgaben sind REP-Folgeausbau | sicherer Print-Zweig aus grant-geladener Planversion | `feeding-plan-detail.test.tsx` | FEED-PLAN-027 |
-| FEED-REP-002 | Beratungsbericht, Soll-Ist-, Verlaufsbericht | MUSS | — | NOT_IMPLEMENTED | Report-Aggregat | Inkrement 5 | — | — |
+| FEED-REP-002 | Beratungsbericht, Soll-Ist-, Verlaufsbericht | MUSS | strukturierter, hash-idempotenter und versionierter Beratungsentwurf aus Fall, Beobachtungen und aktuellen Maßnahmen | PARTIAL | PDF/DMS/Zustellung sowie Soll-Ist- und Verlaufsbericht | FEED-CONS-032, FEED-REP-039/040 | `test_feeding_consulting_report_api.py`, `consulting-cases.test.tsx` | ADR-055, FEED-CONS-032 |
 | FEED-REP-003 | CSV/Excel-Export | MUSS | grant-gefilterter UTF-8-CSV-Export der komponentenbezogenen Ist-Fuetterung mit Plan-/Record-ID, Soll/Ist/Delta, Ursache und Wertfolge; native Exportaktion | VERIFIED | weitere Berichtstypen bleiben eigene Requirements | FEED-ACT-029 | `test_feeding_actual_api.py`, `feeding-actual-page.test.tsx` | ADR-052, FEED-ACT-029 |
 
 ## Kapitel 6.16 — Zusammenarbeit/Freigaben
@@ -166,7 +166,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-COLLAB-001 | Statusworkflow + Freigabehistorie + Unveränderlichkeit | MUSS | Lifecycle-Statusautomat + Audit + Checksum | VERIFIED | — | vorhanden | `test_rations_lifecycle_domain.py` | Slice 007 |
-| FEED-COLLAB-002 | Kommentare, Änderungsanforderung, Benachrichtigung | MUSS | Reviewgründe persistent; Benachrichtigungskanäle offen | PARTIAL | Notification-Anbindung | Inkrement 5 | Slice 007 | Paritätsmatrix |
+| FEED-COLLAB-002 | Kommentare, Änderungsanforderung, Benachrichtigung | MUSS | Reviewgründe persistent; idempotente Overdue-Events und tenant-/grant-/empfängersicheres In-App-Read-Model mit stabilem Deep-Link | PARTIAL | globale Glocke, Kanalpräferenzen und externe Push-Zustellung | FEED-CONS-032 plus Folgeausbau | `test_feeding_measure_lifecycle_api.py` | ADR-055, FEED-CONS-032 |
 | FEED-COLLAB-003 | Vier-Augen-Prinzip konfigurierbar | SOLL | APPROVE-Rollen getrennt von WRITE | PARTIAL | erzwungene Fremd-Prüfung | Release B | `test_rations_authz.py` | Slice 013 |
 
 ## Kapitel 6.17/6.18 — UI/Mobil

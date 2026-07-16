@@ -586,3 +586,19 @@ Das Controlling zeigt IOFC nur bei vollstaendiger Basis. Planversionswechsel
 erscheinen als datierte Textmarker mit Versionsnummer. Layout, Tabellen,
 Actions und Statussemantik verbleiben in der zentralen Meridian-Laufzeitkette;
 die Dialoge sind begruendete Domain-Overlays.
+
+## 21. Wirksamkeitskontrolle im Beratungsfall FEED-CONS-032
+
+Die bestehende Beratungsfall-Journey zeigt verknuepfte Massnahmen mit Owner,
+Termin und lesbarem Status. `Bearbeitung starten` und
+`Wirksamkeitskontrolle einplanen` fuehren sichtbar durch die Arbeitsstaende.
+Bei `review_due` oeffnet die Aktion
+`Wirksamkeit bestaetigen` ein beschriftetes, tastaturbedienbares Domain-Overlay.
+Bewertung und mindestens zehn Zeichen Ergebnis sind sichtbar erforderlich;
+Abbruch veraendert nichts. Der Abschluss verwendet die angezeigte Version und
+meldet Konflikte handlungsorientiert. `Berichtentwurf erzeugen` zeigt Version
+und Entwurfsstatus, behauptet aber weder PDF noch Zustellung.
+
+Die Integration bleibt ein schmaler Uebergang im vorhandenen Consulting-Screen.
+Ein spaeterer nativer Ausbau muss ueber ScreenDefinition, RenderPlan und
+UniversalMaskRenderer erfolgen, nicht als zweite Seitenarchitektur.

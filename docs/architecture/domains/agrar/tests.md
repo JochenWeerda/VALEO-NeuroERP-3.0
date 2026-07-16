@@ -25,6 +25,7 @@ pytest tests/test_feeding_ration_editor.py tests/test_feeding_ration_editor_api.
 pytest tests/test_feeding_ration_templates.py tests/test_feeding_ration_templates_api.py -q --no-cov
 pytest tests/test_feeding_plan.py tests/test_feeding_plan_api.py -q --no-cov
 pytest tests/test_feeding_events.py tests/test_feeding_import_monitor_api.py -q --no-cov
+pytest tests/test_feeding_measure_lifecycle.py tests/test_feeding_measure_lifecycle_api.py tests/test_feeding_consulting_report_api.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`
@@ -42,3 +43,6 @@ Plan-ObjectPage/Mobil: `feeding-plan-detail.test.tsx`,
 
 Lifecycle Browser-Abnahme:
 `packages/frontend-web/tests/e2e/feed-advice-lifecycle.spec.ts`
+
+Massnahmen-/Beratungs-UI:
+`packages/frontend-web/src/__tests__/features/feed-advice/consulting-cases.test.tsx`

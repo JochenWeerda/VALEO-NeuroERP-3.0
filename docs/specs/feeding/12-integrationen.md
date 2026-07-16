@@ -387,3 +387,12 @@ Alerts:
 6. Metrics, Logs, Alerts, Runbook, Retry und Circuit Breaker vorhanden.
 7. Live-Gate, Pilot, Reconciliation und Rollback abgenommen.
 8. API, Datenmodell, Workflow und Traceability aktualisiert.
+
+## 21. Interner Notification-Port FEED-CONS-032
+
+Der Feeding-Kontext emittiert `feeding.measure.overdue|completed` ueber den
+schemafesten ADR-054-Outbox-Vertrag. `feeding_notifications` ist die lokale,
+empfaengerspezifische In-App-Projektion mit stabilem Deep-Link und Dedupe-Key.
+Externe Push-, Mail- oder Portalzustellung wird erst mit einem realen
+Notification-Consumer und dokumentierten Praeferenzen angebunden; der
+Faelligkeitslauf ruft keinen erfundenen Provider direkt auf.

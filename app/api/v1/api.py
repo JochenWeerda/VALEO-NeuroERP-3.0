@@ -128,6 +128,7 @@ from app.api.v1.endpoints import (
     agrar_drying_rules,
     harvest_acceptance,
     rations_optimization,
+    feeding_measures,
     grundfutter_analysen,
     rations_zugang,
     quality_protocols,
@@ -1278,6 +1279,17 @@ api_router.include_router(
     rations_optimization.router,
     prefix="/agrar/rations-optimization",
     tags=["agrar", "futtermittel", "rations-optimization"]
+)
+api_router.include_router(
+    feeding_measures.router,
+    prefix="/agrar/rations-optimization",
+    tags=[
+        "agrar",
+        "futtermittel",
+        "rations-optimization",
+        "agrar",
+        "rations-optimization",
+    ],
 )
 
 # Grundfutter-Laboranalysen (LUFA / VDLUFA-Import)

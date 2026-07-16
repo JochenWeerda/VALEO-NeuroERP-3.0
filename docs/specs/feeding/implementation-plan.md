@@ -84,6 +84,12 @@ Traceability-Zeilen der 6 Slices auf VERIFIED.
 
 #### FEED-CONS-032 — Maßnahmen-Vollausbau, Benachrichtigung, Beratungsbericht-Kern
 
+**Lieferstatus 2026-07-16:** Kern implementiert. Append-only Lifecycle,
+Wirksamkeitsguard, empfaengersicherer Overdue-Hinweis, schemafeste Events und
+hash-versionierter strukturierter Berichtsentwurf sind geliefert. PDF, DMS,
+Zustellung und globale Notification-Glocke bleiben FEED-REP-039/040 bzw.
+COLLAB-Folgeausbau.
+
 - **Requirements:** FEED-CONS-002, FEED-COLLAB-002, FEED-REP-002-Kern. **Abhängig von:** 030/031.
 - **Scope:** `Measure` vervollständigen (Verantwortlicher, Fälligkeit, Wiedervorlage, Wirksamkeitskontrolle mit Ergebnisfeld, Eskalationsstatus); Benachrichtigungs-Port über NATS-Outbox (`feeding.measure.created/overdue/completed`) mit In-App-Konsument; Beratungsbericht als strukturierter Entwurf aus Fall+Befunden+Maßnahmen (Persistenz als Report-Entwurf, PDF folgt FEED-REP-039/040).
 - **Akzeptanz:** Überfällige Maßnahmen erzeugen genau-einmal ein Ereignis; Wirksamkeitskontrolle erzwingt Ergebnis vor Abschluss; Berichtentwurf reproduzierbar aus Falldaten.
