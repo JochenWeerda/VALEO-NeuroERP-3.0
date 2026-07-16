@@ -525,3 +525,12 @@ Bewertungsleiste mit vierstufiger Prioritaet, verursachendem Futtermittel und
 konkreter Abhilfe. Ein Klick fokussiert die Mengenposition; Speichern bewahrt
 die Grenzen im append-only Versionssnapshot. Die bestehende Split-Workbench
 bleibt die zentrale Editor-Journey und fuehrt keine neue Maskenarchitektur ein.
+
+## 16. Betriebsakte FEED-EDITOR-025
+
+`agrar/feeding-business` ist eine native Meridian-ObjectPage unter
+`/futtermittel/fuetterungsbetrieb/{id}`. Die Arbeitsuebersicht trennt Datenlage,
+Lifecycle und Analysereife; Lazy-Tabs zeigen Tiergruppen, Rationen, Befunde und
+unveraenderliche Vorlagen. Tabellenzeilen fuehren in bestehende Detail-Journeys.
+Anlegen und Anwenden einer Vorlage sind schmale Overlays; Layout, Tabellen und
+Zustandssemantik bleiben in ScreenDefinition, RenderPlan und zentraler Runtime.

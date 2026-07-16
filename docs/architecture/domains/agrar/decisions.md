@@ -24,3 +24,4 @@ version: 1.0.0
 | [ADR-046](../../../adr/adr-046-feeding-reference-data-and-unit-conversion.md) | Versionierte Fuetterungsreferenzdaten und explizite FM-TM-Semantik |
 | [ADR-047](../../../adr/adr-047-canonical-feeding-feed-catalog.md) | Kanonischer Fuetterungs-Futtermittelkatalog auf bestehendem Stamm |
 | [ADR-048](../../../adr/adr-048-feeding-analysis-provenance.md) | Versionierte Futteranalyse, Provenienz und scope-spezifisch aktive Version |
+| [ADR-049](../../../adr/adr-049-feeding-business-file-and-ration-templates.md) | Betriebsakte und unveraenderliche Rationsvorlagen |

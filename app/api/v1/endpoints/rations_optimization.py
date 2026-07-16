@@ -7201,3 +7201,5 @@ from app.api.v1.endpoints.feeding_feed_analyses import router as _feeding_feed_a
 router.include_router(_feeding_feed_analyses_router)
 from app.api.v1.endpoints.feeding_ration_editor import router as _feeding_ration_editor_router
 router.include_router(_feeding_ration_editor_router)
+from app.api.v1.endpoints.feeding_ration_templates import router as _feeding_ration_templates_router
+router.include_router(_feeding_ration_templates_router)

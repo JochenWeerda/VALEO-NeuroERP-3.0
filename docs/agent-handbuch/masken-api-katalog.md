@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (43 Masken).
+> Generiert aus `app/core/screen_definitions.py` (44 Masken).
 
 ## Übersicht
 
@@ -21,6 +21,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
 | `agrar/feed-readiness` | Futter-Einsatzbereitschaft | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| `agrar/feeding-business` | Fuetterungsbetrieb | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
 | `agrar/feeding-reference-data` | Naehrstoffe und Einheiten | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
@@ -202,6 +203,48 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `open_inventory` | Bestaende pflegen | safe | nein | `—` |
 | `open_analyses` | Analysen pruefen | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-business` — Fuetterungsbetrieb
+
+**Zweck:** Die naechste fachliche Fuetterungsentscheidung aus belastbarer Datenlage ableiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-business/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-business/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-business/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/overview`
+- `groups` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/groups`
+- `rations` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/rations`
+- `findings` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/findings`
+- `templates` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/ration-templates`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Ration ist blockiert?
+- Wo fehlt eine belastbare Analyse?
+- Welche Befunde sind kritisch?
+
+**Sensible Felder:** `business_partner_id, preferences, snapshot_checksum`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create_template` | Vorlage anlegen | safe | nein | `—` |
+| `apply_template` | Vorlage anwenden | safe | nein | `—` |
 
 ---
 

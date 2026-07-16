@@ -2741,6 +2741,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/fuetterungsbetrieb-native",
+      "path": "futtermittel/fuetterungsbetrieb/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
       "path": "futtermittel/fuetterungsdokumentation-mobil",
       "source": "auto"

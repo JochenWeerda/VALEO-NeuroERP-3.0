@@ -487,3 +487,13 @@ Release ist Approver-gebunden, optimistisch versioniert und ueber
 `actions/release|reject` auch im ActionRuntime-Vertrag `validate`, `dryRun`,
 `propose`, `execute` verfuegbar. Cross-Tenant-Zugriffe liefern 404,
 Versions-/Lifecyclekonflikte 409 und Rollenfehler 403.
+
+## 19. Vorlagen- und Betriebsakten-API FEED-EDITOR-025
+
+`POST /feeding/ration-templates` legt Metadaten um eine existierende
+Rationsversion. `GET /feeding/businesses/{id}/ration-templates` liest den
+grant-sicheren Katalog. `POST /feeding/ration-templates/{id}/apply` verlangt
+Zielration, `expected_latest_version_no` und mindestens zehn Zeichen Auditgrund;
+es antwortet mit einer neuen Draft-Version oder 409 bei Versions-/Gruppenkonflikt.
+Die Read-Endpunkte `overview`, `groups`, `rations` und `findings` beliefern die
+Betriebsakte und kennzeichnen fehlende Readiness ausdruecklich als ungeprueft.

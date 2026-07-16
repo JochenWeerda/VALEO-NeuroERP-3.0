@@ -2,9 +2,10 @@ slice_id: FEED-EDITOR-025
 id: FEED-EDITOR-025
 title: Rationsvorlagen Kopieren Betriebsakte und Fuetterungsuebersicht
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-16"
 started_at: "2026-07-16"
+completed_at: "2026-07-16"
 goal: >-
   Wiederverwendbare Rationsvorlagen und begruendetes Kopieren als neue
   unveraenderliche Draft-Version liefern und die vorhandenen Betriebs-, Gruppen-,
@@ -17,7 +18,9 @@ file_ownership:
   - alembic/versions/feed_editor_templates_20260716.py
   - app/agrar/rations/ration_templates.py
   - app/services/feeding_ration_template_service.py
+  - app/services/rations_lifecycle_service.py
   - app/api/v1/endpoints/feeding_ration_templates.py
+  - app/api/v1/endpoints/rations_lifecycle.py
   - app/api/v1/endpoints/rations_optimization.py
   - app/core/screen_definitions.py
   - tests/test_feeding_ration_templates.py
@@ -27,9 +30,13 @@ file_ownership:
   - packages/frontend-web/src/lib/api/feeding-business.ts
   - packages/frontend-web/src/pages/futtermittel/fuetterungsbetrieb-native.tsx
   - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/app/routing/route-inventory.gen.json
+  - packages/frontend-web/src/app/routing/route-tree.gen.tsx
   - packages/frontend-web/src/__tests__/features/feed-advice/feeding-business-detail.test.tsx
   - docs/adr/adr-049-feeding-business-file-and-ration-templates.md
   - docs/architecture/domains/agrar/
+  - config/architecture-index.yaml
+  - docs/entwickler/container-inventory.md
   - docs/architecture/agents/impact-notes/FEED-EDITOR-025.md
   - docs/specs/feeding/
   - docs/agent-handbuch/
@@ -57,3 +64,18 @@ risks:
   - Vorlagen duerfen historische Snapshots nicht nachtraeglich veraendern.
   - Betriebsakte darf Business-Grant und Tenant-Grenzen nicht durch Aggregation umgehen.
   - Readiness-Kennzahlen duerfen fehlende Daten nicht als Null oder gesund darstellen.
+evidence:
+  red:
+    - Domain-, Migration-, API- und Screen-Vertraege wurden als Slice-Abnahme vor dem Green-Nachweis festgelegt.
+    - Der fokussierte UI-Test reproduzierte die noch fehlende asynchrone Quellversionsauswahl und wurde gegen den realen Zustand geschaerft.
+  green:
+    - Neun neue Domain-, Migration-, Screen- und API-Tests gruen.
+    - Breite Feeding-/Rations-Regression 592 bestanden und 1 bewusst uebersprungen.
+    - Frontend-Gesamtsuite 98 Dateien, 401 Tests gruen und 1 bewusst uebersprungen.
+    - TypeScript, fokussiertes ESLint und Routing-Integrity gruen.
+    - Markdown 127 und Governance 129 Dateien gruen.
+    - Architecture Validate/Strict Drift 902/902 Routen, 210 Services und 406 Endpoints gruen.
+    - Agent-Handbuch driftfrei; Alembic Single-Head/current auf feed_editor_templates_20260716.
+  refactor:
+    - Vorlagen-Commands und Betriebsaktenprojektion sind getrennt; Lifecycle bleibt einziger Versions-Write-Pfad.
+    - ObjectPage laeuft zentral ueber ScreenDefinition, RenderPlan, Runtime und Renderer; nur zwei Domain-Overlays bleiben lokal.

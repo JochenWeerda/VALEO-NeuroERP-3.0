@@ -308,13 +308,16 @@ class RationLifecycleService:
             )
         if based_on_version_id:
             base_exists = self.db.execute(text("""
-              SELECT 1 FROM domain_agrar.ration_versions
-              WHERE tenant_id=:tenant_id AND ration_id=:ration_id AND id=:version_id
+              SELECT 1 FROM domain_agrar.ration_versions rv
+              JOIN domain_agrar.rations base_ration
+                ON base_ration.tenant_id=rv.tenant_id AND base_ration.id=rv.ration_id
+              WHERE rv.tenant_id=:tenant_id AND rv.id=:version_id
+                AND base_ration.group_id=:group_id
             """), {
-                "tenant_id": self.tenant_id, "ration_id": ration_id, "version_id": based_on_version_id,
+                "tenant_id": self.tenant_id, "group_id": ration["group_id"], "version_id": based_on_version_id,
             }).first()
             if not base_exists:
-                raise RationLifecycleNotFound("Basisversion nicht gefunden.")
+                raise RationLifecycleNotFound("Basisversion in dieser Fuetterungsgruppe nicht gefunden.")
         version_id = str(uuid7())
         checksum = snapshot_checksum(snapshot)
         version_no = latest + 1

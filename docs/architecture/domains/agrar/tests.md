@@ -22,6 +22,7 @@ pytest tests/test_feeding_reference_data.py tests/test_rations_reference_data_ap
 pytest tests/test_feeding_feed_catalog.py tests/test_feeding_feed_catalog_api.py tests/test_futter_stamm.py -q --no-cov
 pytest tests/test_feeding_feed_analysis.py tests/test_feeding_feed_analysis_api.py tests/test_grundfutteranalysen.py -q --no-cov
 pytest tests/test_feeding_ration_editor.py tests/test_feeding_ration_editor_api.py -q --no-cov
+pytest tests/test_feeding_ration_templates.py tests/test_feeding_ration_templates_api.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`
@@ -31,6 +32,8 @@ Fuetterungsberatung UX: `packages/frontend-web/src/__tests__/pages/portal/feed-a
 Analyse-UX: `packages/frontend-web/src/__tests__/features/feed-advice/feeding-analysis-detail.test.tsx`
 
 Rationseditor-Grenzen: `packages/frontend-web/src/__tests__/features/feed-advice/ration-editor.test.tsx`
+
+Betriebsakte/Vorlagen: `packages/frontend-web/src/__tests__/features/feed-advice/feeding-business-detail.test.tsx`
 
 Lifecycle Browser-Abnahme:
 `packages/frontend-web/tests/e2e/feed-advice-lifecycle.spec.ts`

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-EDITOR-025 Rationsvorlagen, Kopieren, Betriebsakte und Fuetterungsuebersicht - reserviert 2026-07-16
+## FEED-EDITOR-025 Rationsvorlagen, Kopieren, Betriebsakte und Fuetterungsuebersicht - abgeschlossen 2026-07-16
 
-**Owner:** Codex. **Stand:** reserviert (Claim). Persistente Vorlagen referenzieren unveraenderliche Rationsversionen; Anwenden erzeugt eine neue Draft-Version mit `based_on_version_id`, optimistischer Latest-Version und Auditgrund. Parallel wird der vorhandene Fuetterungsbetrieb von der Worklistzeile zur nativen Betriebsakte ausgebaut: Gruppen, Rationen, Analyse-/Datenreife und priorisierte Handlungsbedarfe werden grant-/tenant-sicher projiziert. Die UI bleibt in der zentralen Meridian-Kette; nur die Vorlage-/Kopieren-Aktion ist ein schmales Domain-Overlay. **TDD:** Domain/Migration/API/Isolation/Screen zuerst rot.
+**Owner:** Codex. **Stand:** abgeschlossen. Persistente append-only Vorlagen referenzieren unveraenderliche Rationsversionen ohne Snapshotduplikat. Anwenden erzeugt ueber den bestehenden Lifecycle eine neue Draft-Version mit gruppensicherem `based_on_version_id`, optimistischer Latest-Version und Pflicht-Auditgrund. Die native Betriebsakte priorisiert Gruppen, Rationen, Daten-/Analysereife, Findings und Vorlagen grant-/tenant-sicher; fehlende Reife bleibt ehrlich `not_checked`/`incomplete`. Die UI laeuft durch ScreenDefinition -> RenderPlan -> UniversalMaskRuntime -> UniversalMaskRenderer; nur Anlegen/Anwenden sind schmale Overlays. **TDD-Abnahme:** 9 neue Backend-/Screen-Tests; Feeding-/Rations-Regression 592 gruen/1 skipped; Frontend 98 Dateien/401 Tests gruen/1 skipped; TypeScript, ESLint, Routing, Doku 127/129, Architektur 902/902 (210 Services, 406 Endpoints), Handbuch und Alembic-Head gruen. **Requirements:** FEED-RAT-003 VERIFIED; FEED-BUS-003 PARTIAL, weil direkte Analysenliste, Aufgaben und Berichte bewusst als Folgeprojektionen dokumentiert bleiben.
 
 ## FEED-EDITOR-024 Min/Max-Grenzen in der Ration + benannte Grenzkonflikte - abgeschlossen 2026-07-16
 

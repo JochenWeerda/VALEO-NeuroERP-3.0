@@ -479,3 +479,10 @@ Ein Blocker oder fehlender DMS-Beleg verhindert Release. Die neue aktive
 Version ersetzt innerhalb desselben Feed-/Scopes die alte Version atomar durch
 `superseded`; bereits gespeicherte Rationsversionen bleiben unveraendert.
 Legacy-Loeschen wird als auditiertes `rejected` historisiert.
+
+## 25. Implementierter Vorlagenfluss FEED-EDITOR-025
+
+Quellversion waehlen -> unveraenderliche Vorlage benennen -> Zielration derselben
+Gruppe waehlen -> aktuellen Zielversionsstand und Auditgrund bestaetigen -> neue
+Draft-Version mit kopiertem Snapshot und `based_on_version_id`. Ein veralteter
+Zielstand oder Gruppenwechsel endet ohne Teilpersistenz mit 409.

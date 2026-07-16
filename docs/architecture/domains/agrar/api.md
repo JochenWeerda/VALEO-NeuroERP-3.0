@@ -112,3 +112,16 @@ Original-/Rechenwerte, Basis, Methode und Schätzstatus bleiben getrennt.
 Release erfordert Approver-Rolle, blockierungsfreie Validierung und bei Importen
 eine DMS-ID mit SHA-256. Entscheidung:
 [ADR-048](../../../adr/adr-048-feeding-analysis-provenance.md).
+
+## Fuetterungsberatung / Rationsvorlagen und Betriebsakte
+
+- `POST /api/v1/agrar/rations-optimization/feeding/ration-templates`
+- `GET .../feeding/businesses/{id}/ration-templates`
+- `POST .../feeding/ration-templates/{id}/apply`
+- `GET .../feeding/businesses/{id}/overview|groups|rations|findings`
+
+Vorlagen referenzieren eine unveraenderliche Quellversion. Apply erzeugt mit
+optimistischer Zielversion und Auditgrund eine neue Draft-Version; Quelle und
+Ziel muessen dieselbe Fuetterungsgruppe besitzen. Alle Pfade erzwingen Tenant,
+Feed-Rolle und Business-Grant. Entscheidung:
+[ADR-049](../../../adr/adr-049-feeding-business-file-and-ration-templates.md).

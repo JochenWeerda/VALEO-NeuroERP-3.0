@@ -17,6 +17,20 @@ export interface FeedingBusiness {
   updated_at: string
 }
 
+export interface FeedingBusinessOverview extends FeedingBusiness {
+  ration_count: number
+  template_count: number
+  active_ration_count: number
+  readiness_unknown_count: number
+  readiness_blocked_count: number
+  data_status: 'empty' | 'incomplete' | 'available'
+}
+
+export async function fetchFeedingBusinessOverview(id: string): Promise<FeedingBusinessOverview> {
+  const response = await apiClient.get<FeedingBusinessOverview>(`${BASE}/businesses/${id}/overview`)
+  return response.data
+}
+
 export interface CreateFeedingBusiness {
   name: string
   production_type?: string | null

@@ -2299,6 +2299,7 @@ def build_agrar_feeding_businesses_screen_definition() -> dict[str, Any]:
             "pageSize": 100,
             "virtualized": True,
             "rowHeight": 48,
+            "rowRouteTemplate": "/futtermittel/fuetterungsbetrieb/{id}",
             "columns": [
                 {"key": "name", "label": "Betrieb", "sortable": True, "filterable": True, "width": 260},
                 {"key": "production_type", "label": "Produktionsrichtung", "filterable": True, "width": 180},
@@ -2341,6 +2342,126 @@ def build_agrar_feeding_businesses_screen_definition() -> dict[str, Any]:
                 "screenRoot": "[data-testid='screen-agrar/feeding-businesses']",
                 "primaryAction": "[data-action-kind='primary']",
             },
+        },
+    }
+
+
+def build_agrar_feeding_business_screen_definition() -> dict[str, Any]:
+    """Prioritized feeding-business file over existing aggregates (FEED-EDITOR-025)."""
+    base = "/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}"
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/feeding-business",
+        "domain": "agrar",
+        "mode": "detail",
+        "title": "Fuetterungsbetrieb",
+        "subtitle": "Gruppen, Rationsstatus, Analysereife und offene Befunde in einer Arbeitsakte",
+        "adapter": {"type": "native", "sourceId": "agrar/feeding-business", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": f"{base}/overview", "staleTimeMs": 15_000},
+            {"key": "groups", "endpoint": f"{base}/groups", "pageSize": 100},
+            {"key": "rations", "endpoint": f"{base}/rations", "pageSize": 100},
+            {"key": "findings", "endpoint": f"{base}/findings", "pageSize": 100},
+            {"key": "templates", "endpoint": f"{base}/ration-templates", "pageSize": 100},
+        ],
+        "tabs": [
+            {
+                "key": "overview", "label": "Arbeitsuebersicht", "lazy": False, "keepAlive": True,
+                "fields": [
+                    {"key": "name", "label": "Betrieb", "type": "text", "required": True},
+                    {"key": "advisory_status", "label": "Beratungsstatus", "type": "text"},
+                    {"key": "data_status", "label": "Datenlage", "type": "text"},
+                    {"key": "group_count", "label": "Tiergruppen", "type": "number"},
+                    {"key": "ration_count", "label": "Rationen", "type": "number"},
+                    {"key": "active_ration_count", "label": "Aktive Rationen", "type": "number"},
+                    {"key": "readiness_blocked_count", "label": "Blockierte Rationen", "type": "number"},
+                    {"key": "readiness_unknown_count", "label": "Reife ungeprueft", "type": "number"},
+                    {"key": "template_count", "label": "Vorlagen", "type": "number"},
+                ],
+            },
+            {
+                "key": "groups", "label": "Tiergruppen", "lazy": True, "keepAlive": True,
+                "tables": [{
+                    "key": "groups", "label": "Gruppen im Betrieb", "dataSourceKey": "groups",
+                    "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                    "rowRouteTemplate": "/futtermittel/tiergruppe/{id}",
+                    "columns": [
+                        {"key": "name", "label": "Gruppe", "sortable": True, "filterable": True, "width": 240},
+                        {"key": "animal_count", "label": "Tiere", "numeric": True, "width": 90},
+                        {"key": "profile_code", "label": "Profil", "filterable": True, "width": 150},
+                        {"key": "risk_level", "label": "Risiko", "renderKind": "status", "width": 110},
+                        {"key": "ration_count", "label": "Rationen", "numeric": True, "width": 100},
+                        {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "width": 170},
+                    ],
+                }],
+            },
+            {
+                "key": "rations", "label": "Rationen und Reife", "lazy": True, "keepAlive": True,
+                "tables": [{
+                    "key": "rations", "label": "Neuester Stand je Ration", "dataSourceKey": "rations",
+                    "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                    "rowRouteTemplate": "/futtermittel/ration/{id}",
+                    "columns": [
+                        {"key": "name", "label": "Ration", "sortable": True, "filterable": True, "width": 240},
+                        {"key": "group_name", "label": "Gruppe", "filterable": True, "width": 200},
+                        {"key": "version_no", "label": "Version", "numeric": True, "width": 90},
+                        {"key": "status", "label": "Lifecycle", "renderKind": "status", "width": 120},
+                        {"key": "readiness_status", "label": "Analysereife", "renderKind": "status", "width": 150},
+                        {"key": "readiness_blockers", "label": "Blocker", "numeric": True, "width": 90},
+                        {"key": "readiness_warnings", "label": "Warnungen", "numeric": True, "width": 110},
+                    ],
+                }],
+            },
+            {
+                "key": "findings", "label": "Offene Befunde", "lazy": True, "keepAlive": True,
+                "tables": [{
+                    "key": "findings", "label": "Priorisiert nach Schwere", "dataSourceKey": "findings",
+                    "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 56,
+                    "columns": [
+                        {"key": "severity", "label": "Prioritaet", "renderKind": "status", "width": 110},
+                        {"key": "group_name", "label": "Gruppe", "filterable": True, "width": 180},
+                        {"key": "ration_name", "label": "Ration", "filterable": True, "width": 200},
+                        {"key": "message", "label": "Befund", "width": 420},
+                        {"key": "evaluated_at", "label": "Bewertet", "renderKind": "datetime", "width": 170},
+                    ],
+                }],
+            },
+            {
+                "key": "templates", "label": "Rationsvorlagen", "lazy": True, "keepAlive": True,
+                "tables": [{
+                    "key": "templates", "label": "Unveraenderliche Vorlagen", "dataSourceKey": "templates",
+                    "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                    "columns": [
+                        {"key": "name", "label": "Vorlage", "sortable": True, "filterable": True, "width": 260},
+                        {"key": "source_ration_name", "label": "Quellration", "width": 220},
+                        {"key": "source_version_no", "label": "Version", "numeric": True, "width": 90},
+                        {"key": "created_by", "label": "Erstellt von", "width": 180},
+                        {"key": "created_at", "label": "Erstellt", "renderKind": "datetime", "width": 170},
+                    ],
+                }],
+            },
+        ],
+        "actions": [{
+            "key": "create_template", "label": "Vorlage anlegen", "kind": "primary",
+            "dangerLevel": "safe", "permission": "futtermittel.rations.update",
+        }, {
+            "key": "apply_template", "label": "Vorlage anwenden", "kind": "secondary",
+            "dangerLevel": "safe", "permission": "futtermittel.rations.update",
+        }],
+        "noWorkflowReason": "Die Betriebsakte priorisiert vorhandene Aggregate; Freigaben bleiben im Rations-Lifecycle.",
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "findings", "tableProfile": "audit",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True,
+            "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Die naechste fachliche Fuetterungsentscheidung aus belastbarer Datenlage ableiten.",
+            "examplePrompts": ["Welche Ration ist blockiert?", "Wo fehlt eine belastbare Analyse?", "Welche Befunde sind kritisch?"],
+            "sensitiveFields": ["business_partner_id", "preferences", "snapshot_checksum"],
+            "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feeding-business']", "primaryAction": "[data-action-kind='primary']"},
         },
     }
 
@@ -2799,6 +2920,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
     "agrar/feeding-businesses": build_agrar_feeding_businesses_screen_definition,
+    "agrar/feeding-business": build_agrar_feeding_business_screen_definition,
     "agrar/feeding-group": build_agrar_feeding_group_screen_definition,
     "agrar/feeding-reference-data": build_agrar_feeding_reference_data_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
@@ -3323,6 +3445,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
     "agrar/feeding-businesses": "/portal/rationsoptimierung?view=businesses",
+    "agrar/feeding-business": "/portal/rationsoptimierung?view=businesses",
     "agrar/feeding-group": "/portal/rationsoptimierung?view=rations",
     "agrar/feeding-reference-data": "/portal/rationsoptimierung?view=reference-data",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",

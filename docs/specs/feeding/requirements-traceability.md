@@ -33,7 +33,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 |---|---|---|---|---|---|---|---|---|
 | FEED-BUS-001 | CRM-Partner als Fütterungsbetrieb aktivieren | MUSS | `POST /feeding/businesses/activate-from-partner`, `business_partner_id` | VERIFIED | — | idempotente fachliche Projektion ohne Partnerduplikat | `test_feeding_business_core.py` | FEED-CORE-015 |
 | FEED-BUS-002 | Betriebsstätten/Herden/Ställe je Betrieb | MUSS | `feeding_businesses` → `farm_sites` → `herds` → `feeding_groups` | VERIFIED | Stall als Standort-/Herdenmerkmal, kein eigenes Aggregat | tenant- und betriebsgebundene Hierarchie | `test_feeding_business_core.py` + DB-Integration | Migration `feed_core_business_20260715` |
-| FEED-BUS-003 | Betriebsakte (Analysen/Rationen/Aufgaben/Berichte gebündelt) | MUSS | Einzelseiten vorhanden, keine Akte | NOT_IMPLEMENTED | zentrale ObjectPage fehlt | Inkrement 2 (UI) | — | — |
+| FEED-BUS-003 | Betriebsakte (Analysen/Rationen/Aufgaben/Berichte gebündelt) | MUSS | native Betriebsakte mit Gruppen, Rationen, Analysereife, Befunden und Vorlagen | PARTIAL | direkte Analysenliste, Aufgaben und Berichte folgen additiv | grant-sichere ObjectPage-Projektion ohne erfundene Null-KPIs | Backend-/Screen-/Vitest `test_feeding_ration_templates*` | FEED-EDITOR-025 |
 | FEED-BUS-004 | Beratungsstatus/Risiko-Filter | SOLL | — | NOT_IMPLEMENTED | — | Release C | — | — |
 
 ## Kapitel 6.2 — Tiergruppen
@@ -79,7 +79,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 |---|---|---|---|---|---|---|---|---|
 | FEED-RAT-001 | Zeilen-CRUD, FM/TM, Fixierung, Min/Max in der Ration | MUSS | Native Editor-Journey bewahrt Min/Max in Draft/API/Versionssnapshot und bewertet Grenzverletzungen live; Workbench-Fixierung bleibt kompatibel | VERIFIED | — | `RationEditor`, typisierter Draft-Vertrag und deterministische Bound-Pruefung | Domain/API/Vitest `test_feeding_ration_editor*`, `ration-editor.test.tsx` | Slice 006, FEED-EDITOR-024 |
 | FEED-RAT-002 | Versionierung, Status, Gültigkeit, unveränderliche Freigabe | MUSS | `lifecycle/domain.py`, `ration_versions` (snapshot_checksum) | VERIFIED | Gültig-bis fehlt (nur feeding_start + Ein-Aktiv) | Feld in Inkrement 3 | `test_rations_lifecycle_{domain,api}.py` | Slice 007 |
-| FEED-RAT-003 | Kopieren/Vorlagen | MUSS | `based_on_version_id` bei Versionen | PARTIAL | Vorlagenkatalog fehlt | Inkrement 2 | `test_rations_lifecycle_api.py` | — |
+| FEED-RAT-003 | Kopieren/Vorlagen | MUSS | append-only Vorlagenkatalog mit Quellversion; gruppensicheres Apply erzeugt neue Draft-Version | VERIFIED | — | Herkunft, Auditgrund und optimistische Zielversion sind Pflicht | `test_feeding_ration_templates.py`, `test_feeding_ration_templates_api.py`, UI-Test | FEED-EDITOR-025 |
 | FEED-RAT-004 | Undo/Redo, Mischreihenfolge-Sortierung, Tastatur | MUSS | Rationseditor-Kernjourney live (`features/feed-advice/RationEditor.tsx`): Zeilen-CRUD, Inline-Mengen mit sofort sichtbarer Wirkung (entprellte deterministische Live-Bewertung), append-only Speichern mit optimistischer Revision; Mischreihenfolge im Solver | PARTIAL | Undo/Redo, Mischreihenfolge-Sortierung in der UI, volle Tastatur-Journey (FEED-WP-072ff) | Inkrement 2 Folgepakete | `ration-editor.test.tsx` (3), `test_rations_solver_mixing.py` | FEED-EDITOR-021 |
 | FEED-RAT-005 | Kosten je Tier/Tag, ct/kg ECM, Versionsdiff | MUSS | Praxis-KPIs (ct/kg ECM, KF-TM/kg ECM, €/Kuh/Tag) | VERIFIED | Versionsdiff-Ansicht offen | Inkrement 2 | Vitest Workbench | Slice 006 |
 

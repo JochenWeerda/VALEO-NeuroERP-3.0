@@ -394,3 +394,11 @@ bleiben stabil.
 
 Migration `feed_core_feed_analyses_20260715` ist linear, additiv und bewahrt
 alle vorhandenen Analyse-IDs und Legacy-Messspalten.
+
+## 20. Rationsvorlagen FEED-EDITOR-025
+
+`domain_agrar.ration_templates` ist tenant- und betriebsgebunden, verweist auf
+Gruppe und unveraenderliche `source_ration_version_id` und dupliziert keinen
+Snapshot. Unique-Constraint und Trigger schuetzen Name und Append-only-Regel.
+Kopien bleiben normale `ration_versions` mit gruppensicherer
+`based_on_version_id`-Provenienz.
