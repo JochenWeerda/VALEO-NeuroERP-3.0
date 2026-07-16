@@ -11,6 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.agrar.rations.actual_measures import evaluate_deviation, validate_thresholds
+from app.agrar.rations.events import emit_feeding_event
 from app.core.uuid7 import uuid7
 
 
@@ -203,8 +204,38 @@ class FeedingActualMeasureService:
             .mappings()
             .one()
         )
+        result_row = dict(row)
+        emit_feeding_event(
+            self.db,
+            tenant_id=self.tenant_id,
+            event_type="feeding.deviation.exceeded",
+            aggregate_id=finding["actual_component_id"],
+            payload={
+                "actual_component_id": finding["actual_component_id"],
+                "actual_record_id": finding["actual_record_id"],
+                "plan_version_id": finding["plan_version_id"],
+                "group_id": finding["group_id"],
+                "feed_id": finding["feed_id"],
+                "severity": finding["severity"],
+                "policy_id": finding["policy_id"],
+                "policy_version": finding["policy_version"],
+            },
+        )
+        emit_feeding_event(
+            self.db,
+            tenant_id=self.tenant_id,
+            event_type="feeding.measure.created",
+            aggregate_id=result_row["id"],
+            payload={
+                "measure_id": result_row["id"],
+                "actual_component_id": finding["actual_component_id"],
+                "group_id": finding["group_id"],
+                "owner_subject": result_row["owner_subject"],
+                "due_date": str(result_row["due_date"]),
+            },
+        )
         self.db.commit()
-        return dict(row)
+        return result_row
 
     def list_measures(self, *, group_ids: list[str]) -> list[dict[str, Any]]:
         if not group_ids:

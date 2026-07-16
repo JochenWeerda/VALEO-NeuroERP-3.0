@@ -389,8 +389,8 @@ Import, Optimierung, Report und Export folgen einem Muster:
 Versionierte Outbox-Ereignisse umfassen etwa:
 
 - `feeding.ration.version.approved.v1`
-- `feeding.ration.version.activated.v1`
-- `feeding.analysis.released.v1`
+- `feeding.ration.version.activated` (`schema_version=1.0`)
+- `feeding.analysis.released` (`schema_version=1.0`)
 - `feeding.plan.exported.v1`
 - `feeding.execution.completed.v1`
 - `feeding.controlling.deviation.detected.v1`

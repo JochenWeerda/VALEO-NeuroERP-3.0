@@ -1,5 +1,7 @@
 """Extrahiert NATS/Outbox-Event-IDs aus dem App-Code."""
-import re, json
+
+import re
+import json
 from pathlib import Path
 
 REPO = Path(__file__).parent.parent
@@ -29,6 +31,7 @@ DOMAIN_MAP = {
     "qs": "Qualitätssicherung",
     "qualitaets": "Qualitätssicherung",
     "ration": "Tierernährung",
+    "feeding": "Tierernährung",
     "harvest": "Agrar",
     "agrar": "Agrar",
     "payment": "Finanzbuchhaltung",
@@ -45,6 +48,7 @@ DOMAIN_MAP = {
     "duenge_bilanz": "Agrar",
 }
 
+
 def get_domain(event_id: str) -> str:
     for prefix, domain in DOMAIN_MAP.items():
         if event_id.startswith(prefix) or event_id.replace(".", "_").startswith(prefix):
@@ -58,6 +62,7 @@ def _py_files(root: Path):
         if p.exists():
             yield from p.rglob("*.py")
 
+
 for f in sorted(_py_files(REPO)):
     if "test" in f.parts or "__pycache__" in f.parts:
         continue
@@ -68,17 +73,32 @@ for f in sorted(_py_files(REPO)):
         for m in P_OUTBOX.finditer(src):
             eid = m.group(1)
             if eid not in events:
-                events[eid] = {"id": eid, "source": rel, "domain": get_domain(eid), "channel": "outbox"}
+                events[eid] = {
+                    "id": eid,
+                    "source": rel,
+                    "domain": get_domain(eid),
+                    "channel": "outbox",
+                }
 
         for m in P_EVENT.finditer(src):
             eid = m.group(1)
             if "." in eid and eid not in events:
-                events[eid] = {"id": eid, "source": rel, "domain": get_domain(eid), "channel": "outbox"}
+                events[eid] = {
+                    "id": eid,
+                    "source": rel,
+                    "domain": get_domain(eid),
+                    "channel": "outbox",
+                }
 
         for m in P_SUBJECT.finditer(src):
             eid = m.group(1).strip()
             if eid and eid not in events:
-                events[eid] = {"id": eid, "source": rel, "domain": get_domain(eid), "channel": "nats"}
+                events[eid] = {
+                    "id": eid,
+                    "source": rel,
+                    "domain": get_domain(eid),
+                    "channel": "nats",
+                }
     except Exception:
         pass
 

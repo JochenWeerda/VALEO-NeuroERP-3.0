@@ -412,6 +412,16 @@ nav:
           - ADR-042 Unveraenderliche Rationsversionen und expliziter Lebenszyklus: adr/adr-042-immutable-ration-lifecycle.md
           - ADR-043 Futter-Readiness als domänenübergreifendes Read-Model: adr/adr-043-feed-readiness-read-model.md
           - ADR-044 Kanonische Tagesbeobachtungen für das Fütterungscontrolling: adr/adr-044-feeding-controlling-observations.md
+          - ADR-045 Versionierte Fuetterungsgruppen und betrieblicher Zugriffsscope: adr/adr-045-versioned-feeding-groups.md
+          - ADR-046 Versionierte Fuetterungsreferenzdaten und explizite FM-TM-Semantik: adr/adr-046-feeding-reference-data-and-unit-conversion.md
+          - ADR-047 Kanonischer Fuetterungs-Futtermittelkatalog auf bestehendem Stamm: adr/adr-047-canonical-feeding-feed-catalog.md
+          - ADR-048 Versionierte Futteranalyse mit Provenienz und bewusster Aktivierung: adr/adr-048-feeding-analysis-provenance.md
+          - ADR-049 Betriebsakte und unveraenderliche Rationsvorlagen: adr/adr-049-feeding-business-file-and-ration-templates.md
+          - ADR-050 Unveraenderliche FeedingPlanVersion und atomare Publikation: adr/adr-050-feeding-plan-version-and-publication.md
+          - "ADR-051: Planbasierte Futterversorgung und kontrollierter Einkaufs-Handoff": adr/adr-051-feeding-supply-and-procurement-handoff.md
+          - ADR-052 Komponentenbezogene Ist-Fuetterung gegen Planversion: adr/adr-052-component-actual-feeding.md
+          - ADR-053 Versionierte Abweichungsschwellen und menschliche Massnahmen: adr/adr-053-feeding-deviation-measures.md
+          - ADR-054 Schemafeste Feeding-Events auf der Transactional Outbox: adr/adr-054-schemafeste-feeding-events.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

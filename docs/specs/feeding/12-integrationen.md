@@ -246,9 +246,9 @@ Consumer deduplizieren `event_id`.
 
 | Event | Konsumenten |
 |---|---|
-| `feeding.analysis.released.v1` | Readiness, Rationshinweis, Reporting |
+| `feeding.analysis.released` | Readiness, Rationshinweis, Reporting |
 | `feeding.ration.version.approved.v1` | Planung, Workflow, Reporting |
-| `feeding.ration.version.activated.v1` | Stall, Controlling, Notification |
+| `feeding.ration.version.activated` | Stall, Controlling, Notification |
 | `feeding.plan.published` (`schema_version=1.0`) | Stall, Versorgung, Mixer, Reporting |
 | `feeding.plan.exported.v1` | Gerätejournal, Operations |
 | `feeding.execution.completed.v1` | Inventory, Controlling, Beratung |
@@ -261,6 +261,14 @@ FEED-PLAN-026 publiziert `feeding.plan.published` atomar mit Plan-,
 Planversions-, Quell-Rationsversions- und Gruppen-ID, Versionsnummer sowie
 Gueltigkeitsintervall. Das Ereignis enthaelt keine Mengen- oder Tierdetails;
 Konsumenten laden die Planversion autorisiert und deduplizieren `event_id`.
+
+FEED-INT-036 vereinheitlicht die gelieferten Feeding-Ereignisse ueber
+`app/agrar/rations/events.py`. Der kanonische Envelope besteht aus
+`schema_version=1.0`, `event_id`, `event_type`, `aggregate_id`, `timestamp` und
+einem referenzorientierten `payload`. Der Emitter fuehrt keinen Commit aus;
+Fachaggregat und Outboxeintrag werden gemeinsam committed oder zurueckgerollt.
+Die Zustellung bleibt at-least-once und jeder Konsument dedupliziert
+`event_id`. `.v1`-Suffixe sind fuer diesen Envelope keine zweite Namensvariante.
 
 ## 13. Quarantäne
 

@@ -2582,5 +2582,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 66
+  "event_count": 74
 }

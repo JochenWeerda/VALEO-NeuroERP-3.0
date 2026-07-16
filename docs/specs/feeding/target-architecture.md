@@ -77,9 +77,9 @@ Router **einbindet statt dupliziert**:
 
 ## 4. Eventmodell (NATS-Outbox)
 
-`feeding.analysis.verified` · `feeding.ration.version.approved` ·
+`feeding.analysis.released` · `feeding.ration.version.approved` ·
 `feeding.ration.version.activated` · `feeding.plan.published` ·
-`feeding.actuals.recorded` · `feeding.deviation.exceeded` ·
+`feeding.actual.recorded` · `feeding.deviation.exceeded` ·
 `feeding.measure.created/completed` · `feeding.import.quarantined`.
 Konsumenten: Aufgaben/Benachrichtigung, Einkauf (Reichweitenwarnung), Berichte.
 

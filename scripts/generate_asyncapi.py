@@ -5,6 +5,7 @@ Verwendung:
 
 Liest events_raw.json aus dem Repo-Root (erzeugt von scripts/extract_events.py).
 """
+
 import json
 import subprocess
 import sys
@@ -16,15 +17,19 @@ events_file = REPO / "events_raw.json"
 
 # Automatisch extrahieren wenn nicht vorhanden
 if not events_file.exists():
-    subprocess.run([sys.executable, str(REPO / "scripts" / "extract_events.py")], check=True)
+    subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "extract_events.py")], check=True
+    )
 
 events = json.loads(events_file.read_text(encoding="utf-8"))
 
+
 # ── AsyncAPI 2.6 YAML ─────────────────────────────────────────────────────────
 def yaml_str(s: str) -> str:
-    if any(c in s for c in [':', '#', '{', '}']):
+    if any(c in s for c in [":", "#", "{", "}"]):
         return f'"{s}"'
     return s
+
 
 lines = [
     "asyncapi: '2.6.0'",
@@ -63,13 +68,13 @@ for ev in events:
 
     lines += [
         f"  {yaml_str(subject)}:",
-        f"    description: >",
+        "    description: >",
         f"      [{domain}] {eid.replace('.', ' ').replace('_', ' ').title()}",
-        f"    subscribe:",
+        "    subscribe:",
         f"      summary: {yaml_str(eid)}",
-        f"      operationId: on_{eid.replace('.','_').replace('-','_').replace('*','any')}",
-        f"      message:",
-        f"        $ref: '#/components/messages/{eid.replace('.','_').replace('-','_').replace('*','any').replace('{','').replace('}','')}Event'",
+        f"      operationId: on_{eid.replace('.', '_').replace('-', '_').replace('*', 'any')}",
+        "      message:",
+        f"        $ref: '#/components/messages/{eid.replace('.', '_').replace('-', '_').replace('*', 'any').replace('{', '').replace('}', '')}Event'",
         "",
     ]
 
@@ -79,34 +84,67 @@ lines += [
 ]
 for ev in events:
     eid = ev["id"]
-    key = eid.replace(".","_").replace("-","_").replace("*","any").replace("{","").replace("}","")
-    lines += [
+    key = (
+        eid.replace(".", "_")
+        .replace("-", "_")
+        .replace("*", "any")
+        .replace("{", "")
+        .replace("}", "")
+    )
+    message_lines = [
         f"  {key}Event:",
         f"    name: {yaml_str(eid)}",
-        f"    title: {eid.replace('.',' ').replace('_',' ').title()}",
-        f"    contentType: application/json",
-        f"    payload:",
-        f"      type: object",
-        f"      required: [event_id, tenant_id, occurred_at, payload]",
-        f"      properties:",
-        f"        event_id:",
-        f"          type: string",
-        f"          format: uuid",
-        f"        tenant_id:",
-        f"          type: string",
-        f"        occurred_at:",
-        f"          type: string",
-        f"          format: date-time",
-        f"        correlation_id:",
-        f"          type: string",
-        f"        payload:",
-        f"          type: object",
-        f"          description: Fachliche Nutzdaten je Event-Typ",
-        "",
+        f"    title: {eid.replace('.', ' ').replace('_', ' ').title()}",
+        "    contentType: application/json",
+        "    payload:",
+        "      type: object",
     ]
+    if eid.startswith("feeding."):
+        message_lines += [
+            "      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]",
+            "      properties:",
+            "        schema_version:",
+            "          type: string",
+            "          const: '1.0'",
+            "        event_id:",
+            "          type: string",
+            "          format: uuid",
+            "        event_type:",
+            "          type: string",
+            f"          const: {eid}",
+            "        aggregate_id:",
+            "          type: string",
+            "        timestamp:",
+            "          type: string",
+            "          format: date-time",
+            "        payload:",
+            "          type: object",
+            "          description: Referenzorientierte fachliche Nutzdaten",
+            "",
+        ]
+    else:
+        message_lines += [
+            "      required: [event_id, tenant_id, occurred_at, payload]",
+            "      properties:",
+            "        event_id:",
+            "          type: string",
+            "          format: uuid",
+            "        tenant_id:",
+            "          type: string",
+            "        occurred_at:",
+            "          type: string",
+            "          format: date-time",
+            "        correlation_id:",
+            "          type: string",
+            "        payload:",
+            "          type: object",
+            "          description: Fachliche Nutzdaten je Event-Typ",
+            "",
+        ]
+    lines += message_lines
 
 asyncapi_path = REPO / "docs/schnittstellen/asyncapi.yaml"
-asyncapi_path.write_text("\n".join(lines), encoding="utf-8")
+asyncapi_path.write_text("\n".join(line.rstrip() for line in lines), encoding="utf-8")
 print(f"Geschrieben: {asyncapi_path} ({len(events)} Channels)")
 
 # ── MkDocs-Seite ──────────────────────────────────────────────────────────────
@@ -176,5 +214,5 @@ md_lines += [
 ]
 
 events_md_path = REPO / "docs" / "schnittstellen" / "events.md"
-events_md_path.write_text("\n".join(md_lines), encoding="utf-8")
+events_md_path.write_text("\n".join(line.rstrip() for line in md_lines), encoding="utf-8")
 print(f"Geschrieben: {events_md_path}")

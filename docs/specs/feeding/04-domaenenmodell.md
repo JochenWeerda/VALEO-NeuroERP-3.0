@@ -271,13 +271,13 @@ expected status/version. Listen liefern Pagination und explizite Filter.
 | feeding.business.activated | CRM-Partner wird FeedingBusiness | tenant, business, partner, actor | Betriebsworklist, Audit |
 | feeding.group.snapshot.changed | neuer gueltiger Gruppenstand | business, herd, group, snapshot, validity | Readiness, Bedarf |
 | feeding.analysis.received | Import/Erfassung | analysis, source, hash | Mapping/Quarantaene |
-| feeding.analysis.verified | fachliche Freigabe | feed, analysis_version, actor | Readiness, Notification |
+| feeding.analysis.released | fachliche Freigabe | feed, analysis_version, actor | Readiness, Notification |
 | feeding.ration.version.created | neuer Entwurf | ration, version, checksum, source | Evaluation |
 | feeding.optimization.completed | Run beendet | run, status, result_ref, solver_version | Editor, Monitoring |
 | feeding.ration.version.approved | Freigabe | ration, version, approver, reason | Planerstellung |
 | feeding.ration.version.activated | Aktivierung | group, version, valid_from | Controlling, Mobil |
 | feeding.plan.published | Plan freigegeben | plan_version, ration_version, group, validity | Mobil, Maschine, Bestand |
-| feeding.actuals.recorded | Ist gespeichert | actual, plan_version, source | Abweichung, Controlling |
+| feeding.actual.recorded | Ist gespeichert | actual, plan_version, source | Abweichung, Controlling |
 | feeding.deviation.exceeded | Schwelle verletzt | metric/component, target, actual, threshold | Task/Notification |
 | feeding.measure.created | Massnahme angelegt | case, measure, owner, due | Workflow/Notification |
 | feeding.measure.completed | Massnahme abgeschlossen | measure, outcome, actor | Bericht, Wirksamkeit |

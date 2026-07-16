@@ -110,8 +110,12 @@ Traceability-Zeilen der 6 Slices auf VERIFIED.
 
 #### FEED-INT-036 — Feeding-Events und Konsumenten
 
+> **Stand 2026-07-16:** Eventvertrag und atomare Producer sind umgesetzt;
+> Aufgaben-/Benachrichtigungskonsumenten bleiben im bereits definierten
+> FEED-CONS-032-Scope. FEED-INT-003 bleibt extern blockiert.
+
 - **Requirements:** FEED-INT-004, FEED-COLLAB-002-Rest. **Hinweis:** FEED-INT-003 (reale DDW-/MLP-Livepfade) bleibt **BLOCKED bis Partnervertrag** — keine erfundenen Providerpfade.
-- **Scope:** Outbox-Events schemafest (`feeding.analysis.verified`, `feeding.ration.version.activated`, `feeding.plan.published`, `feeding.actuals.recorded`, `feeding.deviation.exceeded`, `feeding.measure.*`, `feeding.import.quarantined`) mit Replay-/Genau-einmal-Vertrag; Konsumenten: Aufgaben/Benachrichtigung (032), Einkaufs-Reichweitenwarnung (028), Berichtsauslöser; optional Webhooks je Mandant (Admin-Level).
+- **Scope:** Outbox-Events schemafest (`feeding.analysis.released`, `feeding.ration.version.activated`, `feeding.plan.published`, `feeding.actual.recorded`, `feeding.deviation.exceeded`, `feeding.measure.*`, `feeding.import.quarantined`) mit Replay-/Genau-einmal-Vertrag; Konsumenten: Aufgaben/Benachrichtigung (032), Einkaufs-Reichweitenwarnung (028), Berichtsauslöser; optional Webhooks je Mandant (Admin-Level).
 - **Akzeptanz:** Contract-/Replay-Tests je Event; Konsumentenwirkung idempotent.
 
 ### Inkrement 7 — Vervollständigung (neue Slices für die Lastenheft-Reste)

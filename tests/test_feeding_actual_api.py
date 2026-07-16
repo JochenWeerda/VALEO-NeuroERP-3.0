@@ -389,6 +389,37 @@ def test_deviation_policy_finding_and_human_measure_journey() -> None:
 
     db = SessionLocal()
     try:
+        measure_events = (
+            db.execute(
+                text(
+                    """SELECT event_type,payload FROM public.outbox_events
+                WHERE tenant_id=:tenant_id AND (
+                  (event_type='feeding.measure.created' AND aggregate_id=:measure_id) OR
+                  (event_type='feeding.deviation.exceeded' AND aggregate_id=:component_id)
+                ) ORDER BY event_type"""
+                ),
+                {
+                    "tenant_id": TENANT,
+                    "measure_id": created.json()["id"],
+                    "component_id": component_id,
+                },
+            )
+            .mappings()
+            .all()
+        )
+        assert [event["event_type"] for event in measure_events] == [
+            "feeding.deviation.exceeded",
+            "feeding.measure.created",
+        ]
+        assert all(
+            (
+                event["payload"]
+                if isinstance(event["payload"], dict)
+                else json.loads(event["payload"])
+            )["schema_version"]
+            == "1.0"
+            for event in measure_events
+        )
         with pytest.raises(DBAPIError):
             db.execute(
                 text(

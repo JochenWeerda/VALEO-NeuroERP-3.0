@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-INT-036 Schemafeste Feeding-Events auf der Outbox - in Arbeit 2026-07-16
+## FEED-INT-036 Schemafeste Feeding-Events auf der Outbox - abgeschlossen 2026-07-16
 
-**Owner:** Codex (Uebernahme nach Session-Limit von Claude; Red-Welle bewahrt). **Stand:** in Arbeit (Claim). Abschluss Inkrement 6 gemaess Slice-Spec 049 (Requirements FEED-INT-004; FEED-INT-003 bleibt BLOCKED/Partnervertrag): Zentrales Event-Modul `app/agrar/rations/events.py` (Schema 1.0: schema_version/event_id/event_type/aggregate_id/timestamp/payload; geschlossene Typliste, unbekannter Typ → ValueError) extrahiert bestehende Inline-Muster; Emission **in derselben Transaktion** (genau-einmal mit dem fachlichen Commit) an `feeding.ration.version.activated`, `feeding.analysis.released`, `feeding.import.quarantined` sowie den bereits gelieferten Plan-/Actual-/Deviation-/Measure-Punkten. Konsumenten (Aufgaben/Benachrichtigung) bleiben 032-Scope. **TDD:** Red 3/3 reproduziert (fehlendes Modul und zwei fehlende Emissionen). **Dateibesitz:** siehe `FEED-INT-036.yaml`.
+**Owner:** Codex (Uebernahme nach Session-Limit von Claude; Red-Welle bewahrt). **Stand:** abgeschlossen. `app/agrar/rations/events.py` erzwingt Schema 1.0, geschlossene Typliste und einen commit-freien Transactional-Outbox-Emitter. Aktivierung, Analysefreigabe und Quarantaene emittieren nun atomar; Plan, Actual, Abweichung, Massnahme und Einkaufsuebergabe nutzen denselben Vertrag statt Inline-Huellen. Retry erzeugt aufgrund der fachlichen Idempotenz keine Dublette, ein Rollback entfernt auch das Event. AsyncAPI und Agent-Handbuch katalogisieren acht tatsaechlich emittierte Topics; `measure.completed/overdue` sind fuer FEED-CONS-032 reserviert. Keine erfundenen Konsumenten oder Liveprovider: FEED-INT-003 bleibt bis Partnervertrag BLOCKED. **TDD-Abnahme:** Red 3/3 reproduziert, fokussiert 27 gruen; Feeding-/Rations-Regression 749 gruen/1 skipped; Ruff, Compile, Doku 127/134, Architektur/Drift 905/905, AsyncAPI 74 Events, Handbuch 46 Masken und Alembic Single-Head gruen. **Requirement:** FEED-INT-004 VERIFIED. **Entscheidung:** ADR-054 Proposed.
 
 ## FEED-INT-035 Mischtechnik bidirektional: Planexport + idempotente Rueckmeldung mit Konflikt-Quarantaene - abgeschlossen 2026-07-16
 

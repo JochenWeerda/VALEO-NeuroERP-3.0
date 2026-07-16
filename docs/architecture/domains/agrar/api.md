@@ -142,3 +142,12 @@ Delta. Entscheidung: [ADR-050](../../../adr/adr-050-feeding-plan-version-and-pub
 `plan_status` wird serverseitig als `scheduled`, `current` oder `stale`
 abgeleitet. Eine neuere Version ersetzt die vorherige erst ab ihrem
 `valid_from`; abgelaufene Plaene erscheinen nie in `/current`.
+
+## Fuetterungsberatung / Events
+
+Feeding-Commands schreiben ihre Ereignisse atomar in `public.outbox_events`.
+Die Huelle besteht aus `schema_version=1.0`, `event_id`, `event_type`,
+`aggregate_id`, `timestamp` und `payload`; die geschlossene Typliste liegt in
+`app/agrar/rations/events.py`. Zustellung ist at-least-once, Konsumenten
+deduplizieren `event_id`. Entscheidung:
+[ADR-054](../../../adr/adr-054-schemafeste-feeding-events.md).

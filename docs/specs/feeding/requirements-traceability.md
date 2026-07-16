@@ -184,7 +184,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | FEED-INT-001 | Idempotente Importe, Dubletten, Audit, Vorschau, Quarantäne | MUSS | payload_hash + ON CONFLICT (010) **plus Integrationsmonitor**: `feeding_import_jobs` mit Statusautomat validated→accepted / quarantined→rejected, Vorschau ohne Persistenz (Adapter = Validierungs-SSOT), Übernahme über den bestehenden idempotenten Pfad, Verwerfen nur mit Pflicht-Begründung; Monitor-Worklist `futtermittel/integrationsmonitor` | VERIFIED | interaktives Material-Mapping als eigene Worklist folgt (FEED-INT-034-Rest/035) | Monitor + Direktpfad | `test_feeding_import_monitor_api.py` (7), `import-monitor.test.tsx` (3), Bestandstests 010 | Slices 010/034 |
 | FEED-INT-002 | Connector-Gates (Consent/Contract/Secret/Egress) | MUSS | HerdDataSyncService-Gates, Admin-Level | VERIFIED | Mapping-UI/Quarantäne je Betrieb | Inkrement 6 | `test_rations_herd_data_connectors.py` (10) | Slice 010 |
 | FEED-INT-003 | Reale DDW-/MLP-/Mischwagen-Livepfade | MUSS | Templates konfigurierbar, bewusst offen | BLOCKED | lizenzierter Partnervertrag erforderlich | extern | — | Paritätsmatrix |
-| FEED-INT-004 | Event-Bus/Webhooks | SOLL | NATS-Outbox systemweit | PARTIAL | Feeding-Events | Inkrement 6 | — | — |
+| FEED-INT-004 | Event-Bus/Webhooks | SOLL | geschlossene Feeding-Typliste und Schema-1.0-Huelle; atomare Outbox-Emission fuer Analyse, Rationsaktivierung, Plan, Actual, Abweichung, Massnahme, Quarantaene und Einkaufsuebergabe; at-least-once mit `event_id`-Deduplizierung | VERIFIED | optionale Tenant-Webhooks bleiben Admin-Ausbau, kein Muss-Gap | FEED-INT-036 | `test_feeding_events.py`, Plan-/Actual-/Analyse-/Import-API-Tests | ADR-054, FEED-INT-036 |
 
 ## Kapitel 6.20 — KI
 

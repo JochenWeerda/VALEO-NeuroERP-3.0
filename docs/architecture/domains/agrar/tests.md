@@ -24,6 +24,7 @@ pytest tests/test_feeding_feed_analysis.py tests/test_feeding_feed_analysis_api.
 pytest tests/test_feeding_ration_editor.py tests/test_feeding_ration_editor_api.py -q --no-cov
 pytest tests/test_feeding_ration_templates.py tests/test_feeding_ration_templates_api.py -q --no-cov
 pytest tests/test_feeding_plan.py tests/test_feeding_plan_api.py -q --no-cov
+pytest tests/test_feeding_events.py tests/test_feeding_import_monitor_api.py -q --no-cov
 ```
 
 Frontend: `packages/frontend-web/src/pages/agrar/`

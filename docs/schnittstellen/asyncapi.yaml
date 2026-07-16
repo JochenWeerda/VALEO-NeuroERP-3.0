@@ -5,7 +5,7 @@ info:
   description: >
     NATS JetStream / Transactional-Outbox Events für VALEO NeuroERP 3.0.
     Generiert via scripts/generate_asyncapi.py.
-  x-generated: '2026-06-26'
+  x-generated: '2026-07-16'
 
 servers:
   production:
@@ -28,6 +28,15 @@ channels:
       operationId: on_agrar_contract_allocated
       message:
         $ref: '#/components/messages/agrar_contract_allocatedEvent'
+
+  "tenant.{tenantId}.agrar.harvest_settlement.print_requested":
+    description: >
+      [Agrar] Agrar Harvest Settlement Print Requested
+    subscribe:
+      summary: agrar.harvest_settlement.print_requested
+      operationId: on_agrar_harvest_settlement_print_requested
+      message:
+        $ref: '#/components/messages/agrar_harvest_settlement_print_requestedEvent'
 
   "tenant.{tenantId}.agrar.weighing_ticket.allocated":
     description: >
@@ -55,6 +64,24 @@ channels:
       operationId: on_field_service_task_created
       message:
         $ref: '#/components/messages/field_service_task_createdEvent'
+
+  "tenant.{tenantId}.crm.lead.qualified":
+    description: >
+      [CRM] Crm Lead Qualified
+    subscribe:
+      summary: crm.lead.qualified
+      operationId: on_crm_lead_qualified
+      message:
+        $ref: '#/components/messages/crm_lead_qualifiedEvent'
+
+  "tenant.{tenantId}.crm.opportunity.activity_created":
+    description: >
+      [CRM] Crm Opportunity Activity Created
+    subscribe:
+      summary: crm.opportunity.activity_created
+      operationId: on_crm_opportunity_activity_created
+      message:
+        $ref: '#/components/messages/crm_opportunity_activity_createdEvent'
 
   "tenant.{tenantId}.crm_case.created":
     description: >
@@ -172,6 +199,24 @@ channels:
       operationId: on_lager_einlagerung_created
       message:
         $ref: '#/components/messages/lager_einlagerung_createdEvent'
+
+  "tenant.{tenantId}.lager.stock_movement.storniert":
+    description: >
+      [Lager] Lager Stock Movement Storniert
+    subscribe:
+      summary: lager.stock_movement.storniert
+      operationId: on_lager_stock_movement_storniert
+      message:
+        $ref: '#/components/messages/lager_stock_movement_storniertEvent'
+
+  "tenant.{tenantId}.lager.wareneingang.booked":
+    description: >
+      [Lager] Lager Wareneingang Booked
+    subscribe:
+      summary: lager.wareneingang.booked
+      operationId: on_lager_wareneingang_booked
+      message:
+        $ref: '#/components/messages/lager_wareneingang_bookedEvent'
 
   "tenant.{tenantId}.inventory.material_flow.edge_created":
     description: >
@@ -326,6 +371,15 @@ channels:
       message:
         $ref: '#/components/messages/qualitaets_check_createdEvent'
 
+  "tenant.{tenantId}....":
+    description: >
+      [Sonstige]
+    subscribe:
+      summary: ...
+      operationId: on____
+      message:
+        $ref: '#/components/messages/___Event'
+
   "tenant.{tenantId}.cash_closing.posted":
     description: >
       [Sonstige] Cash Closing Posted
@@ -334,6 +388,15 @@ channels:
       operationId: on_cash_closing_posted
       message:
         $ref: '#/components/messages/cash_closing_postedEvent'
+
+  "tenant.{tenantId}.collab.note.created":
+    description: >
+      [Sonstige] Collab Note Created
+    subscribe:
+      summary: collab.note.created
+      operationId: on_collab_note_created
+      message:
+        $ref: '#/components/messages/collab_note_createdEvent'
 
   "tenant.{tenantId}.compliance.violations_detected":
     description: >
@@ -344,6 +407,51 @@ channels:
       message:
         $ref: '#/components/messages/compliance_violations_detectedEvent'
 
+  "tenant.{tenantId}.einkauf.bestellung.created_from_angebot":
+    description: >
+      [Sonstige] Einkauf Bestellung Created From Angebot
+    subscribe:
+      summary: einkauf.bestellung.created_from_angebot
+      operationId: on_einkauf_bestellung_created_from_angebot
+      message:
+        $ref: '#/components/messages/einkauf_bestellung_created_from_angebotEvent'
+
+  "tenant.{tenantId}.einkauf.bestellung.created_from_supplier":
+    description: >
+      [Sonstige] Einkauf Bestellung Created From Supplier
+    subscribe:
+      summary: einkauf.bestellung.created_from_supplier
+      operationId: on_einkauf_bestellung_created_from_supplier
+      message:
+        $ref: '#/components/messages/einkauf_bestellung_created_from_supplierEvent'
+
+  "tenant.{tenantId}.finance.ap_invoice.approved":
+    description: >
+      [Sonstige] Finance Ap Invoice Approved
+    subscribe:
+      summary: finance.ap_invoice.approved
+      operationId: on_finance_ap_invoice_approved
+      message:
+        $ref: '#/components/messages/finance_ap_invoice_approvedEvent'
+
+  "tenant.{tenantId}.finance.ar_open_item.dunning_created":
+    description: >
+      [Sonstige] Finance Ar Open Item Dunning Created
+    subscribe:
+      summary: finance.ar_open_item.dunning_created
+      operationId: on_finance_ar_open_item_dunning_created
+      message:
+        $ref: '#/components/messages/finance_ar_open_item_dunning_createdEvent'
+
+  "tenant.{tenantId}.finance.payment_run.approved":
+    description: >
+      [Sonstige] Finance Payment Run Approved
+    subscribe:
+      summary: finance.payment_run.approved
+      operationId: on_finance_payment_run_approved
+      message:
+        $ref: '#/components/messages/finance_payment_run_approvedEvent'
+
   "tenant.{tenantId}.inventur.abgeschlossen":
     description: >
       [Sonstige] Inventur Abgeschlossen
@@ -352,6 +460,24 @@ channels:
       operationId: on_inventur_abgeschlossen
       message:
         $ref: '#/components/messages/inventur_abgeschlossenEvent'
+
+  "tenant.{tenantId}.qualitaet.reklamation.closed":
+    description: >
+      [Sonstige] Qualitaet Reklamation Closed
+    subscribe:
+      summary: qualitaet.reklamation.closed
+      operationId: on_qualitaet_reklamation_closed
+      message:
+        $ref: '#/components/messages/qualitaet_reklamation_closedEvent'
+
+  "tenant.{tenantId}.sales.delivery_note.print_requested":
+    description: >
+      [Sonstige] Sales Delivery Note Print Requested
+    subscribe:
+      summary: sales.delivery_note.print_requested
+      operationId: on_sales_delivery_note_print_requested
+      message:
+        $ref: '#/components/messages/sales_delivery_note_print_requestedEvent'
 
   "tenant.{tenantId}.settlement.created":
     description: >
@@ -470,6 +596,87 @@ channels:
       message:
         $ref: '#/components/messages/tenant_any_workflow_verbEvent'
 
+  tenant.*.xxx:
+    description: >
+      [System] Tenant * Xxx
+    subscribe:
+      summary: tenant.*.xxx
+      operationId: on_tenant_any_xxx
+      message:
+        $ref: '#/components/messages/tenant_any_xxxEvent'
+
+  "tenant.{tenantId}.feeding.actual.recorded":
+    description: >
+      [Tierernährung] Feeding Actual Recorded
+    subscribe:
+      summary: feeding.actual.recorded
+      operationId: on_feeding_actual_recorded
+      message:
+        $ref: '#/components/messages/feeding_actual_recordedEvent'
+
+  "tenant.{tenantId}.feeding.analysis.released":
+    description: >
+      [Tierernährung] Feeding Analysis Released
+    subscribe:
+      summary: feeding.analysis.released
+      operationId: on_feeding_analysis_released
+      message:
+        $ref: '#/components/messages/feeding_analysis_releasedEvent'
+
+  "tenant.{tenantId}.feeding.deviation.exceeded":
+    description: >
+      [Tierernährung] Feeding Deviation Exceeded
+    subscribe:
+      summary: feeding.deviation.exceeded
+      operationId: on_feeding_deviation_exceeded
+      message:
+        $ref: '#/components/messages/feeding_deviation_exceededEvent'
+
+  "tenant.{tenantId}.feeding.import.quarantined":
+    description: >
+      [Tierernährung] Feeding Import Quarantined
+    subscribe:
+      summary: feeding.import.quarantined
+      operationId: on_feeding_import_quarantined
+      message:
+        $ref: '#/components/messages/feeding_import_quarantinedEvent'
+
+  "tenant.{tenantId}.feeding.measure.created":
+    description: >
+      [Tierernährung] Feeding Measure Created
+    subscribe:
+      summary: feeding.measure.created
+      operationId: on_feeding_measure_created
+      message:
+        $ref: '#/components/messages/feeding_measure_createdEvent'
+
+  "tenant.{tenantId}.feeding.plan.published":
+    description: >
+      [Tierernährung] Feeding Plan Published
+    subscribe:
+      summary: feeding.plan.published
+      operationId: on_feeding_plan_published
+      message:
+        $ref: '#/components/messages/feeding_plan_publishedEvent'
+
+  "tenant.{tenantId}.feeding.ration.version.activated":
+    description: >
+      [Tierernährung] Feeding Ration Version Activated
+    subscribe:
+      summary: feeding.ration.version.activated
+      operationId: on_feeding_ration_version_activated
+      message:
+        $ref: '#/components/messages/feeding_ration_version_activatedEvent'
+
+  "tenant.{tenantId}.feeding.supply.procurement_handoff.created":
+    description: >
+      [Tierernährung] Feeding Supply Procurement Handoff Created
+    subscribe:
+      summary: feeding.supply.procurement_handoff.created
+      operationId: on_feeding_supply_procurement_handoff_created
+      message:
+        $ref: '#/components/messages/feeding_supply_procurement_handoff_createdEvent'
+
   "tenant.{tenantId}.ration.created":
     description: >
       [Tierernährung] Ration Created
@@ -484,6 +691,28 @@ components:
   agrar_contract_allocatedEvent:
     name: agrar.contract.allocated
     title: Agrar Contract Allocated
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  agrar_harvest_settlement_print_requestedEvent:
+    name: agrar.harvest_settlement.print_requested
+    title: Agrar Harvest Settlement Print Requested
     contentType: application/json
     payload:
       type: object
@@ -550,6 +779,50 @@ components:
   field_service_task_createdEvent:
     name: field_service_task.created
     title: Field Service Task Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  crm_lead_qualifiedEvent:
+    name: crm.lead.qualified
+    title: Crm Lead Qualified
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  crm_opportunity_activity_createdEvent:
+    name: crm.opportunity.activity_created
+    title: Crm Opportunity Activity Created
     contentType: application/json
     payload:
       type: object
@@ -836,6 +1109,50 @@ components:
   lager_einlagerung_createdEvent:
     name: lager.einlagerung.created
     title: Lager Einlagerung Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  lager_stock_movement_storniertEvent:
+    name: lager.stock_movement.storniert
+    title: Lager Stock Movement Storniert
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  lager_wareneingang_bookedEvent:
+    name: lager.wareneingang.booked
+    title: Lager Wareneingang Booked
     contentType: application/json
     payload:
       type: object
@@ -1229,9 +1546,53 @@ components:
           type: object
           description: Fachliche Nutzdaten je Event-Typ
 
+  ___Event:
+    name: ...
+    title:
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
   cash_closing_postedEvent:
     name: cash_closing.posted
     title: Cash Closing Posted
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  collab_note_createdEvent:
+    name: collab.note.created
+    title: Collab Note Created
     contentType: application/json
     payload:
       type: object
@@ -1273,9 +1634,163 @@ components:
           type: object
           description: Fachliche Nutzdaten je Event-Typ
 
+  einkauf_bestellung_created_from_angebotEvent:
+    name: einkauf.bestellung.created_from_angebot
+    title: Einkauf Bestellung Created From Angebot
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  einkauf_bestellung_created_from_supplierEvent:
+    name: einkauf.bestellung.created_from_supplier
+    title: Einkauf Bestellung Created From Supplier
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  finance_ap_invoice_approvedEvent:
+    name: finance.ap_invoice.approved
+    title: Finance Ap Invoice Approved
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  finance_ar_open_item_dunning_createdEvent:
+    name: finance.ar_open_item.dunning_created
+    title: Finance Ar Open Item Dunning Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  finance_payment_run_approvedEvent:
+    name: finance.payment_run.approved
+    title: Finance Payment Run Approved
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
   inventur_abgeschlossenEvent:
     name: inventur.abgeschlossen
     title: Inventur Abgeschlossen
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  qualitaet_reklamation_closedEvent:
+    name: qualitaet.reklamation.closed
+    title: Qualitaet Reklamation Closed
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  sales_delivery_note_print_requestedEvent:
+    name: sales.delivery_note.print_requested
+    title: Sales Delivery Note Print Requested
     contentType: application/json
     payload:
       type: object
@@ -1580,6 +2095,236 @@ components:
         payload:
           type: object
           description: Fachliche Nutzdaten je Event-Typ
+
+  tenant_any_xxxEvent:
+    name: tenant.*.xxx
+    title: Tenant * Xxx
+    contentType: application/json
+    payload:
+      type: object
+      required: [event_id, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+        payload:
+          type: object
+          description: Fachliche Nutzdaten je Event-Typ
+
+  feeding_actual_recordedEvent:
+    name: feeding.actual.recorded
+    title: Feeding Actual Recorded
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.actual.recorded
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_analysis_releasedEvent:
+    name: feeding.analysis.released
+    title: Feeding Analysis Released
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.analysis.released
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_deviation_exceededEvent:
+    name: feeding.deviation.exceeded
+    title: Feeding Deviation Exceeded
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.deviation.exceeded
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_import_quarantinedEvent:
+    name: feeding.import.quarantined
+    title: Feeding Import Quarantined
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.import.quarantined
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_measure_createdEvent:
+    name: feeding.measure.created
+    title: Feeding Measure Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.measure.created
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_plan_publishedEvent:
+    name: feeding.plan.published
+    title: Feeding Plan Published
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.plan.published
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_ration_version_activatedEvent:
+    name: feeding.ration.version.activated
+    title: Feeding Ration Version Activated
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.ration.version.activated
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
+
+  feeding_supply_procurement_handoff_createdEvent:
+    name: feeding.supply.procurement_handoff.created
+    title: Feeding Supply Procurement Handoff Created
+    contentType: application/json
+    payload:
+      type: object
+      required: [schema_version, event_id, event_type, aggregate_id, timestamp, payload]
+      properties:
+        schema_version:
+          type: string
+          const: '1.0'
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          const: feeding.supply.procurement_handoff.created
+        aggregate_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Referenzorientierte fachliche Nutzdaten
 
   ration_createdEvent:
     name: ration.created
