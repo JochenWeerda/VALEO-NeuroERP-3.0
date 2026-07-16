@@ -69,3 +69,117 @@ def feeding_plan_csv(content: dict[str, Any]) -> str:
             "" if load["target_batch_kg"] is None else f"{load['target_batch_kg']:.3f}",
         ]))
     return "\n".join(lines) + "\n"
+
+
+# ── Berichtspaket 2 (FEED-REP-040) ──────────────────────────────────────────
+
+def _require_reader_profile(report_label: str, profile: str) -> None:
+    """consulting/target_actual/trend richten sich an farmer/advisor;
+    ein Fuetterer-Profil existiert fachlich nicht (Kap. 6.14)."""
+    if profile not in {"farmer", "advisor"}:
+        raise ValueError(
+            f"Profil '{profile}' ist fuer {report_label} nicht anwendbar "
+            "(zulaessig: farmer, advisor)."
+        )
+
+
+# Interne Steuerfelder der Massnahmenverfolgung, die nur der Berater sieht.
+_MEASURE_INTERNAL_FIELDS = ("owner_subject", "reminder_date", "escalation_status")
+
+
+def build_consulting_report(draft: dict[str, Any], profile: str) -> dict[str, Any]:
+    _require_reader_profile("Beratungsberichte", profile)
+    draft_content = draft["content"]
+    content: dict[str, Any] = {
+        "report_type": "consulting",
+        "profile": profile,
+        "title": f"Beratungsbericht {draft_content['case'].get('title')}",
+        "case": draft_content["case"],
+        "observations": draft_content["observations"],
+        "measures": draft_content["measures"],
+    }
+    if profile == "farmer":
+        content["measures"] = [
+            {key: value for key, value in measure.items()
+             if key not in _MEASURE_INTERNAL_FIELDS}
+            for measure in draft_content["measures"]
+        ]
+    if profile == "advisor":
+        content["source"] = {
+            "draft_id": draft["id"],
+            "draft_version": draft["version"],
+            "case_id": draft["case_id"],
+        }
+    return content
+
+
+def build_target_actual_report(plan_version: dict[str, Any],
+                               aggregation: dict[str, Any],
+                               profile: str) -> dict[str, Any]:
+    _require_reader_profile("Soll-Ist-Berichte", profile)
+    content: dict[str, Any] = {
+        "report_type": "target_actual",
+        "profile": profile,
+        "title": (f"Soll-Ist-Bericht {plan_version['name']} "
+                  f"(Planversion {plan_version['version_no']})"),
+        "group_name": plan_version["group_name"],
+        "record_count": aggregation["record_count"],
+        "components": aggregation["components"],
+    }
+    if profile == "advisor":
+        content["cause_breakdown"] = aggregation["cause_breakdown"]
+        content["source"] = {
+            "plan_version_id": plan_version["id"],
+            "plan_id": plan_version["plan_id"],
+            "source_ration_version_id": plan_version["source_ration_version_id"],
+        }
+    return content
+
+
+_TREND_FARMER_FIELDS = (
+    "observation_date", "cow_count", "actual_milk_kg_cow", "actual_dmi_kg_cow",
+    "actual_fat_pct", "actual_protein_pct",
+)
+_TREND_ADVISOR_FIELDS = _TREND_FARMER_FIELDS + (
+    "ration_version_no", "plan_version_no", "source",
+)
+
+
+def build_trend_report(group: dict[str, Any], days: list[dict[str, Any]],
+                       profile: str) -> dict[str, Any]:
+    _require_reader_profile("Verlaufsberichte", profile)
+    fields = _TREND_ADVISOR_FIELDS if profile == "advisor" else _TREND_FARMER_FIELDS
+    content: dict[str, Any] = {
+        "report_type": "trend",
+        "profile": profile,
+        "title": f"Verlaufsbericht {group['name']}",
+        "group_name": group["name"],
+        "days": [{key: day.get(key) for key in fields} for day in days],
+    }
+    if profile == "advisor":
+        content["source"] = {"group_id": group["id"]}
+    return content
+
+
+def target_actual_csv(content: dict[str, Any]) -> str:
+    lines = ["feed_id;feed_name;n;target_kg_sum;actual_kg_sum;delta_kg_sum"]
+    for line in content["components"]:
+        lines.append(";".join([
+            str(line["feed_id"]),
+            "" if line["feed_name"] is None else str(line["feed_name"]),
+            str(line["n"]),
+            f"{line['target_kg_sum']:.3f}",
+            f"{line['actual_kg_sum']:.3f}",
+            f"{line['delta_kg_sum']:.3f}",
+        ]))
+    return "\n".join(lines) + "\n"
+
+
+def trend_csv(content: dict[str, Any]) -> str:
+    lines = [";".join(_TREND_FARMER_FIELDS)]
+    for day in content["days"]:
+        lines.append(";".join(
+            "" if day.get(key) is None else str(day[key])
+            for key in _TREND_FARMER_FIELDS
+        ))
+    return "\n".join(lines) + "\n"

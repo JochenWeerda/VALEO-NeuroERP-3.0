@@ -1,0 +1,41 @@
+slice_id: FEED-REP-040
+title: Beratungs-, Soll-Ist- und Verlaufsberichte auf der Report-Entitaet
+status: done
+owner: claude-feed-chain
+date: 2026-07-16
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.14 Berichte)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-REP-040)
+requirements:
+  - FEED-REP-002 (Beratungsbericht, Soll-Ist-Bericht, Verlaufsbericht)
+contracts:
+  api:
+    - POST /feeding/reports report_type consulting|target_actual|trend (Literal additiv erweitert)
+    - GET /feeding/reports/{id}/csv fuer target_actual/trend; consulting -> 422 (narrativ)
+  db:
+    - Migration alembic/versions/feed_reports_types_20260716.py — CHECK-Erweiterung report_type
+  domain:
+    - report_profiles.py additiv — build_consulting_report (advisor voll inkl. Quellblock,
+      farmer ohne interne Steuerfelder owner/reminder/escalation; feeder -> 422),
+      build_target_actual_report (Komponenten-Aggregation n/Soll/Ist/Delta,
+      advisor + Ursachenverteilung + Quellblock), build_trend_report (Tagesreihe,
+      advisor + ration_version_no/plan_version_no), target_actual_csv, trend_csv
+  services:
+    - feeding_reports_service.py additiv — Quellen: consulting_report_drafts (unveraenderlich, 032),
+      FeedingPlanService.get_version + Aggregation feeding_actual_components (append-only, 029),
+      feeding_controlling_daily je Gruppe deterministisch ohne today()-Fenster
+semantics:
+  - Datenstand-Aenderung (neue Ist-Saetze/Beobachtungen) => neuer content_hash => neuer
+    Berichtsdatensatz; keine stille Ueberschreibung (Kap. 16)
+  - gleicher Datenstand => idempotent derselbe Datensatz
+tdd:
+  red: "3 failed (422 report_type-Literal / fehlende Quellen) — tests/test_feeding_reports_pack2_api.py vor Implementierung"
+  green: "3 passed; Regression Reports+Consulting+Actual+Performance 18 passed"
+  refactor: "Profil-Gate _require_reader_profile + Feld-Whitelists zentral in report_profiles.py"
+gates:
+  - python -m alembic upgrade head + heads: single head feed_reports_types_20260716
+  - python scripts/generate_architecture_index.py: routes 905/905, services 210/210, endpoints 406/406
+  - pnpm arch:drift: OK
+notes:
+  - Berichte-Maske (Liste/Erzeugen/Zustellprofil) und Portalbereitstellung = FE-Rest
+  - PDF/DMS-Zustellung weiterhin expliziter REP-Rest (dms_document_ref vorbereitet)
