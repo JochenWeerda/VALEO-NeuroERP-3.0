@@ -2791,6 +2791,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/integrationsmonitor",
+      "path": "futtermittel/integrationsmonitor",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/mischfuttermittel-liste",
       "path": "futtermittel/mischfuttermittel-liste",
       "source": "auto"

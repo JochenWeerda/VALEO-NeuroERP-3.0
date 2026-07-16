@@ -125,15 +125,15 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | FEED-ACT-001 | Istmengen erfassen (manuell/Schnittstelle), idempotent | MUSS | `rations_controlling.py` observations + Quellen manual/mixing_wagon/herd_data/import | VERIFIED | — | vorhanden | `test_rations_controlling.py` | Slice 009 |
 | FEED-ACT-002 | Abweichung absolut/%, Nährstoff-/Kostenfolge, Verlauf | MUSS | append-only ActualFeeding je Planinstruction mit Decimal Soll/Ist/Delta/%, eingefrorener Preis-/Naehrstofffolge und nativer Komponentenprojektion; Tagestrends vorhanden | VERIFIED | Schwellen/Aufgaben siehe FEED-ACT-030 | FEED-ACT-029 | `test_feeding_actual.py`, `test_feeding_actual_api.py`, `feeding-plan-mobile.test.tsx` | ADR-052, FEED-ACT-029 |
 | FEED-ACT-003 | Mischgenauigkeit, Restfutter, Lade-/Mischzeiten | SOLL | `control/feeding_control.py` (<5%-Regelkreis) | VERIFIED | UI-Verlauf offen | Inkrement 4 | `test_rations_{feeding_control_dlg2025,mixing_protocol}.py` | DLG 01/2025 |
-| FEED-ACT-004 | Aufgaben aus Abweichungen, Ursachenklassifikation | MUSS | — | NOT_IMPLEMENTED | Measure/Task-Aggregat | **Inkrement 4/5** | — | Paritätsmatrix Tiergesundheit |
+| FEED-ACT-004 | Aufgaben aus Abweichungen, Ursachenklassifikation | MUSS | tenant-/klassenbezogene Policyversionen; planversionsgebundene Findings; menschlicher, idempotenter append-only Massnahmen-Command mit Owner, Termin und Grund; Ursachenklasse am ActualRecord | VERIFIED | — | FEED-ACT-029/030 | `test_feeding_actual_measures.py`, `test_feeding_actual_api.py`, `feeding-actual-page.test.tsx` | ADR-052/053, FEED-ACT-030 |
 
 ## Kapitel 6.12 — Leistungscontrolling
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-PERF-001 | Milch/ECM, Futterkosten, Effizienz, N-Effizienz, Methan je Gruppe | MUSS | `controlling.py` + Tagesreihe + Trends | VERIFIED | — | vorhanden | `test_rations_controlling.py`, `test_rations_efficiency_dlg2025.py` | Slices 009/012 |
-| FEED-PERF-002 | IOFC | MUSS (sofern Daten) | Milchpreis in feeding_control (IOFC-Basis) | PARTIAL | IOFC in Tagesreihe/Trends | Inkrement 4 | `test_rations_feeding_control_dlg2025.py` | — |
-| FEED-PERF-003 | Verlauf vor/nach Rationswechsel (Version im Zeitverlauf) | MUSS | ration_version_id an jedem Tagespunkt | PARTIAL | Versionsmarker in Trend-UI | Inkrement 4 | Slice 009 | — |
+| FEED-PERF-002 | IOFC | MUSS (sofern Daten) | Tagespunkt speichert Milchpreis, Milchumsatz und IOFC mit offengelegter Formel; unvollstaendige Basis bleibt `null`; Trendmetriken enthalten IOFC | VERIFIED | — | FEED-ACT-030 | `test_feeding_actual_measures.py`, `test_rations_controlling.py`, `feed-controlling-trends.test.tsx` | ADR-053, FEED-ACT-030 |
+| FEED-PERF-003 | Verlauf vor/nach Rationswechsel (Version im Zeitverlauf) | MUSS | jeder Tagespunkt traegt effektive FeedingPlanVersion-ID/-Nummer; Trend-UI zeigt datierte Textmarker bei Wechseln | VERIFIED | — | FEED-ACT-030 | `test_rations_controlling.py`, `feed-controlling-trends.test.tsx` | ADR-053, FEED-ACT-030 |
 | FEED-PERF-004 | MLP/Milchgüte/AMS-Kennzahlen (Harnstoff, FEQ, Zellzahl) | SOLL | ICAR-ADE-Adapter (Kuhprofil) | PARTIAL | Kennzahlenpfad in Controlling | Inkrement 6 | `test_rations_integrations_f5.py` | Slice 010 |
 | FEED-PERF-005 | Benchmarking Gruppen/Betriebe | SOLL | Gruppen-Benchmark (kuhzahl-gewichtet) | PARTIAL | Betriebsvergleich anonymisiert offen | Release C | `feed-controlling-trends.test.tsx` | Slice 012 |
 
@@ -181,7 +181,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-INT-001 | Idempotente Importe, Dubletten, Audit | MUSS | payload_hash + ON CONFLICT (Imports, Observations, Logs) | VERIFIED | Vorschau/Validierungsbericht | Inkrement 6 | `test_rations_integrations_f5.py`, `test_rations_herd_data_connectors.py` | Slices 010 |
+| FEED-INT-001 | Idempotente Importe, Dubletten, Audit, Vorschau, Quarantäne | MUSS | payload_hash + ON CONFLICT (010) **plus Integrationsmonitor**: `feeding_import_jobs` mit Statusautomat validated→accepted / quarantined→rejected, Vorschau ohne Persistenz (Adapter = Validierungs-SSOT), Übernahme über den bestehenden idempotenten Pfad, Verwerfen nur mit Pflicht-Begründung; Monitor-Worklist `futtermittel/integrationsmonitor` | VERIFIED | interaktives Material-Mapping als eigene Worklist folgt (FEED-INT-034-Rest/035) | Monitor + Direktpfad | `test_feeding_import_monitor_api.py` (7), `import-monitor.test.tsx` (3), Bestandstests 010 | Slices 010/034 |
 | FEED-INT-002 | Connector-Gates (Consent/Contract/Secret/Egress) | MUSS | HerdDataSyncService-Gates, Admin-Level | VERIFIED | Mapping-UI/Quarantäne je Betrieb | Inkrement 6 | `test_rations_herd_data_connectors.py` (10) | Slice 010 |
 | FEED-INT-003 | Reale DDW-/MLP-/Mischwagen-Livepfade | MUSS | Templates konfigurierbar, bewusst offen | BLOCKED | lizenzierter Partnervertrag erforderlich | extern | — | Paritätsmatrix |
 | FEED-INT-004 | Event-Bus/Webhooks | SOLL | NATS-Outbox systemweit | PARTIAL | Feeding-Events | Inkrement 6 | — | — |

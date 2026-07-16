@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-16
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-16T13:26:03Z'
+generated_at: '2026-07-16T13:38:22Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -214,6 +214,7 @@ domains:
     - /futtermittel/futtermittel-wareneingang
     - /futtermittel/grundfutteranalysen
     - /futtermittel/grundfutteranalysen/:id
+    - /futtermittel/integrationsmonitor
     - /futtermittel/mischfuttermittel-liste
     - /futtermittel/mischfuttermittel-stamm
     - /futtermittel/mischfuttermittel/:id
@@ -417,6 +418,7 @@ domains:
     - docs/adr/adr-050-feeding-plan-version-and-publication.md
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-052-component-actual-feeding.md
+    - docs/adr/adr-053-feeding-deviation-measures.md
     status: active
   crm:
     owner: domain/crm
@@ -1855,8 +1857,8 @@ domains:
     - docs/adr/adr-047-canonical-feeding-feed-catalog.md
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
 mapping_stats:
-  frontend_routes_total: 904
-  frontend_routes_mapped: 904
+  frontend_routes_total: 905
+  frontend_routes_mapped: 905
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

@@ -2505,6 +2505,10 @@
       "path": "futtermittel/beratung"
     },
     {
+      "module": "@/pages/futtermittel/integrationsmonitor",
+      "path": "futtermittel/integrationsmonitor"
+    },
+    {
       "module": "@/pages/futtermittel/grundfutteranalysen-native",
       "path": "futtermittel/grundfutteranalysen"
     },
