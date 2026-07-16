@@ -107,7 +107,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-CMP-001 | Zwei Rationen/Versionen vergleichen (Futtermittel/Nährstoff/Kosten-Diff) | MUSS | Intent-Vorschläge mit Delta (RATIONS-UX-INTENT-002); Versionsliste | PARTIAL | dedizierte Vergleichsansicht + Druck | Inkrement 2 | Vitest Workbench | — |
+| FEED-CMP-001 | Zwei Rationen/Versionen vergleichen (Futtermittel/Nährstoff/Kosten-Diff) | MUSS | `POST /feeding/ration-versions/compare` (deterministisch, gleiche Gruppe erzwungen → 409, fehlende Seite bleibt unbekannt/nie 0-günstig) + Vergleichsseite `futtermittel/rationsvergleich` (Komponenten-/Kennzahlen-Diff, Befunde beider Seiten) | VERIFIED | Druck-/PDF-Export und Kommentar je Variante folgen mit Berichtspaket (FEED-REP) | compare_drafts + Seite | `test_feeding_ration_editor.py::test_compare_drafts…`, API-Journey (409/404/403), `ration-comparison.test.tsx` (2) | FEED-EDITOR-023 |
 | FEED-CMP-002 | Szenarien (Preis/Analyse/Leistung) | SOLL | — | NOT_IMPLEMENTED | Paritätsmatrix Wirtschaftlichkeit | Release C | — | — |
 
 ## Kapitel 6.10 — Fütterungsplan

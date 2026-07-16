@@ -2497,6 +2497,10 @@
       "path": "futtermittel/rationseditor"
     },
     {
+      "module": "@/pages/futtermittel/rationsvergleich",
+      "path": "futtermittel/rationsvergleich"
+    },
+    {
       "module": "@/pages/futtermittel/grundfutteranalysen-native",
       "path": "futtermittel/grundfutteranalysen"
     },

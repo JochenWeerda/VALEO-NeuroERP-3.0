@@ -14,13 +14,17 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.agrar.rations.ration_draft import evaluate_draft
+from app.agrar.rations.ration_draft import compare_drafts, evaluate_draft
 from app.core.uuid7 import uuid7
 from app.services.feeding_feed_catalog_service import FeedingFeedCatalogService
 
 
 class EmptyRationVersionError(ValueError):
     """Version ohne Komponenten kann nicht fachlich bewertet werden."""
+
+
+class IncomparableVersionsError(ValueError):
+    """Versionen unterschiedlicher Gruppen sind fachlich nicht vergleichbar."""
 
 
 class FeedingRationEditorService:
@@ -107,6 +111,28 @@ class FeedingRationEditorService:
                "actor": self.actor}).mappings().one()
         self.db.commit()
         return dict(row)
+
+    def compare_versions(self, base_version_id: str, variant_version_id: str) -> dict[str, Any]:
+        """Zwei Versionen derselben Gruppe gegen dasselbe (juengste) Bedarfsprofil
+        vergleichen — deterministisch, ohne Persistenz (FEED-MASK-010)."""
+        base_version, base_components = self._version_components(base_version_id)
+        variant_version, variant_components = self._version_components(variant_version_id)
+        if base_version["group_id"] != variant_version["group_id"]:
+            raise IncomparableVersionsError(
+                "Versionen gehoeren zu unterschiedlichen Fuetterungsgruppen und sind nicht vergleichbar.")
+        base_eval = self.evaluate(group_id=base_version["group_id"],
+                                  requirement_profile_id=None, components=base_components)
+        variant_eval = self.evaluate(group_id=base_version["group_id"],
+                                     requirement_profile_id=base_eval["requirement_profile_id"],
+                                     components=variant_components)
+        result = compare_drafts(base_eval, variant_eval)
+        result["group_id"] = base_version["group_id"]
+        result["requirement_profile_id"] = base_eval["requirement_profile_id"]
+        result["base"] = {"version_id": base_version_id, "ration_id": base_version["ration_id"],
+                          "totals": base_eval["totals"]}
+        result["variant"] = {"version_id": variant_version_id, "ration_id": variant_version["ration_id"],
+                             "totals": variant_eval["totals"]}
+        return result
 
     def latest_evaluation(self, version_id: str) -> dict[str, Any]:
         row = self.db.execute(text("""

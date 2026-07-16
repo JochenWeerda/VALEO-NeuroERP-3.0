@@ -187,3 +187,58 @@ def _finding(code: str, severity: str, metric: str, actual: float,
              target: float | None, message: str) -> dict[str, Any]:
     return {"code": code, "severity": severity, "metric": metric,
             "actual": actual, "target": target, "message": message}
+
+
+# ── Variantenvergleich (FEED-EDITOR-023) ────────────────────────────────────
+
+COMPARE_METRICS: tuple[str, ...] = ("dm_kg", "fm_kg", "cost_eur", *NUTRIENT_KEYS.keys())
+
+
+def compare_drafts(base: Mapping[str, Any], variant: Mapping[str, Any]) -> dict[str, Any]:
+    """Deterministischer Diff zweier Draft-Bewertungen (gleiches Bedarfsprofil).
+
+    Entfernte/hinzugefuegte Komponenten behalten auf der fehlenden Seite
+    ``None`` (unbekannt) — nie eine nullwertig guenstige 0 (FEED-MASK-010).
+    Reihenfolge: Basisreihenfolge, danach Neuzugaenge der Variante.
+    """
+    base_positions = {p["feed_id"]: p for p in base["positions"]}
+    variant_positions = {p["feed_id"]: p for p in variant["positions"]}
+
+    component_diff: list[dict[str, Any]] = []
+    ordered_ids = [p["feed_id"] for p in base["positions"]]
+    ordered_ids += [p["feed_id"] for p in variant["positions"] if p["feed_id"] not in base_positions]
+
+    for feed_id in ordered_ids:
+        base_position = base_positions.get(feed_id)
+        variant_position = variant_positions.get(feed_id)
+        base_kg = float(base_position["kg_fm"]) if base_position else None
+        variant_kg = float(variant_position["kg_fm"]) if variant_position else None
+        if base_position and variant_position:
+            change = "changed" if base_kg != variant_kg else "unchanged"
+        elif base_position:
+            change = "removed"
+        else:
+            change = "added"
+        component_diff.append({
+            "feed_id": feed_id,
+            "name": str((variant_position or base_position or {}).get("name") or feed_id),
+            "base_kg_fm": base_kg,
+            "variant_kg_fm": variant_kg,
+            "delta_kg_fm": (variant_kg - base_kg) if (base_kg is not None and variant_kg is not None) else None,
+            "change": change,
+        })
+
+    metric_diff = [{
+        "metric": metric,
+        "label": METRIC_LABELS.get(metric, metric),
+        "base": float(base["totals"].get(metric, 0.0)),
+        "variant": float(variant["totals"].get(metric, 0.0)),
+        "delta": float(variant["totals"].get(metric, 0.0)) - float(base["totals"].get(metric, 0.0)),
+    } for metric in COMPARE_METRICS]
+
+    return {
+        "component_diff": component_diff,
+        "metric_diff": metric_diff,
+        "base_findings": list(base["findings"]),
+        "variant_findings": list(variant["findings"]),
+    }

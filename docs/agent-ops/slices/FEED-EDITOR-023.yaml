@@ -1,0 +1,90 @@
+slice_id: FEED-EDITOR-023
+id: FEED-EDITOR-023
+title: Variantenvergleich zweier Rationsversionen
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-16"
+requirements: [FEED-CMP-001]
+work_packages: [FEED-WP-081]
+decision_level: normal
+dependencies: [FEED-EDITOR-021, FEED-EDITOR-022]
+goal: >-
+  Berater entscheiden zwischen zwei Versionen anhand gemeinsamer fachlicher
+  Dimensionen: Komponenten-, Kennzahlen- und Kosten-Diff gegen dasselbe
+  Bedarfsprofil, Befunde beider Seiten nebeneinander (FEED-MASK-010).
+scope:
+  - "ration_draft.compare_drafts: deterministischer Diff (Basisreihenfolge +
+    Neuzugaenge; entfernte/hinzugefuegte Seite bleibt None — nie nullwertig
+    guenstig; Kennzahlen-Diff ueber COMPARE_METRICS)."
+  - "Service compare_versions: beide Snapshots serverseitig aufgeloest, gleiche
+    Gruppe erzwungen (IncomparableVersionsError -> 409), Variante gegen
+    DASSELBE Profil der Basis bewertet."
+  - "POST /feeding/ration-versions/compare (READ-Rollen, 404/409/422-Pfade,
+    typisierte Out-Modelle)."
+  - "Frontend RationComparison + Route futtermittel/rationsvergleich
+    (?base=&variant=): Komponenten-Tabelle mit Neu/Entfernt/Geaendert,
+    Kennzahlen-Diff, Befundgegenueberstellung, Fehlerzustand mit Retry."
+  - "Journey-Fund behoben: Lifecycle-source-Literal um 'editor' erweitert —
+    der Editor-Speicherpfad aus 021 haette real 422 erhalten (im
+    Component-Test unsichtbar, weil Client gemockt); Lifecycle-Regression
+    gruen."
+file_ownership:
+  - app/agrar/rations/ration_draft.py
+  - app/services/feeding_ration_editor_service.py
+  - app/api/v1/endpoints/feeding_ration_editor.py
+  - app/api/v1/endpoints/rations_lifecycle.py (source-Literal additiv)
+  - tests/test_feeding_ration_editor.py
+  - tests/test_feeding_ration_editor_api.py
+  - packages/frontend-web/src/features/feed-advice/RationComparison.tsx
+  - packages/frontend-web/src/lib/api/feeding-ration-editor.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsvergleich.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/ration-comparison.test.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-EDITOR-023.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    Backend: ImportError compare_drafts (1 failed) + Compare-Journey 404 vor
+    Implementierung; dabei realer 422-Fund am Lifecycle-source-Literal.
+    Frontend: Modulaufloesung RationComparison fehlgeschlagen.
+  green: >-
+    Backend 11/11 + Lifecycle-Regression (16 gesamt); Frontend 7/7
+    (Editor+Vergleich).
+  refactor: >-
+    Diff-Reihenfolge und Metrikliste als benannte Konstanten; FindingList als
+    gemeinsame Teilkomponente.
+acceptance:
+  - "Diff zeigt je Futtermittel Basis/Variante/Delta; entfernte oder neue
+    Komponenten bleiben auf der fehlenden Seite unbekannt."
+  - "Versionen unterschiedlicher Gruppen sind nicht vergleichbar (409)."
+  - "Beide Seiten werden gegen dasselbe Bedarfsprofil bewertet; Befunde
+    stehen nebeneinander."
+tests:
+  - "pytest Editor-Suiten 11/11 + rations_lifecycle 5/5 (nach Red-Welle 3)."
+  - "Vitest ration-comparison 2/2 + ration-editor 5/5; tsc 0; eslint 0."
+  - "Routen 901; Architecture Validate/Drift 901/901."
+risks:
+  - "Druck-/PDF-Ausgabe und Entscheidungsdokumentation je Variante folgen im
+    Berichts-Inkrement; Vergleich >2 Versionen bewusst spaeter."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Vergleich immer auf gleicher fachlicher Basis (Gruppe + Profil); fehlende
+    Werte nie nullwertig guenstig.
+  architektur_vertrag: >-
+    Reiner Rechen-Endpoint auf bestehenden Aggregaten; Diff-Logik als reine
+    Funktion im Domainmodul.
+  daten_vertrag: >-
+    Keine Persistenz; keine Migration (source-Erweiterung ist Vertrags-,
+    nicht Schemaaenderung — Spalte war bereits frei).
+  security_vertrag: >-
+    READ-Rollen; Tenant-Scope ueber Versionsaufloesung.
+  betriebs_vertrag: >-
+    Rollback = Revert.
+  dokumentations_vertrag: >-
+    Traceability FEED-CMP-001 VERIFIED; Workboard; dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz Welle 3; Guards 403/404/409/422 getestet; Regression gruen.

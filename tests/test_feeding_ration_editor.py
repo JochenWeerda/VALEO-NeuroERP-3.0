@@ -119,3 +119,39 @@ def test_findings_carry_four_level_priority_and_are_ordered() -> None:
     assert "high" in severities, "Unterdeckung muss Stufe high tragen"
     ranks = [SEVERITY_ORDER.index(s) for s in severities]
     assert ranks == sorted(ranks), "Befunde muessen nach Prioritaet geordnet sein"
+
+
+def test_compare_drafts_diffs_components_and_metrics() -> None:
+    """FEED-EDITOR-023 (TDD-Red-Welle 3): Vergleich zweier Komponentenbilder
+    liefert je Futtermittel Basis/Variante/Delta inkl. hinzugefuegt/entfernt
+    sowie Kennzahlen-Deltas beider Bewertungen."""
+    from app.agrar.rations.ration_draft import compare_drafts, evaluate_draft
+
+    feeds = {
+        "gras": _feed("gras"),
+        "mais": _feed("mais", dm_frac=0.33, me=11.2, price=0.18),
+        "soja": _feed("soja", dm_frac=0.88, me=13.5, sidp=350.0, price=0.45),
+    }
+    base = [{"feed_id": "gras", "kg_fm": 20.0}, {"feed_id": "mais", "kg_fm": 18.0}]
+    variant = [{"feed_id": "gras", "kg_fm": 16.0}, {"feed_id": "soja", "kg_fm": 2.0}]
+
+    base_eval = evaluate_draft(base, feeds, REQUIREMENTS)
+    variant_eval = evaluate_draft(variant, feeds, REQUIREMENTS)
+    comparison = compare_drafts(base_eval, variant_eval)
+
+    rows = {row["feed_id"]: row for row in comparison["component_diff"]}
+    assert rows["gras"]["base_kg_fm"] == 20.0
+    assert rows["gras"]["variant_kg_fm"] == 16.0
+    assert rows["gras"]["delta_kg_fm"] == -4.0
+    assert rows["gras"]["change"] == "changed"
+    assert rows["mais"]["change"] == "removed"
+    assert rows["mais"]["variant_kg_fm"] is None, "entfernt bleibt unbekannt, nie 0-guenstig"
+    assert rows["soja"]["change"] == "added"
+    assert rows["soja"]["base_kg_fm"] is None
+
+    metric_rows = {row["metric"]: row for row in comparison["metric_diff"]}
+    assert metric_rows["cost_eur"]["delta"] == (
+        variant_eval["totals"]["cost_eur"] - base_eval["totals"]["cost_eur"])
+    assert metric_rows["me_mj"]["base"] == base_eval["totals"]["me_mj"]
+    # Reihenfolge deterministisch (Basisreihenfolge, dann Neuzugaenge)
+    assert [row["feed_id"] for row in comparison["component_diff"]] == ["gras", "mais", "soja"]

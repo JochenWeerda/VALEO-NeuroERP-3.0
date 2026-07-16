@@ -2826,6 +2826,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/futtermittel/rationsvergleich",
+      "path": "futtermittel/rationsvergleich",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/futtermittel-wareneingang",
       "path": "futtermittel/wareneingang",
       "source": "alias"

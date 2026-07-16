@@ -16,6 +16,7 @@ from app.core.tenant import get_tenant_id
 from app.services.feeding_ration_editor_service import (
     EmptyRationVersionError,
     FeedingRationEditorService,
+    IncomparableVersionsError,
 )
 
 router = APIRouter(prefix="/feeding", tags=["feeding-ration-editor"])
@@ -119,6 +120,66 @@ async def get_ration_version_evaluation(version_id: str, db: Session = Depends(g
     service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
     try:
         return service.latest_evaluation(version_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+class VersionCompareIn(BaseModel):
+    base_version_id: str = Field(min_length=1, max_length=80)
+    variant_version_id: str = Field(min_length=1, max_length=80)
+
+
+class ComponentDiffOut(BaseModel):
+    feed_id: str
+    name: str
+    base_kg_fm: float | None = None
+    variant_kg_fm: float | None = None
+    delta_kg_fm: float | None = None
+    change: str
+
+
+class MetricDiffOut(BaseModel):
+    metric: str
+    label: str
+    base: float
+    variant: float
+    delta: float
+
+
+class VersionCompareSideOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    version_id: str
+    ration_id: str
+    totals: dict[str, float]
+
+
+class VersionComparisonOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    group_id: str
+    requirement_profile_id: str
+    base: VersionCompareSideOut
+    variant: VersionCompareSideOut
+    component_diff: list[ComponentDiffOut]
+    metric_diff: list[MetricDiffOut]
+    base_findings: list[DraftFindingOut]
+    variant_findings: list[DraftFindingOut]
+
+
+@router.post("/ration-versions/compare", response_model=VersionComparisonOut,
+             summary="Zwei Rationsversionen derselben Gruppe deterministisch vergleichen")
+async def compare_ration_versions(body: VersionCompareIn, db: Session = Depends(get_db),
+                                  tenant_id: str = Depends(get_tenant_id),
+                                  user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer den Variantenvergleich.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.compare_versions(body.base_version_id, body.variant_version_id)
+    except IncomparableVersionsError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except EmptyRationVersionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 

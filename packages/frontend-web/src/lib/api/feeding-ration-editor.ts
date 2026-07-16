@@ -69,3 +69,39 @@ export async function createRationVersion(rationId: string, input: {
   )
   return response.data
 }
+
+export interface ComponentDiff {
+  feed_id: string
+  name: string
+  base_kg_fm: number | null
+  variant_kg_fm: number | null
+  delta_kg_fm: number | null
+  change: 'added' | 'removed' | 'changed' | 'unchanged'
+}
+
+export interface MetricDiff {
+  metric: string
+  label: string
+  base: number
+  variant: number
+  delta: number
+}
+
+export interface VersionComparison {
+  group_id: string
+  requirement_profile_id: string
+  base: { version_id: string; ration_id: string; totals: Record<string, number> }
+  variant: { version_id: string; ration_id: string; totals: Record<string, number> }
+  component_diff: ComponentDiff[]
+  metric_diff: MetricDiff[]
+  base_findings: DraftFinding[]
+  variant_findings: DraftFinding[]
+}
+
+export async function compareRationVersions(input: {
+  base_version_id: string
+  variant_version_id: string
+}): Promise<VersionComparison> {
+  const response = await apiClient.post<VersionComparison>(`${BASE}/feeding/ration-versions/compare`, input)
+  return response.data
+}

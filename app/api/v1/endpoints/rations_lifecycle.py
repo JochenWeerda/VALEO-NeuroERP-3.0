@@ -150,13 +150,13 @@ class RationCreateIn(BaseModel):
     name: str = Field(min_length=1, max_length=240)
     description: str | None = Field(default=None, max_length=4_000)
     snapshot: dict[str, Any] = Field(min_length=1)
-    source: Literal["solver", "manual", "import"] = "solver"
+    source: Literal["solver", "manual", "import", "editor"] = "solver"
     comment: str | None = Field(default=None, max_length=2_000)
 
 
 class RationVersionCreateIn(BaseModel):
     snapshot: dict[str, Any] = Field(min_length=1)
-    source: Literal["solver", "manual", "import"] = "solver"
+    source: Literal["solver", "manual", "import", "editor"] = "solver"
     comment: str | None = Field(default=None, max_length=2_000)
     based_on_version_id: str | None = Field(default=None, max_length=80)
     expected_latest_version_no: int = Field(ge=1)

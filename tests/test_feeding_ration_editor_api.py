@@ -162,3 +162,72 @@ def test_version_evaluation_endpoints_reject_user_without_role() -> None:
         get = role_client.get("/feeding/ration-versions/v-1/evaluation")
     assert post.status_code == 403
     assert get.status_code == 403
+
+
+def test_compare_endpoint_journey_and_guards() -> None:
+    """FEED-EDITOR-023 (TDD-Red-Welle 3): Vergleich zweier Versionen derselben
+    Gruppe; ungleiche Gruppen -> 409; unbekannte Version -> 404; RBAC 403."""
+    suffix = uuid4().hex[:8]
+    feed_id = _create_feed(suffix)
+
+    def make_group(name: str) -> str:
+        response = client.post(f"{ROOT}/lifecycle/groups", headers=HEADERS, json={
+            "name": name, "animal_count": 8, "feeding_system": "TMR",
+            "profile_code": "fresh_cow", "pregnancy_status": "unknown"})
+        assert response.status_code == 201, response.text
+        return response.json()["id"]
+
+    group_id = make_group(f"Vergleich {suffix}")
+    profile = client.post(f"{ROOT}/feeding/requirement-profiles", headers=HEADERS,
+                          json={"group_id": group_id, "inputs": {"milk_kg_day": 30}})
+    assert profile.status_code == 201, profile.text
+
+    ration = client.post(f"{ROOT}/lifecycle/rations", headers=HEADERS, json={
+        "group_id": group_id, "name": f"VglRation {suffix}",
+        "snapshot": {"components": [{"feed_id": feed_id, "kg_fm": 30.0}]}})
+    assert ration.status_code == 201, ration.text
+    base_version = ration.json()["latest_version_id"]
+
+    second = client.post(f"{ROOT}/lifecycle/rations/{ration.json()['id']}/versions",
+                         headers=HEADERS, json={
+                             "snapshot": {"components": [{"feed_id": feed_id, "kg_fm": 26.0}]},
+                             "expected_latest_version_no": 1, "source": "editor"})
+    assert second.status_code == 201, second.text
+    variant_version = second.json()["id"]
+
+    comparison = client.post(f"{ROOT}/feeding/ration-versions/compare", headers=HEADERS,
+                             json={"base_version_id": base_version,
+                                   "variant_version_id": variant_version})
+    assert comparison.status_code == 200, comparison.text
+    payload = comparison.json()
+    row = payload["component_diff"][0]
+    assert row["base_kg_fm"] == 30.0 and row["variant_kg_fm"] == 26.0
+    assert payload["base"]["version_id"] == base_version
+    assert payload["variant"]["version_id"] == variant_version
+    metrics = {m["metric"] for m in payload["metric_diff"]}
+    assert {"dm_kg", "cost_eur", "me_mj"} <= metrics
+
+    # Ungleiche Gruppen -> 409
+    other_group = make_group(f"Andere {suffix}")
+    other_profile = client.post(f"{ROOT}/feeding/requirement-profiles", headers=HEADERS,
+                                json={"group_id": other_group, "inputs": {"milk_kg_day": 25}})
+    assert other_profile.status_code == 201
+    other_ration = client.post(f"{ROOT}/lifecycle/rations", headers=HEADERS, json={
+        "group_id": other_group, "name": f"Fremd {suffix}",
+        "snapshot": {"components": [{"feed_id": feed_id, "kg_fm": 10.0}]}})
+    assert other_ration.status_code == 201
+    mismatch = client.post(f"{ROOT}/feeding/ration-versions/compare", headers=HEADERS,
+                           json={"base_version_id": base_version,
+                                 "variant_version_id": other_ration.json()["latest_version_id"]})
+    assert mismatch.status_code == 409
+
+    missing = client.post(f"{ROOT}/feeding/ration-versions/compare", headers=HEADERS,
+                          json={"base_version_id": base_version,
+                                "variant_version_id": str(uuid4())})
+    assert missing.status_code == 404
+
+    _CONTEXT["roles"] = []
+    with TestClient(_build_role_app()) as role_client:
+        forbidden = role_client.post("/feeding/ration-versions/compare", json={
+            "base_version_id": "a", "variant_version_id": "b"})
+    assert forbidden.status_code == 403
