@@ -4,31 +4,31 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 version: 3.0.0
-generated: 2026-07-15
+generated: 2026-07-16
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-16` · Stand: `2026-07-15`
+> **Automatisch generiert** · Daten seit: `2026-04-17` · Stand: `2026-07-16`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **82** |
-| Slices abgeschlossen | **63** (77 %) |
-| Mit externen Gates | 66 |
+| Slices gesamt | **94** |
+| Slices abgeschlossen | **75** (80 %) |
+| Mit externen Gates | 74 |
 | Ohne Doku-Dateien | 30 |
-| Slices ohne Cycle-Time (kein Claim-Commit) | 71 |
+| Slices ohne Cycle-Time (kein Claim-Commit) | 77 |
 
 ## Cycle Time
 
 | Metrik | Wert |
 |---|---|
 | Median | **0.1 h** |
-| P90 | **0.2 h** |
+| P90 | **0.9 h** |
 
 !!! info "Interpretation"
     Cycle Time = Zeit zwischen `chore: claim <SLICE-ID>` und dem ersten `feat(…): <SLICE-ID>`-Commit.
@@ -36,7 +36,7 @@ generated: 2026-07-15
 
 ## Rework-Rate
 
-**64.1 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**62.8 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
@@ -48,17 +48,19 @@ generated: 2026-07-15
 
 | Slice | Cycle Time | Owner |
 |---|---|---|
-| `DESIGN-CHARTS-TOKEN-006` | 0.2 h | Claude |
-| `RATIONS-INT-UI-018` | 0.2 h | Codex |
+| `FEED-ADVICE-ROLES-013` | 2.1 h | Claude |
+| `FEED-CORE-019` | 0.9 h | Codex -> Claude (Uebernahme nach Codex-Token-Stopp auf ausdruecklichen Auftrag) |
 
 ## Agent-Produktivität (Slices je Owner)
 
 | Owner | Slices | Anteil |
 |---|---|---|
-| Codex | 41 | `████████████████████` |
-| Claude | 18 | `█████████░░░░░░░░░░░` |
+| Codex | 46 | `████████████████████` |
+| Claude | 23 | `██████████░░░░░░░░░░` |
 | Cursor | 15 | `███████░░░░░░░░░░░░░` |
 | offen | 6 | `███░░░░░░░░░░░░░░░░░` |
+| Codex -> Claude (Uebernahme nach Codex-Token-Stopp auf ausdruecklichen Auftrag) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
+| Claude (Fortfuehrung der Kette nach Codex-Token-Stopp) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | unclaimed | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | Claude Code | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 
