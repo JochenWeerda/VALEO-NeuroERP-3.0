@@ -12,3 +12,9 @@ def nitrogen_efficiency(milk_kg: float | None, protein_pct: float | None, feed_n
 
 def deviation(actual: float | None, target: float | None) -> float | None:
     return None if actual is None or target is None else round(actual - target, 3)
+
+def fat_protein_quotient(fat_pct: float | None, protein_pct: float | None) -> float | None:
+    """FEQ (MLP-Kennzahl, FEED-PERF-033): unbekannte oder unplausible Eingaben
+    bleiben None — nie 0-fabriziert."""
+    if fat_pct is None or protein_pct is None or protein_pct <= 0: return None
+    return round(fat_pct / protein_pct, 3)

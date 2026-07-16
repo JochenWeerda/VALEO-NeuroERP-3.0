@@ -29,6 +29,9 @@ class DailyObservationIn(BaseModel):
     feed_n_kg_cow: float | None = Field(default=None, ge=0)
     actual_methane_kg_cow: float | None = Field(default=None, ge=0)
     methane_estimated: bool = False
+    # MLP-/Milchguete-Kennzahlen (FEED-PERF-033); Provenienz via source-Feld.
+    milk_urea_mg_dl: float | None = Field(default=None, ge=0, le=100)
+    somatic_cell_count_k: float | None = Field(default=None, ge=0)
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
