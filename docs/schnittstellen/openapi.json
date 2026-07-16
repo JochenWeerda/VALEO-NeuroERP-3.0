@@ -24380,6 +24380,62 @@
         "title": "ComplianceWhistleblowerOut",
         "type": "object"
       },
+      "ComponentDiffOut": {
+        "properties": {
+          "base_kg_fm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Kg Fm"
+          },
+          "change": {
+            "title": "Change",
+            "type": "string"
+          },
+          "delta_kg_fm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Kg Fm"
+          },
+          "feed_id": {
+            "title": "Feed Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "variant_kg_fm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Kg Fm"
+          }
+        },
+        "required": [
+          "feed_id",
+          "name",
+          "change"
+        ],
+        "title": "ComponentDiffOut",
+        "type": "object"
+      },
       "ConcentrateRecipeProfile": {
         "description": "Rezeptur-/Pansen-Charakteristik eines Konzentratfutters.\n\nEntscheidet (zusammen mit `FeedingSystemConfig`) ueber die zulaessigen\nEinzelgaben im Melkstand/Transponder/AMS.\n\n- starch_breakdown_class: 'slow' (Trockenschnitzel+Maismehl dominant),\n  'rapid' (Muehlennebenprodukte dominant), 'mixed' (Default).\n- rumen_buffer_present: NaHCO3 oder MgO als Zusatz in der Rezeptur.\n- Quelle kennzeichnet, ob Werte deklariert, per OCR gescannt, manuell\n  geschaetzt oder Default sind (UI zeigt Badge an).",
         "properties": {
@@ -75197,6 +75253,39 @@
         "title": "MessageOut",
         "type": "object"
       },
+      "MetricDiffOut": {
+        "properties": {
+          "base": {
+            "title": "Base",
+            "type": "number"
+          },
+          "delta": {
+            "title": "Delta",
+            "type": "number"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "variant": {
+            "title": "Variant",
+            "type": "number"
+          }
+        },
+        "required": [
+          "metric",
+          "label",
+          "base",
+          "variant",
+          "delta"
+        ],
+        "title": "MetricDiffOut",
+        "type": "object"
+      },
       "MhdAbschreibungIn": {
         "properties": {
           "article_id": {
@@ -96700,7 +96789,8 @@
             "enum": [
               "solver",
               "manual",
-              "import"
+              "import",
+              "editor"
             ],
             "title": "Source",
             "type": "string"
@@ -96981,7 +97071,8 @@
             "enum": [
               "solver",
               "manual",
-              "import"
+              "import",
+              "editor"
             ],
             "title": "Source",
             "type": "string"
@@ -118839,6 +118930,112 @@
         "description": "Response schema for versicherungen endpoints.",
         "properties": {},
         "title": "VersicherungenOut",
+        "type": "object"
+      },
+      "VersionCompareIn": {
+        "properties": {
+          "base_version_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Base Version Id",
+            "type": "string"
+          },
+          "variant_version_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Variant Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_version_id",
+          "variant_version_id"
+        ],
+        "title": "VersionCompareIn",
+        "type": "object"
+      },
+      "VersionCompareSideOut": {
+        "properties": {
+          "ration_id": {
+            "title": "Ration Id",
+            "type": "string"
+          },
+          "totals": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Totals",
+            "type": "object"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version_id",
+          "ration_id",
+          "totals"
+        ],
+        "title": "VersionCompareSideOut",
+        "type": "object"
+      },
+      "VersionComparisonOut": {
+        "properties": {
+          "base": {
+            "$ref": "#/components/schemas/VersionCompareSideOut"
+          },
+          "base_findings": {
+            "items": {
+              "$ref": "#/components/schemas/DraftFindingOut"
+            },
+            "title": "Base Findings",
+            "type": "array"
+          },
+          "component_diff": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentDiffOut"
+            },
+            "title": "Component Diff",
+            "type": "array"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "metric_diff": {
+            "items": {
+              "$ref": "#/components/schemas/MetricDiffOut"
+            },
+            "title": "Metric Diff",
+            "type": "array"
+          },
+          "requirement_profile_id": {
+            "title": "Requirement Profile Id",
+            "type": "string"
+          },
+          "variant": {
+            "$ref": "#/components/schemas/VersionCompareSideOut"
+          },
+          "variant_findings": {
+            "items": {
+              "$ref": "#/components/schemas/DraftFindingOut"
+            },
+            "title": "Variant Findings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "group_id",
+          "requirement_profile_id",
+          "base",
+          "variant",
+          "component_diff",
+          "metric_diff",
+          "base_findings",
+          "variant_findings"
+        ],
+        "title": "VersionComparisonOut",
         "type": "object"
       },
       "VersionEvaluateIn": {
@@ -159812,6 +160009,75 @@
           }
         ],
         "summary": "Rationsentwurf deterministisch bewerten (ohne Persistenz, ohne Solverlauf)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-ration-editor"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/ration-versions/compare": {
+      "post": {
+        "operationId": "compare_ration_versions_api_v1_agrar_rations_optimization_feeding_ration_versions_compare_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionCompareIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionComparisonOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zwei Rationsversionen derselben Gruppe deterministisch vergleichen",
         "tags": [
           "agrar",
           "futtermittel",
