@@ -8500,3 +8500,6 @@ from app.api.v1.endpoints.feeding_mixer import router as _feeding_mixer_router
 router.include_router(_feeding_mixer_router)
 from app.api.v1.endpoints.feeding_performance import router as _feeding_performance_router
 router.include_router(_feeding_performance_router)
+
+from app.api.v1.endpoints.feeding_reports import router as _feeding_reports_router  # noqa: E402
+router.include_router(_feeding_reports_router)

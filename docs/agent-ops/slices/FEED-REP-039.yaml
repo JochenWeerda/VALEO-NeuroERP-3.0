@@ -1,0 +1,40 @@
+slice_id: FEED-REP-039
+title: Report-Entitaet mit reproduzierbaren, profilierten Ausgaben
+status: done
+owner: claude-feed-chain
+date: 2026-07-16
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.14 Berichte, Kap. 16 verbotene Loesungen)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-REP-039)
+requirements:
+  - FEED-REP-001 (profilierte Ausgaben aus unveraenderlicher Quellversion)
+  - FEED-REP-003 (CSV-Export strukturierter Berichtsdaten)
+contracts:
+  api:
+    - POST /api/v1/agrar/rations-optimization/feeding/reports (WRITE_ROLES, 201, idempotent via content_hash)
+    - GET /api/v1/agrar/rations-optimization/feeding/reports?source_ref= (READ_ROLES)
+    - GET /api/v1/agrar/rations-optimization/feeding/reports/{id} (READ_ROLES)
+    - GET /api/v1/agrar/rations-optimization/feeding/reports/{id}/csv (READ_ROLES, text/csv)
+  db:
+    - domain_agrar.feeding_reports (append-only Trigger, UNIQUE tenant/report_type/source_ref/profile/content_hash)
+    - Migration alembic/versions/feed_reports_20260716.py (revises feed_perf_mlp_20260716)
+  domain:
+    - app/agrar/rations/report_profiles.py — deterministische Inhalte, Profile feeder/farmer/advisor,
+      content_hash = sha256(json sort_keys); keine Zeitstempel im Inhalt (Reproduzierbarkeit)
+    - Profilierung: feeder = Mischfolge/Mengen ohne Quellendetails; farmer = + Gruppe/Tierzahl/Gueltigkeit;
+      advisor = + Quellblock (plan_version_id, plan_id, source_ration_version_id, reason)
+  services:
+    - app/services/feeding_reports_service.py — idempotente Erzeugung (SELECT-by-identity vor INSERT),
+      Quelle via FeedingPlanService.get_version (unveraenderliche Planversion)
+tdd:
+  red: "5 failed — ImportError app.api.v1.endpoints.feeding_reports (tests/test_feeding_reports_api.py vor Implementierung)"
+  green: "5 passed in 26.27s (--noconftest); Regression feeding-Batterie 17 passed"
+  refactor: "Profil-Logik als reine Funktionen in report_profiles.py extrahiert (testbar ohne DB)"
+gates:
+  - pytest tests/test_feeding_reports_api.py + feeding-Regression: 17 passed
+  - python -m alembic upgrade head + heads: single head feed_reports_20260716
+  - python scripts/generate_architecture_index.py: routes 905/905, services 210/210, endpoints 406/406
+  - pnpm arch:drift: OK
+notes:
+  - PDF-Rendering + DMS-Zustellung bewusst offen (dms_document_ref vorbereitet); folgt als REP-Ausbau
+  - FEED-REP-040 baut Beratungs-/Soll-Ist-/Verlaufsberichte auf derselben Report-Entitaet auf
