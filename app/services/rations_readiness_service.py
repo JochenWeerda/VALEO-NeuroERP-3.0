@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.agrar.rations.readiness import evaluate_material, summarize
+from app.services.feeding_plan_service import FeedingPlanService
 
 class RationsReadinessService:
     def __init__(self, db: Session, tenant_id: str):
@@ -45,7 +46,8 @@ class RationsReadinessService:
         for component in self._components(snapshot):
             feed_id, name = str(component.get("feed_id") or ""), str(component.get("name") or "Unbekannt")
             match = next((item for item in catalog if feed_id in {str(item["id"]), str(item["artikel_nummer"]), str(item["inventory_article_id"] or "")}), None)
-            if match is None: match = next((item for item in catalog if item["name"].casefold() == name.casefold()), None)
+            if match is None:
+                match = next((item for item in catalog if item["name"].casefold() == name.casefold()), None)
             forage = any(token in f"{match.get('art', '') if match else ''} {name}".casefold() for token in ("silage", "heu", "gras", "mais", "grundfutter"))
             rows.append(evaluate_material(feed_id=feed_id or None, name=name,
                 daily_kg=float(component.get("soll_kg") or 0), stock_kg=match.get("stock_kg") if match else None,
@@ -58,12 +60,19 @@ class RationsReadinessService:
                 price_updated_at=match.get("price_updated_at") if match else None, as_of=day))
         return summarize(rows, day)
 
-    def active_materials(self, *, as_of: date | None = None) -> list[dict[str, Any]]:
-        snapshots = self.db.execute(text("""
-          SELECT rv.snapshot FROM domain_agrar.ration_version_lifecycle lc
-          JOIN domain_agrar.ration_versions rv ON rv.id=lc.version_id AND rv.tenant_id=lc.tenant_id
-          WHERE lc.tenant_id=:tenant_id AND lc.status='active'
-        """), {"tenant_id": self.tenant_id}).scalars().all()
-        merged: dict[str, Any] = {"mobile": {"components": []}}
-        for snapshot in snapshots: merged["mobile"]["components"].extend(self._components(snapshot))
-        return self.evaluate(merged, as_of=as_of)["materials"]
+    def active_materials(self, *, subject: str = "", unrestricted: bool = False,
+                         as_of: date | None = None) -> list[dict[str, Any]]:
+        """Evaluate immutable current plan instructions, never editor/mobile snapshots."""
+        plans = FeedingPlanService(self.db, self.tenant_id, subject or "unknown").list_current(
+            subject=subject, unrestricted=unrestricted,
+        )
+        components = [
+            {
+                "feed_id": instruction["feed_id"],
+                "name": instruction.get("feed_name") or instruction["feed_id"],
+                "soll_kg": instruction.get("target_batch_kg") or 0,
+            }
+            for plan in plans
+            for instruction in plan["instructions"]
+        ]
+        return self.evaluate({"mobile": {"components": components}}, as_of=as_of)["materials"]

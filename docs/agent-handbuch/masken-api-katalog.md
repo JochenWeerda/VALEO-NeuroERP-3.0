@@ -20,7 +20,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
-| `agrar/feed-readiness` | Futter-Einsatzbereitschaft | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| `agrar/feed-readiness` | Futterversorgung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
 | `agrar/feeding-business` | Fuetterungsbetrieb | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
@@ -170,9 +170,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `agrar/feed-readiness` — Futter-Einsatzbereitschaft
+### `agrar/feed-readiness` — Futterversorgung
 
-**Zweck:** Engpaesse und Datenluecken vor Freigabe oder Fuetterungsstart erklaerbar erkennen.
+**Zweck:** Planbedarf, Sicherheitsreserve und Bestandsreichweite erklaerbar vergleichen und Unterdeckungen kontrolliert an den Einkauf geben.
 
 | | |
 |---|---|
@@ -184,7 +184,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `materials` → `/api/v1/agrar/rations-optimization/readiness/materials`
+- `materials` → `/api/v1/agrar/rations-optimization/feeding/supply`
 
 **MCP-Tools (Domäne):**
 
@@ -194,16 +194,16 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Welche Futtermittel reichen weniger als 14 Tage?
-- Welche Analyse oder welcher Preis ist abgelaufen?
+- Welche Unterdeckungen sind wegen unbekannter Handelseinheiten noch nicht uebergabefaehig?
 
-**Sensible Felder:** `price_eur_t`
+**Sensible Felder:** `stock_kg`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `create_handoff` | An Einkauf uebergeben | confirm | nein | `—` |
 | `open_inventory` | Bestaende pflegen | safe | nein | `—` |
-| `open_analyses` | Analysen pruefen | safe | nein | `—` |
 
 ---
 

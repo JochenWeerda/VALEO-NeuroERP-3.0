@@ -56,7 +56,9 @@ def test_feed_readiness_is_native_inventory_worklist() -> None:
     definition = get_screen_definition("agrar/feed-readiness")
     assert definition is not None
     assert definition["layout"]["tableProfile"] == "inventory"
-    assert definition["dataSources"][0]["endpoint"].endswith("/readiness/materials")
+    assert definition["dataSources"][0]["endpoint"].endswith("/feeding/supply")
+    assert any(column["key"] == "suggested_order_kg" for column in definition["tables"][0]["columns"])
+    assert any(action["key"] == "create_handoff" for action in definition["actions"])
     assert _check_readiness(definition)["generatorReady"] is True
 
 

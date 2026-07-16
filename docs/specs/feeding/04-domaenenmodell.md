@@ -384,6 +384,19 @@ Hotspots fuer Detailentscheidungen:
 - Lifecycle: `app/agrar/rations/lifecycle/domain.py`
 - Solver: `app/agrar/rations/solver/`
 - Readiness: `app/agrar/rations/readiness.py`
+
+## 14. Planversorgung und Einkaufs-Handoff FEED-SUP-028
+
+`SupplyProjection` ist ein unveraenderliches Value Object aus Planinstruction,
+Horizont, Sicherheitsprozentsatz, bekanntem Bestand und optionaler expliziter
+Handelseinheit. Es ist kein Lager-Aggregat und wird nicht persistiert.
+
+`FeedingSupplyHandoff` ist ein append-only Uebergabe-Aggregat mit Planversion,
+Gruppe, Feed, Entscheidungsprojektion, Pflichtgrund, Akteur, Tenant und
+Idempotenzvertrag. Das Domain Event
+`feeding.supply.procurement_handoff.created` signalisiert einen zu pruefenden
+Bedarf. Die Einkaufsdomaene allein entscheidet ueber Bestellvorschlag,
+Lieferant, Kontrakt und Freigabe.
 - Controlling: `app/agrar/rations/controlling.py`
 - Integrations-ACL: `app/agrar/rations/integrations/`
 - Zielentscheidungen: `target-architecture.md`

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-SUP-028 Planbedarf, Reichweite, Sicherheitszuschlag und Einkaufsuebergabe - reserviert 2026-07-16
+## FEED-SUP-028 Planbedarf, Reichweite, Sicherheitszuschlag und Einkaufsuebergabe - abgeschlossen 2026-07-16
 
-**Owner:** Codex. **Stand:** reserviert (Claim). Die Versorgung wechselt von `ration.snapshot.mobile` auf aktuelle FeedingPlanInstructions. Reine Decimal-Regeln berechnen Tages-/Horizontbedarf, expliziten Sicherheitszuschlag, bekannte Reichweite und auf Handelseinheiten gerundete Unterdeckung; unbekannter Bestand bleibt unbekannt. Kritische Unterdeckung erzeugt nur eine idempotente, begruendete Einkaufsuebergabe mit Outbox-Ereignis, niemals automatisch eine Bestellung. Die Meridian-Ansicht priorisiert Abhilfe und Datenluecken. **TDD:** Supply-Boundaries, API/Isolation/Outbox und Screen-Vertrag zuerst rot.
+**Owner:** Codex. **Stand:** abgeschlossen. Die Versorgung liest aktuelle FeedingPlanInstructions statt `ration.snapshot.mobile`. Reine Decimal-Regeln zeigen Netto-, Sicherheits- und Bruttobedarf, bekannten Bestand, Reichweite, Unterdeckung, explizite Handelseinheit und Rundungsaufschlag; unbekannter Bestand bleibt unbekannt. Kritische Unterdeckung erzeugt nur eine tenant-/grant-sichere, idempotente und begruendete append-only Einkaufsuebergabe samt atomarem Outbox-Ereignis, niemals automatisch eine Bestellung. Die native Meridian-ListReport-Maske blockiert unbekannte Daten und bestaetigt den konkreten Zeilenbedarf in einem schmalen Overlay. **TDD-Abnahme:** fokussiert 25 Backend-/Screen- und 10 Frontend-Tests; Feeding-/Rations-Regression 620 gruen/1 skipped; Frontend 101 Dateien/406 gruen/1 skipped; TypeScript, ESLint, Ruff, Compile, Alembic, Doku 127/131, Architektur 903/903 (210 Services, 406 Endpoints) und Handbuch 45 Masken gruen. **Requirements:** FEED-SUP-001 und FEED-SUP-003 VERIFIED; Chargen-FIFO/Reservierungen bleiben FEED-SUP-002.
 
 ## FEED-PLAN-027 Plan-ObjectPage, Druck, Mobilroute und Veraltet-Kennzeichnung - abgeschlossen 2026-07-16
 

@@ -2704,36 +2704,38 @@ def build_agrar_feeding_reference_data_screen_definition() -> dict[str, Any]:
 
 
 def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
-    """Native worklist for inventory, lab-analysis and price readiness."""
+    """Native plan-bound supply worklist with controlled procurement handoff."""
     return {
         "schemaVersion": 1, "id": "agrar/feed-readiness", "domain": "agrar", "mode": "list",
-        "title": "Futter-Einsatzbereitschaft",
-        "subtitle": "Reichweite, Laboranalyse und Preisstand der aktiven Rationen",
+        "title": "Futterversorgung",
+        "subtitle": "Bedarf, Sicherheitszuschlag, Reichweite und Unterdeckung aus gueltigen Fuetterungsplaenen",
         "adapter": {"type": "native", "sourceId": "agrar/feed-readiness", "temporary": False},
-        "dataSources": [{"key": "materials", "endpoint": "/api/v1/agrar/rations-optimization/readiness/materials", "pageSize": 100, "staleTimeMs": 30_000}],
+        "dataSources": [{"key": "materials", "endpoint": "/api/v1/agrar/rations-optimization/feeding/supply", "pageSize": 100, "staleTimeMs": 30_000}],
         "tables": [{
-            "key": "materials", "label": "Eingesetzte Futtermittel", "dataSourceKey": "materials",
+            "key": "materials", "label": "30-Tage-Bedarf inkl. 10 % Sicherheitszuschlag", "dataSourceKey": "materials",
             "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
             "columns": [
-                {"key": "name", "label": "Futtermittel", "sortable": True, "filterable": True, "width": 220},
+                {"key": "group_name", "label": "Tiergruppe", "sortable": True, "filterable": True, "width": 190},
+                {"key": "feed_name", "label": "Futtermittel", "sortable": True, "filterable": True, "width": 220},
                 {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
-                {"key": "daily_kg", "label": "Soll kg/Tag", "numeric": True, "width": 120},
+                {"key": "daily_demand_kg", "label": "Soll kg/Tag", "numeric": True, "width": 120},
+                {"key": "gross_demand_kg", "label": "Bedarf inkl. Sicherheit", "numeric": True, "width": 170},
                 {"key": "stock_kg", "label": "Bestand kg", "numeric": True, "width": 120},
                 {"key": "reach_days", "label": "Reichweite Tage", "numeric": True, "sortable": True, "width": 140},
-                {"key": "analysis_date", "label": "Analyse", "renderKind": "date", "width": 130},
-                {"key": "price_eur_t", "label": "EUR/t", "renderKind": "currency", "numeric": True, "width": 120},
-                {"key": "price_valid_to", "label": "Preis gueltig bis", "renderKind": "date", "width": 150},
-                {"key": "issue_summary", "label": "Handlungsbedarf", "width": 360},
+                {"key": "shortage_kg", "label": "Unterdeckung kg", "numeric": True, "sortable": True, "width": 140},
+                {"key": "trade_unit_kg", "label": "Handelseinheit kg", "numeric": True, "width": 150},
+                {"key": "suggested_order_kg", "label": "Vorschlag kg", "numeric": True, "width": 130},
+                {"key": "order_rounding_delta_kg", "label": "Rundungsaufschlag", "numeric": True, "width": 150},
             ],
         }],
         "actions": [
-            {"key": "open_inventory", "label": "Bestaende pflegen", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
-            {"key": "open_analyses", "label": "Analysen pruefen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+            {"key": "create_handoff", "label": "An Einkauf uebergeben", "kind": "primary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
+            {"key": "open_inventory", "label": "Bestaende pflegen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
-        "noWorkflowReason": "Das Read-Model bewertet vorhandene Stamm-, Bestands-, Labor- und Preisdaten ohne sie zu duplizieren.",
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "copilot", "tableProfile": "inventory"},
+        "noWorkflowReason": "Die Maske erzeugt ausschliesslich einen auditierbaren Bedarfsvorschlag; Bestellung und Freigabe bleiben im Einkaufsprozess.",
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "listReport", "density": "compact", "contextRail": "copilot", "tableProfile": "inventory"},
         "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
-        "agentContract": {"businessPurpose": "Engpaesse und Datenluecken vor Freigabe oder Fuetterungsstart erklaerbar erkennen.", "examplePrompts": ["Welche Futtermittel reichen weniger als 14 Tage?", "Welche Analyse oder welcher Preis ist abgelaufen?"], "sensitiveFields": ["price_eur_t"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-readiness']"}},
+        "agentContract": {"businessPurpose": "Planbedarf, Sicherheitsreserve und Bestandsreichweite erklaerbar vergleichen und Unterdeckungen kontrolliert an den Einkauf geben.", "examplePrompts": ["Welche Futtermittel reichen weniger als 14 Tage?", "Welche Unterdeckungen sind wegen unbekannter Handelseinheiten noch nicht uebergabefaehig?"], "sensitiveFields": ["stock_kg"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-readiness']"}},
     }
 
 

@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from app.agrar.rations.authz import READ_ROLES, require_roles
+from app.agrar.rations.authz import APPROVE_ROLES, READ_ROLES, require_roles
 from app.auth.deps import User, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -24,4 +24,7 @@ async def evaluate_readiness(body: ReadinessEvaluateIn, db: Session = Depends(ge
 @router.get("/materials", response_model=list[dict], summary="Readiness der aktuell eingesetzten Futtermittel")
 async def active_material_readiness(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer die Readiness-Pruefung.")
-    return RationsReadinessService(db, tenant_id).active_materials()
+    return RationsReadinessService(db, tenant_id).active_materials(
+        subject=str(user.get("sub") or ""),
+        unrestricted=bool(set(user.get("roles") or []).intersection(APPROVE_ROLES)),
+    )

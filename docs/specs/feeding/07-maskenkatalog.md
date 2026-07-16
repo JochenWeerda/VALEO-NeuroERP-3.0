@@ -547,3 +547,18 @@ druckt Plan-ID, Quellversion, Gueltigkeit, Druckzeitpunkt und Rundungsdelta.
 `/feeding/plans/current`. Der Offline-Fallback ist an Planversions-ID und
 Cachevertrag v2 gebunden. Unbekannte Zielmengen bleiben sichtbar und blockieren
 die Ist-Erfassung; geplante/veraltete Versionen werden nicht angeboten.
+
+## 18. Planbasierte Futterversorgung FEED-SUP-028
+
+`agrar/feed-readiness` ist eine native Meridian-ListReport-Maske unter
+`/portal/rationsoptimierung?view=readiness`. Die Tabelle ordnet Tiergruppe und
+Futtermittel den getrennten Bedarfs-, Sicherheits-, Bestands-, Reichweiten-,
+Unterdeckungs- und Rundungswerten zu. `unknown`, `sufficient` und `critical`
+sind Textzustaende.
+
+Die Zeilenaktion `An Einkauf uebergeben` ist nur bei bekanntem Bestand,
+positiver Unterdeckung und expliziter Handelseinheit moeglich. Ein schmales
+Bestaetigungs-Overlay zeigt Unterdeckung, gerundeten Vorschlag und
+Rundungsaufschlag, fordert einen Auditgrund und erklaert, dass keine Bestellung
+entsteht. Die Maske bleibt in der Kette ScreenDefinition -> RenderPlan ->
+UniversalMaskRuntime -> UniversalMaskRenderer.

@@ -506,3 +506,17 @@ Dosierschritt, Rundungsmodus, Gueltigkeit, Auditgrund und Idempotency-Key. Nur
 Planversion, gleicher Key mit anderem Request 409. `GET /feeding/plans` und
 `GET /feeding/plans/{id}` sind tenant-/grant-gefiltert. Alle Mengenfelder sind
 Decimal-basiert; unbekannte FM-Mengen erscheinen als `null`, nicht `0`.
+
+## 21. Planversorgung und Einkaufsuebergabe FEED-SUP-028
+
+- `GET /feeding/supply?horizon_days=30&safety_pct=10` liefert je aktueller,
+  grant-sichtbarer Planinstruction Netto-/Bruttobedarf, Zuschlag, bekannten
+  Bestand, Reichweite, Unterdeckung, Handelseinheit und gerundeten Vorschlag.
+- `POST /feeding/supply/procurement-handoffs` verlangt Planversion, Feed,
+  Horizont, Sicherheitsprozentsatz, Idempotency-Key und Pflichtgrund. Unbekannter
+  Bestand, fehlende Handelseinheit oder fehlende Unterdeckung antworten 409.
+- `GET /feeding/supply/procurement-handoffs` liefert nur tenant- und
+  business-grant-sichtbare Nachweise. READ/WRITE-Rollen gelten serverseitig.
+
+Der POST erzeugt ausschliesslich Handoff und Outbox-Ereignis; niemals einen
+Einkaufsauftrag.

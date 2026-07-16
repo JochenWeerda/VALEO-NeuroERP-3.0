@@ -149,9 +149,9 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-SUP-001 | Reichweite/Unterdeckung aus aktiven Rationen | MUSS | Readiness: Bestand + deterministische Reichweite | VERIFIED | Sicherheitszuschlag/Handelseinheit offen | Inkrement 3 | `test_rations_readiness.py` | Slice 008 |
+| FEED-SUP-001 | Reichweite/Unterdeckung aus aktiven Rationen | MUSS | aktuelle FeedingPlanInstructions; Decimal-Netto-/Sicherheits-/Bruttobedarf, Bestand, Reichweite, Unterdeckung und Handelseinheitsrundung; unbekannter Bestand bleibt unbekannt | VERIFIED | Chargen/Reservierungen siehe FEED-SUP-002 | FEED-SUP-028 | `test_feeding_supply.py`, `test_feeding_supply_api.py` | ADR-051, FEED-SUP-028 |
 | FEED-SUP-002 | Chargen-FIFO, Reservierungen | SOLL | — | NOT_IMPLEMENTED | Paritätsmatrix Futterbestand | Inkrement 6 | — | — |
-| FEED-SUP-003 | Bestellvorschlag/Übergabe Einkauf | SOLL | Bestellvorschlags-Framework (`einkauf/bestellvorschlag-*`), `futtermittel-bestellung.tsx` | PARTIAL | Kopplung an Rationsbedarf | Inkrement 6 | — | — |
+| FEED-SUP-003 | Bestellvorschlag/Übergabe Einkauf | SOLL | planbezogener, idempotenter und auditierter Handoff mit atomarem Outbox-Ereignis; keine automatische Bestellung; native Bestaetigungsjourney | VERIFIED | Konsumentenprojektion im Einkauf kann auf Event aufsetzen | FEED-SUP-028 | `test_feeding_supply_api.py`, `feeding-supply-page.test.tsx` | ADR-051, FEED-SUP-028 |
 
 ## Kapitel 6.15 — Berichte
 

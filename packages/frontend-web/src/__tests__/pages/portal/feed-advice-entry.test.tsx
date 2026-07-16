@@ -38,6 +38,10 @@ vi.mock('@/features/feed-advice/FeedingReferenceData', () => ({
   FeedingReferenceData: () => <div data-testid="feeding-reference-data">Referenzdaten</div>,
 }))
 
+vi.mock('@/features/feed-advice/FeedingSupplyPage', () => ({
+  FeedingSupplyPage: () => <div data-testid="feeding-supply-page">agrar/feed-readiness</div>,
+}))
+
 describe('Portal Fuetterungsberatung entry architecture', () => {
   beforeEach(() => {
     locationState.search = ''
@@ -72,10 +76,10 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
     expect(screen.getByTestId('ration-lifecycle-detail')).toHaveTextContent('r-42')
   })
 
-  it('routes inventory readiness through a native screen definition', () => {
+  it('routes plan-bound supply through a native screen definition', () => {
     locationState.search = '?view=readiness'
     render(<PortalFeedAdvicePage />)
-    expect(screen.getByTestId('native-feed-cockpit')).toHaveTextContent('agrar/feed-readiness')
+    expect(screen.getByTestId('feeding-supply-page')).toHaveTextContent('agrar/feed-readiness')
     expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
   })
 

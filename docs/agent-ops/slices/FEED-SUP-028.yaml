@@ -2,9 +2,10 @@ slice_id: FEED-SUP-028
 id: FEED-SUP-028
 title: Planbedarf Reichweite Sicherheitszuschlag und Einkaufsuebergabe
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-16"
 started_at: "2026-07-16"
+completed_at: "2026-07-16"
 goal: >-
   Bedarf und Reichweite aus aktuellen FeedingPlanVersions statt Legacy-Mobile-
   Snapshots ableiten, Sicherheitszuschlag und Handelseinheit transparent
@@ -29,7 +30,7 @@ file_ownership:
   - tests/test_rations_readiness.py
   - packages/frontend-web/src/lib/api/feeding-supply.ts
   - packages/frontend-web/src/features/feed-advice/FeedingSupplyPage.tsx
-  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-supply.test.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-supply-page.test.tsx
   - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
   - docs/architecture/agents/impact-notes/FEED-SUP-028.md
   - docs/architecture/domains/agrar/
@@ -59,8 +60,24 @@ tests:
   - tests/test_feeding_supply.py
   - tests/test_feeding_supply_api.py
   - tests/test_rations_readiness.py
-  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-supply.test.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-supply-page.test.tsx
 risks:
   - Bestandseinheiten und Plan-FM duerfen nicht ohne explizite Konvertierung vermischt werden.
   - Unbekannter Bestand darf keinen Null-Bestellvorschlag erzeugen.
   - Einkaufsuebergabe darf eine Bestellung weder erzeugen noch freigeben.
+evidence:
+  red:
+    - Elf Boundary-/Property-Vertraege fuer Decimal-Bedarf, Sicherheit, unbekannten Bestand, Reichweite und Handelseinheitsrundung.
+    - API-/DB-Journey fuer Current-Plan-Projektion, RBAC, Tenant/Grant, Idempotenz, Audit und Outbox.
+    - Meridian-Screen- und Component-Vertraege fuer kontrollierte Zeilenuebergabe und unbekannten Bestand.
+  green:
+    - Fokussiert 25 Backend-/Screen-Tests und 10 Frontend-Tests gruen.
+    - Feeding-/Rations-Regression 620 gruen und 1 bewusst uebersprungen.
+    - Frontend-Gesamtsuite 101 Dateien, 406 Tests gruen und 1 bewusst uebersprungen.
+    - TypeScript, ESLint, Ruff, Python-Compile und Alembic-Head gruen.
+    - Markdown 127 und Governance 131 Dateien gruen.
+    - Architecture Validate/Strict Drift 903/903 Routen, 210 Services und 406 Endpoints; Handbuch 45 Masken driftfrei.
+  refactor:
+    - Current FeedingPlanInstructions ersetzen snapshot.mobile als Quelle der aktiven Material-Readiness.
+    - Reine Supply-Regeln, grant-sichere Read-Projektion und append-only Command-Persistenz sind getrennt.
+    - Meridian bleibt zentral; nur der begruendete Handoff ist ein schmales Overlay.

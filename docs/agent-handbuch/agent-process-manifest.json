@@ -941,7 +941,7 @@
     },
     {
       "mask_id": "agrar/feed-readiness",
-      "title": "Futter-Einsatzbereitschaft",
+      "title": "Futterversorgung",
       "domain": "agrar",
       "process_keys": [],
       "rollout_route": "/mask-rollout/agrar__feed-readiness/:entityId",
@@ -950,6 +950,17 @@
       "readiness_url": "/api/v1/masks/agrar/feed-readiness/readiness",
       "risk_summary": "low",
       "actions": [
+        {
+          "key": "create_handoff",
+          "label": "An Einkauf uebergeben",
+          "dangerLevel": "confirm",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
         {
           "key": "open_inventory",
           "label": "Bestaende pflegen",
@@ -960,21 +971,10 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        },
-        {
-          "key": "open_analyses",
-          "label": "Analysen pruefen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [
-        "price_eur_t"
+        "stock_kg"
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",

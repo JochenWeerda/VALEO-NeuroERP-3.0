@@ -494,3 +494,14 @@ angeben -> MixingInstructions serverseitig skalieren und runden -> Planversion,
 Anweisungen und `feeding.plan.published` atomar speichern. Retry mit identischem
 Idempotency-Key ist wirkungslos; widerspruechlicher Retry endet 409. Bereits
 publizierte Daten koennen nicht mutiert oder geloescht werden.
+
+## 27. Planbedarf an Einkauf uebergeben FEED-SUP-028
+
+Aktuelle Planversionen lesen -> Tagesbedarf je Mischanweisung bestimmen ->
+Horizont und expliziten Sicherheitszuschlag ausweisen -> Bestand/Reichweite und
+Unterdeckung berechnen -> nur bekannte Handelseinheit aufrunden -> konkreten
+Zeilenbedarf und Auditgrund bestaetigen -> append-only Handoff und
+`feeding.supply.procurement_handoff.created` atomar speichern -> im Einkauf als
+Vorschlag pruefen. Unbekannter Bestand oder unbekannte Handelseinheit beendet
+den Agrar-Command ohne Persistenz. Bestellung und Freigabe bleiben separate
+Einkaufsentscheidungen.

@@ -8,6 +8,7 @@ import { FeedControllingPage } from '@/features/feed-advice/FeedControllingPage'
 import { FeedingBusinessWorklist } from '@/features/feed-advice/FeedingBusinessWorklist'
 import { FeedingGroupDetail } from '@/features/feed-advice/FeedingGroupDetail'
 import { FeedingReferenceData } from '@/features/feed-advice/FeedingReferenceData'
+import { FeedingSupplyPage } from '@/features/feed-advice/FeedingSupplyPage'
 
 const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsoptimierung'))
 
@@ -40,17 +41,7 @@ export default function PortalFeedAdvicePage(): JSX.Element {
   }
 
   if (routeState.view === 'readiness') {
-    return (
-      <UniversalNativeCockpitPage
-        screenId="agrar/feed-readiness"
-        testId="feed-readiness-worklist"
-        permissions={['futtermittel.rations.update']}
-        onAction={(actionKey) => {
-          if (actionKey === 'open_inventory') window.location.assign('/futtermittel/einzelfuttermittel-liste')
-          if (actionKey === 'open_analyses') window.location.assign('/futtermittel/grundfutteranalysen')
-        }}
-      />
-    )
+    return <FeedingSupplyPage />
   }
 
   if (routeState.view === 'controlling') {

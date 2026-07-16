@@ -414,3 +414,13 @@ Kopien bleiben normale `ration_versions` mit gruppensicherer
   nullable.
 - Trigger verhindern Update/Delete an Planversion und Anweisungen. Planversion,
   Instructions und `public.outbox_events` entstehen in derselben Transaktion.
+
+## 22. FeedingSupplyHandoff FEED-SUP-028
+
+`domain_agrar.feeding_supply_handoffs` referenziert Tenant, Planversion und
+Fuetterungsgruppe. Feed-ID, vollstaendige Entscheidungsprojektion,
+Idempotency-Key/Request-Hash, Pflichtgrund, Status und Akteur bilden den
+revisionssicheren Uebergabenachweis. Ein Unique-Constraint verhindert doppelte
+Keys je Tenant; ein Trigger verhindert Update/Delete. Das zugehoerige
+`feeding.supply.procurement_handoff.created` wird in derselben Transaktion in
+`public.outbox_events` geschrieben. Einkaufsbestellungen werden nicht beruehrt.
