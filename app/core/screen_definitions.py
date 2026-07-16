@@ -2549,6 +2549,86 @@ def build_agrar_feeding_group_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_agrar_feeding_plan_screen_definition() -> dict[str, Any]:
+    """Native object page for immutable feeding-plan versions (FEED-PLAN-027)."""
+    return {
+        "schemaVersion": 1,
+        "id": "agrar/feeding-plan",
+        "domain": "agrar",
+        "mode": "detail",
+        "title": "Fuetterungsplan",
+        "subtitle": "Freigegebene Mischfolge, Chargenmengen und Rundungsnachweis",
+        "adapter": {"type": "native", "sourceId": "agrar/feeding-plan", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/agrar/rations-optimization/feeding/plans/{entity_id}"},
+            {"key": "instructions", "endpoint": "/api/v1/agrar/rations-optimization/feeding/plans/{entity_id}/instructions", "pageSize": 100},
+        ],
+        "tabs": [
+            {
+                "key": "plan", "label": "Plan und Gueltigkeit", "lazy": False, "keepAlive": True,
+                "fields": [
+                    {"key": "name", "label": "Plan", "type": "text"},
+                    {"key": "plan_status", "label": "Ausfuehrungsstatus", "type": "text"},
+                    {"key": "version_no", "label": "Planversion", "type": "number"},
+                    {"key": "animal_count", "label": "Tierzahl", "type": "number"},
+                    {"key": "valid_from", "label": "Gueltig ab", "type": "date"},
+                    {"key": "valid_until", "label": "Gueltig bis", "type": "date"},
+                    {"key": "dosing_step_kg", "label": "Dosierschritt kg", "type": "number"},
+                    {"key": "rounding_mode", "label": "Rundungsmodus", "type": "text"},
+                    {"key": "reason", "label": "Publikationsgrund", "type": "textarea"},
+                ],
+            },
+            {
+                "key": "mixing", "label": "Mischanweisung", "lazy": True, "keepAlive": True,
+                "tables": [{
+                    "key": "instructions", "label": "Dosierbare Mischfolge", "dataSourceKey": "instructions",
+                    "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 48,
+                    "columns": [
+                        {"key": "sequence", "label": "Folge", "numeric": True, "sortable": True, "width": 80},
+                        {"key": "feed_name", "label": "Futtermittel", "filterable": True, "width": 260},
+                        {"key": "kg_fm_per_animal", "label": "kg FM/Tier", "numeric": True, "width": 130},
+                        {"key": "raw_batch_kg", "label": "Charge roh kg", "numeric": True, "width": 140},
+                        {"key": "target_batch_kg", "label": "Dosierziel kg", "numeric": True, "width": 140},
+                        {"key": "rounding_delta_kg", "label": "Rundungsdelta kg", "numeric": True, "width": 150},
+                    ],
+                }],
+            },
+            {
+                "key": "provenance", "label": "Herkunft und Audit", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "id", "label": "Planversions-ID", "type": "text"},
+                    {"key": "plan_id", "label": "Plan-ID", "type": "text"},
+                    {"key": "source_ration_version_id", "label": "Quell-Rationsversion", "type": "text"},
+                    {"key": "published_by", "label": "Publiziert von", "type": "text"},
+                    {"key": "published_at", "label": "Publiziert am", "type": "datetime"},
+                ],
+            },
+        ],
+        "actions": [{
+            "key": "print_plan", "label": "Drucken / als PDF speichern", "kind": "primary",
+            "dangerLevel": "safe", "permission": "futtermittel.rations.read",
+        }, {
+            "key": "open_mobile", "label": "Mobile Stallansicht", "kind": "secondary",
+            "dangerLevel": "safe", "permission": "futtermittel.rations.read",
+        }],
+        "noWorkflowReason": "Publizierte Planversionen sind unveraenderlich; Aenderungen entstehen als neue Publikation.",
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "audit", "tableProfile": "audit",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": True,
+            "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice",
+        },
+        "agentContract": {
+            "businessPurpose": "Eine publizierte Mischanweisung sicher ausfuehren und ihre Herkunft nachweisen.",
+            "examplePrompts": ["Welche Menge kommt als Naechstes?", "Ist dieser Plan noch aktuell?", "Warum wurde gerundet?"],
+            "sensitiveFields": ["source_ration_version_id", "published_by"],
+            "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feeding-plan']", "primaryAction": "[data-action-kind='primary']"},
+        },
+    }
+
+
 def build_agrar_feeding_reference_data_screen_definition() -> dict[str, Any]:
     """Native read model for canonical nutrient and unit definitions (FEED-CORE-017)."""
     return {
@@ -2922,6 +3002,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/feeding-businesses": build_agrar_feeding_businesses_screen_definition,
     "agrar/feeding-business": build_agrar_feeding_business_screen_definition,
     "agrar/feeding-group": build_agrar_feeding_group_screen_definition,
+    "agrar/feeding-plan": build_agrar_feeding_plan_screen_definition,
     "agrar/feeding-reference-data": build_agrar_feeding_reference_data_screen_definition,
     "agrar/feed-readiness": build_agrar_feed_readiness_screen_definition,
     "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
@@ -3447,6 +3528,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/feeding-businesses": "/portal/rationsoptimierung?view=businesses",
     "agrar/feeding-business": "/portal/rationsoptimierung?view=businesses",
     "agrar/feeding-group": "/portal/rationsoptimierung?view=rations",
+    "agrar/feeding-plan": "/portal/rationsoptimierung?view=rations",
     "agrar/feeding-reference-data": "/portal/rationsoptimierung?view=reference-data",
     "agrar/feed-readiness": "/portal/rationsoptimierung?view=readiness",
     "agrar/feed-controlling": "/portal/rationsoptimierung?view=controlling",

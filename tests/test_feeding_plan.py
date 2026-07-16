@@ -7,6 +7,7 @@ from app.agrar.rations.feeding_plan import (
     build_mixing_instructions,
     round_to_dosing_step,
 )
+from app.core.screen_definitions import get_screen_definition
 
 
 @pytest.mark.parametrize(("mode", "expected"), [
@@ -50,3 +51,14 @@ def test_invalid_scaling_contract_is_rejected(payload: dict) -> None:
             animal_count=payload["animal_count"], dosing_step_kg=payload["step"],
             rounding_mode=payload["mode"],
         )
+
+
+def test_feeding_plan_uses_native_meridian_object_page() -> None:
+    definition = get_screen_definition("agrar/feeding-plan")
+    assert definition["adapter"] == {
+        "type": "native", "sourceId": "agrar/feeding-plan", "temporary": False,
+    }
+    assert definition["layout"]["floorplan"] == "objectPage"
+    assert definition["layout"]["contextRail"] == "audit"
+    assert [tab["key"] for tab in definition["tabs"]] == ["plan", "mixing", "provenance"]
+    assert {action["key"] for action in definition["actions"]} == {"print_plan", "open_mobile"}

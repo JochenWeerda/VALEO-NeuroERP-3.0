@@ -473,3 +473,12 @@ Tests als erledigt markiert.
 - `tests/test_grundfutteranalysen.py`: 56 Parser-/VDLUFA-Regressionen.
 - `packages/frontend-web/src/__tests__/features/feed-advice/feeding-analysis-detail.test.tsx`:
   Meridian-Worklist, Erfassung, Validierung und begruendete Freigabe.
+
+## 18. FEED-PLAN-027-Nachweise
+
+- `test_feeding_plan_api.py`: current/scheduled/stale, Gueltigkeit, Grant,
+  Tenant, Idempotenz und unveraenderliche Planversion.
+- `feeding-plan-detail.test.tsx`: Stale-Klartext, zentrale Runtime,
+  Printprojektion und Mobile-Aktion.
+- `feeding-plan-mobile.test.tsx` und `rations-mobile-feeding.spec.ts`:
+  aktuelle Planversion, gerundete Charge und planversionsgebundener Cache.

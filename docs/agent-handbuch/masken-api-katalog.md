@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (44 Masken).
+> Generiert aus `app/core/screen_definitions.py` (45 Masken).
 
 ## Übersicht
 
@@ -24,6 +24,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feeding-business` | Fuetterungsbetrieb | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
+| `agrar/feeding-plan` | Fuetterungsplan | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-plan/agent-contract` |
 | `agrar/feeding-reference-data` | Naehrstoffe und Einheiten | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
@@ -318,6 +319,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit_group` | Tiergruppe bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-plan` — Fuetterungsplan
+
+**Zweck:** Eine publizierte Mischanweisung sicher ausfuehren und ihre Herkunft nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-plan/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-plan/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-plan/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-plan/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/feeding/plans/{entity_id}`
+- `instructions` → `/api/v1/agrar/rations-optimization/feeding/plans/{entity_id}/instructions`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Menge kommt als Naechstes?
+- Ist dieser Plan noch aktuell?
+- Warum wurde gerundet?
+
+**Sensible Felder:** `source_ration_version_id, published_by`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `print_plan` | Drucken / als PDF speichern | safe | nein | `—` |
+| `open_mobile` | Mobile Stallansicht | safe | nein | `—` |
 
 ---
 

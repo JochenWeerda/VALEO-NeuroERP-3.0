@@ -1,17 +1,14 @@
 import { expect, test } from '@playwright/test'
 
-const activeRation = {
-  version: 1,
-  updatedAt: '2026-07-12T08:00:00.000Z',
-  group: { id: 'g1', name: 'Hochleistung Nordstall', count: 58 },
-  milkYield: 38,
-  milkPriceEur: 0.44,
-  totalCostEurDay: 6.2,
-  pendfSollGKgdm: 180,
-  ndfProxyGKgdm: 360,
-  components: [
-    { feed_id: 'mais', name: 'Maissilage', soll_kg: 620 },
-    { feed_id: 'gras', name: 'Grassilage', soll_kg: 410 },
+const currentPlan = {
+  id: 'plan-version-2', plan_id: 'plan-1', group_id: 'g1', group_name: 'Hochleistung Nordstall',
+  name: 'Stallplan', version_no: 2, source_ration_version_id: 'ration-v4', animal_count: 58,
+  dosing_step_kg: 0.5, rounding_mode: 'nearest', valid_from: '2026-07-16', valid_until: '2026-07-31',
+  reason: 'Freigabe fuer Stallarbeit', published_by: 'advisor', published_at: '2026-07-16T08:00:00Z',
+  plan_status: 'current', is_stale: false,
+  instructions: [
+    { id: 'i1', sequence: 1, feed_id: 'mais', feed_name: 'Maissilage', kg_fm_per_animal: 10.69, raw_batch_kg: 620, target_batch_kg: 620, rounding_delta_kg: 0 },
+    { id: 'i2', sequence: 2, feed_id: 'gras', feed_name: 'Grassilage', kg_fm_per_animal: 7.07, raw_batch_kg: 410, target_batch_kg: 410, rounding_delta_kg: 0 },
   ],
 }
 
@@ -26,7 +23,7 @@ const controlResult = {
 test.describe('Mobile Fütterungsdokumentation F6', () => {
   test('SOLL → IST → Kontrolle speichert ohne horizontalen Body-Scroll', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
-    await page.addInitScript((snapshot) => localStorage.setItem('valeo.rations.active-mobile.v1', JSON.stringify(snapshot)), activeRation)
+    await page.route('**/feeding/plans/current', async (route) => route.fulfill({ json: [currentPlan] }))
     await page.route('**/feeding-control/logs?**', async (route) => route.fulfill({ json: [] }))
     await page.route('**/feeding-control/logs', async (route) => {
       if (route.request().method() !== 'POST') return route.continue()

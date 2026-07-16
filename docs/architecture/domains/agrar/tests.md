@@ -36,5 +36,8 @@ Rationseditor-Grenzen: `packages/frontend-web/src/__tests__/features/feed-advice
 
 Betriebsakte/Vorlagen: `packages/frontend-web/src/__tests__/features/feed-advice/feeding-business-detail.test.tsx`
 
+Plan-ObjectPage/Mobil: `feeding-plan-detail.test.tsx`,
+`feeding-plan-mobile.test.tsx` und `tests/e2e/rations-mobile-feeding.spec.ts`.
+
 Lifecycle Browser-Abnahme:
 `packages/frontend-web/tests/e2e/feed-advice-lifecycle.spec.ts`

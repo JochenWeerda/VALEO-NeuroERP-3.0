@@ -2751,6 +2751,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/futtermittel/fuetterungsplan-native",
+      "path": "futtermittel/fuetterungsplan/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/futtermittel-bestellung",
       "path": "futtermittel/futtermittel-bestellung",
       "source": "auto"

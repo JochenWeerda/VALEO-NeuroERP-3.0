@@ -130,9 +130,15 @@ Feed-Rolle und Business-Grant. Entscheidung:
 
 - `POST /api/v1/agrar/rations-optimization/feeding/plans/publish`
 - `GET /api/v1/agrar/rations-optimization/feeding/plans?group_id=...`
+- `GET /api/v1/agrar/rations-optimization/feeding/plans/current`
 - `GET /api/v1/agrar/rations-optimization/feeding/plans/{version_id}`
+- `GET /api/v1/agrar/rations-optimization/feeding/plans/{version_id}/instructions`
 
 Publish verlangt freigegebene/aktive Quellversion, Tierzahl, Dosierschritt,
 Rundungsmodus, Gueltigkeit, Auditgrund und Idempotency-Key. Die Antwort enthaelt
 geordnete MixingInstructions mit ungerundeter und dosierbarer Chargenmenge samt
 Delta. Entscheidung: [ADR-050](../../../adr/adr-050-feeding-plan-version-and-publication.md).
+
+`plan_status` wird serverseitig als `scheduled`, `current` oder `stale`
+abgeleitet. Eine neuere Version ersetzt die vorherige erst ab ihrem
+`valid_from`; abgelaufene Plaene erscheinen nie in `/current`.

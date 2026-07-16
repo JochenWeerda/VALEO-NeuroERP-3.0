@@ -114,8 +114,8 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-PLAN-001 | Freigegebene Ration als Planversion (Skalierung, Mischreihenfolge, PDF) | MUSS | FeedingPlanVersion/MixingInstruction-Aggregat mit Decimal-Skalierung, Rundungsdelta, Gueltigkeit, Idempotenz und Publication-Event | PARTIAL | PDF/ObjectPage folgt FEED-PLAN-027 | serverseitige unveraenderliche Planpublikation | `test_feeding_plan.py`, `test_feeding_plan_api.py` | FEED-PLAN-026 |
-| FEED-PLAN-002 | Mobile Ansicht + Offline-Fallback | MUSS | `fuetterungsdokumentation-mobil.tsx` (Browsercache-Fallback) | VERIFIED | Sync-Konflikte offen | Inkrement 3/6 | Playwright Lifecycle 1/1 | Slice 007 |
+| FEED-PLAN-001 | Freigegebene Ration als Planversion (Skalierung, Mischreihenfolge, PDF) | MUSS | unveraenderliches Aggregat plus native ObjectPage und reproduzierbarer Browserdruck/PDF mit Herkunft | VERIFIED | signierter Server-PDF-Job ist Berichts-Ausbau, nicht Kernplan | Serverpublikation und Meridian-Planansicht | Backend-, Component- und Mobile-Tests | FEED-PLAN-026/027 |
+| FEED-PLAN-002 | Mobile Ansicht + Offline-Fallback | MUSS | aktuelle Planversion mit planversionsgebundenem v2-Cache; Legacy-Rationscache wird ignoriert | VERIFIED | Offline-Sync-Konflikte der Ist-Erfassung folgen FEED-ACT | `/feeding/plans/current` statt Snapshot-Nebenwahrheit | Component + Playwright Mobile | FEED-PLAN-027 |
 | FEED-PLAN-003 | Mischwagen-/Roboterexport, Rückmeldung | SOLL | agrirouter-Adapter (Feeding-Log-Import) | PARTIAL | Export-Richtung + Rückmeldeabgleich | Inkrement 6 | `test_rations_integrations_f5.py` | Slice 010 |
 
 ## Kapitel 6.11 — Soll-Ist-Controlling
@@ -157,7 +157,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-REP-001 | Rations-PDF mit Version/Freigabe | MUSS | PDF-/Review-Pfad vorhanden (Paritätsmatrix Ausgabe) | PARTIAL | profilierte Landwirt/Berater/Fütterer-Ausgaben | Inkrement 3 | — | UIX-011 |
+| FEED-REP-001 | Rations-PDF mit Version/Freigabe | MUSS | druckfaehige Planprojektion mit Plan-/Quellversion, Gueltigkeit, Druckstand und Mischfolge; Browserdialog speichert PDF | VERIFIED | signiertes Archiv-PDF und profilierte Ausgaben sind REP-Folgeausbau | sicherer Print-Zweig aus grant-geladener Planversion | `feeding-plan-detail.test.tsx` | FEED-PLAN-027 |
 | FEED-REP-002 | Beratungsbericht, Soll-Ist-, Verlaufsbericht | MUSS | — | NOT_IMPLEMENTED | Report-Aggregat | Inkrement 5 | — | — |
 | FEED-REP-003 | CSV/Excel-Export | MUSS | Serien-API liefert strukturierte Daten | PARTIAL | Export-Buttons | Inkrement 4 | — | — |
 

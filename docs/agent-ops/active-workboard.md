@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FEED-PLAN-027 Plan-ObjectPage, Druck, Mobilroute und Veraltet-Kennzeichnung - reserviert 2026-07-16
+## FEED-PLAN-027 Plan-ObjectPage, Druck, Mobilroute und Veraltet-Kennzeichnung - abgeschlossen 2026-07-16
 
-**Owner:** Codex. **Stand:** reserviert (Claim). Publizierte Planversionen erhalten eine native Meridian-ObjectPage mit Herkunft, Gueltigkeit, Dosierprofil, Mischanweisungen und serverseitig abgeleitetem aktuell/veraltet-Status. Eine sichere Druckansicht ist ueber Browserdruck als PDF speicherbar. Die mobile Stallroute konsumiert kuenftig aktuelle FeedingPlanVersions und bindet ihren Offline-Cache an die Planversions-ID statt an die alte `active-rations.snapshot.mobile`-Nebenwahrheit. **TDD:** Current/Stale-API, Screen-/Print-Vertrag und Mobile-Planvertrag zuerst rot.
+**Owner:** Codex. **Stand:** abgeschlossen. Der Server leitet `scheduled/current/stale` aus Gueltigkeit und wirksam gewordenen neueren Versionen ab; `/current` liefert nur grant-sichere aktuelle Planversionen samt Instructions. `agrar/feeding-plan` ist eine native Meridian-ObjectPage mit Plan, Mischanweisung und Provenienz. Der Print-Zweig erzeugt ohne Raw-HTML-Sink einen Browserdruck/PDF-Nachweis mit IDs, Quelle, Gueltigkeit, Druckstand und Rundungsdelta. Die mobile Stallroute konsumiert Planversionen, nutzt Cache v2 mit Planversions-ID und ignoriert die alte Snapshot-Nebenwahrheit. **TDD-Abnahme:** 14 Backend-/Screen-Tests, 3 Component-Tests, Playwright 1/1 plus Visual Tour 0 Probleme; Feeding-/Rations-Regression 606 gruen/1 skipped; Frontend 100 Dateien/404 Tests gruen/1 skipped; TypeScript, ESLint, Ruff, Routing, Doku 127/130, Architektur 903/903 (210 Services, 406 Endpoints), Handbuch 45 Masken und Alembic gruen. **Requirements:** FEED-PLAN-001/002 und FEED-REP-001 VERIFIED; signierter Server-PDF-Job bleibt bewusst Berichts-Ausbau.
 
 ## FEED-PLAN-026 FeedingPlanVersion, Mischanweisung und Publication Event - abgeschlossen 2026-07-16
 

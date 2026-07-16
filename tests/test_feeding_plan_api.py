@@ -53,7 +53,7 @@ def _publish(version_id: str, key: str, **patch: Any):
     payload = {
         "source_ration_version_id": version_id, "animal_count": 42,
         "dosing_step_kg": "0.5", "rounding_mode": "nearest",
-        "valid_from": "2026-07-17", "valid_until": "2026-07-31",
+        "valid_from": "2026-07-16", "valid_until": "2026-07-31",
         "reason": "Freigabe fuer die naechste Fuetterungsperiode", "idempotency_key": key,
     }
     payload.update(patch)
@@ -74,6 +74,7 @@ def test_publish_plan_scales_instructions_and_writes_one_outbox_event() -> None:
     plan = published.json()
     assert plan["group_id"] == group["id"]
     assert plan["version_no"] == 1
+    assert plan["is_stale"] is False
     assert [row["feed_id"] for row in plan["instructions"]] == ["mineral", "grass"]
     assert float(plan["instructions"][0]["raw_batch_kg"]) == pytest.approx(6.594)
     assert float(plan["instructions"][0]["target_batch_kg"]) == pytest.approx(6.5)
@@ -100,6 +101,18 @@ def test_publish_plan_scales_instructions_and_writes_one_outbox_event() -> None:
     listed = client.get(f"{BASE}/feeding/plans?group_id={group['id']}", headers=HEADERS)
     assert listed.status_code == 200
     assert any(row["id"] == plan["id"] for row in listed.json())
+    current = client.get(f"{BASE}/feeding/plans/current", headers=HEADERS)
+    assert current.status_code == 200
+    assert any(row["id"] == plan["id"] and row["instructions"] for row in current.json())
+
+    second = _publish(version_id, f"publish-{uuid4()}", valid_from="2026-07-16", valid_until="2026-08-31")
+    assert second.status_code == 201
+    stale = client.get(f"{BASE}/feeding/plans/{plan['id']}", headers=HEADERS)
+    assert stale.status_code == 200
+    assert stale.json()["is_stale"] is True
+    current_ids = {row["id"] for row in client.get(f"{BASE}/feeding/plans/current", headers=HEADERS).json()}
+    assert second.json()["id"] in current_ids
+    assert plan["id"] not in current_ids
 
 
 def test_idempotency_payload_conflict_and_tenant_isolation() -> None:

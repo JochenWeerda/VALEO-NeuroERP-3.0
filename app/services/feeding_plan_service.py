@@ -95,18 +95,34 @@ class FeedingPlanService:
         return self.get_version(version_id)
 
     def get_version(self, version_id: str) -> dict[str, Any]:
-        row = self.db.execute(text("""SELECT pv.*,p.group_id,p.name FROM domain_agrar.feeding_plan_versions pv
+        row = self.db.execute(text("""SELECT pv.*,p.group_id,p.name,g.name AS group_name,
+          CASE WHEN pv.valid_from>CURRENT_DATE THEN 'scheduled'
+            WHEN pv.valid_until IS NOT NULL AND pv.valid_until<CURRENT_DATE THEN 'stale'
+            WHEN EXISTS (SELECT 1 FROM domain_agrar.feeding_plan_versions newer
+              WHERE newer.tenant_id=pv.tenant_id AND newer.plan_id=pv.plan_id
+                AND newer.version_no>pv.version_no AND newer.valid_from<=CURRENT_DATE) THEN 'stale'
+            ELSE 'current' END AS plan_status
+          FROM domain_agrar.feeding_plan_versions pv
           JOIN domain_agrar.feeding_plans p ON p.tenant_id=pv.tenant_id AND p.id=pv.plan_id
+          JOIN domain_agrar.feeding_groups g ON g.tenant_id=p.tenant_id AND g.id=p.group_id
           WHERE pv.tenant_id=:tenant_id AND pv.id=:id"""), {"tenant_id": self.tenant_id, "id": version_id}).mappings().first()
         if not row:
             raise FeedingPlanNotFound("Planversion nicht gefunden.")
         result = dict(row)
+        result["is_stale"] = result["plan_status"] == "stale"
         result["instructions"] = [dict(x) for x in self.db.execute(text("SELECT * FROM domain_agrar.feeding_mixing_instructions WHERE tenant_id=:tenant_id AND plan_version_id=:id ORDER BY sequence"), {"tenant_id": self.tenant_id, "id": version_id}).mappings().all()]
         return result
 
     def list_versions(self, group_id: str | None = None, *, subject: str = "",
                       unrestricted: bool = False) -> list[dict[str, Any]]:
-        rows = self.db.execute(text("""SELECT pv.*,p.group_id,p.name FROM domain_agrar.feeding_plan_versions pv
+        rows = self.db.execute(text("""SELECT pv.*,p.group_id,p.name,g.name AS group_name,
+          CASE WHEN pv.valid_from>CURRENT_DATE THEN 'scheduled'
+            WHEN pv.valid_until IS NOT NULL AND pv.valid_until<CURRENT_DATE THEN 'stale'
+            WHEN EXISTS (SELECT 1 FROM domain_agrar.feeding_plan_versions newer
+              WHERE newer.tenant_id=pv.tenant_id AND newer.plan_id=pv.plan_id
+                AND newer.version_no>pv.version_no AND newer.valid_from<=CURRENT_DATE) THEN 'stale'
+            ELSE 'current' END AS plan_status
+          FROM domain_agrar.feeding_plan_versions pv
           JOIN domain_agrar.feeding_plans p ON p.tenant_id=pv.tenant_id AND p.id=pv.plan_id
           JOIN domain_agrar.feeding_groups g ON g.tenant_id=p.tenant_id AND g.id=p.group_id
           LEFT JOIN domain_agrar.feeding_businesses b ON b.tenant_id=g.tenant_id AND b.id=g.business_id
@@ -120,4 +136,14 @@ class FeedingPlanService:
             )) ORDER BY pv.published_at DESC"""),
           {"tenant_id": self.tenant_id, "group_id": group_id, "subject": subject,
            "unrestricted": unrestricted}).mappings().all()
-        return [dict(row) for row in rows]
+        result = [dict(row) for row in rows]
+        for row in result:
+            row["is_stale"] = row["plan_status"] == "stale"
+        return result
+
+    def list_current(self, *, subject: str = "", unrestricted: bool = False) -> list[dict[str, Any]]:
+        current = [
+            row for row in self.list_versions(subject=subject, unrestricted=unrestricted)
+            if row["plan_status"] == "current"
+        ]
+        return [self.get_version(row["id"]) for row in current]

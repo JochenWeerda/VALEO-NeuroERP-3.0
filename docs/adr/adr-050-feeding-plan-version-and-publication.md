@@ -42,5 +42,7 @@ zeitlich gueltigen Ausfuehrungssnapshot mit Tierzahl und Dosiertechnik.
 ## Konsequenzen
 
 Stallansicht, PDF, Maschinenexport, Bedarf und ActualFeeding koennen stabil auf
-eine Planversions-ID referenzieren. UI, Druck und Mobilroute folgen in
-FEED-PLAN-027; sie berechnen keine eigenen Chargenmengen.
+eine Planversions-ID referenzieren. FEED-PLAN-027 liefert native ObjectPage,
+Browserdruck/PDF und die planversionsgebundene mobile Stallroute; sie berechnen
+keine eigenen Chargenmengen. Ein signierter Server-PDF-Job bleibt Teil der
+spaeteren Berichtsarchitektur.

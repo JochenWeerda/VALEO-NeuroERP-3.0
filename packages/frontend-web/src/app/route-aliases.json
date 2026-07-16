@@ -2589,6 +2589,10 @@
       "path": "futtermittel/rations-schnittstellen-import"
     },
     {
+      "module": "@/pages/futtermittel/fuetterungsplan-native",
+      "path": "futtermittel/fuetterungsplan/:id"
+    },
+    {
       "module": "@/pages/futtermittel/fuetterungsbetrieb-native",
       "path": "futtermittel/fuetterungsbetrieb/:id"
     },

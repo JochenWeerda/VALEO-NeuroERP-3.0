@@ -534,3 +534,16 @@ Lifecycle und Analysereife; Lazy-Tabs zeigen Tiergruppen, Rationen, Befunde und
 unveraenderliche Vorlagen. Tabellenzeilen fuehren in bestehende Detail-Journeys.
 Anlegen und Anwenden einer Vorlage sind schmale Overlays; Layout, Tabellen und
 Zustandssemantik bleiben in ScreenDefinition, RenderPlan und zentraler Runtime.
+
+## 17. FeedingPlan-ObjectPage und mobile Stallroute FEED-PLAN-027
+
+`agrar/feeding-plan` ist eine native ObjectPage unter
+`/futtermittel/fuetterungsplan/{id}`. Kopf und Statusbanner zeigen current,
+scheduled oder stale als Text; Tabs enthalten Plan/Gueltigkeit, dosierbare
+Mischfolge und Provenienz. Browserdruck blendet die interaktive Runtime aus und
+druckt Plan-ID, Quellversion, Gueltigkeit, Druckzeitpunkt und Rundungsdelta.
+
+`/futtermittel/fuetterungsdokumentation-mobil` liest ausschliesslich
+`/feeding/plans/current`. Der Offline-Fallback ist an Planversions-ID und
+Cachevertrag v2 gebunden. Unbekannte Zielmengen bleiben sichtbar und blockieren
+die Ist-Erfassung; geplante/veraltete Versionen werden nicht angeboten.

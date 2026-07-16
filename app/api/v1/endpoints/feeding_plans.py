@@ -37,11 +37,15 @@ class PlanOut(BaseModel):
     id: str
     plan_id: str
     group_id: str
+    group_name: str
+    name: str
     version_no: int
     source_ration_version_id: str
     animal_count: int
     valid_from: date
     valid_until: date | None
+    is_stale: bool
+    plan_status: Literal["scheduled", "current", "stale"]
     instructions: list[dict[str, Any]] = Field(default_factory=list)
 
 
@@ -95,6 +99,28 @@ async def list_plans(group_id: str | None = Query(None), db: Session = Depends(g
         group_id, subject=str(user.get("sub") or ""), unrestricted=_unrestricted(user),
     )
     return [{**row, "instructions": []} for row in rows]
+
+
+@router.get("/current", response_model=list[PlanOut])
+async def list_current_plans(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+                             user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
+    require_roles(user, READ_ROLES)
+    return _service(db, tenant_id, user).list_current(
+        subject=str(user.get("sub") or ""), unrestricted=_unrestricted(user),
+    )
+
+
+@router.get("/{version_id}/instructions")
+async def list_plan_instructions(version_id: str, db: Session = Depends(get_db),
+                                 tenant_id: str = Depends(get_tenant_id),
+                                 user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
+    require_roles(user, READ_ROLES)
+    try:
+        result = _service(db, tenant_id, user).get_version(version_id)
+        _require_group(db, tenant_id, user, result["group_id"], "read")
+        return result["instructions"]
+    except Exception as exc:
+        raise _translate(exc) from exc
 
 
 @router.get("/{version_id}", response_model=PlanOut)

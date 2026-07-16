@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-07-16
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-16T10:22:18Z'
+generated_at: '2026-07-16T10:49:10Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -206,6 +206,7 @@ domains:
     - /futtermittel/einzelfuttermittel/stamm/new
     - /futtermittel/fuetterungsbetrieb/:id
     - /futtermittel/fuetterungsdokumentation-mobil
+    - /futtermittel/fuetterungsplan/:id
     - /futtermittel/futtermittel-bestellung
     - /futtermittel/futtermittel-qualitaetskontrolle
     - /futtermittel/futtermittel-statistik
@@ -1849,8 +1850,8 @@ domains:
     - docs/adr/adr-043-feed-readiness-read-model.md
     - docs/adr/adr-047-canonical-feeding-feed-catalog.md
 mapping_stats:
-  frontend_routes_total: 902
-  frontend_routes_mapped: 902
+  frontend_routes_total: 903
+  frontend_routes_mapped: 903
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

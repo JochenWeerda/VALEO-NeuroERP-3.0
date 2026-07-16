@@ -2,9 +2,10 @@ slice_id: FEED-PLAN-027
 id: FEED-PLAN-027
 title: Plan ObjectPage Druck Mobilroute und Veraltet Kennzeichnung
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-07-16"
 started_at: "2026-07-16"
+completed_at: "2026-07-16"
 goal: >-
   Publizierte FeedingPlanVersions als native Meridian-ObjectPage, sichere
   druck-/PDF-faehige Ansicht und aktuelle mobile Stallanweisung ausliefern;
@@ -29,6 +30,7 @@ file_ownership:
   - packages/frontend-web/src/app/routing/route-tree.gen.tsx
   - packages/frontend-web/src/__tests__/features/feed-advice/feeding-plan-detail.test.tsx
   - packages/frontend-web/src/__tests__/pages/futtermittel/feeding-plan-mobile.test.tsx
+  - packages/frontend-web/tests/e2e/rations-mobile-feeding.spec.ts
   - docs/adr/adr-050-feeding-plan-version-and-publication.md
   - docs/architecture/agents/impact-notes/FEED-PLAN-027.md
   - docs/architecture/domains/agrar/
@@ -62,3 +64,20 @@ risks:
   - Legacy-Mobile-Daten duerfen nicht parallel als zweite aktuelle Planwahrheit fortbestehen.
   - Browserdruck darf keine unmaskierten oder fremden Betriebsdaten nachladen.
   - Veraltet darf nie allein aus Clientzeit oder Farbe abgeleitet werden.
+evidence:
+  red:
+    - API-/Service-Vertrag fuer serverseitige current/scheduled/stale-Ableitung und grant-sichere aktuelle Plaene.
+    - Screen-/Component-Vertraege fuer native ObjectPage, Druckprojektion, Klartextstatus und Planversionscache.
+    - Bestehende Playwright-Stalljourney wurde vom Legacy-Rationspayload auf den realen Current-Plan-Vertrag umgestellt.
+  green:
+    - Vierzehn fokussierte Backend-/Screen-Tests gruen.
+    - Drei neue Component-Tests und ein fokussierter Playwright-Test gruen; Visual Tour ohne Probleme.
+    - Feeding-/Rations-Regression 606 bestanden und 1 bewusst uebersprungen.
+    - Frontend-Gesamtsuite 100 Dateien, 404 Tests gruen und 1 bewusst uebersprungen.
+    - TypeScript, fokussiertes ESLint, Ruff und Routing-Integrity gruen.
+    - Markdown 127 und Governance 130 Dateien gruen.
+    - Architecture Validate/Strict Drift 903/903 Routen, 210 Services und 406 Endpoints; Handbuch 45 Masken driftfrei.
+  refactor:
+    - Server ist alleinige Quelle fuer current/scheduled/stale; Client zeigt nur den Vertrag.
+    - Mobile Stallroute konsumiert Planversion/Instructions und ignoriert Legacy-Cache v1.
+    - Interaktive ObjectPage bleibt zentral; die Druckprojektion nutzt dieselben grant-geladenen Daten ohne Raw-HTML-Sink.
