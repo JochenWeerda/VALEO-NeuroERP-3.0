@@ -7209,3 +7209,5 @@ from app.api.v1.endpoints.feeding_supply import router as _feeding_supply_router
 router.include_router(_feeding_supply_router)
 from app.api.v1.endpoints.feeding_actual import router as _feeding_actual_router
 router.include_router(_feeding_actual_router)
+from app.api.v1.endpoints.feeding_consulting import router as _feeding_consulting_router
+router.include_router(_feeding_consulting_router)

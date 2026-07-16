@@ -2501,6 +2501,10 @@
       "path": "futtermittel/rationsvergleich"
     },
     {
+      "module": "@/pages/futtermittel/beratung",
+      "path": "futtermittel/beratung"
+    },
+    {
       "module": "@/pages/futtermittel/grundfutteranalysen-native",
       "path": "futtermittel/grundfutteranalysen"
     },

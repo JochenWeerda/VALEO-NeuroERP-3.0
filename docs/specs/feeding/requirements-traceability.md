@@ -141,7 +141,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
-| FEED-CONS-001 | Beratungsfall (Besuch, Beobachtung, Foto, Bewertung, Bericht) | MUSS | Reviewgründe/Kommentare im Lifecycle | PARTIAL | ConsultingCase/Observation-Aggregat | **Inkrement 5** | `test_rations_lifecycle_api.py` | — |
+| FEED-CONS-001 | Beratungsfall (Besuch, Beobachtung, Foto, Bewertung, Bericht) | MUSS | `consulting_cases` (Besuch/Remote, Betrieb-/Gruppenbezug, Ausgangssituation, Abschlussbewertung; geschlossen = keine neuen Beobachtungen → 409) + `consulting_observations` (append-only per Trigger, Kategorien+Freitext, DMS-Fotoreferenzen, **idempotenter Mobil-Vertrag via client_ref**); Worklist+Falldetail `futtermittel/beratung` | PARTIAL | strukturierte fachliche Bewertung/Empfehlung (032) + Beratungsbericht (040) | Inkrement 5 Folgeslices | `test_feeding_consulting_api.py` (6), `consulting-cases.test.tsx` (3) | FEED-CONS-031 |
 | FEED-CONS-002 | Maßnahmen (Verantwortlicher, Fälligkeit, Status, Wirksamkeit) | MUSS | — | NOT_IMPLEMENTED | Measure-Aggregat | Inkrement 5 | — | Paritätsmatrix |
 | FEED-CONS-003 | Workflow-/CRM-Aufgabenintegration | SOLL | flow_spines/CRM-Aktivitäten existieren systemweit | PARTIAL | Verknüpfung | Inkrement 5/6 | — | — |
 
@@ -175,7 +175,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 |---|---|---|---|---|---|---|---|---|
 | FEED-UI-001 | Mask-Builder-Muster, Design-Tokens, WCAG 2.2 AA | MUSS | native SDs, Token-System, axe 8/8, Chart-Palette validiert | VERIFIED | — | laufend | axe-E2E, Vitest | Design-Audit (alle 8 Punkte) |
 | FEED-UI-002 | Betriebsakte/Fütterungsübersicht/Rationseditor-Seiten | MUSS | Cockpit `agrar/feed-advice` + Aufgabenkacheln; Rationseditor-Kernseite (FEED-MASK-009 Split-Layout: Positionsfläche + sticky Bewertung) unter `futtermittel/rationseditor?ration_id=…` | PARTIAL | Betriebsakte, Fütterungsübersicht, Variantenvergleich, Berichte, Integrationsmonitor (Kap. 10) | Inkremente 2–5 | `feed-advice-entry.test.tsx`, `ration-editor.test.tsx` | ADR-041, FEED-EDITOR-021 |
-| FEED-MOB-001 | Mobile MUSS-Fälle (Plan, Istmengen, Beobachtung, Foto) | MUSS | Mobil-Protokoll (Plan+Istmengen) | PARTIAL | Beobachtung/Foto/Maßnahme | Inkrement 5 | Playwright | Slice 007 |
+| FEED-MOB-001 | Mobile MUSS-Fälle (Plan, Istmengen, Beobachtung, Foto) | MUSS | Mobil-Protokoll (Plan+Istmengen); Beobachtung+Foto-Referenz über idempotenten `client_ref`-Vertrag (Retry/Doppel-Submit dublettes-frei) + responsives Falldetail | PARTIAL | Maßnahme abhaken mobil (032), Offline-Queue (045) | Inkrement 5/7 | Playwright, `test_feeding_consulting_api.py` (Idempotenz) | Slices 007/031 |
 
 ## Kapitel 6.19 — Schnittstellen
 
