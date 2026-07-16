@@ -1,0 +1,51 @@
+slice_id: FEED-INT-036
+id: FEED-INT-036
+title: Schemafeste Feeding-Events auf der Outbox
+owner: Codex
+status: in_arbeit
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Feeding-Domain-Events ueber einen geschlossenen, versionierten Vertrag bauen
+  und atomar mit den fachlichen Transaktionen in die bestehende Outbox schreiben.
+requirements: [FEED-INT-004]
+dependencies: [FEED-ACT-030, FEED-INT-034, FEED-INT-035]
+decision_level: significant
+file_ownership:
+  - app/agrar/rations/events.py
+  - app/services/rations_lifecycle_service.py
+  - app/services/feeding_feed_analysis_service.py
+  - app/services/feeding_import_monitor_service.py
+  - app/services/feeding_plan_service.py
+  - app/services/feeding_actual_service.py
+  - app/services/feeding_actual_measure_service.py
+  - tests/test_feeding_events.py
+  - docs/adr/adr-054-schemafeste-feeding-events.md
+  - docs/architecture/agents/impact-notes/FEED-INT-036.md
+  - docs/architecture/domains/agrar/
+  - docs/specs/feeding/
+  - docs/agent-ops/slices/FEED-INT-036.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Ein zentraler Builder erzwingt Schema 1.0 und eine geschlossene Event-Typliste.
+  - Unbekannte Eventtypen werden vor Persistenz abgelehnt.
+  - Aktivierung, Analysefreigabe und Quarantaene emittieren je fachlichem Commit genau ein Event.
+  - Bestehende Plan-, Actual-, Deviation- und Measure-Events verwenden denselben Vertrag.
+  - Event und Aggregat werden in derselben DB-Transaktion geschrieben; Rollback entfernt beide.
+  - Payloads enthalten stabile Aggregate- und fachliche Referenzen ohne erfundene Providerdaten.
+  - FEED-INT-003 bleibt bis zum Partnervertrag explizit BLOCKED.
+tdd:
+  red:
+    - 3 Vertrags-/Emissions-Tests schlagen ohne Builder und Emissionen fehl.
+  green: zentraler Builder und atomare Outbox-Emissionen
+  refactor: Inline-Eventbau in bestehenden Feeding-Services entfernen
+tests:
+  - tests/test_feeding_events.py
+  - tests/test_feeding_plan_api.py
+  - tests/test_feeding_actual_api.py
+  - tests/test_feeding_actual_measures.py
+  - tests/test_feeding_import_monitor_api.py
+risks:
+  - Doppelte Emission bei Retry oder wiederholter Transition.
+  - Eventpersistenz ausserhalb der fachlichen Transaktion.
+  - Eventnamen-Drift zwischen bestehendem Singular/Plural-Vertrag.
