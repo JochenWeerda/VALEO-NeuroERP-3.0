@@ -1,0 +1,61 @@
+slice_id: FEED-ACT-029
+id: FEED-ACT-029
+title: Komponentenbezogene Ist-Fuetterung gegen Planversion
+owner: Codex
+status: reserviert
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+goal: >-
+  Ist-Mengen je Planinstruction idempotent und revisionssicher erfassen,
+  Mengen-, Naehrstoff- und Kostenfolgen nachvollziehbar berechnen,
+  Abweichungsursachen klassifizieren und die Auswertung als CSV exportieren.
+requirements: [FEED-ACT-002, FEED-REP-003]
+work_packages: [FEED-WP-121, FEED-WP-122, FEED-WP-123, FEED-WP-124, FEED-WP-125, FEED-WP-126, FEED-WP-127, FEED-WP-129, FEED-WP-130]
+decision_level: significant
+dependencies: [FEED-PLAN-027, FEED-SUP-028]
+file_ownership:
+  - alembic/versions/feed_actual_feeding_20260716.py
+  - app/agrar/rations/actual_feeding.py
+  - app/services/feeding_actual_service.py
+  - app/api/v1/endpoints/feeding_actual.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - app/core/screen_definitions.py
+  - tests/test_feeding_actual.py
+  - tests/test_feeding_actual_api.py
+  - packages/frontend-web/src/lib/api/feeding-actual.ts
+  - packages/frontend-web/src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx
+  - packages/frontend-web/src/features/feed-advice/FeedingActualPage.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-page.test.tsx
+  - packages/frontend-web/src/__tests__/pages/futtermittel/feeding-plan-mobile.test.tsx
+  - docs/adr/adr-052-component-actual-feeding.md
+  - docs/architecture/agents/impact-notes/FEED-ACT-029.md
+  - docs/specs/feeding/
+  - docs/agent-handbuch/
+  - config/architecture-index.yaml
+  - docs/agent-ops/slices/FEED-ACT-029.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Jede Ist-Erfassung referenziert eine sichtbare, aktuelle FeedingPlanVersion und deren Instructions.
+  - Ist-Komponenten koennen nur bekannte Planfeeds enthalten; fehlende und doppelte Komponenten werden erklaerbar behandelt.
+  - Soll, Ist, absolute und prozentuale Abweichung bleiben je Komponente sichtbar; unbekannte Basis erzeugt keinen Nullwert.
+  - Naehrstoff- und Kostenfolge verwenden versionierte Feedwerte und kennzeichnen fehlende Abdeckung statt sie als null Euro oder null Naehrstoff auszugeben.
+  - Ursache ist eine kontrollierte Klassifikation mit optionalem Pflichtkommentar statt Freitext als einzige Semantik.
+  - Command ist tenant-/grant-/rollen-sicher, idempotent und append-only; Event und Erfassung entstehen atomar.
+  - CSV-Export enthaelt Tenant-sicher Plan-/Erfassungs-ID, Zeit, Feed, Soll/Ist/Delta, Ursache und Wertfolgen.
+  - Mobile Journey sendet Planversions-ID statt eines Rations-String-Adapters und kann nach Retry ohne Doppelwirkung fortsetzen.
+tdd:
+  red:
+    - Decimal-/Boundary-Tests fuer Komponentenabweichung, Prozentbasis und unvollstaendige Wertabdeckung.
+    - API-/DB-Journey fuer Planbindung, Tenant/Grant/RBAC, Idempotenz, Audit, Outbox und CSV.
+    - Component-Vertrag fuer mobile Erfassung und native Auswertung.
+  green: kleinster Plan-to-Actual-to-Variance-Pfad mit CSV ohne zweite Planwahrheit
+  refactor: reine Abweichungsberechnung, persistenter Command und Auswertungsprojektion trennen
+tests:
+  - tests/test_feeding_actual.py
+  - tests/test_feeding_actual_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/feeding-actual-page.test.tsx
+  - packages/frontend-web/src/__tests__/pages/futtermittel/feeding-plan-mobile.test.tsx
+risks:
+  - Legacy-FeedingControl darf nicht parallel dieselbe mobile Aktion als zweite Wahrheit persistieren.
+  - Fehlende Naehrstoff-/Preisdaten duerfen keine scheinbar guenstige Nullfolge erzeugen.
+  - Korrektur darf Historie nicht ueberschreiben; neuer Command referenziert den Vorgaenger.

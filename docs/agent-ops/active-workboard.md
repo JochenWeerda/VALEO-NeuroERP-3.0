@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FEED-ACT-029 Komponentenbezogene Ist-Fuetterung gegen Planversion - reserviert 2026-07-16
+
+**Owner:** Codex. **Stand:** reserviert (Claim). Die mobile Ist-Erfassung wird von der Legacy-`ration_ref`-Dokumentation auf einen eigenstaendigen, append-only ActualFeeding-Command je aktueller Planversion umgestellt. Soll/Ist, absolute/prozentuale Abweichung, Ursachenklassifikation sowie Naehrstoff-/Kostenfolge bleiben je Komponente nachvollziehbar; fehlende Wertabdeckung bleibt unbekannt. Tenant, Business-Grant, Rolle, Idempotenz, Audit, Outbox und CSV-Export werden serverseitig geschlossen. **TDD:** Domain-Boundaries, API-/DB-/CSV-Journey und mobile/native Component-Vertraege zuerst rot.
+
 ## FEED-SUP-028 Planbedarf, Reichweite, Sicherheitszuschlag und Einkaufsuebergabe - abgeschlossen 2026-07-16
 
 **Owner:** Codex. **Stand:** abgeschlossen. Die Versorgung liest aktuelle FeedingPlanInstructions statt `ration.snapshot.mobile`. Reine Decimal-Regeln zeigen Netto-, Sicherheits- und Bruttobedarf, bekannten Bestand, Reichweite, Unterdeckung, explizite Handelseinheit und Rundungsaufschlag; unbekannter Bestand bleibt unbekannt. Kritische Unterdeckung erzeugt nur eine tenant-/grant-sichere, idempotente und begruendete append-only Einkaufsuebergabe samt atomarem Outbox-Ereignis, niemals automatisch eine Bestellung. Die native Meridian-ListReport-Maske blockiert unbekannte Daten und bestaetigt den konkreten Zeilenbedarf in einem schmalen Overlay. **TDD-Abnahme:** fokussiert 25 Backend-/Screen- und 10 Frontend-Tests; Feeding-/Rations-Regression 620 gruen/1 skipped; Frontend 101 Dateien/406 gruen/1 skipped; TypeScript, ESLint, Ruff, Compile, Alembic, Doku 127/131, Architektur 903/903 (210 Services, 406 Endpoints) und Handbuch 45 Masken gruen. **Requirements:** FEED-SUP-001 und FEED-SUP-003 VERIFIED; Chargen-FIFO/Reservierungen bleiben FEED-SUP-002.
