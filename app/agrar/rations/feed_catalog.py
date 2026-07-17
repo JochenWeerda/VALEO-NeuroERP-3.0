@@ -124,3 +124,40 @@ def build_solver_feed(head: Mapping[str, Any],
         if code in values and code not in {"metabolizable_energy", "crude_protein"}:
             result[target] = float(values[code])
     return result
+
+
+# LP-Konvention des Rations-Solvers (FEED-OPT-042/FEED-WIZ-051): fehlende
+# Koeffizienten zaehlen als 0-Beitrag (konservativ fuer >=-Grenzen), omdfan1 65
+# als Standard-Verdaulichkeit. Das ist Solver-Arithmetik, keine Anzeige —
+# Anzeige-Luecken bleiben None (Kap. 16).
+_LP_FEED_DEFAULTS: dict[str, Any] = {
+    "lid": None, "konservierung": "", "min_kg": 0.0, "sidp": None, "ndf": 0.0, "adf": 0.0,
+    "st": 0.0, "bst": 0.0, "zu": 0.0, "nfc": 0.0, "xl": 0.0,
+    "ca": 0.0, "p": 0.0, "na": 0.0, "mg": 0.0, "k": 0.0,
+    "dcab": None, "edg": None, "rmd": 0.0, "omdfan1": 65.0,
+    "ndfd": None, "ge": None, "sidlys": None, "sidmet": None,
+}
+
+# max_kg ist im LP ein hartes Bound (0 = Futter gesperrt); ohne gesetzte
+# Grenze gilt das physiologische DMI-Maximum als Nicht-Limit.
+_LP_NO_LIMIT_KG_DM = 28.5
+
+
+def lp_ready_solver_feed(solver_feed: Mapping[str, Any]) -> dict[str, Any]:
+    """Katalog-/Editor-Futter auf das vollstaendige LP-Feed-Format bringen.
+
+    Dokumentierte Solver-Konventionen (042-Befunde): fehlendes ``max_kg``
+    sperrt das Futter, der Mindest-Grobfutteranteil erkennt Grobfutter am
+    group-String, fehlendes ``sidp`` wird als 60 % von XP geschaetzt
+    (Monolith-Konvention ``_gfa_to_feed``).
+    """
+    feed = {**_LP_FEED_DEFAULTS,
+            **{key: value for key, value in solver_feed.items() if value is not None}}
+    if feed.get("sidp") is None:
+        feed["sidp"] = float(feed.get("cp") or 0.0) * 0.60
+    if not float(feed.get("max_kg") or 0.0):
+        feed["max_kg"] = _LP_NO_LIMIT_KG_DM
+    group = str(feed.get("group") or "")
+    if feed.get("forage") and "grobfutter" not in group.lower():
+        feed["group"] = f"{group}/Grobfutter" if group else "Grobfutter"
+    return feed

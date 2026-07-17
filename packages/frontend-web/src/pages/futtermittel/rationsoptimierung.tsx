@@ -81,6 +81,7 @@ import {
 } from '@/lib/api/rations-optimization'
 import { isRecord, numberValue, stringValue } from '@/lib/record-utils'
 import { createRationDraft, ensureFeedingGroup, evaluateFeedReadiness, transitionRationVersion } from '@/lib/api/rations-lifecycle'
+import { WizardFeedSections, type SectionFeed } from '@/features/feed-advice/WizardFeedSections'
 
 // ---------------------------------------------------------------------------
 // Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
@@ -1771,6 +1772,25 @@ function Wizard({
     [allDisplayFeeds, searchQuery],
   )
 
+  // Bereichsansicht (FEED-WIZ-051): DLG-FUTTERART/Kategorie -> fachlicher Bereich;
+  // Nummern-Spalte aus PRIMARYID (DLG), Artikelnummer (Katalog) bzw. Herkunftslabel.
+  const [feedView, setFeedView] = useState<'bereiche' | 'tabelle'>('bereiche')
+  const sectionFeeds = useMemo<SectionFeed[]>(() => allDisplayFeeds.map((f) => {
+    const raw = f as FeedIngredient & { _isCustom?: boolean; _compoundId?: string; _analyseId?: string }
+    const nummer = raw.dlg_primaryid
+      ?? (raw as { artikel_nummer?: string }).artikel_nummer
+      ?? (raw._compoundId ? 'Mischung' : raw._analyseId ? 'Analyse' : null)
+    return {
+      id: f.id,
+      name: f.name,
+      nummer,
+      futterart: raw.futterart ?? f.group ?? '',
+      tmPct: Number.isFinite(f.dm_frac) ? f.dm_frac * 100 : null,
+      me: Number.isFinite(f.me_mj_kgdm) ? f.me_mj_kgdm : null,
+      selected: selectedFeedIds.has(f.id),
+    }
+  }), [allDisplayFeeds, selectedFeedIds])
+
   const { data: dlgInfo } = useQuery({ queryKey: ['dlg-info'], queryFn: fetchDlgInfo, staleTime: 60_000 })
   const dlgRefreshMut = useMutation({ mutationFn: triggerDlgRefresh })
 
@@ -2391,27 +2411,73 @@ function Wizard({
               </div>
             )}
 
-            {/* TS/FM-Umschalter für die Verzehrsgrenzen-Eingabe (Fodjan-Muster) */}
-            <div className="flex items-center justify-end gap-2 mb-2">
-              <span className="text-[11px] font-medium" style={{ color: C.muted }}>Grenzen eingeben in:</span>
+            {/* Ansicht + TS/FM-Umschalter für die Verzehrsgrenzen-Eingabe */}
+            <div className="flex items-center justify-between gap-2 mb-2">
+              {/* Bereichsansicht (FEED-WIZ-051, Futter-R-Muster) vs. Katalogtabelle */}
               <div className="inline-flex rounded-md border overflow-hidden" style={{ borderColor: C.border }}>
-                {(['TM', 'FM'] as FeedLimitUnit[]).map((u) => (
+                {([['bereiche', 'Bereiche'], ['tabelle', 'Katalogtabelle']] as const).map(([value, label]) => (
                   <button
-                    key={u}
+                    key={value}
                     type="button"
-                    onClick={() => setFeedLimitUnit(u)}
+                    onClick={() => setFeedView(value)}
                     className="px-3 py-1 text-xs font-semibold transition-colors"
-                    style={{ background: feedLimitUnit === u ? C.accent : '#fff', color: feedLimitUnit === u ? '#fff' : C.dark }}
-                    title={u === 'TM' ? 'Grenzen in kg Trockenmasse/Tag eingeben' : 'Grenzen in kg Frischmasse/Tag eingeben'}
+                    style={{ background: feedView === value ? C.accent : '#fff', color: feedView === value ? '#fff' : C.dark }}
+                    title={value === 'bereiche'
+                      ? 'Futtermittel je Bereich über eine leere Zeile hinzufügen (Rauhfutter, Feuchtfutter, Schrote, …)'
+                      : 'Vollständige DLG-Katalogtabelle mit Suche und Alle/Keine'}
                   >
-                    {u === 'TM' ? 'kg TM' : 'kg FM'}
+                    {label}
                   </button>
                 ))}
               </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium" style={{ color: C.muted }}>Grenzen eingeben in:</span>
+                <div className="inline-flex rounded-md border overflow-hidden" style={{ borderColor: C.border }}>
+                  {(['TM', 'FM'] as FeedLimitUnit[]).map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => setFeedLimitUnit(u)}
+                      className="px-3 py-1 text-xs font-semibold transition-colors"
+                      style={{ background: feedLimitUnit === u ? C.accent : '#fff', color: feedLimitUnit === u ? '#fff' : C.dark }}
+                      title={u === 'TM' ? 'Grenzen in kg Trockenmasse/Tag eingeben' : 'Grenzen in kg Frischmasse/Tag eingeben'}
+                    >
+                      {u === 'TM' ? 'kg TM' : 'kg FM'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
+            {feedView === 'bereiche' && (
+              <div className="flex-1 overflow-auto">
+                <WizardFeedSections
+                  feeds={sectionFeeds}
+                  unit={feedLimitUnit}
+                  minFm={feedMinFm}
+                  maxFm={feedMaxFm}
+                  onSelect={(id) => setSelectedFeedIds((prev) => new Set([...prev, id]))}
+                  onRemove={(id) => setSelectedFeedIds((prev) => {
+                    const next = new Set(prev); next.delete(id); return next
+                  })}
+                  onMinChange={(id, value) => setFeedMinFm((prev) => {
+                    const next = { ...prev }
+                    if (Number.isFinite(value) && value > 0) next[id] = value
+                    else delete next[id]
+                    return next
+                  })}
+                  onMaxChange={(id, value) => setFeedMaxFm((prev) => {
+                    const next = { ...prev }
+                    if (Number.isFinite(value) && value > 0) next[id] = value
+                    else delete next[id]
+                    return next
+                  })}
+                />
+              </div>
+            )}
+
             {/* Feed-Tabelle */}
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto" style={{ display: feedView === 'tabelle' ? undefined : 'none' }}>
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 z-10" style={{ background: '#F9FAFB' }}>
                   <tr>

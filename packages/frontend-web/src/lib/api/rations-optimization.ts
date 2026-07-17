@@ -221,6 +221,12 @@ export interface FeedIngredient {
   min_kgdm: number
   max_kgdm: number
   active: boolean
+  /** DLG-FUTTERART (Bereichszuordnung im Wizard, FEED-WIZ-051) */
+  futterart?: string | null
+  /** 8-stellige DLG-PRIMARYID als fachliche Nummer */
+  dlg_primaryid?: string | null
+  /** DLG-Nomenklatur der Druckform */
+  nomenklatur?: string | null
 }
 
 export interface RationItem {

@@ -598,6 +598,11 @@ def _load_dlg_feeds_from_json(json_path: str) -> List[Dict[str, Any]]:
             {
                 "id": feed_id,
                 "lid": lid,
+                # Fachliche Nummern der DLG-FWT (FEED-WIZ-051): PRIMARYID ist der
+                # 8-stellige Schluessel (Futterart+LID+Differenzierung+Konservierung),
+                # NOMENKLATUR die DLG-Positionsnummer der Druckform.
+                "dlg_primaryid": primaryid or None,
+                "nomenklatur": entry.get("NOMENKLATUR") or None,
                 "name": name,
                 "konservierung": konservierung,
                 "group": group,
@@ -1374,6 +1379,9 @@ from app.agrar.rations.requirements import (  # noqa: E402
     CowRequirements as _CowReq,
     gfe_requirements as _gfe_requirements,
     normalize_feeding_type as _normalize_feeding_type,
+)
+from app.agrar.rations.feed_catalog import (  # noqa: E402
+    lp_ready_solver_feed as _lp_ready_solver_feed,
 )
 
 
@@ -7715,6 +7723,11 @@ async def optimize_from_profile(
                 custom = [
                     _gfa_to_feed(cf)
                     if cf.get("_source") == "gfa" or "rohprotein_ts" in cf
+                    # Katalog-Futter (FEED-WIZ-051): solver_feed des Futtermittel-
+                    # stamms auf die LP-Konvention vervollstaendigen (042-Befunde:
+                    # fehlende Koeffizienten, max_kg-Sperre, Grobfutter-group).
+                    else _lp_ready_solver_feed(cf)
+                    if cf.get("_source") == "catalog"
                     else cf
                     for cf in body.custom_feeds
                 ]

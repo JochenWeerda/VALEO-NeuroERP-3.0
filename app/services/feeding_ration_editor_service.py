@@ -14,6 +14,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.agrar.rations.feed_catalog import lp_ready_solver_feed
 from app.agrar.rations.ration_draft import compare_drafts, evaluate_draft
 from app.core.uuid7 import uuid7
 from app.services.feeding_feed_catalog_service import FeedingFeedCatalogService
@@ -169,36 +170,11 @@ class FeedingRationEditorService:
 
     # ── Optimieren im Editor (FEED-OPT-042) ─────────────────────────────────
 
-    # LP-Konvention des Solvers (wie _gfa_to_feed im Optimierungsmodul):
-    # fehlende Koeffizienten zaehlen als 0-Beitrag (konservativ fuer >=-Grenzen),
-    # omdfan1 65 als Standard-Verdaulichkeit. Das ist Solver-Arithmetik, keine
-    # Anzeige — Anzeige-Luecken bleiben None (Kap. 16).
-    _LP_FEED_DEFAULTS: dict[str, Any] = {
-        "lid": None, "konservierung": "", "sidp": None, "ndf": 0.0, "adf": 0.0,
-        "st": 0.0, "bst": 0.0, "zu": 0.0, "nfc": 0.0, "xl": 0.0,
-        "ca": 0.0, "p": 0.0, "na": 0.0, "mg": 0.0, "k": 0.0,
-        "dcab": None, "edg": None, "rmd": 0.0, "omdfan1": 65.0,
-        "ndfd": None, "ge": None, "sidlys": None, "sidmet": None,
-    }
-    # max_kg ist im LP ein hartes Bound (0 = Futter gesperrt); ohne gesetzte
-    # Grenze gilt das physiologische DMI-Maximum als Nicht-Limit.
-    _LP_NO_LIMIT_KG_DM = 28.5
-
+    # LP-Normalisierung zentral in feed_catalog.lp_ready_solver_feed
+    # (FEED-WIZ-051: gleiche Konvention fuer Editor-Optimieren und
+    # Katalog-custom_feeds im from-profile-Pfad).
     def _lp_feed(self, solver_feed: dict[str, Any]) -> dict[str, Any]:
-        feed = {**self._LP_FEED_DEFAULTS,
-                **{key: value for key, value in solver_feed.items() if value is not None}}
-        if feed.get("sidp") is None:
-            # Monolith-Konvention (_gfa_to_feed): ohne sidP-Analyse 60 % von XP.
-            feed["sidp"] = float(feed.get("cp") or 0.0) * 0.60
-        if not float(feed.get("max_kg") or 0.0):
-            feed["max_kg"] = self._LP_NO_LIMIT_KG_DM
-        # Grobfutter-Konvention des LP: der Mindest-Grobfutteranteil (>=40 % DMI)
-        # erkennt Grobfutter am group-String ("grobfutter"); Katalogfutter mit
-        # forage-Kennzeichen muessen dieser Konvention folgen.
-        group = str(feed.get("group") or "")
-        if feed.get("forage") and "grobfutter" not in group.lower():
-            feed["group"] = f"{group}/Grobfutter" if group else "Grobfutter"
-        return feed
+        return lp_ready_solver_feed(solver_feed)
 
     def optimize_version(self, version_id: str, *,
                          expected_latest_version_no: int) -> dict[str, Any]:
