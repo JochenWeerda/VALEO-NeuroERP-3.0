@@ -8286,14 +8286,17 @@ from app.api.v1.endpoints.rations_controlling import (
 )
 
 router.include_router(_rations_controlling_router)
+from app.agrar.rations.module_gate import (  # noqa: E402
+    require_feeding_advisory as _require_feeding_advisory,
+)
 from app.api.v1.endpoints.feeding_core import router as _feeding_core_router
 
-router.include_router(_feeding_core_router)
+router.include_router(_feeding_core_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_requirements import (
     router as _feeding_requirements_router,
 )
 
-router.include_router(_feeding_requirements_router)
+router.include_router(_feeding_requirements_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.rations_reference_data import (
     router as _rations_reference_data_router,
 )
@@ -8313,43 +8316,43 @@ from app.api.v1.endpoints.feeding_ration_editor import (
     router as _feeding_ration_editor_router,
 )
 
-router.include_router(_feeding_ration_editor_router)
+router.include_router(_feeding_ration_editor_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_ration_templates import (
     router as _feeding_ration_templates_router,
 )
 
-router.include_router(_feeding_ration_templates_router)
+router.include_router(_feeding_ration_templates_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_plans import router as _feeding_plans_router
 
-router.include_router(_feeding_plans_router)
+router.include_router(_feeding_plans_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_supply import router as _feeding_supply_router
 
-router.include_router(_feeding_supply_router)
+router.include_router(_feeding_supply_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_actual import router as _feeding_actual_router
 
-router.include_router(_feeding_actual_router)
+router.include_router(_feeding_actual_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_consulting import router as _feeding_consulting_router
 
-router.include_router(_feeding_consulting_router)
+router.include_router(_feeding_consulting_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_import_monitor import (
     router as _feeding_import_monitor_router,
 )
 
-router.include_router(_feeding_import_monitor_router)
+router.include_router(_feeding_import_monitor_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_mixer import router as _feeding_mixer_router
 
-router.include_router(_feeding_mixer_router)
+router.include_router(_feeding_mixer_router, dependencies=[Depends(_require_feeding_advisory)])
 from app.api.v1.endpoints.feeding_performance import router as _feeding_performance_router
-router.include_router(_feeding_performance_router)
+router.include_router(_feeding_performance_router, dependencies=[Depends(_require_feeding_advisory)])
 
 from app.api.v1.endpoints.feeding_reports import router as _feeding_reports_router  # noqa: E402
-router.include_router(_feeding_reports_router)
+router.include_router(_feeding_reports_router, dependencies=[Depends(_require_feeding_advisory)])
 
 from app.api.v1.endpoints.feeding_herd_history import router as _feeding_herd_history_router  # noqa: E402
-router.include_router(_feeding_herd_history_router)
+router.include_router(_feeding_herd_history_router, dependencies=[Depends(_require_feeding_advisory)])
 
 from app.api.v1.endpoints.feeding_assist import router as _feeding_assist_router  # noqa: E402
-router.include_router(_feeding_assist_router)
+router.include_router(_feeding_assist_router, dependencies=[Depends(_require_feeding_advisory)])
 
 from app.api.v1.endpoints.feeding_governance import router as _feeding_governance_router  # noqa: E402
-router.include_router(_feeding_governance_router)
+router.include_router(_feeding_governance_router, dependencies=[Depends(_require_feeding_advisory)])

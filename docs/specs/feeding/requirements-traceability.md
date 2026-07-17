@@ -203,7 +203,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | FEED-NFR-004 | Betrieb (Logs/Metriken/Health/Alembic) | VERIFIED (Bestand) | Prometheus-Middleware, AuditMiddleware, Alembic Single-Head |
 | FEED-NFR-005 | Security (OIDC/RBAC/Tenant) | VERIFIED | `test_rations_authz.py` (Slice 013) |
 | FEED-NFR-006 | A11y WCAG 2.2 AA | VERIFIED (Kernrouten) | axe-E2E 8/8 |
-| FEED-NFR-007 | Feature Flag + Pilot vor Rollout | PARTIAL | Module-Registry vorhanden; Feeding-Flag bei Inkrement 1 |
+| FEED-NFR-007 | Feature Flag + Pilot vor Rollout | VERIFIED (Technik) | Modul `feeding_advisory` in der Registry (Default installiert; je Tenant via TENANT_MODULE_FLAGS schaltbar), Router-Gate über alle /feeding-Subrouter (404 mit Modulnennung; Katalog/Analysen ausgenommen), Playwright-Release-Journeys A/B/C grün, Runbook `docs/ops/feeding-advisory-rollout-runbook.md` inkl. Rollback + Referenzbetrieb-Vergleich; **Pilotabnahme durch Fütterungsberater = offenes Auftraggeber-Gate vor Breitenaktivierung** — `test_feeding_module_flag.py`, `feeding-release-journeys.spec.ts` (FEED-REL-047) |
 
 ## Gap-Kurzbild
 

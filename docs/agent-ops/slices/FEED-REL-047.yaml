@@ -1,0 +1,40 @@
+slice_id: FEED-REL-047
+title: Pilot und Rollout (Feature-Flag, Release-Journeys, Runbook)
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Phase 6 Pilot/Rollout)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 8, FEED-REL-047)
+requirements:
+  - FEED-NFR-007 -> VERIFIED (Technik); Pilotabnahme bleibt Auftraggeber-Gate
+contracts:
+  module_flag:
+    - ModuleDefinition feeding_advisory (required agrar) in modules/bootstrap.py
+    - INSTALLED_MODULES Default + feeding_advisory (heutiges Verhalten unveraendert)
+    - Router-Gate app/agrar/rations/module_gate.py als Dependency an allen
+      /feeding-Subroutern (15 Router; feed-catalog + feed-analyses als Basis-Agrar
+      bewusst ausgenommen); deaktivierter Tenant -> 404 mit Modulnennung
+  journeys:
+    - packages/frontend-web/tests/e2e/feeding-release-journeys.spec.ts —
+      A Ration->Editor-Worklist->Editor(Positionen+Bewertung)->Freigabe->Bericht+CSV;
+      B Plan->mobile Ist-Dokumentation (Stallanweisung sichtbar);
+      C Beratungsfall->Beratungs-Maske (Fall + Beobachtung)
+  runbook:
+    - docs/ops/feeding-advisory-rollout-runbook.md — Flag-Steuerung je Tenant,
+      Vorbedingungen, automatisierter Smoke, Referenzbetrieb-Vergleich
+      (rations_hof_ostfriesland-Seed als manueller Release-Schritt), Rollback
+      (Flag aus, kein Downgrade noetig), bekannte Reste + externe Gates
+external_gates:
+  - Pilotabnahme durch fachkundigen Fuetterungsberater vor Breitenaktivierung
+    (Auftraggeber-Gate, Runbook Abschnitt 6 — nicht simulierbar)
+tdd:
+  red: "2 failed (Modul nicht registriert, Gate fehlt) — tests/test_feeding_module_flag.py vor Implementierung"
+  green: "3/3 Flag-Gate; Playwright-Journeys 3/3 gegen Dev-Server + Docker-Backend; Regression 19 gruen"
+  refactor: "Include-Gating zentral per Dependency statt Route-Duplikaten"
+gates:
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+  - alembic Single-Head unveraendert feed_rbac_audit_20260717 (kein Schema-Change)
+notes:
+  - Journey-Fund: Editor zeigt bei Nicht-Katalog-Futter im Snapshot ehrlich
+    "Futtermittel nicht gefunden" in der Bewertungsleiste (kein stiller 0-Wert)

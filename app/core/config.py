@@ -170,7 +170,9 @@ class Settings(BaseSettings):
     DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
     DEFAULT_BANK_ACCOUNT_ID: str = "1000"  # Kontonummer für OP-Ausgleich (Zahlungseingang)
     DEFAULT_VAT_RATE: float = 0.19  # MwSt-Satz (19 %) für Portal-Shop
-    INSTALLED_MODULES: List[str] = ["core", "agrar"]
+    # feeding_advisory ist standardmaessig installiert (heutiges Verhalten);
+    # Deaktivierung je Tenant ueber TENANT_MODULE_FLAGS (FEED-REL-047).
+    INSTALLED_MODULES: List[str] = ["core", "agrar", "feeding_advisory"]
     TENANT_MODULE_FLAGS: dict[str, list[str]] = {}
 
     @field_validator("INSTALLED_MODULES", mode="before")
