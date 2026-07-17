@@ -191,7 +191,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | ID | Anforderung | Prio | IST | Status | Gap | Umsetzung | Test | Nachweis |
 |---|---|---|---|---|---|---|---|---|
 | FEED-AI-001 | KI nur unterstützend, keine stille Freigabe, keine erfundenen Werte | MUSS | Copilot-/Intent-Vorschläge mit Delta-Anzeige; Freigabe nur via Lifecycle | VERIFIED | — | Leitplanke bleibt | `test_rations_lifecycle_api.py` | ADR-041 |
-| FEED-AI-002 | Erklärungen/Ursachen/Maßnahmenvorschläge | SOLL | Erklärschicht + Diagnose | PARTIAL | Maßnahmen-Ableitung nach Inkrement 5 | Release C | `test_rations_aggregator.py` | — |
+| FEED-AI-002 | Erklärungen/Ursachen/Maßnahmenvorschläge | SOLL | Erklärschicht + Diagnose; **deterministische Assistenzstufe** nach dem Proposal-Schema (11-agenten.md §3.1): `POST /feeding/assist/explain-findings` (facts/assumptions/recommendations mit evidence_refs, confidence aus Datenlage, requires_human_approval; append-only auditiert), `POST /feeding/assist/propose-measures` (bestätigungspflichtige proposed_commands für den bestehenden Maßnahmen-Vertrag — **nichts wird committed**), `GET /feeding/assist/substitutes` (gleiche Futterklasse, nach Preis, mit Provenienz; fehlende Analyse = benannte Unsicherheit statt Schätzung) | VERIFIED | LLM-Gateway-Anbindung inkl. Kill Switch/Injection-Suite = expliziter Folgeausbau (Modellpfad); Leitplanken FEED-AI-001..012 gelten unverändert | deterministische Rechendienste statt Modell (FEED-AI-003-konform) | `test_feeding_assist_api.py`, `test_rations_aggregator.py` | FEED-AI-046 |
 
 ## Kapitel 7 — NFR (Zusammenfassung)
 

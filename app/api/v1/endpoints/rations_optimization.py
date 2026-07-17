@@ -8347,3 +8347,6 @@ router.include_router(_feeding_reports_router)
 
 from app.api.v1.endpoints.feeding_herd_history import router as _feeding_herd_history_router  # noqa: E402
 router.include_router(_feeding_herd_history_router)
+
+from app.api.v1.endpoints.feeding_assist import router as _feeding_assist_router  # noqa: E402
+router.include_router(_feeding_assist_router)
