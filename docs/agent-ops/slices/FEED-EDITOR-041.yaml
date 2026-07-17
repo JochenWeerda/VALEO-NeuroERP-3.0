@@ -1,0 +1,40 @@
+slice_id: FEED-EDITOR-041
+title: Editor-Komfortstufe (Undo/Redo, Tastatur, Mischreihenfolge, Expertenspalten)
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.4 Rationseditor)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-EDITOR-041)
+requirements:
+  - FEED-RAT-004 (Undo/Redo, Mischreihenfolge-Sortierung, Tastatur-Journey)
+contracts:
+  frontend:
+    - RationEditor.tsx — Undo/Redo-Historie (past/future-Stacks; zusammenhaengende
+      Eingabe am selben Feld = 1 Undo-Schritt via actionKey-Koaleszenz; Reset bei
+      Laden/Speichern); Buttons Rueckgaengig/Wiederholen + Strg+Z / Strg+Y/Strg+Umschalt+Z
+      als Window-Listener (funktioniert auch nach Fokusverlust durch disabled-Buttons)
+    - Mischreihenfolge: Zeilen-Buttons hoch/runter; mixing_sequence wird beim
+      Speichern Teil des Versions-Snapshots; Laden sortiert nach mixing_sequence
+    - Tastatur-Journey: Enter im Mengenfeld springt zur naechsten Position,
+      am Ende zum Hinzufuegen-Select; Sortier-/Entfernen-Buttons tastaturbedienbar
+    - Expertenspalten (progressiv, aria-pressed-Toggle): Ca/P/Na/Mg/K je Position;
+      fehlende Werte als Gedankenstrich, nie 0
+  backend:
+    - ration_draft.py — NUTRIENT_KEYS additiv um ca_g/p_g/na_g/mg_g/k_g erweitert
+      (Beitraege je Position, Coverage-Hinweis bei fehlender Analyse, METRIC_LABELS)
+    - feeding-ration-editor.ts — DraftComponent.mixing_sequence (optional, additiv)
+tdd:
+  red: "FE 4 failed (Undo/Sortierung/Enter/Expertenspalten) + BE 1 failed (KeyError ca_g) vor Implementierung"
+  green: "FE 10/10 (ration-editor.test.tsx); BE 13/13 (editor unit+api); tsc + eslint sauber"
+  refactor: "zentrale applyDraft-Mutation ersetzt verstreute setComponents-Aufrufe"
+gates:
+  - pytest editor + feeding-Regression: 13 + 15 passed (nach Flake-Fix 4/4 actual)
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+  - alembic Single-Head unveraendert feed_reports_types_20260716 (kein Schema-Change)
+notes:
+  - Flake-Fix in test_feeding_actual_api.py (Datums-Rollover auf persistenter Dev-DB):
+    aktuelle Policy nutzt valid_from=heute statt festem Vergangenheitsdatum, da
+    "Zukunfts-Policies" frueherer Laeufe am Folgetag aktiv werden und per
+    valid_from-Vorrang gewinnen wuerden
+  - Docker-Desktop-Absturz waehrend der Green-Welle; nach Neustart alle Gates gruen

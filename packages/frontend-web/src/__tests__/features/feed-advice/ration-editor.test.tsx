@@ -136,6 +136,115 @@ describe('RationEditor', () => {
   })
 })
 
+describe('RationEditor Komfortstufe (FEED-EDITOR-041)', () => {
+  beforeEach(() => {
+    fetchRationDetailMock.mockReset()
+    evaluateRationDraftMock.mockReset()
+    createRationVersionMock.mockReset()
+    listFeedingFeedsMock.mockReset()
+    listFeedingFeedsMock.mockResolvedValue([])
+    fetchRationDetailMock.mockResolvedValue({
+      ...ration,
+      versions: [{
+        id: 'v-3', version_no: 3, status: 'draft', snapshot: {
+          components: [
+            { feed_id: 'f-gras', name: 'Grassilage', kg_fm: 24 },
+            { feed_id: 'f-min', name: 'Mineral', kg_fm: 0.2 },
+          ],
+        }, snapshot_checksum: 'c',
+      }],
+    })
+    evaluateRationDraftMock.mockResolvedValue({
+      ...evaluation,
+      positions: [
+        { ...evaluation.positions[0], ca_g: 42, p_g: 24.5 },
+        { feed_id: 'f-min', name: 'Mineral', kg_fm: 0.2, kg_tm: 0.18, cost_eur: 0.09 },
+      ],
+    })
+  })
+
+  it('macht Aenderungen rueckgaengig und stellt sie wieder her (auch per Tastatur)', async () => {
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByRole('heading', { name: /Sommerration/ })
+
+    const undoButton = screen.getByRole('button', { name: /^Rückgängig$/ })
+    const redoButton = screen.getByRole('button', { name: /^Wiederholen$/ })
+    expect(undoButton).toBeDisabled()
+    expect(redoButton).toBeDisabled()
+
+    const amount = screen.getByLabelText(/Menge Grassilage/)
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '30')
+    expect(screen.getByLabelText(/Menge Grassilage/)).toHaveValue(30)
+
+    // Undo stellt exakt den vorherigen Draft her (zusammenhaengende Eingabe = 1 Schritt)
+    await userEvent.click(undoButton)
+    expect(screen.getByLabelText(/Menge Grassilage/)).toHaveValue(24)
+    expect(undoButton).toBeDisabled()
+
+    await userEvent.click(redoButton)
+    expect(screen.getByLabelText(/Menge Grassilage/)).toHaveValue(30)
+
+    // Tastatur: Strg+Z
+    await userEvent.keyboard('{Control>}z{/Control}')
+    expect(screen.getByLabelText(/Menge Grassilage/)).toHaveValue(24)
+  })
+
+  it('sortiert die Mischreihenfolge und persistiert sie im Snapshot', async () => {
+    createRationVersionMock.mockResolvedValue({ id: 'v-4', version_no: 4 })
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByRole('heading', { name: /Sommerration/ })
+
+    // erste Position kann nicht weiter nach oben
+    expect(screen.getByRole('button', { name: /Grassilage nach oben/ })).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: /Grassilage nach unten/ }))
+
+    const rows = screen.getAllByRole('row').slice(1) // ohne Kopfzeile
+    expect(rows[0]).toHaveTextContent('Mineral')
+    expect(rows[1]).toHaveTextContent('Grassilage')
+
+    await userEvent.click(screen.getByRole('button', { name: /Als neue Version speichern/ }))
+    await waitFor(() => {
+      expect(createRationVersionMock).toHaveBeenCalledWith('r-1', expect.objectContaining({
+        snapshot: expect.objectContaining({
+          components: [
+            expect.objectContaining({ feed_id: 'f-min', mixing_sequence: 1 }),
+            expect.objectContaining({ feed_id: 'f-gras', mixing_sequence: 2 }),
+          ],
+        }),
+      }))
+    })
+  })
+
+  it('springt mit Enter zur naechsten Position (Tastatur-Journey)', async () => {
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByRole('heading', { name: /Sommerration/ })
+
+    const first = screen.getByLabelText(/Menge Grassilage/)
+    first.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByLabelText(/Menge Mineral/)).toHaveFocus()
+  })
+
+  it('blendet Expertenspalten (Mineralstoffe) erst nach Aktivierung ein', async () => {
+    render(<RationEditor rationId="r-1" />)
+    await screen.findByRole('heading', { name: /Sommerration/ })
+
+    expect(screen.queryByRole('columnheader', { name: 'Ca (g)' })).not.toBeInTheDocument()
+    const toggle = screen.getByRole('button', { name: /Expertenspalten/ })
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+    await userEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('columnheader', { name: 'Ca (g)' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'P (g)' })).toBeInTheDocument()
+    // Wert vorhanden -> formatiert; fehlend -> "–" (nie 0 fabriziert)
+    expect(screen.getByText('42,0')).toBeInTheDocument()
+    const mineralRow = screen.getAllByRole('row').find((row) => row.textContent?.includes('Mineral'))
+    expect(mineralRow?.textContent).toContain('–')
+  })
+})
+
 describe('RationEditor Befund-Navigation (FEED-EDITOR-022)', () => {
   beforeEach(() => {
     fetchRationDetailMock.mockReset()

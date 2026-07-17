@@ -317,7 +317,11 @@ def test_deviation_policy_finding_and_human_measure_journey() -> None:
             "feed_class": "forage",
             "warning_pct": "5",
             "critical_pct": "10",
-            "valid_from": "2026-01-01",
+            # heute statt festem Vergangenheitsdatum: auf einer persistenten
+            # Dev-DB werden "Zukunfts"-Policies frueherer Laeufe am Folgetag
+            # aktiv und wuerden per valid_from-Vorrang gewinnen; bei gleichem
+            # valid_from entscheidet die hoechste (= diese) Version.
+            "valid_from": date.today().isoformat(),
             "reason": "Betriebliche Toleranz fuer Grundfutter festlegen",
         },
     )

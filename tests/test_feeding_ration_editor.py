@@ -91,6 +91,28 @@ def test_missing_nutrient_values_are_reported_as_incomplete_never_zero() -> None
     assert "sidp_g_incomplete" in incomplete
 
 
+def test_mineral_contributions_are_available_for_expert_columns() -> None:
+    """FEED-EDITOR-041: Mineralstoffe (Ca/P/Na/Mg/K) als Expertenkennzahlen je
+    Position; fehlende Werte bleiben None (nie 0) mit Abdeckungshinweis."""
+    from app.agrar.rations.ration_draft import evaluate_draft
+
+    gras = _feed("gras", ca=6.0, p=3.5, na=0.5, mg=2.0, k=25.0)
+    stroh = _feed("stroh")  # ohne Mineralstoffanalyse
+    feeds = {"gras": gras, "stroh": stroh}
+    result = evaluate_draft(
+        [{"feed_id": "gras", "kg_fm": 20.0}, {"feed_id": "stroh", "kg_fm": 2.0}],
+        feeds, REQUIREMENTS)
+
+    gras_position = next(p for p in result["positions"] if p["feed_id"] == "gras")
+    assert gras_position["ca_g"] == pytest.approx(20.0 * 0.35 * 6.0)
+    assert gras_position["p_g"] == pytest.approx(20.0 * 0.35 * 3.5)
+    stroh_position = next(p for p in result["positions"] if p["feed_id"] == "stroh")
+    assert stroh_position["ca_g"] is None, "fehlender Wert bleibt None, nie 0"
+    assert result["coverage"]["ca_g"]["complete"] is False
+    assert "stroh" in result["coverage"]["ca_g"]["missing_feed_ids"]
+    assert result["totals"]["ca_g"] == pytest.approx(20.0 * 0.35 * 6.0)
+
+
 def test_unknown_feed_raises_lookup_error() -> None:
     from app.agrar.rations.ration_draft import evaluate_draft
 

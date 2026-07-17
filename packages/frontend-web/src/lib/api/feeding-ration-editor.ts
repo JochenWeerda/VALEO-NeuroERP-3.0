@@ -8,6 +8,8 @@ export interface DraftComponent {
   kg_fm: number
   min_kg_fm?: number | null
   max_kg_fm?: number | null
+  /** Mischreihenfolge — wird beim Speichern Teil des Versions-Snapshots. */
+  mixing_sequence?: number
 }
 
 export interface DraftDelta {

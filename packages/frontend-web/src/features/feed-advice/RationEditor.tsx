@@ -24,17 +24,26 @@ function snapshotComponents(detail: RationDetail): DraftComponent[] {
     ?? detail.versions[0]
   const raw = (latest?.snapshot as { components?: unknown })?.components
   if (!Array.isArray(raw)) return []
-  return raw
+  const components = raw
     .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
-    .map((item) => ({
+    .map((item, index) => ({
       feed_id: String(item.feed_id ?? ''),
       name: typeof item.name === 'string' ? item.name : undefined,
       kg_fm: Number(item.kg_fm ?? 0),
       min_kg_fm: item.min_kg_fm == null ? null : Number(item.min_kg_fm),
       max_kg_fm: item.max_kg_fm == null ? null : Number(item.max_kg_fm),
+      // Mischreihenfolge ist Teil der Version (FEED-EDITOR-041)
+      mixing_sequence: item.mixing_sequence == null ? index + 1 : Number(item.mixing_sequence),
     }))
     .filter((item) => item.feed_id !== '')
+  return components.sort((a, b) => a.mixing_sequence - b.mixing_sequence)
 }
+
+/** Expertenspalten (Mineralstoffe) — progressiv, erst nach Aktivierung (FEED-EDITOR-041). */
+const EXPERT_COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  ['ca_g', 'Ca (g)'], ['p_g', 'P (g)'], ['na_g', 'Na (g)'],
+  ['mg_g', 'Mg (g)'], ['k_g', 'K (g)'],
+]
 
 /** Vier Prioritaetsstufen (FEED-EDITOR-022, Maskenvertrag FEED-MASK-009). */
 const SEVERITY_LABEL: Record<string, string> = {
@@ -71,6 +80,12 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
   const [saveError, setSaveError] = useState<string | null>(null)
   const debounceRef = useRef<number | null>(null)
   const amountInputRefs = useRef(new Map<string, HTMLInputElement>())
+  // Undo/Redo fuer ungespeicherte Aenderungen (FEED-EDITOR-041): zusammenhaengende
+  // Eingaben am selben Feld werden zu einem Schritt zusammengefasst (lastKey).
+  const historyRef = useRef<{ past: DraftComponent[][]; future: DraftComponent[][]; lastKey: string | null }>(
+    { past: [], future: [], lastKey: null })
+  const [, setHistoryVersion] = useState(0)
+  const [showExpert, setShowExpert] = useState(false)
 
   const load = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -83,6 +98,9 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
       setDetail(rationDetail)
       setComponents(snapshotComponents(rationDetail))
       setFeeds(feedList)
+      // Historie gilt nur fuer ungespeicherte Aenderungen der geladenen Version.
+      historyRef.current = { past: [], future: [], lastKey: null }
+      setHistoryVersion((version) => version + 1)
     } catch (error) {
       setLoadError(getAxiosErrorMessage(error))
     } finally {
@@ -124,32 +142,104 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
     }
   }, [components, detail])
 
+  /** Zentrale Draft-Mutation mit Undo-Historie. Gleicher actionKey in Folge
+   * (z. B. Tippen im selben Mengenfeld) bildet einen Undo-Schritt. */
+  function applyDraft(next: DraftComponent[], actionKey: string | null): void {
+    const history = historyRef.current
+    if (actionKey === null || actionKey !== history.lastKey) {
+      history.past.push(components)
+    }
+    history.lastKey = actionKey
+    history.future = []
+    setComponents(next)
+    setHistoryVersion((version) => version + 1)
+    setSaveMessage(null)
+  }
+
+  function undo(): void {
+    const history = historyRef.current
+    const previous = history.past.pop()
+    if (!previous) return
+    history.future.push(components)
+    history.lastKey = null
+    setComponents(previous)
+    setHistoryVersion((version) => version + 1)
+    setSaveMessage(null)
+  }
+
+  function redo(): void {
+    const history = historyRef.current
+    const next = history.future.pop()
+    if (!next) return
+    history.past.push(components)
+    history.lastKey = null
+    setComponents(next)
+    setHistoryVersion((version) => version + 1)
+    setSaveMessage(null)
+  }
+
+  // Tastatur-Undo/Redo auch nach Fokusverlust (z. B. Button wird disabled):
+  // Window-Listener, der stets die aktuelle Handler-Fassung aufruft.
+  const historyKeyRef = useRef<(event: KeyboardEvent) => void>(() => {})
+  historyKeyRef.current = (event: KeyboardEvent): void => {
+    if (!(event.ctrlKey || event.metaKey)) return
+    const key = event.key.toLowerCase()
+    if (key === 'z' && !event.shiftKey) {
+      event.preventDefault()
+      undo()
+    } else if (key === 'y' || (key === 'z' && event.shiftKey)) {
+      event.preventDefault()
+      redo()
+    }
+  }
+  useEffect(() => {
+    const listener = (event: KeyboardEvent): void => historyKeyRef.current(event)
+    window.addEventListener('keydown', listener)
+    return () => window.removeEventListener('keydown', listener)
+  }, [])
+
   function updateAmount(feedId: string, value: string): void {
     const amount = Number(value)
-    setComponents((current) => current.map((component) =>
-      component.feed_id === feedId ? { ...component, kg_fm: Number.isFinite(amount) ? amount : 0 } : component))
-    setSaveMessage(null)
+    applyDraft(components.map((component) =>
+      component.feed_id === feedId ? { ...component, kg_fm: Number.isFinite(amount) ? amount : 0 } : component),
+      `amount:${feedId}`)
   }
 
   function updateBound(feedId: string, key: 'min_kg_fm' | 'max_kg_fm', rawValue: string): void {
     const value = rawValue === '' ? null : Number(rawValue)
     if (value !== null && (!Number.isFinite(value) || value < 0)) return
-    setComponents((current) => current.map((component) =>
-      component.feed_id === feedId ? { ...component, [key]: value } : component))
-    setSaveMessage(null)
+    applyDraft(components.map((component) =>
+      component.feed_id === feedId ? { ...component, [key]: value } : component),
+      `${key}:${feedId}`)
   }
 
   function removePosition(feedId: string): void {
-    setComponents((current) => current.filter((component) => component.feed_id !== feedId))
-    setSaveMessage(null)
+    applyDraft(components.filter((component) => component.feed_id !== feedId), null)
   }
 
   function addPosition(): void {
     const feed = feeds.find((item) => item.id === selectedFeedId)
     if (!feed || components.some((component) => component.feed_id === feed.id)) return
-    setComponents((current) => [...current, { feed_id: feed.id, name: feed.name, kg_fm: 1 }])
+    applyDraft([...components, { feed_id: feed.id, name: feed.name, kg_fm: 1 }], null)
     setSelectedFeedId('')
-    setSaveMessage(null)
+  }
+
+  /** Mischreihenfolge in der UI sortieren (FEED-EDITOR-041). */
+  function movePosition(feedId: string, direction: -1 | 1): void {
+    const index = components.findIndex((component) => component.feed_id === feedId)
+    const target = index + direction
+    if (index < 0 || target < 0 || target >= components.length) return
+    const next = [...components]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    applyDraft(next, null)
+  }
+
+  /** Tastatur-Journey: Enter springt zur Menge der naechsten Position. */
+  function focusNextAmount(feedId: string): void {
+    const index = components.findIndex((component) => component.feed_id === feedId)
+    const next = components[index + 1]
+    if (next) amountInputRefs.current.get(next.feed_id)?.focus()
+    else document.getElementById('editor-add-feed')?.focus()
   }
 
   async function save(): Promise<void> {
@@ -159,7 +249,8 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
     setSaveMessage(null)
     try {
       const created = await createRationVersion(detail.id, {
-        snapshot: { components },
+        // Mischreihenfolge wird Teil der Version (FEED-EDITOR-041).
+        snapshot: { components: components.map((component, index) => ({ ...component, mixing_sequence: index + 1 })) },
         expected_latest_version_no: detail.latest_version_no,
         comment: 'Editor-Bearbeitung',
       })
@@ -204,6 +295,9 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
     )
   }
 
+  const canUndo = historyRef.current.past.length > 0
+  const canRedo = historyRef.current.future.length > 0
+
   return (
     <section className="space-y-4" data-testid="ration-editor">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -216,6 +310,12 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
         <div className="flex items-center gap-3">
           {saveMessage ? <p className="text-sm text-status-success" role="status">{saveMessage}</p> : null}
           {saveError ? <p className="text-sm text-status-error" role="alert">{saveError}</p> : null}
+          <Button type="button" variant="outline" size="sm" disabled={!canUndo} onClick={undo}>
+            Rückgängig
+          </Button>
+          <Button type="button" variant="outline" size="sm" disabled={!canRedo} onClick={redo}>
+            Wiederholen
+          </Button>
           <Button type="button" disabled={saving || components.length === 0} onClick={() => { void save() }}>
             {saving ? 'Speichert…' : 'Als neue Version speichern'}
           </Button>
@@ -224,7 +324,13 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
 
       <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-3 rounded-lg border bg-card p-4">
-          <h2 className="font-medium">Rationspositionen</h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-medium">Rationspositionen</h2>
+            <Button type="button" variant="outline" size="sm" aria-pressed={showExpert}
+                    onClick={() => setShowExpert((current) => !current)}>
+              Expertenspalten
+            </Button>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
@@ -234,11 +340,14 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                 <th className="py-1.5 pr-2 font-medium text-right">Max kg FM</th>
                 <th className="py-1.5 pr-2 font-medium text-right">kg TM</th>
                 <th className="py-1.5 pr-2 font-medium text-right">EUR</th>
+                {showExpert ? EXPERT_COLUMNS.map(([key, label]) => (
+                  <th key={key} className="py-1.5 pr-2 font-medium text-right">{label}</th>
+                )) : null}
                 <th className="py-1.5" aria-hidden />
               </tr>
             </thead>
             <tbody>
-              {components.map((component) => {
+              {components.map((component, index) => {
                 const position = positionByFeed.get(component.feed_id)
                 const label = component.name ?? String(position?.name ?? component.feed_id)
                 return (
@@ -253,6 +362,12 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                         step="0.1"
                         value={String(component.kg_fm)}
                         onChange={(event) => updateAmount(component.feed_id, event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault()
+                            focusNextAmount(component.feed_id)
+                          }
+                        }}
                         ref={(element) => {
                           if (element) amountInputRefs.current.set(component.feed_id, element)
                           else amountInputRefs.current.delete(component.feed_id)
@@ -275,18 +390,36 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                     <td className="py-1.5 pr-2 text-right font-mono tabular-nums">
                       {formatNumber(position?.cost_eur as number | undefined, 2)}
                     </td>
+                    {showExpert ? EXPERT_COLUMNS.map(([key]) => (
+                      <td key={key} className="py-1.5 pr-2 text-right font-mono tabular-nums">
+                        {formatNumber(position?.[key] as number | undefined)}
+                      </td>
+                    )) : null}
                     <td className="py-1.5 text-right">
-                      <Button type="button" variant="ghost" size="sm"
-                              onClick={() => removePosition(component.feed_id)}>
-                        Entfernen
-                      </Button>
+                      <span className="inline-flex items-center gap-0.5">
+                        <Button type="button" variant="ghost" size="sm" disabled={index === 0}
+                                aria-label={`${label} nach oben verschieben`}
+                                onClick={() => movePosition(component.feed_id, -1)}>
+                          ↑
+                        </Button>
+                        <Button type="button" variant="ghost" size="sm" disabled={index === components.length - 1}
+                                aria-label={`${label} nach unten verschieben`}
+                                onClick={() => movePosition(component.feed_id, 1)}>
+                          ↓
+                        </Button>
+                        <Button type="button" variant="ghost" size="sm"
+                                onClick={() => removePosition(component.feed_id)}>
+                          Entfernen
+                        </Button>
+                      </span>
                     </td>
                   </tr>
                 )
               })}
               {components.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-4 text-center text-muted-foreground" role="status">
+                  <td colSpan={7 + (showExpert ? EXPERT_COLUMNS.length : 0)}
+                      className="py-4 text-center text-muted-foreground" role="status">
                     Noch keine Positionen — unten ein Futtermittel hinzufügen.
                   </td>
                 </tr>

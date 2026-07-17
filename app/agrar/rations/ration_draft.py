@@ -22,6 +22,13 @@ NUTRIENT_KEYS: dict[str, tuple[str, str]] = {
     "ndf_g": ("ndf", "g"),
     "starch_g": ("st", "g"),
     "sugar_g": ("zu", "g"),
+    # Mineralstoffe fuer Expertenspalten (FEED-EDITOR-041); fehlende Werte
+    # bleiben None mit Abdeckungshinweis — nie 0 summiert.
+    "ca_g": ("ca", "g"),
+    "p_g": ("p", "g"),
+    "na_g": ("na", "g"),
+    "mg_g": ("mg", "g"),
+    "k_g": ("k", "g"),
 }
 
 # Toleranzen fuer Befunde: 2 % Unterdeckung gilt als Defizit, ab +10 % Ueberschuss.
@@ -41,6 +48,11 @@ METRIC_LABELS = {
     "starch_g": "Staerke",
     "sugar_g": "Zucker",
     "dm_kg": "TM-Aufnahme",
+    "ca_g": "Calcium",
+    "p_g": "Phosphor",
+    "na_g": "Natrium",
+    "mg_g": "Magnesium",
+    "k_g": "Kalium",
 }
 
 
