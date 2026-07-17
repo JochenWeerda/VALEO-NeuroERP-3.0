@@ -2627,6 +2627,10 @@
     {
       "module": "@/pages/portal/whatsapp-simulator",
       "path": "portal/whatsapp-simulator"
+    },
+    {
+      "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
+      "path": "futtermittel/fuetterungsdokumentation-mobil"
     }
   ]
 }

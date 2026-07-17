@@ -86,6 +86,26 @@ export async function fetchRationDetail(rationId: string): Promise<RationDetail>
   return response.data
 }
 
+export interface RationWorklistItem {
+  id: string
+  name: string
+  group_id: string
+  group_name: string
+  version_no: number
+  status: RationStatus
+  updated_at: string
+}
+
+/** Rationen-Worklist (Einstieg in den Rationseditor). */
+export async function listRations(input?: { group_id?: string; status?: RationStatus }): Promise<RationWorklistItem[]> {
+  const params = new URLSearchParams()
+  if (input?.group_id) params.set('group_id', input.group_id)
+  if (input?.status) params.set('status', input.status)
+  const query = params.toString()
+  const response = await apiClient.get<RationWorklistItem[]>(`${BASE}/rations${query ? `?${query}` : ''}`)
+  return response.data
+}
+
 export async function fetchActiveRations(): Promise<Array<{
   ration_id: string
   version_id: string
