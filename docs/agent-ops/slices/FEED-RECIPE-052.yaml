@@ -1,0 +1,47 @@
+slice_id: FEED-RECIPE-052
+title: Bidirektionaler Kundenrezeptur-Kreislauf
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.15 Bestellung/Supply)
+  - User-Auftrag 2026-07-17 (Rezeptur-Kreislauf, Drift-Schutz)
+requirements:
+  - FEED-SUP-004 (bidirektionaler Kundenrezeptur-Kreislauf) -> VERIFIED
+contracts:
+  db:
+    - feeding_customer_recipes (Kunden-Artikelnr. UNIQUE tenant+customer_ref+artikel_nr)
+    - feeding_recipe_versions (append-only Trigger; version_no UNIQUE je recipe)
+    - feeding_recipe_orders (recipe_version_id fixiert; idempotency UNIQUE; soll_components)
+    - feeding_recipe_deliveries (append-only Trigger; eine je order; nachkalkulation)
+    - Migration alembic/versions/feed_recipes_20260717.py (revises feed_rbac_audit_20260717)
+  api:
+    - POST /feeding/recipes (Teilmenge verknuepfter Zeilen, source_ration_ref optional)
+    - GET /feeding/recipes?customer_ref=
+    - POST /feeding/recipes/{id}/versions (append-only, optimistische Revision)
+    - POST /feeding/recipes/{id}/approve (Optimal-Rezeptur)
+    - POST /feeding/recipes/{id}/orders (fixiert freigegebene Version; 409 ohne Freigabe)
+    - POST /feeding/recipe-orders/{id}/delivery (Ist mixer/manual/import; Nachkalkulation)
+    - GET /feeding/recipe-orders/{id}
+    - Modul-Gate feeding_advisory (FEED-REL-047) greift ueber den Include
+  services:
+    - feeding_recipe_service.py — Soll = kg_per_t × Menge aus der FREIGEGEBENEN Version;
+      Nachkalkulation delta_kg/delta_pct gegen die fixierte Version; unbekannte
+      Ist-Komponente -> RecipeValidationError (422)
+semantics:
+  - Teilmenge: der Kunde verknuepft nur ausgewaehlte Zeilen (Mehle/Schrote/Mineral) —
+    Grund-/Feuchtfutter hat er vorraetig; kg_per_t-Summe muss nicht 1000 sein
+  - Drift-Schutz (getestet): nach einer Ist-Lieferung mit Abweichungen zieht die
+    naechste Bestellung wieder exakt die Optimal-Rezeptur, nie das gelieferte Ist;
+    frueherer Auftrag bleibt auf seiner fixierten Version
+tdd:
+  red: "9 failed (ImportError feeding_recipes) vor Implementierung"
+  green: "9/9; Regression Recipes+ModuleFlag+Actual+Reports 21 gruen"
+  refactor: "Fehlerklassen (NotFound/Conflict/Validation) zentral auf 404/409/422 gemappt"
+gates:
+  - python -m alembic upgrade head + heads: single head feed_recipes_20260717
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+notes:
+  - FE-Rest: Portal-Rezeptur-Verwaltung (Zeilen verknuepfen aus dem Wizard),
+    Bestell-Button und Nachkalkulations-Anzeige; Einkaufs-/DMS-Anbindung der
+    Bestellung als Folgeausbau (FEED-SUP-003-Event-Muster liegt vor)

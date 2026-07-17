@@ -8369,3 +8369,6 @@ router.include_router(_feeding_assist_router, dependencies=[Depends(_require_fee
 
 from app.api.v1.endpoints.feeding_governance import router as _feeding_governance_router  # noqa: E402
 router.include_router(_feeding_governance_router, dependencies=[Depends(_require_feeding_advisory)])
+
+from app.api.v1.endpoints.feeding_recipes import router as _feeding_recipes_router  # noqa: E402
+router.include_router(_feeding_recipes_router, dependencies=[Depends(_require_feeding_advisory)])
