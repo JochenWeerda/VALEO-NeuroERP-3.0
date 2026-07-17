@@ -4,31 +4,31 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 version: 3.0.0
-generated: 2026-07-16
+generated: 2026-07-17
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-17` · Stand: `2026-07-16`
+> **Automatisch generiert** · Daten seit: `2026-04-18` · Stand: `2026-07-17`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **94** |
-| Slices abgeschlossen | **75** (80 %) |
-| Mit externen Gates | 74 |
+| Slices gesamt | **109** |
+| Slices abgeschlossen | **90** (83 %) |
+| Mit externen Gates | 80 |
 | Ohne Doku-Dateien | 30 |
-| Slices ohne Cycle-Time (kein Claim-Commit) | 77 |
+| Slices ohne Cycle-Time (kein Claim-Commit) | 78 |
 
 ## Cycle Time
 
 | Metrik | Wert |
 |---|---|
-| Median | **0.1 h** |
-| P90 | **0.9 h** |
+| Median | **0.2 h** |
+| P90 | **1.6 h** |
 
 !!! info "Interpretation"
     Cycle Time = Zeit zwischen `chore: claim <SLICE-ID>` und dem ersten `feat(…): <SLICE-ID>`-Commit.
@@ -36,7 +36,7 @@ generated: 2026-07-16
 
 ## Rework-Rate
 
-**62.8 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**60.3 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
@@ -48,17 +48,19 @@ generated: 2026-07-16
 
 | Slice | Cycle Time | Owner |
 |---|---|---|
+| `FEED-EDITOR-023` | 13.4 h | Claude |
+| `FEED-INT-036` | 2.2 h | Codex |
 | `FEED-ADVICE-ROLES-013` | 2.1 h | Claude |
-| `FEED-CORE-019` | 0.9 h | Codex -> Claude (Uebernahme nach Codex-Token-Stopp auf ausdruecklichen Auftrag) |
+| `FEED-ACT-030` | 1.6 h | Codex |
 
 ## Agent-Produktivität (Slices je Owner)
 
 | Owner | Slices | Anteil |
 |---|---|---|
-| Codex | 46 | `████████████████████` |
-| Claude | 23 | `██████████░░░░░░░░░░` |
-| Cursor | 15 | `███████░░░░░░░░░░░░░` |
-| offen | 6 | `███░░░░░░░░░░░░░░░░░` |
+| Codex | 55 | `████████████████████` |
+| Claude | 29 | `███████████░░░░░░░░░` |
+| Cursor | 15 | `█████░░░░░░░░░░░░░░░` |
+| offen | 6 | `██░░░░░░░░░░░░░░░░░░` |
 | Codex -> Claude (Uebernahme nach Codex-Token-Stopp auf ausdruecklichen Auftrag) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | Claude (Fortfuehrung der Kette nach Codex-Token-Stopp) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | unclaimed | 1 | `░░░░░░░░░░░░░░░░░░░░` |
