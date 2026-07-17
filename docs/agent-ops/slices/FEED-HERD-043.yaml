@@ -1,0 +1,38 @@
+slice_id: FEED-HERD-043
+title: Gruppenhistorie aus Herd-Deltas + Veraltet-Warnung
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.2 Gruppen, SOLL Veraltet-Warnung)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-HERD-043)
+requirements:
+  - FEED-HERD-003 (Parameterhistorie aus Herd-Deltas + Veraltet-Warnung)
+contracts:
+  db:
+    - domain_agrar.animal_group_snapshots — UNIQUE (tenant,group,snapshot_date), Upsert
+    - feeding_groups.parameters_confirmed_at (additiv)
+    - Migration alembic/versions/feed_herd_snapshots_20260717.py (revises feed_reports_types_20260716)
+  api:
+    - POST /feeding/groups/{id}/snapshots/condense (WRITE) — idempotente Verdichtung;
+      422 ohne external_ref (keine Provider-Zuordnung), 404 unbekannte Gruppe
+    - GET /feeding/groups/{id}/parameter-history (READ) — Tages-Snapshots absteigend
+    - GET /feeding/groups/{id}/parameter-staleness (READ) — Alter der letzten Bestaetigung
+      (COALESCE(parameters_confirmed_at, updated_at)), stale ueber 30 Tage
+    - POST /feeding/groups/{id}/confirm-parameters (WRITE) — quittiert, setzt Warnung zurueck
+  services:
+    - feeding_herd_snapshot_service.py — DISTINCT ON je Tag (juengste provider_updated_at
+      gewinnt: Tageskorrektur ersetzt Datenstand, nie zwei Wahrheiten)
+    - feeding_ration_editor_service.evaluate additiv — Finding `group_parameters_stale`
+      (severity info, Text nennt Alter und Schwelle) fuer Editor UND Bedarfskontext
+tdd:
+  red: "6 failed (ImportError feeding_herd_history) — tests/test_feeding_herd_snapshots_api.py vor Implementierung"
+  green: "6/6; Regression Editor+Optimize+Requirements 15 gruen"
+  refactor: "Staleness-SQL zentral; Schwelle STALE_AFTER_DAYS als benannte Konstante"
+gates:
+  - python -m alembic upgrade head + heads: single head feed_herd_snapshots_20260717
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+notes:
+  - Ingest-Pfad im Test = bestehender mock-import (032/035-Vertrag); Live-Sync bleibt
+    vertrags-gegated (DDW-Partnervertrag, externes Gate)
+  - Gruppen-ObjectPage-Anzeige der Historie = FE-Rest

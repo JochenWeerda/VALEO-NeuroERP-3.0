@@ -62,7 +62,35 @@ class FeedingRationEditorService:
         result = evaluate_draft(components, feeds, requirements)
         result["requirement_profile_id"] = profile_id
         result["group_id"] = group_id
+        stale_finding = self._group_staleness_finding(group_id)
+        if stale_finding:
+            result["findings"] = list(result["findings"]) + [stale_finding]
         return result
+
+    def _group_staleness_finding(self, group_id: str) -> dict[str, Any] | None:
+        """Veraltet-Warnung (FEED-HERD-043, 6.2 SOLL): Bedarf/Editor warnen,
+        wenn die Gruppenparameter laenger als die Schwelle unbestaetigt sind."""
+        from app.services.feeding_herd_snapshot_service import STALE_AFTER_DAYS
+        row = self.db.execute(text("""
+          SELECT GREATEST(0, EXTRACT(DAY FROM now() -
+                   COALESCE(parameters_confirmed_at, updated_at)))::int AS days
+          FROM domain_agrar.feeding_groups
+          WHERE tenant_id=:tenant_id AND id=:group_id
+        """), {"tenant_id": self.tenant_id, "group_id": group_id}).mappings().first()
+        if not row or int(row["days"]) <= STALE_AFTER_DAYS:
+            return None
+        days = int(row["days"])
+        return {
+            "code": "group_parameters_stale",
+            "severity": "info",
+            "metric": "group_parameters",
+            "actual": float(days),
+            "target": float(STALE_AFTER_DAYS),
+            "message": (f"Gruppenparameter seit {days} Tagen unbestaetigt "
+                        f"(Schwelle {STALE_AFTER_DAYS} Tage) — Tierzahl und "
+                        "Leistungsdaten pruefen und bestaetigen."),
+            "remediation": "Gruppenparameter pruefen und ueber 'Parameter bestaetigen' quittieren.",
+        }
 
     # ── Persistierte Versionsbewertung (FEED-EDITOR-022) ───────────────────
 
