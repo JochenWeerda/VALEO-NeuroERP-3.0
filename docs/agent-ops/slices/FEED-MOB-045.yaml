@@ -1,0 +1,36 @@
+slice_id: FEED-MOB-045
+title: Mobile Offline-Stufe (Queue mit idempotenten Replays)
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.18 SOLL Offline/Sync)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-MOB-045)
+requirements:
+  - FEED-MOB-001 (Offline-Queue-Anteil; Kamera/DMS bleibt expliziter Rest)
+contracts:
+  frontend:
+    - lib/offline/feeding-offline-queue.ts (NEU) — FeedingOfflineQueue mit injizierbarem
+      Storage (localStorage-Default, Memory fuer Tests) und Sender-Map; FIFO-Replay.
+      KEIN zweiter Datenpfad: Queue haelt exakt die POST /feeding/actuals-Payload,
+      idempotency_key wird beim Einreihen fixiert (Replay = idempotenter API-Vertrag)
+    - Statusregeln: Netzwerkfehler -> pending bleibt + Replay stoppt (weiter offline);
+      409 -> conflict mit sichtbarer Meldung (Plan veraltet), nie blind erneut;
+      andere Fehler -> failed mit Fehlertext, explizites retry()/remove() — kein
+      stilles Verwerfen (Kap. 16)
+    - fuetterungsdokumentation-mobil.tsx additiv — Offline-Fallback im save-Handler
+      (sichtbar "Offline gespeichert"), Replay bei Mount + online-Event,
+      Banner fuer ausstehende Eintraege und Konflikt-/Fehlerkarten mit Aktionen
+tdd:
+  red: "2 Testdateien failed (Import lib/offline/feeding-offline-queue) vor Implementierung"
+  green: "9/9 (6 Queue-Unit + 3 Page-Integration); komplette FE-Suite 429 passed / 1 skipped; tsc + eslint sauber"
+  refactor: "Fehlerklassifikation zentral (isNetworkError/errorDetail)"
+gates:
+  - npx vitest run src/__tests__: 429 passed
+  - npx tsc --noEmit: sauber; eslint auf beruehrten Dateien: sauber
+  - kein Backend-/Schema-Change (Alembic-Head unveraendert)
+notes:
+  - Kamera-Anbindung fuer Beobachtungsfotos = expliziter Rest (DMS-Upload-Vertrag
+    fehlt); kein stiller Scope-Cut
+  - Beobachtungs-Queue (consulting observations) folgt demselben Muster, sobald
+    der mobile Beobachtungs-Einstieg existiert (QueueKind ist erweiterbar)
