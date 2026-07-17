@@ -139,6 +139,156 @@ class FeedingRationEditorService:
                              "totals": variant_eval["totals"]}
         return result
 
+    # ── Optimieren im Editor (FEED-OPT-042) ─────────────────────────────────
+
+    # LP-Konvention des Solvers (wie _gfa_to_feed im Optimierungsmodul):
+    # fehlende Koeffizienten zaehlen als 0-Beitrag (konservativ fuer >=-Grenzen),
+    # omdfan1 65 als Standard-Verdaulichkeit. Das ist Solver-Arithmetik, keine
+    # Anzeige — Anzeige-Luecken bleiben None (Kap. 16).
+    _LP_FEED_DEFAULTS: dict[str, Any] = {
+        "lid": None, "konservierung": "", "sidp": None, "ndf": 0.0, "adf": 0.0,
+        "st": 0.0, "bst": 0.0, "zu": 0.0, "nfc": 0.0, "xl": 0.0,
+        "ca": 0.0, "p": 0.0, "na": 0.0, "mg": 0.0, "k": 0.0,
+        "dcab": None, "edg": None, "rmd": 0.0, "omdfan1": 65.0,
+        "ndfd": None, "ge": None, "sidlys": None, "sidmet": None,
+    }
+    # max_kg ist im LP ein hartes Bound (0 = Futter gesperrt); ohne gesetzte
+    # Grenze gilt das physiologische DMI-Maximum als Nicht-Limit.
+    _LP_NO_LIMIT_KG_DM = 28.5
+
+    def _lp_feed(self, solver_feed: dict[str, Any]) -> dict[str, Any]:
+        feed = {**self._LP_FEED_DEFAULTS,
+                **{key: value for key, value in solver_feed.items() if value is not None}}
+        if feed.get("sidp") is None:
+            # Monolith-Konvention (_gfa_to_feed): ohne sidP-Analyse 60 % von XP.
+            feed["sidp"] = float(feed.get("cp") or 0.0) * 0.60
+        if not float(feed.get("max_kg") or 0.0):
+            feed["max_kg"] = self._LP_NO_LIMIT_KG_DM
+        # Grobfutter-Konvention des LP: der Mindest-Grobfutteranteil (>=40 % DMI)
+        # erkennt Grobfutter am group-String ("grobfutter"); Katalogfutter mit
+        # forage-Kennzeichen muessen dieser Konvention folgen.
+        group = str(feed.get("group") or "")
+        if feed.get("forage") and "grobfutter" not in group.lower():
+            feed["group"] = f"{group}/Grobfutter" if group else "Grobfutter"
+        return feed
+
+    def optimize_version(self, version_id: str, *,
+                         expected_latest_version_no: int) -> dict[str, Any]:
+        """Optimieren erzeugt eine Candidate-Version (nie Aktivierung) atomar
+        mit einem OptimizationRun — kein Ergebnis ohne persistierten Run
+        (FEED-OPT-005). Unloesbarkeit dokumentiert den Run mit status
+        `infeasible` und erklaert die Konfliktgrenzen (Erklaerschicht + 024)."""
+        import time
+
+        version, components = self._version_components(version_id)
+        profile_row = self.db.execute(text("""
+          SELECT id, inputs FROM domain_agrar.requirement_profiles
+          WHERE tenant_id=:tenant_id AND group_id=:group_id
+          ORDER BY created_at DESC LIMIT 1
+        """), {"tenant_id": self.tenant_id, "group_id": version["group_id"]}).mappings().first()
+        if not profile_row:
+            raise LookupError(
+                "Kein Bedarfsprofil fuer diese Gruppe gefunden — bitte zuerst Bedarf berechnen.")
+
+        # Kandidatenmenge = Editor-Positionen mit ihren Grenzen (FM -> TM).
+        custom_feeds: list[dict[str, Any]] = []
+        feed_ids: list[str] = []
+        for component in components:
+            detail = self._catalog.get_feed(component["feed_id"])
+            feed = self._lp_feed(dict(detail["solver_feed"]))
+            dm_frac = float(feed.get("dm_frac") or 0)
+            if component.get("min_kg_fm") is not None and dm_frac > 0:
+                feed["min_kg"] = float(component["min_kg_fm"]) * dm_frac
+            if component.get("max_kg_fm") is not None and dm_frac > 0:
+                feed["max_kg"] = float(component["max_kg_fm"]) * dm_frac
+            custom_feeds.append(feed)
+            feed_ids.append(str(feed["id"]))
+
+        # Lazy-Import: rations_optimization inkludiert diesen Router am Dateiende
+        # (Import beim Modul-Load waere zirkulaer). feed_ids filtert die
+        # DLG-Basisfeeds heraus; custom_feeds kommen danach als Kandidaten dazu.
+        from app.api.v1.endpoints.rations_optimization import _optimize_internal
+        started = time.monotonic()
+        result = _optimize_internal(dict(profile_row["inputs"]),
+                                    custom_feeds=custom_feeds, feed_ids=feed_ids)
+        duration_ms = int((time.monotonic() - started) * 1000)
+        status = str(result.get("status") or "error")
+        if status not in {"optimal", "infeasible", "unbounded", "timeout"}:
+            status = "error"
+        objective = str(result.get("objective_strategy") or "balance_then_cost")
+        run_parameters: dict[str, Any] = {
+            "trigger": "editor",
+            "source_version_id": version_id,
+            "requirement_profile_id": profile_row["id"],
+            "candidate_feed_ids": feed_ids,
+            "bounds": [{key: component.get(key) for key in
+                        ("feed_id", "min_kg_fm", "max_kg_fm")} for component in components],
+        }
+
+        def insert_run(run_version_id: str, extra: dict[str, Any]) -> dict[str, Any]:
+            row = self.db.execute(text("""
+              INSERT INTO domain_agrar.optimization_runs
+                (id,tenant_id,ration_id,ration_version_id,solver_version,objective,
+                 status,duration_ms,parameters,created_by)
+              VALUES (:id,:tenant_id,:ration_id,:version_id,:solver_version,:objective,
+                      :status,:duration_ms,CAST(:parameters AS jsonb),:actor)
+              RETURNING *
+            """), {"id": str(uuid7()), "tenant_id": self.tenant_id,
+                   "ration_id": version["ration_id"], "version_id": run_version_id,
+                   "solver_version": "rations-lp-highs", "objective": objective,
+                   "status": status, "duration_ms": duration_ms,
+                   "parameters": json.dumps({**run_parameters, **extra}, ensure_ascii=False),
+                   "actor": self.actor}).mappings().one()
+            return dict(row)
+
+        if status != "optimal":
+            # Erklaerschicht: Solver-Diagnose + strukturelle Grenzbefunde (024).
+            evaluation = self.evaluate(group_id=version["group_id"],
+                                       requirement_profile_id=str(profile_row["id"]),
+                                       components=components)
+            bound_findings = [finding for finding in evaluation["findings"]
+                              if finding["metric"] in {"bounds", "dm_kg"}]
+            explanation = {
+                "diagnosis": result.get("diagnosis"),
+                "warnings": result.get("warnings") or [],
+                "bound_findings": bound_findings,
+            }
+            run = insert_run(version_id, {"explanation": explanation})
+            self.db.commit()
+            return {"status": status, "candidate_version": None,
+                    "optimization_run": run, "explanation": explanation}
+
+        # optimal: Candidate-Version + Run in EINER Transaktion (atomar).
+        source_by_feed = {component["feed_id"]: component for component in components}
+        candidate_components = []
+        for index, item in enumerate(result.get("ration_items") or []):
+            source_component = source_by_feed.get(str(item.get("feed_id")), {})
+            candidate_components.append({
+                "feed_id": str(item.get("feed_id")),
+                "name": item.get("name"),
+                "kg_fm": float(item.get("kgfm") or 0),
+                "min_kg_fm": source_component.get("min_kg_fm"),
+                "max_kg_fm": source_component.get("max_kg_fm"),
+                "mixing_sequence": index + 1,
+            })
+        from app.services.rations_lifecycle_service import RationLifecycleService
+        lifecycle = RationLifecycleService(self.db, self.tenant_id, self.actor)
+        candidate = lifecycle._create_version_locked(
+            ration_id=version["ration_id"],
+            snapshot={"components": candidate_components},
+            source="optimizer",
+            comment="Optimierungslauf aus dem Rationseditor",
+            based_on_version_id=version_id,
+            expected_latest_version_no=expected_latest_version_no,
+        )
+        run = insert_run(candidate["id"], {
+            "total_cost_eur_day": result.get("total_cost_eur_day"),
+            "objective_value": result.get("objective_value"),
+        })
+        self.db.commit()
+        return {"status": status, "candidate_version": candidate,
+                "optimization_run": run, "explanation": None}
+
     def latest_evaluation(self, version_id: str) -> dict[str, Any]:
         row = self.db.execute(text("""
           SELECT * FROM domain_agrar.ration_evaluations

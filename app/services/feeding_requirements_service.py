@@ -14,6 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.agrar.rations.evaluation_systems import SEED_SYSTEMS
+from app.agrar.rations.requirements import gfe_requirements
 from app.core.uuid7 import uuid7
 
 # Fachliche Defaults fuer fehlende Eingangsgroessen. Jede Anwendung eines
@@ -105,11 +106,9 @@ class FeedingRequirementsService:
             if value is not None:
                 profile_inputs[key] = value
 
-        # Adapter auf die golden-getestete GfE-2023-Bedarfslogik. Lazy-Import,
-        # weil die Funktion (bewusste Bestandsschuld, Editor-Inkrement) noch im
-        # Optimierungs-Endpoint-Modul lebt; kein Monolith-Umbau in diesem Slice.
-        from app.api.v1.endpoints.rations_optimization import _gfe_requirements
-        requirements = _gfe_requirements(profile_inputs).model_dump()
+        # Golden-getestete GfE-2023-Bedarfslogik (Code-SSOT seit FEED-OPT-042
+        # als eigenes Domaenenmodul — kein Monolith-Import mehr).
+        requirements = gfe_requirements(profile_inputs).model_dump()
 
         system_version_id = self._current_version_id(REQUIREMENTS_SYSTEM_ID)
         row = self.db.execute(text("""

@@ -1,0 +1,48 @@
+slice_id: FEED-OPT-042
+title: Optimieren im Editor + Requirements-Modularisierung
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.7 Optimierung)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-OPT-042)
+requirements:
+  - FEED-OPT-004 (Unloesbarkeit erklaeren, Konfliktgrenzen benennen — Editor-Kontext)
+  - FEED-OPT-005 (automatischer OptimizationRun-Hook, atomar zur Version)
+contracts:
+  domain:
+    - app/agrar/rations/requirements.py (NEU) — normalize_feeding_type, CowRequirements,
+      gfe_requirements: 1:1-Extraktion der GfE-2023-Bedarfslogik aus dem Monolithen;
+      Golden-Test mit vorab erfassten Literalwerten (4 Profile: Standard, PMR+Weide,
+      Trockensteher, FANi-korrigiert) beweist Drift-Freiheit
+    - rations_optimization.py — Definitionen ersetzt durch Import-Aliase
+      (_CowReq/_gfe_requirements/_normalize_feeding_type), 149 Zeilen entfernt
+    - feeding_requirements_service.py — importiert das Modul; Monolith-Lazy-Import entfaellt
+  api:
+    - POST /feeding/ration-versions/{id}/optimize (WRITE_ROLES):
+      optimal -> Candidate-Version (source `optimizer`, based_on, nie Aktivierung,
+      Grenzen und Mischreihenfolge uebernommen) + OptimizationRun in EINER Transaktion;
+      infeasible -> Run status `infeasible` auf der Quellversion + explanation
+      (Solver-diagnosis/warnings + Grenzbefunde aus 024); 409 bei veralteter
+      expected_latest_version_no; 404 ohne Bedarfsprofil (handlungsorientiert)
+    - rations_lifecycle.py — source-Literal additiv um `optimizer`
+  services:
+    - feeding_ration_editor_service.optimize_version — Kandidatenmenge = Snapshot-
+      Komponenten mit Editor-Grenzen (FM->TM) als custom_feeds gegen _optimize_internal
+      (feed_ids filtert den DLG-Pool); _lp_feed normalisiert Katalogfutter auf die
+      LP-Konvention (fehlende Koeffizienten 0-Beitrag, sidp-Fallback 60% XP,
+      max_kg-Nicht-Limit 28.5, Grobfutter-group-Konvention fuer forage)
+tdd:
+  red: "10 failed (ImportError requirements-Modul + 404/422 Optimize-Routen) vor Implementierung"
+  green: "10/10 (Golden 4 + Aliase + normalize + RBAC + 3 Journeys); Regression 25 (wizard/editor/requirements) + 15 (Solver-Batterie) gruen"
+  refactor: "Monolith um 149 Zeilen reduziert; LP-Feed-Normalisierung zentral im Service"
+gates:
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+  - alembic Single-Head unveraendert (kein Schema-Change; optimization_runs existierte aus 020)
+findings:
+  - LP-Konventionen dokumentiert: max_kg=0 sperrt ein Futter; Mindest-Grobfutteranteil
+    (>=40% DMI) erkennt Grobfutter am group-String; aNDFom-Dichte-Obergrenze 420 g/kg TM;
+    ME-Absolut-Obergrenze 112% des Bedarfs — Editor-Kandidaten muessen dem Pool-Format folgen
+notes:
+  - Editor-UI-Anbindung (Optimieren-Button im RationEditor) folgt als FE-Anteil;
+    der Vertrag (Candidate + Run + explanation) ist API-seitig vollstaendig

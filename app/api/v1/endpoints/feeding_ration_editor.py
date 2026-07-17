@@ -192,6 +192,63 @@ async def compare_ration_versions(body: VersionCompareIn, db: Session = Depends(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+# ── Optimieren im Editor (FEED-OPT-042) ─────────────────────────────────────
+
+class VersionOptimizeIn(BaseModel):
+    expected_latest_version_no: int = Field(ge=0)
+
+
+class CandidateVersionOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    version_no: int
+    source: str
+    status: str
+
+
+class OptimizationRunRefOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    ration_id: str
+    ration_version_id: str
+    solver_version: str
+    objective: str
+    status: str
+    duration_ms: int | None = None
+
+
+class VersionOptimizeOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    status: str
+    candidate_version: CandidateVersionOut | None = None
+    optimization_run: OptimizationRunRefOut
+    explanation: dict[str, Any] | None = None
+
+
+@router.post("/ration-versions/{version_id}/optimize", response_model=VersionOptimizeOut,
+             summary="Optimieren erzeugt eine Candidate-Version (nie Aktivierung) mit atomarem Solverlauf-Protokoll")
+async def optimize_ration_version(version_id: str, body: VersionOptimizeIn,
+                                  db: Session = Depends(get_db),
+                                  tenant_id: str = Depends(get_tenant_id),
+                                  user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer die Rationsoptimierung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    from app.services.rations_lifecycle_service import RationLifecycleConflict
+    try:
+        return service.optimize_version(
+            version_id, expected_latest_version_no=body.expected_latest_version_no)
+    except RationLifecycleConflict as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except EmptyRationVersionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @router.post("/ration-drafts/evaluate", response_model=RationDraftEvaluationOut,
              summary="Rationsentwurf deterministisch bewerten (ohne Persistenz, ohne Solverlauf)")
 async def evaluate_ration_draft(body: RationDraftEvaluateIn, db: Session = Depends(get_db),
