@@ -174,7 +174,9 @@ export function usePortalFeldbuch() {
   return useQuery({
     queryKey: ['portal', 'feldbuch'],
     queryFn: async () => (await apiClient.get<PortalFeldbuch[]>('/api/v1/portal/feldbuch')).data,
-    initialData: [],
+    // placeholderData statt initialData: eine leere Liste darf den Mount-Fetch
+    // nicht unterdruecken (Seeds waren sonst bis zur ersten Mutation unsichtbar).
+    placeholderData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -185,7 +187,7 @@ export function usePortalFeldbuchSchlaege() {
   return useQuery({
     queryKey: ['portal', 'feldbuch', 'schlaege'],
     queryFn: async () => (await apiClient.get<PortalSchlag[]>('/api/v1/portal/feldbuch/schlaege')).data,
-    initialData: [],
+    placeholderData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -207,7 +209,7 @@ export function usePortalFeldbuchMassnahmen(params?: {
       const url = `/api/v1/portal/feldbuch/massnahmen${p.toString() ? `?${  p.toString()}` : ''}`
       return (await apiClient.get<PortalMassnahme[]>(url)).data
     },
-    initialData: [],
+    placeholderData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -216,7 +218,7 @@ export function usePortalFeldbuchStats() {
   return useQuery({
     queryKey: ['portal', 'feldbuch', 'stats'],
     queryFn: async () => (await apiClient.get<PortalFeldbuchStats>('/api/v1/portal/feldbuch/stats')).data,
-    initialData: EMPTY_PORTAL_FELDBUCH_STATS,
+    placeholderData: EMPTY_PORTAL_FELDBUCH_STATS,
     staleTime: 2 * 60 * 1000,
   })
 }
