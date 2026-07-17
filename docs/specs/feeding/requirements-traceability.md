@@ -25,7 +25,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 | FEED-RBAC-002 | Rollenbasierte Zugriffe (Lesen/Bearbeiten/Freigabe/Admin) | MUSS | `app/agrar/rations/authz.py` + 4 Router | VERIFIED | Rollen nur auf Domänenebene | IdP-Rollout betriebsindividuell | `test_rations_authz.py` (24) | FEED-ADVICE-ROLES-013 |
 | FEED-RBAC-003 | Rechte je Betrieb/Standort/Herde/Beratungsfall | MUSS | `feeding_business_service.py`, `feeding_core.py` | VERIFIED | Beratungsfall-Scoping folgt mit FEED-CASE-030 | Betriebs-Grants zusätzlich zu Domänenrollen; tenant- und hierarchiesichere Verknüpfung | `test_feeding_business_core.py` | FEED-CORE-015 |
 | FEED-RBAC-004 | Externe Berater je Betrieb, zeitlich begrenzt | SOLL | `feeding_business_grants.valid_until` + append-only Widerruf | VERIFIED | — | aktive Grants mit Scope-Hierarchie und Gültigkeitsfenster | `test_feeding_business_core.py` | FEED-CORE-015 |
-| FEED-RBAC-005 | Änderungsprotokoll fachlicher Änderungen | MUSS | Lifecycle-Audit (`rations_lifecycle_service.py`), Controlling recorded_by | PARTIAL | Audit nur Lifecycle/Controlling, nicht Stammdaten | AuditEvent je Aggregat in Inkrement 1 | `test_rations_lifecycle_domain.py` | Slice 007 |
+| FEED-RBAC-005 | Änderungsprotokoll fachlicher Änderungen | MUSS | Lifecycle-Audit + Controlling recorded_by + **vereinheitlichtes Stammdaten-Audit** (`feeding_master_data_audit_events`, append-only): Betriebe (created/updated), Grants (granted/revoked), Futter (created/updated mit changed_fields), Analysen (reference_value_added) — Audit-INSERT atomar in derselben Transaktion wie die Mutation; Einsicht `GET /feeding/audit/master-data` | VERIFIED | Produkte/Preisstaffeln-Audit folgt demselben Helper bei Bedarf | `master_audit.record_master_data_audit` nach Lifecycle-Muster | `test_rations_lifecycle_domain.py`, `test_feeding_governance_api.py` | Slice 007, FEED-RBAC-048 |
 
 ## Kapitel 6.1 — Betriebs-/Kundenverwaltung
 
@@ -167,7 +167,7 @@ Status: `NOT_ANALYZED` · `NOT_IMPLEMENTED` · `PARTIAL` · `IMPLEMENTED_UNVERIF
 |---|---|---|---|---|---|---|---|---|
 | FEED-COLLAB-001 | Statusworkflow + Freigabehistorie + Unveränderlichkeit | MUSS | Lifecycle-Statusautomat + Audit + Checksum | VERIFIED | — | vorhanden | `test_rations_lifecycle_domain.py` | Slice 007 |
 | FEED-COLLAB-002 | Kommentare, Änderungsanforderung, Benachrichtigung | MUSS | Reviewgründe persistent; idempotente Overdue-Events und tenant-/grant-/empfängersicheres In-App-Read-Model mit stabilem Deep-Link | PARTIAL | globale Glocke, Kanalpräferenzen und externe Push-Zustellung | FEED-CONS-032 plus Folgeausbau | `test_feeding_measure_lifecycle_api.py` | ADR-055, FEED-CONS-032 |
-| FEED-COLLAB-003 | Vier-Augen-Prinzip konfigurierbar | SOLL | APPROVE-Rollen getrennt von WRITE | PARTIAL | erzwungene Fremd-Prüfung | Release B | `test_rations_authz.py` | Slice 013 |
+| FEED-COLLAB-003 | Vier-Augen-Prinzip konfigurierbar | SOLL | APPROVE-Rollen getrennt von WRITE; **mandantenkonfigurierbare Erzwingung**: `feeding_tenant_policies.four_eyes_approval` (Default aus = heutiges Verhalten) via `GET/PUT /feeding/policies` (Admin); bei aktiver Policy blockt die Freigabe (approved) den Einreicher (Actor des jüngsten in_review-Events) mit 409 und klarer Meldung — zweite berechtigte Person gibt frei | VERIFIED | — | Enforcement im Lifecycle-Übergang (`rations_lifecycle_service`) | `test_rations_authz.py`, `test_feeding_governance_api.py` | Slice 013, FEED-RBAC-048 |
 
 ## Kapitel 6.17/6.18 — UI/Mobil
 

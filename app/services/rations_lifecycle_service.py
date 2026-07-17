@@ -719,6 +719,24 @@ class RationLifecycleService:
             raise RationLifecycleConflict(
                 f"Readiness blockiert diesen Schritt ({blockers} Befund(e)). Begruendete Ausnahme mit 'OVERRIDE:' erforderlich."
             )
+        # Vier-Augen-Prinzip (FEED-RBAC-048, mandantenkonfigurierbar):
+        # bei aktiver Policy muss der Freigeber vom Einreicher verschieden sein.
+        if target is RationStatus.APPROVED and self._four_eyes_enabled():
+            submitter = self.db.execute(
+                text("""
+              SELECT actor FROM domain_agrar.ration_audit_events
+              WHERE tenant_id=:tenant_id AND version_id=:version_id
+                AND to_status='in_review'
+              ORDER BY occurred_at DESC, id DESC LIMIT 1
+            """),
+                {"tenant_id": self.tenant_id, "version_id": version_id},
+            ).scalar()
+            if submitter is not None and str(submitter) == self.actor:
+                raise RationLifecycleConflict(
+                    "Vier-Augen-Prinzip aktiv: Einreicher und Freigeber muessen "
+                    "verschiedene Personen sein. Die Freigabe braucht eine zweite "
+                    "berechtigte Person."
+                )
         superseded: list[dict[str, Any]] = []
         if target is RationStatus.ACTIVE:
             if effective_start is None:
@@ -855,6 +873,15 @@ class RationLifecycleService:
             .all()
         )
         return [_dict(row) for row in rows]
+
+    def _four_eyes_enabled(self) -> bool:
+        return bool(self.db.execute(
+            text("""
+          SELECT four_eyes_approval FROM domain_agrar.feeding_tenant_policies
+          WHERE tenant_id=:tenant_id
+        """),
+            {"tenant_id": self.tenant_id},
+        ).scalar())
 
     def _audit(
         self,

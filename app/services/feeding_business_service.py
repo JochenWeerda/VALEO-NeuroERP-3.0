@@ -12,6 +12,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.agrar.rations.master_audit import record_master_data_audit
 from app.core.uuid7 import uuid7
 
 DEFAULT_BUSINESS_NAME = "Eigener Betrieb"
@@ -89,10 +90,18 @@ class FeedingBusinessService:
              feeding_system=EXCLUDED.feeding_system, milking_system=EXCLUDED.milking_system,
              advisory_status=EXCLUDED.advisory_status, preferences=EXCLUDED.preferences,
              active=EXCLUDED.active, updated_by=EXCLUDED.updated_by, updated_at=now()
-          RETURNING *
+          RETURNING *, (xmax = 0) AS _inserted
         """), params).mappings().one()
+        record_master_data_audit(
+            self.db, tenant_id=self.tenant_id, actor=self.actor,
+            entity_type="business", entity_id=str(row["id"]),
+            event_type="created" if row["_inserted"] else "updated",
+            delta={"name": params["name"], "advisory_status": params["advisory_status"],
+                   "active": params["active"]})
         self.db.commit()
-        return dict(row)
+        result = dict(row)
+        result.pop("_inserted", None)
+        return result
 
     def activate_from_partner(self, business_partner_id: str, name: str) -> dict[str, Any]:
         """CRM-Partner ohne Doppelerfassung als Fuetterungsbetrieb aktivieren (FEED-BUS-001)."""
@@ -237,6 +246,11 @@ class FeedingBusinessService:
         """), {"id": str(uuid7()), "tenant_id": self.tenant_id, "business_id": business_id,
                "subject": subject, "scope": scope, "valid_until": valid_until,
                "actor": self.actor}).mappings().one()
+        record_master_data_audit(
+            self.db, tenant_id=self.tenant_id, actor=self.actor,
+            entity_type="grant", entity_id=str(row["id"]), event_type="granted",
+            delta={"business_id": business_id, "subject": subject, "scope": scope,
+                   "valid_until": valid_until})
         self.db.commit()
         return dict(row)
 
@@ -247,11 +261,19 @@ class FeedingBusinessService:
           SET revoked_by=:actor, revoked_at=now(), revoke_reason=:reason
           WHERE tenant_id=:tenant_id AND business_id=:business_id
             AND subject=:subject AND scope=:scope AND revoked_at IS NULL
+          RETURNING id
         """), {"tenant_id": self.tenant_id, "business_id": business_id,
                "subject": subject, "scope": scope, "actor": self.actor,
                "reason": reason})
+        revoked_ids = [str(item[0]) for item in result.fetchall()]
+        for grant_id in revoked_ids:
+            record_master_data_audit(
+                self.db, tenant_id=self.tenant_id, actor=self.actor,
+                entity_type="grant", entity_id=grant_id, event_type="revoked",
+                delta={"business_id": business_id, "subject": subject, "scope": scope},
+                reason=reason)
         self.db.commit()
-        return result.rowcount or 0
+        return len(revoked_ids)
 
     def list_grants(self, business_id: str) -> list[dict[str, Any]]:
         rows = self.db.execute(text("""

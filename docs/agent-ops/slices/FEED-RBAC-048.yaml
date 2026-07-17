@@ -1,0 +1,44 @@
+slice_id: FEED-RBAC-048
+title: Audit-Vereinheitlichung + Vier-Augen-Konfiguration
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.16 RBAC/Audit, 6.17 Kollaboration)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-RBAC-048)
+requirements:
+  - FEED-RBAC-005 (Aenderungsprotokoll auch fuer Stammdaten) -> VERIFIED
+  - FEED-COLLAB-003 (Vier-Augen konfigurierbar + erzwungen) -> VERIFIED
+contracts:
+  db:
+    - domain_agrar.feeding_master_data_audit_events — append-only (Trigger); entity_type
+      business|feed|analysis|grant; fachlich lesbares delta (Name/Artikelnummer/Subject,
+      nicht nur IDs); Indexe je entity_id und entity_type
+    - domain_agrar.feeding_tenant_policies — four_eyes_approval (Default FALSE)
+    - Migration alembic/versions/feed_rbac_audit_20260717.py (revises feed_assist_20260717)
+  domain:
+    - app/agrar/rations/master_audit.py — record_master_data_audit OHNE Commit:
+      Audit-Event atomar in derselben Transaktion wie die Mutation (Lifecycle-Muster)
+  services:
+    - feeding_business_service additiv — upsert (created/updated via xmax-Erkennung),
+      grant_access (granted), revoke_access (revoked je Grant-Zeile, mit reason)
+    - feeding_feed_catalog_service additiv — create_feed (created), update_feed
+      (updated mit changed_fields+revision), add_reference_value (analysis/
+      reference_value_added mit nutrient_code/value/source)
+    - rations_lifecycle_service additiv — _four_eyes_enabled + Gate im approved-Uebergang:
+      Einreicher = Actor des juengsten in_review-Audit-Events der Version; Selbstfreigabe
+      -> 409 mit klarer Meldung; ohne Policy unveraendert heutiges Verhalten
+  api:
+    - GET /feeding/audit/master-data?entity_type=&entity_id= (READ)
+    - GET /feeding/policies (READ) / PUT /feeding/policies (Futtermittel-Admin)
+tdd:
+  red: "6 failed (ImportError feeding_governance) — tests/test_feeding_governance_api.py vor Implementierung"
+  green: "6/6; Regression Editor+Optimize+Assist+Actual+Governance 26 + Reports/Consulting 7 gruen"
+  refactor: "Audit-Helper zentral (master_audit.py) statt vier Insert-Duplikate"
+gates:
+  - python -m alembic upgrade head + heads: single head feed_rbac_audit_20260717
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+notes:
+  - Zweiter Akteur im Test ueber isolierte App mit echtem SessionLocal-get_db —
+    beweist die Fremd-Freigabe gegen die Dev-DB
+  - Governance-/Audit-Maske (Einsicht + Policy-Schalter im Admin) = FE-Rest

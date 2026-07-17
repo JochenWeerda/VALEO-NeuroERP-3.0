@@ -14,6 +14,7 @@ from app.agrar.rations.feed_catalog import (
     build_solver_feed,
     validate_feed,
 )
+from app.agrar.rations.master_audit import record_master_data_audit
 from app.core.uuid7 import uuid7
 
 
@@ -131,6 +132,13 @@ class FeedingFeedCatalogService:
                 "approval_status": values["approval_status"], "valid_from": values["valid_from"] or date.today(),
             })
             self._append_revision(feed_id, 1, "Anlage")
+            record_master_data_audit(
+                self.db, tenant_id=self.tenant_id, actor=self.actor,
+                entity_type="feed", entity_id=feed_id, event_type="created",
+                delta={"name": payload.get("name"),
+                       "artikel_nummer": payload.get("artikel_nummer"),
+                       "feed_kind": values["feed_kind"],
+                       "approval_status": values["approval_status"]})
             self.db.commit()
             return self.get_feed(feed_id)
         except Exception:
@@ -159,6 +167,11 @@ class FeedingFeedCatalogService:
               {**changes, "actor": self.actor, "tenant_id": self.tenant_id, "feed_id": feed_id})
         revision = expected + 1
         self._append_revision(feed_id, revision, reason)
+        record_master_data_audit(
+            self.db, tenant_id=self.tenant_id, actor=self.actor,
+            entity_type="feed", entity_id=feed_id, event_type="updated",
+            delta={"name": merged.get("name"), "revision": revision,
+                   "changed_fields": sorted(changes)}, reason=reason)
         self.db.commit()
         return self.get_feed(feed_id)
 
@@ -207,6 +220,13 @@ class FeedingFeedCatalogService:
                   :source_ref,:valid_from,:valid_until,:priority,:actor)
           RETURNING *"""), {**payload, "id": value_id, "tenant_id": self.tenant_id, "feed_id": feed_id,
                              "actor": self.actor}).mappings().one()
+        record_master_data_audit(
+            self.db, tenant_id=self.tenant_id, actor=self.actor,
+            entity_type="analysis", entity_id=feed_id, event_type="reference_value_added",
+            delta={"nutrient_code": payload["nutrient_code"],
+                   "value": str(payload["value"]), "unit_code": payload["unit_code"],
+                   "source_type": payload.get("source_type"),
+                   "source_ref": payload.get("source_ref")})
         self.db.commit()
         return dict(row)
 
