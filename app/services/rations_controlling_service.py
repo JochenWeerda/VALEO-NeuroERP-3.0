@@ -245,6 +245,103 @@ class RationsControllingService:
             })
         return results
 
+    # ── Benchmarking-Ausbau (FEED-PERF-044) ────────────────────────────────
+
+    BENCHMARK_METRICS = ("actual_milk_kg_cow", "actual_ecm_kg_cow",
+                         "actual_dmi_kg_cow", "iofc_eur_cow")
+
+    def _window_aggregate(self, group_id: str, date_from: date, date_to: date) -> dict[str, Any]:
+        row = self.db.execute(text("""
+          SELECT COUNT(*)::int AS n,
+                 AVG(actual_milk_kg_cow) AS actual_milk_kg_cow,
+                 AVG(actual_ecm_kg_cow) AS actual_ecm_kg_cow,
+                 AVG(actual_dmi_kg_cow) AS actual_dmi_kg_cow,
+                 AVG(iofc_eur_cow) AS iofc_eur_cow
+          FROM domain_agrar.feeding_controlling_daily
+          WHERE tenant_id=:tenant_id AND group_id=:group_id
+            AND observation_date >= :date_from AND observation_date < :date_to
+        """), {"tenant_id": self.tenant_id, "group_id": group_id,
+               "date_from": date_from, "date_to": date_to}).mappings().one()
+        return {
+            "n": int(row["n"]), "from": str(date_from), "to": str(date_to),
+            "metrics": {metric: (round(float(row[metric]), 3)
+                                  if row[metric] is not None else None)
+                        for metric in self.BENCHMARK_METRICS},
+        }
+
+    def _require_group(self, group_id: str) -> dict[str, Any]:
+        row = self.db.execute(text("""
+          SELECT id, name FROM domain_agrar.feeding_groups
+          WHERE tenant_id=:tenant_id AND id=:group_id
+        """), {"tenant_id": self.tenant_id, "group_id": group_id}).mappings().first()
+        if not row:
+            raise LookupError("Fuetterungsgruppe nicht gefunden.")
+        return dict(row)
+
+    def period_comparison(self, *, group_id: str, period_days: int = 30,
+                          reference_date: date | None = None) -> dict[str, Any]:
+        """Aktueller vs. vorangehender Zeitraum derselben Gruppe — ehrliche
+        Unsicherheit wie in version_impact (insufficient_data unter n=7)."""
+        self._require_group(group_id)
+        end = (reference_date or date.today()) + timedelta(days=1)
+        current = self._window_aggregate(group_id, end - timedelta(days=period_days), end)
+        previous = self._window_aggregate(
+            group_id, end - timedelta(days=2 * period_days), end - timedelta(days=period_days))
+        delta = {}
+        for metric in self.BENCHMARK_METRICS:
+            current_value = current["metrics"][metric]
+            previous_value = previous["metrics"][metric]
+            delta[metric] = (round(current_value - previous_value, 3)
+                             if current_value is not None and previous_value is not None
+                             else None)
+        return {
+            "group_id": group_id, "period_days": period_days,
+            "current": current, "previous": previous, "delta": delta,
+            "confidence": ("sufficient" if current["n"] >= 7 and previous["n"] >= 7
+                           else "insufficient_data"),
+        }
+
+    def group_benchmark(self, *, group_id: str, window_days: int = 30) -> dict[str, Any]:
+        """Kennzahlprofil der Gruppe gegen die uebrigen Gruppen DESSELBEN Tenants.
+
+        Bewusst tenant-intern (scope-Feld dokumentiert das): ein anonymisierter
+        betriebsuebergreifender Vergleich braucht die Opt-in-Entscheidung des
+        Auftraggebers und ist hier NICHT enthalten (FEED-PERF-005-Rest).
+        """
+        group = self._require_group(group_id)
+        end = date.today() + timedelta(days=1)
+        start = end - timedelta(days=window_days)
+        own = self._window_aggregate(group_id, start, end)
+        peers = self.db.execute(text("""
+          SELECT COUNT(DISTINCT group_id)::int AS peer_group_count,
+                 PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY actual_milk_kg_cow) AS actual_milk_kg_cow,
+                 PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY actual_ecm_kg_cow) AS actual_ecm_kg_cow,
+                 PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY actual_dmi_kg_cow) AS actual_dmi_kg_cow,
+                 PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY iofc_eur_cow) AS iofc_eur_cow
+          FROM domain_agrar.feeding_controlling_daily
+          WHERE tenant_id=:tenant_id AND group_id <> :group_id
+            AND observation_date >= :date_from AND observation_date < :date_to
+        """), {"tenant_id": self.tenant_id, "group_id": group_id,
+               "date_from": start, "date_to": end}).mappings().one()
+        metrics = {}
+        for metric in self.BENCHMARK_METRICS:
+            peer_value = peers[metric]
+            group_value = own["metrics"][metric]
+            metrics[metric] = {
+                "group_avg": group_value,
+                "peer_median": round(float(peer_value), 3) if peer_value is not None else None,
+                "delta": (round(group_value - float(peer_value), 3)
+                          if group_value is not None and peer_value is not None else None),
+            }
+        return {
+            "group_id": group_id, "group_name": group["name"],
+            "window_days": window_days, "scope": "tenant_internal",
+            "n": own["n"], "peer_group_count": int(peers["peer_group_count"]),
+            "metrics": metrics,
+            "confidence": ("sufficient" if own["n"] >= 7 and int(peers["peer_group_count"]) >= 1
+                           else "insufficient_data"),
+        }
+
     def series(
         self,
         *,

@@ -161,6 +161,53 @@ def build_trend_report(group: dict[str, Any], days: list[dict[str, Any]],
     return content
 
 
+def build_benchmark_report(group: dict[str, Any], benchmark: dict[str, Any],
+                           period_comparison: dict[str, Any],
+                           profile: str) -> dict[str, Any]:
+    """Benchmark-Bericht (FEED-PERF-044): tenant-interner Gruppenvergleich +
+    Zeitraumvergleich. Advisor sieht zusaetzlich die Stichprobenkontexte."""
+    _require_reader_profile("Benchmark-Berichte", profile)
+    content: dict[str, Any] = {
+        "report_type": "benchmark",
+        "profile": profile,
+        "title": f"Benchmark {group['name']}",
+        "group_id": group["id"],
+        "group_name": group["name"],
+        "benchmark": {
+            "scope": benchmark["scope"],
+            "window_days": benchmark["window_days"],
+            "peer_group_count": benchmark["peer_group_count"],
+            "metrics": benchmark["metrics"],
+            "confidence": benchmark["confidence"],
+        },
+        "period_comparison": {
+            "period_days": period_comparison["period_days"],
+            "delta": period_comparison["delta"],
+            "confidence": period_comparison["confidence"],
+        },
+    }
+    if profile == "advisor":
+        content["benchmark"]["n"] = benchmark["n"]
+        content["period_comparison"]["current"] = period_comparison["current"]
+        content["period_comparison"]["previous"] = period_comparison["previous"]
+        content["source"] = {"group_id": group["id"]}
+    return content
+
+
+def benchmark_csv(content: dict[str, Any]) -> str:
+    lines = ["metric;group_avg;peer_median;delta;period_delta"]
+    period_delta = content["period_comparison"]["delta"]
+    for metric, values in content["benchmark"]["metrics"].items():
+        lines.append(";".join([
+            metric,
+            "" if values["group_avg"] is None else f"{values['group_avg']:.3f}",
+            "" if values["peer_median"] is None else f"{values['peer_median']:.3f}",
+            "" if values["delta"] is None else f"{values['delta']:.3f}",
+            "" if period_delta.get(metric) is None else f"{period_delta[metric]:.3f}",
+        ]))
+    return "\n".join(lines) + "\n"
+
+
 def target_actual_csv(content: dict[str, Any]) -> str:
     lines = ["feed_id;feed_name;n;target_kg_sum;actual_kg_sum;delta_kg_sum"]
     for line in content["components"]:

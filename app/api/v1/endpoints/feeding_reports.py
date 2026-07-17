@@ -18,7 +18,7 @@ from app.services.feeding_reports_service import FeedingReportsService
 
 router = APIRouter(prefix="/feeding", tags=["feeding-reports"])
 
-ReportType = Literal["feeding_plan", "consulting", "target_actual", "trend"]
+ReportType = Literal["feeding_plan", "consulting", "target_actual", "trend", "benchmark"]
 ReportProfile = Literal["farmer", "advisor", "feeder"]
 
 

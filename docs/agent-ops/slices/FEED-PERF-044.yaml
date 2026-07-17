@@ -1,0 +1,39 @@
+slice_id: FEED-PERF-044
+title: Benchmarking-Ausbau (Zeitraumvergleich, tenant-interner Benchmark, Bericht)
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/lastenheft-fuetterungsberatung.md (Kap. 6.13 Leistung/Benchmark)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-PERF-044)
+requirements:
+  - FEED-PERF-005 (freier Teil; anonymisierter Betriebsvergleich bleibt BLOCKED)
+contracts:
+  api:
+    - GET /feeding/performance/period-comparison?group_id=&period_days= (READ) —
+      aktueller vs. vorangehender Zeitraum (AVG Milch/ECM/DMI/IOFC, n je Seite,
+      delta je Kennzahl; confidence insufficient_data unter n=7 — 033-Muster)
+    - GET /feeding/performance/group-benchmark?group_id=&window_days= (READ) —
+      Gruppe vs. PERCENTILE_CONT-Median der uebrigen Gruppen desselben Tenants;
+      scope=tenant_internal explizit im Vertrag (kein Betriebsvergleich ohne Opt-in)
+    - POST /feeding/reports report_type benchmark (source_ref=group_id; farmer/advisor,
+      feeder -> 422) + GET /{id}/csv (metric;group_avg;peer_median;delta;period_delta)
+  db:
+    - Migration alembic/versions/feed_benchmark_20260717.py — report_type-CHECK + benchmark
+  services:
+    - rations_controlling_service additiv — _window_aggregate, period_comparison,
+      group_benchmark (BENCHMARK_METRICS zentral)
+    - report_profiles.build_benchmark_report — advisor sieht Stichprobenkontexte (n,
+      current/previous) + Quellblock; farmer die verdichteten Kennzahlen
+blocked:
+  - anonymisierter betriebsuebergreifender Vergleich: Auftraggeber-/Datenschutz-
+    entscheidung (Opt-in-Modell) steht aus — bewusst NICHT implementiert
+tdd:
+  red: "5 failed (404 neue Routen, 422 report_type) — tests/test_feeding_benchmark_api.py vor Implementierung"
+  green: "5/5; Regression Reports+Performance+Herd 18 gruen"
+  refactor: "Fensteraggregation zentral (_window_aggregate) fuer 033/044-Pfade"
+gates:
+  - python -m alembic upgrade head + heads: single head feed_benchmark_20260717
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+notes:
+  - Benchmark-Charts in der Leistungs-Maske = FE-Rest

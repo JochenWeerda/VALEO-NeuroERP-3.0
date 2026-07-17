@@ -14,6 +14,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.agrar.rations.report_profiles import (
+    benchmark_csv,
+    build_benchmark_report,
     build_consulting_report,
     build_feeding_plan_report,
     build_target_actual_report,
@@ -44,6 +46,14 @@ class FeedingReportsService:
         if report_type == "trend":
             return build_trend_report(
                 self._group(source_ref), self._trend_days(source_ref), profile)
+        if report_type == "benchmark":
+            from app.services.rations_controlling_service import RationsControllingService
+            controlling = RationsControllingService(self.db, self.tenant_id, self.actor)
+            return build_benchmark_report(
+                self._group(source_ref),
+                controlling.group_benchmark(group_id=source_ref),
+                controlling.period_comparison(group_id=source_ref),
+                profile)
         raise ValueError(f"Unbekannter Berichtstyp: {report_type}")
 
     def _consulting_draft(self, draft_id: str) -> dict[str, Any]:
@@ -179,6 +189,8 @@ class FeedingReportsService:
             return target_actual_csv(report["content"])
         if report["report_type"] == "trend":
             return trend_csv(report["content"])
+        if report["report_type"] == "benchmark":
+            return benchmark_csv(report["content"])
         raise ValueError(
             f"CSV-Export fuer Berichtstyp {report['report_type']} nicht definiert "
             "(narrative Berichte werden nicht als CSV ausgegeben)."
