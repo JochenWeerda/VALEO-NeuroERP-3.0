@@ -4,23 +4,23 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 version: 3.0.0
-generated: 2026-07-17
+generated: 2026-07-18
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-18` · Stand: `2026-07-17`
+> **Automatisch generiert** · Daten seit: `2026-04-19` · Stand: `2026-07-18`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **109** |
-| Slices abgeschlossen | **90** (83 %) |
+| Slices gesamt | **110** |
+| Slices abgeschlossen | **90** (82 %) |
 | Mit externen Gates | 80 |
-| Ohne Doku-Dateien | 30 |
+| Ohne Doku-Dateien | 31 |
 | Slices ohne Cycle-Time (kein Claim-Commit) | 78 |
 
 ## Cycle Time
@@ -28,7 +28,7 @@ generated: 2026-07-17
 | Metrik | Wert |
 |---|---|
 | Median | **0.2 h** |
-| P90 | **1.6 h** |
+| P90 | **2.1 h** |
 
 !!! info "Interpretation"
     Cycle Time = Zeit zwischen `chore: claim <SLICE-ID>` und dem ersten `feat(…): <SLICE-ID>`-Commit.
@@ -36,7 +36,7 @@ generated: 2026-07-17
 
 ## Rework-Rate
 
-**60.3 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**60.0 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
@@ -49,9 +49,9 @@ generated: 2026-07-17
 | Slice | Cycle Time | Owner |
 |---|---|---|
 | `FEED-EDITOR-023` | 13.4 h | Claude |
+| `FEED-AI-046` | 3.9 h | claude-feed-chain |
 | `FEED-INT-036` | 2.2 h | Codex |
 | `FEED-ADVICE-ROLES-013` | 2.1 h | Claude |
-| `FEED-ACT-030` | 1.6 h | Codex |
 
 ## Agent-Produktivität (Slices je Owner)
 
@@ -61,6 +61,7 @@ generated: 2026-07-17
 | Claude | 29 | `███████████░░░░░░░░░` |
 | Cursor | 15 | `█████░░░░░░░░░░░░░░░` |
 | offen | 6 | `██░░░░░░░░░░░░░░░░░░` |
+| claude-feed-chain | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | Codex -> Claude (Uebernahme nach Codex-Token-Stopp auf ausdruecklichen Auftrag) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | Claude (Fortfuehrung der Kette nach Codex-Token-Stopp) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 | unclaimed | 1 | `░░░░░░░░░░░░░░░░░░░░` |
