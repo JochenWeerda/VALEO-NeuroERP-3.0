@@ -62,9 +62,12 @@ def test_optimal_response_carries_canonical_contract():
     ):
         assert key in att, f"attainability fehlt {key}"
 
-    # Baseline und technical_max werden im Optimierlauf NICHT erfunden.
+    # Baseline wird im Optimierlauf nicht erfunden.
     assert att["baseline_supported"] is None
-    assert att["technical_max"] is None
+    # WB-12: technical_max ist real (Aufwaerts-Suche) und mindestens die sichere
+    # Leistung; im Optimierlauf mit positivem Ziel gefuellt.
+    assert att["technical_max"] is not None
+    assert att["technical_max"] >= att["safe_attainable"] - 0.5
 
     assert att["target"] == 38.0
     assert att["safe_attainable"] is not None and att["safe_attainable"] > 0

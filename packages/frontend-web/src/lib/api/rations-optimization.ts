@@ -918,6 +918,8 @@ export interface OptimizeFromProfileExtras {
   /** Slice 1h: explizites Fuetterungssystem (snake_case wie FastAPI-Body). */
   feeding_system_config?: FeedingSystemConfig
   feed_block_overrides?: FeedBlockAssignment[]
+  /** WB-12: technical_max (Aufwaerts-Suche) berechnen; Live-Sheet-Edit setzt false für schnelle Neuberechnung. */
+  compute_technical_max?: boolean
 }
 
 export async function optimizeFromProfile(

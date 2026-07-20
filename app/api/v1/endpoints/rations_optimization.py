@@ -5726,6 +5726,14 @@ def _build_response(
         policy_profile_targets_dict,
         policy_profile_bands,
     )
+    # WB-12: zusaetzliche Anzeige-Tachos (Staerke/Zucker/Fett/Ca:P) fuer das
+    # Cockpit – reine Anzeige aus den Ist-Dichten, ohne Strafkosten/LP-Bezug.
+    _display_bands = _display_gauge_bands(nutrient_supply)
+    if _display_bands and isinstance(policy_profile_evaluation, dict):
+        policy_profile_evaluation = {
+            **policy_profile_evaluation,
+            "bands": list(policy_profile_evaluation.get("bands") or []) + _display_bands,
+        }
 
     penalty_summary = _summarize_penalty(constraint_status)
 
@@ -6463,6 +6471,7 @@ def _resolve_runtime_options(
     disable_milk_tradeoff_between_stages: Optional[bool] = None,
     milk_tradeoff_max_pct_per_stage: Optional[float] = None,
     stage2_minimize_feed_eur_per_day: Optional[bool] = None,
+    compute_technical_max: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Vereinheitlicht FAN-/Policy-/Relaxation-Optionen und setzt V1-Defaults.
 
@@ -6576,6 +6585,8 @@ def _resolve_runtime_options(
         "disable_milk_tradeoff_between_stages": disable_milk_tradeoff_bool,
         "milk_tradeoff_max_pct_per_stage": _mtp_clean,
         "stage2_minimize_feed_eur_per_day": stage2_min_feed_eur_day_bool,
+        # WB-12: technical_max nur auf vollen Laeufen berechnen (Live-Edit setzt False).
+        "compute_technical_max": True if compute_technical_max is None else bool(compute_technical_max),
     }
 
 
@@ -6900,7 +6911,84 @@ def _optimize_internal(
         if recovered is not None:
             return recovered
 
+    # WB-12: reales technical_max (hoechste erreichbare Zielleistung) fuer die
+    # Erreichbare-Leistung-Anzeige. Nur auf dem vollen Lauf (nicht auf dem
+    # schnellen Live-Evaluate-Pfad, der compute_technical_max=False setzt) und
+    # nur wenn ueberhaupt ein positives Ziel und eine feasible Loesung vorliegt.
+    _compute_tmax = (runtime_options or {}).get("compute_technical_max", True)
+    if (
+        _enable_recovery
+        and _compute_tmax
+        and response.get("status") == "optimal"
+        and _target0 > 0
+        and isinstance(response.get("attainability"), dict)
+        and response["attainability"].get("technical_max") is None
+    ):
+        tmax = _technical_max_search(
+            profile,
+            base_target=_target0,
+            custom_feeds=custom_feeds,
+            feed_ids=feed_ids,
+            price_overrides=price_overrides,
+            max_tm_overrides=max_tm_overrides,
+            min_tm_overrides=min_tm_overrides,
+            runtime_options=runtime_options,
+        )
+        if tmax is not None:
+            response["attainability"]["technical_max"] = tmax
+
     return response
+
+
+def _technical_max_search(
+    profile: Dict[str, Any],
+    *,
+    base_target: float,
+    custom_feeds: Optional[List[Dict[str, Any]]] = None,
+    feed_ids: Optional[List[str]] = None,
+    price_overrides: Optional[Dict[str, float]] = None,
+    max_tm_overrides: Optional[Dict[str, float]] = None,
+    min_tm_overrides: Optional[Dict[str, float]] = None,
+    runtime_options: Optional[Dict[str, Any]] = None,
+) -> Optional[float]:
+    """Hoechste unter allen harten Grenzen erreichbare Zielleistung (Skill §3).
+
+    Beschraenkte Aufwaerts-Suche (max. ~4 Solves): ``base_target`` ist bekannt
+    loesbar; es wird nach oben getastet und anschliessend eingegabelt. Dient der
+    Anzeige "Technisch max." und ist bewusst grob (0,3-kg-Aufloesung)."""
+
+    def _feasible_at(target_kg: float) -> bool:
+        pp = {**profile, "milk_kg_day": round(target_kg, 2)}
+        r = _optimize_internal(
+            pp,
+            custom_feeds=custom_feeds,
+            feed_ids=feed_ids,
+            price_overrides=price_overrides,
+            max_tm_overrides=max_tm_overrides,
+            min_tm_overrides=min_tm_overrides,
+            runtime_options=runtime_options,
+            _enable_recovery=False,
+        )
+        return r.get("status") == "optimal"
+
+    lo = float(base_target)
+    hi = float(base_target) * 1.30
+    if _feasible_at(hi):
+        hi2 = float(base_target) * 1.60
+        if _feasible_at(hi2):
+            # Ceiling liegt oberhalb; konservativ auf hi2 deckeln (grob).
+            return round(hi2, 1)
+        lo, hi = hi, hi2
+    # Einfache Eingabelung: lo feasible, hi infeasible.
+    for _ in range(3):
+        if hi - lo <= 0.3:
+            break
+        mid = (lo + hi) / 2.0
+        if _feasible_at(mid):
+            lo = mid
+        else:
+            hi = mid
+    return round(lo, 1)
 
 
 def _best_attainable_recovery(
@@ -7508,6 +7596,7 @@ from app.agrar.rations.solver.lp_stage2 import (  # noqa: E402,F401
     policy_profile_band_evaluate as _policy_profile_band_evaluate,
     build_policy_band_lp_extension as _build_policy_band_lp_extension,
     build_policy_profile_evaluation as _build_policy_profile_evaluation,
+    display_gauge_bands as _display_gauge_bands,
 )
 
 
@@ -7758,6 +7847,9 @@ class _OptimizeFromProfileBody(BaseModel):
     # mit milkparlor; PMR -> PMR_stall mit transponder; sonst TMR/included).
     feeding_system_config: Optional[FeedingSystemConfig] = None
     feed_block_overrides: Optional[List[FeedBlockAssignment]] = None
+    # WB-12: technical_max nur auf vollen Laeufen (Live-Edit im Sheet setzt False,
+    # damit die Neuberechnung schnell bleibt).
+    compute_technical_max: Optional[bool] = None
 
 
 class _SensitivitySweep(BaseModel):
@@ -7977,6 +8069,7 @@ async def optimize_from_profile(
                 disable_milk_tradeoff_between_stages=body.disable_milk_tradeoff_between_stages,
                 milk_tradeoff_max_pct_per_stage=body.milk_tradeoff_max_pct_per_stage,
                 stage2_minimize_feed_eur_per_day=body.stage2_minimize_feed_eur_per_day,
+                compute_technical_max=body.compute_technical_max,
             )
             result = _optimize_internal(
                 body.cow_profile,

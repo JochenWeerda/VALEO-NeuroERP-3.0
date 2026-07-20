@@ -1,0 +1,56 @@
+slice_id: RATION-WB-12-TECHMAX-CARB-GAUGES
+id: RATION-WB-12-TECHMAX-CARB-GAUGES
+title: Rationswerkbank Backend – reales technical_max + Stärke/Zucker/Fett/Ca:P-Tachos
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Cockpit-Tachos vollständig mit echten Daten versorgen (kein Mock): (1) reales
+  technical_max über beschränkte Aufwärts-Suche (max ~4 Solves), nur auf vollen
+  Läufen; (2) zusätzliche Anzeige-Tachos Stärke/Zucker/Fett/Ca:P aus den
+  Ist-Dichten gegen DLG-/GfE-Zielkorridore – ohne Strafkosten/LP-Bezug.
+scope:
+  - lp_stage2.display_gauge_bands + DISPLAY_GAUGE_SPECS (Stärke/Zucker/Fett/Ca:P)
+  - _build_response hängt Display-Bänder an policy_profile_evaluation.bands (nicht constraint_status)
+  - _technical_max_search + Verdrahtung in _optimize_internal (compute_technical_max Flag)
+  - compute_technical_max in _resolve_runtime_options + _OptimizeFromProfileBody + FE-Extras
+non_scope:
+  - Exaktes Maximalleistungs-LP (eigene Zielfunktion) – Aufwärts-Suche ist bewusst grob (0,3 kg)
+  - Stärke/Zucker/Ca:P als penalty-/LP-bindende Constraints
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-12-TECHMAX-CARB-GAUGES.yaml
+  - app/agrar/rations/solver/lp_stage2.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - tests/test_rations_result_contract_e2e.py
+acceptance:
+  - "technical_max real gefüllt (>= safe_attainable) auf feasiblem Lauf"
+  - "Live-Edit-Pfad (compute_technical_max=false) bleibt schnell, technical_max null"
+  - "Display-Bänder Stärke/Zucker/Fett/Ca:P erscheinen in policy_profile_evaluation.bands, NICHT in constraint_status"
+  - "Stärke-Dichte = staerke_g/dmi (identisch zur KPI-Formel)"
+  - "Bestehende Solver-/Contract-Tests grün"
+tests:
+  - "pytest tests/test_rations_result_contract_e2e.py tests/test_rations_best_attainable_recovery.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+risks:
+  - "technical_max fügt ~4 Solves auf vollen Läufen hinzu (Solver ~0,2 s/Lauf → <1 s Gesamtmehraufwand gemessen)."
+  - "Stärke/Zucker/Ca:P-Korridore sind DLG 01|2025 / GfE-2023-Praxiswerte (Quelle im Code dokumentiert), keine harten Normgrenzen."
+ai_harness:
+  fachlicher_vertrag: >-
+    technical_max ist die tatsächlich höchste lösbare Zielleistung unter allen
+    harten Grenzen (echte Solves, keine Schätzung). Die Kohlenhydrat-/Ca:P-Tachos
+    zeigen Ist-Dichten gegen dokumentierte DLG/GfE-Praxiskorridore (Anzeige, kein
+    Penalty).
+  test_vertrag: >-
+    E2E gegen echten Solver; Leak-Check (Display-Bänder nicht in constraint_status).
+  daten_vertrag: >-
+    Fehlt ein Ist-Wert (z. B. p_g=0), entfällt der Tacho statt Division/Fantasie.
+  api_vertrag: >-
+    Additiv: attainability.technical_max real; policy_profile_evaluation.bands um
+    Display-Bänder ergänzt; compute_technical_max optionales Body-Feld.
+  ui_vertrag: >-
+    NutrientGaugeRow rendert die neuen Bänder automatisch; Cockpit zeigt reales
+    technical_max.
+  persistenz_vertrag: >-
+    Reine Berechnung/Anzeige; keine Persistenzänderung.
