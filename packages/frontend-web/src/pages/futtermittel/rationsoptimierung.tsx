@@ -2950,6 +2950,24 @@ function ConstraintStatusPanel({
               <span className="flex items-center gap-1.5">
                 <span className="inline-block h-2 w-2 rounded-full" style={{ background: color }} />
                 <span className="font-medium">{it.name}</span>
+                {/* RATION-CANON-02: Härteklasse (safety/business_hard = nie auto-relaxiert). */}
+                {it.hardness && (
+                  <span
+                    className="text-[8px] uppercase font-bold px-1 rounded"
+                    title={`Härte: ${it.hardness}${it.source_type ? ` · Quelle: ${it.source_type}` : ''}`}
+                    style={{
+                      color:
+                        it.hardness === 'safety_hard' ? C.error :
+                        it.hardness === 'business_hard' ? C.warn : C.muted,
+                      background:
+                        it.hardness === 'safety_hard' ? `color-mix(in srgb, ${C.error} 12%, transparent)` :
+                        it.hardness === 'business_hard' ? `color-mix(in srgb, ${C.warn} 12%, transparent)` :
+                        'hsl(var(--muted))',
+                    }}
+                  >
+                    {it.hardness === 'safety_hard' ? 'safety' : it.hardness === 'business_hard' ? 'business' : it.relaxable ? 'weich' : 'fix'}
+                  </span>
+                )}
                 <span className="text-[9px]" style={{ color: C.muted }}>
                   {it.kind}{klass}
                 </span>
@@ -2979,6 +2997,193 @@ function ConstraintStatusPanel({
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// RATION-CANON: Live-Ergebnisse-Cockpit (Ergebnisvertrag + Erreichbarkeit)
+// ---------------------------------------------------------------------------
+
+const RESULT_STATUS_LABEL: Record<string, { label: string; tone: 'success' | 'warn' | 'error' | 'muted' }> = {
+  FEASIBLE_OPTIMAL: { label: 'Optimal erreichbar', tone: 'success' },
+  FEASIBLE_NON_OPTIMAL: { label: 'Zulässig (nicht optimal)', tone: 'success' },
+  BEST_ATTAINABLE: { label: 'Best-Attainable', tone: 'warn' },
+  RELAXED_ACCEPTABLE: { label: 'Nach Relaxation erreichbar', tone: 'warn' },
+  TARGET_NOT_ATTAINABLE: { label: 'Ziel nicht erreichbar', tone: 'error' },
+  CONSTRAINT_CONFLICT: { label: 'Grenzkonflikt', tone: 'error' },
+  DATA_INCOMPLETE: { label: 'Daten unvollständig', tone: 'error' },
+  UNSAFE_REJECTED: { label: 'Sicherheitsgrenze verletzt', tone: 'error' },
+  SOLVER_ERROR: { label: 'Solverfehler', tone: 'error' },
+}
+
+function toneColor(tone: 'success' | 'warn' | 'error' | 'muted'): string {
+  return tone === 'success' ? C.success : tone === 'warn' ? C.warn : tone === 'error' ? C.error : C.muted
+}
+
+/** Halbkreis-Tacho (Zielbereich + Nadel) für die erreichbare Leistung (Skill §6.2). */
+function PerformanceGauge({
+  value,
+  target,
+  max,
+  ok,
+}: {
+  value: number | null
+  target: number | null
+  max: number
+  ok: boolean
+}) {
+  const R = 58
+  const CX = 70
+  const CY = 66
+  const sw = 11
+  const pathLen = Math.PI * R
+  const safeMax = max > 0 ? max : 1
+  const clampFrac = (v: number) => Math.max(0, Math.min(1, v / safeMax))
+  // Punkt auf dem oberen Halbkreis für Anteil t (0=links, 1=rechts).
+  const polar = (t: number) => {
+    const deg = 180 * (1 - Math.max(0, Math.min(1, t)))
+    const rad = (deg * Math.PI) / 180
+    return { x: CX + R * Math.cos(rad), y: CY - R * Math.sin(rad) }
+  }
+  const track = `M ${CX - R} ${CY} A ${R} ${R} 0 0 0 ${CX + R} ${CY}`
+  const valFrac = value != null ? clampFrac(value) : 0
+  const fillColor = ok ? C.success : value != null && target != null && value >= target * 0.9 ? C.warn : C.error
+  const targetPt = target != null ? polar(clampFrac(target)) : null
+  return (
+    <svg viewBox="0 0 140 78" className="w-full max-w-[180px] mx-auto block" role="img" aria-label="Erreichbare Leistung">
+      <path d={track} fill="none" stroke="hsl(var(--muted))" strokeWidth={sw} strokeLinecap="round" />
+      <path
+        d={track}
+        fill="none"
+        stroke={fillColor}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        strokeDasharray={`${valFrac * pathLen} ${pathLen}`}
+      />
+      {targetPt && (
+        <line
+          x1={CX + (targetPt.x - CX) * 0.72}
+          y1={CY + (targetPt.y - CY) * 0.72}
+          x2={targetPt.x}
+          y2={targetPt.y}
+          stroke={C.dark}
+          strokeWidth={2}
+        />
+      )}
+      <text x={CX} y={CY - 6} textAnchor="middle" className="font-bold" style={{ fontSize: 18, fill: C.dark }}>
+        {value != null ? value.toFixed(1) : '–'}
+      </text>
+      <text x={CX} y={CY + 8} textAnchor="middle" style={{ fontSize: 8, fill: C.muted }}>
+        kg Milch/Tag
+      </text>
+    </svg>
+  )
+}
+
+/** Live-Cockpit: fachlicher Status, Erreichbarkeits-Fünfling, Best-Attainable (Skill §3/§4.4). */
+function AttainabilityCockpit({ result }: { result: OptimizationResult | null }) {
+  const att = result?.attainability
+  if (!result || !att) return null
+  const statusKey = result.result_status ?? ''
+  const st = RESULT_STATUS_LABEL[statusKey] ?? { label: statusKey || '—', tone: 'muted' as const }
+  const rec = result.best_attainable_recovery
+  const target = att.target ?? null
+  const safe = att.safe_attainable ?? null
+  const techMax = att.technical_max ?? null
+  const scaleMax = Math.max(target ?? 0, techMax ?? 0, safe ?? 0) * 1.12 || 1
+  const axisLabel = att.limiting_axis === 'energy' ? 'Energie' : att.limiting_axis === 'protein' ? 'Protein' : null
+
+  return (
+    <div id="attainability-cockpit" className={card()}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          Erreichbare Leistung
+        </div>
+        <span
+          className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded"
+          style={{ color: toneColor(st.tone), background: `color-mix(in srgb, ${toneColor(st.tone)} 12%, transparent)` }}
+        >
+          {st.label}
+        </span>
+      </div>
+
+      <PerformanceGauge value={safe} target={target} max={scaleMax} ok={att.meets_target} />
+
+      <div className="grid grid-cols-3 gap-1.5 mt-2 text-center">
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Sicher erreichbar</div>
+          <div className="text-[13px] font-bold font-mono">{safe != null ? safe.toFixed(1) : '–'}</div>
+        </div>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Technisch max.</div>
+          <div className="text-[13px] font-bold font-mono">{techMax != null ? techMax.toFixed(1) : '—'}</div>
+        </div>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Ziel</div>
+          <div className="text-[13px] font-bold font-mono">{target != null ? target.toFixed(1) : '—'}</div>
+        </div>
+      </div>
+
+      {att.target_gap != null && Math.abs(att.target_gap) > 0.05 && (
+        <div className="mt-2 flex justify-between items-center text-[11px]">
+          <span style={{ color: C.muted }}>
+            Ziellücke{axisLabel ? ` · limitiert durch ${axisLabel}` : ''}
+          </span>
+          <span className="font-semibold font-mono" style={{ color: att.target_gap > 0 ? C.warn : C.success }}>
+            {att.target_gap > 0 ? '−' : '+'}{Math.abs(att.target_gap).toFixed(1)} kg
+          </span>
+        </div>
+      )}
+
+      {rec?.triggered && (
+        <div
+          className="mt-2 rounded border p-2 text-[11px]"
+          style={{ borderColor: C.warn, background: `color-mix(in srgb, ${C.warn} 8%, transparent)` }}
+        >
+          <div className="font-bold mb-0.5" style={{ color: C.warn }}>Best-Attainable statt Solver-Abbruch</div>
+          <div style={{ color: C.dark }}>
+            Ziel {rec.original_target_kg.toFixed(0)} kg nicht voll erreichbar. Beste technisch
+            erreichbare Lösung: {rec.technical_max_kg.toFixed(1)} kg. Harte Grenzen bleiben eingehalten.
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Preflight Phase 0: Hinweise & Warnungen aus der Eingabe-/Modellprüfung (Skill §3). */
+function PreflightPanel({ result }: { result: OptimizationResult | null }) {
+  const pf = result?.preflight
+  if (!pf?.findings || pf.findings.length === 0) return null
+  const order = { blocker: 0, warning: 1, info: 2 } as const
+  const findings = [...pf.findings].sort(
+    (a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3),
+  )
+  const sevColor = (s: string) => (s === 'blocker' ? C.error : s === 'warning' ? C.warn : C.muted)
+  return (
+    <div className={card()}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          Hinweise &amp; Warnungen
+        </div>
+        <div className="text-[10px]" style={{ color: C.muted }}>
+          {pf.blocker_count ?? 0} Blocker · {pf.warning_count ?? 0} Warnung
+        </div>
+      </div>
+      <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+        {findings.map((f, i) => (
+          <div key={`${f.code}-${i}`} className="flex gap-1.5 text-[11px]">
+            <span className="inline-block h-2 w-2 rounded-full mt-1 shrink-0" style={{ background: sevColor(f.severity) }} />
+            <div>
+              <div className="font-medium">{f.cause}</div>
+              {f.remediation && (
+                <div className="text-[10px]" style={{ color: C.muted }}>→ {f.remediation}</div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -3490,6 +3695,12 @@ function Workbench({
             )}
           </div>
         </div>
+
+        {/* RATION-CANON: Live-Ergebnisse-Cockpit (Erreichbarkeit + Best-Attainable) */}
+        <AttainabilityCockpit result={result} />
+
+        {/* RATION-CANON-03: Preflight-Hinweise & Warnungen */}
+        <PreflightPanel result={result} />
 
         {/* Effizienz-Cockpit (F2, DLG 01|2025 Kap. 10) ------------------------ */}
         <EfficiencyPanel result={result} />
