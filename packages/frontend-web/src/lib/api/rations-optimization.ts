@@ -194,6 +194,15 @@ export interface ConstraintStatusItem {
   penalty_cost: number
   status: 'ok' | 'violated' | 'hard_violated'
   source?: string
+  // RATION-CANON-02: Constraint-Meta-Modell (Haerteklasse + Quelle, Skill §5).
+  /** Haerteklasse: safety_hard/business_hard werden nie automatisch relaxiert. */
+  hardness?: 'safety_hard' | 'business_hard' | 'advisory' | 'solver_working' | 'observation' | null
+  /** Herkunft der Grenze (Norm/Praxis/Betrieb/Default). */
+  source_type?: 'law' | 'gfe' | 'dlg' | 'farm_policy' | 'advisor' | 'solver_default' | 'ui_default' | null
+  /** Darf der Solver diese Grenze automatisch relaxieren? */
+  relaxable?: boolean
+  /** Prioritaet (hoeher = wichtiger; safety_hard > business_hard > advisory …). */
+  priority?: number | null
 }
 
 export interface PenaltySummary {
@@ -645,8 +654,69 @@ export interface RationFeedSuggestion {
   cp?: string
 }
 
+/** Fachlicher Ergebnisstatus (RATION-CANON-01, Skill §4.4) – additiv zum technischen `status`. */
+export type RationResultStatus =
+  | 'FEASIBLE_OPTIMAL'
+  | 'FEASIBLE_NON_OPTIMAL'
+  | 'BEST_ATTAINABLE'
+  | 'RELAXED_ACCEPTABLE'
+  | 'TARGET_NOT_ATTAINABLE'
+  | 'CONSTRAINT_CONFLICT'
+  | 'DATA_INCOMPLETE'
+  | 'UNSAFE_REJECTED'
+  | 'SOLVER_ERROR'
+
+/** Erreichbarkeitsanalyse (RATION-CANON-01, Skill §3/Phase 2). `null` = nicht bestimmt, nie „0 Leistung“. */
+export interface AttainabilityReport {
+  /** Mit der Ausgangsration versorgte Leistung; im Optimierlauf null. */
+  baseline_supported: number | null
+  /** Unter allen harten Grenzen sicher erreichbare Leistung. */
+  safe_attainable: number | null
+  /** Technisch maximale Leistung; null bis zum dedizierten Maximalleistungslauf. */
+  technical_max: number | null
+  /** Gewuenschte Herdenleistung (Planungsziel). */
+  target: number | null
+  /** Ziellücke = target − safe_attainable (positiv = unterversorgt). */
+  target_gap: number | null
+  /** Limitierende Naehrstoffachse ('energy' | 'protein' | null). */
+  limiting_axis: 'energy' | 'protein' | null
+  meets_target: boolean
+  tolerance_kg: number
+  unit: 'kg_milk_day'
+}
+
+/** Preflight-Finding (RATION-CANON-03, Skill §3/Phase 0). */
+export interface PreflightFinding {
+  code: string
+  severity: 'info' | 'warning' | 'blocker'
+  metric: string
+  actual: number | null
+  limit: number | null
+  unit: string
+  cause: string
+  remediation: string
+  feed_id?: string | null
+  feed_name?: string | null
+}
+
+/** Preflight-Report (RATION-CANON-03) – strukturierte Eingabe-/Modellpruefung vor der Bewertung. */
+export interface PreflightReport {
+  ok: boolean
+  has_blocker: boolean
+  blocker_count?: number
+  warning_count?: number
+  info_count?: number
+  findings: PreflightFinding[]
+}
+
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
+  /** RATION-CANON-01: fachlicher Ergebnisstatus (Zielbereich-Tacho, Best-Attainable-Panel). */
+  result_status?: RationResultStatus
+  /** RATION-CANON-01: Erreichbarkeits-Fuenfling fuer Cockpit „Erreichbare Leistung“. */
+  attainability?: AttainabilityReport
+  /** RATION-CANON-03: Preflight-Findings (Hinweise & Warnungen im linken Rail). */
+  preflight?: PreflightReport
   objective_value?: number
   // F2 (DLG 01|2025, Kap. 10): Effizienz-Kennzahlen
   efficiency?: {

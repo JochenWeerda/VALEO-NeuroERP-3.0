@@ -79,6 +79,37 @@ from app.agrar.rations.response import (  # noqa: E402,F401
     aggregate_ration,
 )
 
+# RATION-CANON-01: kanonischer Ergebnisvertrag (fachlicher Status + Erreichbarkeit)
+from app.agrar.rations.contract import build_result_contract  # noqa: E402
+
+# RATION-CANON-02: Constraint-Meta-Modell (Haerteklassen + Quelle)
+from app.agrar.rations.constraint_meta import (  # noqa: E402
+    assert_safety_hard_not_relaxed as _assert_safety_hard_not_relaxed,
+    meta_row as _constraint_meta_row,
+)
+
+# RATION-CANON-03: Preflight Phase 0 (strukturierte Findings vor der Bewertung)
+from app.agrar.rations.preflight import run_preflight as _run_preflight  # noqa: E402
+
+
+def _build_preflight(feeds: List[Dict[str, Any]], req: "_CowReq", profile: Dict[str, Any]) -> Dict[str, Any]:
+    """Preflight-Report (Skill §3/Phase 0) als serialisierbares Dict.
+
+    Best-effort: ein Fehler im Preflight darf die Optimierung nicht kippen,
+    daher defensiv gekapselt (die Findings sind Zusatzinformation, kein
+    Blocker fuer die bereits vorhandene Antwort).
+    """
+    try:
+        report = _run_preflight(
+            feeds,
+            dmi_min_kg=float(getattr(req, "dmi_min_kg", 0.0) or 0.0) or None,
+            dmi_max_kg=float(getattr(req, "dmi_max_kg", 0.0) or 0.0) or None,
+            profile=profile,
+        )
+        return report.to_dict()
+    except Exception:  # pragma: no cover - Preflight ist nicht antwortkritisch
+        return {"ok": True, "has_blocker": False, "findings": [], "error": "preflight_failed"}
+
 # Refactor 2026-04-23 (Schritt 3): Constraint-Registry statt Magic-Index
 from app.agrar.rations.solver import (  # noqa: E402,F401
     CONSTR_ANDFOM_GF_GEQ as _CONSTR_ANDFOM_GF_GEQ,
@@ -4272,6 +4303,8 @@ def _build_constraint_status_v2(
                 "penalty_cost": round(pen, 4),
                 "status": status,
                 "source": "constraint_report",
+                # RATION-CANON-02: Haerteklasse + Quelle (additiv, Skill §5.2).
+                **_constraint_meta_row(name),
             }
         )
 
@@ -4306,6 +4339,8 @@ def _build_constraint_status_v2(
                 "penalty_cost": round(pen, 4),
                 "status": status,
                 "source": extra.get("source", "supply_metric"),
+                # RATION-CANON-02: Haerteklasse + Quelle (additiv, Skill §5.2).
+                **_constraint_meta_row(name),
             }
         )
 
@@ -4770,8 +4805,23 @@ def _build_response(
             warnings=warnings,
             relaxation_policy=str(relaxation_policy or _RELAXATION_DEFAULT),
         )
+        # RATION-CANON-01: fachlicher Status + Erreichbarkeit auch im
+        # Infeasible-Fall. Ohne Loesung ist safe_attainable None (keine
+        # erfundene Leistung). Ein Hinweis mit Grundfutter-/Struktur-Luecken
+        # deutet auf einen harten Constraint-Konflikt.
+        _preflight_inf = _build_preflight(feeds, req, profile)
+        _canon_inf = build_result_contract(
+            solver_ok=False,
+            target=float(profile.get("milk_kg_day") or 0.0) or None,
+            safe_attainable=None,
+            constraint_conflict=bool(hint.get("gaps")),
+            data_incomplete=bool(_preflight_inf.get("has_blocker")),
+        )
         return {
             "status": "infeasible",
+            "result_status": _canon_inf["result_status"],
+            "attainability": _canon_inf["attainability"],
+            "preflight": _preflight_inf,
             "ration_items": [],
             "nutrient_supply": {},
             "constraint_report": [],
@@ -5806,8 +5856,49 @@ def _build_response(
         body_weight_kg=float(profile.get("body_weight_kg") or 0.0),
     )
 
+    # RATION-CANON-02: Invarianten-Guard §11.2 – keine safety_hard-Grenze darf
+    # in der Relaxationsmenge auftauchen. Die Stage-2-Relaxationen fuehren interne
+    # Schluessel; hier auf die Meta-Namen abgebildet. Unbekannte/solver-working
+    # Schluessel (z. B. feed_max_kg_dm_non_forage) sind nicht safety_hard und
+    # werden ignoriert. Faellt hart aus, falls je eine Sicherheitsgrenze relaxiert
+    # wuerde (Regressionsschutz fuer kuenftige Solveraenderungen).
+    _RELAX_KEY_TO_META = {
+        "pabkh_density_ceiling_g_kg_tm": "pabKH (g/kg TM)",
+        "cp_density_ceiling_g_kg_tm": "CP-Dichte (g/kg TM)",
+        "stage2_forage_share_floor": "Grundfutteranteil (%TM)",
+    }
+    _relaxed_meta_names = [
+        _RELAX_KEY_TO_META[str(rx.get("constraint"))]
+        for rx in _stage2_rx
+        if str(rx.get("constraint")) in _RELAX_KEY_TO_META
+    ]
+    _assert_safety_hard_not_relaxed(_relaxed_meta_names)
+
+    # RATION-CANON-01: kanonischer Ergebnisvertrag (fachlicher Status +
+    # Erreichbarkeit). safe_attainable = die unter allen harten Grenzen
+    # limitierende Leistung der optimierten Ration (min aus Energie/Protein).
+    # baseline_supported bleibt None: im Optimierlauf wird die Eingaberation
+    # veraendert, ist also keine belastbare Baseline (Skill §3, §10.3).
+    # technical_max bleibt None bis zum dedizierten Maximalleistungslauf.
+    # RATION-CANON-03: Preflight Phase 0 – ein blockierendes Datenfinding macht
+    # die Bewertung fachlich nicht belastbar (Skill §3) -> data_incomplete.
+    _preflight = _build_preflight(feeds, req, profile)
+    _canon = build_result_contract(
+        solver_ok=True,
+        optimal=True,
+        target=float(profile.get("milk_kg_day") or 0.0) or None,
+        safe_attainable=float(supplemented_milk.get("limiting_milk_kg") or 0.0),
+        milk_from_energy=supplemented_milk.get("milk_from_energy_kg"),
+        milk_from_protein=supplemented_milk.get("milk_from_protein_kg"),
+        relaxation_applied=bool(_stage2_rx),
+        data_incomplete=bool(_preflight.get("has_blocker")),
+    )
+
     return {
         "status": "optimal",
+        "result_status": _canon["result_status"],
+        "attainability": _canon["attainability"],
+        "preflight": _preflight,
         "efficiency": efficiency,
         "objective_value": round(_f(result.fun), 4),
         "total_cost_eur_day": round(total_cost, 4),

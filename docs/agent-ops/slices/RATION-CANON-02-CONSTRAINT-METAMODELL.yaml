@@ -1,0 +1,60 @@
+slice_id: RATION-CANON-02-CONSTRAINT-METAMODELL
+id: RATION-CANON-02-CONSTRAINT-METAMODELL
+title: Rationsoptimierung – Constraint-Meta-Modell (Haerteklassen + Quelle) TDD
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Skill §5 umsetzen: jede Nebenbedingung erhaelt eine Haerteklasse
+  (safety_hard/business_hard/advisory/solver_working/observation) und eine
+  Quelle (law/gfe/dlg/farm_policy/advisor/solver_default/ui_default). Damit gilt
+  die Invariante §11.2 (Safety-hard nie automatisch relaxiert) strukturell,
+  nicht nur implizit aus dem Solverpfad. Additiv zur bestehenden hart/weich- und
+  Penalty-A/B/C-Klassifikation; keine Aenderung der LP-Mathematik.
+scope:
+  - Standalone-Meta-Modul app/agrar/rations/constraint_meta.py (Enums + Registry)
+  - Additive Anreicherung der constraint_status-Zeilen (hardness/source_type/relaxable/priority)
+  - Runtime-Invarianten-Guard gegen Relaxation von safety_hard
+  - Frontend-Typ ConstraintStatusItem erweitert
+  - Unit-Tests inkl. Konsistenztest gegen die produktive _CONSTRAINT_CLASSIFICATION
+non_scope:
+  - Constraint-Domaenenobjekt mit vollem YAML-Feldsatz je Grenze (scope/bound_type/basis) – Folge-Ausbau
+  - Kontrollierter Relaxationslauf RELAX_ADVISORY_CONSTRAINTS (Best-Attainable-Slice)
+file_ownership:
+  - docs/agent-ops/slices/RATION-CANON-02-CONSTRAINT-METAMODELL.yaml
+  - app/agrar/rations/constraint_meta.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - tests/test_rations_constraint_meta.py
+acceptance:
+  - "pytest tests/test_rations_constraint_meta.py gruen (17 Faelle)"
+  - "Konsistenztest bindet Meta-Modell an _CONSTRAINT_CLASSIFICATION (kein Drift)"
+  - "constraint_status-Zeilen tragen hardness + source_type + relaxable + priority"
+  - "Bestehende Solver-/Penalty-Tests unveraendert gruen (kein Regress)"
+tests:
+  - "pytest tests/test_rations_constraint_meta.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+risks:
+  - "Haerteklassifikation ist fachliche Auslegung; source_ref je Grenze dokumentiert, Feinjustierung mit Beratung moeglich."
+ai_harness:
+  fachlicher_vertrag: >-
+    Haerteklasse trennt Recht/Physiologie (safety_hard) von Zielsetzung
+    (business_hard) und Praxis/Beratung (advisory). Bedarfs-Floors ME/sidP sind
+    business_hard (nur ueber Zielaenderung offen), Mineral-/DMI-Grenzen
+    safety_hard, Struktur-/Pansenkorridore advisory.
+  test_vertrag: >-
+    TDD: Meta-Modul zuerst unit-getestet; der Konsistenztest erzwingt, dass jede
+    LP-harte Grenze nicht auto-relaxierbar ist und jede weiche advisory/
+    solver_working ist.
+  daten_vertrag: >-
+    Unbekannte Grenzen gelten fail-safe als nicht auto-relaxierbar; keine
+    erfundene Quelle (Observation-Platzhalter mit null).
+  api_vertrag: >-
+    Additiv: constraint_status-Zeilen erhalten hardness/source_type/relaxable/
+    priority; bestehende Felder (kind/class/penalty_cost/status) unveraendert.
+  ui_vertrag: >-
+    ConstraintStatusItem end-to-end typisiert; Werkbank-Cockpit kann
+    Constraints-Status (weiche/harte Verletzung, Quelle) darstellen.
+  persistenz_vertrag: >-
+    Keine neuen Tabellen; Meta-Felder wandern im Response-/Varianten-Snapshot mit.
