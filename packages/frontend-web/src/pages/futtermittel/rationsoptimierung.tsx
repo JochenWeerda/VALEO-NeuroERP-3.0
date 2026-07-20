@@ -3300,6 +3300,54 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
   )
 }
 
+/** RATION-WB-13: Rationskosten-Panel (Kosten/Kuh/Tag + /100 kg ECM + /100 kg Milch). */
+function RationCostPanel({ result }: { result: OptimizationResult | null }) {
+  if (!result || result.status !== 'optimal') return null
+  const perCow = result.total_cost_eur_day
+  const per100Ecm = result.feed_cost_eur_per_kg_ecm != null ? result.feed_cost_eur_per_kg_ecm * 100 : null
+  const per100Milk = result.total_cost_eur_100kg_milk
+  const rows: { label: string; value: string }[] = [
+    { label: 'Kosten / Kuh · Tag', value: perCow != null ? `${fmt(perCow, 2)} €` : '–' },
+    { label: 'Kosten / 100 kg ECM', value: per100Ecm != null ? `${fmt(per100Ecm, 2)} €` : '–' },
+    { label: 'Kosten / 100 kg Milch', value: per100Milk != null ? `${fmt(per100Milk, 2)} €` : '–' },
+  ]
+  return (
+    <div className={card()}>
+      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Rationskosten</div>
+      <div className="space-y-1">
+        {rows.map((r) => (
+          <div key={r.label} className="flex justify-between items-center text-[12px] py-0.5">
+            <span style={{ color: C.muted }}>{r.label}</span>
+            <span className="font-bold font-mono" style={{ color: C.dark }}>{r.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** RATION-WB-13: Maßnahmenvorschläge (kompakt aus ration_adjustment_suggestions). */
+function MassnahmenPanel({ result }: { result: OptimizationResult | null }) {
+  const sugg = result?.ration_adjustment_suggestions ?? []
+  if (sugg.length === 0) return null
+  return (
+    <div className={card()}>
+      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Maßnahmenvorschläge</div>
+      <div className="space-y-2">
+        {sugg.slice(0, 4).map((s) => (
+          <div key={s.id} className="flex gap-1.5">
+            <span className="mt-0.5" style={{ color: C.accent }}>›</span>
+            <div>
+              <div className="text-[12px] font-semibold" style={{ color: C.dark }}>{s.title}</div>
+              <div className="text-[10px]" style={{ color: C.muted }}>{s.detail}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** Preflight Phase 0: Hinweise & Warnungen aus der Eingabe-/Modellprüfung (Skill §3). */
 function PreflightPanel({ result }: { result: OptimizationResult | null }) {
   const pf = result?.preflight
@@ -3351,6 +3399,81 @@ function wizardToCowProfile(wd: WizardData): CowProfile {
     wizard_dmi_max_kg: wd.wizardHardBounds?.dmiMaxKg,
     feeding_type: wd.feedingType,
   }
+}
+
+/** RATION-WB-14: Variantenvergleich (Baseline + gespeicherte Varianten). */
+function VariantComparisonPanel({
+  baseline,
+  variants,
+}: {
+  baseline: OptimizationResult | null
+  variants: { name: string; result: OptimizationResult }[]
+}) {
+  if (!baseline || baseline.status !== 'optimal') return null
+  const bandVal = (r: OptimizationResult, n: string) =>
+    (r.policy_profile_evaluation?.bands ?? []).find((b) => b.name === n)?.actual ?? null
+  const bandRange = (n: string): string => {
+    const b = (baseline.policy_profile_evaluation?.bands ?? []).find((x) => x.name === n)
+    if (!b) return '–'
+    const lo = b.target_min, hi = b.target_max
+    if (lo != null && hi != null) return `${fmt(lo, 0)}–${fmt(hi, 0)}`
+    if (lo != null) return `≥ ${fmt(lo, 0)}`
+    if (hi != null) return `≤ ${fmt(hi, 0)}`
+    return '–'
+  }
+  const metrics: { label: string; unit: string; get: (r: OptimizationResult) => number | null; ziel: string; dec: number }[] = [
+    { label: 'ME', unit: 'MJ/kg TM', get: (r) => r.nutrient_supply.me_kgdm ?? null, ziel: bandRange('ME-Dichte'), dec: 1 },
+    { label: 'sidP', unit: 'g/kg TM', get: (r) => r.nutrient_supply.sidp_kgdm ?? null, ziel: bandRange('sidP-Dichte'), dec: 0 },
+    { label: 'nXP (CP)', unit: 'g/kg TM', get: (r) => r.nutrient_supply.cp_kgdm ?? null, ziel: bandRange('CP-Dichte'), dec: 0 },
+    { label: 'Stärke', unit: 'g/kg TM', get: (r) => bandVal(r, 'Stärke'), ziel: bandRange('Stärke'), dec: 0 },
+    { label: 'Zucker', unit: 'g/kg TM', get: (r) => bandVal(r, 'Zucker'), ziel: bandRange('Zucker'), dec: 0 },
+    { label: 'Kosten / Kuh · Tag', unit: '€', get: (r) => r.total_cost_eur_day ?? null, ziel: '–', dec: 2 },
+  ]
+  const cols: { name: string; result: OptimizationResult }[] = [
+    { name: 'Baseline', result: baseline },
+    ...variants,
+  ]
+  return (
+    <div className={card()}>
+      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+        Variantenvergleich — wichtige Kennzahlen
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr style={{ background: '#F9FAFB' }}>
+              <th className="py-1.5 px-2 border-b text-left font-semibold text-[#4B5563]">Kennzahl</th>
+              <th className="py-1.5 px-2 border-b text-left font-semibold text-[#4B5563]">Einheit</th>
+              {cols.map((c, i) => (
+                <th key={`${c.name}-${i}`} className="py-1.5 px-2 border-b text-right font-semibold text-[#4B5563] whitespace-nowrap">{c.name}</th>
+              ))}
+              <th className="py-1.5 px-2 border-b text-right font-semibold text-[#4B5563]">Zielbereich</th>
+            </tr>
+          </thead>
+          <tbody>
+            {metrics.map((m) => (
+              <tr key={m.label} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                <td className="px-2 py-1 font-medium" style={{ color: C.dark }}>{m.label}</td>
+                <td className="px-2 py-1" style={{ color: C.muted }}>{m.unit}</td>
+                {cols.map((c, i) => {
+                  const v = m.get(c.result)
+                  return (
+                    <td key={`${c.name}-${i}`} className="px-2 py-1 text-right font-mono">{v != null ? fmt(v, m.dec) : '–'}</td>
+                  )
+                })}
+                <td className="px-2 py-1 text-right font-mono" style={{ color: C.muted }}>{m.ziel}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {variants.length === 0 && (
+        <div className="mt-2 text-[10px]" style={{ color: C.muted }}>
+          Mit „Variante speichern" (oben) weitere Spalten zum Vergleich hinzufügen.
+        </div>
+      )}
+    </div>
+  )
 }
 
 /** RATION-WB-07: Parametrische Sensitivitätsanalyse (Skill §8). */
@@ -3526,6 +3649,7 @@ function Workbench({
   onGoDiagnose,
   onGoWizard,
   onApplySuggestionPatch,
+  onFrameworkChange,
   previewResult,
   previewIntent,
   previewPending,
@@ -3548,6 +3672,7 @@ function Workbench({
   onGoDiagnose: () => void
   onGoWizard: () => void
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
+  onFrameworkChange: (partial: Partial<Pick<WizardData, 'milkYield' | 'feedingType'>>) => void
   previewResult: OptimizationResult | null
   previewIntent: IntentKey | null
   previewPending: boolean
@@ -3559,6 +3684,11 @@ function Workbench({
   onTourNext?: () => void
 }) {
   const [activeVariant, setActiveVariant] = useState('Entwurf A')
+  // WB-10: Arbeitsmodus (Bewertung/Assistent/Optimierung) – steuert das Verhalten
+  // von Sheet-Änderungen (Bewertung: nur neu bewerten; Optimierung: umoptimieren).
+  const [workbenchMode, setWorkbenchMode] = useState<'Bewertung' | 'Assistent' | 'Optimierung'>('Optimierung')
+  // WB-09/WB-14: gespeicherte Varianten-Snapshots für den Vergleich.
+  const [savedVariants, setSavedVariants] = useState<{ name: string; result: OptimizationResult }[]>([])
   const [aiMessage, setAiMessage] = useState('')
   const defaultChat = chatSeed && chatSeed.length > 0
     ? chatSeed
@@ -3692,11 +3822,128 @@ function Workbench({
 
   return (
     <div
-      className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px] lg:h-[calc(100vh-120px)] p-[15px] gap-[15px]"
+      className="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] lg:h-[calc(100vh-120px)] p-[15px] gap-[15px]"
       style={{ background: C.bg }}
     >
-      {/* ── Linke Sidebar ── */}
-      <aside className="flex flex-col gap-[15px]">
+      {/* ── Linke Sidebar: Rahmenbedingungen ── */}
+      <aside className="flex flex-col gap-[15px] overflow-y-auto">
+        {/* RATION-WB-10: Rahmenbedingungen (Herde, Leistung, System, Modus) */}
+        <div className={card()}>
+          <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Rahmenbedingungen</div>
+          <div className="space-y-2.5">
+            <div>
+              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Herde / Gruppe</label>
+              <div className="mt-0.5 rounded border px-2 py-1.5 text-[13px] font-medium" style={{ borderColor: C.border, color: C.dark, background: '#F9FAFB' }}>
+                {wizardData ? `Laktierende Kühe · ${wizardData.group.count ?? '–'} Tiere` : 'Laktierende Kühe'}
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Leistungsniveau (kg ECM/Kuh/Tag)</label>
+              <input
+                type="number"
+                step={0.5}
+                min={0}
+                key={`milk-${wizardData?.milkYield ?? ''}`}
+                defaultValue={wizardData?.milkYield ?? ''}
+                disabled={!canEditRation}
+                aria-label="Leistungsniveau kg ECM je Kuh und Tag; Enter berechnet neu"
+                onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+                onBlur={(e) => {
+                  const v = e.target.valueAsNumber
+                  if (!Number.isFinite(v) || v <= 0 || v === wizardData?.milkYield) return
+                  onFrameworkChange({ milkYield: v })
+                }}
+                className="mt-0.5 w-full rounded border px-2 py-1.5 text-[14px] font-bold font-mono focus-visible:ring-1 disabled:opacity-60"
+                style={{ borderColor: C.border, color: C.dark }}
+              />
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Fütterungssystem</label>
+              <select
+                value={wizardData?.feedingType ?? 'TMR'}
+                disabled={!canEditRation}
+                onChange={(e) => onFrameworkChange({ feedingType: e.target.value as FeedingMode })}
+                className="mt-0.5 w-full rounded border px-2 py-1.5 text-[13px] disabled:opacity-60"
+                style={{ borderColor: C.border, color: C.dark, background: 'transparent' }}
+              >
+                <option value="TMR">TMR – Ganzjahresration</option>
+                <option value="PMR">PMR – Stall</option>
+                <option value="PMR+Weide">PMR + Weide</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Modus</label>
+              <div className="mt-0.5 grid grid-cols-3 gap-1">
+                {(['Bewertung', 'Assistent', 'Optimierung'] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setWorkbenchMode(m)}
+                    className="rounded px-1 py-1 text-[11px] font-semibold border transition-colors"
+                    style={{
+                      background: workbenchMode === m ? C.accent : 'transparent',
+                      color: workbenchMode === m ? C.accentOnDark : C.muted,
+                      borderColor: workbenchMode === m ? C.accent : C.border,
+                    }}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RATION-WB-10: Limitierende Faktoren (aus constraint_status + Anzeige-Bändern) */}
+        {result && (() => {
+          const bands = result.policy_profile_evaluation?.bands ?? []
+          const cs = result.constraint_status ?? []
+          const findBand = (n: string) => bands.find((b) => b.name === n)
+          const findCs = (n: string) => cs.find((c) => c.name === n)
+          const factors: { label: string; ok: boolean }[] = []
+          const meC = findCs('ME (MJ/d)'); if (meC) factors.push({ label: 'ME Versorgung', ok: meC.status !== 'hard_violated' })
+          const sidpC = findCs('sidP (g/d)'); if (sidpC) factors.push({ label: 'sidP Versorgung', ok: sidpC.status !== 'hard_violated' })
+          const cpB = findBand('CP-Dichte') ?? findCs('CP-Dichte (g/kg TM)'); if (cpB) factors.push({ label: 'nXP / Rohprotein', ok: (cpB as { status?: string }).status !== 'violated' && (cpB as { status?: string }).status !== 'hard_violated' })
+          const stB = findBand('Stärke'); if (stB) factors.push({ label: 'Stärke Zielbereich', ok: stB.status === 'ok' })
+          const zuB = findBand('Zucker'); if (zuB) factors.push({ label: 'Zucker Zielbereich', ok: zuB.status === 'ok' })
+          const feB = findBand('Fett (XL)'); if (feB) factors.push({ label: 'Fett Zielbereich', ok: feB.status === 'ok' })
+          if (factors.length === 0) return null
+          return (
+            <div className={card()}>
+              <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Limitierende Faktoren</div>
+              <div className="space-y-1">
+                {factors.map((f) => (
+                  <div key={f.label} className="flex items-center gap-1.5 text-[12px]">
+                    <span style={{ color: f.ok ? C.success : C.warn }}>{f.ok ? '✓' : '⚠'}</span>
+                    <span style={{ color: C.dark }}>{f.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* RATION-WB-10: Hinweise & Warnungen (aus warnings + Best-Attainable-Signal) */}
+        {result && ((result.warnings?.length ?? 0) > 0 || result.best_attainable_recovery?.triggered) && (
+          <div className={card()}>
+            <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Hinweise &amp; Warnungen</div>
+            <div className="space-y-1.5 max-h-40 overflow-y-auto">
+              {result.best_attainable_recovery?.triggered && (
+                <div className="flex gap-1.5 text-[11px]">
+                  <span style={{ color: C.accent }}>ℹ</span>
+                  <span style={{ color: C.dark }}>Best-Attainable verfügbar (Ziel technisch nicht voll erreichbar).</span>
+                </div>
+              )}
+              {(result.warnings ?? []).slice(0, 6).map((w, i) => (
+                <div key={i} className="flex gap-1.5 text-[11px]">
+                  <span style={{ color: C.warn }}>⚠</span>
+                  <span style={{ color: C.muted }}>{w}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className={card()}>
           <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Varianten</div>
           {[
@@ -3764,16 +4011,43 @@ function Workbench({
         {/* Sticky Kennzahlen-Trio (Fodjan-Muster): immer sichtbar beim Scrollen */}
         <RationSummaryBar result={result} milkPriceEur={wizardData?.milkPriceEur ?? 0.44} />
 
-        {/* Toolbar */}
-        <div className="flex gap-[10px] flex-wrap">
+        {/* Toolbar (WB-09: Bewerten · Optimieren · Best Attainable · Variante speichern) */}
+        <div className="flex gap-[10px] flex-wrap items-center">
           <button
-            onClick={onOptimize}
+            onClick={() => { setWorkbenchMode('Bewertung'); onOptimize() }}
+            disabled={isOptimizing || !canEditRation}
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            style={{ borderColor: C.border, color: C.dark }}
+            title="Aktuelle Ration nach GfE 2023 bewerten (ohne Umoptimierung)"
+          >
+            <Play size={14} /> Bewerten
+          </button>
+          <button
+            onClick={() => { setWorkbenchMode('Optimierung'); onOptimize() }}
             disabled={isOptimizing}
             className="px-4 py-2 rounded text-sm font-bold text-white flex items-center gap-2 transition-opacity hover:opacity-90"
             style={{ background: C.accent }}
           >
             {isOptimizing ? <Loader2 size={14} className="animate-spin" /> : <Calculator size={14} />}
             Optimieren
+          </button>
+          <button
+            onClick={onOptimize}
+            disabled={isOptimizing}
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            style={{ borderColor: C.border, color: C.dark }}
+            title="Beste unter allen harten Grenzen erreichbare Ration (Best-Attainable, Skill §4.2)"
+          >
+            <Sparkles size={14} /> Best Attainable
+          </button>
+          <button
+            onClick={() => { if (result) setSavedVariants((prev) => [...prev, { name: `Variante ${String.fromCharCode(65 + prev.length)}`, result }]) }}
+            disabled={!result || result.status !== 'optimal'}
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            style={{ borderColor: C.border, color: C.dark }}
+            title="Aktuelles Ergebnis als Vergleichsvariante ablegen"
+          >
+            <Copy size={14} /> Variante speichern
           </button>
           <button onClick={onDemo} disabled={isOptimizing} className="px-4 py-2 rounded text-sm font-semibold border transition-colors hover:bg-slate-50" style={{ borderColor: C.border }}>
             Demo
@@ -4072,6 +4346,11 @@ function Workbench({
         <MixingProtocolPanel protocol={result?.mixing_protocol ?? null} compact />
         <FeedingControlPanel protocol={result?.mixing_protocol ?? null} wizardData={wizardData} result={result} />
 
+        {/* RATION-WB-14: Variantenvergleich (Baseline + gespeicherte Varianten) */}
+        {rationItems.length > 0 && (
+          <VariantComparisonPanel baseline={result} variants={savedVariants} />
+        )}
+
         {/* RATION-WB-07: Sensitivität — parametrischer Sweep (Skill §8) */}
         {rationItems.length > 0 && (
           <SensitivityPanel wizardData={wizardData} rationItems={rationItems} />
@@ -4104,6 +4383,12 @@ function Workbench({
 
         {/* RATION-CANON: Live-Ergebnisse-Cockpit (Erreichbarkeit + Best-Attainable) */}
         <AttainabilityCockpit result={result} />
+
+        {/* RATION-WB-13: Rationskosten */}
+        <RationCostPanel result={result} />
+
+        {/* RATION-WB-13: Maßnahmenvorschläge */}
+        <MassnahmenPanel result={result} />
 
         {/* RATION-CANON-03: Preflight-Hinweise & Warnungen */}
         <PreflightPanel result={result} />
@@ -5009,6 +5294,7 @@ type AppView = 'dashboard' | 'wizard' | 'workbench' | 'diagnose' | 'review'
 function runOptimizeForWizard(
   nextWizardData: WizardData | null,
   feeds: FeedIngredient[],
+  opts?: { computeTechnicalMax?: boolean },
 ): Promise<OptimizationResult> {
   if (!nextWizardData) return optimizeDemo()
   const profile: CowProfile = {
@@ -5059,6 +5345,9 @@ function runOptimizeForWizard(
   // FAN-MODE-V1: Bewertungsmodus + Relaxation aus Wizard durchreichen
   const extras = {
     objective_strategy,
+    // WB-15: Live-Sheet-Edits berechnen technical_max NICHT (schnelle Neuberechnung);
+    // Buttons (Optimieren/Bewerten/Best Attainable) lassen es berechnen.
+    compute_technical_max: opts?.computeTechnicalMax ?? true,
     fan_options: {
       mode: nextWizardData.fanMode,
       ...(nextWizardData.fanMode === 'reference' ? { reference: nextWizardData.fanReference } : {}),
@@ -5524,6 +5813,22 @@ export default function Rationsoptimierung() {
     },
   })
 
+  // WB-15: schnelle Live-Neuberechnung bei Sheet-Änderungen (ohne technical_max-Suche),
+  // damit die Tachos unmittelbar auf jede Mengen-/Grenzänderung reagieren.
+  const editMutation = useMutation({
+    mutationFn: (nextWizardData: WizardData | null) =>
+      runOptimizeForWizard(nextWizardData, feeds, { computeTechnicalMax: false }),
+    onSuccess: (data) => {
+      setResult(data)
+      setError(null)
+      setView('workbench')
+      setWizardData((prev) => (prev ? { ...prev, wizardBaselineKgDm: rationItemsToBaselineKgDm(data.ration_items ?? []) } : prev))
+    },
+    onError: (err: unknown) => {
+      setError(getRationsApiErrorMessage(err, 'Neuberechnung fehlgeschlagen'))
+    },
+  })
+
   const openWizardFresh = useCallback(() => {
     setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
     setView('wizard')
@@ -5542,9 +5847,24 @@ export default function Rationsoptimierung() {
       }
       const next = patchHasSolverKeys(patch) ? applyRationPatch(wizardData, patch) : wizardData
       setWizardData(next)
-      optimizeMutation.mutate(next)
+      // WB-15: Sheet-Edit → schnelle Live-Neuberechnung (Tachos reagieren sofort).
+      editMutation.mutate(next)
     },
-    [wizardData, optimizeMutation, openWizardFresh],
+    [wizardData, editMutation, openWizardFresh],
+  )
+
+  // WB-10: Rahmenbedingungen (Leistungsniveau, Fütterungssystem) ändern und neu rechnen.
+  const handleFrameworkChange = useCallback(
+    (partial: Partial<Pick<WizardData, 'milkYield' | 'feedingType'>>) => {
+      if (!wizardData) {
+        openWizardFresh()
+        return
+      }
+      const next: WizardData = { ...wizardData, ...partial }
+      setWizardData(next)
+      editMutation.mutate(next)
+    },
+    [wizardData, editMutation, openWizardFresh],
   )
 
   const demoMutation = useMutation({
@@ -5559,7 +5879,7 @@ export default function Rationsoptimierung() {
     },
   })
 
-  const isOptimizing = optimizeMutation.isPending || demoMutation.isPending
+  const isOptimizing = optimizeMutation.isPending || demoMutation.isPending || editMutation.isPending
 
   // Intent-Vorschau: rechnet mit einem WizardData-Override, ohne die aktive Ansicht zu überschreiben.
   const previewMutation = useMutation({
@@ -5761,6 +6081,7 @@ export default function Rationsoptimierung() {
             onGoDiagnose={() => setView('diagnose')}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}
+            onFrameworkChange={handleFrameworkChange}
             previewResult={previewResult}
             previewIntent={previewIntent}
             previewPending={previewMutation.isPending}

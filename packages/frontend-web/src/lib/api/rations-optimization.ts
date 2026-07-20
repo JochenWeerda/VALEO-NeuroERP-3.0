@@ -265,8 +265,16 @@ export function rationItemsToBaselineKgDm(items: RationItem[]): Record<string, n
 export interface NutrientSupply {
   dmi_kg: number
   me_mj: number
+  /** ME-Dichte MJ/kg TM (Backend liefert). */
+  me_kgdm?: number | null
   sidp_g: number
+  /** sidP-Dichte g/kg TM. */
+  sidp_kgdm?: number | null
+  /** Rohprotein (CP) Dichte g/kg TM. */
+  cp_kgdm?: number | null
+  cp_g?: number | null
   andfom_g: number
+  andfom_kgdm?: number | null
   starch_g: number
   staerke_g?: number
   sugar_g: number
