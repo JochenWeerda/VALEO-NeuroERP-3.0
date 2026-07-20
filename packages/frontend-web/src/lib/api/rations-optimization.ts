@@ -946,6 +946,42 @@ export async function optimizeDemo(): Promise<OptimizationResult> {
   return data
 }
 
+// RATION-WB-07: Parametrische Sensitivitätsanalyse (Skill §8)
+export type SensitivityParameter = 'milk_target' | 'price' | 'feed_max_kg' | 'feed_min_kg'
+
+export interface SensitivityStep {
+  value: number
+  status?: string
+  result_status?: RationResultStatus
+  me_density_mj_kgdm: number | null
+  sidp_density_g_kgdm: number | null
+  cost_eur_cow_day: number | null
+  attainable_output_kg: number | null
+  technical_max_kg: number | null
+  ecm_supply_kg_day?: number | null
+  binding_constraints: string[]
+}
+
+export interface SensitivityResult {
+  parameter: SensitivityParameter
+  feed_id?: string | null
+  unit: string
+  steps: SensitivityStep[]
+}
+
+export async function runSensitivity(
+  cowProfile: CowProfile,
+  sweep: { parameter: SensitivityParameter; feed_id?: string; start: number; stop: number; step: number },
+  feedIds?: string[],
+): Promise<SensitivityResult> {
+  const { data } = await apiClient.post<SensitivityResult>(`${BASE}/sensitivity`, {
+    cow_profile: cowProfile,
+    feeds: feedIds,
+    sweep,
+  })
+  return data
+}
+
 // F1 (DLG 01|2025, Kap. 11/12): Fütterungscontrolling — SOLL/IST-Kontrolle
 export interface FeedingControlComponentIn {
   feed_id: string

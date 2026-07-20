@@ -7760,6 +7760,21 @@ class _OptimizeFromProfileBody(BaseModel):
     feed_block_overrides: Optional[List[FeedBlockAssignment]] = None
 
 
+class _SensitivitySweep(BaseModel):
+    """Parametrische Analyse (Skill §8): eine Groesse schrittweise variieren."""
+
+    # feed_max_kg | feed_min_kg | price | milk_target
+    parameter: str
+    feed_id: Optional[str] = None  # Pflicht fuer feed_*/price
+    start: float
+    stop: float
+    step: float = 0.5
+
+
+class _SensitivityBody(_OptimizeFromProfileBody):
+    sweep: _SensitivitySweep
+
+
 class _RequirementsBody(BaseModel):
     body_weight_kg: float = 675.0
     milk_kg_day: float = 30.0
@@ -7987,6 +8002,113 @@ async def optimize_from_profile(
     )
 
 
+def _sensitivity_steps(start: float, stop: float, step: float) -> List[float]:
+    """Sichere, begrenzte Schrittfolge (max. 20 Punkte) fuer die Sweep-Achse."""
+    step = abs(step) or 0.5
+    if stop < start:
+        start, stop = stop, start
+    steps: List[float] = []
+    v = start
+    # +1e-9 fuer Rundungsfehler am oberen Rand.
+    while v <= stop + 1e-9 and len(steps) < 20:
+        steps.append(round(v, 4))
+        v += step
+    return steps
+
+
+def _sensitivity_row(value: float, result: Dict[str, Any]) -> Dict[str, Any]:
+    """Kennzahlen eines Sweep-Schritts (Skill §8: Kosten/Leistung/Versorgung/Bindung)."""
+    ns = result.get("nutrient_supply") or {}
+    att = result.get("attainability") or {}
+    dmi = float(ns.get("dmi_kg") or ns.get("dmi") or 0.0)
+    me_mj = float(ns.get("me_mj") or 0.0)
+    sidp_g = float(ns.get("sidp_g") or 0.0)
+    me_density = round(me_mj / dmi, 2) if dmi > 1e-9 else None
+    sidp_density = round(sidp_g / dmi, 1) if dmi > 1e-9 else None
+    # Bindende/verletzte Grenzen dieses Schritts.
+    binding = [
+        row.get("name")
+        for row in (result.get("constraint_status") or [])
+        if row.get("status") in {"violated", "hard_violated"}
+    ]
+    return {
+        "value": value,
+        "status": result.get("status"),
+        "result_status": result.get("result_status"),
+        "me_density_mj_kgdm": me_density,
+        "sidp_density_g_kgdm": sidp_density,
+        "cost_eur_cow_day": result.get("total_cost_eur_day"),
+        "attainable_output_kg": att.get("safe_attainable"),
+        "technical_max_kg": att.get("technical_max"),
+        "ecm_supply_kg_day": result.get("ecm_supply_kg_day"),
+        "binding_constraints": [b for b in binding if b][:4],
+    }
+
+
+def _run_sensitivity(body: "_SensitivityBody") -> Dict[str, Any]:
+    """Fuehre den parametrischen Sweep aus (Skill §8) – ein Solve je Schritt."""
+    sweep = body.sweep
+    values = _sensitivity_steps(sweep.start, sweep.stop, sweep.step)
+    param = (sweep.parameter or "").strip()
+    rows: List[Dict[str, Any]] = []
+
+    for v in values:
+        profile = dict(body.cow_profile)
+        price_ov = dict(body.price_overrides or {})
+        max_ov = dict(body.max_tm_overrides or {})
+        min_ov = dict(body.min_tm_overrides or {})
+
+        if param == "milk_target":
+            profile["milk_kg_day"] = v
+        elif param == "price" and sweep.feed_id:
+            price_ov[sweep.feed_id] = v
+        elif param == "feed_max_kg" and sweep.feed_id:
+            max_ov[sweep.feed_id] = v
+        elif param == "feed_min_kg" and sweep.feed_id:
+            min_ov[sweep.feed_id] = v
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "Ungueltige Sweep-Parametrisierung: parameter muss milk_target/"
+                    "price/feed_max_kg/feed_min_kg sein; feed_*/price benoetigen feed_id."
+                ),
+            )
+
+        runtime_options = _resolve_runtime_options(
+            profile,
+            fan_options=body.fan_options,
+            relaxation_policy=body.relaxation_policy,
+            objective_strategy=body.objective_strategy,
+            season_profile=body.season_profile,
+            policy_profile=body.policy_profile,
+            policy_overrides=body.policy_overrides,
+            feeding_system_config=body.feeding_system_config,
+            feed_block_overrides=body.feed_block_overrides,
+        )
+        result = _optimize_internal(
+            profile,
+            feed_ids=body.feeds,
+            price_overrides=price_ov or None,
+            max_tm_overrides=max_ov or None,
+            min_tm_overrides=min_ov or None,
+            runtime_options=runtime_options,
+        )
+        rows.append(_sensitivity_row(v, result))
+
+    return {
+        "parameter": param,
+        "feed_id": sweep.feed_id,
+        "unit": {
+            "milk_target": "kg Milch/Tag",
+            "price": "EUR/kg TM",
+            "feed_max_kg": "kg TM/Tag",
+            "feed_min_kg": "kg TM/Tag",
+        }.get(param, ""),
+        "steps": rows,
+    }
+
+
 def _build_demo_result() -> Dict[str, Any]:
     """Self-contained Demo-Showcase inkl. vollständiger DLG-/Struktur-Analyse.
 
@@ -8092,6 +8214,38 @@ async def optimize(
     tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
         "POST", "/api/v1/optimize", tenant_id=tenant_id, json_body=body
+    )
+
+
+@router.post(
+    "/sensitivity",
+    summary="Sensitivitaet (parametrischer Sweep)",
+    response_model=RationsOptimizationOut,
+)
+async def sensitivity(
+    body: _SensitivityBody,
+    request: Request,
+    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
+):
+    """Parametrische Analyse (Skill §8): eine Grenze/Preis/Zielleistung schrittweise
+    variieren und je Schritt Kosten, erreichbare Leistung, Versorgung und bindende
+    Grenzen ausgeben."""
+    if not get_rations_base_url():
+        try:
+            return JSONResponse(content=_run_sensitivity(body))
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.exception("Sensitivitaetsanalyse fehlgeschlagen: %s", exc)
+            raise HTTPException(
+                status_code=500, detail=f"Sensitivitaetsanalyse fehlgeschlagen: {exc}"
+            )
+    tenant_id = _tenant_from_request(request, x_tenant_id)
+    return await _proxy_request(
+        "POST",
+        "/api/v1/sensitivity",
+        tenant_id=tenant_id,
+        json_body=body.model_dump(),
     )
 
 

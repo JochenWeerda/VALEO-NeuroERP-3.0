@@ -43,6 +43,10 @@ import {
   fetchFeeds,
   optimizeFromProfile,
   optimizeDemo,
+  runSensitivity,
+  type SensitivityResult,
+  type SensitivityParameter,
+  type RationItem,
   saveFeedingControlLog,
   fetchFeedingControlLogs,
   uploadCompoundFeedDocument,
@@ -3205,6 +3209,179 @@ function PreflightPanel({ result }: { result: OptimizationResult | null }) {
   )
 }
 
+/** WizardData → CowProfile (gleiche Felder wie runOptimizeForWizard). */
+function wizardToCowProfile(wd: WizardData): CowProfile {
+  return {
+    breed: 'Holstein',
+    body_weight_kg: wd.group.bodyMass,
+    milk_kg_day: wd.milkYield,
+    milk_fat_pct: wd.fatPercent,
+    milk_protein_pct: wd.proteinPercent,
+    lactation_stage_days: wd.group.lactationDays,
+    parity: Math.round(wd.group.lactationNumber),
+    target_dmi_kg: wd.dmiTarget,
+    wizard_dmi_min_kg: wd.wizardHardBounds?.dmiMinKg,
+    wizard_dmi_max_kg: wd.wizardHardBounds?.dmiMaxKg,
+    feeding_type: wd.feedingType,
+  }
+}
+
+/** RATION-WB-07: Parametrische Sensitivitätsanalyse (Skill §8). */
+function SensitivityPanel({
+  wizardData,
+  rationItems,
+}: {
+  wizardData: WizardData | null
+  rationItems: RationItem[]
+}) {
+  const [parameter, setParameter] = useState<SensitivityParameter>('milk_target')
+  const [feedId, setFeedId] = useState<string>('')
+  const [start, setStart] = useState<number>(34)
+  const [stop, setStop] = useState<number>(40)
+  const [step, setStep] = useState<number>(2)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<SensitivityResult | null>(null)
+
+  const needsFeed = parameter !== 'milk_target'
+  const feedChoices = rationItems.map((it) => ({ id: it.feed_id, name: it.name }))
+  const effFeedId = feedId || feedChoices[0]?.id || ''
+
+  async function handleRun() {
+    if (loading) return
+    if (!wizardData) {
+      setError('Sensitivität benötigt eine Ration mit Profil — bitte zuerst „Neue Ration“ starten.')
+      return
+    }
+    if (needsFeed && !effFeedId) {
+      setError('Bitte ein Futtermittel für die Variation wählen.')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await runSensitivity(
+        wizardToCowProfile(wizardData),
+        { parameter, feed_id: needsFeed ? effFeedId : undefined, start, stop, step },
+        wizardData.selectedFeedIds.size > 0 ? [...wizardData.selectedFeedIds] : undefined,
+      )
+      setData(res)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Sensitivitätsanalyse fehlgeschlagen.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const paramLabel: Record<SensitivityParameter, string> = {
+    milk_target: 'Milchleistungsziel',
+    price: 'Preis',
+    feed_max_kg: 'Max-Menge',
+    feed_min_kg: 'Min-Menge',
+  }
+
+  return (
+    <div id="sensitivity-panel" className={card()}>
+      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+        Sensitivität — parametrische Analyse
+      </div>
+      <div className="flex flex-wrap items-end gap-2 mb-2">
+        <label className="text-[10px]" style={{ color: C.muted }}>
+          Größe
+          <select
+            value={parameter}
+            onChange={(e) => { setParameter(e.target.value as SensitivityParameter); setData(null) }}
+            className="block mt-0.5 rounded border bg-transparent px-1.5 py-1 text-xs"
+            style={{ borderColor: C.border }}
+          >
+            {(['milk_target', 'feed_max_kg', 'feed_min_kg', 'price'] as SensitivityParameter[]).map((p) => (
+              <option key={p} value={p}>{paramLabel[p]}</option>
+            ))}
+          </select>
+        </label>
+        {needsFeed && (
+          <label className="text-[10px]" style={{ color: C.muted }}>
+            Futtermittel
+            <select
+              value={effFeedId}
+              onChange={(e) => setFeedId(e.target.value)}
+              className="block mt-0.5 rounded border bg-transparent px-1.5 py-1 text-xs max-w-[160px]"
+              style={{ borderColor: C.border }}
+            >
+              {feedChoices.map((f) => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        {([['von', start, setStart], ['bis', stop, setStop], ['Schritt', step, setStep]] as const).map(
+          ([lbl, val, setter]) => (
+            <label key={lbl} className="text-[10px]" style={{ color: C.muted }}>
+              {lbl}
+              <input
+                type="number"
+                step={0.5}
+                value={val}
+                onChange={(e) => { const n = e.target.valueAsNumber; if (Number.isFinite(n)) setter(n) }}
+                className="block mt-0.5 w-16 rounded border bg-transparent px-1.5 py-1 text-right font-mono text-xs"
+                style={{ borderColor: C.border }}
+              />
+            </label>
+          ),
+        )}
+        <button
+          type="button"
+          onClick={handleRun}
+          disabled={loading || !wizardData}
+          className="rounded px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+          style={{ background: C.accent }}
+        >
+          {loading ? <Loader2 size={13} className="inline animate-spin" /> : 'Berechnen'}
+        </button>
+      </div>
+
+      {error && (
+        <div className="text-[11px] mb-2" style={{ color: C.error }}>{error}</div>
+      )}
+
+      {data && data.steps.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-[11px]">
+            <thead>
+              <tr style={{ background: '#F9FAFB' }}>
+                {[`${paramLabel[data.parameter]} (${data.unit})`, 'ME MJ/kg TM', 'sidP g/kg TM', 'Kosten €/Kuh/Tag', 'Erreichbar kg', 'Bindende Grenzen'].map((h, i) => (
+                  <th key={h} className={cn('py-1.5 px-2 border-b font-semibold text-[#4B5563] whitespace-nowrap', i === 0 || i === 5 ? 'text-left' : 'text-right')} style={{ borderColor: C.border }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.steps.map((s) => (
+                <tr key={s.value} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                  <td className="px-2 py-1 font-mono font-semibold">{fmt(s.value, 2)}</td>
+                  <td className="px-2 py-1 text-right font-mono">{s.me_density_mj_kgdm != null ? fmt(s.me_density_mj_kgdm, 2) : '–'}</td>
+                  <td className="px-2 py-1 text-right font-mono">{s.sidp_density_g_kgdm != null ? fmt(s.sidp_density_g_kgdm, 0) : '–'}</td>
+                  <td className="px-2 py-1 text-right font-mono">{s.cost_eur_cow_day != null ? fmt(s.cost_eur_cow_day, 2) : '–'}</td>
+                  <td className="px-2 py-1 text-right font-mono font-semibold" style={{ color: s.status === 'optimal' ? C.dark : C.warn }}>
+                    {s.attainable_output_kg != null ? fmt(s.attainable_output_kg, 1) : (s.technical_max_kg != null ? `≤${fmt(s.technical_max_kg, 1)}` : '–')}
+                  </td>
+                  <td className="px-2 py-1 text-[10px]" style={{ color: C.muted }}>
+                    {s.binding_constraints.length ? s.binding_constraints.join(', ') : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {data && data.steps.length === 0 && (
+        <div className="text-[11px]" style={{ color: C.muted }}>Keine Schritte berechnet.</div>
+      )}
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // VIEW: Workbench (3-column)
 // ---------------------------------------------------------------------------
@@ -3764,6 +3941,11 @@ function Workbench({
         {/* Slice 3: Misch- und Fuetterungsprotokoll (TMR-Mischmasse). */}
         <MixingProtocolPanel protocol={result?.mixing_protocol ?? null} compact />
         <FeedingControlPanel protocol={result?.mixing_protocol ?? null} wizardData={wizardData} result={result} />
+
+        {/* RATION-WB-07: Sensitivität — parametrischer Sweep (Skill §8) */}
+        {rationItems.length > 0 && (
+          <SensitivityPanel wizardData={wizardData} rationItems={rationItems} />
+        )}
       </main>
 
       {/* ── Rechte Spalte: KPI + AI ── */}
