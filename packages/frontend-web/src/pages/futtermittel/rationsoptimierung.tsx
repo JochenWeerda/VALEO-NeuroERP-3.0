@@ -47,6 +47,7 @@ import {
   type SensitivityResult,
   type SensitivityParameter,
   type RationItem,
+  type PolicyProfileBand,
   saveFeedingControlLog,
   fetchFeedingControlLogs,
   uploadCompoundFeedDocument,
@@ -3042,6 +3043,132 @@ function toneColor(tone: 'success' | 'warn' | 'error' | 'muted'): string {
   return tone === 'success' ? C.success : tone === 'warn' ? C.warn : tone === 'error' ? C.error : C.muted
 }
 
+// ---------------------------------------------------------------------------
+// RATION-WB-08: Nährstoff-Tacho-Reihe (Zielbereich-Gauges aus DLG-Korridoren)
+// ---------------------------------------------------------------------------
+
+type GaugeStatus = 'ok' | 'warn' | 'error'
+
+function gaugeStatusColor(s: GaugeStatus): string {
+  return s === 'ok' ? C.success : s === 'warn' ? C.warn : C.error
+}
+
+/** Skaliert ein DLG-Policy-Band auf eine Tacho-Geometrie (Zielbereich = grünes Band). */
+function bandToGauge(b: PolicyProfileBand): {
+  scaleMin: number; scaleMax: number; greenLo: number; greenHi: number; status: GaugeStatus
+} {
+  const tmin = b.target_min ?? null
+  const tmax = b.target_max ?? null
+  let scaleMin: number, scaleMax: number, greenLo: number, greenHi: number
+  if (tmin != null && tmax != null) {
+    const range = Math.max(tmax - tmin, 1e-6)
+    scaleMin = Math.max(0, tmin - range * 0.6)
+    scaleMax = tmax + range * 0.6
+    greenLo = tmin
+    greenHi = tmax
+  } else if (tmin != null) {
+    // Untergrenze (≥): Zielbereich reicht nach oben.
+    scaleMin = Math.max(0, tmin * 0.5)
+    scaleMax = Math.max(b.actual, tmin) * 1.4 + 1e-6
+    greenLo = tmin
+    greenHi = scaleMax
+  } else if (tmax != null) {
+    // Obergrenze (≤): Zielbereich reicht nach unten.
+    scaleMin = 0
+    scaleMax = Math.max(b.actual, tmax) * 1.3 + 1e-6
+    greenLo = 0
+    greenHi = tmax
+  } else {
+    scaleMin = 0
+    scaleMax = Math.max(b.actual * 1.4, 1)
+    greenLo = 0
+    greenHi = scaleMax
+  }
+  const status: GaugeStatus = b.fulfilled ? 'ok' : b.deviation_norm <= 1 ? 'warn' : 'error'
+  return { scaleMin, scaleMax, greenLo, greenHi, status }
+}
+
+function gaugeValueFmt(value: number, unit: string): string {
+  if (/MJ/i.test(unit)) return fmt(value, 1)
+  if (unit.includes(':') || unit.trim() === '') return fmt(value, 2)
+  return fmt(value, 0)
+}
+
+/** Einzelner Nährstoff-Tacho: grüner Zielkorridor + statusgefärbte Nadel. */
+function NutrientGauge({ band }: { band: PolicyProfileBand }) {
+  const { scaleMin, scaleMax, greenLo, greenHi, status } = bandToGauge(band)
+  const R = 42
+  const CX = 52
+  const CY = 48
+  const sw = 8
+  const pathLen = Math.PI * R
+  const frac = (v: number) => Math.max(0, Math.min(1, (v - scaleMin) / (scaleMax - scaleMin || 1)))
+  const polar = (f: number) => {
+    const deg = 180 * (1 - f)
+    const rad = (deg * Math.PI) / 180
+    return { x: CX + R * Math.cos(rad), y: CY - R * Math.sin(rad) }
+  }
+  const track = `M ${CX - R} ${CY} A ${R} ${R} 0 0 0 ${CX + R} ${CY}`
+  const gLo = frac(greenLo)
+  const gHi = frac(greenHi)
+  const greenLen = Math.max(0, (gHi - gLo) * pathLen)
+  const needle = polar(frac(band.actual))
+  const color = gaugeStatusColor(status)
+  const icon = status === 'ok' ? '✓' : status === 'warn' ? '⚠' : '✗'
+  return (
+    <div className="flex flex-col items-center">
+      <div className="text-[10px] font-semibold text-center leading-tight h-7 flex items-end" style={{ color: C.dark }}>
+        {band.name}
+      </div>
+      <svg viewBox="0 0 104 56" className="w-full max-w-[120px]" role="img" aria-label={`${band.name} ${gaugeValueFmt(band.actual, band.unit)} ${band.unit}`}>
+        <path d={track} fill="none" stroke="hsl(var(--muted))" strokeWidth={sw} strokeLinecap="round" />
+        <path
+          d={track}
+          fill="none"
+          stroke={C.success}
+          strokeWidth={sw}
+          strokeLinecap="butt"
+          strokeDasharray={`${greenLen} ${pathLen}`}
+          strokeDashoffset={-(gLo * pathLen)}
+        />
+        <line x1={CX + (needle.x - CX) * 0.35} y1={CY + (needle.y - CY) * 0.35} x2={needle.x} y2={needle.y} stroke={C.dark} strokeWidth={2} />
+        <circle cx={CX} cy={CY} r={3} fill={C.dark} />
+        <text x={CX} y={CY - 5} textAnchor="middle" className="font-bold" style={{ fontSize: 13, fill: color }}>
+          {gaugeValueFmt(band.actual, band.unit)}
+        </text>
+      </svg>
+      <div className="text-[9px] -mt-1 text-center" style={{ color: C.muted }}>
+        <span style={{ color }}>{icon}</span> {band.unit || 'Verhältnis'}
+      </div>
+    </div>
+  )
+}
+
+/** RATION-WB-08: Reihe von Nährstoff-Tachos aus den DLG-Zielkorridoren (Skill §6.2). */
+function NutrientGaugeRow({ result }: { result: OptimizationResult | null }) {
+  const bands = result?.policy_profile_evaluation?.bands
+  if (!bands || bands.length === 0) return null
+  return (
+    <div className={card()}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          Live-Ergebnisse — Nährstoffversorgung (Zielbereich)
+        </div>
+        <div className="flex items-center gap-3 text-[9px]" style={{ color: C.muted }}>
+          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.success }} /> im Zielbereich</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.warn }} /> leicht abweichend</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.error }} /> deutlich abweichend</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-3">
+        {bands.map((b, i) => (
+          <NutrientGauge key={`${b.name}-${i}`} band={b} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** Halbkreis-Tacho (Zielbereich + Nadel) für die erreichbare Leistung (Skill §6.2). */
 function PerformanceGauge({
   value,
@@ -3923,6 +4050,9 @@ function Workbench({
             </div>
           )}
         </div>
+
+        {/* RATION-WB-08: Nährstoff-Tacho-Reihe (Zielbereich-Gauges aus DLG-Korridoren) */}
+        <NutrientGaugeRow result={result} />
 
         <RationWarningAdjustmentsPanel
           result={result}

@@ -1,0 +1,51 @@
+slice_id: RATION-WB-08-NUTRIENT-GAUGES
+id: RATION-WB-08-NUTRIENT-GAUGES
+title: Rationswerkbank – Nährstoff-Tacho-Reihe (Zielbereich-Gauges)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Die Tacho-Reihe aus dem Zielbild: je DLG-Nährstoffkorridor ein Halbkreis-
+  Tacho mit grünem Zielbereich, Nadel, Wert und Ampel-Status (im Zielbereich /
+  leicht abweichend / deutlich abweichend). Zielbereiche stammen aus den
+  autoritativen policy_profile_evaluation.bands (DLG 01|2025), nicht aus
+  erfundenen Grenzen (Skill §2.2/§10.3).
+scope:
+  - NutrientGauge (SVG-Halbkreis mit grünem Korridor) + NutrientGaugeRow
+  - bandToGauge-Skalierung (min/max/≥/≤-Korridore) + Status aus fulfilled/deviation_norm
+  - Legende (Zielbereich/leicht/deutlich); Mount unter der Spielwiese
+non_scope:
+  - Metriken ohne DLG-Korridor (Stärke/Zucker/Fett/Ca:P als eigene Gauges) – erst wenn Backend Zielkorridore liefert
+  - 5-Zonen-Farbverlauf (rot-gelb-grün-gelb-rot); hier grüner Korridor + statusgefärbte Nadel
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-08-NUTRIENT-GAUGES.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+acceptance:
+  - "tsc --noEmit gruen (0 Fehler)"
+  - "eslint der geaenderten Datei gruen"
+  - "Live im Portal verifiziert: 8 DLG-Tachos mit grünem Korridor, Nadel, Wert, Status"
+tests:
+  - "npx tsc --noEmit -p tsconfig.json"
+  - "npx eslint src/pages/futtermittel/rationsoptimierung.tsx"
+  - "Manuelle Sichtprüfung Demo-Ration (Rations-Workbench → Demo starten)"
+risks:
+  - "Nur Metriken mit DLG-Zielkorridor erhalten einen Tacho; Stärke/Zucker/Fett/Ca:P fehlen mangels autoritativem Korridor (bewusst, kein erfundener Zielbereich)."
+ai_harness:
+  fachlicher_vertrag: >-
+    Der grüne Zielbereich jedes Tachos ist der DLG-Referenzkorridor (target_min/
+    target_max) des aktiven Profils; der Status folgt fulfilled/deviation_norm
+    des Bandes. Keine erfundenen Zielwerte.
+  test_vertrag: >-
+    Statischer Vertrag tsc+eslint gruen; reine Anzeige (keine Mutation);
+    Live-Sichtprüfung im laufenden Portal.
+  daten_vertrag: >-
+    Fehlt ein Korridor (kein Band), erscheint kein Tacho – statt eines
+    Platzhalter-Zielbereichs.
+  api_vertrag: >-
+    Konsumiert policy_profile_evaluation.bands; keine neuen Requests.
+  ui_vertrag: >-
+    Erweitert die Werkbank additiv; erscheint nur bei vorhandenen DLG-Bändern.
+  persistenz_vertrag: >-
+    Reine Anzeige; keine Persistenzänderung.
