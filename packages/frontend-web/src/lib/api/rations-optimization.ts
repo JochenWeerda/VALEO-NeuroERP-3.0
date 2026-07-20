@@ -604,6 +604,10 @@ export interface RationAdjustmentApplyPatch {
   unfix_feed_ids?: string[]
   /** Zeilen-CRUD Workbench: Futtermittel aus dem Korb entfernen. */
   remove_feed_ids?: string[]
+  /** Spielwiese (RATION-WB-06): Untergrenze je feed_id in kg FM/Tag setzen (Grenzen öffnen/verdichten). */
+  set_feed_min_fm?: Record<string, number>
+  /** Spielwiese (RATION-WB-06): Obergrenze je feed_id in kg FM/Tag setzen (Grenzen öffnen/verdichten). */
+  set_feed_max_fm?: Record<string, number>
 }
 
 export interface RationAdjustmentSuggestion {

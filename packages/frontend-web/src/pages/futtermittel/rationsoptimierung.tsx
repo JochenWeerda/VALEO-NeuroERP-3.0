@@ -299,6 +299,21 @@ export function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPat
     }
     next.selectedFeedIds = s
   }
+  // Spielwiese (RATION-WB-06): Min/Max getrennt setzen ("Grenzen öffnen/verdichten").
+  if (patch.set_feed_min_fm && Object.keys(patch.set_feed_min_fm).length > 0) {
+    next.feedMinFm = { ...(next.feedMinFm ?? {}) }
+    for (const [id, v] of Object.entries(patch.set_feed_min_fm)) {
+      if (!Number.isFinite(v) || v < 0) continue
+      next.feedMinFm[id] = v
+    }
+  }
+  if (patch.set_feed_max_fm && Object.keys(patch.set_feed_max_fm).length > 0) {
+    next.feedMaxFm = { ...next.feedMaxFm }
+    for (const [id, v] of Object.entries(patch.set_feed_max_fm)) {
+      if (!Number.isFinite(v) || v < 0) continue
+      next.feedMaxFm[id] = v
+    }
+  }
   return next
 }
 
@@ -310,6 +325,8 @@ function patchHasSolverKeys(patch: RationAdjustmentApplyPatch): boolean {
     || Object.keys(patch.fix_feed_fm ?? {}).length > 0
     || (patch.unfix_feed_ids?.length ?? 0) > 0
     || (patch.remove_feed_ids?.length ?? 0) > 0
+    || Object.keys(patch.set_feed_min_fm ?? {}).length > 0
+    || Object.keys(patch.set_feed_max_fm ?? {}).length > 0
   )
 }
 
@@ -3503,17 +3520,23 @@ function Workbench({
 
         {/* Table */}
         <div id="feed-table" className={cn(card('grow overflow-hidden p-0'))} style={tourRing('feed-table')}>
+          {/* RATION-WB-06: Spielwiese-Kopf (Live-Neuberechnung bei jeder Änderung, Skill §6) */}
+          <div className="flex items-center justify-between border-b px-3 py-2" style={{ borderColor: C.border }}>
+            <div className="text-[13px] font-bold" style={{ color: C.dark }}>Spielwiese / Ration am Futtertisch</div>
+            <div className="text-[10px]" style={{ color: C.muted }}>Live-Neuberechnung bei jeder Änderung · Grenzen öffnen/verdichten über Min/Max</div>
+          </div>
           {isOptimizing ? (
-            <div className="flex items-center justify-center h-full gap-3" style={{ color: C.muted }}>
+            <div className="flex items-center justify-center h-full gap-3 py-16" style={{ color: C.muted }}>
               <Loader2 size={24} className="animate-spin" />
-              <span className="text-sm font-medium">Optimierung läuft…</span>
+              <span className="text-sm font-medium">Neuberechnung läuft…</span>
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>
                 <tr style={{ background: '#F9FAFB' }}>
-                  {['Futtermittel', 'kg FM', 'kg TM', '% TM', 'ME (MJ)', 'sidP (g)', '€/Tag', ''].map((h, hi) => (
-                    <th key={`${h}-${hi}`} className="py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] text-right first:text-left" style={{ borderColor: C.border }}>
+                  {['Futtermittel', 'kg FM', 'kg TM', 'Struktur', 'Min', 'Max', 'ME (MJ)', 'sidP (g)', '€/Tag', ''].map((h, hi) => (
+                    <th key={`${h}-${hi}`} className="py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] text-right first:text-left whitespace-nowrap" style={{ borderColor: C.border }}>
                       {h}
                     </th>
                   ))}
@@ -3522,15 +3545,16 @@ function Workbench({
               <tbody>
                 {rationItems.map((item) => {
                   const feed = feedById.get(item.feed_id)
-                  const anteil = totalKgdm > 0 ? (item.kgdm / totalKgdm) * 100 : 0
                   const meBeitrag = feed ? item.kgdm * feed.me_mj_kgdm : 0
                   const sidpBeitrag = feed ? item.kgdm * feed.sidp_g_kgdm : 0
+                  const strukturDichte = feed ? feed.andfom_g_kgdm : null
                   const dupName = (rationNameDupCounts.get(item.name) ?? 0) > 1
-                  const isFixed = wizardData?.feedMinFm?.[item.feed_id] != null
-                    && wizardData.feedMinFm[item.feed_id] === wizardData.feedMaxFm?.[item.feed_id]
+                  const minFm = wizardData?.feedMinFm?.[item.feed_id]
+                  const maxFm = wizardData?.feedMaxFm?.[item.feed_id]
+                  const isFixed = minFm != null && minFm === maxFm
                   return (
                     <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50" style={{ borderColor: '#F3F4F6' }}>
-                      <td className="p-2 font-medium" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
+                      <td className="p-2 font-medium whitespace-nowrap" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
                         {item.name}
                         {dupName ? (
                           <span className="text-slate-400 font-normal text-[11px] ml-1">({item.feed_id})</span>
@@ -3580,7 +3604,56 @@ function Workbench({
                         </div>
                       </td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(item.kgdm, 2)}</td>
-                      <td className="p-2 text-right font-mono text-xs">{fmt(anteil, 1)}%</td>
+                      <td className="p-2 text-right font-mono text-xs">{strukturDichte != null ? fmt(strukturDichte, 0) : '–'}</td>
+                      {/* RATION-WB-06: Min/Max (kg FM) — Grenzen öffnen/verdichten (Skill §6.1) */}
+                      <td className="p-1 text-right">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={0.1}
+                          min={0}
+                          key={`min:${item.feed_id}:${minFm ?? ''}`}
+                          defaultValue={minFm ?? ''}
+                          disabled={!canEditRation}
+                          placeholder="–"
+                          aria-label={`Untergrenze ${item.name} in kg Frischmasse je Tag`}
+                          title="Untergrenze (kg FM/Tag); leer = keine Untergrenze. Enter berechnet neu."
+                          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+                          onBlur={(e) => {
+                            const raw = e.target.value.trim()
+                            const v = raw === '' ? 0 : e.target.valueAsNumber
+                            if (!Number.isFinite(v) || v < 0) return
+                            if ((minFm ?? 0) === v) return
+                            onApplySuggestionPatch({ set_feed_min_fm: { [item.feed_id]: v } })
+                          }}
+                          className="w-14 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-[11px] focus-visible:ring-1 disabled:opacity-60"
+                          style={{ borderColor: C.border }}
+                        />
+                      </td>
+                      <td className="p-1 text-right">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={0.1}
+                          min={0}
+                          key={`max:${item.feed_id}:${maxFm ?? ''}`}
+                          defaultValue={maxFm ?? ''}
+                          disabled={!canEditRation}
+                          placeholder="–"
+                          aria-label={`Obergrenze ${item.name} in kg Frischmasse je Tag`}
+                          title="Obergrenze (kg FM/Tag); leer = Solver-Standard. Enter berechnet neu."
+                          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+                          onBlur={(e) => {
+                            const raw = e.target.value.trim()
+                            const v = raw === '' ? 0 : e.target.valueAsNumber
+                            if (!Number.isFinite(v) || v < 0) return
+                            if ((maxFm ?? 0) === v) return
+                            onApplySuggestionPatch({ set_feed_max_fm: { [item.feed_id]: v } })
+                          }}
+                          className="w-14 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-[11px] focus-visible:ring-1 disabled:opacity-60"
+                          style={{ borderColor: C.border }}
+                        />
+                      </td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(meBeitrag, 1)}</td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(sidpBeitrag, 0)}</td>
                       <td className="p-2 text-right font-mono text-xs font-bold">{fmt(item.total_cost, 2)}</td>
@@ -3601,7 +3674,7 @@ function Workbench({
                 })}
                 {rationItems.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center text-sm" style={{ color: C.muted }}>
+                    <td colSpan={10} className="py-16 text-center text-sm" style={{ color: C.muted }}>
                       Starten Sie die Optimierung oder laden Sie die Demo
                     </td>
                   </tr>
@@ -3610,18 +3683,39 @@ function Workbench({
               {rationItems.length > 0 && (
                 <tfoot>
                   <tr className="font-bold" style={{ background: '#F9FAFB' }}>
-                    <td className="p-2 text-sm" style={{ color: C.dark }}>Gesamt</td>
+                    <td className="p-2 text-sm" style={{ color: C.dark }}>Rationssumme</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(rationItems.reduce((s, r) => s + r.kgfm, 0), 1)}</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(totalKgdm, 2)}</td>
-                    <td className="p-2 text-right font-mono text-xs">100%</td>
+                    <td className="p-2 text-right font-mono text-xs">
+                      {fmt(totalKgdm > 0 ? rationItems.reduce((s, it) => { const f = feedById.get(it.feed_id); return s + (f ? it.kgdm * f.andfom_g_kgdm : 0) }, 0) / totalKgdm : 0, 0)}
+                    </td>
+                    <td /><td />
                     <td className="p-2 text-right font-mono text-xs">{fmt(result?.nutrient_supply.me_mj ?? 0, 1)}</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(result?.nutrient_supply.sidp_g ?? 0, 0)}</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(totalCost, 2)}</td>
                     <td />
                   </tr>
+                  {/* RATION-WB-06: „reicht für Milch nach ME/sidP" (aus dem kanonischen Vertrag) */}
+                  {result?.forage_performance?.supplemented && (
+                    <>
+                      <tr className="text-[11px]" style={{ color: C.muted }}>
+                        <td className="px-2 py-1" colSpan={3}>reicht für Milch nach ME</td>
+                        <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={7} style={{ color: C.dark }}>
+                          {fmt(result.forage_performance.supplemented.milk_from_energy_kg, 1)} l
+                        </td>
+                      </tr>
+                      <tr className="text-[11px]" style={{ color: C.muted }}>
+                        <td className="px-2 py-1" colSpan={3}>reicht für Milch nach sidP</td>
+                        <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={7} style={{ color: C.dark }}>
+                          {fmt(result.forage_performance.supplemented.milk_from_protein_kg, 1)} l
+                        </td>
+                      </tr>
+                    </>
+                  )}
                 </tfoot>
               )}
             </table>
+            </div>
           )}
           {!isOptimizing && rationItems.length > 0 && (
             <div className="flex items-center gap-2 border-t px-2 py-1.5" style={{ borderColor: C.border }}>
