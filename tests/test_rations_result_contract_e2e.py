@@ -81,24 +81,25 @@ def test_optimal_contract_consistent_with_forage_performance():
     assert result["attainability"]["safe_attainable"] == round(lim, 1)
 
 
-def test_infeasible_response_carries_canonical_contract():
-    # Unrealistisch hohes Ziel -> Solver infeasible.
+def test_unrealistic_target_recovers_to_best_attainable():
+    # Unrealistisch hohes Ziel -> Best-Attainable-Recovery (Skill §4.2) statt Leere.
     result = _solve(_profile(milk_kg_day=60))
-    assert result.get("status") == "infeasible"
-
-    # Kein bloss technischer Abbruch mehr: fachlicher Status statt Leere.
-    assert result.get("result_status") in {
-        "CONSTRAINT_CONFLICT",
-        "TARGET_NOT_ATTAINABLE",
-        "DATA_INCOMPLETE",
-    }
+    assert result.get("status") == "optimal"
+    assert result.get("result_status") == "BEST_ATTAINABLE"
 
     att = result.get("attainability")
     assert isinstance(att, dict)
-    # Ohne Loesung wird keine Leistung erfunden (Skill §2.3/§10.3).
-    assert att["safe_attainable"] is None
     assert att["target"] == 60.0
     assert att["meets_target"] is False
+    # technische Maximalleistung ist jetzt gefuellt und unter dem Ziel.
+    assert att["technical_max"] is not None
+    assert 0 < att["technical_max"] < 60.0
+    assert att["target_gap"] is not None and att["target_gap"] > 0
+
+    rec = result.get("best_attainable_recovery")
+    assert rec and rec.get("triggered") is True
+    # Es gibt eine echte, nutzbare Ration.
+    assert len(result.get("ration_items") or []) > 0
 
 
 def test_no_target_profile_is_feasible_optimal():

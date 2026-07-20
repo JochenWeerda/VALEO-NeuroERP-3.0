@@ -6587,6 +6587,7 @@ def _optimize_internal(
     max_tm_overrides: Optional[Dict[str, float]] = None,
     min_tm_overrides: Optional[Dict[str, float]] = None,
     runtime_options: Optional[Dict[str, Any]] = None,
+    _enable_recovery: bool = True,
 ) -> Dict[str, Any]:
     req = _gfe_requirements(profile)
     feeds = list(_get_feeds())
@@ -6877,7 +6878,133 @@ def _optimize_internal(
             _post_by_id.get(str(f.get("id") or id(f)), "tmr_block") for f in feeds
         ]
 
-    return _build_response(lp_out, req, profile)
+    response = _build_response(lp_out, req, profile)
+
+    # RATION-CANON-04: Best-Attainable-Recovery (Skill §4.2). Ein technischer
+    # INFEASIBLE-Status wird nicht als leere fachliche Antwort weitergegeben:
+    # bei positiver Wunschleistung wird die hoechste unter allen harten Grenzen
+    # erreichbare Leistung gesucht und als BEST_ATTAINABLE-Ration zurueckgegeben.
+    _target0 = float(profile.get("milk_kg_day") or 0.0)
+    if _enable_recovery and response.get("status") == "infeasible" and _target0 > 0:
+        recovered = _best_attainable_recovery(
+            profile,
+            original_target=_target0,
+            original_response=response,
+            custom_feeds=custom_feeds,
+            feed_ids=feed_ids,
+            price_overrides=price_overrides,
+            max_tm_overrides=max_tm_overrides,
+            min_tm_overrides=min_tm_overrides,
+            runtime_options=runtime_options,
+        )
+        if recovered is not None:
+            return recovered
+
+    return response
+
+
+def _best_attainable_recovery(
+    profile: Dict[str, Any],
+    *,
+    original_target: float,
+    original_response: Dict[str, Any],
+    custom_feeds: Optional[List[Dict[str, Any]]] = None,
+    feed_ids: Optional[List[str]] = None,
+    price_overrides: Optional[Dict[str, float]] = None,
+    max_tm_overrides: Optional[Dict[str, float]] = None,
+    min_tm_overrides: Optional[Dict[str, float]] = None,
+    runtime_options: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Skill §4.2, Schritt 3-4: Wunschleistung weich setzen, Best-Attainable finden.
+
+    Da die Loesbarkeit in der Zielleistung monoton ist (weniger Milch = leichter),
+    bestimmt eine Bisektion zwischen 0 und ``original_target`` die hoechste noch
+    loesbare Zielleistung. Die zugehoerige, unter ALLEN harten Grenzen zulaessige
+    Ration wird als ``BEST_ATTAINABLE`` mit gefuelltem ``technical_max``
+    zurueckgegeben. Die harten Grenzen (Mineralien, Struktur, DMI) bleiben aktiv;
+    nur die Zielleistung wird abgesenkt.
+
+    Liefert ``None``, wenn selbst der Erhaltungsfall (Ziel 0) nicht loesbar ist –
+    dann ist die Ursache datentechnisch/strukturell und die urspruengliche
+    Infeasible-Antwort (mit Preflight-Findings) bleibt die ehrliche Antwort.
+    """
+
+    def _solve_at(target_kg: float) -> Dict[str, Any]:
+        probe_profile = {**profile, "milk_kg_day": round(target_kg, 2)}
+        return _optimize_internal(
+            probe_profile,
+            custom_feeds=custom_feeds,
+            feed_ids=feed_ids,
+            price_overrides=price_overrides,
+            max_tm_overrides=max_tm_overrides,
+            min_tm_overrides=min_tm_overrides,
+            runtime_options=runtime_options,
+            _enable_recovery=False,
+        )
+
+    lo, hi = 0.0, float(original_target)
+    best_resp: Optional[Dict[str, Any]] = None
+    best_target = 0.0
+
+    # Bisektion (max. 7 Sonden) auf die hoechste loesbare Zielleistung.
+    for _ in range(7):
+        if hi - lo <= 0.5:
+            break
+        mid = (lo + hi) / 2.0
+        resp = _solve_at(mid)
+        if resp.get("status") == "optimal":
+            best_resp = resp
+            best_target = mid
+            lo = mid
+        else:
+            hi = mid
+
+    # Fallback: Erhaltungsfall (Ziel 0) als unterste feasible Schranke.
+    if best_resp is None:
+        resp0 = _solve_at(0.0)
+        if resp0.get("status") == "optimal":
+            best_resp = resp0
+            best_target = 0.0
+        else:
+            return None
+
+    # Kennzahlen der gefundenen Ration in den kanonischen Vertrag ueberfuehren,
+    # aber mit der urspruenglichen Wunschleistung als Ziel.
+    att = best_resp.get("attainability") or {}
+    safe = att.get("safe_attainable")
+    fp_sup = ((best_resp.get("forage_performance") or {}).get("supplemented")) or {}
+    _canon = build_result_contract(
+        solver_ok=True,
+        optimal=False,
+        target=original_target,
+        safe_attainable=safe,
+        technical_max=round(best_target, 1),
+        milk_from_energy=fp_sup.get("milk_from_energy_kg"),
+        milk_from_protein=fp_sup.get("milk_from_protein_kg"),
+        relaxation_applied=True,
+    )
+    best_resp["result_status"] = _canon["result_status"]
+    best_resp["attainability"] = _canon["attainability"]
+    best_resp["best_attainable_recovery"] = {
+        "triggered": True,
+        "original_target_kg": round(original_target, 1),
+        "technical_max_kg": round(best_target, 1),
+        "limiting_axis": _canon["attainability"].get("limiting_axis"),
+        "original_infeasibility": (original_response.get("diagnosis") or {}),
+    }
+    _gap = _canon["attainability"].get("target_gap")
+    _msg = (
+        f"Die gewuenschte Leistung von {original_target:.0f} kg ist mit den aktuell "
+        f"zugelassenen Futtermitteln unter allen harten Grenzen nicht erreichbar. "
+        f"Technisch erreichbar sind rund {best_target:.1f} kg "
+        f"(Ziellücke {(_gap or 0.0):.1f} kg). Die angezeigte Ration ist die beste "
+        f"erreichbare Loesung; harte Grenzen (Mineralstoffe, Struktur, TM-Aufnahme) "
+        f"bleiben eingehalten."
+    )
+    _warns = list(best_resp.get("warnings") or [])
+    _warns.insert(0, _msg)
+    best_resp["warnings"] = _warns
+    return best_resp
 
 
 # ---------------------------------------------------------------------------

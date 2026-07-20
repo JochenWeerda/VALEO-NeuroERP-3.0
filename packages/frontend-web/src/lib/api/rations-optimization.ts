@@ -717,6 +717,14 @@ export interface OptimizationResult {
   attainability?: AttainabilityReport
   /** RATION-CANON-03: Preflight-Findings (Hinweise & Warnungen im linken Rail). */
   preflight?: PreflightReport
+  /** RATION-CANON-04: Best-Attainable-Recovery (bei unerreichbarem Ziel, Skill §4.2). */
+  best_attainable_recovery?: {
+    triggered: boolean
+    original_target_kg: number
+    technical_max_kg: number
+    limiting_axis?: 'energy' | 'protein' | null
+    original_infeasibility?: { reason?: string | null; gaps?: string[]; suggestions?: unknown[] }
+  }
   objective_value?: number
   // F2 (DLG 01|2025, Kap. 10): Effizienz-Kennzahlen
   efficiency?: {
