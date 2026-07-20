@@ -3115,10 +3115,12 @@ function NutrientGauge({ band }: { band: PolicyProfileBand }) {
   const needle = polar(frac(band.actual))
   const color = gaugeStatusColor(status)
   const icon = status === 'ok' ? '✓' : status === 'warn' ? '⚠' : '✗'
+  // Kürzeres Label fürs Cockpit (Präfix "DLG-Policy: " entfernen).
+  const shortName = band.name.replace(/^DLG-Policy:\s*/, '')
   return (
     <div className="flex flex-col items-center">
-      <div className="text-[10px] font-semibold text-center leading-tight h-7 flex items-end" style={{ color: C.dark }}>
-        {band.name}
+      <div className="text-[10px] font-semibold text-center leading-tight h-7 flex items-end justify-center" style={{ color: C.dark }} title={band.name}>
+        {shortName}
       </div>
       <svg viewBox="0 0 104 56" className="w-full max-w-[120px]" role="img" aria-label={`${band.name} ${gaugeValueFmt(band.actual, band.unit)} ${band.unit}`}>
         <path d={track} fill="none" stroke="hsl(var(--muted))" strokeWidth={sw} strokeLinecap="round" />
