@@ -3145,22 +3145,22 @@ function NutrientGauge({ band }: { band: PolicyProfileBand }) {
 }
 
 /** RATION-WB-08: Reihe von Nährstoff-Tachos aus den DLG-Zielkorridoren (Skill §6.2). */
-function NutrientGaugeRow({ result }: { result: OptimizationResult | null }) {
+function NutrientGaugeRow({ result, compact = false }: { result: OptimizationResult | null; compact?: boolean }) {
   const bands = result?.policy_profile_evaluation?.bands
   if (!bands || bands.length === 0) return null
   return (
     <div className={card()}>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
         <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
-          Live-Ergebnisse — Nährstoffversorgung (Zielbereich)
+          Live-Ergebnisse (Cockpit)
         </div>
-        <div className="flex items-center gap-3 text-[9px]" style={{ color: C.muted }}>
+        <div className="flex items-center gap-2 text-[9px]" style={{ color: C.muted }}>
           <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.success }} /> im Zielbereich</span>
-          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.warn }} /> leicht abweichend</span>
-          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.error }} /> deutlich abweichend</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.warn }} /> leicht abw.</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.error }} /> deutlich abw.</span>
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-3">
+      <div className={cn('grid gap-x-2 gap-y-3', compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6')}>
         {bands.map((b, i) => (
           <NutrientGauge key={`${b.name}-${i}`} band={b} />
         ))}
@@ -3822,7 +3822,7 @@ function Workbench({
 
   return (
     <div
-      className="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] lg:h-[calc(100vh-120px)] p-[15px] gap-[15px]"
+      className="grid grid-cols-1 lg:grid-cols-[250px_1fr_340px] lg:h-[calc(100vh-120px)] p-[15px] gap-[15px]"
       style={{ background: C.bg }}
     >
       {/* ── Linke Sidebar: Rahmenbedingungen ── */}
@@ -4113,8 +4113,8 @@ function Workbench({
             <table className="w-full text-[12px]">
               <thead>
                 <tr style={{ background: '#F9FAFB' }}>
-                  {['Futtermittel', 'kg FM', 'kg TM', 'Struktur', 'Min', 'Max', 'ME (MJ)', 'sidP (g)', '€/Tag', ''].map((h, hi) => (
-                    <th key={`${h}-${hi}`} className="py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] text-right first:text-left whitespace-nowrap" style={{ borderColor: C.border }}>
+                  {['Aktiv', 'Futtermittel', 'kg FM', 'kg TM', 'Roth %', 'Struktur', 'Min', 'Max', 'ME (MJ)', 'sidP (g)', '€/Tag', ''].map((h, hi) => (
+                    <th key={`${h}-${hi}`} className={cn('py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] whitespace-nowrap', hi === 0 ? 'text-center' : hi === 1 ? 'text-left' : 'text-right')} style={{ borderColor: C.border }}>
                       {h}
                     </th>
                   ))}
@@ -4130,8 +4130,21 @@ function Workbench({
                   const minFm = wizardData?.feedMinFm?.[item.feed_id]
                   const maxFm = wizardData?.feedMaxFm?.[item.feed_id]
                   const isFixed = minFm != null && minFm === maxFm
+                  const rothPct = item.cp_g != null && item.kgdm > 0 ? item.cp_g / item.kgdm / 10 : null
                   return (
                     <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50" style={{ borderColor: '#F3F4F6' }}>
+                      {/* RATION-WB-11: Aktiv-Checkbox (Abwählen entfernt die Zutat und rechnet neu) */}
+                      <td className="p-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked
+                          disabled={!canEditRation}
+                          aria-label={`${item.name} aktiv – abwählen entfernt die Zutat`}
+                          title="Aktiv – abwählen entfernt die Zutat und berechnet neu"
+                          onChange={(e) => { if (!e.target.checked) onApplySuggestionPatch({ remove_feed_ids: [item.feed_id] }) }}
+                          className="h-3.5 w-3.5 accent-[color:hsl(var(--primary))] disabled:opacity-40"
+                        />
+                      </td>
                       <td className="p-2 font-medium whitespace-nowrap" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
                         {item.name}
                         {dupName ? (
@@ -4182,6 +4195,7 @@ function Workbench({
                         </div>
                       </td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(item.kgdm, 2)}</td>
+                      <td className="p-2 text-right font-mono text-xs">{rothPct != null ? `${fmt(rothPct, 1)}%` : '–'}</td>
                       <td className="p-2 text-right font-mono text-xs">{strukturDichte != null ? fmt(strukturDichte, 0) : '–'}</td>
                       {/* RATION-WB-06: Min/Max (kg FM) — Grenzen öffnen/verdichten (Skill §6.1) */}
                       <td className="p-1 text-right">
@@ -4252,7 +4266,7 @@ function Workbench({
                 })}
                 {rationItems.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="py-16 text-center text-sm" style={{ color: C.muted }}>
+                    <td colSpan={12} className="py-16 text-center text-sm" style={{ color: C.muted }}>
                       Starten Sie die Optimierung oder laden Sie die Demo
                     </td>
                   </tr>
@@ -4261,9 +4275,13 @@ function Workbench({
               {rationItems.length > 0 && (
                 <tfoot>
                   <tr className="font-bold" style={{ background: '#F9FAFB' }}>
+                    <td />
                     <td className="p-2 text-sm" style={{ color: C.dark }}>Rationssumme</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(rationItems.reduce((s, r) => s + r.kgfm, 0), 1)}</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(totalKgdm, 2)}</td>
+                    <td className="p-2 text-right font-mono text-xs">
+                      {fmt(totalKgdm > 0 && (result?.nutrient_supply.cp_kgdm != null) ? result.nutrient_supply.cp_kgdm / 10 : 0, 1)}%
+                    </td>
                     <td className="p-2 text-right font-mono text-xs">
                       {fmt(totalKgdm > 0 ? rationItems.reduce((s, it) => { const f = feedById.get(it.feed_id); return s + (f ? it.kgdm * f.andfom_g_kgdm : 0) }, 0) / totalKgdm : 0, 0)}
                     </td>
@@ -4277,14 +4295,14 @@ function Workbench({
                   {result?.forage_performance?.supplemented && (
                     <>
                       <tr className="text-[11px]" style={{ color: C.muted }}>
-                        <td className="px-2 py-1" colSpan={3}>reicht für Milch nach ME</td>
-                        <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={7} style={{ color: C.dark }}>
+                        <td className="px-2 py-1" colSpan={4}>reicht für Milch nach ME</td>
+                        <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={8} style={{ color: C.dark }}>
                           {fmt(result.forage_performance.supplemented.milk_from_energy_kg, 1)} l
                         </td>
                       </tr>
                       <tr className="text-[11px]" style={{ color: C.muted }}>
-                        <td className="px-2 py-1" colSpan={3}>reicht für Milch nach sidP</td>
-                        <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={7} style={{ color: C.dark }}>
+                        <td className="px-2 py-1" colSpan={4}>reicht für Milch nach sidP</td>
+                        <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={8} style={{ color: C.dark }}>
                           {fmt(result.forage_performance.supplemented.milk_from_protein_kg, 1)} l
                         </td>
                       </tr>
@@ -4321,12 +4339,31 @@ function Workbench({
                   <option key={f.id} value={f.id}>{f.name}</option>
                 ))}
               </select>
+              <div className="grow" />
+              {/* RATION-WB-11: CRUD-Bulk-Aktionen (Alle fixieren / Zurücksetzen) */}
+              <button
+                type="button"
+                disabled={!canEditRation}
+                onClick={() => onApplySuggestionPatch({ fix_feed_fm: Object.fromEntries(rationItems.map((it) => [it.feed_id, Number(it.kgfm.toFixed(2))])) })}
+                className="rounded border px-2.5 py-1 text-[11px] font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
+                style={{ borderColor: C.border, color: C.dark }}
+                title="Alle aktuellen Mengen fixieren (Min=Max)"
+              >
+                Alle fixieren
+              </button>
+              <button
+                type="button"
+                disabled={!canEditRation}
+                onClick={() => onApplySuggestionPatch({ unfix_feed_ids: rationItems.map((it) => it.feed_id) })}
+                className="rounded border px-2.5 py-1 text-[11px] font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
+                style={{ borderColor: C.border, color: C.dark }}
+                title="Alle Fixierungen und Min/Max-Grenzen zurücksetzen"
+              >
+                <RotateCcw size={11} className="inline" /> Zurücksetzen
+              </button>
             </div>
           )}
         </div>
-
-        {/* RATION-WB-08: Nährstoff-Tacho-Reihe (Zielbereich-Gauges aus DLG-Korridoren) */}
-        <NutrientGaugeRow result={result} />
 
         <RationWarningAdjustmentsPanel
           result={result}
@@ -4357,8 +4394,11 @@ function Workbench({
         )}
       </main>
 
-      {/* ── Rechte Spalte: KPI + AI ── */}
-      <aside className="flex flex-col gap-[15px]">
+      {/* ── Rechte Spalte: Live-Ergebnisse (Cockpit) ── */}
+      <aside className="flex flex-col gap-[15px] overflow-y-auto">
+        {/* RATION-WB-08: Nährstoff-Tacho-Reihe – führt das Cockpit an (wie Zielbild) */}
+        <NutrientGaugeRow result={result} compact />
+
         {/* KPI */}
         <div id="kpi-bar" className={card()} style={tourRing('kpi-bar')}>
           <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>KPI Status</div>

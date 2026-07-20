@@ -245,6 +245,10 @@ export interface RationItem {
   kgfm: number
   unit_cost: number
   total_cost: number
+  /** Beiträge (Backend liefert). */
+  me_mj?: number
+  sidp_g?: number
+  cp_g?: number
   fan_slope_source?: 'exact' | 'mapped' | 'fallback'
   // Slice 1f (2026-04-23): Block-Zuordnung je Fuetterungssystem.
   block?: 'tmr_block' | 'pasture_block' | 'concentrate_staged_block' | string
