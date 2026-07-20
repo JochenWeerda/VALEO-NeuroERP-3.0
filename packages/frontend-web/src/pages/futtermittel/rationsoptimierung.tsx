@@ -5913,6 +5913,33 @@ export default function Rationsoptimierung() {
       setResult(data)
       setError(null)
       setView('workbench')
+      // WB-16: Demo als voll interaktiver Playground – synthetisches WizardData,
+      // damit Rahmenbedingungen/Spielwiese editierbar sind und Sheet-Edits live
+      // neu berechnen (canEditRation = Boolean(wizardData)).
+      const scen = DEMO_SCENARIOS[demoScenarioIdx] ?? DEMO_SCENARIOS[0]
+      const grp = GROUPS[demoScenarioIdx] ?? GROUPS[0]
+      const demoWizard: WizardData = {
+        group: grp,
+        milkYield: scen.profile.milk_kg_day,
+        fatPercent: scen.profile.milk_fat_pct,
+        proteinPercent: scen.profile.milk_protein_pct,
+        dmiTarget: data.nutrient_supply?.dmi_kg ?? 21,
+        feedingType: 'TMR',
+        mode: 'Kosten minimieren',
+        selectedFeedIds: new Set((data.ration_items ?? []).map((i) => i.feed_id)),
+        customFeeds: [],
+        compoundFeeds: [],
+        feedMaxFm: {},
+        feedMinFm: {},
+        fanMode: 'auto_iterative',
+        fanReference: 3.0,
+        relaxationPolicy: 'standard',
+        seasonProfile: null,
+        policyProfile: null,
+        wizardBaselineKgDm: rationItemsToBaselineKgDm(data.ration_items ?? []),
+        milkPriceEur: 0.44,
+      }
+      setWizardData(demoWizard)
     },
     onError: (err: unknown) => {
       setError(getRationsApiErrorMessage(err, 'Demo fehlgeschlagen'))
