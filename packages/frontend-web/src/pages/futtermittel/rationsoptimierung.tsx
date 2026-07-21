@@ -3403,6 +3403,45 @@ function wizardToCowProfile(wd: WizardData): CowProfile {
   }
 }
 
+/** RATION-WB-18: Best-Attainable-Panel für das Bottom-Band (Skill §4.2). */
+function BestAttainablePanel({ result }: { result: OptimizationResult | null }) {
+  const att = result?.attainability
+  const rec = result?.best_attainable_recovery
+  return (
+    <div className={card()}>
+      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+        {rec?.triggered ? 'Best-Attainable statt Solver-Abbruch' : 'Erreichbarkeit'}
+      </div>
+      {!att ? (
+        <div className="text-[11px]" style={{ color: C.muted }}>Noch keine Ergebnisse.</div>
+      ) : rec?.triggered ? (
+        <div className="text-[12px] space-y-1.5">
+          <div style={{ color: C.dark }}>
+            Ziel {rec.original_target_kg.toFixed(0)} kg ist unter allen harten Grenzen nicht voll
+            erreichbar. Beste technisch erreichbare Lösung: <b>{rec.technical_max_kg.toFixed(1)} kg</b>.
+          </div>
+          <div style={{ color: C.muted }}>
+            Ursache: {rec.original_infeasibility?.gaps?.[0] ?? 'harte Grenzen limitieren die Leistung.'}
+          </div>
+          {att.limiting_axis && (
+            <div style={{ color: C.muted }}>Limitierende Achse: {att.limiting_axis === 'energy' ? 'Energie' : 'Protein'}.</div>
+          )}
+        </div>
+      ) : (
+        <div className="text-[12px] space-y-1">
+          <div className="flex justify-between"><span style={{ color: C.muted }}>Sicher erreichbar</span><span className="font-mono font-semibold">{att.safe_attainable != null ? `${fmt(att.safe_attainable, 1)} kg` : '–'}</span></div>
+          <div className="flex justify-between"><span style={{ color: C.muted }}>Technisch max.</span><span className="font-mono font-semibold">{att.technical_max != null ? `${fmt(att.technical_max, 1)} kg` : '—'}</span></div>
+          <div className="flex justify-between"><span style={{ color: C.muted }}>Ziel</span><span className="font-mono font-semibold">{att.target != null ? `${fmt(att.target, 1)} kg` : '—'}</span></div>
+          {att.target_gap != null && Math.abs(att.target_gap) > 0.05 && (
+            <div className="flex justify-between"><span style={{ color: C.muted }}>Ziellücke{att.limiting_axis ? ` (${att.limiting_axis === 'energy' ? 'Energie' : 'Protein'})` : ''}</span><span className="font-mono font-semibold" style={{ color: att.target_gap > 0 ? C.warn : C.success }}>{att.target_gap > 0 ? '−' : '+'}{fmt(Math.abs(att.target_gap), 1)} kg</span></div>
+          )}
+          <div className="pt-1 text-[10px]" style={{ color: C.muted }}>Best-Attainable-Lauf verfügbar über „Best Attainable" (oben).</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** RATION-WB-14: Variantenvergleich (Baseline + gespeicherte Varianten). */
 function VariantComparisonPanel({
   baseline,
@@ -3823,10 +3862,9 @@ function Workbench({
   }
 
   return (
-    <div
-      className="grid grid-cols-1 lg:grid-cols-[250px_1fr_340px] lg:h-[calc(100vh-120px)] p-[15px] gap-[15px]"
-      style={{ background: C.bg }}
-    >
+    <div className="flex flex-col p-[15px] gap-[15px]" style={{ background: C.bg }}>
+      {/* RATION-WB-18: Werkbank-Hauptzeile (3 Spalten) + Bottom-Band (wie Zielbild) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr_340px] lg:h-[calc(100vh-150px)] gap-[15px]">
       {/* ── Linke Sidebar: Rahmenbedingungen ── */}
       <aside className="flex flex-col gap-[15px] overflow-y-auto">
         {/* RATION-WB-10: Rahmenbedingungen (Herde, Leistung, System, Modus) */}
@@ -4384,16 +4422,6 @@ function Workbench({
         {/* Slice 3: Misch- und Fuetterungsprotokoll (TMR-Mischmasse). */}
         <MixingProtocolPanel protocol={result?.mixing_protocol ?? null} compact />
         <FeedingControlPanel protocol={result?.mixing_protocol ?? null} wizardData={wizardData} result={result} />
-
-        {/* RATION-WB-14: Variantenvergleich (Baseline + gespeicherte Varianten) */}
-        {rationItems.length > 0 && (
-          <VariantComparisonPanel baseline={result} variants={savedVariants} />
-        )}
-
-        {/* RATION-WB-07: Sensitivität — parametrischer Sweep (Skill §8) */}
-        {rationItems.length > 0 && (
-          <SensitivityPanel wizardData={wizardData} rationItems={rationItems} />
-        )}
       </main>
 
       {/* ── Rechte Spalte: Live-Ergebnisse (Cockpit) ── */}
@@ -4793,6 +4821,16 @@ function Workbench({
           </div>
         </div>
       </aside>
+      </div>
+
+      {/* ── Bottom-Band: Variantenvergleich · Sensitivität · Best-Attainable (Zielbild) ── */}
+      {rationItems.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[15px]">
+          <VariantComparisonPanel baseline={result} variants={savedVariants} />
+          <SensitivityPanel wizardData={wizardData} rationItems={rationItems} />
+          <BestAttainablePanel result={result} />
+        </div>
+      )}
     </div>
   )
 }
