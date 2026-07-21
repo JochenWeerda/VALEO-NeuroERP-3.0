@@ -5885,9 +5885,35 @@ def _build_response(
     # RATION-CANON-01: kanonischer Ergebnisvertrag (fachlicher Status +
     # Erreichbarkeit). safe_attainable = die unter allen harten Grenzen
     # limitierende Leistung der optimierten Ration (min aus Energie/Protein).
-    # baseline_supported bleibt None: im Optimierlauf wird die Eingaberation
-    # veraendert, ist also keine belastbare Baseline (Skill §3, §10.3).
-    # technical_max bleibt None bis zum dedizierten Maximalleistungslauf.
+    # WB-19: baseline_supported ("Aktuell") = die von der aktuell gefuetterten
+    # Eingaberation (policy_overrides.wizard_baseline_kg_dm, feed_id -> kg TM)
+    # versorgte Leistung – reine GfE-Bewertung ohne Solve. None, wenn keine
+    # Baseline vorliegt (kein erfundener Wert, Skill §10.3).
+    _baseline_supported: Optional[float] = None
+    _baseline_map = (
+        policy_overrides.get("wizard_baseline_kg_dm")
+        if isinstance(policy_overrides, dict)
+        else None
+    )
+    if _baseline_map:
+        _feed_nutr = {
+            str(f.get("id")): (float(f.get("me") or 0.0), float(f.get("sidp") or 0.0))
+            for f in feeds
+        }
+        _bl_me = _bl_sidp = _bl_dmi = 0.0
+        for _fid, _kg in _baseline_map.items():
+            _me_c, _sidp_c = _feed_nutr.get(str(_fid), (0.0, 0.0))
+            _kgf = float(_kg or 0.0)
+            _bl_me += _kgf * _me_c
+            _bl_sidp += _kgf * _sidp_c
+            _bl_dmi += _kgf
+        if _bl_dmi > 1e-6:
+            _bl_density = _bl_me / _bl_dmi
+            _bl_milk = _milk_from_supply(
+                _bl_me, _bl_sidp, profile, _bl_density, **_milk_kl_kw
+            )
+            _baseline_supported = _bl_milk.get("limiting_milk_kg")
+    # technical_max wird weiter unten (WB-12) durch die Aufwaerts-Suche gefuellt.
     # RATION-CANON-03: Preflight Phase 0 – ein blockierendes Datenfinding macht
     # die Bewertung fachlich nicht belastbar (Skill §3) -> data_incomplete.
     _preflight = _build_preflight(feeds, req, profile)
@@ -5896,6 +5922,7 @@ def _build_response(
         optimal=True,
         target=float(profile.get("milk_kg_day") or 0.0) or None,
         safe_attainable=float(supplemented_milk.get("limiting_milk_kg") or 0.0),
+        baseline_supported=_baseline_supported,
         milk_from_energy=supplemented_milk.get("milk_from_energy_kg"),
         milk_from_protein=supplemented_milk.get("milk_from_protein_kg"),
         relaxation_applied=bool(_stage2_rx),

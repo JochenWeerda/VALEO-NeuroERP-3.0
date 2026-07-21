@@ -3260,13 +3260,17 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
 
       <PerformanceGauge value={safe} target={target} max={scaleMax} ok={att.meets_target} />
 
-      <div className="grid grid-cols-3 gap-1.5 mt-2 text-center">
+      <div className="grid grid-cols-4 gap-1.5 mt-2 text-center">
         <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
-          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Sicher erreichbar</div>
+          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Aktuell</div>
+          <div className="text-[13px] font-bold font-mono">{att.baseline_supported != null ? att.baseline_supported.toFixed(1) : '—'}</div>
+        </div>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Solver err.</div>
           <div className="text-[13px] font-bold font-mono">{safe != null ? safe.toFixed(1) : '–'}</div>
         </div>
         <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
-          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Technisch max.</div>
+          <div className="text-[9px] uppercase" style={{ color: C.muted }}>Techn. max.</div>
           <div className="text-[13px] font-bold font-mono">{techMax != null ? techMax.toFixed(1) : '—'}</div>
         </div>
         <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
@@ -3429,7 +3433,8 @@ function BestAttainablePanel({ result }: { result: OptimizationResult | null }) 
         </div>
       ) : (
         <div className="text-[12px] space-y-1">
-          <div className="flex justify-between"><span style={{ color: C.muted }}>Sicher erreichbar</span><span className="font-mono font-semibold">{att.safe_attainable != null ? `${fmt(att.safe_attainable, 1)} kg` : '–'}</span></div>
+          <div className="flex justify-between"><span style={{ color: C.muted }}>Aktuell</span><span className="font-mono font-semibold">{att.baseline_supported != null ? `${fmt(att.baseline_supported, 1)} kg` : '—'}</span></div>
+          <div className="flex justify-between"><span style={{ color: C.muted }}>Solver erreichbar</span><span className="font-mono font-semibold">{att.safe_attainable != null ? `${fmt(att.safe_attainable, 1)} kg` : '–'}</span></div>
           <div className="flex justify-between"><span style={{ color: C.muted }}>Technisch max.</span><span className="font-mono font-semibold">{att.technical_max != null ? `${fmt(att.technical_max, 1)} kg` : '—'}</span></div>
           <div className="flex justify-between"><span style={{ color: C.muted }}>Ziel</span><span className="font-mono font-semibold">{att.target != null ? `${fmt(att.target, 1)} kg` : '—'}</span></div>
           {att.target_gap != null && Math.abs(att.target_gap) > 0.05 && (
@@ -5448,8 +5453,9 @@ function runOptimizeForWizard(
         maximize_n_efficiency_rmd: sg.maximizeNEfficiencyRmd,
         prefer_homegrown: sg.preferHomegrown,
       },
-      ...(sg.minimizeDeviationFromBaseline &&
-      nextWizardData.wizardBaselineKgDm &&
+      // WB-19: Baseline-Ration immer mitsenden (nicht nur bei minimize_deviation),
+      // damit das Backend baseline_supported ("Aktuell") bewerten kann.
+      ...(nextWizardData.wizardBaselineKgDm &&
       Object.keys(nextWizardData.wizardBaselineKgDm).length > 0
         ? { wizard_baseline_kg_dm: nextWizardData.wizardBaselineKgDm }
         : {}),
@@ -5966,7 +5972,9 @@ export default function Rationsoptimierung() {
         dmiTarget: data.nutrient_supply?.dmi_kg ?? 21,
         feedingType: 'TMR',
         mode: 'Kosten minimieren',
-        selectedFeedIds: new Set((data.ration_items ?? []).map((i) => i.feed_id)),
+        // WB-19: vollen Katalog zulassen (nicht nur die 9 Demo-Positionen), damit
+        // Neuberechnung/Optimieren aus der Demo feasible bleibt (z. B. Mineralstoffe).
+        selectedFeedIds: new Set(feeds.map((f) => f.id)),
         customFeeds: [],
         compoundFeeds: [],
         feedMaxFm: {},
