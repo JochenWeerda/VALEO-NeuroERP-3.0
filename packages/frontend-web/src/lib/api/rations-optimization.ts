@@ -266,6 +266,49 @@ export function rationItemsToBaselineKgDm(items: RationItem[]): Record<string, n
   return out
 }
 
+/**
+ * RATION-WB-20: Vorlaeufige Live-Vorschau fuer die Spielwiese.
+ *
+ * Skaliert die vom Backend gelieferten Beitraege einer Position linear auf eine
+ * neue Frischmasse-Menge. Das ist bewusst KEIN Evaluator (Skill §10.2): es wird
+ * keine Bedarfs-, Struktur- oder Zielbereichsaussage abgeleitet, sondern nur die
+ * Arithmetik vorweggenommen, die bei fixierter Menge ohnehin linear ist. Die
+ * autoritative Bewertung liefert weiterhin der Server.
+ *
+ * Fehlende Beitragsfelder bleiben undefined (keine stillen 0-Defaults, Skill §10.3).
+ */
+export function scaleRationItems(
+  items: RationItem[],
+  overridesKgFm: Record<string, number>,
+): RationItem[] {
+  if (!items.length) return items
+  const ids = Object.keys(overridesKgFm)
+  if (!ids.length) return items
+
+  return items.map((item) => {
+    const next = overridesKgFm[item.feed_id]
+    if (!Number.isFinite(next) || next < 0) return item
+    // Ohne Ausgangsmenge ist keine Dichte ableitbar — dann bleibt die Position
+    // unveraendert stehen, bis der Server den echten Wert liefert.
+    if (!Number.isFinite(item.kgfm) || item.kgfm <= 1e-9) return item
+    if (Math.abs(next - item.kgfm) < 1e-9) return item
+
+    const factor = next / item.kgfm
+    const scale = (v: number | undefined): number | undefined =>
+      typeof v === 'number' && Number.isFinite(v) ? v * factor : undefined
+
+    return {
+      ...item,
+      kgfm: next,
+      kgdm: item.kgdm * factor,
+      total_cost: item.total_cost * factor,
+      me_mj: scale(item.me_mj),
+      sidp_g: scale(item.sidp_g),
+      cp_g: scale(item.cp_g),
+    }
+  })
+}
+
 export interface NutrientSupply {
   dmi_kg: number
   me_mj: number

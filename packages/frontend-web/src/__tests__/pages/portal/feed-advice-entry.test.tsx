@@ -47,22 +47,23 @@ describe('Portal Fuetterungsberatung entry architecture', () => {
     locationState.search = ''
   })
 
-  it('starts in the native Meridian cockpit', () => {
+  it('starts directly in the Rationswerkbank', async () => {
+    render(<PortalFeedAdvicePage />)
+
+    expect(await screen.findByTestId('expert-ration-workspace')).toBeInTheDocument()
+    expect(screen.queryByTestId('native-feed-cockpit')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /zur fuetterungsuebersicht/i })).toHaveAttribute(
+      'href',
+      '/portal/rationsoptimierung?mode=cockpit',
+    )
+  })
+
+  it('keeps the native Meridian cockpit reachable via ?mode=cockpit', () => {
+    locationState.search = '?mode=cockpit'
     render(<PortalFeedAdvicePage />)
 
     expect(screen.getByTestId('native-feed-cockpit')).toHaveTextContent('agrar/feed-advice')
     expect(screen.queryByTestId('expert-ration-workspace')).not.toBeInTheDocument()
-  })
-
-  it('loads the specialised solver only for a concrete task', async () => {
-    locationState.search = '?mode=expert'
-    render(<PortalFeedAdvicePage />)
-
-    expect(await screen.findByTestId('expert-ration-workspace')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /zur fuetterungsuebersicht/i })).toHaveAttribute(
-      'href',
-      '/portal/rationsoptimierung',
-    )
   })
 
   it('routes lifecycle list and detail without loading the solver', () => {

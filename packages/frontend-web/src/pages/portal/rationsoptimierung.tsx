@@ -13,19 +13,19 @@ import { FeedingSupplyPage } from '@/features/feed-advice/FeedingSupplyPage'
 const ExpertRationWorkspace = lazy(() => import('@/pages/futtermittel/rationsoptimierung'))
 
 /**
- * Rollenorientierter Einstieg in die Fuetterungsberatung.
+ * Einstieg in die Fuetterungsberatung.
  *
- * Das Portal startet bewusst mit einer nativen Meridian-ScreenDefinition. Die
- * rechenintensive Solver-Workbench wird erst fuer eine konkrete Planungs- oder
- * Auswertungsaufgabe geladen. So bleibt der taegliche Einstieg ruhig und mobil
- * bedienbar, waehrend Fachberater die volle Tabellendichte behalten.
+ * Das Portal startet direkt in der Rationswerkbank (Spielwiese + Live-Cockpit),
+ * weil das der eigentliche Arbeitsplatz der Fachberatung ist. Die rollenorientierte
+ * Meridian-Uebersicht bleibt ueber `?mode=cockpit` erreichbar, die aufgabenbezogenen
+ * Teilmasken weiterhin ueber `?view=...`.
  */
 export default function PortalFeedAdvicePage(): JSX.Element {
   const { search } = useLocation()
   const routeState = useMemo(() => {
     const params = new URLSearchParams(search)
     return {
-      expert: params.get('mode') === 'expert',
+      cockpit: params.get('mode') === 'cockpit',
       view: params.get('view'),
       rationId: params.get('ration_id'),
       groupId: params.get('group_id'),
@@ -60,14 +60,14 @@ export default function PortalFeedAdvicePage(): JSX.Element {
     return <FeedingReferenceData />
   }
 
-  if (!routeState.expert) {
+  if (routeState.cockpit) {
     return <UniversalNativeCockpitPage screenId="agrar/feed-advice" testId="feed-advice-cockpit" />
   }
 
   return (
     <div data-testid="feed-advice-task-workspace">
       <a
-        href="/portal/rationsoptimierung"
+        href="/portal/rationsoptimierung?mode=cockpit"
         className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />

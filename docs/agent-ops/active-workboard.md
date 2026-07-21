@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RATION-WB-20-LIVE-PREVIEW Excel-artige Live-Vorschau in der Spielwiese - abgeschlossen 2026-07-21
+
+**Von:** Nutzeranforderung ("neue Ration komponieren mit Live-Formelwerte-Umrechnung wie in Excel"). **Owner:** Claude. **Stand:** abgeschlossen 2026-07-21.
+
+**Ziel:** Mengen-Edits in der Spielwiese fuehlen sich wie ein Tabellenblatt an: die linearen Aggregate (kg TM, ME-/sidP-/XP-Beitraege, Rationssumme, Kosten) laufen beim Tippen sofort lokal mit, der autoritative Solve startet debounced (400 ms) nach der letzten Eingabe statt erst bei Enter/Blur. Neue reine Funktion `scaleRationItems()` skaliert ausschliesslich serverseitig gelieferte Beitraege linear — **kein Client-Evaluator** (Skill §10.2): Bedarfs-, Struktur- und Zielbereichsurteile bleiben serverautoritativ. Vorlaeufige Werte sind als solche gekennzeichnet (Statuszeile im Spielwiesen-Kopf, Tacho-Reihe auf `opacity-50` + `aria-busy` mit Hinweis "Stand vor der laufenden Änderung").
+
+**Befund bei der Umsetzung:** Der Vollbild-Spinner ersetzte bisher die gesamte Spielwiese bei jedem Solve. Mit Debounce haette das die Tabelle im Sekundentakt verschwinden lassen und den Excel-Effekt zerstoert; der Spinner greift jetzt nur noch bei `rationItems.length === 0`.
+
+**Dateibesitz:** `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/src/__tests__/pages/futtermittel/rations-live-preview.test.ts`, `docs/agent-ops/slices/RATION-WB-20-LIVE-PREVIEW.yaml`, dieser Workboard-Abschnitt.
+
+**Abnahme:** `vitest` 19/19 gruen (davon 7 neue Unit-Tests fuer `scaleRationItems` inkl. Linearitaet, Nullmenge, fehlende Beitragsfelder bleiben `undefined` statt 0 nach Skill §10.3); `tsc --noEmit` -> 0; `eslint` der geaenderten Dateien -> 0. Offen: visuelle Endabnahme des Tippgefuehls im laufenden Portal.
+
 ## ACKER-OPEN-GAPS-009 Ackerschlagkartei restliche Lastenheft-Gaps TDD - abgeschlossen 2026-07-16
 
 **Owner:** Claude. **Stand:** abgeschlossen. Domain-Module Stammdaten/Aussaat/Beregnung/AUM/QS/Lagerverbrauch/Schlaginfo-Export/Offline-Queue/Betrieb; Migration `feldbuch_open_gaps_20260716`; Portal-Endpoints + UI (Typen beregnung/aum, Sachkunde-Felder, Text-Druck). **TDD:** `tests/test_feldbuch_open_gaps.py` 13/13. Traceability aktualisiert; ASK-INT-001 NÄON/ENNI und Precision-Farming bleiben ehrlich BLOCKED (externe Gates). **Dateibesitz:** `app/agrar/feldbuch/*`, `portal_feldbuch.py`, Migration, Portal-UI/API, Specs, Workboard.

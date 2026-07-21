@@ -60,6 +60,7 @@ import {
   FAN_REFERENCE_PRESETS,
   defaultFeedingSystemConfig,
   rationItemsToBaselineKgDm,
+  scaleRationItems,
   type CowProfile,
   type FeedIngredient,
   type OptimizationResult,
@@ -148,6 +149,13 @@ type CowGroup = {
   lactationNumber: number
   location: string
 }
+
+/**
+ * RATION-WB-20: Wartezeit nach der letzten Tastatureingabe, bevor der autoritative
+ * Solve startet. Kurz genug, dass es sich unmittelbar anfuehlt, lang genug, dass
+ * eine mehrstellige Zahl nicht mehrere Solverlaeufe ausloest.
+ */
+const LIVE_PREVIEW_COMMIT_MS = 400
 
 const GROUPS: CowGroup[] = [
   { id: 'g1', name: 'Hochleistung Nordstall', count: 58, bodyMass: 670, lactationDays: 110, lactationNumber: 2.4, location: 'Nordstall' },
@@ -3147,7 +3155,7 @@ function NutrientGauge({ band }: { band: PolicyProfileBand }) {
 }
 
 /** RATION-WB-08: Reihe von Nährstoff-Tachos aus den DLG-Zielkorridoren (Skill §6.2). */
-function NutrientGaugeRow({ result, compact = false }: { result: OptimizationResult | null; compact?: boolean }) {
+function NutrientGaugeRow({ result, compact = false, stale = false }: { result: OptimizationResult | null; compact?: boolean; stale?: boolean }) {
   const bands = result?.policy_profile_evaluation?.bands
   if (!bands || bands.length === 0) return null
   return (
@@ -3156,13 +3164,26 @@ function NutrientGaugeRow({ result, compact = false }: { result: OptimizationRes
         <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Live-Ergebnisse (Cockpit)
         </div>
-        <div className="flex items-center gap-2 text-[9px]" style={{ color: C.muted }}>
-          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.success }} /> im Zielbereich</span>
-          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.warn }} /> leicht abw.</span>
-          <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.error }} /> deutlich abw.</span>
-        </div>
+        {/* RATION-WB-20: Bei laufender Bearbeitung zeigen die Tachos noch den zuletzt
+            bestaetigten Stand. Das Zielbereichs-Urteil bleibt serverautoritativ
+            (Skill §10.2) und darf nicht aus vorlaeufigen Werten abgeleitet werden. */}
+        {stale ? (
+          <div className="flex items-center gap-1.5 text-[9px] font-medium" role="status" style={{ color: C.warn }}>
+            <Loader2 size={10} className="animate-spin" aria-hidden="true" />
+            Stand vor der laufenden Änderung
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-[9px]" style={{ color: C.muted }}>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.success }} /> im Zielbereich</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.warn }} /> leicht abw.</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: C.error }} /> deutlich abw.</span>
+          </div>
+        )}
       </div>
-      <div className={cn('grid gap-x-2 gap-y-3', compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6')}>
+      <div
+        className={cn('grid gap-x-2 gap-y-3 transition-opacity', compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6', stale && 'opacity-50')}
+        aria-busy={stale || undefined}
+      >
         {bands.map((b, i) => (
           <NutrientGauge key={`${b.name}-${i}`} band={b} />
         ))}
@@ -3743,7 +3764,45 @@ function Workbench({
 
   const feedById = useMemo(() => buildFeedLookupMap(feeds, wizardData), [feeds, wizardData])
 
-  const rationItems = result?.ration_items.filter((r) => r.kgdm > 0.001) ?? []
+  // RATION-WB-20: Excel-artige Live-Vorschau. draftKgFm haelt die gerade getippten
+  // Mengen; daraus werden die linearen Aggregate sofort lokal skaliert, waehrend
+  // der autoritative Solve debounced nachzieht. Sobald eine Serverantwort eintrifft,
+  // wird der Draft verworfen — der Server ist die einzige bestaetigte Quelle (Skill §10.2).
+  const [draftKgFm, setDraftKgFm] = useState<Record<string, number>>({})
+  const commitTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hasDraft = Object.keys(draftKgFm).length > 0
+
+  useEffect(() => {
+    setDraftKgFm({})
+  }, [result])
+
+  useEffect(() => () => {
+    if (commitTimer.current) clearTimeout(commitTimer.current)
+  }, [])
+
+  // Menge waehrend des Tippens: lokal skalieren, autoritative Neuberechnung debounced.
+  const handleDraftKgFm = useCallback(
+    (feedId: string, value: number) => {
+      setDraftKgFm((prev) => ({ ...prev, [feedId]: value }))
+      if (commitTimer.current) clearTimeout(commitTimer.current)
+      commitTimer.current = setTimeout(() => {
+        commitTimer.current = null
+        if (value === 0) {
+          onApplySuggestionPatch({ remove_feed_ids: [feedId] })
+        } else {
+          onApplySuggestionPatch({ fix_feed_fm: { [feedId]: value } })
+        }
+      }, LIVE_PREVIEW_COMMIT_MS)
+    },
+    [onApplySuggestionPatch],
+  )
+
+  const scaledRationItems = useMemo(
+    () => (result ? scaleRationItems(result.ration_items, draftKgFm) : []),
+    [result, draftKgFm],
+  )
+
+  const rationItems = scaledRationItems.filter((r) => r.kgdm > 0.001)
   const rationNameDupCounts = useMemo(() => {
     const m = new Map<string, number>()
     const items = result?.ration_items.filter((r) => r.kgdm > 0.001) ?? []
@@ -4146,9 +4205,21 @@ function Workbench({
           {/* RATION-WB-06: Spielwiese-Kopf (Live-Neuberechnung bei jeder Änderung, Skill §6) */}
           <div className="flex items-center justify-between border-b px-3 py-2" style={{ borderColor: C.border }}>
             <div className="text-[13px] font-bold" style={{ color: C.dark }}>Spielwiese / Ration am Futtertisch</div>
-            <div className="text-[10px]" style={{ color: C.muted }}>Live-Neuberechnung bei jeder Änderung · Grenzen öffnen/verdichten über Min/Max</div>
+            {/* RATION-WB-20: Vorlaeufig-Zustand explizit ausweisen — lokal skalierte Werte
+                sind noch nicht gegen die GfE-Restriktionen geprueft (Skill §11.2). */}
+            {hasDraft ? (
+              <div className="flex items-center gap-1.5 text-[10px] font-medium" role="status" style={{ color: C.warn }}>
+                <Loader2 size={11} className="animate-spin" aria-hidden="true" />
+                Vorläufige Werte · verbindliche Neuberechnung läuft
+              </div>
+            ) : (
+              <div className="text-[10px]" style={{ color: C.muted }}>Live-Neuberechnung bei jeder Änderung · Grenzen öffnen/verdichten über Min/Max</div>
+            )}
           </div>
-          {isOptimizing ? (
+          {/* RATION-WB-20: Der Vollbild-Spinner darf die Tabelle beim Tippen nicht ersetzen —
+              sonst verschwindet der Arbeitsplatz alle paar hundert Millisekunden. Er greift
+              nur noch, wenn es ueberhaupt keine anzeigbare Ration gibt. */}
+          {isOptimizing && rationItems.length === 0 ? (
             <div className="flex items-center justify-center h-full gap-3 py-16" style={{ color: C.muted }}>
               <Loader2 size={24} className="animate-spin" />
               <span className="text-sm font-medium">Neuberechnung läuft…</span>
@@ -4216,23 +4287,25 @@ function Workbench({
                             inputMode="decimal"
                             step={0.1}
                             min={0}
-                            key={`${item.feed_id}:${item.kgfm.toFixed(1)}`}
+                            key={`${item.feed_id}:${draftKgFm[item.feed_id] != null ? 'draft' : item.kgfm.toFixed(1)}`}
                             defaultValue={Number(item.kgfm.toFixed(1))}
                             disabled={!canEditRation}
                             aria-label={`Menge ${item.name} in kg Frischmasse je Tag (Eingabe fixiert die Menge; 0 entfernt die Zutat)`}
                             title={canEditRation
-                              ? 'Menge eingeben und Enter: fixiert die Zutat (Min=Max) und optimiert neu; 0 entfernt sie'
+                              ? 'Menge eingeben: Zwischenwerte laufen sofort mit, die verbindliche Neuberechnung startet kurz nach der letzten Eingabe. 0 entfernt die Zutat.'
                               : 'Im Demo-Modus nicht editierbar — eigene Ration über „Neue Ration" starten'}
+                            // RATION-WB-20: Live-Vorschau beim Tippen; Enter erzwingt den sofortigen Commit.
+                            onChange={(e) => {
+                              const v = e.target.valueAsNumber
+                              if (!Number.isFinite(v) || v < 0) return
+                              handleDraftKgFm(item.feed_id, v)
+                            }}
                             onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
                             onBlur={(e) => {
                               const v = e.target.valueAsNumber
                               if (!Number.isFinite(v) || v < 0) return
                               if (Math.abs(v - item.kgfm) < 0.05) return
-                              if (v === 0) {
-                                onApplySuggestionPatch({ remove_feed_ids: [item.feed_id] })
-                              } else {
-                                onApplySuggestionPatch({ fix_feed_fm: { [item.feed_id]: v } })
-                              }
+                              handleDraftKgFm(item.feed_id, v)
                             }}
                             className="w-16 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-xs focus-visible:ring-1 disabled:opacity-60"
                             style={{ borderColor: isFixed ? C.accent : C.border }}
@@ -4432,7 +4505,7 @@ function Workbench({
       {/* ── Rechte Spalte: Live-Ergebnisse (Cockpit) ── */}
       <aside className="flex flex-col gap-[15px] overflow-y-auto">
         {/* RATION-WB-08: Nährstoff-Tacho-Reihe – führt das Cockpit an (wie Zielbild) */}
-        <NutrientGaugeRow result={result} compact />
+        <NutrientGaugeRow result={result} compact stale={hasDraft} />
 
         {/* KPI */}
         <div id="kpi-bar" className={card()} style={tourRing('kpi-bar')}>
