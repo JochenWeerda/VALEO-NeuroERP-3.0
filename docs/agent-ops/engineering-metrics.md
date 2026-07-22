@@ -4,24 +4,24 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-21
+last_reviewed: 2026-07-22
 version: 3.0.0
-generated: 2026-07-21
+generated: 2026-07-22
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-22` · Stand: `2026-07-21`
+> **Automatisch generiert** · Daten seit: `2026-04-23` · Stand: `2026-07-22`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **120** |
-| Slices abgeschlossen | **99** (82 %) |
-| Mit externen Gates | 80 |
+| Slices gesamt | **121** |
+| Slices abgeschlossen | **100** (83 %) |
+| Mit externen Gates | 81 |
 | Ohne Doku-Dateien | 31 |
-| Slices ohne Cycle-Time (kein Claim-Commit) | 88 |
+| Slices ohne Cycle-Time (kein Claim-Commit) | 89 |
 
 ## Cycle Time
 
@@ -36,7 +36,7 @@ generated: 2026-07-21
 
 ## Rework-Rate
 
-**59.4 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**59.3 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
@@ -58,7 +58,7 @@ generated: 2026-07-21
 | Owner | Slices | Anteil |
 |---|---|---|
 | Codex | 55 | `████████████████████` |
-| Claude | 39 | `██████████████░░░░░░` |
+| Claude | 40 | `███████████████░░░░░` |
 | Cursor | 15 | `█████░░░░░░░░░░░░░░░` |
 | offen | 6 | `██░░░░░░░░░░░░░░░░░░` |
 | claude-feed-chain | 1 | `░░░░░░░░░░░░░░░░░░░░` |
