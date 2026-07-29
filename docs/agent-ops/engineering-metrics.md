@@ -4,14 +4,14 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 version: 3.0.0
-generated: 2026-07-28
+generated: 2026-07-29
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-29` · Stand: `2026-07-28`
+> **Automatisch generiert** · Daten seit: `2026-04-30` · Stand: `2026-07-29`
 
 ## Überblick
 
