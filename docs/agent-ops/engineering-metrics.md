@@ -4,14 +4,14 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-08-13
+last_reviewed: 2026-08-14
 version: 3.0.0
-generated: 2026-08-13
+generated: 2026-08-14
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-05-15` · Stand: `2026-08-13`
+> **Automatisch generiert** · Daten seit: `2026-05-16` · Stand: `2026-08-14`
 
 ## Überblick
 
@@ -36,7 +36,7 @@ generated: 2026-08-13
 
 ## Rework-Rate
 
-**60.8 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**65.4 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
