@@ -5,7 +5,7 @@ type: reference
 audience: [entwickler, lead]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-08-10
+last_reviewed: 2026-08-17
 version: 3.0.0
 ---
 
@@ -18,23 +18,29 @@ version: 3.0.0
 
 | Metrik | Wert |
 |---|---|
-| Gesamter Drift | **0** |
-| Status | **GRUEN** |
-| Stand | 2026-08-10 06:09 UTC |
+| Gesamter Drift | **5** |
+| Status | **GELB** |
+| Stand | 2026-08-17 05:33 UTC |
 | Gate | `--fail-over 0` (DOC-DRIFT-GATE-002) |
 
 ## Dimensionen
 
 | Dimension | Anzahl | Status |
 |---|---|---|
-| Endpoints ohne Doku | 0 | GRUEN |
+| Endpoints ohne Doku | 2 | GELB |
 | Migrationen ohne Runbook | 0 | GRUEN |
-| Services ohne Doku | 0 | GRUEN |
+| Services ohne Doku | 3 | GELB |
 | Frontend-Seiten ohne Route/Nav | 0 | GRUEN |
 
 ## Offene Punkte
 
-Kein Drift erkannt — Gate ist grün.
+| Typ | Datei/Stem |
+|---|---|
+| `endpoint_no_doc` | `app/api/v1/endpoints/feeding_feed_analyses.py` |
+| `endpoint_no_doc` | `app/api/v1/endpoints/feeding_measures.py` |
+| `service_no_doc` | `app/services/feeding_consulting_report_service.py` |
+| `service_no_doc` | `app/services/feeding_ration_template_service.py` |
+| `service_no_doc` | `app/services/rations_reference_data_service.py` |
 
 ## Gate-Verhalten
 
@@ -55,4 +61,4 @@ Bei neuem Drift sofort beheben:
 > Historische Drift-Reports werden als CI-Artefakte unter `.github/workflows/doc-drift-report.yml`
 > für 90 Tage aufbewahrt (retention-days: 90).
 
-*Stand: 2026-08-10 06:09 UTC · 0 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
+*Stand: 2026-08-17 05:33 UTC · 5 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
