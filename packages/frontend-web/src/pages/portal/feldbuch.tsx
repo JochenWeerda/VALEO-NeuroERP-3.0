@@ -1,27 +1,33 @@
 /**
  * Kundenportal - Ackerschlagkartei / Feldbuch
  *
- * Echte Daten via:
- *   GET /portal/feldbuch/schlaege
- *   GET /portal/feldbuch/massnahmen
- *   GET /portal/feldbuch/stats
- *   POST /portal/feldbuch/massnahmen
- *   GET /portal/feldbuch/export?format=ackerschlagkartei
- *   POST /portal/feldbuch/import
+ * CRUD (auch für AI-Agenten via OpenAPI operation_id / portalFeldbuchAgentApi):
+ *   GET/POST/PUT/DELETE /portal/feldbuch/schlaege[/{id}]
+ *   GET/POST/PUT/DELETE /portal/feldbuch/massnahmen[/{id}]
  */
 
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   exportFeldbuchCsv,
   importFeldbuchCsv,
   useCreatePortalMassnahme,
   useCreatePortalSchlag,
+  useDeletePortalMassnahme,
+  useDeletePortalSchlag,
+  usePortalArbeitskontext,
   usePortalFeldbuchMassnahmen,
   usePortalFeldbuchSchlaege,
   usePortalFeldbuchStats,
+  usePortalJahreswechsel,
+  usePortalSammelDuengung,
+  usePortalSchlaginfo,
+  useUpdatePortalMassnahme,
+  useUpdatePortalSchlag,
   type PortalMassnahme,
   type PortalSchlag,
 } from '@/lib/api/portal'
+import { toast } from 'sonner'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -63,9 +69,11 @@ import {
   Info,
   Leaf,
   MapPin,
+  Pencil,
   Plus,
   Search,
   Sprout,
+  Trash2,
   Upload,
   AlertTriangle,
 } from 'lucide-react'
@@ -78,6 +86,8 @@ const typConfig: Record<string, { label: string; icon: React.ReactNode; color: s
   aussaat: { label: 'Aussaat', icon: <Sprout className="h-3 w-3" />, color: 'bg-emerald-100 text-emerald-800' },
   ernte: { label: 'Ernte', icon: <Leaf className="h-3 w-3" />, color: 'bg-yellow-100 text-yellow-800' },
   bodenbearbeitung: { label: 'Bodenbearbeitung', icon: <MapPin className="h-3 w-3" />, color: 'bg-gray-100 text-gray-800' },
+  beregnung: { label: 'Beregnung', icon: <Droplets className="h-3 w-3" />, color: 'bg-cyan-100 text-cyan-800' },
+  aum: { label: 'AUM / Umwelt', icon: <Globe className="h-3 w-3" />, color: 'bg-lime-100 text-lime-800' },
   sonstiges: { label: 'Sonstiges', icon: <Calendar className="h-3 w-3" />, color: 'bg-slate-100 text-slate-800' },
 }
 
@@ -103,30 +113,64 @@ function QuelleBadge({ quelle }: { quelle: string }) {
   return null
 }
 
-// ── Schlag anlegen Dialog ──────────────────────────────────────────────────
+// ── Schlag anlegen / bearbeiten ────────────────────────────────────────────
 
-function SchlagAnlegenDialog({
+function SchlagFormDialog({
   open,
   onOpenChange,
+  wirtschaftsjahr,
+  initial,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
+  wirtschaftsjahr: number
+  initial?: PortalSchlag | null
 }) {
   const createSchlag = useCreatePortalSchlag()
-  const [form, setForm] = useState({ name: '', flaeche: '', kultur: '', gemeinde: '', flik: '' })
+  const updateSchlag = useUpdatePortalSchlag()
+  const editing = Boolean(initial?.id)
+  const pending = createSchlag.isPending || updateSchlag.isPending
+  const [form, setForm] = useState({ name: '', flaeche: '', kultur: '', gemeinde: '', flik: '', status: 'aktiv' })
+
+  useEffect(() => {
+    if (!open) return
+    if (initial) {
+      setForm({
+        name: initial.name ?? '',
+        flaeche: String(initial.flaeche ?? ''),
+        kultur: initial.kultur ?? '',
+        gemeinde: initial.gemeinde ?? '',
+        flik: initial.flik ?? '',
+        status: initial.status ?? 'aktiv',
+      })
+    } else {
+      setForm({ name: '', flaeche: '', kultur: '', gemeinde: '', flik: '', status: 'aktiv' })
+    }
+  }, [open, initial])
 
   const handleSubmit = async () => {
-    if (!form.name || !form.flaeche) return
-    await createSchlag.mutateAsync({
+    if (!form.name || !form.flaeche || pending) return
+    const payload = {
       name: form.name,
       flaeche: parseFloat(form.flaeche),
       kultur: form.kultur,
       gemeinde: form.gemeinde,
       flik: form.flik || undefined,
-      status: 'aktiv',
-    } as Omit<PortalSchlag, 'id'>)
-    setForm({ name: '', flaeche: '', kultur: '', gemeinde: '', flik: '' })
-    onOpenChange(false)
+      status: form.status,
+      wirtschaftsjahr,
+    }
+    try {
+      if (editing && initial) {
+        await updateSchlag.mutateAsync({ id: initial.id, data: payload })
+        toast.success('Schlag aktualisiert')
+      } else {
+        await createSchlag.mutateAsync(payload)
+        toast.success('Schlag angelegt')
+      }
+      onOpenChange(false)
+    } catch (err) {
+      toast.error(getAxiosErrorMessage(err) || 'Schlag konnte nicht gespeichert werden')
+    }
   }
 
   return (
@@ -135,40 +179,56 @@ function SchlagAnlegenDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Schlag anlegen
+            {editing ? 'Schlag bearbeiten' : 'Schlag anlegen'}
           </DialogTitle>
-          <DialogDescription>Neuen Feldschlag in Ihrer Ackerschlagkartei erfassen</DialogDescription>
+          <DialogDescription>
+            {editing ? 'Stammdaten des Schlags ändern' : 'Neuen Feldschlag in Ihrer Ackerschlagkartei erfassen'}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div className="space-y-1">
-            <Label>Name *</Label>
-            <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="z.B. Südfeld" />
+            <Label htmlFor="schlag-name">Name *</Label>
+            <Input id="schlag-name" data-testid="schlag-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="z.B. Südfeld" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label>Fläche (ha) *</Label>
-              <Input type="number" step="0.01" value={form.flaeche} onChange={e => setForm(p => ({ ...p, flaeche: e.target.value }))} placeholder="12.5" />
+              <Label htmlFor="schlag-flaeche">Fläche (ha) *</Label>
+              <Input id="schlag-flaeche" data-testid="schlag-flaeche" type="number" step="0.01" value={form.flaeche} onChange={e => setForm(p => ({ ...p, flaeche: e.target.value }))} placeholder="12.5" />
             </div>
             <div className="space-y-1">
-              <Label>Kultur</Label>
-              <Input value={form.kultur} onChange={e => setForm(p => ({ ...p, kultur: e.target.value }))} placeholder="Winterweizen" />
+              <Label htmlFor="schlag-kultur">Kultur</Label>
+              <Input id="schlag-kultur" data-testid="schlag-kultur" value={form.kultur} onChange={e => setForm(p => ({ ...p, kultur: e.target.value }))} placeholder="Winterweizen" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label>Gemeinde</Label>
-              <Input value={form.gemeinde} onChange={e => setForm(p => ({ ...p, gemeinde: e.target.value }))} placeholder="Musterdorf" />
+              <Label htmlFor="schlag-gemeinde">Gemeinde</Label>
+              <Input id="schlag-gemeinde" data-testid="schlag-gemeinde" value={form.gemeinde} onChange={e => setForm(p => ({ ...p, gemeinde: e.target.value }))} placeholder="Musterdorf" />
             </div>
             <div className="space-y-1">
-              <Label>FLIK</Label>
-              <Input value={form.flik} onChange={e => setForm(p => ({ ...p, flik: e.target.value }))} placeholder="DE-09-12345-0001" />
+              <Label htmlFor="schlag-flik">FLIK</Label>
+              <Input id="schlag-flik" data-testid="schlag-flik" value={form.flik} onChange={e => setForm(p => ({ ...p, flik: e.target.value }))} placeholder="DE-09-12345-0001" />
             </div>
           </div>
+          {editing && (
+            <div className="space-y-1">
+              <Label>Status</Label>
+              <NativeSelect
+                value={form.status}
+                onValueChange={v => setForm(p => ({ ...p, status: v }))}
+                options={[
+                  { value: 'aktiv', label: 'aktiv' },
+                  { value: 'stillgelegt', label: 'stillgelegt' },
+                  { value: 'brache', label: 'brache' },
+                ]}
+              />
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-          <Button onClick={handleSubmit} disabled={!form.name || !form.flaeche || createSchlag.isPending}>
-            {createSchlag.isPending ? 'Speichern…' : 'Schlag anlegen'}
+          <Button onClick={() => void handleSubmit()} disabled={!form.name || !form.flaeche || pending}>
+            {pending ? 'Speichern…' : editing ? 'Änderungen speichern' : 'Schlag anlegen'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -182,13 +242,18 @@ function MassnahmeDialog({
   open,
   onOpenChange,
   schlaege,
+  initial,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   schlaege: PortalSchlag[]
+  initial?: PortalMassnahme | null
 }) {
   const createMassnahme = useCreatePortalMassnahme()
-  const [form, setForm] = useState({
+  const updateMassnahme = useUpdatePortalMassnahme()
+  const editing = Boolean(initial?.id)
+  const pending = createMassnahme.isPending || updateMassnahme.isPending
+  const emptyForm = {
     schlagId: '',
     datum: new Date().toISOString().split('T')[0],
     typ: 'psm',
@@ -199,13 +264,44 @@ function MassnahmeDialog({
     flaeche: '',
     anwender: '',
     bemerkung: '',
-  })
+    sorte: '',
+    aumCode: '',
+    sachkundeNummer: '',
+    sachkundeGueltigBis: '',
+    begruendung: '',
+  }
+  const [form, setForm] = useState(emptyForm)
+
+  useEffect(() => {
+    if (!open) return
+    if (initial) {
+      setForm({
+        schlagId: initial.schlagId ?? '',
+        datum: initial.datum?.slice(0, 10) || new Date().toISOString().split('T')[0],
+        typ: initial.typ || 'psm',
+        bezeichnung: initial.bezeichnung ?? '',
+        mittel: initial.mittel ?? '',
+        menge: initial.menge != null ? String(initial.menge) : '',
+        einheit: initial.einheit || 'l/ha',
+        flaeche: initial.flaeche != null ? String(initial.flaeche) : '',
+        anwender: initial.anwender ?? '',
+        bemerkung: initial.bemerkung ?? '',
+        sorte: '',
+        aumCode: '',
+        sachkundeNummer: initial.sachkundeNummer ?? '',
+        sachkundeGueltigBis: initial.sachkundeGueltigBis?.slice(0, 10) ?? '',
+        begruendung: initial.begruendung ?? '',
+      })
+    } else {
+      setForm(emptyForm)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when dialog opens / target changes
+  }, [open, initial?.id])
 
   const handleSubmit = async () => {
-    if (!form.datum || !form.typ) return
-    await createMassnahme.mutateAsync({
-      schlagId: form.schlagId || null,
-      schlagName: schlaege.find(s => s.id === form.schlagId)?.name ?? null,
+    if (!form.datum || !form.typ || pending) return
+    const payload: Record<string, unknown> = {
+      schlag_id: form.schlagId || undefined,
       datum: form.datum,
       typ: form.typ,
       bezeichnung: form.bezeichnung || undefined,
@@ -215,8 +311,32 @@ function MassnahmeDialog({
       flaeche: form.flaeche ? parseFloat(form.flaeche) : undefined,
       anwender: form.anwender || undefined,
       bemerkung: form.bemerkung || undefined,
-    } as Omit<PortalMassnahme, 'id' | 'quelle' | 'compliant' | 'exportiert'>)
-    onOpenChange(false)
+      sorte: form.typ === 'aussaat' ? form.sorte || form.mittel : undefined,
+      wassermenge_mm: form.typ === 'beregnung' && form.menge ? parseFloat(form.menge) : undefined,
+      aum_code: form.typ === 'aum' ? form.aumCode : undefined,
+      begruendung: form.typ === 'psm' ? form.begruendung || undefined : undefined,
+      sachkunde_nummer: form.typ === 'psm' ? form.sachkundeNummer || undefined : undefined,
+      sachkunde_gueltig_bis: form.typ === 'psm' && form.sachkundeGueltigBis
+        ? form.sachkundeGueltigBis
+        : undefined,
+    }
+    try {
+      if (editing && initial) {
+        await updateMassnahme.mutateAsync({ id: initial.id, data: payload })
+        toast.success('Maßnahme aktualisiert')
+      } else {
+        await createMassnahme.mutateAsync({
+          ...payload,
+          client_ref: typeof crypto !== 'undefined' && 'randomUUID' in crypto
+            ? crypto.randomUUID()
+            : undefined,
+        })
+        toast.success('Maßnahme erfasst')
+      }
+      onOpenChange(false)
+    } catch (err) {
+      toast.error(getAxiosErrorMessage(err) || 'Maßnahme konnte nicht gespeichert werden')
+    }
   }
 
   return (
@@ -225,9 +345,13 @@ function MassnahmeDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Maßnahme erfassen
+            {editing ? 'Maßnahme bearbeiten' : 'Maßnahme erfassen'}
           </DialogTitle>
-          <DialogDescription>Eigene Maßnahme in der Ackerschlagkartei dokumentieren</DialogDescription>
+          <DialogDescription>
+            {editing
+              ? 'Eigene Portal-Maßnahme ändern (VALEO-Dienste sind schreibgeschützt)'
+              : 'Eigene Maßnahme in der Ackerschlagkartei dokumentieren'}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
@@ -236,49 +360,77 @@ function MassnahmeDialog({
               <NativeSelect value={form.schlagId} onValueChange={v => setForm(p => ({ ...p, schlagId: v }))} placeholder="Schlag waehlen" options={[{ value: '', label: 'Kein Schlag' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
             </div>
             <div className="space-y-1">
-              <Label>Datum *</Label>
-              <Input type="date" value={form.datum} onChange={e => setForm(p => ({ ...p, datum: e.target.value }))} />
+              <Label htmlFor="massnahme-datum">Datum *</Label>
+              <Input id="massnahme-datum" data-testid="massnahme-datum" type="date" value={form.datum} onChange={e => setForm(p => ({ ...p, datum: e.target.value }))} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label>Maßnahme-Typ *</Label>
-              <NativeSelect value={form.typ} onValueChange={v => setForm(p => ({ ...p, typ: v }))} options={Object.entries(typConfig).map(([key, cfg]) => ({ value: key, label: cfg.label }))} />
+              <Label htmlFor="massnahme-typ">Maßnahme-Typ *</Label>
+              <NativeSelect id="massnahme-typ" data-testid="massnahme-typ" value={form.typ} onValueChange={v => setForm(p => ({ ...p, typ: v }))} options={Object.entries(typConfig).map(([key, cfg]) => ({ value: key, label: cfg.label }))} />
             </div>
             <div className="space-y-1">
-              <Label>Mittel / Produkt</Label>
-              <Input value={form.mittel} onChange={e => setForm(p => ({ ...p, mittel: e.target.value }))} placeholder="z.B. Roundup PowerFlex" />
+              <Label htmlFor="massnahme-mittel">Mittel / Produkt</Label>
+              <Input id="massnahme-mittel" data-testid="massnahme-mittel" value={form.mittel} onChange={e => setForm(p => ({ ...p, mittel: e.target.value }))} placeholder="z.B. Roundup PowerFlex" />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label>Menge</Label>
-              <Input type="number" step="0.1" value={form.menge} onChange={e => setForm(p => ({ ...p, menge: e.target.value }))} placeholder="3.5" />
+              <Label htmlFor="massnahme-menge">Menge</Label>
+              <Input id="massnahme-menge" data-testid="massnahme-menge" type="number" step="0.1" value={form.menge} onChange={e => setForm(p => ({ ...p, menge: e.target.value }))} placeholder="3.5" />
             </div>
             <div className="space-y-1">
               <Label>Einheit</Label>
               <NativeSelect value={form.einheit} onValueChange={v => setForm(p => ({ ...p, einheit: v }))} options={['l/ha', 'kg/ha', 'ml/ha', 'g/ha', 't/ha', 'Stueck/ha'].map((e) => ({ value: e, label: e }))} />
             </div>
             <div className="space-y-1">
-              <Label>Fläche (ha)</Label>
-              <Input type="number" step="0.01" value={form.flaeche} onChange={e => setForm(p => ({ ...p, flaeche: e.target.value }))} placeholder="12.4" />
+              <Label htmlFor="massnahme-flaeche">Fläche (ha)</Label>
+              <Input id="massnahme-flaeche" data-testid="massnahme-flaeche" type="number" step="0.01" value={form.flaeche} onChange={e => setForm(p => ({ ...p, flaeche: e.target.value }))} placeholder="12.4" />
             </div>
           </div>
+          {form.typ === 'aussaat' && (
+            <div className="space-y-1">
+              <Label>Sorte *</Label>
+              <Input value={form.sorte} onChange={e => setForm(p => ({ ...p, sorte: e.target.value }))} placeholder="z.B. RGT Reform" />
+            </div>
+          )}
+          {form.typ === 'aum' && (
+            <div className="space-y-1">
+              <Label>AUM-Code *</Label>
+              <Input value={form.aumCode} onChange={e => setForm(p => ({ ...p, aumCode: e.target.value }))} placeholder="z.B. ÖRö1" />
+            </div>
+          )}
+          {form.typ === 'psm' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="massnahme-begruendung">Begründung *</Label>
+                <Input id="massnahme-begruendung" data-testid="massnahme-begruendung" value={form.begruendung} onChange={e => setForm(p => ({ ...p, begruendung: e.target.value }))} placeholder="Schadschwelle / Notwendigkeit" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="massnahme-sachkunde-nr">Sachkunde-Nr. *</Label>
+                <Input id="massnahme-sachkunde-nr" data-testid="massnahme-sachkunde-nr" value={form.sachkundeNummer} onChange={e => setForm(p => ({ ...p, sachkundeNummer: e.target.value }))} placeholder="SK-…" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="massnahme-sachkunde-bis">Sachkunde gültig bis *</Label>
+                <Input id="massnahme-sachkunde-bis" data-testid="massnahme-sachkunde-bis" type="date" value={form.sachkundeGueltigBis} onChange={e => setForm(p => ({ ...p, sachkundeGueltigBis: e.target.value }))} />
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label>Anwender</Label>
-              <Input value={form.anwender} onChange={e => setForm(p => ({ ...p, anwender: e.target.value }))} placeholder="Eigenleistung" />
+              <Label htmlFor="massnahme-anwender">Anwender</Label>
+              <Input id="massnahme-anwender" data-testid="massnahme-anwender" value={form.anwender} onChange={e => setForm(p => ({ ...p, anwender: e.target.value }))} placeholder="Eigenleistung" />
             </div>
             <div className="space-y-1">
-              <Label>Bemerkung</Label>
-              <Input value={form.bemerkung} onChange={e => setForm(p => ({ ...p, bemerkung: e.target.value }))} />
+              <Label htmlFor="massnahme-bemerkung">Bemerkung</Label>
+              <Input id="massnahme-bemerkung" data-testid="massnahme-bemerkung" value={form.bemerkung} onChange={e => setForm(p => ({ ...p, bemerkung: e.target.value }))} />
             </div>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-          <Button onClick={handleSubmit} disabled={!form.datum || !form.typ || createMassnahme.isPending}>
-            {createMassnahme.isPending ? 'Speichern…' : 'Maßnahme erfassen'}
+          <Button onClick={() => void handleSubmit()} disabled={!form.datum || !form.typ || pending}>
+            {pending ? 'Speichern…' : editing ? 'Änderungen speichern' : 'Maßnahme erfassen'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -380,6 +532,7 @@ function ImportDialog({
   open: boolean
   onOpenChange: (v: boolean) => void
 }) {
+  const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{ created: number; updated: number; errors: string[] } | null>(null)
@@ -394,6 +547,7 @@ function ImportDialog({
     try {
       const res = await importFeldbuchCsv(file)
       setResult(res)
+      await queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch'] })
     } catch (err: unknown) {
       setError(getAxiosErrorMessage(err))
     } finally {
@@ -464,10 +618,12 @@ function ImportDialog({
                 accept=".csv"
                 onChange={handleFile}
                 className="hidden"
+                data-testid="feldbuch-import-file"
               />
               <Button
                 variant="outline"
                 className="mt-3 gap-2"
+                data-testid="feldbuch-import-pick"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
               >
@@ -487,6 +643,175 @@ function ImportDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Schließen</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function SammelDuengungDialog({
+  open,
+  onOpenChange,
+  schlaege,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  schlaege: PortalSchlag[]
+}) {
+  const sammel = usePortalSammelDuengung()
+  const [selected, setSelected] = useState<string[]>([])
+  const [form, setForm] = useState({
+    datum: new Date().toISOString().split('T')[0],
+    mittel: 'KAS',
+    menge: '350',
+    nGehalt: '27',
+    anwender: '',
+  })
+
+  const toggle = (id: string) => {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
+
+  const handleSubmit = async () => {
+    if (selected.length === 0 || sammel.isPending) return
+    try {
+      const result = await sammel.mutateAsync({
+        schlag_ids: selected,
+        datum: new Date(form.datum).toISOString(),
+        mittel: form.mittel,
+        menge_kg_ha: parseFloat(form.menge),
+        n_gehalt: parseFloat(form.nGehalt) || 0,
+        duenger_form: 'M',
+        anwender: form.anwender || undefined,
+      })
+      toast.success(`Sammeldüngung: ${String(result.anzahl ?? selected.length)} Maßnahmen angelegt`)
+      setSelected([])
+      onOpenChange(false)
+    } catch (err) {
+      toast.error(getAxiosErrorMessage(err) || 'Sammeldüngung fehlgeschlagen')
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Sammeldüngung</DialogTitle>
+          <DialogDescription>Eine Düngung auf mehrere Schläge verteilen (flächenproportional).</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div className="max-h-40 space-y-1 overflow-y-auto rounded border p-2">
+            {schlaege.map((s) => (
+              <label key={s.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(s.id)}
+                  onChange={() => toggle(s.id)}
+                />
+                {s.name} ({s.flaeche.toFixed(2)} ha)
+              </label>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Datum</Label>
+              <Input type="date" value={form.datum} onChange={(e) => setForm((p) => ({ ...p, datum: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label>Mittel</Label>
+              <Input value={form.mittel} onChange={(e) => setForm((p) => ({ ...p, mittel: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label>Menge kg/ha</Label>
+              <Input type="number" value={form.menge} onChange={(e) => setForm((p) => ({ ...p, menge: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label>N-Gehalt %</Label>
+              <Input type="number" value={form.nGehalt} onChange={(e) => setForm((p) => ({ ...p, nGehalt: e.target.value }))} />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label>Anwender</Label>
+            <Input value={form.anwender} onChange={(e) => setForm((p) => ({ ...p, anwender: e.target.value }))} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
+          <Button onClick={() => void handleSubmit()} disabled={selected.length === 0 || sammel.isPending}>
+            {sammel.isPending ? 'Buche…' : `Auf ${selected.length} Schläge buchen`}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function SchlaginfoDialog({
+  open,
+  onOpenChange,
+  schlagId,
+  wirtschaftsjahr,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  schlagId: string | null
+  wirtschaftsjahr: number
+}) {
+  const { data, isLoading, isError, error } = usePortalSchlaginfo(schlagId, wirtschaftsjahr)
+  const kosten = (data?.kosten ?? {}) as Record<string, unknown>
+  const schlag = (data?.schlag ?? {}) as Record<string, unknown>
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Schlaginformation</DialogTitle>
+          <DialogDescription>
+            Gesamtdokumentation WJ {wirtschaftsjahr}
+            {schlag.name ? ` — ${String(schlag.name)}` : ''}
+          </DialogDescription>
+        </DialogHeader>
+        {isLoading && <Skeleton className="h-24 w-full" />}
+        {isError && (
+          <Alert variant="destructive">
+            <AlertTitle>Schlaginfo nicht geladen</AlertTitle>
+            <AlertDescription>{getAxiosErrorMessage(error)}</AlertDescription>
+          </Alert>
+        )}
+        {data && !isLoading && (
+          <div className="space-y-2 text-sm">
+            <p>Aussaat: {Array.isArray(data.aussaat) ? data.aussaat.length : 0}</p>
+            <p>Düngung: {Array.isArray(data.duengung) ? data.duengung.length : 0}</p>
+            <p>Pflanzenschutz: {Array.isArray(data.pflanzenschutz) ? data.pflanzenschutz.length : 0}</p>
+            <p>Beregnung: {Array.isArray(data.beregnung) ? data.beregnung.length : 0}</p>
+            <p>AUM: {Array.isArray(data.aum) ? data.aum.length : 0}</p>
+            <p>Ernte: {Array.isArray(data.ernte) ? data.ernte.length : 0}</p>
+            <div className="rounded border p-3">
+              <p className="font-semibold">Direktkostenfreie Leistung</p>
+              <p>{Number(kosten.direktkostenfreieLeistungEur ?? 0).toLocaleString('de-DE', { maximumFractionDigits: 2 })} €</p>
+              <p className="text-muted-foreground">
+                {kosten.direktkostenfreieLeistungEurHa != null
+                  ? `${Number(kosten.direktkostenfreieLeistungEurHa).toLocaleString('de-DE', { maximumFractionDigits: 2 })} €/ha`
+                  : '–'}
+              </p>
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button
+            variant="outline"
+            disabled={!schlagId}
+            onClick={() => {
+              if (!schlagId) return
+              window.open(
+                `/api/v1/portal/feldbuch/schlaege/${schlagId}/schlaginfo.txt?wirtschaftsjahr=${wirtschaftsjahr}`,
+                '_blank',
+              )
+            }}
+          >
+            Druck/Text
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Schließen</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -519,17 +844,41 @@ function FeldbuchSkeleton() {
 // ── Hauptkomponente ────────────────────────────────────────────────────────
 
 export default function PortalFeldbuch() {
+  const currentYear = new Date().getFullYear()
   const [activeTab, setActiveTab] = useState('schlaege')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSchlag, setSelectedSchlag] = useState<string>('alle')
+  const [wirtschaftsjahr, setWirtschaftsjahr] = useState(currentYear)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showSchlagDialog, setShowSchlagDialog] = useState(false)
   const [showMassnahmeDialog, setShowMassnahmeDialog] = useState(false)
+  const [showSammelDialog, setShowSammelDialog] = useState(false)
+  const [schlaginfoId, setSchlaginfoId] = useState<string | null>(null)
+  const [editSchlag, setEditSchlag] = useState<PortalSchlag | null>(null)
+  const [editMassnahme, setEditMassnahme] = useState<PortalMassnahme | null>(null)
+  const [pendingKeys, setPendingKeys] = useState<Set<string>>(new Set())
+  const pendingRef = useRef<Set<string>>(new Set())
 
   const { data: schlaege = [], isLoading: loadingSchlaege, isError: errSchlaege, error: errSchlaegObj, refetch: refetchSchlaege } = usePortalFeldbuchSchlaege()
   const { data: massnahmen = [], isLoading: loadingMassnahmen, isError: errMassnahmen, error: errMassnahmenObj } = usePortalFeldbuchMassnahmen()
   const { data: stats } = usePortalFeldbuchStats()
+  const { data: kontext } = usePortalArbeitskontext(wirtschaftsjahr)
+  const jahreswechsel = usePortalJahreswechsel()
+  const deleteSchlag = useDeletePortalSchlag()
+  const deleteMassnahme = useDeletePortalMassnahme()
+
+  const withPending = useCallback(async (key: string, run: () => Promise<void>) => {
+    if (pendingRef.current.has(key)) return
+    pendingRef.current.add(key)
+    setPendingKeys(new Set(pendingRef.current))
+    try {
+      await run()
+    } finally {
+      pendingRef.current.delete(key)
+      setPendingKeys(new Set(pendingRef.current))
+    }
+  }, [])
 
   const isLoading = loadingSchlaege || loadingMassnahmen
   const isError = errSchlaege || errMassnahmen
@@ -539,12 +888,59 @@ export default function PortalFeldbuch() {
     return <ErrorState error={(errSchlaegObj ?? errMassnahmenObj) as Error} onRetry={() => { void refetchSchlaege() }} />
   }
 
+  const handleDeleteSchlag = (schlag: PortalSchlag) => {
+    if (!window.confirm(`Schlag „${schlag.name}“ wirklich löschen? Zugehörige Portal-Maßnahmen werden mitgelöscht.`)) return
+    void withPending(`schlag:delete:${schlag.id}`, async () => {
+      try {
+        await deleteSchlag.mutateAsync(schlag.id)
+        toast.success('Schlag gelöscht')
+      } catch (err) {
+        toast.error(getAxiosErrorMessage(err) || 'Schlag konnte nicht gelöscht werden')
+      }
+    })
+  }
+
+  const handleDeleteMassnahme = (m: PortalMassnahme) => {
+    if (m.quelle === 'erp_service' || m.quelle === 'erp_lieferschein') {
+      toast.error('VALEO-Dienstleistungen können nicht gelöscht werden')
+      return
+    }
+    if (!window.confirm(`Maßnahme vom ${m.datum} wirklich löschen?`)) return
+    void withPending(`massnahme:delete:${m.id}`, async () => {
+      try {
+        await deleteMassnahme.mutateAsync(m.id)
+        toast.success('Maßnahme gelöscht')
+      } catch (err) {
+        toast.error(getAxiosErrorMessage(err) || 'Maßnahme konnte nicht gelöscht werden')
+      }
+    })
+  }
+
+  const handleJahreswechsel = async () => {
+    if (jahreswechsel.isPending) return
+    try {
+      const result = await jahreswechsel.mutateAsync({
+        von_jahr: wirtschaftsjahr,
+        nach_jahr: wirtschaftsjahr + 1,
+      })
+      toast.success(
+        `Jahreswechsel: ${String(result.angelegt ?? 0)} Schläge nach ${wirtschaftsjahr + 1} übernommen`,
+      )
+      setWirtschaftsjahr(wirtschaftsjahr + 1)
+    } catch (err) {
+      toast.error(getAxiosErrorMessage(err) || 'Jahreswechsel fehlgeschlagen')
+    }
+  }
+
   // Filter
-  const filteredSchlaege = schlaege.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.kultur ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.flik ?? '').toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredSchlaege = schlaege.filter(s => {
+    const matchesYear = s.wirtschaftsjahr == null || s.wirtschaftsjahr === wirtschaftsjahr
+    const matchesSearch =
+      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.kultur ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.flik ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesYear && matchesSearch
+  })
 
   const filteredMassnahmen = massnahmen.filter(m => {
     const matchesSearch =
@@ -572,7 +968,27 @@ export default function PortalFeldbuch() {
           <h1 className="text-2xl font-bold">Ackerschlagkartei</h1>
           <p className="text-muted-foreground">Ihre Schläge, dokumentierten Maßnahmen und VALEO-Dienstleistungen</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <NativeSelect
+            value={String(wirtschaftsjahr)}
+            onValueChange={(v) => setWirtschaftsjahr(Number(v))}
+            options={[currentYear - 1, currentYear, currentYear + 1].map((y) => ({
+              value: String(y),
+              label: `WJ ${y}`,
+            }))}
+          />
+          <Button variant="outline" onClick={() => setShowSammelDialog(true)} className="gap-2">
+            <Droplets className="h-4 w-4" />
+            Sammeldüngung
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => void handleJahreswechsel()}
+            disabled={jahreswechsel.isPending}
+            className="gap-2"
+          >
+            Jahreswechsel
+          </Button>
           <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
             <Upload className="h-4 w-4" />
             Import
@@ -583,6 +999,17 @@ export default function PortalFeldbuch() {
           </Button>
         </div>
       </div>
+
+      {kontext && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Arbeitskontext</AlertTitle>
+          <AlertDescription>
+            {kontext.betriebName} · WJ {kontext.wirtschaftsjahr} · Ernte {kontext.erntejahr} ·{' '}
+            {kontext.rolle} · Sync: {kontext.syncStatus}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <NextActionPanel
         title="Was ist als Naechstes sinnvoll?"
@@ -670,13 +1097,23 @@ export default function PortalFeldbuch() {
             <TabsTrigger value="massnahmen">Maßnahmen ({massnahmen.length})</TabsTrigger>
           </TabsList>
           {activeTab === 'schlaege' && (
-            <Button size="sm" onClick={() => setShowSchlagDialog(true)} className="gap-1">
+            <Button
+              size="sm"
+              data-testid="schlag-create"
+              onClick={() => { setEditSchlag(null); setShowSchlagDialog(true) }}
+              className="gap-1"
+            >
               <Plus className="h-4 w-4" />
               Schlag anlegen
             </Button>
           )}
           {activeTab === 'massnahmen' && (
-            <Button size="sm" onClick={() => setShowMassnahmeDialog(true)} className="gap-1">
+            <Button
+              size="sm"
+              data-testid="massnahme-create"
+              onClick={() => { setEditMassnahme(null); setShowMassnahmeDialog(true) }}
+              className="gap-1"
+            >
               <Plus className="h-4 w-4" />
               Maßnahme erfassen
             </Button>
@@ -695,20 +1132,23 @@ export default function PortalFeldbuch() {
                   <TableHead>FLIK</TableHead>
                   <TableHead>Gemeinde</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSchlaege.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       {schlaege.length === 0
                         ? 'Noch keine Schläge angelegt. Klicken Sie auf "Schlag anlegen".'
                         : 'Keine Schläge gefunden'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredSchlaege.map(schlag => (
-                    <TableRow key={schlag.id}>
+                  filteredSchlaege.map(schlag => {
+                    const rowBusy = pendingKeys.has(`schlag:delete:${schlag.id}`)
+                    return (
+                    <TableRow key={schlag.id} data-testid={`schlag-row-${schlag.id}`}>
                       <TableCell className="font-medium">{schlag.name}</TableCell>
                       <TableCell>
                         {schlag.kultur ? <Badge variant="secondary">{schlag.kultur}</Badge> : <span className="text-muted-foreground">–</span>}
@@ -721,8 +1161,36 @@ export default function PortalFeldbuch() {
                           {schlag.status}
                         </Badge>
                       </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => setSchlaginfoId(schlag.id)} aria-label={`Info ${schlag.name}`}>
+                            Info
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            aria-label={`Bearbeiten ${schlag.name}`}
+                            data-testid={`schlag-edit-${schlag.id}`}
+                            onClick={() => { setEditSchlag(schlag); setShowSchlagDialog(true) }}
+                            disabled={rowBusy}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            aria-label={`Löschen ${schlag.name}`}
+                            data-testid={`schlag-delete-${schlag.id}`}
+                            onClick={() => handleDeleteSchlag(schlag)}
+                            disabled={rowBusy}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  ))
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
@@ -743,20 +1211,24 @@ export default function PortalFeldbuch() {
                   <TableHead>Anwender</TableHead>
                   <TableHead>Quelle</TableHead>
                   <TableHead>Compliance</TableHead>
+                  <TableHead className="text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredMassnahmen.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                       {massnahmen.length === 0
                         ? 'Noch keine Maßnahmen dokumentiert.'
                         : 'Keine Maßnahmen gefunden'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredMassnahmen.map(m => (
-                    <TableRow key={m.id}>
+                  filteredMassnahmen.map(m => {
+                    const isErp = m.quelle === 'erp_service' || m.quelle === 'erp_lieferschein'
+                    const rowBusy = pendingKeys.has(`massnahme:delete:${m.id}`)
+                    return (
+                    <TableRow key={m.id} data-testid={`massnahme-row-${m.id}`}>
                       <TableCell className="whitespace-nowrap">{m.datum}</TableCell>
                       <TableCell className="font-medium">{m.schlagName || '–'}</TableCell>
                       <TableCell>
@@ -782,15 +1254,45 @@ export default function PortalFeldbuch() {
                         <QuelleBadge quelle={m.quelle} />
                       </TableCell>
                       <TableCell>
-                        {m.typ === 'psm' && !m.compliant && (
-                          <Badge className="bg-red-100 text-red-800 gap-1">
+                        {m.typ === 'psm' && (
+                          m.compliant === false
+                          || !m.begruendung
+                          || !m.sachkundeNummer
+                          || !m.sachkundeGueltigBis
+                        ) && (
+                          <Badge className="bg-red-100 text-red-800 gap-1" data-testid={`psm-pruefen-${m.id}`}>
                             <AlertTriangle className="h-3 w-3" />
                             Prüfen
                           </Badge>
                         )}
                       </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            aria-label={`Bearbeiten Maßnahme ${m.datum}`}
+                            data-testid={`massnahme-edit-${m.id}`}
+                            disabled={isErp || rowBusy}
+                            onClick={() => { setEditMassnahme(m); setShowMassnahmeDialog(true) }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            aria-label={`Löschen Maßnahme ${m.datum}`}
+                            data-testid={`massnahme-delete-${m.id}`}
+                            disabled={isErp || rowBusy}
+                            onClick={() => handleDeleteMassnahme(m)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  ))
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
@@ -799,8 +1301,25 @@ export default function PortalFeldbuch() {
       </Tabs>
 
       {/* Dialoge */}
-      <SchlagAnlegenDialog open={showSchlagDialog} onOpenChange={setShowSchlagDialog} />
-      <MassnahmeDialog open={showMassnahmeDialog} onOpenChange={setShowMassnahmeDialog} schlaege={schlaege} />
+      <SchlagFormDialog
+        open={showSchlagDialog}
+        onOpenChange={(v) => { if (!v) setEditSchlag(null); setShowSchlagDialog(v) }}
+        wirtschaftsjahr={wirtschaftsjahr}
+        initial={editSchlag}
+      />
+      <MassnahmeDialog
+        open={showMassnahmeDialog}
+        onOpenChange={(v) => { if (!v) setEditMassnahme(null); setShowMassnahmeDialog(v) }}
+        schlaege={schlaege}
+        initial={editMassnahme}
+      />
+      <SammelDuengungDialog open={showSammelDialog} onOpenChange={setShowSammelDialog} schlaege={filteredSchlaege} />
+      <SchlaginfoDialog
+        open={Boolean(schlaginfoId)}
+        onOpenChange={(v) => { if (!v) setSchlaginfoId(null) }}
+        schlagId={schlaginfoId}
+        wirtschaftsjahr={wirtschaftsjahr}
+      />
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} schlaege={schlaege} />
       <ImportDialog open={showImportDialog} onOpenChange={setShowImportDialog} />
     </div>

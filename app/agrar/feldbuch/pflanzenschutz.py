@@ -29,10 +29,14 @@ class PsmMassnahme:
     begruendung: Optional[str] = None
     wartezeit_tage: Optional[int] = None
     kosten_eur: Optional[float] = None
+    sachkunde_nummer: Optional[str] = None
+    sachkunde_gueltig_bis: Optional[date] = None
 
 
 def psm_compliance(m: PsmMassnahme) -> Dict[str, object]:
     """Prueft die PflSchG-/CC-Pflichtangaben einer PSM-Massnahme."""
+    from app.agrar.feldbuch.sachkunde import pruefe_sachkunde
+
     fehlend: List[str] = []
     if not m.mittel:
         fehlend.append("Mittel")
@@ -46,6 +50,15 @@ def psm_compliance(m: PsmMassnahme) -> Dict[str, object]:
         fehlend.append("Anwender")
     if not m.begruendung:
         fehlend.append("Begruendung")
+    sk = pruefe_sachkunde(
+        anwender=m.anwender,
+        sachkunde_nummer=m.sachkunde_nummer,
+        gueltig_bis=m.sachkunde_gueltig_bis,
+        anwendungsdatum=m.datum,
+    )
+    for item in sk["fehlende"]:
+        if item not in fehlend:
+            fehlend.append(item)
     return {"compliant": len(fehlend) == 0, "fehlende_pflichtangaben": fehlend}
 
 

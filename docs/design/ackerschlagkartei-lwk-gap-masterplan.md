@@ -87,6 +87,10 @@ Empfohlene Reihenfolge: **AS-W1 → AS-W4 → AS-W2 → AS-W5 → AS-W3 → AS-W
 (erst die täglich genutzte, rechtssichere Dünge-/PSM-Erfassung, dann Bedarf/Bilanz, dann Ernte/Auswertung,
 zuletzt ANDI/GIS).
 
+**Update 2026-07-16:** AS-W1…W10 abgeschlossen. Weiterführung über Lastenheft-Inkremente
+unter `docs/specs/agrar/` — Slice `ACKER-INK1-GAPS-008` (Arbeitskontext, Schlaginfo,
+Jahreswechsel, Sammeldüngung) testgetrieben umgesetzt.
+
 ---
 
 ## 4. Leitprinzipien

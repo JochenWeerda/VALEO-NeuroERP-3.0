@@ -170,6 +170,7 @@ class PortalSchlagCreate(_SchlagDuevFields):
     bodenart: Optional[str] = None
     ackerzahl: Optional[float] = None
     status: str = "aktiv"
+    wirtschaftsjahr: Optional[int] = None
 
 
 class PortalSchlagUpdate(_SchlagDuevFields):
@@ -183,6 +184,7 @@ class PortalSchlagUpdate(_SchlagDuevFields):
     bodenart: Optional[str] = None
     ackerzahl: Optional[float] = None
     status: Optional[str] = None
+    wirtschaftsjahr: Optional[int] = None
 
 
 # Nicht-Spalten-Eingaben (nur zur Berechnung), werden vor dem Persistieren entfernt.
@@ -201,12 +203,25 @@ class PortalMassnahmeBase(BaseModel):
     # AS-W4: Pflanzenschutz
     wirkungsbereich: Optional[str] = None
     begruendung: Optional[str] = None
+    sachkunde_nummer: Optional[str] = None
+    sachkunde_gueltig_bis: Optional[datetime] = None
     # AS-W6: Ernte
     ertrag_dt_ha: Optional[float] = None
     qualitaet: Optional[str] = None
     erloes_eur: Optional[float] = None
     nebenleistung_eur: Optional[float] = None
     kosten_eur: Optional[float] = None
+    # Open-Gaps
+    sorte: Optional[str] = None
+    wassermenge_mm: Optional[float] = None
+    aum_code: Optional[str] = None
+    register_daten: Optional[dict[str, Any]] = None
+    lager_artikel_id: Optional[str] = None
+    lager_charge: Optional[str] = None
+    lager_verbrauch: Optional[float] = None
+    client_ref: Optional[str] = None
+    mittel_id: Optional[str] = None
+    mittel_typ: Optional[str] = None
 
 
 class PortalMassnahmeCreate(PortalMassnahmeBase):
@@ -235,6 +250,14 @@ class PortalMassnahmeUpdate(PortalMassnahmeBase):
     flaeche: Optional[float] = None
     anwender: Optional[str] = None
     bemerkung: Optional[str] = None
+
+
+_NON_COLUMN_KEYS = _NUTRIENT_INPUT_KEYS + (
+    "sorte",
+    "wassermenge_mm",
+    "schlagId",
+    "schlagName",
+)
 
 
 def _apply_duengung_nutrients(payload: dict[str, Any]) -> dict[str, Any]:
@@ -271,6 +294,67 @@ def _apply_duengung_nutrients(payload: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def _normalize_register_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Validiert typ-spezifische Register (Aussaat/Beregnung/AUM) vor Persistenz."""
+    typ = str(payload.get("typ") or "")
+    try:
+        if typ == "aussaat":
+            from app.agrar.feldbuch.aussaat import validate_aussaat
+
+            reg = validate_aussaat(payload)
+            payload.update({k: v for k, v in reg.items() if k != "register_daten" or v is not None})
+            payload["register_daten"] = reg.get("register_daten")
+        elif typ == "beregnung":
+            from app.agrar.feldbuch.beregnung import validate_beregnung
+
+            reg = validate_beregnung(payload)
+            payload["typ"] = "beregnung"
+            payload["menge"] = reg["menge"]
+            payload["einheit"] = reg["einheit"]
+            payload["bezeichnung"] = reg.get("bezeichnung") or payload.get("bezeichnung")
+            payload["register_daten"] = reg.get("register_daten")
+        elif typ == "aum":
+            from app.agrar.feldbuch.aum import validate_aum
+
+            reg = validate_aum(payload)
+            payload["typ"] = "aum"
+            payload["aum_code"] = reg["aum_code"]
+            payload["bezeichnung"] = reg["bezeichnung"]
+            payload["flaeche"] = reg["flaeche"]
+            payload["mittel"] = reg.get("mittel")
+            payload["register_daten"] = reg.get("register_daten")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    for key in _NON_COLUMN_KEYS:
+        payload.pop(key, None)
+    return payload
+
+
+def _apply_psm_compliance_flag(massnahme: FeldbuchMassnahme) -> None:
+    """AS-W4 / ASK-PPP-002: compliant-Flag aus PflSchG-/Sachkunde-Prüfung setzen."""
+    if str(massnahme.typ or "") != "psm":
+        return
+    from app.agrar.feldbuch.pflanzenschutz import PsmMassnahme, psm_compliance
+
+    sk_bis = massnahme.sachkunde_gueltig_bis
+    comp = psm_compliance(
+        PsmMassnahme(
+            datum=massnahme.datum.date() if massnahme.datum else None,
+            mittel=massnahme.mittel,
+            menge=float(massnahme.menge) if massnahme.menge is not None else None,
+            flaeche=float(massnahme.flaeche) if massnahme.flaeche is not None else None,
+            anwender=massnahme.anwender,
+            wirkungsbereich=massnahme.wirkungsbereich,
+            begruendung=massnahme.begruendung,
+            wartezeit_tage=massnahme.wartezeit_tage,
+            kosten_eur=float(massnahme.kosten_eur) if massnahme.kosten_eur is not None else None,
+            sachkunde_nummer=massnahme.sachkunde_nummer,
+            sachkunde_gueltig_bis=sk_bis.date() if sk_bis else None,
+        )
+    )
+    massnahme.compliant = bool(comp["compliant"])
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ────────────────────────────────────────────────────────────────────────────
@@ -288,6 +372,7 @@ def _schlag_to_dict(s: FeldbuchSchlag) -> dict[str, Any]:
         "bodenart": str(s.bodenart) if s.bodenart else None,
         "ackerzahl": float(s.ackerzahl) if s.ackerzahl is not None else None,
         "status": str(s.status) if s.status else "aktiv",
+        "wirtschaftsjahr": int(s.wirtschaftsjahr) if s.wirtschaftsjahr is not None else None,
         # AS-W2/W5 (DüV): Sollwert, Nmin, Bodenuntersuchung
         "nSollwertKgHa": float(s.n_sollwert_kg_ha) if s.n_sollwert_kg_ha is not None else None,
         "ertragsniveauDtHa": float(s.ertragsniveau_dt_ha) if s.ertragsniveau_dt_ha is not None else None,
@@ -336,6 +421,10 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
         # AS-W4: Pflanzenschutz
         "wirkungsbereich": str(m.wirkungsbereich) if m.wirkungsbereich else None,
         "begruendung": str(m.begruendung) if m.begruendung else None,
+        "sachkundeNummer": str(m.sachkunde_nummer) if m.sachkunde_nummer else None,
+        "sachkundeGueltigBis": (
+            m.sachkunde_gueltig_bis.date().isoformat() if m.sachkunde_gueltig_bis else None
+        ),
         "wartezeitTage": int(m.wartezeit_tage) if m.wartezeit_tage is not None else None,
         # AS-W6: Ernte
         "ertragDtHa": float(m.ertrag_dt_ha) if m.ertrag_dt_ha is not None else None,
@@ -369,8 +458,11 @@ def _require_portal_massnahme(
 # Schläge
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/schlaege", summary="List schlaege portal",
-    response_model=list[PortalFeldbuchOut]
+@router.get(
+    "/feldbuch/schlaege",
+    summary="List schlaege portal",
+    response_model=list[PortalFeldbuchOut],
+    operation_id="portal_feldbuch_list_schlaege",
 )
 async def portal_list_schlaege(
     skip: int = Query(0, ge=0),
@@ -403,8 +495,12 @@ async def portal_list_schlaege(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/feldbuch/schlaege", status_code=201, summary="Create schlag portal",
-    response_model=PortalFeldbuchOut
+@router.post(
+    "/feldbuch/schlaege",
+    status_code=201,
+    summary="Create schlag portal",
+    response_model=PortalFeldbuchOut,
+    operation_id="portal_feldbuch_create_schlag",
 )
 async def portal_create_schlag(
     data: PortalSchlagCreate,
@@ -425,8 +521,37 @@ async def portal_create_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.put("/feldbuch/schlaege/{schlag_id}", summary="Update schlag portal",
-    response_model=PortalFeldbuchOut
+@router.get(
+    "/feldbuch/schlaege/{schlag_id}",
+    summary="Get schlag portal",
+    response_model=PortalFeldbuchOut,
+    operation_id="portal_feldbuch_get_schlag",
+)
+async def portal_get_schlag(
+    schlag_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    schlag = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.id == schlag_id,
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+        )
+        .first()
+    )
+    if not schlag:
+        raise HTTPException(status_code=404, detail="Schlag nicht gefunden")
+    return _schlag_to_dict(schlag)
+
+
+@router.put(
+    "/feldbuch/schlaege/{schlag_id}",
+    summary="Update schlag portal",
+    response_model=PortalFeldbuchOut,
+    operation_id="portal_feldbuch_update_schlag",
 )
 async def portal_update_schlag(
     schlag_id: str,
@@ -453,8 +578,12 @@ async def portal_update_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.delete("/feldbuch/schlaege/{schlag_id}", status_code=204, response_class=Response,
-    summary="Delete schlag portal"
+@router.delete(
+    "/feldbuch/schlaege/{schlag_id}",
+    status_code=204,
+    response_class=Response,
+    summary="Delete schlag portal",
+    operation_id="portal_feldbuch_delete_schlag",
 )
 async def portal_delete_schlag(
     schlag_id: str,
@@ -504,8 +633,11 @@ async def portal_delete_schlag(
 # Maßnahmen
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/massnahmen", summary="List massnahmen portal",
-    response_model=list[PortalFeldbuchOut]
+@router.get(
+    "/feldbuch/massnahmen",
+    summary="List massnahmen portal",
+    response_model=list[PortalFeldbuchOut],
+    operation_id="portal_feldbuch_list_massnahmen",
 )
 async def portal_list_massnahmen(
     schlag_id: Optional[str] = Query(None),
@@ -553,8 +685,12 @@ async def portal_list_massnahmen(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/feldbuch/massnahmen", status_code=201, summary="Create massnahme portal",
-    response_model=PortalFeldbuchOut
+@router.post(
+    "/feldbuch/massnahmen",
+    status_code=201,
+    summary="Create massnahme portal",
+    response_model=PortalFeldbuchOut,
+    operation_id="portal_feldbuch_create_massnahme",
 )
 async def portal_create_massnahme(
     data: PortalMassnahmeCreate,
@@ -562,7 +698,19 @@ async def portal_create_massnahme(
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
 ) -> dict[str, Any]:
-    payload = _apply_duengung_nutrients(data.model_dump())
+    payload = _normalize_register_payload(_apply_duengung_nutrients(data.model_dump()))
+    if data.client_ref:
+        existing = (
+            db.query(FeldbuchMassnahme)
+            .filter(
+                FeldbuchMassnahme.tenant_id == tenant_id,
+                FeldbuchMassnahme.customer_id == customer_id,
+                FeldbuchMassnahme.client_ref == data.client_ref,
+            )
+            .first()
+        )
+        if existing:
+            return _massnahme_to_dict(existing)
     massnahme = FeldbuchMassnahme(
         id=uuid7(),
         tenant_id=tenant_id,
@@ -570,14 +718,34 @@ async def portal_create_massnahme(
         quelle="portal",
         **payload,
     )
+    _apply_psm_compliance_flag(massnahme)
     db.add(massnahme)
     db.commit()
     db.refresh(massnahme)
     return _massnahme_to_dict(massnahme)
 
 
-@router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Update massnahme portal",
-    response_model=PortalFeldbuchOut
+@router.get(
+    "/feldbuch/massnahmen/{massnahme_id}",
+    summary="Get massnahme portal",
+    response_model=PortalFeldbuchOut,
+    operation_id="portal_feldbuch_get_massnahme",
+)
+async def portal_get_massnahme(
+    massnahme_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db)
+    return _massnahme_to_dict(massnahme)
+
+
+@router.put(
+    "/feldbuch/massnahmen/{massnahme_id}",
+    summary="Update massnahme portal",
+    response_model=PortalFeldbuchOut,
+    operation_id="portal_feldbuch_update_massnahme",
 )
 async def portal_update_massnahme(
     massnahme_id: str,
@@ -593,16 +761,23 @@ async def portal_update_massnahme(
             status_code=403,
             detail="VALEO-Dienstleistungen können nicht bearbeitet werden",
         )
-    payload = _apply_duengung_nutrients(data.model_dump(exclude_none=True))
+    payload = _normalize_register_payload(
+        _apply_duengung_nutrients(data.model_dump(exclude_none=True))
+    )
     for field, value in payload.items():
         setattr(massnahme, field, value)
+    _apply_psm_compliance_flag(massnahme)
     db.commit()
     db.refresh(massnahme)
     return _massnahme_to_dict(massnahme)
 
 
-@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response,
-    summary="Delete massnahme portal"
+@router.delete(
+    "/feldbuch/massnahmen/{massnahme_id}",
+    status_code=204,
+    response_class=Response,
+    summary="Delete massnahme portal",
+    operation_id="portal_feldbuch_delete_massnahme",
 )
 async def portal_delete_massnahme(
     massnahme_id: str,
@@ -786,6 +961,7 @@ async def portal_andi_import(
             id=uuid7(), tenant_id=tenant_id, customer_id=customer_id,
             name=sch["name"], flaeche=sch["flaeche"], flik=sch.get("flik"),
             kultur=sch.get("kultur"), gemeinde=sch.get("gemeinde"), gemarkung=sch.get("gemarkung"),
+            wirtschaftsjahr=parsed.get("jahr"),
             status="aktiv", created_by=f"andi:{customer_id}",
         ))
         angelegt += 1
@@ -1023,6 +1199,10 @@ async def portal_pflanzenschutz_uebersicht(
             begruendung=m.begruendung,
             wartezeit_tage=int(m.wartezeit_tage) if m.wartezeit_tage is not None else None,
             kosten_eur=float(m.kosten_eur) if m.kosten_eur is not None else None,
+            sachkunde_nummer=m.sachkunde_nummer,
+            sachkunde_gueltig_bis=(
+                m.sachkunde_gueltig_bis.date() if m.sachkunde_gueltig_bis else None
+            ),
         )
         for m in rows
     ]
@@ -1059,6 +1239,596 @@ async def portal_pflanzenschutz_uebersicht(
             "gesamt": round(sum(split.values()), 2),
         },
         "massnahmen": massnahmen_out,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Open-Gaps: Stammdaten, Betrieb, QS, Lager, Offline, Schlaginfo-Druck
+# ────────────────────────────────────────────────────────────────────────────
+
+
+@router.get("/feldbuch/stammdaten", response_model=PortalFeldbuchOut,
+    summary="Betriebsmittel-Stammdaten portal"
+)
+async def portal_stammdaten(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK-MST-001: Dünger/PSM/Saatgut/Kulturen für Portal-Auswahl."""
+    from app.agrar.feldbuch.stammdaten import list_kulturen
+    from app.infrastructure.models.agrar_models import Duenger, PSM, Saatgut
+
+    def _safe_query(model: Any) -> list[Any]:
+        try:
+            return (
+                db.query(model)
+                .filter(model.tenant_id == tenant_id, model.ist_aktiv.is_(True))
+                .order_by(model.name)
+                .limit(500)
+                .all()
+            )
+        except Exception:
+            logger.exception("Stammdaten-Query fehlgeschlagen: %s", model)
+            return []
+
+    duenger = [
+        {
+            "id": str(d.id),
+            "name": d.name,
+            "n_gehalt": float(d.n_gehalt) if d.n_gehalt is not None else None,
+            "p_gehalt": float(d.p_gehalt) if d.p_gehalt is not None else None,
+            "k_gehalt": float(d.k_gehalt) if d.k_gehalt is not None else None,
+            "typ": d.typ,
+            "vk_preis": float(d.vk_preis) if d.vk_preis is not None else None,
+        }
+        for d in _safe_query(Duenger)
+    ]
+    psm = []
+    for p in _safe_query(PSM):
+        psm.append({
+            "id": str(p.id),
+            "name": p.name,
+            "mittel_typ": p.mittel_typ,
+            "wartezeit": int(p.wartezeit) if p.wartezeit is not None else None,
+            "vk_preis": float(p.vk_preis) if getattr(p, "vk_preis", None) is not None else None,
+        })
+    saatgut = [
+        {
+            "id": str(s.id),
+            "name": s.name,
+            "sorte": s.sorte,
+            "art": s.art,
+            "vk_preis": float(s.vk_preis) if s.vk_preis is not None else None,
+        }
+        for s in _safe_query(Saatgut)
+    ]
+    schlaege = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+        )
+        .all()
+    )
+    kulturen = list_kulturen(
+        [{"kultur": s.kultur} for s in schlaege],
+        extra=[s.art for s in _safe_query(Saatgut) if getattr(s, "art", None)],
+    )
+    return {"duenger": duenger, "psm": psm, "saatgut": saatgut, "kulturen": kulturen}
+
+
+@router.get("/feldbuch/betrieb", response_model=PortalFeldbuchOut,
+    summary="Betriebssnapshot portal"
+)
+async def portal_betrieb(
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK-BUS-001: schlanker Betriebssnapshot aus Kundenkontext."""
+    from app.agrar.feldbuch.betrieb import build_betrieb_snapshot
+
+    return build_betrieb_snapshot({"id": customer_id, "name": customer_id})
+
+
+class _QsBody(BaseModel):
+    schlagdokumentation_vollstaendig: bool = False
+    wartezeiten_eingehalten: bool = False
+    sachkunde_nachgewiesen: bool = False
+    geraetepruefung_gueltig: bool = False
+    risikobewertung_boden: bool = False
+
+
+@router.post("/feldbuch/qs-checkliste", response_model=PortalFeldbuchOut,
+    summary="QS-Checkliste bewerten portal"
+)
+async def portal_qs_checkliste(body: _QsBody) -> dict[str, Any]:
+    from app.agrar.feldbuch.qs_checkliste import evaluate_qs_checkliste
+
+    return evaluate_qs_checkliste(body.model_dump())
+
+
+class _LagerBody(BaseModel):
+    massnahme_id: str
+    artikel_id: str
+    charge: Optional[str] = None
+    menge: float
+    einheit: str = "kg"
+    kostentraeger_schlag_id: Optional[str] = None
+    client_ref: Optional[str] = None
+
+
+@router.post("/feldbuch/lagerverbrauch", response_model=PortalFeldbuchOut,
+    summary="Lagerverbrauch je Massnahme portal"
+)
+async def portal_lagerverbrauch(
+    body: _LagerBody,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    from app.agrar.feldbuch.lagerverbrauch import plane_lagerverbrauch
+
+    m = _require_portal_massnahme(body.massnahme_id, customer_id, tenant_id, db)
+    try:
+        buchung = plane_lagerverbrauch(
+            massnahme_id=body.massnahme_id,
+            artikel_id=body.artikel_id,
+            charge=body.charge,
+            menge=body.menge,
+            einheit=body.einheit,
+            kostentraeger_schlag_id=body.kostentraeger_schlag_id or m.schlag_id,
+            client_ref=body.client_ref,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    m.lager_artikel_id = buchung["artikel_id"]
+    m.lager_charge = buchung["charge"]
+    m.lager_verbrauch = buchung["menge"]
+    if body.client_ref:
+        m.client_ref = body.client_ref
+    db.commit()
+    return buchung
+
+
+class _OfflineSyncBody(BaseModel):
+    ops: list[dict[str, Any]]
+
+
+@router.post("/feldbuch/offline/sync", response_model=PortalFeldbuchOut,
+    summary="Offline-Queue synchronisieren portal"
+)
+async def portal_offline_sync(
+    body: _OfflineSyncBody,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK-MOB-001: idempotente Offline-Ops (create_massnahme) nach client_ref."""
+    from app.agrar.feldbuch.offline_queue import merge_offline_ops
+
+    try:
+        merged = merge_offline_ops(body.ops)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    applied = 0
+    skipped = 0
+    ids: list[str] = []
+    for op in merged:
+        if op.get("op") != "create_massnahme":
+            skipped += 1
+            continue
+        ref = str(op["client_ref"])
+        existing = (
+            db.query(FeldbuchMassnahme)
+            .filter(
+                FeldbuchMassnahme.tenant_id == tenant_id,
+                FeldbuchMassnahme.customer_id == customer_id,
+                FeldbuchMassnahme.client_ref == ref,
+            )
+            .first()
+        )
+        if existing:
+            skipped += 1
+            ids.append(str(existing.id))
+            continue
+        payload = dict(op.get("payload") or {})
+        payload = _apply_duengung_nutrients(payload)
+        datum = payload.get("datum") or datetime.now()
+        if isinstance(datum, str):
+            datum = datetime.fromisoformat(datum.replace("Z", "+00:00"))
+        m = FeldbuchMassnahme(
+            id=uuid7(),
+            tenant_id=tenant_id,
+            customer_id=customer_id,
+            schlag_id=payload.get("schlag_id"),
+            datum=datum,
+            typ=payload.get("typ") or "sonstiges",
+            bezeichnung=payload.get("bezeichnung"),
+            mittel=payload.get("mittel"),
+            menge=payload.get("menge"),
+            einheit=payload.get("einheit"),
+            flaeche=payload.get("flaeche"),
+            anwender=payload.get("anwender"),
+            n_kg=payload.get("n_kg"),
+            p2o5_kg=payload.get("p2o5_kg"),
+            k2o_kg=payload.get("k2o_kg"),
+            kosten_eur=payload.get("kosten_eur"),
+            duenger_form=payload.get("duenger_form"),
+            wirkungsbereich=payload.get("wirkungsbereich"),
+            begruendung=payload.get("begruendung"),
+            sachkunde_nummer=payload.get("sachkunde_nummer"),
+            client_ref=ref,
+            quelle="portal",
+        )
+        db.add(m)
+        applied += 1
+        ids.append(str(m.id))
+    db.commit()
+    return {"merged": len(merged), "applied": applied, "skipped": skipped, "massnahmeIds": ids}
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Inkrement-1 Gaps: Arbeitskontext, Schlaginfo, Jahreswechsel, Sammelbuchung
+# ────────────────────────────────────────────────────────────────────────────
+
+
+class _ArbeitskontextBody(BaseModel):
+    betrieb_name: Optional[str] = None
+    wirtschaftsjahr: int
+    erntejahr: Optional[int] = None
+    rolle: str = "betriebsleiter"
+    betriebsstaette: Optional[str] = None
+
+
+@router.get("/feldbuch/arbeitskontext", response_model=PortalFeldbuchOut,
+    summary="Arbeitskontext portal"
+)
+async def portal_arbeitskontext_get(
+    wirtschaftsjahr: int = Query(...),
+    betrieb_name: Optional[str] = Query(None),
+    erntejahr: Optional[int] = Query(None),
+    rolle: str = Query("betriebsleiter"),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK Kap. 5: aktiver Betrieb-/Jahreskontext für die Portal-Ackerschlagkartei."""
+    from app.agrar.feldbuch.arbeitskontext import build_arbeitskontext
+
+    try:
+        return build_arbeitskontext(
+            customer_id=customer_id,
+            betrieb_name=betrieb_name or customer_id,
+            wirtschaftsjahr=wirtschaftsjahr,
+            erntejahr=erntejahr,
+            rolle=rolle,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/feldbuch/arbeitskontext", response_model=PortalFeldbuchOut,
+    summary="Arbeitskontext setzen portal"
+)
+async def portal_arbeitskontext_set(
+    body: _ArbeitskontextBody,
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    from app.agrar.feldbuch.arbeitskontext import build_arbeitskontext
+
+    try:
+        return build_arbeitskontext(
+            customer_id=customer_id,
+            betrieb_name=body.betrieb_name or customer_id,
+            wirtschaftsjahr=body.wirtschaftsjahr,
+            erntejahr=body.erntejahr,
+            rolle=body.rolle,
+            betriebsstaette=body.betriebsstaette,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/feldbuch/schlaege/{schlag_id}/schlaginfo", response_model=PortalFeldbuchOut,
+    summary="Schlaginfo Gesamtdokumentation portal"
+)
+async def portal_schlaginfo(
+    schlag_id: str,
+    wirtschaftsjahr: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK Kap. 19: schlagbezogene Gesamtdokumentation inkl. Direktkostenfreier Leistung."""
+    from sqlalchemy import extract
+
+    from app.agrar.feldbuch.schlaginfo import build_schlaginfo
+
+    schlag = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.id == schlag_id,
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+        )
+        .first()
+    )
+    if not schlag:
+        raise HTTPException(status_code=404, detail="Schlag nicht gefunden")
+
+    q = db.query(FeldbuchMassnahme).filter(
+        FeldbuchMassnahme.schlag_id == schlag_id,
+        FeldbuchMassnahme.tenant_id == tenant_id,
+        FeldbuchMassnahme.customer_id == customer_id,
+    )
+    year = wirtschaftsjahr or schlag.wirtschaftsjahr
+    if year is not None:
+        q = q.filter(extract("year", FeldbuchMassnahme.datum) == int(year))
+    massnahmen = q.order_by(FeldbuchMassnahme.datum).all()
+    return build_schlaginfo(
+        {
+            "id": str(schlag.id),
+            "name": schlag.name,
+            "flik": schlag.flik,
+            "flaeche": float(schlag.flaeche or 0.0),
+            "kultur": schlag.kultur,
+            "vorkultur": schlag.vorkultur,
+            "n_sollwert_kg_ha": schlag.n_sollwert_kg_ha,
+            "nmin_fruehjahr_kg_ha": schlag.nmin_fruehjahr_kg_ha,
+            "versorgungsstufe": schlag.versorgungsstufe,
+        },
+        [
+            {
+                "typ": m.typ,
+                "datum": m.datum.date().isoformat() if m.datum else None,
+                "mittel": m.mittel,
+                "menge": float(m.menge) if m.menge is not None else None,
+                "einheit": m.einheit,
+                "flaeche": float(m.flaeche) if m.flaeche is not None else None,
+                "n_kg": float(m.n_kg) if m.n_kg is not None else None,
+                "kosten_eur": float(m.kosten_eur) if m.kosten_eur is not None else None,
+                "erloes_eur": float(m.erloes_eur) if m.erloes_eur is not None else None,
+                "nebenleistung_eur": float(m.nebenleistung_eur) if m.nebenleistung_eur is not None else None,
+                "wirkungsbereich": m.wirkungsbereich,
+                "ertrag_dt_ha": float(m.ertrag_dt_ha) if m.ertrag_dt_ha is not None else None,
+                "anwender": m.anwender,
+                "begruendung": m.begruendung,
+            }
+            for m in massnahmen
+        ],
+        wirtschaftsjahr=int(year) if year is not None else None,
+    )
+
+
+@router.get("/feldbuch/schlaege/{schlag_id}/schlaginfo.txt", summary="Schlaginfo Text-Export portal")
+async def portal_schlaginfo_text(
+    schlag_id: str,
+    wirtschaftsjahr: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> Response:
+    from app.agrar.feldbuch.schlaginfo_export import render_schlaginfo_text
+
+    info = await portal_schlaginfo(
+        schlag_id=schlag_id,
+        wirtschaftsjahr=wirtschaftsjahr,
+        db=db,
+        tenant_id=tenant_id,
+        customer_id=customer_id,
+    )
+    return Response(
+        content=render_schlaginfo_text(info),
+        media_type="text/plain; charset=utf-8",
+    )
+
+
+class _JahreswechselBody(BaseModel):
+    von_jahr: int
+    nach_jahr: int
+    dry_run: bool = False
+
+
+@router.post("/feldbuch/jahreswechsel", response_model=PortalFeldbuchOut,
+    summary="Jahreswechsel Schlaege fortfuehren portal"
+)
+async def portal_jahreswechsel(
+    body: _JahreswechselBody,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK Kap. 36: Vorjahresschläge ohne Bewegungsdaten in das neue Wirtschaftsjahr übernehmen."""
+    from app.agrar.feldbuch.jahreswechsel import plan_jahreswechsel
+
+    existing = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+            FeldbuchSchlag.status == "aktiv",
+        )
+        .all()
+    )
+    try:
+        geplant = plan_jahreswechsel(
+            schlaege=[
+                {
+                    "id": str(s.id),
+                    "name": s.name,
+                    "flik": s.flik,
+                    "flaeche": float(s.flaeche or 0.0),
+                    "kultur": s.kultur,
+                    "vorkultur": s.vorkultur,
+                    "gemeinde": s.gemeinde,
+                    "gemarkung": s.gemarkung,
+                    "bodenart": s.bodenart,
+                    "ackerzahl": float(s.ackerzahl) if s.ackerzahl is not None else None,
+                    "geometry_geojson": s.geometry_geojson,
+                    "wirtschaftsjahr": s.wirtschaftsjahr,
+                }
+                for s in existing
+            ],
+            von_jahr=body.von_jahr,
+            nach_jahr=body.nach_jahr,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    # Idempotenz: Name+FLIK+Zieljahr bereits vorhanden → überspringen
+    vorhandene = {
+        (str(s.name), str(s.flik or ""), int(s.wirtschaftsjahr))
+        for s in existing
+        if s.wirtschaftsjahr is not None
+    }
+    angelegt = 0
+    uebersprungen = 0
+    angelegte_ids: list[str] = []
+    if not body.dry_run:
+        for neu in geplant:
+            key = (str(neu["name"]), str(neu.get("flik") or ""), int(body.nach_jahr))
+            if key in vorhandene:
+                uebersprungen += 1
+                continue
+            sid = uuid7()
+            db.add(
+                FeldbuchSchlag(
+                    id=sid,
+                    tenant_id=tenant_id,
+                    customer_id=customer_id,
+                    name=neu["name"],
+                    flik=neu.get("flik"),
+                    flaeche=neu["flaeche"],
+                    kultur=None,
+                    vorkultur=neu.get("vorkultur"),
+                    gemeinde=neu.get("gemeinde"),
+                    gemarkung=neu.get("gemarkung"),
+                    bodenart=neu.get("bodenart"),
+                    ackerzahl=neu.get("ackerzahl"),
+                    geometry_geojson=neu.get("geometry_geojson"),
+                    wirtschaftsjahr=body.nach_jahr,
+                    status="aktiv",
+                    created_by=f"jahreswechsel:{customer_id}",
+                )
+            )
+            angelegte_ids.append(str(sid))
+            angelegt += 1
+            vorhandene.add(key)
+        db.commit()
+    else:
+        angelegt = len(geplant)
+
+    return {
+        "vonJahr": body.von_jahr,
+        "nachJahr": body.nach_jahr,
+        "geplant": len(geplant),
+        "angelegt": angelegt,
+        "uebersprungen": uebersprungen,
+        "dryRun": body.dry_run,
+        "schlagIds": angelegte_ids,
+    }
+
+
+class _SammelDuengungBody(BaseModel):
+    schlag_ids: list[str]
+    datum: datetime
+    mittel: str
+    menge_kg_ha: float
+    einheit: str = "kg/ha"
+    n_gehalt: float = 0.0
+    p2o5_gehalt: float = 0.0
+    k2o_gehalt: float = 0.0
+    mgo_gehalt: float = 0.0
+    s_gehalt: float = 0.0
+    duenger_form: str = "M"
+    preis_je_einheit: Optional[float] = None
+    anwender: Optional[str] = None
+    begruendung: Optional[str] = None
+
+
+@router.post("/feldbuch/massnahmen/sammel-duengung", response_model=PortalFeldbuchOut,
+    summary="Sammelbuchung Duengung portal"
+)
+async def portal_sammel_duengung(
+    body: _SammelDuengungBody,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    customer_id: str = Depends(_get_customer_id),
+) -> dict[str, Any]:
+    """ASK Kap. 31: eine Düngung auf mehrere Schläge mit flächenproportionaler Nährstoffrechnung."""
+    from app.agrar.feldbuch.sammelbuchung import plane_sammel_duengung
+
+    if not body.schlag_ids:
+        raise HTTPException(status_code=422, detail="schlag_ids sind Pflicht")
+    schlaege = (
+        db.query(FeldbuchSchlag)
+        .filter(
+            FeldbuchSchlag.id.in_(body.schlag_ids),
+            FeldbuchSchlag.tenant_id == tenant_id,
+            FeldbuchSchlag.customer_id == customer_id,
+            FeldbuchSchlag.status == "aktiv",
+        )
+        .all()
+    )
+    found = {str(s.id): s for s in schlaege}
+    missing = [sid for sid in body.schlag_ids if sid not in found]
+    if missing:
+        raise HTTPException(status_code=404, detail=f"Schlaege nicht gefunden: {', '.join(missing)}")
+
+    try:
+        plan = plane_sammel_duengung(
+            schlaege=[
+                {"id": sid, "name": found[sid].name, "flaeche": float(found[sid].flaeche or 0.0)}
+                for sid in body.schlag_ids
+            ],
+            datum=body.datum,
+            mittel=body.mittel,
+            menge_kg_ha=body.menge_kg_ha,
+            einheit=body.einheit,
+            n_gehalt=body.n_gehalt,
+            p2o5_gehalt=body.p2o5_gehalt,
+            k2o_gehalt=body.k2o_gehalt,
+            mgo_gehalt=body.mgo_gehalt,
+            s_gehalt=body.s_gehalt,
+            duenger_form=body.duenger_form,
+            preis_je_einheit=body.preis_je_einheit,
+            anwender=body.anwender,
+            begruendung=body.begruendung,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    created = []
+    for payload in plan["massnahmen"]:
+        m = FeldbuchMassnahme(
+            id=uuid7(),
+            tenant_id=tenant_id,
+            customer_id=customer_id,
+            schlag_id=payload["schlag_id"],
+            datum=payload["datum"],
+            typ=payload["typ"],
+            bezeichnung=payload.get("bezeichnung"),
+            mittel=payload.get("mittel"),
+            menge=payload.get("menge"),
+            einheit=payload.get("einheit"),
+            flaeche=payload.get("flaeche"),
+            anwender=payload.get("anwender"),
+            bemerkung=payload.get("bemerkung"),
+            duenger_form=payload.get("duenger_form"),
+            n_kg=payload.get("n_kg"),
+            p2o5_kg=payload.get("p2o5_kg"),
+            k2o_kg=payload.get("k2o_kg"),
+            mgo_kg=payload.get("mgo_kg"),
+            s_kg=payload.get("s_kg"),
+            kosten_eur=payload.get("kosten_eur"),
+            quelle="portal",
+        )
+        db.add(m)
+        created.append(str(m.id))
+    db.commit()
+    return {
+        "anzahl": plan["anzahl"],
+        "gesamtFlaecheHa": plan["gesamtFlaecheHa"],
+        "massnahmeIds": created,
     }
 
 

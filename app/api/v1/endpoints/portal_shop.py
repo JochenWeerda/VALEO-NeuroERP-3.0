@@ -190,8 +190,8 @@ async def get_portal_products(
             rabattPreis=round(
                 float(article.sales_price) * (1 - float(article.rabatt_auftrag_rechnung) / 100), 2
             ) if getattr(article, "rabatt_auftrag_rechnung", None) and article.sales_price else None,
-            verfuegbar=article.available_stock > 0,
-            bestand=article.available_stock,
+            verfuegbar=(article.available_stock or 0) > 0,
+            bestand=article.available_stock if article.available_stock is not None else 0,
             zertifikate=[c for c in [
                 "Bio" if getattr(article, "bio_kennzeichnung", False) else None,
                 "GMP+" if getattr(article, "gmp_plus_relevanz", False) else None,

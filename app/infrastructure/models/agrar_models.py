@@ -285,6 +285,8 @@ class FeldbuchSchlag(Base):
     ackerzahl = Column(Float, nullable=True)        # Bodenpunktzahl
     status = Column(String(20), default='aktiv')    # aktiv/stillgelegt/brache
     geometry_geojson = Column(Text, nullable=True)  # GeoJSON Polygon/MultiPolygon für GIS-Karte
+    # ASK Inkrement-1: Wirtschaftsjahr für Anbauplan/Jahreswechsel
+    wirtschaftsjahr = Column(Integer, nullable=True, index=True)
 
     # AS-W2 (DüV): N-Düngebedarf-Grundlagen je Schlag (aktuelles Jahr)
     n_sollwert_kg_ha = Column(Float, nullable=True)     # Kultur-Sollwert N [kg/ha]
@@ -362,12 +364,23 @@ class FeldbuchMassnahme(Base):
     # AS-W4 (PflSchG/CC): Pflanzenschutz-Wirkungsbereich + Begründung
     wirkungsbereich = Column(String(30), nullable=True)  # Herbizid/Fungizid/Insektizid/Wachstumsregler/Sonstiges
     begruendung = Column(String(300), nullable=True)     # Notwendigkeit/Schadschwelle
+    # ASK-PPP-002: Sachkundenachweis des Anwenders
+    sachkunde_nummer = Column(String(80), nullable=True)
+    sachkunde_gueltig_bis = Column(DateTime(timezone=True), nullable=True)
 
     # AS-W6: Ernte-Kennzahlen
     ertrag_dt_ha = Column(Float, nullable=True)
     qualitaet = Column(String(100), nullable=True)
     erloes_eur = Column(Float, nullable=True)
     nebenleistung_eur = Column(Float, nullable=True)
+
+    # Open-Gaps: typ-spezifische Register, AUM, Lager, Offline
+    register_daten = Column(JSONB, nullable=True)
+    aum_code = Column(String(40), nullable=True)
+    lager_artikel_id = Column(String, nullable=True)
+    lager_charge = Column(String(80), nullable=True)
+    lager_verbrauch = Column(Float, nullable=True)
+    client_ref = Column(String(120), nullable=True, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

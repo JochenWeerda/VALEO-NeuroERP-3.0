@@ -61,6 +61,18 @@ export type PortalSchlag = {
   bodenart?: string
   ackerzahl?: number
   status: 'aktiv' | 'stillgelegt' | 'brache'
+  wirtschaftsjahr?: number | null
+}
+
+export type PortalArbeitskontext = {
+  customerId: string
+  betriebName: string
+  betriebsstaette?: string | null
+  wirtschaftsjahr: number
+  erntejahr: number
+  rolle: string
+  syncStatus: string
+  datenstand: string
 }
 
 export type PortalMassnahme = {
@@ -80,6 +92,9 @@ export type PortalMassnahme = {
   compliant: boolean
   exportiert: boolean
   bemerkung?: string
+  begruendung?: string | null
+  sachkundeNummer?: string | null
+  sachkundeGueltigBis?: string | null
 }
 
 export type PortalFeldbuchStats = {
@@ -266,13 +281,149 @@ export function usePortalErnteAuswertung(jahr?: number) {
   })
 }
 
+export function usePortalArbeitskontext(wirtschaftsjahr: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'arbeitskontext', wirtschaftsjahr],
+    queryFn: async () =>
+      (await apiClient.get<PortalArbeitskontext>(`${FB}/arbeitskontext?wirtschaftsjahr=${wirtschaftsjahr}`)).data,
+    staleTime: 60 * 1000,
+    enabled: Number.isFinite(wirtschaftsjahr),
+  })
+}
+
+export function usePortalSchlaginfo(schlagId: string | null, wirtschaftsjahr?: number) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'schlaginfo', schlagId, wirtschaftsjahr ?? 'all'],
+    queryFn: async () => {
+      const q = wirtschaftsjahr ? `?wirtschaftsjahr=${wirtschaftsjahr}` : ''
+      return (await apiClient.get<Record<string, unknown>>(`${FB}/schlaege/${schlagId}/schlaginfo${q}`)).data
+    },
+    enabled: Boolean(schlagId),
+    staleTime: 30 * 1000,
+  })
+}
+
+export function usePortalJahreswechsel() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: { von_jahr: number; nach_jahr: number; dry_run?: boolean }) =>
+      (await apiClient.post<Record<string, unknown>>(`${FB}/jahreswechsel`, body)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'schlaege'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function usePortalSammelDuengung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: {
+      schlag_ids: string[]
+      datum: string
+      mittel: string
+      menge_kg_ha: number
+      n_gehalt?: number
+      duenger_form?: string
+      preis_je_einheit?: number
+      anwender?: string
+    }) => (await apiClient.post<Record<string, unknown>>(`${FB}/massnahmen/sammel-duengung`, body)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function usePortalStammdaten() {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'stammdaten'],
+    queryFn: async () => (await apiClient.get<Record<string, unknown>>(`${FB}/stammdaten`)).data,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function usePortalQsCheckliste() {
+  return useMutation({
+    mutationFn: async (body: Record<string, boolean>) =>
+      (await apiClient.post<Record<string, unknown>>(`${FB}/qs-checkliste`, body)).data,
+  })
+}
+
+export function usePortalOfflineSync() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (ops: Array<Record<string, unknown>>) =>
+      (await apiClient.post<Record<string, unknown>>(`${FB}/offline/sync`, { ops })).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch'] })
+    },
+  })
+}
+
+/** Imperative Agent-/Tool-API (ohne React-Hooks) — Pfade = OpenAPI operation_id-Familie. */
+export const portalFeldbuchAgentApi = {
+  listSchlaege: async () =>
+    (await apiClient.get<PortalSchlag[]>(`${FB}/schlaege`)).data,
+  getSchlag: async (id: string) =>
+    (await apiClient.get<PortalSchlag>(`${FB}/schlaege/${id}`)).data,
+  createSchlag: async (data: Record<string, unknown>) =>
+    (await apiClient.post<PortalSchlag>(`${FB}/schlaege`, data)).data,
+  updateSchlag: async (id: string, data: Record<string, unknown>) =>
+    (await apiClient.put<PortalSchlag>(`${FB}/schlaege/${id}`, data)).data,
+  deleteSchlag: async (id: string) => {
+    await apiClient.delete(`${FB}/schlaege/${id}`)
+  },
+  listMassnahmen: async (params?: { schlag_id?: string; typ?: string }) => {
+    const p = new URLSearchParams()
+    if (params?.schlag_id) p.set('schlag_id', params.schlag_id)
+    if (params?.typ) p.set('typ', params.typ)
+    const qs = p.toString()
+    const q = qs ? `?${qs}` : ''
+    return (await apiClient.get<PortalMassnahme[]>(`${FB}/massnahmen${q}`)).data
+  },
+  getMassnahme: async (id: string) =>
+    (await apiClient.get<PortalMassnahme>(`${FB}/massnahmen/${id}`)).data,
+  createMassnahme: async (data: Record<string, unknown>) =>
+    (await apiClient.post<PortalMassnahme>(`${FB}/massnahmen`, data)).data,
+  updateMassnahme: async (id: string, data: Record<string, unknown>) =>
+    (await apiClient.put<PortalMassnahme>(`${FB}/massnahmen/${id}`, data)).data,
+  deleteMassnahme: async (id: string) => {
+    await apiClient.delete(`${FB}/massnahmen/${id}`)
+  },
+} as const
+
 export function useCreatePortalSchlag() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (data: Omit<PortalSchlag, 'id'>) =>
-      (await apiClient.post<PortalSchlag>('/api/v1/portal/feldbuch/schlaege', data)).data,
+    mutationFn: async (data: Omit<PortalSchlag, 'id'> | Record<string, unknown>) =>
+      portalFeldbuchAgentApi.createSchlag(data as Record<string, unknown>),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'schlaege'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function useUpdatePortalSchlag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Record<string, unknown> }) =>
+      portalFeldbuchAgentApi.updateSchlag(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'schlaege'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function useDeletePortalSchlag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => portalFeldbuchAgentApi.deleteSchlag(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'schlaege'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
       queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
     },
   })
@@ -281,8 +432,8 @@ export function useCreatePortalSchlag() {
 export function useCreatePortalMassnahme() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (data: Omit<PortalMassnahme, 'id' | 'quelle' | 'compliant' | 'exportiert'>) =>
-      (await apiClient.post<PortalMassnahme>('/api/v1/portal/feldbuch/massnahmen', data)).data,
+    mutationFn: async (data: Record<string, unknown>) =>
+      portalFeldbuchAgentApi.createMassnahme(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
       queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
@@ -293,10 +444,22 @@ export function useCreatePortalMassnahme() {
 export function useUpdatePortalMassnahme() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<PortalMassnahme> }) =>
-      (await apiClient.put<PortalMassnahme>(`/api/v1/portal/feldbuch/massnahmen/${id}`, data)).data,
+    mutationFn: async ({ id, data }: { id: string; data: Record<string, unknown> }) =>
+      portalFeldbuchAgentApi.updateMassnahme(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function useDeletePortalMassnahme() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => portalFeldbuchAgentApi.deleteMassnahme(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
     },
   })
 }

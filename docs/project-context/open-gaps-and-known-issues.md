@@ -11,6 +11,16 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## ASK-ACKERSCHLAGKARTEI — Lastenheft LWK 2017+ (2026-07-16)
+
+Status: **repo-Gaps geschlossen** (Slice ACKER-OPEN-GAPS-009). Traceability: [`docs/specs/agrar/ackerschlagkartei-traceability.md`](../specs/agrar/ackerschlagkartei-traceability.md).
+
+| Cluster | Status |
+|---|---|
+| AS-W1…W10 + Ink.1–5 Kern (Stammdaten, Register, QS/AUM, Lager, Offline-Queue) | erledigt (TDD) |
+| NÄON/ENNI, Precision Farming / Telemetrie | BLOCKED / external_gate |
+| GIS-Geometrieversionierung, Bodenhistorie, native PWA | PARTIAL / Folge |
+
 ## PROD-READINESS-AUDIT-001 — Production-Readiness-Audit & Agenten-Programm (2026-07-02)
 
 Status: **aktiv**. Der aktuelle Production-Readiness-Nachaudit ist unter

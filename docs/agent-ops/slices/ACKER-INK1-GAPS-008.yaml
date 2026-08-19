@@ -1,0 +1,47 @@
+slice_id: ACKER-INK1-GAPS-008
+id: ACKER-INK1-GAPS-008
+title: Ackerschlagkartei Inkrement-1 Gaps (Arbeitskontext, Schlaginfo, Jahreswechsel, Sammelbuchung) TDD
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+goal: >-
+  Lastenheft-Inkrement-1 Kernlücken testgetrieben schließen: Arbeitskontext mit
+  Wirtschaftsjahr, Schlaginfo inkl. Direktkostenfreier Leistung, Jahreswechsel
+  ohne Bewegungsdaten, Sammeldüngung über mehrere Schläge. Specs (IST-Audit,
+  Traceability, Zielarchitektur, Umsetzungsplan) anlegen.
+scope:
+  - Domain-Module arbeitskontext/schlaginfo/jahreswechsel/sammelbuchung
+  - Migration wirtschaftsjahr am Schlag
+  - Portal-Endpoints und Portal-UI
+  - docs/specs/agrar/*
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ACKER-INK1-GAPS-008.yaml
+  - app/agrar/feldbuch/arbeitskontext.py
+  - app/agrar/feldbuch/schlaginfo.py
+  - app/agrar/feldbuch/jahreswechsel.py
+  - app/agrar/feldbuch/sammelbuchung.py
+  - app/api/v1/endpoints/portal_feldbuch.py
+  - app/infrastructure/models/agrar_models.py
+  - alembic/versions/feldbuch_inkrement1_20260716.py
+  - tests/test_feldbuch_inkrement1_gaps.py
+  - packages/frontend-web/src/lib/api/portal.ts
+  - packages/frontend-web/src/pages/portal/feldbuch.tsx
+  - docs/specs/agrar/
+acceptance:
+  - "pytest tests/test_feldbuch_inkrement1_gaps.py gruen"
+  - "Alembic Single-Head feldbuch_inkrement1_20260716"
+  - "Portal zeigt Arbeitskontext, Sammeldüngung, Jahreswechsel, Schlaginfo"
+  - "Traceability dokumentiert VERIFIED vs. offene Inkremente ehrlich"
+tests:
+  - "pytest tests/test_feldbuch_inkrement1_gaps.py"
+risks:
+  - "Vollständiges Lastenheft (Mobile/NÄON/Precision Farming) bleibt Folgeinkrementen vorbehalten."
+ai_harness:
+  fachlicher_vertrag: >-
+    Inkrement-1 schließt die priorisierten Portal-Gaps aus dem Soll-Ist-Vergleich
+    gegen das LWK-Lastenheft; keine Schein-Integrationen.
+  test_vertrag: >-
+    TDD: Domain-Unit-Tests zuerst rot, dann grün; API verdrahtet dieselben Domain-Funktionen.

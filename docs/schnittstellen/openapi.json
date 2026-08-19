@@ -89363,6 +89363,29 @@
             ],
             "title": "S Gehalt"
           },
+          "sachkunde_gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sachkunde Gueltig Bis"
+          },
+          "sachkunde_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sachkunde Nummer"
+          },
           "schlag_id": {
             "anyOf": [
               {
@@ -89641,6 +89664,29 @@
               }
             ],
             "title": "S Gehalt"
+          },
+          "sachkunde_gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sachkunde Gueltig Bis"
+          },
+          "sachkunde_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sachkunde Nummer"
           },
           "schlag_id": {
             "anyOf": [
@@ -90103,6 +90149,17 @@
               }
             ],
             "title": "Vorkultur"
+          },
+          "wirtschaftsjahr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wirtschaftsjahr"
           }
         },
         "required": [
@@ -90334,6 +90391,17 @@
               }
             ],
             "title": "Vorkultur"
+          },
+          "wirtschaftsjahr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wirtschaftsjahr"
           }
         },
         "title": "PortalSchlagUpdate",
@@ -128458,6 +128526,57 @@
         "title": "_AndiImportBody",
         "type": "object"
       },
+      "_ArbeitskontextBody": {
+        "properties": {
+          "betrieb_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrieb Name"
+          },
+          "betriebsstaette": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betriebsstaette"
+          },
+          "erntejahr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erntejahr"
+          },
+          "rolle": {
+            "default": "betriebsleiter",
+            "title": "Rolle",
+            "type": "string"
+          },
+          "wirtschaftsjahr": {
+            "title": "Wirtschaftsjahr",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "wirtschaftsjahr"
+        ],
+        "title": "_ArbeitskontextBody",
+        "type": "object"
+      },
       "_CertificationItem": {
         "properties": {
           "value": {
@@ -128715,6 +128834,29 @@
         "title": "_FollowUpActionItem",
         "type": "object"
       },
+      "_JahreswechselBody": {
+        "properties": {
+          "dry_run": {
+            "default": false,
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "nach_jahr": {
+            "title": "Nach Jahr",
+            "type": "integer"
+          },
+          "von_jahr": {
+            "title": "Von Jahr",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "von_jahr",
+          "nach_jahr"
+        ],
+        "title": "_JahreswechselBody",
+        "type": "object"
+      },
       "_OptimizeFromProfileBody": {
         "properties": {
           "cow_profile": {
@@ -128921,6 +129063,106 @@
           "cow_profile"
         ],
         "title": "_OptimizeFromProfileBody",
+        "type": "object"
+      },
+      "_SammelDuengungBody": {
+        "properties": {
+          "anwender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anwender"
+          },
+          "begruendung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Begruendung"
+          },
+          "datum": {
+            "format": "date-time",
+            "title": "Datum",
+            "type": "string"
+          },
+          "duenger_form": {
+            "default": "M",
+            "title": "Duenger Form",
+            "type": "string"
+          },
+          "einheit": {
+            "default": "kg/ha",
+            "title": "Einheit",
+            "type": "string"
+          },
+          "k2o_gehalt": {
+            "default": 0.0,
+            "title": "K2O Gehalt",
+            "type": "number"
+          },
+          "menge_kg_ha": {
+            "title": "Menge Kg Ha",
+            "type": "number"
+          },
+          "mgo_gehalt": {
+            "default": 0.0,
+            "title": "Mgo Gehalt",
+            "type": "number"
+          },
+          "mittel": {
+            "title": "Mittel",
+            "type": "string"
+          },
+          "n_gehalt": {
+            "default": 0.0,
+            "title": "N Gehalt",
+            "type": "number"
+          },
+          "p2o5_gehalt": {
+            "default": 0.0,
+            "title": "P2O5 Gehalt",
+            "type": "number"
+          },
+          "preis_je_einheit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Je Einheit"
+          },
+          "s_gehalt": {
+            "default": 0.0,
+            "title": "S Gehalt",
+            "type": "number"
+          },
+          "schlag_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Schlag Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schlag_ids",
+          "datum",
+          "mittel",
+          "menge_kg_ha"
+        ],
+        "title": "_SammelDuengungBody",
         "type": "object"
       },
       "_ShakerBoxIn": {
@@ -296528,6 +296770,180 @@
         ]
       }
     },
+    "/api/v1/portal/feldbuch/arbeitskontext": {
+      "get": {
+        "description": "ASK Kap. 5: aktiver Betrieb-/Jahreskontext für die Portal-Ackerschlagkartei.",
+        "operationId": "portal_arbeitskontext_get_api_v1_portal_feldbuch_arbeitskontext_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "wirtschaftsjahr",
+            "required": true,
+            "schema": {
+              "title": "Wirtschaftsjahr",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "betrieb_name",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Betrieb Name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "erntejahr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Erntejahr"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rolle",
+            "required": false,
+            "schema": {
+              "default": "betriebsleiter",
+              "title": "Rolle",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Arbeitskontext portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      },
+      "post": {
+        "operationId": "portal_arbeitskontext_set_api_v1_portal_feldbuch_arbeitskontext_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_ArbeitskontextBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Arbeitskontext setzen portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch/duengebedarf": {
       "get": {
         "description": "AS-W2 (DüV): N-Düngebedarfsermittlung je Schlag (Sollwert − Nmin) und\nAbgleich gegen die ausgebrachte N-Menge des Jahres.",
@@ -296994,6 +297410,90 @@
         ]
       }
     },
+    "/api/v1/portal/feldbuch/jahreswechsel": {
+      "post": {
+        "description": "ASK Kap. 36: Vorjahresschläge ohne Bewegungsdaten in das neue Wirtschaftsjahr übernehmen.",
+        "operationId": "portal_jahreswechsel_api_v1_portal_feldbuch_jahreswechsel_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_JahreswechselBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Jahreswechsel Schlaege fortfuehren portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch/massnahmen": {
       "get": {
         "operationId": "portal_list_massnahmen_api_v1_portal_feldbuch_massnahmen_get",
@@ -297231,6 +297731,90 @@
           }
         ],
         "summary": "Create massnahme portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/massnahmen/sammel-duengung": {
+      "post": {
+        "description": "ASK Kap. 31: eine Düngung auf mehrere Schläge mit flächenproportionaler Nährstoffrechnung.",
+        "operationId": "portal_sammel_duengung_api_v1_portal_feldbuch_massnahmen_sammel_duengung_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_SammelDuengungBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sammelbuchung Duengung portal",
         "tags": [
           "portal",
           "feldbuch",
@@ -297825,6 +298409,105 @@
           }
         ],
         "summary": "Update schlag portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/schlaege/{schlag_id}/schlaginfo": {
+      "get": {
+        "description": "ASK Kap. 19: schlagbezogene Gesamtdokumentation inkl. Direktkostenfreier Leistung.",
+        "operationId": "portal_schlaginfo_api_v1_portal_feldbuch_schlaege__schlag_id__schlaginfo_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schlag_id",
+            "required": true,
+            "schema": {
+              "title": "Schlag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "wirtschaftsjahr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Wirtschaftsjahr"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schlaginfo Gesamtdokumentation portal",
         "tags": [
           "portal",
           "feldbuch",

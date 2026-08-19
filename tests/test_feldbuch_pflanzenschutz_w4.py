@@ -23,7 +23,8 @@ from app.agrar.feldbuch.pflanzenschutz import (  # noqa: E402
 class TestCompliance:
     def test_complete_is_compliant(self):
         m = PsmMassnahme(date(2026, 5, 10), "Beispiel-Herbizid", 1.5, 8.0, "Max Mustermann",
-                         wirkungsbereich="Herbizid", begruendung="Ungrasbekaempfung")
+                         wirkungsbereich="Herbizid", begruendung="Ungrasbekaempfung",
+                         sachkunde_nummer="SK-NI-1", sachkunde_gueltig_bis=date(2027, 12, 31))
         r = psm_compliance(m)
         assert r["compliant"] is True
         assert r["fehlende_pflichtangaben"] == []

@@ -1,0 +1,21 @@
+slice_id: ACKER-OPEN-GAPS-009
+id: ACKER-OPEN-GAPS-009
+title: Ackerschlagkartei restliche Lastenheft-Gaps TDD (Ink. 2–5 Kern)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+goal: >-
+  Alle repo-seitig schliessbaren Lastenheft-Gaps testgetrieben umsetzen:
+  Stammdaten, Aussaat, Beregnung, AUM, QS, Lagerverbrauch, Schlaginfo-Druck,
+  Offline-Sync-Queue, Betriebssnapshot. Externe Gates (NÄON/ENNI) ehrlich BLOCKED.
+acceptance:
+  - "pytest tests/test_feldbuch_open_gaps.py gruen"
+  - "Alembic Single-Head feldbuch_open_gaps_20260716"
+  - "Traceability ohne NOT_IMPLEMENTED fuer repo-Gaps"
+tests:
+  - "pytest tests/test_feldbuch_open_gaps.py"
+risks:
+  - "NÄON/ENNI und Precision Farming bleiben externe Gates."
+  - "Lagerverbrauch schreibt Massnahmenfelder, keine vollstaendige ERP-Bestandsbewegung."
