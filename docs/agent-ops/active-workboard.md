@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-FULL-MASK-GAP-002 Vollinventur der L3-Masken und funktionale Gap-Liste - reserviert 2026-08-19
+
+**Von:** Nutzerauftrag zur Screenshot-Inventur aller uebrigen L3-Masken und Ermittlung fehlender VALEO-Funktionalitaeten. **Owner:** Codex. **Stand:** reserviert 2026-08-19.
+
+**Ziel:** Alle in der angemeldeten L3-Remote-Sitzung erreichbaren Hauptmasken und Untermenues read-only erfassen. Sichtbare Funktionen werden ohne Echtdaten gegen VALEO-Routen, ScreenDefinitions, APIs und kanonische Projektdokumentation verifiziert und als priorisierte Gap-Liste dokumentiert.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-FULL-MASK-GAP-002.yaml`, dieser Workboard-Abschnitt, `docs/design/l3-full-mask-functional-gap-inventory.md`, `docs/project-context/open-gaps-and-known-issues.md`.
+
+**Abnahme:** Lokale Screenshots ausserhalb von Git; nachvollziehbarer Abdeckungsstatus je erreichbarer L3-Hauptmaske; P0-P3-Priorisierung echter Funktionsluecken; getrennte Kennzeichnung externer oder rollenbedingter Gates; keine schreibende Aktion in L3.
+
 ## L3-HABIT-BRIDGE-001 L3-Gewohnheitsbruecke ueber Meridian Single Mask Builder - abgeschlossen 2026-08-19
 
 **Von:** Nutzerauftrag zur fliessenden Migration bestehender L3-Anwender. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-19.

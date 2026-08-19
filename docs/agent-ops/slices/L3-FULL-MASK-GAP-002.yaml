@@ -1,0 +1,31 @@
+slice_id: L3-FULL-MASK-GAP-002
+id: L3-FULL-MASK-GAP-002
+title: Vollinventur der L3-Masken und funktionale Gap-Liste
+owner: Codex
+status: reserviert
+created_at: "2026-08-19"
+started_at: "2026-08-19"
+goal: >-
+  Alle noch erreichbaren L3-Masken in der angemeldeten Remote-Desktop-Sitzung
+  read-only erfassen, ihre sichtbaren Funktionen datenschutzkonform abstrahieren
+  und gegen den verifizierten VALEO-NeuroERP-Bestand abgleichen.
+scope:
+  - Vollstaendige Inventur der erreichbaren L3-Ribbonbereiche und Untermenues.
+  - Lokale Screenshots ausserhalb von Git; keine Echtdaten im Repository.
+  - Redigierter Maskenkatalog mit Navigationspfad und sichtbaren Funktionsmustern.
+  - Evidenzbasierter Abgleich gegen VALEO-Routen, ScreenDefinitions, APIs und Doku.
+  - Priorisierte Gap-Liste mit Status vorhanden, teilweise, fehlend oder externes Gate.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/L3-FULL-MASK-GAP-002.yaml
+  - docs/design/l3-full-mask-functional-gap-inventory.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance:
+  - Jede erreichbare L3-Hauptmaske ist erfasst oder mit nachvollziehbarem Blocker markiert.
+  - Screenshots und Echtdaten werden nicht in Git aufgenommen.
+  - Jede behauptete VALEO-Abdeckung besitzt Code-, Routen- oder Dokumentationsevidenz.
+  - Gaps sind nach P0 bis P3 priorisiert und von externen Rollout-Gates getrennt.
+risks:
+  - Einige Menuepunkte koennen lizenz-, rollen- oder mandantenbedingt nicht erreichbar sein.
+  - Read-only-Navigation darf keine Buchung, Freigabe, Loeschung oder Speicherung ausloesen.
+  - Sichtbare Echtdaten duerfen nur im lokalen, nicht versionierten Bildbestand liegen.
