@@ -175,6 +175,18 @@ den Positionen. Kein offener Architektur-Gap. Externes Rollout-Gate bleibt die
 fachliche Pilotabnahme durch erfahrene L3-Anwender. Originalaufnahmen mit
 Echtdaten sind absichtlich nicht versioniert.
 
+Nachzug 2026-08-19 (`L3-FULL-MASK-GAP-002`): Die erreichbaren Funktionen der
+zehn L3-Ribbonbereiche und 37 Dropdown-Gruppen wurden read-only gegen aktuelle
+VALEO-Seiten, APIs und Lieferdokumentation abgeglichen. Es wurde kein neuer
+P0-Blocker gefunden. Offen sind sechs P1-Gaps (MDE-Verarbeitung,
+Dokumentenruecklauf, allgemeiner Produktionsleitstand, Inventur-Nebenlaeufe,
+zentrale Belegkontrolle, Rechnungstapel/Selbstabrechner), sechs P2-Gaps
+(Fremdware-Operator-UI, Abfrage-Center, Teamkalender, Mailarbeitsplatz,
+Tankanlagen-Import, Berichtskatalog-Paritaet) und zwei P3-Gaps. Die vollstaendige
+Evidenz, Abgrenzung und Abnahmekriterien stehen in
+[`l3-full-mask-functional-gap-inventory.md`](../design/l3-full-mask-functional-gap-inventory.md).
+Originalbilder mit Echtdaten bleiben lokal ausserhalb von Git.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

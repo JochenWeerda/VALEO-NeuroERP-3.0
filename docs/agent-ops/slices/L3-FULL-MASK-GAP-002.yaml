@@ -2,7 +2,7 @@ slice_id: L3-FULL-MASK-GAP-002
 id: L3-FULL-MASK-GAP-002
 title: Vollinventur der L3-Masken und funktionale Gap-Liste
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-19"
 started_at: "2026-08-19"
 goal: >-
@@ -29,3 +29,14 @@ risks:
   - Einige Menuepunkte koennen lizenz-, rollen- oder mandantenbedingt nicht erreichbar sein.
   - Read-only-Navigation darf keine Buchung, Freigabe, Loeschung oder Speicherung ausloesen.
   - Sichtbare Echtdaten duerfen nur im lokalen, nicht versionierten Bildbestand liegen.
+completed_at: "2026-08-19"
+result:
+  - Zehn Ribbonbereiche, 37 Dropdown-Gruppen und 53 Einstiegspfade read-only ausgewertet.
+  - Originalbilder und OCR-Belege datenschutzkonform ausserhalb von Git belassen.
+  - Kein neuer P0-Gap; sechs P1-, sechs P2- und zwei P3-Gaps mit Abnahmekriterien dokumentiert.
+  - Bereits vorhandene Kernfunktionen und externe Rollout-Gates explizit von echten Code-Gaps getrennt.
+verification:
+  - git diff --check
+  - node scripts/docs-markdown-check.cjs
+  - node scripts/docs-governance-check.cjs
+  - python scripts/generate_agent_handbuch.py --check
