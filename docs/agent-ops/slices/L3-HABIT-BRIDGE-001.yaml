@@ -1,0 +1,50 @@
+slice_id: L3-HABIT-BRIDGE-001
+id: L3-HABIT-BRIDGE-001
+title: L3-Gewohnheitsbruecke ueber Meridian Single Mask Builder
+owner: Codex
+status: reserviert
+created_at: "2026-08-19"
+started_at: "2026-08-19"
+goal: >-
+  Die Bediengewohnheiten ausgewaehlter L3-Referenzmasken datenschutzkonform
+  erfassen, in herstellerneutrale Masken- und Interaktionsvertraege
+  ueberfuehren und zentral in der bestehenden ScreenDefinition-zu-RenderPlan-
+  zu-UniversalMaskRenderer-Kette umsetzen, damit Bestandsanwender ohne
+  paralleles L3-Frontend sicher zu VALEO NeuroERP wechseln koennen.
+scope:
+  - Read-only Inventur der bereits geoeffneten L3-Referenzmasken; Originalbilder bleiben ausserhalb des Repositories.
+  - Redigierte Gewohnheits- und Paritaetsmatrix fuer Artikelstamm, Kunden-Artikel und Verkaufs-Lieferschein.
+  - Zentraler, herstellerneutraler Interaktionsvertrag in ScreenDefinition und RenderPlan.
+  - Renderer-Unterstuetzung fuer Lookup-Affordanz, feste Aktionszonen, Master-Detail-, Register- und Summenband-Gewohnheiten.
+  - Tastatur-, Layout-, Runtime- und visuelle Abnahme fuer 1366, 1440 und 1920 Pixel.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/L3-HABIT-BRIDGE-001.yaml
+  - docs/design/valeo-meridian-experience.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/MASKEN.md
+  - packages/frontend-web/src/components/mask-builder/
+  - packages/frontend-web/src/__tests__/components/mask-builder/
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/L3-HABIT-BRIDGE-001.yaml
+  - docs/design/valeo-meridian-experience.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/MASKEN.md
+  - packages/frontend-web/src/components/mask-builder/
+  - packages/frontend-web/src/__tests__/components/mask-builder/
+acceptance:
+  - L3-Referenzdaten oder personenbezogene Inhalte werden nicht in Git aufgenommen.
+  - Die Gewohnheitsbruecke ist Teil der kanonischen Runtime-Kette und kein maskenspezifischer Sonderrenderer.
+  - Bestehende ScreenDefinitions bleiben kompatibel; neue Semantik ist additiv und typisiert.
+  - Tastaturreihenfolge, Register, Lookup, Tabellen- und Aktionszonen sind automatisiert getestet.
+  - Die drei Referenzmuster sind als Paritaetsvertraege dokumentiert und auf VALEO-Masken abbildbar.
+risks:
+  - L3-Bildmaterial enthaelt reale Geschaefts- und Personendaten und darf nur lokal ausserhalb von Git liegen.
+  - Eine optische 1:1-Kopie wuerde Bedienprobleme konservieren; uebernommen werden Gewohnheiten und Arbeitsfolgen, nicht Produktbranding.
+external_gates: >-
+  Fachliche Endabnahme durch erfahrene L3-Anwender bleibt ein externes Rollout-Gate;
+  technische und visuelle Repo-Abnahme wird in diesem Slice vollstaendig umgesetzt.
+

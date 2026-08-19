@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-HABIT-BRIDGE-001 L3-Gewohnheitsbruecke ueber Meridian Single Mask Builder - reserviert 2026-08-19
+
+**Von:** Nutzerauftrag zur fliessenden Migration bestehender L3-Anwender. **Owner:** Codex. **Stand:** reserviert 2026-08-19.
+
+**Ziel:** Read-only L3-Referenzmasken werden datenschutzkonform in eine redigierte Gewohnheits- und Paritaetsmatrix ueberfuehrt. Die daraus benoetigten, herstellerneutralen Interaktionsvertraege werden ausschliesslich zentral ueber `ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer` umgesetzt. Kein paralleles L3-Frontend und keine Produktbranding-Kopie.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-HABIT-BRIDGE-001.yaml`, dieser Workboard-Abschnitt, `docs/design/valeo-meridian-experience.md`, `docs/architecture/uix/universal-mask-runtime-status.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/MASKEN.md`, `packages/frontend-web/src/components/mask-builder/` und zugehoerige Tests.
+
+**Abnahme:** Keine L3-PII in Git; additive typisierte Runtime-Vertraege; zentrale Renderer-Vererbung; automatisierte Tastatur-, Lookup-, Register-, Tabellen- und Aktionszonen-Tests; Viewport-Abnahme bei 1366/1440/1920; externe L3-Anwenderabnahme als ehrliches Rollout-Gate dokumentiert.
+
 ## RATION-WB-20-LIVE-PREVIEW Excel-artige Live-Vorschau in der Spielwiese - abgeschlossen 2026-07-21
 
 **Von:** Nutzeranforderung ("neue Ration komponieren mit Live-Formelwerte-Umrechnung wie in Excel"). **Owner:** Claude. **Stand:** abgeschlossen 2026-07-21.
