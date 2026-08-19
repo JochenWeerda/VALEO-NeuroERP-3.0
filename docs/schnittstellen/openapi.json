@@ -21093,6 +21093,34 @@
         "title": "CampaignUpdate",
         "type": "object"
       },
+      "CandidateVersionOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version_no",
+          "source",
+          "status"
+        ],
+        "title": "CandidateVersionOut",
+        "type": "object"
+      },
       "CapabilityResponse": {
         "properties": {
           "capability_key": {
@@ -24753,6 +24781,29 @@
           }
         },
         "title": "ConcentrateRecipeProfile",
+        "type": "object"
+      },
+      "CondenseOut": {
+        "properties": {
+          "condensed_days": {
+            "title": "Condensed Days",
+            "type": "integer"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "snapshot_count": {
+            "title": "Snapshot Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "group_id",
+          "condensed_days",
+          "snapshot_count"
+        ],
+        "title": "CondenseOut",
         "type": "object"
       },
       "ConnectorConfig": {
@@ -32477,6 +32528,19 @@
             ],
             "title": "Milk Price Eur Kg"
           },
+          "milk_urea_mg_dl": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milk Urea Mg Dl"
+          },
           "observation_date": {
             "format": "date",
             "title": "Observation Date",
@@ -32486,6 +32550,18 @@
             "additionalProperties": true,
             "title": "Payload",
             "type": "object"
+          },
+          "somatic_cell_count_k": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Somatic Cell Count K"
           },
           "source": {
             "default": "manual",
@@ -34698,6 +34774,61 @@
           "id"
         ],
         "title": "DeleteRequest",
+        "type": "object"
+      },
+      "DeliveryComponentIn": {
+        "properties": {
+          "ist_kg": {
+            "minimum": 0.0,
+            "title": "Ist Kg",
+            "type": "number"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "ist_kg"
+        ],
+        "title": "DeliveryComponentIn",
+        "type": "object"
+      },
+      "DeliveryIn": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/DeliveryComponentIn"
+            },
+            "minItems": 1,
+            "title": "Components",
+            "type": "array"
+          },
+          "idempotency_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "mixer",
+              "manual",
+              "import"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "idempotency_key",
+          "components"
+        ],
+        "title": "DeliveryIn",
         "type": "object"
       },
       "DeliveryNote": {
@@ -45189,6 +45320,31 @@
         "title": "ExecuteRequest",
         "type": "object"
       },
+      "ExplainFindingsIn": {
+        "properties": {
+          "components": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "minItems": 1,
+            "title": "Components",
+            "type": "array"
+          },
+          "group_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Group Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id",
+          "components"
+        ],
+        "title": "ExplainFindingsIn",
+        "type": "object"
+      },
       "ExplainabilityDetail": {
         "properties": {
           "label": {
@@ -54247,6 +54403,55 @@
           "business_id"
         ],
         "title": "GroupAssignmentOut",
+        "type": "object"
+      },
+      "GroupBenchmarkOut": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "string"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "group_name": {
+            "title": "Group Name",
+            "type": "string"
+          },
+          "metrics": {
+            "additionalProperties": true,
+            "title": "Metrics",
+            "type": "object"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "peer_group_count": {
+            "title": "Peer Group Count",
+            "type": "integer"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "window_days": {
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "group_id",
+          "group_name",
+          "window_days",
+          "scope",
+          "n",
+          "peer_group_count",
+          "metrics",
+          "confidence"
+        ],
+        "title": "GroupBenchmarkOut",
         "type": "object"
       },
       "GroupProfile": {
@@ -74708,6 +74913,68 @@
         "title": "MassnahmeUpdate",
         "type": "object"
       },
+      "MasterDataAuditEventOut": {
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "delta": {
+            "additionalProperties": true,
+            "title": "Delta",
+            "type": "object"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_type": {
+            "enum": [
+              "business",
+              "feed",
+              "analysis",
+              "grant"
+            ],
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "id",
+          "entity_type",
+          "entity_id",
+          "event_type",
+          "actor",
+          "delta",
+          "occurred_at"
+        ],
+        "title": "MasterDataAuditEventOut",
+        "type": "object"
+      },
       "MasterDataCreate": {
         "properties": {
           "category": {
@@ -82155,6 +82422,55 @@
         "title": "OptimizationRunOut",
         "type": "object"
       },
+      "OptimizationRunRefOut": {
+        "properties": {
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "objective": {
+            "title": "Objective",
+            "type": "string"
+          },
+          "ration_id": {
+            "title": "Ration Id",
+            "type": "string"
+          },
+          "ration_version_id": {
+            "title": "Ration Version Id",
+            "type": "string"
+          },
+          "solver_version": {
+            "title": "Solver Version",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ration_id",
+          "ration_version_id",
+          "solver_version",
+          "objective",
+          "status"
+        ],
+        "title": "OptimizationRunRefOut",
+        "type": "object"
+      },
       "OrderCreate": {
         "description": "Bestellung erstellen",
         "properties": {
@@ -82204,6 +82520,27 @@
           "items"
         ],
         "title": "OrderCreate",
+        "type": "object"
+      },
+      "OrderCreateIn": {
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "menge_t": {
+            "exclusiveMinimum": 0.0,
+            "title": "Menge T",
+            "type": "number"
+          }
+        },
+        "required": [
+          "menge_t",
+          "idempotency_key"
+        ],
+        "title": "OrderCreateIn",
         "type": "object"
       },
       "OrderItemCreate": {
@@ -82379,6 +82716,75 @@
           "main_article"
         ],
         "title": "OrderListItem",
+        "type": "object"
+      },
+      "OrderOut": {
+        "properties": {
+          "delivery": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "menge_t": {
+            "title": "Menge T",
+            "type": "number"
+          },
+          "nachkalkulation": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachkalkulation"
+          },
+          "recipe_id": {
+            "title": "Recipe Id",
+            "type": "string"
+          },
+          "recipe_version_id": {
+            "title": "Recipe Version Id",
+            "type": "string"
+          },
+          "recipe_version_no": {
+            "title": "Recipe Version No",
+            "type": "integer"
+          },
+          "soll_components": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Soll Components",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "recipe_id",
+          "recipe_version_id",
+          "recipe_version_no",
+          "menge_t",
+          "soll_components"
+        ],
+        "title": "OrderOut",
         "type": "object"
       },
       "OrderResponse": {
@@ -87842,6 +88248,47 @@
         "title": "PeriodCloseResult",
         "type": "object"
       },
+      "PeriodComparisonOut": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "string"
+          },
+          "current": {
+            "additionalProperties": true,
+            "title": "Current",
+            "type": "object"
+          },
+          "delta": {
+            "additionalProperties": true,
+            "title": "Delta",
+            "type": "object"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "period_days": {
+            "title": "Period Days",
+            "type": "integer"
+          },
+          "previous": {
+            "additionalProperties": true,
+            "title": "Previous",
+            "type": "object"
+          }
+        },
+        "required": [
+          "group_id",
+          "period_days",
+          "current",
+          "previous",
+          "delta",
+          "confidence"
+        ],
+        "title": "PeriodComparisonOut",
+        "type": "object"
+      },
       "PeriodCreate": {
         "description": "Create accounting period.",
         "properties": {
@@ -89149,6 +89596,17 @@
             ],
             "title": "Anwender"
           },
+          "aum_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aum Code"
+          },
           "begruendung": {
             "anyOf": [
               {
@@ -89181,6 +89639,17 @@
               }
             ],
             "title": "Bezeichnung"
+          },
+          "client_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Ref"
           },
           "datum": {
             "format": "date-time",
@@ -89264,6 +89733,39 @@
             ],
             "title": "Kosten Eur"
           },
+          "lager_artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Artikel Id"
+          },
+          "lager_charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Charge"
+          },
+          "lager_verbrauch": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Verbrauch"
+          },
           "menge": {
             "anyOf": [
               {
@@ -89296,6 +89798,28 @@
               }
             ],
             "title": "Mittel"
+          },
+          "mittel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mittel Id"
+          },
+          "mittel_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mittel Typ"
           },
           "n_gehalt": {
             "anyOf": [
@@ -89352,6 +89876,18 @@
             ],
             "title": "Qualitaet"
           },
+          "register_daten": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Register Daten"
+          },
           "s_gehalt": {
             "anyOf": [
               {
@@ -89397,6 +89933,17 @@
             ],
             "title": "Schlag Id"
           },
+          "sorte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sorte"
+          },
           "typ": {
             "title": "Typ",
             "type": "string"
@@ -89411,6 +89958,17 @@
               }
             ],
             "title": "Uhrzeit"
+          },
+          "wassermenge_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wassermenge Mm"
           },
           "wirkungsbereich": {
             "anyOf": [
@@ -89444,6 +90002,17 @@
             ],
             "title": "Anwender"
           },
+          "aum_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aum Code"
+          },
           "begruendung": {
             "anyOf": [
               {
@@ -89476,6 +90045,17 @@
               }
             ],
             "title": "Bezeichnung"
+          },
+          "client_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Ref"
           },
           "datum": {
             "anyOf": [
@@ -89566,6 +90146,39 @@
             ],
             "title": "Kosten Eur"
           },
+          "lager_artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Artikel Id"
+          },
+          "lager_charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Charge"
+          },
+          "lager_verbrauch": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Verbrauch"
+          },
           "menge": {
             "anyOf": [
               {
@@ -89598,6 +90211,28 @@
               }
             ],
             "title": "Mittel"
+          },
+          "mittel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mittel Id"
+          },
+          "mittel_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mittel Typ"
           },
           "n_gehalt": {
             "anyOf": [
@@ -89654,6 +90289,18 @@
             ],
             "title": "Qualitaet"
           },
+          "register_daten": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Register Daten"
+          },
           "s_gehalt": {
             "anyOf": [
               {
@@ -89699,6 +90346,17 @@
             ],
             "title": "Schlag Id"
           },
+          "sorte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sorte"
+          },
           "typ": {
             "anyOf": [
               {
@@ -89720,6 +90378,17 @@
               }
             ],
             "title": "Uhrzeit"
+          },
+          "wassermenge_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wassermenge Mm"
           },
           "wirkungsbereich": {
             "anyOf": [
@@ -96064,6 +96733,99 @@
         "title": "PromotionRule",
         "type": "object"
       },
+      "ProposalOut": {
+        "properties": {
+          "agent": {
+            "title": "Agent",
+            "type": "string"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Refs",
+            "type": "array"
+          },
+          "facts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "objective": {
+            "title": "Objective",
+            "type": "string"
+          },
+          "proposal_id": {
+            "title": "Proposal Id",
+            "type": "string"
+          },
+          "proposed_commands": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Proposed Commands",
+            "type": "array"
+          },
+          "recommendations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Recommendations",
+            "type": "array"
+          },
+          "requires_human_approval": {
+            "title": "Requires Human Approval",
+            "type": "boolean"
+          },
+          "risks": {
+            "items": {},
+            "title": "Risks",
+            "type": "array"
+          },
+          "ruleset": {
+            "title": "Ruleset",
+            "type": "string"
+          },
+          "scope": {
+            "additionalProperties": true,
+            "title": "Scope",
+            "type": "object"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "agent",
+          "objective",
+          "scope",
+          "facts",
+          "assumptions",
+          "recommendations",
+          "evidence_refs",
+          "ruleset",
+          "confidence",
+          "risks",
+          "proposed_commands",
+          "requires_human_approval"
+        ],
+        "title": "ProposalOut",
+        "type": "object"
+      },
       "ProposalRequest": {
         "properties": {
           "action_type": {
@@ -98934,7 +99696,8 @@
               "manual",
               "import",
               "editor",
-              "template"
+              "template",
+              "optimizer"
             ],
             "title": "Source",
             "type": "string"
@@ -99137,6 +99900,103 @@
         "title": "RechnungspruefungIn",
         "type": "object"
       },
+      "RecipeApproveIn": {
+        "properties": {
+          "version_no": {
+            "minimum": 1.0,
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version_no"
+        ],
+        "title": "RecipeApproveIn",
+        "type": "object"
+      },
+      "RecipeComponentIn": {
+        "properties": {
+          "feed_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Id"
+          },
+          "kg_per_t": {
+            "exclusiveMinimum": 0.0,
+            "title": "Kg Per T",
+            "type": "number"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kg_per_t"
+        ],
+        "title": "RecipeComponentIn",
+        "type": "object"
+      },
+      "RecipeCreateIn": {
+        "properties": {
+          "artikel_nr": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Artikel Nr",
+            "type": "string"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/RecipeComponentIn"
+            },
+            "minItems": 1,
+            "title": "Components",
+            "type": "array"
+          },
+          "customer_ref": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Customer Ref",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "source_ration_ref": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ration Ref"
+          }
+        },
+        "required": [
+          "customer_ref",
+          "artikel_nr",
+          "name",
+          "components"
+        ],
+        "title": "RecipeCreateIn",
+        "type": "object"
+      },
       "RecipeImportRequest": {
         "properties": {
           "article_id": {
@@ -99157,6 +100017,93 @@
           "components"
         ],
         "title": "RecipeImportRequest",
+        "type": "object"
+      },
+      "RecipeOut": {
+        "properties": {
+          "approved_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved Version No"
+          },
+          "artikel_nr": {
+            "title": "Artikel Nr",
+            "type": "string"
+          },
+          "customer_ref": {
+            "title": "Customer Ref",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "latest_components": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Latest Components",
+            "type": "array"
+          },
+          "latest_version_no": {
+            "title": "Latest Version No",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "source_ration_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ration Ref"
+          }
+        },
+        "required": [
+          "id",
+          "customer_ref",
+          "artikel_nr",
+          "name",
+          "latest_version_no",
+          "latest_components"
+        ],
+        "title": "RecipeOut",
+        "type": "object"
+      },
+      "RecipeVersionIn": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/RecipeComponentIn"
+            },
+            "minItems": 1,
+            "title": "Components",
+            "type": "array"
+          },
+          "expected_latest_version_no": {
+            "minimum": 1.0,
+            "title": "Expected Latest Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_latest_version_no",
+          "components"
+        ],
+        "title": "RecipeVersionIn",
         "type": "object"
       },
       "RecipientAdd": {
@@ -100277,6 +101224,43 @@
         "title": "ReopenIn",
         "type": "object"
       },
+      "ReportCreateIn": {
+        "properties": {
+          "profile": {
+            "enum": [
+              "farmer",
+              "advisor",
+              "feeder"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "report_type": {
+            "enum": [
+              "feeding_plan",
+              "consulting",
+              "target_actual",
+              "trend",
+              "benchmark"
+            ],
+            "title": "Report Type",
+            "type": "string"
+          },
+          "source_ref": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Source Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "report_type",
+          "profile",
+          "source_ref"
+        ],
+        "title": "ReportCreateIn",
+        "type": "object"
+      },
       "ReportDraftIn": {
         "properties": {
           "reason": {
@@ -100313,6 +101297,101 @@
           "description"
         ],
         "title": "ReportIn",
+        "type": "object"
+      },
+      "ReportOut": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "dms_document_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dms Document Ref"
+          },
+          "duplicate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "profile": {
+            "enum": [
+              "farmer",
+              "advisor",
+              "feeder"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "report_type": {
+            "enum": [
+              "feeding_plan",
+              "consulting",
+              "target_actual",
+              "trend",
+              "benchmark"
+            ],
+            "title": "Report Type",
+            "type": "string"
+          },
+          "source_ref": {
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "report_type",
+          "profile",
+          "source_ref",
+          "content_hash",
+          "created_by",
+          "created_at"
+        ],
+        "title": "ReportOut",
         "type": "object"
       },
       "ReportPermissionIn": {
@@ -109926,6 +111005,57 @@
         "title": "SlaEscalationApiOut",
         "type": "object"
       },
+      "SnapshotOut": {
+        "properties": {
+          "condensed_at": {
+            "format": "date-time",
+            "title": "Condensed At",
+            "type": "string"
+          },
+          "cow_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cow Count"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kpis": {
+            "additionalProperties": true,
+            "title": "Kpis",
+            "type": "object"
+          },
+          "snapshot_date": {
+            "title": "Snapshot Date",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "group_id",
+          "snapshot_date",
+          "kpis",
+          "source",
+          "condensed_at"
+        ],
+        "title": "SnapshotOut",
+        "type": "object"
+      },
       "SperreIn": {
         "properties": {
           "grund": {
@@ -110447,6 +111577,56 @@
           "status"
         ],
         "title": "StaffelrabattOut",
+        "type": "object"
+      },
+      "StalenessOut": {
+        "properties": {
+          "days_since_confirmation": {
+            "title": "Days Since Confirmation",
+            "type": "integer"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "group_name": {
+            "title": "Group Name",
+            "type": "string"
+          },
+          "last_confirmed_at": {
+            "format": "date-time",
+            "title": "Last Confirmed At",
+            "type": "string"
+          },
+          "latest_snapshot_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Snapshot Date"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "stale_after_days": {
+            "title": "Stale After Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "group_id",
+          "group_name",
+          "last_confirmed_at",
+          "days_since_confirmation",
+          "stale",
+          "stale_after_days"
+        ],
+        "title": "StalenessOut",
         "type": "object"
       },
       "StartTransactionCommand": {
@@ -112238,6 +113418,57 @@
         "title": "StoreRequest",
         "type": "object"
       },
+      "StoredProposalOut": {
+        "properties": {
+          "agent": {
+            "title": "Agent",
+            "type": "string"
+          },
+          "content": {
+            "additionalProperties": true,
+            "title": "Content",
+            "type": "object"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "objective": {
+            "title": "Objective",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "agent",
+          "objective",
+          "content",
+          "created_by",
+          "created_at"
+        ],
+        "title": "StoredProposalOut",
+        "type": "object"
+      },
       "StreckeSpeditionenOut": {
         "additionalProperties": true,
         "description": "Response schema for strecke speditionen endpoints.",
@@ -113087,6 +114318,108 @@
         "description": "Response schema for subsidiary ledger reconciliation endpoints.",
         "properties": {},
         "title": "SubsidiaryLedgerReconciliationOut",
+        "type": "object"
+      },
+      "SubstituteCandidateOut": {
+        "properties": {
+          "analysis_complete": {
+            "title": "Analysis Complete",
+            "type": "boolean"
+          },
+          "feed_id": {
+            "title": "Feed Id",
+            "type": "string"
+          },
+          "feed_kind": {
+            "title": "Feed Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "price_eur_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Eur T"
+          },
+          "price_provenance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Provenance"
+          },
+          "uncertainty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty"
+          }
+        },
+        "required": [
+          "feed_id",
+          "name",
+          "feed_kind",
+          "analysis_complete"
+        ],
+        "title": "SubstituteCandidateOut",
+        "type": "object"
+      },
+      "SubstitutesOut": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/SubstituteCandidateOut"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "feed_id": {
+            "title": "Feed Id",
+            "type": "string"
+          },
+          "feed_kind": {
+            "title": "Feed Kind",
+            "type": "string"
+          },
+          "feed_name": {
+            "title": "Feed Name",
+            "type": "string"
+          },
+          "requires_human_approval": {
+            "title": "Requires Human Approval",
+            "type": "boolean"
+          },
+          "restriction": {
+            "title": "Restriction",
+            "type": "string"
+          }
+        },
+        "required": [
+          "feed_id",
+          "feed_name",
+          "feed_kind",
+          "restriction",
+          "candidates",
+          "requires_human_approval"
+        ],
+        "title": "SubstitutesOut",
         "type": "object"
       },
       "SuperglueConnectorConfigRequest": {
@@ -115301,6 +116634,55 @@
         "description": "Response schema for tenant limits endpoints.",
         "properties": {},
         "title": "TenantLimitsOut",
+        "type": "object"
+      },
+      "TenantPoliciesIn": {
+        "properties": {
+          "four_eyes_approval": {
+            "title": "Four Eyes Approval",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "four_eyes_approval"
+        ],
+        "title": "TenantPoliciesIn",
+        "type": "object"
+      },
+      "TenantPoliciesOut": {
+        "properties": {
+          "four_eyes_approval": {
+            "title": "Four Eyes Approval",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By"
+          }
+        },
+        "required": [
+          "four_eyes_approval"
+        ],
+        "title": "TenantPoliciesOut",
         "type": "object"
       },
       "TenantRateLimitCheckIn": {
@@ -121096,6 +122478,99 @@
         "description": "Bewusst leer: die Komponenten kommen ausschliesslich aus dem\nunveraenderlichen Versions-Snapshot (keine Client-Payload).",
         "properties": {},
         "title": "VersionEvaluateIn",
+        "type": "object"
+      },
+      "VersionImpactOut": {
+        "properties": {
+          "activated_at": {
+            "title": "Activated At",
+            "type": "string"
+          },
+          "after": {
+            "additionalProperties": true,
+            "title": "After",
+            "type": "object"
+          },
+          "before": {
+            "additionalProperties": true,
+            "title": "Before",
+            "type": "object"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "string"
+          },
+          "ration_version_id": {
+            "title": "Ration Version Id",
+            "type": "string"
+          },
+          "window_days": {
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ration_version_id",
+          "activated_at",
+          "window_days",
+          "before",
+          "after",
+          "confidence"
+        ],
+        "title": "VersionImpactOut",
+        "type": "object"
+      },
+      "VersionOptimizeIn": {
+        "properties": {
+          "expected_latest_version_no": {
+            "minimum": 0.0,
+            "title": "Expected Latest Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_latest_version_no"
+        ],
+        "title": "VersionOptimizeIn",
+        "type": "object"
+      },
+      "VersionOptimizeOut": {
+        "properties": {
+          "candidate_version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CandidateVersionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "optimization_run": {
+            "$ref": "#/components/schemas/OptimizationRunRefOut"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "optimization_run"
+        ],
+        "title": "VersionOptimizeOut",
         "type": "object"
       },
       "VertraegeOut": {
@@ -128857,8 +130332,97 @@
         "title": "_JahreswechselBody",
         "type": "object"
       },
+      "_LagerBody": {
+        "properties": {
+          "artikel_id": {
+            "title": "Artikel Id",
+            "type": "string"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "client_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Ref"
+          },
+          "einheit": {
+            "default": "kg",
+            "title": "Einheit",
+            "type": "string"
+          },
+          "kostentraeger_schlag_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kostentraeger Schlag Id"
+          },
+          "massnahme_id": {
+            "title": "Massnahme Id",
+            "type": "string"
+          },
+          "menge": {
+            "title": "Menge",
+            "type": "number"
+          }
+        },
+        "required": [
+          "massnahme_id",
+          "artikel_id",
+          "menge"
+        ],
+        "title": "_LagerBody",
+        "type": "object"
+      },
+      "_OfflineSyncBody": {
+        "properties": {
+          "ops": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Ops",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ops"
+        ],
+        "title": "_OfflineSyncBody",
+        "type": "object"
+      },
       "_OptimizeFromProfileBody": {
         "properties": {
+          "compute_technical_max": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compute Technical Max"
+          },
           "cow_profile": {
             "additionalProperties": true,
             "title": "Cow Profile",
@@ -129065,6 +130629,37 @@
         "title": "_OptimizeFromProfileBody",
         "type": "object"
       },
+      "_QsBody": {
+        "properties": {
+          "geraetepruefung_gueltig": {
+            "default": false,
+            "title": "Geraetepruefung Gueltig",
+            "type": "boolean"
+          },
+          "risikobewertung_boden": {
+            "default": false,
+            "title": "Risikobewertung Boden",
+            "type": "boolean"
+          },
+          "sachkunde_nachgewiesen": {
+            "default": false,
+            "title": "Sachkunde Nachgewiesen",
+            "type": "boolean"
+          },
+          "schlagdokumentation_vollstaendig": {
+            "default": false,
+            "title": "Schlagdokumentation Vollstaendig",
+            "type": "boolean"
+          },
+          "wartezeiten_eingehalten": {
+            "default": false,
+            "title": "Wartezeiten Eingehalten",
+            "type": "boolean"
+          }
+        },
+        "title": "_QsBody",
+        "type": "object"
+      },
       "_SammelDuengungBody": {
         "properties": {
           "anwender": {
@@ -129163,6 +130758,269 @@
           "menge_kg_ha"
         ],
         "title": "_SammelDuengungBody",
+        "type": "object"
+      },
+      "_SensitivityBody": {
+        "properties": {
+          "compute_technical_max": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compute Technical Max"
+          },
+          "cow_profile": {
+            "additionalProperties": true,
+            "title": "Cow Profile",
+            "type": "object"
+          },
+          "custom_feeds": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Feeds"
+          },
+          "disable_milk_tradeoff_between_stages": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disable Milk Tradeoff Between Stages"
+          },
+          "fan_options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_FanOptions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "feed_block_overrides": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FeedBlockAssignment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Block Overrides"
+          },
+          "feeding_system_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeedingSystemConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "feeds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeds"
+          },
+          "max_tm_overrides": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Tm Overrides"
+          },
+          "milk_tradeoff_max_pct_per_stage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milk Tradeoff Max Pct Per Stage"
+          },
+          "min_tm_overrides": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Tm Overrides"
+          },
+          "objective_strategy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objective Strategy"
+          },
+          "policy_overrides": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Overrides"
+          },
+          "policy_profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Profile"
+          },
+          "price_overrides": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Overrides"
+          },
+          "relaxation_policy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relaxation Policy"
+          },
+          "season_profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season Profile"
+          },
+          "stage2_minimize_feed_eur_per_day": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage2 Minimize Feed Eur Per Day"
+          },
+          "sweep": {
+            "$ref": "#/components/schemas/_SensitivitySweep"
+          }
+        },
+        "required": [
+          "cow_profile",
+          "sweep"
+        ],
+        "title": "_SensitivityBody",
+        "type": "object"
+      },
+      "_SensitivitySweep": {
+        "description": "Parametrische Analyse (Skill §8): eine Groesse schrittweise variieren.",
+        "properties": {
+          "feed_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Id"
+          },
+          "parameter": {
+            "title": "Parameter",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "number"
+          },
+          "step": {
+            "default": 0.5,
+            "title": "Step",
+            "type": "number"
+          },
+          "stop": {
+            "title": "Stop",
+            "type": "number"
+          }
+        },
+        "required": [
+          "parameter",
+          "start",
+          "stop"
+        ],
+        "title": "_SensitivitySweep",
         "type": "object"
       },
       "_ShakerBoxIn": {
@@ -161735,6 +163593,382 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/feeding/assist/explain-findings": {
+      "post": {
+        "operationId": "explain_findings_api_v1_agrar_rations_optimization_feeding_assist_explain_findings_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExplainFindingsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Befunde deterministisch erklaeren (Proposal mit Evidenz und Unsicherheit)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-assist"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/assist/proposals": {
+      "get": {
+        "operationId": "list_proposals_api_v1_agrar_rations_optimization_feeding_assist_proposals_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Group Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoredProposalOut"
+                  },
+                  "title": "Response List Proposals Api V1 Agrar Rations Optimization Feeding Assist Proposals Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auditierte Assistenz-Proposals (neueste zuerst)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-assist"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/assist/propose-measures": {
+      "post": {
+        "operationId": "propose_measures_api_v1_agrar_rations_optimization_feeding_assist_propose_measures_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestaetigungspflichtige Massnahmenvorschlaege aus offenen Abweichungsbefunden",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-assist"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/assist/substitutes": {
+      "get": {
+        "operationId": "substitutes_api_v1_agrar_rations_optimization_feeding_assist_substitutes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "feed_id",
+            "required": true,
+            "schema": {
+              "title": "Feed Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubstitutesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ersatzfuttermittel gleicher Klasse nach Preis mit Provenienz und Unsicherheit",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-assist"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/audit/master-data": {
+      "get": {
+        "operationId": "list_master_data_audit_api_v1_agrar_rations_optimization_feeding_audit_master_data_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "business",
+                    "feed",
+                    "analysis",
+                    "grant"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MasterDataAuditEventOut"
+                  },
+                  "title": "Response List Master Data Audit Api V1 Agrar Rations Optimization Feeding Audit Master Data Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fachlich lesbares Stammdaten-Audit (Betriebe, Futter, Analysen, Grants)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-governance"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/feeding/businesses": {
       "get": {
         "operationId": "list_businesses_api_v1_agrar_rations_optimization_feeding_businesses_get",
@@ -163655,6 +165889,282 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/feeding/groups/{group_id}/confirm-parameters": {
+      "post": {
+        "operationId": "confirm_group_parameters_api_v1_agrar_rations_optimization_feeding_groups__group_id__confirm_parameters_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StalenessOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gruppenparameter fachlich bestaetigen (setzt die Veraltet-Warnung zurueck)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-herd-history"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/groups/{group_id}/parameter-history": {
+      "get": {
+        "operationId": "group_parameter_history_api_v1_agrar_rations_optimization_feeding_groups__group_id__parameter_history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SnapshotOut"
+                  },
+                  "title": "Response Group Parameter History Api V1 Agrar Rations Optimization Feeding Groups  Group Id  Parameter History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Parameterhistorie der Gruppe (Tages-Snapshots, neueste zuerst)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-herd-history"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/groups/{group_id}/parameter-staleness": {
+      "get": {
+        "operationId": "group_parameter_staleness_api_v1_agrar_rations_optimization_feeding_groups__group_id__parameter_staleness_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StalenessOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alter der letzten Parameterbestaetigung (Veraltet-Warnung)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-herd-history"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/groups/{group_id}/snapshots/condense": {
+      "post": {
+        "operationId": "condense_group_snapshots_api_v1_agrar_rations_optimization_feeding_groups__group_id__snapshots_condense_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CondenseOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Herd-Deltas idempotent zu Tages-Snapshots der Gruppe verdichten",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-herd-history"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/feeding/imports": {
       "get": {
         "operationId": "list_import_jobs_api_v1_agrar_rations_optimization_feeding_imports_get",
@@ -164548,6 +167058,250 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/feeding/performance/group-benchmark": {
+      "get": {
+        "operationId": "group_benchmark_api_v1_agrar_rations_optimization_feeding_performance_group_benchmark_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window_days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 180,
+              "minimum": 3,
+              "title": "Window Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupBenchmarkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kennzahlprofil der Gruppe gegen die uebrigen Tenant-Gruppen (tenant-intern)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-performance"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/performance/period-comparison": {
+      "get": {
+        "operationId": "period_comparison_api_v1_agrar_rations_optimization_feeding_performance_period_comparison_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "period_days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 180,
+              "minimum": 3,
+              "title": "Period Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodComparisonOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zeitraumvergleich der Gruppe (aktuell vs. Vorzeitraum, ehrliche Unsicherheit)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-performance"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/performance/version-impact": {
+      "get": {
+        "operationId": "version_impact_api_v1_agrar_rations_optimization_feeding_performance_version_impact_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window_days",
+            "required": false,
+            "schema": {
+              "default": 14,
+              "maximum": 90,
+              "minimum": 3,
+              "title": "Window Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VersionImpactOut"
+                  },
+                  "title": "Response Version Impact Api V1 Agrar Rations Optimization Feeding Performance Version Impact Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorher/Nachher-Auswertung je aktivierter Rationsversion (ehrliche Unsicherheit)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-performance"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/feeding/plans": {
       "get": {
         "operationId": "list_plans_api_v1_agrar_rations_optimization_feeding_plans_get",
@@ -164965,6 +167719,132 @@
           "agrar",
           "rations-optimization",
           "feeding-plans"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/policies": {
+      "get": {
+        "operationId": "get_policies_api_v1_agrar_rations_optimization_feeding_policies_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantPoliciesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandanten-Governance-Einstellungen lesen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-governance"
+        ]
+      },
+      "put": {
+        "operationId": "put_policies_api_v1_agrar_rations_optimization_feeding_policies_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantPoliciesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantPoliciesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vier-Augen-Prinzip fuer Freigaben mandantenweit konfigurieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-governance"
         ]
       }
     },
@@ -165396,6 +168276,892 @@
           "agrar",
           "rations-optimization",
           "feeding-ration-editor"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/ration-versions/{version_id}/optimize": {
+      "post": {
+        "operationId": "optimize_ration_version_api_v1_agrar_rations_optimization_feeding_ration_versions__version_id__optimize_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionOptimizeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionOptimizeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Optimieren erzeugt eine Candidate-Version (nie Aktivierung) mit atomarem Solverlauf-Protokoll",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-ration-editor"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/recipe-orders/{order_id}": {
+      "get": {
+        "operationId": "get_order_api_v1_agrar_rations_optimization_feeding_recipe_orders__order_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung mit fixierter Version und Nachkalkulation",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/recipe-orders/{order_id}/delivery": {
+      "post": {
+        "operationId": "record_delivery_api_v1_agrar_rations_optimization_feeding_recipe_orders__order_id__delivery_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ist-Mischung (Mahl-/Mischwagen) mit Nachkalkulation gegen die fixierte Version",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/recipes": {
+      "get": {
+        "operationId": "list_recipes_api_v1_agrar_rations_optimization_feeding_recipes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_ref",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Ref"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RecipeOut"
+                  },
+                  "title": "Response List Recipes Api V1 Agrar Rations Optimization Feeding Recipes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellrezepturen (optional je Kunde)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      },
+      "post": {
+        "operationId": "create_recipe_api_v1_agrar_rations_optimization_feeding_recipes_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellrezeptur aus verknuepften Zeilen anlegen (Kunden-Artikelnr.)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/recipes/{recipe_id}/approve": {
+      "post": {
+        "operationId": "approve_recipe_api_v1_agrar_rations_optimization_feeding_recipes__recipe_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeApproveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Optimal-Rezeptur freigeben (Voraussetzung fuer Bestellung)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/recipes/{recipe_id}/orders": {
+      "post": {
+        "operationId": "create_order_api_v1_agrar_rations_optimization_feeding_recipes__recipe_id__orders_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Futterbestellung — fixiert immer die freigegebene Optimal-Version",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/recipes/{recipe_id}/versions": {
+      "post": {
+        "operationId": "add_version_api_v1_agrar_rations_optimization_feeding_recipes__recipe_id__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeVersionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neue Rezepturversion (append-only, optimistische Revision)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-recipes"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/reports": {
+      "get": {
+        "operationId": "list_reports_api_v1_agrar_rations_optimization_feeding_reports_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "source_ref",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source Ref"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReportOut"
+                  },
+                  "title": "Response List Reports Api V1 Agrar Rations Optimization Feeding Reports Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Berichte auflisten (neueste zuerst)",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-reports"
+        ]
+      },
+      "post": {
+        "operationId": "create_report_api_v1_agrar_rations_optimization_feeding_reports_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bericht reproduzierbar aus unveraenderlicher Quellversion erzeugen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-reports"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/reports/{report_id}": {
+      "get": {
+        "operationId": "get_report_api_v1_agrar_rations_optimization_feeding_reports__report_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bericht mit Inhalt lesen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-reports"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/reports/{report_id}/csv": {
+      "get": {
+        "operationId": "report_csv_api_v1_agrar_rations_optimization_feeding_reports__report_id__csv_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Strukturierte Berichtsdaten als CSV exportieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-reports"
         ]
       }
     },
@@ -168233,6 +171999,75 @@
           }
         ],
         "summary": "Requirements maintenance",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/sensitivity": {
+      "post": {
+        "description": "Parametrische Analyse (Skill §8): eine Grenze/Preis/Zielleistung schrittweise\nvariieren und je Schritt Kosten, erreichbare Leistung, Versorgung und bindende\nGrenzen ausgeben.",
+        "operationId": "sensitivity_api_v1_agrar_rations_optimization_sensitivity_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_SensitivityBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RationsOptimizationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sensitivitaet (parametrischer Sweep)",
         "tags": [
           "agrar",
           "futtermittel",
@@ -296944,6 +300779,64 @@
         ]
       }
     },
+    "/api/v1/portal/feldbuch/betrieb": {
+      "get": {
+        "description": "ASK-BUS-001: schlanker Betriebssnapshot aus Kundenkontext.",
+        "operationId": "portal_betrieb_api_v1_portal_feldbuch_betrieb_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Betriebssnapshot portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch/duengebedarf": {
       "get": {
         "description": "AS-W2 (DüV): N-Düngebedarfsermittlung je Schlag (Sollwert − Nmin) und\nAbgleich gegen die ausgebrachte N-Menge des Jahres.",
@@ -297494,9 +301387,92 @@
         ]
       }
     },
+    "/api/v1/portal/feldbuch/lagerverbrauch": {
+      "post": {
+        "operationId": "portal_lagerverbrauch_api_v1_portal_feldbuch_lagerverbrauch_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_LagerBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lagerverbrauch je Massnahme portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch/massnahmen": {
       "get": {
-        "operationId": "portal_list_massnahmen_api_v1_portal_feldbuch_massnahmen_get",
+        "operationId": "portal_feldbuch_list_massnahmen",
         "parameters": [
           {
             "in": "query",
@@ -297626,7 +301602,7 @@
                   "items": {
                     "$ref": "#/components/schemas/PortalFeldbuchOut"
                   },
-                  "title": "Response Portal List Massnahmen Api V1 Portal Feldbuch Massnahmen Get",
+                  "title": "Response Portal Feldbuch List Massnahmen",
                   "type": "array"
                 }
               }
@@ -297658,7 +301634,7 @@
         ]
       },
       "post": {
-        "operationId": "portal_create_massnahme_api_v1_portal_feldbuch_massnahmen_post",
+        "operationId": "portal_feldbuch_create_massnahme",
         "parameters": [
           {
             "in": "query",
@@ -297825,7 +301801,7 @@
     },
     "/api/v1/portal/feldbuch/massnahmen/{massnahme_id}": {
       "delete": {
-        "operationId": "portal_delete_massnahme_api_v1_portal_feldbuch_massnahmen__massnahme_id__delete",
+        "operationId": "portal_feldbuch_delete_massnahme",
         "parameters": [
           {
             "in": "path",
@@ -297897,8 +301873,88 @@
           "feldbuch"
         ]
       },
+      "get": {
+        "operationId": "portal_feldbuch_get_massnahme",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massnahme_id",
+            "required": true,
+            "schema": {
+              "title": "Massnahme Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get massnahme portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      },
       "put": {
-        "operationId": "portal_update_massnahme_api_v1_portal_feldbuch_massnahmen__massnahme_id__put",
+        "operationId": "portal_feldbuch_update_massnahme",
         "parameters": [
           {
             "in": "path",
@@ -297980,6 +302036,90 @@
           }
         ],
         "summary": "Update massnahme portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/offline/sync": {
+      "post": {
+        "description": "ASK-MOB-001: idempotente Offline-Ops (create_massnahme) nach client_ref.",
+        "operationId": "portal_offline_sync_api_v1_portal_feldbuch_offline_sync_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_OfflineSyncBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Offline-Queue synchronisieren portal",
         "tags": [
           "portal",
           "feldbuch",
@@ -298071,9 +302211,58 @@
         ]
       }
     },
+    "/api/v1/portal/feldbuch/qs-checkliste": {
+      "post": {
+        "operationId": "portal_qs_checkliste_api_v1_portal_feldbuch_qs_checkliste_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_QsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "QS-Checkliste bewerten portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch/schlaege": {
       "get": {
-        "operationId": "portal_list_schlaege_api_v1_portal_feldbuch_schlaege_get",
+        "operationId": "portal_feldbuch_list_schlaege",
         "parameters": [
           {
             "in": "query",
@@ -298139,7 +302328,7 @@
                   "items": {
                     "$ref": "#/components/schemas/PortalFeldbuchOut"
                   },
-                  "title": "Response Portal List Schlaege Api V1 Portal Feldbuch Schlaege Get",
+                  "title": "Response Portal Feldbuch List Schlaege",
                   "type": "array"
                 }
               }
@@ -298171,7 +302360,7 @@
         ]
       },
       "post": {
-        "operationId": "portal_create_schlag_api_v1_portal_feldbuch_schlaege_post",
+        "operationId": "portal_feldbuch_create_schlag",
         "parameters": [
           {
             "in": "query",
@@ -298254,7 +302443,7 @@
     },
     "/api/v1/portal/feldbuch/schlaege/{schlag_id}": {
       "delete": {
-        "operationId": "portal_delete_schlag_api_v1_portal_feldbuch_schlaege__schlag_id__delete",
+        "operationId": "portal_feldbuch_delete_schlag",
         "parameters": [
           {
             "in": "path",
@@ -298326,8 +302515,88 @@
           "feldbuch"
         ]
       },
+      "get": {
+        "operationId": "portal_feldbuch_get_schlag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schlag_id",
+            "required": true,
+            "schema": {
+              "title": "Schlag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get schlag portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      },
       "put": {
-        "operationId": "portal_update_schlag_api_v1_portal_feldbuch_schlaege__schlag_id__put",
+        "operationId": "portal_feldbuch_update_schlag",
         "parameters": [
           {
             "in": "path",
@@ -298508,6 +302777,176 @@
           }
         ],
         "summary": "Schlaginfo Gesamtdokumentation portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/schlaege/{schlag_id}/schlaginfo.txt": {
+      "get": {
+        "operationId": "portal_schlaginfo_text_api_v1_portal_feldbuch_schlaege__schlag_id__schlaginfo_txt_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schlag_id",
+            "required": true,
+            "schema": {
+              "title": "Schlag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "wirtschaftsjahr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Wirtschaftsjahr"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schlaginfo Text-Export portal",
+        "tags": [
+          "portal",
+          "feldbuch",
+          "portal",
+          "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/feldbuch/stammdaten": {
+      "get": {
+        "description": "ASK-MST-001: Dünger/PSM/Saatgut/Kulturen für Portal-Auswahl.",
+        "operationId": "portal_stammdaten_api_v1_portal_feldbuch_stammdaten_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalFeldbuchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Betriebsmittel-Stammdaten portal",
         "tags": [
           "portal",
           "feldbuch",
