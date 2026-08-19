@@ -103,7 +103,7 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update"},
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update", "zone": "commit"},
             {
                 "key": "create_activity",
                 "label": "Aktivitaet anlegen",
@@ -116,6 +116,7 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                 "humanApprovalRequired": False,
                 "auditReasonRequired": False,
                 "forbiddenForAgents": False,
+                "zone": "footer",
             },
         ],
         "noWorkflowReason": "Kundenstamm ist ein reines Verwaltungsobjekt ohne prozessgesteuerten Lebenszyklus — Statuswechsel erfolgen implizit ueber Auftraege und Aktivitaeten.",
@@ -139,7 +140,11 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "touchTargetPx": 44,
             "contextRail": "combined",
             "contextRailSections": ["workflow", "audit", "copilot", "collab"],
+            "summaryPlacement": "header",
+            "stickyHeader": True,
+            "stickyFooter": True,
         },
+        "interaction": {"enterMovesFocus": True},
         "performance": {
             "initialPayloadBudgetKb": 48,
             "requiresLazyTabs": True,
@@ -618,7 +623,7 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "lager.artikel.update"},
+            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "lager.artikel.update", "zone": "commit"},
         ],
         "noWorkflowReason": "Artikelstamm ist ein reines Verwaltungsobjekt — kein prozessgesteuerter Lebenszyklus.",
         "agentContract": {
@@ -635,7 +640,8 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
                 "summaryArea": "[data-testid='mask-summary']",
             },
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "summaryPlacement": "header", "stickyHeader": True, "stickyFooter": True},
+        "interaction": {"enterMovesFocus": True},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "lager"},
     }
 
@@ -703,6 +709,8 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
                 "permission": "sales.lieferschein.drucken",
                 "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
                 "method": "POST",
+                "zone": "footer",
+                "keyboardShortcut": "Ctrl+P",
             },
         ],
         "noWorkflowReason": "Lieferschein-Status wird ueber den Verkaufsauftrag gesteuert — kein eigener Workflow-Lebenszyklus.",
@@ -716,7 +724,8 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
             "sensitiveFields": [],
             "testSelectors": {"screenRoot": "[data-testid='sales-delivery-note']", "primaryAction": "[data-testid='action-drucken']", "summaryArea": "[data-testid='mask-summary']"},
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "transaction", "summaryPlacement": "footer", "stickyHeader": True, "stickyFooter": True},
+        "interaction": {"enterMovesFocus": True},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
     }
 

@@ -46,6 +46,26 @@ describe('UniversalMaskRenderer', () => {
     expect(definition.summaryEndpoint).toBe('/api/v1/crm/customers/1/screen-summary')
   })
 
+  it('rejects invalid action zones and duplicate screen shortcuts', () => {
+    const definition: ScreenDefinition = {
+      schemaVersion: 1,
+      id: 'sales/invalid-shortcuts',
+      domain: 'sales',
+      mode: 'detail',
+      title: 'Invalid',
+      actions: [
+        { key: 'one', label: 'One', zone: 'footer', keyboardShortcut: 'Ctrl+S' },
+        { key: 'two', label: 'Two', zone: 'commit', keyboardShortcut: 'ctrl+s' },
+      ],
+    }
+    ;(definition.actions?.[0] as { zone?: string }).zone = 'sidebar'
+
+    expect(validateScreenDefinition(definition)).toEqual(expect.arrayContaining([
+      'action one has invalid zone: sidebar',
+      'keyboardShortcut is duplicated: ctrl+s',
+    ]))
+  })
+
   it('renders header, fields, actions and lazy tabs from ScreenDefinition', () => {
     const definition = adaptMaskConfigToScreenDefinition(legacyMask, {
       id: 'crm/customer',
@@ -148,5 +168,90 @@ describe('UniversalMaskRenderer', () => {
 
     expect(onOverlayChange).toHaveBeenCalledWith({ tables: { op: { visibleColumns: ['nr', 'kunde'] } } })
     expect(onOverlayReset).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders footer and commit action zones and dispatches declared shortcuts', () => {
+    const onAction = vi.fn()
+    const definition: ScreenDefinition = {
+      schemaVersion: 1,
+      id: 'sales/delivery-note',
+      domain: 'sales',
+      mode: 'detail',
+      title: 'Lieferschein',
+      summary: [{ key: 'total', label: 'Gesamt', value: '120,00 EUR' }],
+      layout: {
+        preferredMode: 'desktopDense',
+        mobileMode: 'mobileStack',
+        floorplan: 'transaction',
+        density: 'expertDense',
+        contextRail: 'combined',
+        tableProfile: 'standard',
+        summaryPlacement: 'footer',
+        stickyHeader: true,
+        stickyFooter: true,
+      },
+      interaction: { enterMovesFocus: true },
+      fields: [
+        { key: 'customer', label: 'Kunde', type: 'text' },
+        { key: 'date', label: 'Datum', type: 'date' },
+      ],
+      actions: [
+        { key: 'print', label: 'Drucken', kind: 'secondary', zone: 'footer', keyboardShortcut: 'Ctrl+P' },
+        { key: 'save', label: 'Speichern', kind: 'primary', zone: 'commit', keyboardShortcut: 'Ctrl+S' },
+      ],
+    }
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <UniversalMaskRenderer
+          plan={compileRenderPlanFromScreenDefinition(definition)}
+          data={{ customer: 'Musterkunde', date: '2026-08-19' }}
+          onAction={onAction}
+        />
+      </QueryClientProvider>,
+    )
+
+    const root = screen.getByTestId('screen-sales/delivery-note')
+    expect(screen.getByTestId('meridian-footer-actions')).toHaveAttribute('data-sticky', 'true')
+    expect(screen.getByTestId('action-print')).toHaveAttribute('data-action-zone', 'footer')
+    expect(screen.getByTestId('action-save')).toHaveAttribute('data-action-zone', 'commit')
+    expect(screen.getByTestId('mask-summary')).toBeInTheDocument()
+    expect(screen.getByTestId('meridian-footer-actions').compareDocumentPosition(screen.getByTestId('mask-summary')))
+      .toBe(Node.DOCUMENT_POSITION_PRECEDING)
+
+    fireEvent.keyDown(root, { key: 's', ctrlKey: true })
+    expect(onAction).toHaveBeenCalledWith('save', expect.objectContaining({ customer: 'Musterkunde' }))
+  })
+
+  it('advances through form controls with Enter when the interaction contract enables it', () => {
+    const definition: ScreenDefinition = {
+      schemaVersion: 1,
+      id: 'inventory/article',
+      domain: 'inventory',
+      mode: 'detail',
+      title: 'Artikel',
+      interaction: { enterMovesFocus: true },
+      fields: [
+        { key: 'number', label: 'Artikel-Nr.', type: 'text' },
+        { key: 'name', label: 'Bezeichnung', type: 'text' },
+      ],
+    }
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <UniversalMaskRenderer
+          plan={compileRenderPlanFromScreenDefinition(definition)}
+          data={{ number: '4711', name: 'Testartikel' }}
+        />
+      </QueryClientProvider>,
+    )
+
+    const first = screen.getByLabelText('Artikel-Nr.')
+    const second = screen.getByLabelText('Bezeichnung')
+    first.focus()
+    fireEvent.keyDown(first, { key: 'Enter' })
+    expect(second).toHaveFocus()
   })
 })

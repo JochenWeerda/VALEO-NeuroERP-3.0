@@ -53,7 +53,7 @@ const FastFieldItem = memo(function FastFieldItem({
   if (field.componentKind === 'lookup') {
     const lookupEndpoint = lookupBindings[field.key]?.lookupEndpoint
     return (
-      <div>
+      <div data-meridian-field={field.key}>
         <LookupField
           field={field}
           value={value}
@@ -75,7 +75,7 @@ const FastFieldItem = memo(function FastFieldItem({
   }
 
   return (
-    <div>
+    <div data-meridian-field={field.key}>
       <FieldRenderer
         field={toScreenField(field)}
         value={value}

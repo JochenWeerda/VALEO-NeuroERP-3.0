@@ -98,6 +98,8 @@ function filterActionsByPermission(
       requiresConfirmation: action.requiresConfirmation,
       auditReasonRequired: action.auditReasonRequired,
       humanApprovalRequired: action.humanApprovalRequired,
+      zone: action.zone ?? 'header',
+      keyboardShortcut: action.keyboardShortcut,
     }))
 }
 
@@ -259,6 +261,9 @@ export function compileRenderPlan(
       contextRail,
       contextRailSections,
       tableProfile,
+      summaryPlacement: schema.layout?.summaryPlacement ?? 'header',
+      stickyHeader: schema.layout?.stickyHeader ?? false,
+      stickyFooter: schema.layout?.stickyFooter ?? false,
       summaryEndpoint: schema.summaryEndpoint,
       voice: {
         enabled: schema.voice?.enabled ?? true,
@@ -283,6 +288,9 @@ export function compileRenderPlan(
     tablesByKey,
     tablesByTab,
     actions: filterActionsByPermission(schema.actions ?? [], context.auth.permissions),
+    interaction: {
+      enterMovesFocus: schema.interaction?.enterMovesFocus ?? false,
+    },
     workflow: schema.workflow
       ? {
           processKey: schema.workflow.processKey,

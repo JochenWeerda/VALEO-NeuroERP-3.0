@@ -44,6 +44,7 @@ Die MkDocs-Sidebar listet alle ADRs einzeln (Generator: `python scripts/generate
 - [ADR-035 Kein interaktiver Workflow-Designer](adr-035-kein-workflow-designer.md)
 - [ADR-036 Architektur-Dokumentations-Stack](adr-036-architecture-documentation-stack.md)
 - [ADR-037 Structurizr C4 Source of Truth](adr-037-structurizr-c4-source-of-truth.md)
+- [ADR-056 Herstellerneutraler ERP-Gewohnheitsvertrag](adr-056-vendor-neutral-erp-habit-contract.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
 
 ## Hinweis zu Doppelnummern

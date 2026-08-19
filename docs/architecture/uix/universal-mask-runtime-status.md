@@ -4,12 +4,18 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-07-06
-version: 2.1.0
+last_reviewed: 2026-08-19
+version: 2.2.0
 description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Nachtrag 2026-08-19 (`L3-HABIT-BRIDGE-001`):** Der Single Mask Builder
+> transportiert herstellerneutrale ERP-Gewohnheitsvertraege fuer Aktionszonen,
+> Summary-Position, Sticky-Regionen, deklarative Shortcuts und Enter-Fokus.
+> Aktiviert fuer CRM Customer 360, Lager Artikelbestand und Sales
+> Lieferschein; L3-Originalbilder mit Echtdaten bleiben ausserhalb von Git.
 
 > **Kurzfassung (2026-07-06):** **SPEC-P1-04/08 abgeschlossen** — alle nativen ScreenDefinitions ohne `stubReason`; gemeinsamer `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` Exit 0. Chargen-FEFO sortiert nach MHD. Siehe Handshake [`cursor-claude-spec-p1-04-08-2026-07-06.md`](../../agent-ops/handshakes/cursor-claude-spec-p1-04-08-2026-07-06.md).
 
@@ -63,6 +69,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-061 | Rollen-Workspaces + Tiles-Primitive + Rollen-Redirect | ✅ | 27 pytest, 6 Vitest, Workspace Playwright grün |
 | UIX-062 | Collab-Rail v1: `contextRailSections`, datensatzgebundene Notizen, Mentions, Inbox/Outbox | ✅ lokal | 4 pytest, 7 Vitest, TypeScript 0, Playwright 1/1 |
 | UIX-063 | Planungskalender v1: `calendar`-Contract, Projektionsservice, ICS-Feed, CalendarRenderer | ✅ lokal | 33 pytest, 3 Vitest, TypeScript 0, Playwright 1/1 |
+| L3-HABIT-BRIDGE-001 | Herstellerneutrale Desktop-Gewohnheitsvertraege + 3 Referenzmasken | ✅ technisch abgeschlossen, Human Review vor Rollout | 125 Mask-Builder/RenderPlan-Tests, 4 Backend-Tests, 12 Visual-Audits; ADR-056 + Paritaetsmatrix |
 
 ## Architektur (Single Source of Truth)
 

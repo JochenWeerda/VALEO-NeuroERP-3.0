@@ -1,4 +1,6 @@
+import { type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { LazyTabs } from '@/components/ui/LazyTabs'
+import { cn } from '@/lib/utils'
 import { resolveContextRailSections, type ScreenDefinition, type ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
 import type { ScreenOverlay } from './render-plan/overlay'
@@ -9,6 +11,7 @@ import { LookupBindingContext } from './runtime/LookupBindingContext'
 import { FormStateContext } from './runtime/FormStateContext'
 import {
   ActionBarRenderer,
+  ActionFooterRenderer,
   FastFormRenderer,
   FastSummaryRenderer,
   FastTabRenderer,
@@ -44,6 +47,50 @@ interface UniversalMaskRendererProps {
   formState?: UniversalFormState
   /** Optional rich workflow state (from useWorkflowState) */
   workflowState?: WorkflowState
+}
+
+function matchesShortcut(event: ReactKeyboardEvent<HTMLElement>, shortcut: string): boolean {
+  const parts = shortcut.toLowerCase().split('+').map((part) => part.trim()).filter(Boolean)
+  const key = parts.at(-1)
+  const wantsMod = parts.includes('mod')
+  const wantsCtrl = parts.includes('ctrl')
+  const wantsMeta = parts.includes('meta') || parts.includes('cmd')
+  const wantsAlt = parts.includes('alt')
+  const wantsShift = parts.includes('shift')
+  if ((wantsMod && !(event.ctrlKey || event.metaKey)) || (wantsCtrl && !event.ctrlKey) || (wantsMeta && !event.metaKey)) return false
+  if (event.altKey !== wantsAlt || event.shiftKey !== wantsShift) return false
+  if (!wantsMod && !wantsCtrl && !wantsMeta && (event.ctrlKey || event.metaKey)) return false
+  return event.key.toLowerCase() === key
+}
+
+function handleScreenKeyDown(
+  event: ReactKeyboardEvent<HTMLDivElement>,
+  plan: RenderPlan,
+  payload: Record<string, unknown>,
+  onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>,
+): void {
+  if (!event.repeat) {
+    const action = plan.actions.find((candidate) =>
+      !candidate.disabled && candidate.keyboardShortcut && matchesShortcut(event, candidate.keyboardShortcut),
+    )
+    if (action) {
+      event.preventDefault()
+      void onAction?.(action.key, payload)
+      return
+    }
+  }
+  if (!plan.interaction.enterMovesFocus || event.key !== 'Enter' || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return
+  const target = event.target
+  if (!(target instanceof HTMLElement) || target instanceof HTMLTextAreaElement || target instanceof HTMLButtonElement) return
+  const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+    'input:not([disabled]), select:not([disabled]), textarea:not([disabled])',
+  )).filter((control) => !control.closest('[hidden], [data-state="inactive"]'))
+  const index = controls.indexOf(target)
+  const next = index >= 0 ? controls[index + 1] : undefined
+  if (next) {
+    event.preventDefault()
+    next.focus()
+  }
 }
 
 function renderLegacyFields(
@@ -114,11 +161,14 @@ function RenderFromPlan({
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
   const effectivePayload = formState ? formState.values : payload
   const effectiveEntityId = entityId ?? String(effectivePayload.id ?? effectivePayload.entity_id ?? '')
+  const headerActions = plan.actions.filter((action) => action.zone === 'header')
+  const footerActions = plan.actions.filter((action) => action.zone !== 'header')
 
   return (
     <FormStateContext.Provider value={formState}>
     <div
       className={classes.root}
+      onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, onAction)}
       data-screen-definition={plan.screenId}
       data-testid={`screen-${plan.screenId}`}
       data-layout-mode={plan.shell.layoutMode}
@@ -135,11 +185,11 @@ function RenderFromPlan({
         mode={plan.shell.mode}
         title={plan.shell.title}
         subtitle={plan.shell.subtitle}
-        actions={plan.actions}
+        actions={headerActions}
         floorplan={plan.shell.floorplan}
         density={plan.shell.density}
         contextRail={plan.shell.contextRail}
-        headerClassName={classes.header}
+        headerClassName={cn(classes.header, plan.shell.stickyHeader && 'sticky top-0 z-20')}
         touchTargetClass={classes.touchTarget}
         onAction={onAction}
         payload={effectivePayload}
@@ -152,7 +202,7 @@ function RenderFromPlan({
         entityType={plan.screenId}
         entityId={effectiveEntityId}
       />
-      <FastSummaryRenderer items={plan.summaryItems} />
+      {plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
@@ -212,6 +262,14 @@ function RenderFromPlan({
           }))}
         />
       )}
+
+      {plan.shell.summaryPlacement === 'footer' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      <ActionFooterRenderer
+        actions={footerActions}
+        sticky={plan.shell.stickyFooter && !formState}
+        payload={effectivePayload}
+        onAction={onAction}
+      />
 
       {formState && (
         <div

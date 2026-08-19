@@ -23,7 +23,7 @@ type MeridianCase = {
   testId: string
   title: string
   entityId: string
-  domain: 'finance' | 'crm' | 'lager'
+  domain: 'finance' | 'crm' | 'lager' | 'sales'
   floorplan: 'objectPage' | 'transaction' | 'cockpit'
   density: 'compact' | 'expertDense'
   contextRail: 'audit' | 'combined'
@@ -31,6 +31,8 @@ type MeridianCase = {
   tableKey: string
   tableLabel: string
   primaryActionLabel: string
+  familiarWorkPattern?: boolean
+  summaryPlacement?: 'header' | 'footer'
   rows: Record<string, unknown>[]
 }
 
@@ -78,6 +80,7 @@ const CASES: MeridianCase[] = [
     tableKey: 'activities',
     tableLabel: 'Aktivitaeten',
     primaryActionLabel: 'Naechste Aktion planen',
+    familiarWorkPattern: true,
     rows: [
       { datum: '2026-07-04', typ: 'Anruf', status: 'offen', verantwortung: 'Innendienst' },
       { datum: '2026-07-03', typ: 'Angebot', status: 'gesendet', verantwortung: 'Vertrieb' },
@@ -99,9 +102,33 @@ const CASES: MeridianCase[] = [
     tableKey: 'movements',
     tableLabel: 'Bestandsbewegungen',
     primaryActionLabel: 'Bestand pruefen',
+    familiarWorkPattern: true,
     rows: [
       { artikel: 'A-1000', lagerort: 'Silo 3', bestand: 128.5, reserviert: 24, einheit: 't', status: 'frei' },
       { artikel: 'A-1000', lagerort: 'Halle 1', bestand: 48, reserviert: 12, einheit: 't', status: 'qs' },
+    ],
+  },
+  {
+    label: 'Verkauf Lieferschein',
+    slug: 'sales-delivery-note',
+    path: '/sales/delivery-note/visual-delivery',
+    screenId: 'sales/delivery-note',
+    testId: 'sales-delivery-note',
+    title: 'Visual Lieferschein',
+    entityId: 'visual-delivery',
+    domain: 'sales',
+    floorplan: 'transaction',
+    density: 'expertDense',
+    contextRail: 'combined',
+    tableProfile: 'standard',
+    tableKey: 'positionen',
+    tableLabel: 'Positionen',
+    primaryActionLabel: 'Lieferschein drucken',
+    familiarWorkPattern: true,
+    summaryPlacement: 'footer',
+    rows: [
+      { pos: 10, artikel: 'A-1000', bezeichnung: 'Testartikel', menge: 12.5, einheit: 't', status: 'bereit' },
+      { pos: 20, artikel: 'A-2000', bezeichnung: 'Zweiter Artikel', menge: 4, einheit: 't', status: 'bereit' },
     ],
   },
 ]
@@ -126,6 +153,16 @@ function tableColumns(c: MeridianCase) {
       { key: 'lagerort', label: 'Lagerort', width: 150 },
       { key: 'bestand', label: 'Bestand', width: 120, numeric: true, renderKind: 'number' },
       { key: 'reserviert', label: 'Reserviert', width: 120, numeric: true, renderKind: 'number' },
+      { key: 'einheit', label: 'Einheit', width: 90 },
+      { key: 'status', label: 'Status', width: 110, renderKind: 'status' },
+    ]
+  }
+  if (c.domain === 'sales') {
+    return [
+      { key: 'pos', label: 'Pos.', width: 80, sortable: true },
+      { key: 'artikel', label: 'Artikel-Nr.', width: 130, filterable: true },
+      { key: 'bezeichnung', label: 'Bezeichnung', width: 220 },
+      { key: 'menge', label: 'Menge', width: 120, numeric: true, renderKind: 'number' },
       { key: 'einheit', label: 'Einheit', width: 90 },
       { key: 'status', label: 'Status', width: 110, renderKind: 'status' },
     ]
@@ -204,8 +241,8 @@ function screenDefinition(c: MeridianCase) {
       evidenceRequired: c.tableProfile !== 'standard',
     },
     actions: [
-      { key: 'primary', label: c.primaryActionLabel, kind: 'primary' },
-      { key: 'secondary', label: 'Notiz erfassen', kind: 'secondary' },
+      { key: 'primary', label: c.primaryActionLabel, kind: 'primary', zone: c.familiarWorkPattern ? 'commit' : 'header' },
+      { key: 'secondary', label: 'Notiz erfassen', kind: 'secondary', zone: c.familiarWorkPattern ? 'footer' : 'header' },
       {
         key: 'critical',
         label: c.tableProfile === 'financial' ? 'Zahlungslauf stoppen' : 'Sperre setzen',
@@ -213,6 +250,7 @@ function screenDefinition(c: MeridianCase) {
         dangerLevel: c.tableProfile === 'financial' ? 'critical' : 'high',
         requiresConfirmation: true,
         auditReasonRequired: true,
+        zone: c.familiarWorkPattern ? 'footer' : 'header',
       },
     ],
     permissions: ['*'],
@@ -224,7 +262,11 @@ function screenDefinition(c: MeridianCase) {
       density: c.density,
       contextRail: c.contextRail,
       tableProfile: c.tableProfile,
+      summaryPlacement: c.summaryPlacement ?? 'header',
+      stickyHeader: c.familiarWorkPattern ?? false,
+      stickyFooter: c.familiarWorkPattern ?? false,
     },
+    interaction: { enterMovesFocus: c.familiarWorkPattern ?? false },
     performance: {
       initialPayloadBudgetKb: 64,
       requiresLazyTabs: true,
@@ -323,8 +365,21 @@ for (const viewport of VIEWPORTS) {
         await expect(rendererRoot).toHaveAttribute('data-table-profile', c.tableProfile)
 
         await expect(page.getByRole('heading', { name: c.title })).toBeVisible()
-        await expect(page.getByTestId('meridian-action-bar')).toBeVisible()
+        if (!c.familiarWorkPattern) {
+          await expect(page.getByTestId('meridian-action-bar')).toBeVisible()
+        }
         await expect(page.getByRole('button', { name: c.primaryActionLabel })).toBeVisible()
+        if (c.familiarWorkPattern) {
+          await expect(page.getByTestId('meridian-footer-actions')).toBeVisible()
+          await expect(page.getByTestId('meridian-footer-actions')).toHaveAttribute('data-sticky', 'true')
+          await expect(page.getByTestId('action-primary')).toHaveAttribute('data-action-zone', 'commit')
+        }
+        if (c.summaryPlacement === 'footer') {
+          const summary = page.getByTestId('mask-summary')
+          const footer = page.getByTestId('meridian-footer-actions')
+          await expect(summary).toBeVisible()
+          expect(await summary.evaluate((node, footerNode) => Boolean(node.compareDocumentPosition(footerNode as Node) & Node.DOCUMENT_POSITION_FOLLOWING), await footer.elementHandle())).toBe(true)
+        }
         await expect(page.getByTestId('workflow-panel-placeholder')).toBeVisible()
 
         const table = page.getByTestId(`table-${c.tableKey}`)

@@ -50,6 +50,9 @@ export function ActionBarRenderer({
         data-action-kind={action.kind ?? 'secondary'}
         data-danger-level={action.dangerLevel ?? 'safe'}
         data-requires-confirmation={action.requiresConfirmation ? 'true' : 'false'}
+        data-action-zone={action.zone ?? 'header'}
+        data-testid={`action-${action.key}`}
+        title={action.keyboardShortcut ? `${action.label} (${action.keyboardShortcut})` : undefined}
         onClick={() => { void onAction?.(action.key, payload) }}
       >
         {action.label}

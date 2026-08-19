@@ -9,6 +9,8 @@ import type {
   ScreenLayoutMode,
   ScreenMode,
   ScreenSummaryItem,
+  ScreenSummaryPlacement,
+  ScreenActionZone,
   ScreenTableProfile,
   ScreenTwinMetricKind,
   ScreenVoiceProvider,
@@ -41,6 +43,9 @@ export interface RenderShellPlan {
   contextRail: ScreenContextRail
   contextRailSections: ScreenContextRailSection[]
   tableProfile: ScreenTableProfile
+  summaryPlacement: ScreenSummaryPlacement
+  stickyHeader: boolean
+  stickyFooter: boolean
   summaryEndpoint?: string
   voice?: {
     enabled: boolean
@@ -183,6 +188,12 @@ export interface RenderActionPlan {
   requiresConfirmation?: boolean
   auditReasonRequired?: boolean
   humanApprovalRequired?: boolean
+  zone: ScreenActionZone
+  keyboardShortcut?: string
+}
+
+export interface RenderInteractionPlan {
+  enterMovesFocus: boolean
 }
 
 export interface RenderWorkflowPlan {
@@ -222,6 +233,7 @@ export interface RenderPlan {
   tablesByKey: Record<string, RenderTablePlan>
   tablesByTab: Record<string, RenderTablePlan[]>
   actions: RenderActionPlan[]
+  interaction: RenderInteractionPlan
   workflow?: RenderWorkflowPlan
   performance: RenderPerformancePlan
   /** Vom Nutzer eingeklappte Sektionen (UIX-071 Overlay) */

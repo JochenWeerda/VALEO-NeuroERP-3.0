@@ -1,7 +1,7 @@
 # VALEO NeuroERP - Eingabemasken Standard
 
-**Version:** 1.0.0  
-**Datum:** 2025-01-16  
+**Version:** 1.0.0
+**Datum:** 2025-01-16
 **Status:** ✅ Aktiv
 
 ## 📋 Übersicht
@@ -132,9 +132,12 @@ Alle Belege in einer Belegfolge müssen folgende **gemeinsame Funktionalitäten*
 
 ### Implementierungs-Regeln
 
-1. **Layout-Template verwenden:**
-   - Kopiere Layout-Struktur von `lieferschein-erfassung.tsx`
-   - Passe nur beleg-spezifische Felder an
+1. **Zentralen Layout-Vertrag verwenden:**
+   - Neue und migrierte Standardmasken deklarieren die Struktur in der
+     `ScreenDefinition`; keine Seitenkopie von `lieferschein-erfassung.tsx`.
+   - `RenderPlan` und `UniversalMaskRenderer` setzen Floorplan, Dichte,
+     Register, Summary-Position, Sticky-Regionen und Aktionszonen zentral um.
+   - Spezialisierte Prozessmasken bleiben nur gemaess ADR-031 zulaessig.
 
 2. **Gleiche Komponenten verwenden:**
    - `CustomerSelectionDialog` für Kunden-Auswahl
@@ -145,6 +148,8 @@ Alle Belege in einer Belegfolge müssen folgende **gemeinsame Funktionalitäten*
 3. **Gleiche Shortcuts:**
    - Alle Belege verwenden die gleichen Shortcuts (Strg+F1-F12)
    - Keine beleg-spezifischen Shortcuts ohne Dokumentation
+   - Native Masken deklarieren Shortcuts an `ScreenDefinition.actions[]`;
+     doppelte Shortcuts innerhalb einer Maske sind ungueltig.
 
 4. **Gleiche State-Struktur:**
    ```typescript
@@ -282,7 +287,7 @@ Alle Masken müssen die folgenden **globalen Shortcuts** unterstützen:
 - [ ] **Shortcut-Handler registrieren:**
   ```typescript
   import { useGlobalShortcuts } from '@/lib/shortcuts/global-shortcuts'
-  
+
   function MyMaskPage() {
     useGlobalShortcuts({
       'open-customer-selection': () => setShowCustomerDialog(true),
@@ -296,7 +301,7 @@ Alle Masken müssen die folgenden **globalen Shortcuts** unterstützen:
 - [ ] **Buttons mit ShortcutHintButton wrappen:**
   ```typescript
   import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
-  
+
   <ShortcutHintButton action="save-document" onClick={handleSave}>
     <Save className="h-4 w-4" />
     Speichern
@@ -405,4 +410,3 @@ Bei Erstellung neuer Masken:
 - ✅ Vollautomatische UAT-Tests möglich
 - ✅ Einheitliche Navigation und Bedienung
 - ✅ Barrierefreiheit und Accessibility
-

@@ -4,8 +4,8 @@ type: reference
 audience: [agent, entwickler, design, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-07-05
-version: 1.0.0
+last_reviewed: 2026-08-19
+version: 1.1.0
 description: Meridian als Design-, Layout- und Governance-Vertrag des Single Mask Builder.
 ---
 
@@ -51,12 +51,33 @@ layout: {
   density: 'comfortable' | 'compact' | 'expertDense'
   contextRail: 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
   tableProfile?: 'standard' | 'financial' | 'inventory' | 'audit'
+  summaryPlacement?: 'header' | 'footer'
+  stickyHeader?: boolean
+  stickyFooter?: boolean
 }
 ```
 
 Der `RenderPlan.shell` uebernimmt diese Felder zentral. Renderer lesen den Plan
 und erzeugen daraus Header, Aktionshierarchie, Summary, Tabs, Tabellenprofil,
 Dichte und Kontextbereich.
+
+## Gewohnheitsbruecken
+
+Migration aus einem bestehenden Desktop-ERP wird als Bedienvertrag modelliert,
+nicht als herstellerspezifisches Theme. Additive Meridian-Vertraege sind:
+
+- `actions[].zone`: fachliche Aktionen links im Footer, Commit-Aktionen rechts;
+  ohne Angabe bleibt die Action im Header.
+- `actions[].keyboardShortcut`: sichtbarer und zentral dispatchter Tastaturweg;
+  Berechtigungen und ActionRuntime bleiben unveraendert.
+- `layout.summaryPlacement`: Summen wahlweise im Kopf oder nach Tabellen/Tabs.
+- `layout.stickyHeader` / `stickyFooter`: stabile Orientierung bei dichten
+  Desktopmasken.
+- `interaction.enterMovesFocus`: Enter folgt dem sichtbaren Feldfluss; Textareas
+  und Buttons behalten ihre native Bedeutung.
+
+L3-Referenzfaelle und Datenschutzregeln:
+[`l3-to-meridian-habit-parity.md`](l3-to-meridian-habit-parity.md).
 
 ## Governance
 

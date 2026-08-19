@@ -22,6 +22,8 @@ export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
 export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
 export type ScreenContextRailSection = 'audit' | 'workflow' | 'copilot' | 'collab'
 export type ScreenTableProfile = 'standard' | 'financial' | 'inventory' | 'audit'
+export type ScreenSummaryPlacement = 'header' | 'footer'
+export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 export type ScreenFieldType =
@@ -115,6 +117,10 @@ export interface ScreenActionDefinition {
   auditReasonRequired?: boolean
   humanApprovalRequired?: boolean
   forbiddenForAgents?: boolean
+  /** Visual work zone. Defaults to the header for backwards compatibility. */
+  zone?: ScreenActionZone
+  /** Declarative, screen-local shortcut such as Ctrl+S, Ctrl+P, Escape or F4. */
+  keyboardShortcut?: string
 }
 
 /** Agent-readable contract for a single screen.
@@ -303,6 +309,10 @@ export interface ScreenDefinition {
   }
   seasonProfile?: ScreenSeasonProfile
   actions?: ScreenActionDefinition[]
+  interaction?: {
+    /** ERP desktop flow: Enter advances to the next eligible form control. */
+    enterMovesFocus?: boolean
+  }
   workflow?: ScreenWorkflowDefinition
   layout?: {
     preferredMode?: ScreenLayoutMode
@@ -313,6 +323,9 @@ export interface ScreenDefinition {
     contextRail?: ScreenContextRail
     contextRailSections?: ScreenContextRailSection[]
     tableProfile?: ScreenTableProfile
+    summaryPlacement?: ScreenSummaryPlacement
+    stickyHeader?: boolean
+    stickyFooter?: boolean
   }
   performance?: {
     initialPayloadBudgetKb?: number
@@ -349,6 +362,23 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   }
   if (screen.layout?.tableProfile && !['standard', 'financial', 'inventory', 'audit'].includes(screen.layout.tableProfile)) {
     errors.push(`layout.tableProfile is invalid: ${screen.layout.tableProfile}`)
+  }
+  if (screen.layout?.summaryPlacement && !['header', 'footer'].includes(screen.layout.summaryPlacement)) {
+    errors.push(`layout.summaryPlacement is invalid: ${screen.layout.summaryPlacement}`)
+  }
+  const shortcuts = new Set<string>()
+  for (const action of screen.actions ?? []) {
+    if (action.zone && !['header', 'footer', 'commit'].includes(action.zone)) {
+      errors.push(`action ${action.key} has invalid zone: ${action.zone}`)
+    }
+    const shortcut = action.keyboardShortcut?.trim().toLowerCase()
+    if (action.keyboardShortcut !== undefined && !shortcut) {
+      errors.push(`action ${action.key} has an empty keyboardShortcut`)
+    } else if (shortcut && shortcuts.has(shortcut)) {
+      errors.push(`keyboardShortcut is duplicated: ${action.keyboardShortcut}`)
+    } else if (shortcut) {
+      shortcuts.add(shortcut)
+    }
   }
   if (screen.twin && !screen.twin.endpoint) {
     errors.push('twin.endpoint is required')

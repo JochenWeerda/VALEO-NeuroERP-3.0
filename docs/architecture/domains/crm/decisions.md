@@ -18,5 +18,6 @@ version: 1.0.0
 | [ADR-008](../../../adr/adr-008-eventing-outbox-standard.md) | Eventing/Outbox | CRM-Events |
 | [ADR-036](../../../adr/adr-036-architecture-documentation-stack.md) | Doku-Stack | C4 Component CRM |
 | [ADR-037](../../../adr/adr-037-structurizr-c4-source-of-truth.md) | Structurizr DSL | Container-Modell |
+| [ADR-056](../../../adr/adr-056-vendor-neutral-erp-habit-contract.md) | Herstellerneutraler ERP-Gewohnheitsvertrag | CRM-/Sales-Masken |
 
 Neue **Significant** CRM-Entscheidungen → ADR Proposed + Human Review gemäß [architecture-protocol.md](../../agents/architecture-protocol.md).

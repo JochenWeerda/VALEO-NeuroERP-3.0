@@ -2,9 +2,10 @@ slice_id: L3-HABIT-BRIDGE-001
 id: L3-HABIT-BRIDGE-001
 title: L3-Gewohnheitsbruecke ueber Meridian Single Mask Builder
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-19"
 started_at: "2026-08-19"
+completed_at: "2026-08-19"
 goal: >-
   Die Bediengewohnheiten ausgewaehlter L3-Referenzmasken datenschutzkonform
   erfassen, in herstellerneutrale Masken- und Interaktionsvertraege
@@ -26,6 +27,14 @@ file_ownership:
   - docs/MASKEN.md
   - packages/frontend-web/src/components/mask-builder/
   - packages/frontend-web/src/__tests__/components/mask-builder/
+  - app/core/screen_definitions.py
+  - tests/test_l3_habit_bridge_screen_definitions.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts
+  - docs/design/l3-to-meridian-habit-parity.md
+  - docs/adr/adr-056-vendor-neutral-erp-habit-contract.md
+  - docs/architecture/agents/impact-notes/L3-HABIT-BRIDGE-001.md
+  - config/architecture-index.yaml
 dateibesitz:
   - docs/agent-ops/active-workboard.md
   - docs/agent-ops/slices/L3-HABIT-BRIDGE-001.yaml
@@ -35,6 +44,14 @@ dateibesitz:
   - docs/MASKEN.md
   - packages/frontend-web/src/components/mask-builder/
   - packages/frontend-web/src/__tests__/components/mask-builder/
+  - app/core/screen_definitions.py
+  - tests/test_l3_habit_bridge_screen_definitions.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts
+  - docs/design/l3-to-meridian-habit-parity.md
+  - docs/adr/adr-056-vendor-neutral-erp-habit-contract.md
+  - docs/architecture/agents/impact-notes/L3-HABIT-BRIDGE-001.md
+  - config/architecture-index.yaml
 acceptance:
   - L3-Referenzdaten oder personenbezogene Inhalte werden nicht in Git aufgenommen.
   - Die Gewohnheitsbruecke ist Teil der kanonischen Runtime-Kette und kein maskenspezifischer Sonderrenderer.
@@ -47,4 +64,16 @@ risks:
 external_gates: >-
   Fachliche Endabnahme durch erfahrene L3-Anwender bleibt ein externes Rollout-Gate;
   technische und visuelle Repo-Abnahme wird in diesem Slice vollstaendig umgesetzt.
-
+result: >-
+  Drei redigierte Referenzmuster wurden in additive, herstellerneutrale
+  ScreenDefinition- und RenderPlan-Vertraege ueberfuehrt. Footer-/Commit-Zonen,
+  Sticky-Regionen, Summary-Position, Tastaturaktionen und Enter-Feldfluss werden
+  zentral durch den UniversalMaskRenderer umgesetzt. Originalbilder und Echtdaten
+  wurden nicht versioniert.
+verification:
+  - "Mask-Builder/RenderPlan: 125 Tests gruen; gezielte neue Vertraege 16/16"
+  - "Backend ScreenDefinitions/Readiness: 4/4 gruen"
+  - "Playwright Meridian Visual Audit: 12/12 gruen (1366/1440/1920)"
+  - "TypeScript --noEmit und Production-Build gruen"
+  - "arch:validate und arch:drift gruen (905/905, 210/210, 406/406)"
+  - "Agent-Handbuch Drift-Check gruen"

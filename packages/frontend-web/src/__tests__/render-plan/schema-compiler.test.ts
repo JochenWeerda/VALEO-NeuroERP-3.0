@@ -154,6 +154,49 @@ describe('schema-compiler', () => {
     expect(plan.tablesByKey.positionen?.tableProfile).toBe('financial')
   })
 
+  it('compiles familiar desktop work patterns without a vendor-specific mode', () => {
+    const plan = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      layout: {
+        preferredMode: 'desktopDense',
+        mobileMode: 'mobileStack',
+        floorplan: 'transaction',
+        density: 'expertDense',
+        contextRail: 'combined',
+        tableProfile: 'standard',
+        summaryPlacement: 'footer',
+        stickyHeader: true,
+        stickyFooter: true,
+      },
+      interaction: { enterMovesFocus: true },
+      actions: [
+        {
+          key: 'print',
+          label: 'Drucken',
+          kind: 'secondary',
+          zone: 'footer',
+          keyboardShortcut: 'Ctrl+P',
+        },
+        {
+          key: 'save',
+          label: 'Speichern',
+          kind: 'primary',
+          zone: 'commit',
+          keyboardShortcut: 'Ctrl+S',
+        },
+      ],
+    })
+
+    expect(plan.shell.summaryPlacement).toBe('footer')
+    expect(plan.shell.stickyHeader).toBe(true)
+    expect(plan.shell.stickyFooter).toBe(true)
+    expect(plan.interaction.enterMovesFocus).toBe(true)
+    expect(plan.actions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ key: 'print', zone: 'footer', keyboardShortcut: 'Ctrl+P' }),
+      expect.objectContaining({ key: 'save', zone: 'commit', keyboardShortcut: 'Ctrl+S' }),
+    ]))
+  })
+
   it('compiles voice capability into the RenderPlan shell', () => {
     const plan = compileRenderPlanFromScreenDefinition({
       ...crmSchema(),

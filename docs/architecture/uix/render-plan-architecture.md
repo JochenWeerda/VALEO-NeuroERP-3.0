@@ -72,7 +72,10 @@ Invalidierung bei Logout oder `schemaVersion`-Wechsel.
 - Tabs: Schnittmenge Schema ∩ `summary.available_tabs`
 - Tabellen: `virtualized: true`, `pageSize ≤ 50`, `serverPagination: true`
 - Lookups: min 2 Zeichen, max 25 Treffer, Cache 15min, Debounce 300ms
-- Meridian: `ScreenDefinition.layout.floorplan`, `density`, `contextRail` und `tableProfile` werden in `RenderPlan.shell` uebernommen und steuern Header, Dichte, Kontextbereich und Tabellenprofil zentral.
+- Meridian: `ScreenDefinition.layout.floorplan`, `density`, `contextRail`,
+  `tableProfile`, `summaryPlacement` und Sticky-Regionen werden in
+  `RenderPlan.shell` uebernommen. `actions[].zone`/`keyboardShortcut` und
+  `interaction.enterMovesFocus` steuern Aktionszonen und Tastaturfluss zentral.
 
 ## DataBindingPlan-Regeln
 

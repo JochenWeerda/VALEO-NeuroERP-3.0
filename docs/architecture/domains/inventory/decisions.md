@@ -14,5 +14,6 @@ version: 1.0.0
 |---|---|
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Model |
 | [ADR-014](../../../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md) | Integrationen |
+| [ADR-056](../../../adr/adr-056-vendor-neutral-erp-habit-contract.md) | Herstellerneutraler ERP-Gewohnheitsvertrag |
 
 Microservice vs Monolith: `inventory-service` als separater Container — siehe [c4-02-containers.md](../../views/c4-02-containers.md).

@@ -8,5 +8,9 @@ export const FastSummaryRenderer = memo(function FastSummaryRenderer({
   items: ScreenSummaryItem[]
 }): JSX.Element | null {
   if (items.length === 0) return null
-  return <ScreenSummaryGrid items={items} />
+  return (
+    <div data-testid="mask-summary" aria-label="Zusammenfassung">
+      <ScreenSummaryGrid items={items} />
+    </div>
+  )
 })

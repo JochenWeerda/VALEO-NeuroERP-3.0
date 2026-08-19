@@ -4,8 +4,8 @@ type: reference
 audience: [agent, entwickler, fachlich]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-29
-version: 1.1.0
+last_reviewed: 2026-08-19
+version: 1.2.0
 description: Paritaetsmatrix Legacy-Kundenmaske vs. Universal Mask Generator (CRM 360 Pilot); Native-Runtime siehe UIX-034.
 ---
 
@@ -63,3 +63,11 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 
 - Angebote und Historie: Endpunkt vorhanden, liefert leere Liste bis fachliche Quelle angebunden ist.
 - Vollstaendige Feld-Paritaet aller Legacy-Sections: bewusst ausserhalb Wave 27 (Adapter-Pilot).
+
+## Desktop-Gewohnheitsbruecke 2026-08-19
+
+Die native Maske nutzt den zentralen Meridian-Vertrag: stabiler Header und
+Footer, `create_activity` links als Fachaktion, `edit` rechts als
+Commit-Aktion sowie Enter-Feldfluss. Das Muster ist herstellerneutral; die
+redigierte L3-Ableitung steht in
+[`l3-to-meridian-habit-parity.md`](../../../design/l3-to-meridian-habit-parity.md).

@@ -167,6 +167,14 @@ Visual-Audit-Abnahmepunkt ist als fokussierter Playwright-Test umgesetzt.
 Screenshot-Helfer fuer Render-Wait, Content-QC und Capture-Ziel und prueft
 Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080.
 
+Nachzug 2026-08-19 (`L3-HABIT-BRIDGE-001`): Die technische Gewohnheitsbruecke
+ist zentral im Single Mask Builder umgesetzt. CRM Customer 360, Lager
+Artikelbestand und Sales Lieferschein deklarieren Footer-/Commit-Aktionszonen,
+Sticky-Regionen und Enter-Fokus; der Lieferschein positioniert die Summary nach
+den Positionen. Kein offener Architektur-Gap. Externes Rollout-Gate bleibt die
+fachliche Pilotabnahme durch erfahrene L3-Anwender. Originalaufnahmen mit
+Echtdaten sind absichtlich nicht versioniert.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

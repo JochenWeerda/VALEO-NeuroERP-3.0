@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-07-17
+# Architecture Index — generiert 2026-08-19
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-07-17T18:17:32Z'
+generated_at: '2026-08-19T20:16:19Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1451,6 +1451,7 @@ domains:
     decisions:
     - docs/adr/adr-008-eventing-outbox-standard.md
     - docs/adr/adr-040-contract-gated-herd-data-connectors.md
+    - docs/adr/adr-056-vendor-neutral-erp-habit-contract.md
   platform:
     owner: platform
     frontend_route_prefixes:

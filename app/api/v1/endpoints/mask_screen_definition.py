@@ -164,6 +164,22 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
             schema_errors.append(f"{req} is required")
     if definition.get("schemaVersion") != 1:
         schema_errors.append("schemaVersion must be 1")
+    layout = definition.get("layout") or {}
+    if layout.get("summaryPlacement") not in (None, "header", "footer"):
+        schema_errors.append(f"layout.summaryPlacement is invalid: {layout.get('summaryPlacement')}")
+    shortcuts: set[str] = set()
+    for action in definition.get("actions") or []:
+        if action.get("zone") not in (None, "header", "footer", "commit"):
+            schema_errors.append(f"action {action.get('key')} has invalid zone: {action.get('zone')}")
+        raw_shortcut = action.get("keyboardShortcut")
+        if raw_shortcut is not None:
+            shortcut = str(raw_shortcut).strip().lower()
+            if not shortcut:
+                schema_errors.append(f"action {action.get('key')} has an empty keyboardShortcut")
+            elif shortcut in shortcuts:
+                schema_errors.append(f"keyboardShortcut is duplicated: {raw_shortcut}")
+            else:
+                shortcuts.add(shortcut)
     m("schema_valid", len(schema_errors) == 0, "; ".join(schema_errors) or "OK")
 
     # 2. non_temporary
