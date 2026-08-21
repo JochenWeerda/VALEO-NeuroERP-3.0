@@ -196,6 +196,29 @@ nutzt zentrale statusabhaengige Tabellenzeilen-Aktionen. Damit verbleiben aus
 der L3-Vollinventur fuenf offene P1-Gaps. Reale Geraete-/Provider-Mappings und
 Pilotbetrieb bleiben externe Gates.
 
+Nachzug 2026-08-21 (`L3-DOCRET-INBOX-004`): `L3-GAP-DOCRET-002` ist
+repo-seitig geschlossen. Der kanonische Docflow besitzt nun eine
+mandantenbezogene Ruecklauf-Worklist mit getrennten Versand-/Ruecklaufstatus,
+serverseitigen Filtern nach Benutzer, Kontakt, Datum und Bezugsart,
+Schlagworten, Artefaktvorschau-Metadaten, Ursprungsbeleg-Deep-Link und
+begruendetem append-only Audit. Externe Provider-Zustellnachweise und der
+fachliche Pilot bleiben Rollout-Gates. Damit verbleiben vier offene P1-Gaps.
+
+Nachzug 2026-08-21 (L3-Delta-Inventur): Live-RDP-Erfassung der zehn
+Ribbonbereiche gegen die Inventur vom 19.08.2026. Kein neuer P0, kein neuer
+Ribbon-Hauptbereich; P1–P3-Liste bestaetigt. Feindetail DATEI-Hauptmodule
+dokumentiert. Kanonischer Bericht:
+[`l3-delta-mask-inventory-2026-08-21.md`](../design/l3-delta-mask-inventory-2026-08-21.md).
+Originalbilder lokal unter `Pictures\L3-Capture-2026-08-21-delta`, nicht in Git.
+
+Nachzug 2026-08-21 (`L3-BELEGCHECK-WORKLIST-005`): `L3-GAP-BELEGCHECK-005` ist
+repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit
+vier Ausnahmearten, Zuweisung/Status-Audit, Filter/Pagination und Deep-Link.
+Navigations-Drill dokumentiert in
+[`l3-rdp-navigation-drill.md`](../design/l3-rdp-navigation-drill.md).
+Damit verbleiben aus der L3-Vollinventur drei offene P1-Gaps: Produktion,
+Inventur-Nebenlaeufe und Rechnungstapel/Selbstabrechner.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

@@ -1025,6 +1025,14 @@ api_router.include_router(
     tags=["docflow", "dms", "gobd"]
 )
 
+from app.api.v1.endpoints import docflow_return  # noqa: E402
+
+api_router.include_router(docflow_return.router)
+
+from app.api.v1.endpoints import document_control  # noqa: E402
+
+api_router.include_router(document_control.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

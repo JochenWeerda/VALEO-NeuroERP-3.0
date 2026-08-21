@@ -3068,6 +3068,54 @@ def build_planung_kalender_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_document_return_screen_definition() -> dict[str, Any]:
+    """Native worklist for document shipping and return handling."""
+    return {
+        "schemaVersion": 1, "id": "docflow/dokumenten-ruecklauf", "domain": "dms-compliance", "mode": "list",
+        "title": "Dokumentenruecklauf", "subtitle": "Versand, Ruecklauf und Ursprungsbeleg in einer Worklist",
+        "adapter": {"type": "native", "sourceId": "docflow/dokumenten-ruecklauf", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/docflow/returns/summary", "staleTimeMs": 10_000},
+            {"key": "returns", "endpoint": "/api/v1/docflow/returns", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "not_sent", "label": "Nicht versendet", "tone": "warning"},
+            {"key": "expected", "label": "Erwartet", "tone": "warning"},
+            {"key": "received", "label": "Eingegangen", "tone": "info"},
+            {"key": "overdue", "label": "Ueberfaellig", "tone": "danger"},
+        ],
+        "tables": [{"key": "returns", "label": "Ruecklauffaelle", "dataSourceKey": "returns", "serverPagination": True,
+            "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "created_at", "label": "Datum", "renderKind": "datetime", "sortable": True, "width": 150},
+                {"key": "doc_number", "label": "Ursprungsbeleg", "sortable": True, "filterable": True, "width": 150},
+                {"key": "subject_type", "label": "Bezug", "filterable": True, "width": 105},
+                {"key": "subject_ref", "label": "Kunde / Personal / Vorgang", "filterable": True, "width": 190},
+                {"key": "contact_ref", "label": "Kontakt", "filterable": True, "width": 145},
+                {"key": "assigned_user", "label": "Benutzer", "sortable": True, "filterable": True, "width": 130},
+                {"key": "tags", "label": "Schlagworte", "width": 160},
+                {"key": "shipping_status", "label": "Versand", "renderKind": "status", "sortable": True, "width": 110},
+                {"key": "return_status", "label": "Ruecklauf", "renderKind": "status", "sortable": True, "width": 115},
+                {"key": "file_name", "label": "Vorschau / Datei", "width": 190},
+            ],
+            "rowActions": [
+                {"key": "mark_sent", "label": "Versendet", "visibleWhen": {"field": "shipping_status", "values": ["not_sent", "failed"]}},
+                {"key": "mark_received", "label": "Eingegangen", "visibleWhen": {"field": "return_status", "values": ["expected", "rejected"]}},
+                {"key": "verify_return", "label": "Pruefen", "visibleWhen": {"field": "return_status", "values": ["received"]}},
+                {"key": "preview_evidence", "label": "Vorschau"},
+                {"key": "open_source", "label": "Ursprungsbeleg"},
+            ]}],
+        "noWorkflowReason": "Statuswechsel werden im append-only Ruecklauf-Audit gefuehrt.",
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "docflow"},
+        "agentContract": {"businessPurpose": "Dokumentenversand und erwartete Ruecklaeufe mandantensicher bearbeiten.",
+            "examplePrompts": ["Zeige ueberfaellige Ruecklaeufe.", "Welche Dokumente wurden noch nicht versendet?"],
+            "sensitiveFields": ["contact_ref", "subject_ref", "storage_key"],
+            "forbiddenAgentTasks": ["Ruecklaufstatus ohne menschlichen Grund aendern"],
+            "testSelectors": {"screenRoot": "[data-testid='document-return-inbox']"}},
+    }
+
+
 def build_mde_inbox_screen_definition() -> dict[str, Any]:
     """Native operator worklist for the hardened mobile/MDE event queue."""
 
@@ -3165,7 +3213,81 @@ def build_mde_inbox_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_document_control_screen_definition() -> dict[str, Any]:
+    """Native Ausnahme-Worklist fuer Beleg-Kontrolle."""
+    return {
+        "schemaVersion": 1,
+        "id": "auswertungen/beleg-kontrolle",
+        "domain": "finance",
+        "mode": "list",
+        "title": "Beleg-Kontrolle",
+        "subtitle": "Unerledigte Bestellungen, fehlende Eingangsbelege und Lieferschein-Ausnahmen",
+        "adapter": {"type": "native", "sourceId": "auswertungen/beleg-kontrolle", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/document-control/summary", "staleTimeMs": 10_000},
+            {"key": "exceptions", "endpoint": "/api/v1/document-control/exceptions", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "open_total", "label": "Offen", "tone": "warning"},
+            {"key": "open_purchase_order", "label": "Unerledigte Bestellungen", "tone": "warning"},
+            {"key": "missing_inbound_document", "label": "Fehlende Eingangsbelege", "tone": "danger"},
+            {"key": "blocked_delivery_note", "label": "Gesperrte Lieferscheine", "tone": "danger"},
+            {"key": "uninvoiced_delivery_note", "label": "Nicht fakturiert", "tone": "warning"},
+            {"key": "overdue", "label": "Ueberfaellig", "tone": "danger"},
+        ],
+        "tables": [{
+            "key": "exceptions",
+            "label": "Ausnahmen",
+            "dataSourceKey": "exceptions",
+            "serverPagination": True,
+            "pageSize": 50,
+            "virtualized": True,
+            "rowHeight": 44,
+            "columns": [
+                {"key": "due_at", "label": "Faelligkeit", "renderKind": "datetime", "sortable": True, "width": 150},
+                {"key": "exception_type", "label": "Typ", "sortable": True, "filterable": True, "width": 190},
+                {"key": "document_number", "label": "Beleg", "sortable": True, "filterable": True, "width": 140},
+                {"key": "partner_name", "label": "Partner", "filterable": True, "width": 180},
+                {"key": "partner_ref", "label": "Partner-Nr.", "filterable": True, "width": 110},
+                {"key": "assigned_user", "label": "Verantwortlich", "sortable": True, "filterable": True, "width": 130},
+                {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 120},
+                {"key": "notes", "label": "Hinweis", "width": 220},
+                {"key": "created_at", "label": "Erfasst", "renderKind": "datetime", "sortable": True, "width": 150},
+            ],
+            "rowActions": [
+                {"key": "assign_me", "label": "Zuweisen", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
+                {"key": "start_work", "label": "In Arbeit", "visibleWhen": {"field": "status", "values": ["open", "assigned"]}},
+                {"key": "resolve", "label": "Erledigt", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
+                {"key": "waive", "label": "Verwerfen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
+                {"key": "open_source", "label": "Zum Beleg"},
+            ],
+        }],
+        "noWorkflowReason": "Statuswechsel werden im append-only Belegkontroll-Audit gefuehrt.",
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
+        "performance": {
+            "initialPayloadBudgetKb": 48,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "finance",
+        },
+        "agentContract": {
+            "businessPurpose": "Belegausnahmen mandantensicher priorisieren und zum Ursprungsbeleg springen.",
+            "examplePrompts": [
+                "Zeige nicht fakturierte Lieferscheine.",
+                "Welche Bestellungen sind unerledigt?",
+                "Welche Belegausnahmen sind ueberfaellig?",
+            ],
+            "sensitiveFields": ["partner_name", "partner_ref", "notes"],
+            "forbiddenAgentTasks": ["Ausnahmen ohne menschlichen Audit-Grund erledigen"],
+            "testSelectors": {"screenRoot": "[data-testid='beleg-kontrolle']"},
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "docflow/dokumenten-ruecklauf": build_document_return_screen_definition,
+    "auswertungen/beleg-kontrolle": build_document_control_screen_definition,
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "planung/kalender": build_planung_kalender_screen_definition,
     "schnittstelle/mde-inbox": build_mde_inbox_screen_definition,
@@ -3691,6 +3813,14 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "workspace/leitung": ["leitung cockpit", "geschaeftsleitung", "management workspace"],
     "planung/kalender": ["planungskalender", "kalender", "fristenkalender", "was steht naechste woche an"],
     "schnittstelle/mde-inbox": ["mde", "mobile datenerfassung", "mde eingang", "mde fehler", "mde quarantaene"],
+    "docflow/dokumenten-ruecklauf": ["dokumentenruecklauf", "ruecklauf", "versandstatus", "fehlende dokumente"],
+    "auswertungen/beleg-kontrolle": [
+        "belegkontrolle",
+        "beleg kontrolle",
+        "unerledigte bestellungen",
+        "nicht fakturierte lieferscheine",
+        "fehlende eingangsbelege",
+    ],
 }
 
 
@@ -3750,6 +3880,8 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "workspace/leitung": "/workspace/leitung",
     "planung/kalender": "/planung/kalender",
     "schnittstelle/mde-inbox": "/schnittstelle/mde-inbox",
+    "docflow/dokumenten-ruecklauf": "/docflow/dokumenten-ruecklauf",
+    "auswertungen/beleg-kontrolle": "/auswertungen/beleg-kontrolle",
 }
 
 

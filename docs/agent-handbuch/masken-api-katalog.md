@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (47 Masken).
+> Generiert aus `app/core/screen_definitions.py` (49 Masken).
 
 ## Übersicht
 
@@ -32,9 +32,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
 | `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
+| `auswertungen/beleg-kontrolle` | Beleg-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
 | `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
+| `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
@@ -766,6 +768,34 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+## Domäne: dms-compliance
+
+### `docflow/dokumenten-ruecklauf` — Dokumentenruecklauf
+
+**Zweck:** Dokumentenversand und erwartete Ruecklaeufe mandantensicher bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/readiness` |
+| Rollout-Route | `/mask-rollout/docflow__dokumenten-ruecklauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/docflow/returns/summary`
+- `returns` → `/api/v1/docflow/returns`
+
+**Beispiel-Prompts:**
+
+- Zeige ueberfaellige Ruecklaeufe.
+- Welche Dokumente wurden noch nicht versendet?
+
+**Sensible Felder:** `contact_ref, subject_ref, storage_key`
+
+---
+
 ## Domäne: einkauf
 
 ### `einkauf/anfrage` — Einkaufsanfrage
@@ -1020,6 +1050,38 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: finance
+
+### `auswertungen/beleg-kontrolle` — Beleg-Kontrolle
+
+**Zweck:** Belegausnahmen mandantensicher priorisieren und zum Ursprungsbeleg springen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/beleg-kontrolle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/beleg-kontrolle/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__beleg-kontrolle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/document-control/summary`
+- `exceptions` → `/api/v1/document-control/exceptions`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige nicht fakturierte Lieferscheine.
+- Welche Bestellungen sind unerledigt?
+- Welche Belegausnahmen sind ueberfaellig?
+
+**Sensible Felder:** `partner_name, partner_ref, notes`
+
+---
 
 ### `finance/ap-invoice` — Eingangsrechnung
 

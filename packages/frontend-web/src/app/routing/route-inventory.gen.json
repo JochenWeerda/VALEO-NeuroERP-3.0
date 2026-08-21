@@ -1536,6 +1536,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/docflow/dokumenten-ruecklauf",
+      "path": "docflow/dokumenten-ruecklauf",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/docflow/gobd-export",
       "path": "docflow/gobd-export",
       "source": "alias"

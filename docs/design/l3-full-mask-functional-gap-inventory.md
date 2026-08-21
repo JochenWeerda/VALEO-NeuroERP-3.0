@@ -17,8 +17,8 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**vier offene P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001` und
-`L3-GAP-DOCRET-002` wurden repo-seitig geschlossen. Die groessten verbleibenden
+**drei offene P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+`L3-GAP-DOCRET-002` und `L3-GAP-BELEGCHECK-005` wurden repo-seitig geschlossen. Die groessten verbleibenden
 Wechselrisiken liegen nicht in den Kernbelegen, sondern in allgemeiner
 Produktion, Inventur-Nebenlaeufen und L3-spezifischen
 Ausnahme-Worklists.
@@ -66,7 +66,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Ruest-/Kommissionierliste | FEFO-Kommissionierung und dokumentierter Ruestlisten-Lifecycle | vorhanden | - |
 | Produktionsliste, Artikel-Umbuchung, Stapelbuchung, Muehle, Nachbearbeitung | Mischfutter-Produktionsauftrag mit Rezeptur, Charge, Status und Trace; Rezepturgruppen | teilweise | L3-GAP-PROD-003 |
 | Abfrage-Center | feste Reports und Dashboards vorhanden | fehlend | L3-GAP-QUERY-008 |
-| Beleg-Kontrolle | domaenenspezifische Kontrollseiten vorhanden | teilweise | L3-GAP-BELEGCHECK-005 |
+| Beleg-Kontrolle | native Ausnahme-Worklist mit vier Belegarten, Verantwortlichkeit, Audit und Deep-Link | vorhanden | L3-GAP-BELEGCHECK-005 geschlossen |
 | Dokumenten-Ruecklauf | native Worklist mit Versand-/Ruecklaufstatus, Vorschau-Metadaten, Schlagworten, Audit und Ursprungsbeleg | vorhanden | L3-GAP-DOCRET-002 geschlossen |
 | Kunden-, Lieferanten-, Artikel-, Lager-, Ernte-, Vertreter- und Streckenberichte | zentrale und domaenenspezifische Reports vorhanden | teilweise | L3-GAP-REPORT-012 |
 | Fuhrpark | Fahrzeugakte inkl. Technik, Fahrer, Wirtschaft, Termine, km, Reifen, Unfall, Schaden und Wartung | vorhanden | - |

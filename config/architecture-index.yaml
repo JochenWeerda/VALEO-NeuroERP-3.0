@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-08-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-21T16:24:36Z'
+generated_at: '2026-08-21T17:09:25Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -802,6 +802,7 @@ domains:
     - /compliance/vvvo-register
     - /compliance/zulassungen-register
     - /docflow/artefakt-freigabe
+    - /docflow/dokumenten-ruecklauf
     - /docflow/gobd-export
     - /docflow/nachweisraum
     - /docflow/wiedervorlagen
@@ -884,6 +885,7 @@ domains:
     - docs/adr/adr-039-repo-layout.md
     - docs/adr/adr-048-feeding-analysis-provenance.md
     - docs/adr/adr-055-feeding-measure-lifecycle.md
+    - docs/adr/adr-058-document-return-on-docflow.md
     status: active
   finance:
     owner: domain/finance
@@ -1865,8 +1867,8 @@ domains:
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
 mapping_stats:
-  frontend_routes_total: 906
-  frontend_routes_mapped: 906
+  frontend_routes_total: 907
+  frontend_routes_mapped: 907
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

@@ -1579,6 +1579,24 @@
       ]
     },
     {
+      "mask_id": "docflow/dokumenten-ruecklauf",
+      "title": "Dokumentenruecklauf",
+      "domain": "dms-compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/docflow__dokumenten-ruecklauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/docflow/dokumenten-ruecklauf/screen-definition",
+      "readiness_url": "/api/v1/masks/docflow/dokumenten-ruecklauf/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "contact_ref",
+        "subject_ref",
+        "storage_key"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "einkauf/anfrage",
       "title": "Einkaufsanfrage",
       "domain": "einkauf",
@@ -1786,6 +1804,27 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/beleg-kontrolle",
+      "title": "Beleg-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__beleg-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/beleg-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/beleg-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/beleg-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
       ]
     },
     {

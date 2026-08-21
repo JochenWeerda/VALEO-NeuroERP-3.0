@@ -11,25 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-BELEGCHECK-WORKLIST-005 Zentrale Beleg-Kontroll-Worklist - reserviert 2026-08-21
+## L3-BELEGCHECK-WORKLIST-005 Zentrale Beleg-Kontroll-Worklist - abgeschlossen 2026-08-21
 
-**Von:** Nutzerauftrag Menue-Drill + Gap-Schliessung; DOCRET bleibt Codex-Besitz. **Owner:** Cursor Agent. **Stand:** reserviert 2026-08-21.
+**Von:** Nutzerauftrag Menue-Drill + Gap-Schliessung; DOCRET bleibt Codex-Besitz. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte und nicht fakturierte Lieferscheine mit Verantwortlichem, Faelligkeit, Audit und Deep-Link — nativ Meridian.
 
-**Dateibesitz:** `docs/agent-ops/slices/L3-BELEGCHECK-WORKLIST-005.yaml`, dieser Abschnitt, Document-Control-Service/API/Migration/Tests, ScreenDefinition, Seite `auswertungen/beleg-kontrolle`, Navigation und Gap-Doku.
+**Ergebnis:** `domain_ops.document_control_exceptions` + Audit; API unter `/api/v1/document-control`; native ScreenDefinition `auswertungen/beleg-kontrolle`; Navigation unter Finance; 5 Backend- und 1 Frontend-Test gruen. Live-Projektion aus allen Belegtabellen bleibt Folgeausbau (Register-API fuer Pilot). Gap `L3-GAP-BELEGCHECK-005` repo-seitig geschlossen.
 
-**Abnahme:** Tenant-Isolation; vier Ausnahmearten; auditierte Zuweisung/Erledigung; serverseitige Filter/Pagination; Deep-Link; generatorfaehige Worklist; Tests und Doku gruen.
+**Dateibesitz:** Slice-YAML, Service/API/Migration/Tests, ScreenDefinition, Seite, Navigation, Gap-Doku, Navigations-Drill.
 
-## L3-DOCRET-INBOX-004 Dokumentenruecklauf und Versandstatus - reserviert 2026-08-21
+## L3-DOCRET-INBOX-004 Dokumentenruecklauf und Versandstatus - abgeschlossen 2026-08-21
 
-**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Den vorhandenen Docflow-/Artefakt-/Wiedervorlage-Kern um einen mandantenfaehigen Dokumentenruecklauf mit Versandstatus, Ruecklaufstatus, Vorschau, Schlagworten, Verantwortlichkeit und Deep-Link zum Ursprungsbeleg erweitern. Die Bedienung erfolgt nativ ueber den Single Mask Builder.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-DOCRET-INBOX-004.yaml`, dieser Workboard-Abschnitt, neue Dokumentenruecklauf-Service-/Endpoint-/Migrations-/Testdateien, Docflow-ScreenDefinition und Route, DMS/Docflow-Domain-Pack, ADR/Impact-Note, Agent-Handbuch-, OpenAPI-, Architektur- und Gap-Dokumentation.
 
 **Abnahme:** Tenant-Isolation; serverseitige Filter/Pagination nach Benutzer, Kontakt, Datum und Bezugsart; auditierte Versand-/Ruecklaufstatus-Transitionen; Artefaktvorschau und Ursprungsbeleg-Deep-Link; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Der kanonische Docflow besitzt eine native, serverseitig paginierte Ruecklauf-Worklist mit getrennten Versand-/Ruecklaufstatus, Benutzer-/Kontakt-/Datums-/Bezugsfiltern, Schlagworten, mandanten- und beleggebundener Artefaktvorschau, Ursprungsbeleg-Deep-Link sowie begruendetem append-only Audit. 15 Docflow-Backendtests, zwei fokussierte Frontendtests, TypeScript, Ruff und die Generator-/Architekturgates sind gruen. Extern offen bleiben Provider-Zustellnachweise, produktive Storage-Auslieferung und Pilotbetrieb.
 
 ## L3-DELTA-MASK-2026-08-21 Live-Delta-Inventur RDP - abgeschlossen 2026-08-21
 
