@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-QUERY-CENTER-010 Sicheres Anwender-Abfrage-Center - reserviert 2026-08-21
+
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Berechtigte, tenantgebundene Anwenderabfragen ausschliesslich ueber freigegebene Read Models mit Feld-/Filter-/Aggregations-Allowlist, begrenzter Vorschau, Favoriten, Druck und signiertem Definitionsaustausch bereitstellen; beliebiges SQL bleibt ausgeschlossen.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-QUERY-CENTER-010.yaml`, dieser Workboard-Abschnitt, neue Query-Center-Service-/API-/Migrations-/Testdateien, zentrale ScreenDefinition und Route, Reporting-/Finance-Domain-Pack, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
+
+**Abnahme:** Allowlist-Governance; Tenant-Isolation; paginierte/hart begrenzte Vorschau; gespeicherte Abfragen und Favoriten; signierter Export/verifizierter Import; nativer generatorfaehiger Arbeitsplatz; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-ROHWARE-OPERATOR-009 Fremdware-Operator-Worklist - abgeschlossen 2026-08-21
 
 **Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung nach Abschluss aller P1-Gaps. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.

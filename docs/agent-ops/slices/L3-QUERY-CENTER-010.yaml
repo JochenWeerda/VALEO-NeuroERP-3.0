@@ -1,0 +1,36 @@
+slice_id: L3-QUERY-CENTER-010
+id: L3-QUERY-CENTER-010
+title: Sicheres Anwender-Abfrage-Center
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Ein L3-vertrautes Abfrage-Center ueber freigegebenen Read Models mit
+  Vorschau, Favoriten, Druck und signiertem Austausch bereitzustellen.
+architecture:
+  decision_level: significant
+  domains: [reporting, platform, finance]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Nur explizit freigegebene Datenprodukte und Felder, kein beliebiges SQL.
+  - Tenantgebundene gespeicherte Abfragen und Favoriten.
+  - Begrenzte Vorschau und serverseitige Filter/Aggregationen.
+  - Signierter Export und verifizierter Import von Definitionen.
+file_ownership:
+  - app/services/query_center_service.py
+  - app/api/v1/endpoints/query_center.py
+  - alembic/versions/query_center_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/auswertungen/abfrage-center.tsx
+  - tests/test_query_center.py
+  - generated route, OpenAPI, architecture and handbook artifacts
+  - Reporting/Finance domain packs, ADR, gap documentation and workboard
+acceptance:
+  - Allowlist erzwingt Read Model, Felder, Filter und Aggregationen.
+  - Vorschau ist tenantgebunden, paginiert und hart begrenzt.
+  - Favoriten und gespeicherte Definitionen sind auditierbar.
+  - Import akzeptiert nur gueltig signierte, erneut validierte Definitionen.
+  - Native generator-ready Worklist und gruenen Repository-Gates.
+risks:
+  - Fachliche Freigabe weiterer Read Models bleibt laufende Governance.
