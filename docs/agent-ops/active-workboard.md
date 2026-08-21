@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-RECENT-DOCUMENTS-015 Persoenliche letzte Dokumente - reserviert 2026-08-21
+
+**Von:** Fortsetzung der L3-P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Eine bereichsuebergreifende, personenbezogene und berechtigte Historie zuletzt geoeffneter ERP-Dokumente mit Typ, Nummer, Partner, Zeitpunkt und internem Deep-Link bereitstellen.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-RECENT-DOCUMENTS-015.yaml`, dieser Workboard-Abschnitt, Recent-Document-Service/-Endpoint/-Migration/-Tests, zentrale ScreenDefinition/Runtime-Integration/Route, Workspace-/Domain-Doku, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
+
+**Abnahme:** Tenant-/Benutzerisolation; Dokumentfamilien-Allowlist und Rollenpruefung; interne Deep-Links; deduplizierte Neuoeffnung; Retention/Mengenlimit/Loeschpfad; native generatorfaehige Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-REPORT-CATALOG-014 Priorisierter L3-Berichtskatalog - abgeschlossen 2026-08-21
 
 **Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.

@@ -1,0 +1,33 @@
+slice_id: L3-RECENT-DOCUMENTS-015
+id: L3-RECENT-DOCUMENTS-015
+title: Persoenliche letzte Dokumente
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Eine bereichsuebergreifende, personenbezogene und berechtigte Historie der
+  zuletzt geoeffneten ERP-Dokumente mit sicherem Deep-Link bereitzustellen.
+architecture:
+  decision_level: significant
+  domains: [workspace, crm, finance, inventory, agrar]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Tenant- und benutzergebundene Access-Projektion mit begrenzter Aufbewahrung.
+  - Dokumentfamilien-Allowlist mit Rollenpruefung bei Erfassung und Ausgabe.
+  - Dokumenttyp, Nummer, Partner, Zeitpunkt und ausschliesslich interne Route.
+  - Native, serverseitig paginierte Worklist mit Deep-Link.
+file_ownership:
+  - app/services/recent_documents_service.py
+  - app/api/v1/endpoints/recent_documents.py
+  - alembic/versions/l3_recent_documents_20260821.py
+  - zentrale ScreenDefinition, Runtime-Integration, Navigation, Route und Tests
+  - generated artifacts, ADR, domain packs, gap docs and workboard
+acceptance:
+  - Keine globale oder fremde Benutzerhistorie.
+  - Nur autorisierte Dokumentfamilien und interne Deep-Links.
+  - Deduplizierung pro Benutzer und Dokument, Neuoeffnung aktualisiert den Rang.
+  - Aufbewahrungs- und Mengenlimit mit explizitem Loeschpfad.
+  - Native generator-ready Worklist und gruene Gates.
+risks:
+  - Flächendeckende Erfassung ausserhalb nativer Detailmasken bleibt Folgeintegration.
