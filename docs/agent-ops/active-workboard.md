@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-MDE-INBOX-003 MDE-Eingangskorb und Verarbeitung - reserviert 2026-08-21
+
+**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Einen herstellerneutralen, mandantenfaehigen MDE-Eingangskorb mit idempotenter Annahme, Validierung, Quarantaene, Wiederholung, Auditspur und nativer Meridian-Worklist bereitstellen. Keine Kopie der L3-Oberflaeche; Umsetzung zentral ueber `ScreenDefinition -> RenderPlan -> UniversalMaskRenderer`.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-MDE-INBOX-003.yaml`, dieser Workboard-Abschnitt, neue MDE-Service-/Endpoint-/Migrations-/Testdateien, MDE-ScreenDefinition und Route, Architecture-Prefix/Index, Platform-Domain-Pack, ADR/Impact-Note, Agent-Handbuch-Quellen sowie `docs/project-context/open-gaps-and-known-issues.md`.
+
+**Abnahme:** Tenant-Isolation; idempotente Aufnahme; explizite Statusmaschine; Fehler-/Quarantaenegrund; auditierte Wiederholung; serverseitige Filter/Pagination; generatorfaehige `expertDense`-Worklist mit `audit`-Profil; Backend-/Frontend-Vertragstests, Architektur-/Doku-Drift und Agent-Handbuch-Check gruen.
+
 ## L3-FULL-MASK-GAP-002 Vollinventur der L3-Masken und funktionale Gap-Liste - abgeschlossen 2026-08-19
 
 **Von:** Nutzerauftrag zur Screenshot-Inventur aller uebrigen L3-Masken und Ermittlung fehlender VALEO-Funktionalitaeten. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-19.
