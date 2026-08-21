@@ -1,0 +1,35 @@
+slice_id: L3-MAIL-WORKSPACE-012
+id: L3-MAIL-WORKSPACE-012
+title: Rollenbasierter ERP-Mailarbeitsplatz
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Vorhandenen IMAP-/CRM-Mail-Ingest in einen rollenbasierten, auditierten
+  Mailarbeitsplatz mit Zuordnung, Anlagenuebernahme und Entwurf/Versand zu ueberfuehren.
+architecture:
+  decision_level: significant
+  domains: [crm, dms-compliance, platform]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Rollenpostfaecher und tenantgebundene Message-ID-Idempotenz.
+  - Kontakt-/Belegzuordnung und Anlagen-Nachweis.
+  - Entwurf, Provider-Queue und revisionssichere Aktivitaet.
+  - Bestehenden IMAP-Ingest weiterverwenden.
+file_ownership:
+  - app/services/mail_workspace_service.py
+  - app/api/v1/endpoints/mail_workspace.py
+  - app/services/mail_ingest_service.py
+  - alembic/versions/mail_workspace_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/crm/mail-arbeitsplatz.tsx
+  - tests/test_mail_workspace.py
+  - generated artifacts, ADR, domain packs, gap docs and workboard
+acceptance:
+  - Rollen-/Tenant-Zugriff wird serverseitig erzwungen.
+  - Message-ID idempotent, Anlagen mit Hash und Uebernahmestatus.
+  - Kontakt-/Belegzuordnung und Draft/Queue auditierbar.
+  - Native generator-ready Worklist und gruene Gates.
+risks:
+  - Produktive SMTP-/Graph-Zustellung und Virenscan bleiben externe Gates.

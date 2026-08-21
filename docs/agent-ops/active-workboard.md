@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-MAIL-WORKSPACE-012 Rollenbasierter ERP-Mailarbeitsplatz - reserviert 2026-08-21
+
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Den vorhandenen IMAP-/CRM-Mail-Ingest als rollenbasierten Arbeitsplatz mit Message-ID-Idempotenz, Kontakt-/Belegzuordnung, hashgebundener Anlagenuebernahme, Entwurf, Provider-Queue und revisionssicherer Aktivitaet bereitstellen.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-MAIL-WORKSPACE-012.yaml`, dieser Workboard-Abschnitt, Mail-Workspace-Service/-Endpoint/-Migration/-Tests, kleine Ingest-Integration, zentrale ScreenDefinition/Route, CRM-/DMS-Domain-Packs, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
+
+**Abnahme:** serverseitige Rollen-/Tenant-Grenze; idempotenter Eingang; Kontakt-/Belegzuordnung; Attachment-Hash/Uebernahme; auditierter Draft/Queue-Lifecycle; native generatorfaehige Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-TEAM-CALENDAR-011 Mehrbenutzer-Teamkalender - abgeschlossen 2026-08-21
 
 **Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
