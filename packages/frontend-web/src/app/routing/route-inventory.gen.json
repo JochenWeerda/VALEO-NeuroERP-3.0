@@ -1386,6 +1386,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/crm/mail-arbeitsplatz",
+      "path": "crm/mail-arbeitsplatz",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/crm/opportunities-liste",
       "path": "crm/opportunities",
       "source": "alias"

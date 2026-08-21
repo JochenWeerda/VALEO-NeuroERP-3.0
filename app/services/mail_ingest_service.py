@@ -13,11 +13,10 @@ Idempotenz: Message-ID je Mail (verweis) + zuletzt gesehene IMAP-UID je Ordner
 from __future__ import annotations
 
 import email
+import hashlib
 import imaplib
 import logging
 from email.utils import getaddresses, parseaddr
-from typing import Optional
-
 from sqlalchemy.orm import Session
 
 from app.services.connector_config import (
@@ -27,6 +26,7 @@ from app.services.connector_config import (
     save_imap_state,
 )
 from app.services.crm_auto_capture_service import CrmAutoCaptureService
+from app.services.mail_workspace_service import MailWorkspaceService
 
 logger = logging.getLogger("mail.ingest")
 
@@ -39,7 +39,9 @@ def _plain_text(msg: email.message.Message) -> str:
             ):
                 payload = part.get_payload(decode=True)
                 if payload:
-                    return payload.decode(part.get_content_charset() or "utf-8", "replace")
+                    return payload.decode(
+                        part.get_content_charset() or "utf-8", "replace"
+                    )
         return ""
     payload = msg.get_payload(decode=True)
     if payload:
@@ -50,7 +52,11 @@ def _plain_text(msg: email.message.Message) -> str:
 def _decode(raw: str) -> str:
     out = ""
     for text_part, enc in email.header.decode_header(raw or ""):
-        out += text_part.decode(enc or "utf-8", "replace") if isinstance(text_part, bytes) else text_part
+        out += (
+            text_part.decode(enc or "utf-8", "replace")
+            if isinstance(text_part, bytes)
+            else text_part
+        )
     return out
 
 
@@ -63,19 +69,31 @@ class MailIngestService:
         """Verbindungs-/Login-Probe für die Admin-Suite (kein Abruf)."""
         cfg = load_imap_config(self.db, self.tenant_id)
         if not cfg.resolved_host() or not cfg.resolved_user():
-            return {"ok": False, "detail": "Host und Benutzer sind erforderlich.",
-                    "host": cfg.resolved_host(), "folders": 0}
+            return {
+                "ok": False,
+                "detail": "Host und Benutzer sind erforderlich.",
+                "host": cfg.resolved_host(),
+                "folders": 0,
+            }
         try:
             cfg.validate_command_values()
             imap = self._connect(cfg)
         except (ValueError, imaplib.IMAP4.error, OSError) as exc:
-            return {"ok": False, "detail": f"Login fehlgeschlagen: {exc}",
-                    "host": cfg.resolved_host(), "folders": 0}
+            return {
+                "ok": False,
+                "detail": f"Login fehlgeschlagen: {exc}",
+                "host": cfg.resolved_host(),
+                "folders": 0,
+            }
         try:
             status, boxes = imap.list()
             n = len(boxes) if status == "OK" and boxes else 0
-            return {"ok": True, "detail": f"Login OK · {n} Ordner sichtbar.",
-                    "host": cfg.resolved_host(), "folders": n}
+            return {
+                "ok": True,
+                "detail": f"Login OK · {n} Ordner sichtbar.",
+                "host": cfg.resolved_host(),
+                "folders": n,
+            }
         finally:
             self._logout(imap)
 
@@ -83,12 +101,20 @@ class MailIngestService:
         """Holt neue Mails aus Posteingang (+ optional Gesendet) und erfasst sie."""
         cfg = load_imap_config(self.db, self.tenant_id)
         if not cfg.configured:
-            return {"ok": False, "detail": "IMAP ist nicht aktiviert/konfiguriert.", "processed": 0}
+            return {
+                "ok": False,
+                "detail": "IMAP ist nicht aktiviert/konfiguriert.",
+                "processed": 0,
+            }
         try:
             cfg.validate_command_values()
             imap = self._connect(cfg)
         except (ValueError, imaplib.IMAP4.error, OSError) as exc:
-            return {"ok": False, "detail": f"Login fehlgeschlagen: {exc}", "processed": 0}
+            return {
+                "ok": False,
+                "detail": f"Login fehlgeschlagen: {exc}",
+                "processed": 0,
+            }
 
         state = load_imap_state(self.db, self.tenant_id)
         capture = CrmAutoCaptureService(self.db, self.tenant_id)
@@ -111,8 +137,12 @@ class MailIngestService:
             self._logout(imap)
 
         save_imap_state(self.db, self.tenant_id, state)
-        return {"ok": True, "processed": processed, "created": created,
-                "detail": f"{processed} neue Mail(s) verarbeitet, {created} Kontakt(e) angelegt."}
+        return {
+            "ok": True,
+            "processed": processed,
+            "created": created,
+            "detail": f"{processed} neue Mail(s) verarbeitet, {created} Kontakt(e) angelegt.",
+        }
 
     # ── intern ────────────────────────────────────────────────────────────────
     def _connect(self, cfg: ImapConfig) -> imaplib.IMAP4:
@@ -132,7 +162,9 @@ class MailIngestService:
             pass
 
     @staticmethod
-    def _fetch_new(imap: imaplib.IMAP4, folder: str, last_uid: int) -> list[tuple[int, bytes]]:
+    def _fetch_new(
+        imap: imaplib.IMAP4, folder: str, last_uid: int
+    ) -> list[tuple[int, bytes]]:
         status, _ = imap.select(folder, readonly=True)
         if status != "OK":
             return []
@@ -152,8 +184,9 @@ class MailIngestService:
                 out.append((uid_i, msg_data[0][1]))
         return out
 
-    def _ingest(self, capture: CrmAutoCaptureService, raw: bytes, direction: str,
-                own: list[str]) -> dict:
+    def _ingest(
+        self, capture: CrmAutoCaptureService, raw: bytes, direction: str, own: list[str]
+    ) -> dict:
         msg = email.message_from_bytes(raw)
         from_addr = parseaddr(msg.get("From", ""))[1]
         to_list = [a for _, a in getaddresses(msg.get_all("To", []))]
@@ -164,10 +197,18 @@ class MailIngestService:
         own_lc = {a.lower() for a in own}
         if from_addr and from_addr.lower() in own_lc:
             direction = "outgoing"
-        peer = from_addr if direction == "incoming" else (to_list[0] if to_list else from_addr)
-        content = f"{subject}\n\n{text_body}" if subject and text_body else (text_body or subject)
+        peer = (
+            from_addr
+            if direction == "incoming"
+            else (to_list[0] if to_list else from_addr)
+        )
+        content = (
+            f"{subject}\n\n{text_body}"
+            if subject and text_body
+            else (text_body or subject)
+        )
 
-        return capture.capture(
+        result = capture.capture(
             channel="email",
             direction=direction,
             peer=peer,
@@ -176,3 +217,28 @@ class MailIngestService:
             verweis=message_id,
             bediener="AUTO",
         )
+        attachments: list[dict] = []
+        for part in msg.walk():
+            filename = part.get_filename()
+            if not filename:
+                continue
+            content_bytes = part.get_payload(decode=True) or b""
+            attachments.append(
+                {
+                    "filename": _decode(filename),
+                    "mime_type": part.get_content_type(),
+                    "content": content_bytes,
+                }
+            )
+        workspace_id = message_id or hashlib.sha256(raw).hexdigest()
+        MailWorkspaceService(self.db, self.tenant_id).ingest(
+            message_id=workspace_id,
+            role_key="crm",
+            direction=direction,
+            from_address=from_addr,
+            to_addresses=to_list,
+            subject=subject or None,
+            body_text=text_body,
+            attachments=attachments,
+        )
+        return result

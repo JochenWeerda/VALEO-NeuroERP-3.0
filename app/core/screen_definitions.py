@@ -3469,6 +3469,32 @@ def build_billing_batch_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_mail_workspace_screen_definition() -> dict[str, Any]:
+    """Native role-scoped ERP mail worklist."""
+    return {
+        "schemaVersion": 1, "id": "crm/mail-arbeitsplatz", "domain": "crm", "mode": "list",
+        "title": "Mail-Arbeitsplatz", "subtitle": "Rollenpostfach, Zuordnung, Anlagen und Versandnachweis",
+        "adapter": {"type": "native", "sourceId": "crm/mail-arbeitsplatz", "temporary": False},
+        "dataSources": [
+            {"key": "messages", "endpoint": "/api/v1/mail-workspace", "pageSize": 50, "staleTimeMs": 10_000},
+            {"key": "attachments", "endpoint": "/api/v1/mail-workspace/attachments", "pageSize": 200, "staleTimeMs": 10_000},
+        ],
+        "tables": [
+            {"key": "messages", "label": "Rollenpostfach", "dataSourceKey": "messages", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+             "columns": [{"key": "received_at", "label": "Eingang", "renderKind": "datetime", "sortable": True, "width": 145}, {"key": "role_key", "label": "Postfach", "sortable": True, "filterable": True, "width": 105}, {"key": "direction", "label": "Richtung", "filterable": True, "width": 90}, {"key": "from_address", "label": "Von", "filterable": True, "width": 190}, {"key": "subject", "label": "Betreff", "filterable": True, "width": 300}, {"key": "contact_id", "label": "Kontakt", "filterable": True, "width": 120}, {"key": "document_ref", "label": "Beleg", "filterable": True, "width": 130}, {"key": "attachment_count", "label": "Anlagen", "numeric": True, "width": 75}, {"key": "assigned_to", "label": "Bearbeiter", "filterable": True, "width": 115}, {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 100}],
+             "rowActions": [{"key": "assign", "label": "Zuordnen"}, {"key": "queue", "label": "Senden", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["draft", "error"]}}, {"key": "open_document", "label": "Beleg"}]},
+            {"key": "attachments", "label": "Anlagen", "dataSourceKey": "attachments", "serverPagination": False, "pageSize": 200, "virtualized": True, "rowHeight": 44,
+             "columns": [{"key": "filename", "label": "Datei", "filterable": True, "width": 240}, {"key": "subject", "label": "Mail", "width": 260}, {"key": "mime_type", "label": "Typ", "width": 150}, {"key": "size_bytes", "label": "Bytes", "numeric": True, "width": 90}, {"key": "sha256", "label": "SHA-256", "width": 240}, {"key": "transfer_status", "label": "Uebernahme", "renderKind": "status", "width": 110}],
+             "rowActions": [{"key": "transfer", "label": "In DMS uebernehmen", "visibleWhen": {"field": "transfer_status", "values": ["available"]}}]},
+        ],
+        "actions": [{"key": "draft", "label": "Neue Mail", "kind": "primary", "permission": "crm.mail.write", "dangerLevel": "low"}],
+        "workflow": {"processKey": "mail-workspace", "status": "role-inbox", "nextActionKey": "assign", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "crm"},
+        "performance": {"initialPayloadBudgetKb": 64, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "crm"},
+        "agentContract": {"businessPurpose": "Rollenpostfaecher revisionssicher mit Kontakten und Belegen verbinden.", "examplePrompts": ["Zeige unzugeordnete CRM-Mails.", "Welche Anlagen warten auf DMS-Uebernahme?"], "sensitiveFields": ["from_address", "to_addresses", "subject", "body_text", "contact_id"], "forbiddenAgentTasks": ["Mail ohne menschlichen Audit-Grund senden oder Anlagen ungeprueft uebernehmen"], "testSelectors": {"screenRoot": "[data-testid='mail-arbeitsplatz']"}},
+    }
+
+
 def build_foreign_goods_screen_definition() -> dict[str, Any]:
     """Native L3-style foreign-goods operator worklist."""
     return {
@@ -3530,6 +3556,7 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "crm/mail-arbeitsplatz": build_mail_workspace_screen_definition,
     "auswertungen/abfrage-center": lambda: {
         "schemaVersion": 1, "id": "auswertungen/abfrage-center", "domain": "reporting", "mode": "list",
         "title": "Abfrage-Center", "subtitle": "Freigegebene Datenmodelle sicher filtern, aggregieren und ausgeben",
@@ -4055,6 +4082,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "agrar/kontrakte": ["kontrakt", "vorkontrakt", "liefervertrag", "andienung"],
     "agrar/saatgut": ["saatgut", "sorte", "z-saatgut"],
     "crm/customer-360": ["kunde", "kundenakte", "kunden-360", "kundenstamm"],
+    "crm/mail-arbeitsplatz": ["mail", "email", "rollenpostfach", "posteingang", "anlage", "entwurf"],
     "crm/lead": ["lead", "interessent", "verkaufschance"],
     "crm/opportunity": ["opportunity", "chance", "verkaufschance"],
     "einkauf/anfrage": ["anfrage", "rfq", "preisanfrage"],
@@ -4111,6 +4139,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "crm/mail-arbeitsplatz": "/crm/mail-arbeitsplatz",
     "auswertungen/abfrage-center": "/auswertungen/abfrage-center",
     "lager/fremdware": "/lager/fremdware",
     "finance/rechnungstapel": "/finance/rechnungstapel",

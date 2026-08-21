@@ -85,3 +85,9 @@ Native ScreenDefinition:
 
 - `GET /api/v1/masks/{mask_id}/screen-definition`
 - Pilot bevorzugt native Metadaten, Felder weiterhin aus Adapter bis vollstaendige native Lieferung
+
+### L3-MAIL-WORKSPACE-012
+
+`crm/mail-arbeitsplatz` verbindet den vorhandenen IMAP-/CRM-Capture mit
+Rollenpostfach, Kontakt-/Belegzuordnung, hashgebundenen Anlagen und
+auditiertem Draft-/Provider-Queue-Lifecycle ueber die zentrale Runtime.

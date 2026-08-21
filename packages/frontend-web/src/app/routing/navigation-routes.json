@@ -110,4 +110,5 @@
   ,{ "path": "finance/rechnungstapel", "module": "@/pages/finance/rechnungstapel" }
   ,{ "path": "lager/fremdware", "module": "@/pages/lager/fremdware" }
   ,{ "path": "auswertungen/abfrage-center", "module": "@/pages/auswertungen/abfrage-center" }
+  ,{ "path": "crm/mail-arbeitsplatz", "module": "@/pages/crm/mail-arbeitsplatz" }
 ]

@@ -558,6 +558,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'sales', scope: 'sales:write' },
       },
       {
+        id: 'mail-arbeitsplatz',
+        label: 'Mail-Arbeitsplatz',
+        icon: Inbox,
+        module: '@/pages/crm/mail-arbeitsplatz',
+        preferredPath: 'crm/mail-arbeitsplatz',
+        keywords: ['mail', 'email', 'rollenpostfach', 'posteingang', 'anlage', 'entwurf', 'senden'],
+        mcp: { businessDomain: 'sales', scope: 'sales:write' },
+      },
+      {
         id: 'crm-dubletten',
         label: 'Kunden-Dubletten',
         icon: CopyCheck,

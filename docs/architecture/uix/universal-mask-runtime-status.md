@@ -299,6 +299,12 @@ ausgeschlossen.
 autorisierte Benutzer-/Teamansichten. Private Fremdtermine werden auf
 Frei/Belegt redigiert; Teamdetails sind berechtigt und Ablehnungen optional.
 
+## L3-MAIL-WORKSPACE-012
+
+`crm/mail-arbeitsplatz` ist eine native, rollenbasierte Worklist fuer Eingang,
+Zuordnung, hashgebundene Anlagen, Entwurf und Provider-Queue. Alle fachlichen
+Statuswechsel laufen begruendet und auditiert.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

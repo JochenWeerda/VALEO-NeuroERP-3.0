@@ -16,6 +16,10 @@ Der native Dokumentenruecklauf `docflow/dokumenten-ruecklauf` verbindet
 Docflow-Headers, versionierte Artefakte, Versandstatus, erwarteten Ruecklauf,
 Verantwortlichkeit und Ursprungsbeleg in einer serverseitigen Worklist.
 
+Mailanlagen werden im nativen `crm/mail-arbeitsplatz` mit SHA-256 und
+Uebernahmestatus nachgewiesen. Die DMS-Referenz wird erst nach einer
+begruendeten Uebernahme gesetzt; produktiver Virenscan bleibt externes Gate.
+
 ## Navigation
 
 | Thema | Datei |

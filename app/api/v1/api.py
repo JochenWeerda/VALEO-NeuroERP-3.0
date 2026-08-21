@@ -1053,6 +1053,10 @@ from app.api.v1.endpoints import query_center  # noqa: E402
 
 api_router.include_router(query_center.router)
 
+from app.api.v1.endpoints import mail_workspace  # noqa: E402
+
+api_router.include_router(mail_workspace.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

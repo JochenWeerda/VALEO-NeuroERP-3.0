@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-08-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-21T19:10:36Z'
+generated_at: '2026-08-21T19:25:31Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -528,6 +528,7 @@ domains:
     - /crm/lieferanten/liste
     - /crm/lieferanten/stamm/:id
     - /crm/lieferanten/stamm/new
+    - /crm/mail-arbeitsplatz
     - /crm/opportunities
     - /crm/opportunities-forecast
     - /crm/opportunities-kanban
@@ -758,6 +759,7 @@ domains:
     - docs/adr/adr-036-architecture-documentation-stack.md
     - docs/adr/adr-038-address-value-object.md
     - docs/adr/adr-061-billing-batch-orchestration.md
+    - docs/adr/adr-065-role-scoped-mail-workspace.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -889,6 +891,7 @@ domains:
     - docs/adr/adr-048-feeding-analysis-provenance.md
     - docs/adr/adr-055-feeding-measure-lifecycle.md
     - docs/adr/adr-058-document-return-on-docflow.md
+    - docs/adr/adr-065-role-scoped-mail-workspace.md
     status: active
   finance:
     owner: domain/finance
@@ -1881,8 +1884,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 912
-  frontend_routes_mapped: 912
+  frontend_routes_total: 913
+  frontend_routes_mapped: 913
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

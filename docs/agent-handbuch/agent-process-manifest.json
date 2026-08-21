@@ -1565,6 +1565,42 @@
       ]
     },
     {
+      "mask_id": "crm/mail-arbeitsplatz",
+      "title": "Mail-Arbeitsplatz",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__mail-arbeitsplatz/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/mail-arbeitsplatz/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/mail-arbeitsplatz/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/mail-arbeitsplatz/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "draft",
+          "label": "Neue Mail",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.mail.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "from_address",
+        "to_addresses",
+        "subject",
+        "body_text",
+        "contact_id"
+      ],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.contact.log"
+      ]
+    },
+    {
       "mask_id": "crm/opportunity",
       "title": "Opportunity",
       "domain": "crm",

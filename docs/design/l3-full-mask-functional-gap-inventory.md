@@ -17,10 +17,10 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen P1-, drei P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+**keinen offenen P1-, zwei P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
-`L3-ROHWARE-002`, `L3-GAP-QUERY-008` und `L3-GAP-TEAMCAL-009` sind ebenfalls repo-seitig geschlossen. Die verbleibenden
+`L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009` und `L3-GAP-MAIL-010` sind ebenfalls repo-seitig geschlossen. Die verbleibenden
 P2/P3-Themen betreffen Komfort, breite Berichtskatalog-Paritaet und externe
 Adapter, nicht den P1-Kernwechsel.
 
@@ -55,7 +55,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 |---|---|---:|---|
 | CRM, Kunden, Lieferanten, Artikel, Nachrichten, Wiedervorlage | CRM-360, Stammdaten-, Aktivitaets-, Kontakt-, Lead- und Wiedervorlage-Seiten/APIs | vorhanden | - |
 | Kalender und Teamkalender | native Teamansicht mit Membership-Pruefung, Frei/Belegt-Redaktion, Vorschlaegen und optionalen Ablehnungen | vorhanden | L3-GAP-TEAMCAL-009 geschlossen |
-| Eingebettete E-Mail und letzte Dokumente | Dokumentablage und CRM-Kommunikation vorhanden | teilweise | L3-GAP-MAIL-010, L3-GAP-RECENT-013 |
+| Eingebettete E-Mail und letzte Dokumente | nativer Rollen-Mailarbeitsplatz vorhanden; persoenliche letzte Dokumente noch offen | teilweise | L3-GAP-MAIL-010 geschlossen, L3-GAP-RECENT-013 |
 | Angebote, Auftraege, Disposition, Lieferscheine, Faktura | Verkaufsseiten, Belegkette, unerledigte Positionen und Auftrag-Lieferschein-Abgleich | vorhanden | - |
 | Bestellung, Wareneingang, Einkaufslieferschein/-rechnung | Einkaufsseiten, Bestellvorschlag, Rechnungspruefung und Wareneingangsabgleich | vorhanden | - |
 | Kontrakte, Strecke, Ernte/Annahme, NaWaRo | Kontrakt-Lifecycle, Disposition, Abrechnung, Ernteannahme und NaWaRo-Funktionen | vorhanden | - |
@@ -94,7 +94,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | L3-ROHWARE-002 | Fremdware besitzt keine nachgewiesene geschlossene Operator-UI | Backend fuer Fremdwaren-Einlagerung und Bestandsanteile vorhanden | Worklist fuer Einlagerung, automatische Umbuchung, Fremdbestand je Lager, erledigte Faelle und Druck; Mandant/Eigentuemer stets sichtbar — **repo-seitig geschlossen 2026-08-21** (`L3-ROHWARE-OPERATOR-009`; Lager-/Druckpilot extern) |
 | L3-GAP-QUERY-008 | Anwender-Abfrage-Center fehlt | Vorgegebene Reports/Dashboards vorhanden | Berechtigter Query-Designer ueber freigegebene Read Models, Vorschau, Ausgabe/Druck, Favoriten und signierter Import/Export ohne beliebiges SQL — **repo-seitig geschlossen 2026-08-21** (`L3-QUERY-CENTER-010`) |
 | L3-GAP-TEAMCAL-009 | Teamkalender-Paritaet ist nicht belegt | Planungskalender aggregiert Prozesslayer und bietet ICS | Mehrbenutzer-/Teamansicht, Frei/Belegt, fremde und abgelehnte Termine, Rechte- und Datenschutzmodell — **repo-seitig geschlossen 2026-08-21** (`L3-TEAM-CALENDAR-011`; IAM-/Datenschutzpilot extern) |
-| L3-GAP-MAIL-010 | Integrierter ERP-Mailarbeitsplatz fehlt | Dokumente und Kommunikationsaktivitaeten koennen abgelegt werden | Rollenbasierter Posteingang, Beleg-/Kontaktzuordnung, Anlagenuebernahme, Entwurf/Senden, revisionssichere Aktivitaet; alternativ verbindlicher externer Mail-Deep-Link |
+| L3-GAP-MAIL-010 | Integrierter ERP-Mailarbeitsplatz fehlt | Dokumente und Kommunikationsaktivitaeten koennen abgelegt werden | Rollenbasierter Posteingang, Beleg-/Kontaktzuordnung, Anlagenuebernahme, Entwurf/Senden, revisionssichere Aktivitaet; alternativ verbindlicher externer Mail-Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-MAIL-WORKSPACE-012`; Provider/Virenscan extern) |
 | L3-GAP-TANK-011 | Tankanlagen-Schnittstellenworkflow ist nur teilweise vorhanden | Zapfungen und Tankbestand mit UI/API vorhanden | Adapter-Eingang mit idempotenter Uebernahme, Fehlerkorb, Einzelnachweis und regelbasierter Lieferscheinerzeugung |
 | L3-GAP-REPORT-012 | Exakte L3-Berichtskatalog-Paritaet ist nicht nachgewiesen | allgemeine Umsatz-, Lager-, Finance-, Einkauf- und Dashboardberichte vorhanden | Fachlich priorisierter Berichtskatalog mit Parameter-/Summenparitaet fuer Vertreter, Kunde/Artikel/-gruppe, Charge, Ernte und Strecke; Export und Beleg-Drilldown |
 

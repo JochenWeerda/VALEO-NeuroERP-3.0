@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (54 Masken).
+> Generiert aus `app/core/screen_definitions.py` (55 Masken).
 
 ## Übersicht
 
@@ -36,6 +36,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `auswertungen/beleg-kontrolle` | Beleg-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
 | `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
+| `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
@@ -764,6 +765,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
 | `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+
+---
+
+### `crm/mail-arbeitsplatz` — Mail-Arbeitsplatz
+
+**Zweck:** Rollenpostfaecher revisionssicher mit Kontakten und Belegen verbinden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/mail-arbeitsplatz/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/mail-arbeitsplatz/readiness` |
+| Rollout-Route | `/mask-rollout/crm__mail-arbeitsplatz/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `messages` → `/api/v1/mail-workspace`
+- `attachments` → `/api/v1/mail-workspace/attachments`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Zeige unzugeordnete CRM-Mails.
+- Welche Anlagen warten auf DMS-Uebernahme?
+
+**Sensible Felder:** `from_address, to_addresses, subject, body_text, contact_id`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `draft` | Neue Mail | low | nein | `—` |
 
 ---
 

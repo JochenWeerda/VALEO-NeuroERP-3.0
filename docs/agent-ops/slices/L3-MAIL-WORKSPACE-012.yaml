@@ -2,9 +2,10 @@ slice_id: L3-MAIL-WORKSPACE-012
 id: L3-MAIL-WORKSPACE-012
 title: Rollenbasierter ERP-Mailarbeitsplatz
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Vorhandenen IMAP-/CRM-Mail-Ingest in einen rollenbasierten, auditierten
   Mailarbeitsplatz mit Zuordnung, Anlagenuebernahme und Entwurf/Versand zu ueberfuehren.
