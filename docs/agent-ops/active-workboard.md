@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-DOCRET-INBOX-004 Dokumentenruecklauf und Versandstatus - reserviert 2026-08-21
+
+**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Den vorhandenen Docflow-/Artefakt-/Wiedervorlage-Kern um einen mandantenfaehigen Dokumentenruecklauf mit Versandstatus, Ruecklaufstatus, Vorschau, Schlagworten, Verantwortlichkeit und Deep-Link zum Ursprungsbeleg erweitern. Die Bedienung erfolgt nativ ueber den Single Mask Builder.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-DOCRET-INBOX-004.yaml`, dieser Workboard-Abschnitt, neue Dokumentenruecklauf-Service-/Endpoint-/Migrations-/Testdateien, Docflow-ScreenDefinition und Route, DMS/Docflow-Domain-Pack, ADR/Impact-Note, Agent-Handbuch-, OpenAPI-, Architektur- und Gap-Dokumentation.
+
+**Abnahme:** Tenant-Isolation; serverseitige Filter/Pagination nach Benutzer, Kontakt, Datum und Bezugsart; auditierte Versand-/Ruecklaufstatus-Transitionen; Artefaktvorschau und Ursprungsbeleg-Deep-Link; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-MDE-INBOX-003 MDE-Eingangskorb und Verarbeitung - abgeschlossen 2026-08-21
 
 **Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
