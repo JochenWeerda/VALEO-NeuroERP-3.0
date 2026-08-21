@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-REPORT-CATALOG-014 Priorisierter L3-Berichtskatalog - reserviert 2026-08-21
+
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Feste, tenantgebundene Berichte fuer Vertreter, Kunde, Artikel/-gruppe, Charge, Ernte und Strecke mit gemeinsamem Zeitraum-/Dimensionsfilter, serverseitigen Summen, CSV-Export und Quellenbeleg-Drilldown bereitstellen.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-REPORT-CATALOG-014.yaml`, dieser Workboard-Abschnitt, Report-Catalog-Service/-Endpoint/-Migration/-Tests, zentrale ScreenDefinition/Route, Finance-/CRM-/Inventory-/Agrar-Domain-Packs, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
+
+**Abnahme:** fester Katalog ohne SQL; vollstaendiger Parameter-/Summenvertrag; Exportparitaet; Beleg-Drilldown; native generatorfaehige Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-TANK-ADAPTER-013 Tankanlagen-Adapter und Fehlerkorb - abgeschlossen 2026-08-21
 
 **Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.

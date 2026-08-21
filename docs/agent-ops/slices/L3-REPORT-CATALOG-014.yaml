@@ -1,0 +1,35 @@
+slice_id: L3-REPORT-CATALOG-014
+id: L3-REPORT-CATALOG-014
+title: Priorisierter L3-Berichtskatalog
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Einen festen Berichtskatalog mit Parameter-, Summen-, Export- und
+  Drilldown-Vertraegen fuer die priorisierten L3-Auswertungsdimensionen bereitzustellen.
+architecture:
+  decision_level: significant
+  domains: [finance, crm, inventory, agrar]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Freigegebene Katalogdefinitionen fuer Vertreter, Kunde, Artikel, Gruppe, Charge, Ernte und Strecke.
+  - Tenantgebundene Reporting-Fact-Projektion mit Quellenroute.
+  - Einheitliche Zeitraum-/Dimensionsparameter und serverseitige Summen.
+  - CSV-Export und paginierter Beleg-Drilldown.
+file_ownership:
+  - app/services/l3_report_catalog_service.py
+  - app/api/v1/endpoints/l3_report_catalog.py
+  - alembic/versions/l3_report_catalog_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/auswertungen/l3-berichtskatalog.tsx
+  - tests/test_l3_report_catalog.py
+  - generated artifacts, ADR, domain packs, gap docs and workboard
+acceptance:
+  - Nur feste Berichte/Dimensionen, keine freie SQL-Eingabe.
+  - Parameter- und Summenvertrag fuer alle priorisierten Dimensionen.
+  - Export reproduziert dieselbe Ergebnis-/Summenlogik.
+  - Jede Ergebniszeile besitzt Beleg-Drilldown.
+  - Native generator-ready Worklist und gruene Gates.
+risks:
+  - Fachliche Echtdaten-Summenabnahme bleibt externes UAT-Gate.
