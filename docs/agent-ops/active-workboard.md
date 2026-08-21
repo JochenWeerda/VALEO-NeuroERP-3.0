@@ -21,6 +21,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Abnahme:** inaktive versionierte Profile; tenant-/profilgebundene Idempotenz; Payload-Konflikt; Quarantaene/Retry; kanonisches Dry-run-Staging; Reconciliation und Aktivierungs-Gate; native Monitoring-Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
 
+## L3-FULL-MASK-SHOTS-018 Vollstaendige Masken-Screenshots - reserviert 2026-08-21
+
+**Von:** User-Auftrag: Screenshots aller oeffbaren L3-Masken. **Owner:** Cursor Agent. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Read-only RDP-Erfassung aller Ribbon-Icons (praeziser Linksklick auf Icon-Mitte) mit lokalem Screenshot je Maske; Captures ausserhalb Git. Slice-ID 018 wegen Codex-017.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-FULL-MASK-SHOTS-018.yaml`, dieser Abschnitt, `docs/design/l3-rdp-navigation-drill.md`. Keine Codex-Dateien.
+
+**Abnahme:** Pro Ribbon Tab aktiviert; je sichtbarem Icon Screenshot nach erfolgreichem Oeffnen; leere Workspaces als Miss geloggt und nachgeklickt; keine Schreibaktionen in L3.
+
 ## L3-BELEGCHECK-PROJECTION-016 Belegkontrolle Live-Projektion - abgeschlossen 2026-08-21
 
 **Von:** Dokumentierter Folgeausbau aus `L3-BELEGCHECK-WORKLIST-005`. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-21.

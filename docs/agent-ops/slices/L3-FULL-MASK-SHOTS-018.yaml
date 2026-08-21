@@ -1,0 +1,26 @@
+slice_id: L3-FULL-MASK-SHOTS-018
+id: L3-FULL-MASK-SHOTS-018
+title: Vollstaendige L3-Masken-Screenshots per RDP
+owner: Cursor Agent
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Alle oeffbaren L3-Ribbon-Masken read-only per praezisem Icon-Linksklick
+  oeffnen und lokal ausserhalb Git dokumentieren.
+scope:
+  - Ribbon-Tabs DATEI bis SCHNITTSTELLE (und FENSTER falls Icons)
+  - Icon-Mitte erkennen, Linksklick, Screenshot, Esc/Ctrl+F4 schliessen
+  - Keine Speichern/Buchen/Loesch-Aktionen
+file_ownership:
+  - docs/agent-ops/slices/L3-FULL-MASK-SHOTS-018.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/design/l3-rdp-navigation-drill.md
+non_ownership:
+  - docs/agent-ops/slices/L3-LEGACY-INTERFACES-017.yaml
+acceptance:
+  - Capture-Ordner mit Screenshot je geoeffneter Maske
+  - Miss-Log fuer fehlgeschlagene Klicks
+  - Keine PII in Git
+risks:
+  - Lizenzdialoge oder leere Workspace bei Nebenklick
