@@ -327,6 +327,15 @@ die Projektion bleibt auf Tenant und Benutzer begrenzt, prueft die aktuelle
 Dokumentfamilienrolle erneut und entfernt abgelaufene oder ueberzaehlige
 Eintraege automatisch.
 
+## L3-LEGACY-INTERFACES-017
+
+`schnittstelle/legacy-adapter-monitor` ist eine native Meridian-Worklist fuer
+die festen, standardmaessig inaktiven Profile `l3_standard` und `unimet`.
+Hashgebundener Intake, versionierte Format-/Mappingvertraege, Quarantaene,
+deterministisches Dry-run-Staging, Reconciliation und Pilotfreigabe werden
+zentral gerendert. Eine produktive Domaenenbuchung bleibt bis zum realen
+Kundenformat und Zieladapter technisch gesperrt.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

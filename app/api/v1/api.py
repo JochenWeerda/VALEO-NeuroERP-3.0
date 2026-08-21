@@ -1069,6 +1069,10 @@ from app.api.v1.endpoints import recent_documents  # noqa: E402
 
 api_router.include_router(recent_documents.router)
 
+from app.api.v1.endpoints import legacy_interface_adapters  # noqa: E402
+
+api_router.include_router(legacy_interface_adapters.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

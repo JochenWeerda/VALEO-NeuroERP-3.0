@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (58 Masken).
+> Generiert aus `app/core/screen_definitions.py` (59 Masken).
 
 ## Übersicht
 
@@ -67,6 +67,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
+| `schnittstelle/legacy-adapter-monitor` | Standard-/Unimet-Adapter | integration | niedrig | — | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
 | `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
 | `tankstelle/adapter-inbox` | Tankanlagen-Eingang | agrar | niedrig | — | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
 | `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
@@ -1624,6 +1625,34 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+## Domäne: integration
+
+### `schnittstelle/legacy-adapter-monitor` — Standard-/Unimet-Adapter
+
+**Zweck:** L3 Standard- und Unimet-Dateien idempotent pruefen, mappen und abstimmen, ohne produktiv zu buchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
+| Readiness | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/readiness` |
+| Rollout-Route | `/mask-rollout/schnittstelle__legacy-adapter-monitor/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/legacy-interface-adapters/batches`
+- `batches` → `/api/v1/legacy-interface-adapters/batches`
+
+**Beispiel-Prompts:**
+
+- Zeige quarantinierte Unimet-Batches.
+- Stimme diesen L3-Standard-Batch ab.
+
+**Sensible Felder:** `external_id, payload_hash, error_message`
 
 ---
 

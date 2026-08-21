@@ -5,6 +5,7 @@ import {
   BarChart3,
   Building2,
   Calendar,
+  Cable,
   Calculator,
   Database,
   Euro,
@@ -1532,6 +1533,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'schnittstelle/mde-inbox',
         keywords: ['mde', 'mobile datenerfassung', 'schnittstelle', 'quarantaene', 'import'],
         mcp: { businessDomain: 'system', scope: 'system:read' },
+      },
+      {
+        id: 'legacy-adapter-monitor',
+        label: 'Standard-/Unimet-Adapter',
+        icon: Cable,
+        module: '@/pages/schnittstelle/legacy-adapter-monitor',
+        preferredPath: 'schnittstelle/legacy-adapter-monitor',
+        keywords: ['standard schnittstelle', 'unimet', 'adapter', 'fehlerkorb', 'reconciliation'],
+        mcp: { businessDomain: 'integration', scope: 'integration:read' },
       },
       {
         id: 'workflow-leitstand',

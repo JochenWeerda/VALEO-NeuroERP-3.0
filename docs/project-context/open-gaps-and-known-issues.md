@@ -245,6 +245,15 @@ begruendetem Retry. Damit sind alle P1-Gaps der L3-Vollinventur repo-seitig
 geschlossen. Providerzustellung, fiskalische Pilotabnahme und Echtdaten-UAT
 bleiben externe Gates.
 
+Nachzug 2026-08-21 (`L3-LEGACY-INTERFACES-017`): Nach Abschluss von
+Berichtskatalog und persoenlichen letzten Dokumenten ist auch der letzte
+repo-seitige P3-Gap geschlossen. `l3_standard` und `unimet` besitzen feste,
+versionierte und standardmaessig inaktive Profile, hashgebundenen Intake,
+Quarantaene, deklaratives Dry-run-Staging, Reconciliation, Audit und nativen
+Betriebsmonitor. Reale Kundenformate, Mappingabnahme, Zieladapter und
+Produktivpilot bleiben externe Aktivierungs-Gates; `execution_enabled` bleibt
+bis dahin `false`.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

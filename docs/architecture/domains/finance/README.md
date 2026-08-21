@@ -50,3 +50,10 @@ zentrale Runtime; beliebiges SQL ist nicht Bestandteil des Vertrags.
 Berichtssichten mit gemeinsamer Summen-, Export- und Drilldown-Semantik bereit.
 Die Finance-Domaene konsumiert die freigegebene Reporting-Projektion, ohne
 freie SQL- oder domaenenfremde Schreiblogik einzufuehren.
+
+## L3 Standard und Unimet
+
+Der zentrale Legacy-Adapterrahmen nimmt `l3_standard`- und `unimet`-Payloads
+hashgebunden auf und fuehrt sie nur bis in ein kanonisches, abgestimmtes
+Staging. Finance-Zielbuchungen bleiben gesperrt, bis Kundenformat, Mapping und
+fachliche Pilotfreigabe vorliegen.

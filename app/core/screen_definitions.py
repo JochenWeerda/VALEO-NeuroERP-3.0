@@ -3556,6 +3556,20 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "schnittstelle/legacy-adapter-monitor": lambda: {
+        "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
+        "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
+        "adapter": {"type": "native", "sourceId": "schnittstelle/legacy-adapter-monitor", "temporary": False},
+        "dataSources": [{"key": "entity", "endpoint": "/api/v1/legacy-interface-adapters/batches", "staleTimeMs": 15_000}, {"key": "batches", "endpoint": "/api/v1/legacy-interface-adapters/batches", "pageSize": 50, "staleTimeMs": 15_000}],
+        "summary": [{"key": "total", "label": "Batches", "tone": "info"}, {"key": "execution_enabled", "label": "Produktivbuchung", "tone": "warning"}],
+        "tables": [{"key": "batches", "label": "Adapter-Monitor", "dataSourceKey": "batches", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [{"key": "profile_key", "label": "Profil", "filterable": True, "width": 140}, {"key": "external_id", "label": "Externe ID", "width": 170}, {"key": "mapping_version", "label": "Mapping", "width": 100}, {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120}, {"key": "record_count", "label": "Quelle", "renderKind": "number", "width": 90}, {"key": "staged_count", "label": "Staging", "renderKind": "number", "width": 90}, {"key": "mismatch_count", "label": "Abweichung", "renderKind": "number", "width": 100}, {"key": "error_message", "label": "Fehler", "width": 260}, {"key": "created_at", "label": "Eingang", "renderKind": "datetime", "width": 170}],
+            "rowActions": [{"key": "stage", "label": "Dry-run Staging", "visibleWhen": {"field": "status", "in": ["received", "quarantine"]}}, {"key": "reconcile", "label": "Abstimmen", "visibleWhen": {"field": "status", "in": ["staged", "quarantine"]}}, {"key": "approve", "label": "Fuer Pilot freigeben", "visibleWhen": {"field": "status", "equals": "reconciled"}}]}],
+        "workflow": {"processKey": "legacy-interface-adapter", "status": "externally-gated", "nextActionKey": "stage", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
+        "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "integration"},
+        "agentContract": {"businessPurpose": "L3 Standard- und Unimet-Dateien idempotent pruefen, mappen und abstimmen, ohne produktiv zu buchen.", "examplePrompts": ["Zeige quarantinierte Unimet-Batches.", "Stimme diesen L3-Standard-Batch ab."], "sensitiveFields": ["external_id", "payload_hash", "error_message"], "forbiddenAgentTasks": ["Adapter ohne Kundenformat aktivieren", "Stagingdaten als produktiv gebucht darstellen"], "testSelectors": {"screenRoot": "[data-testid='legacy-adapter-monitor']"}},
+    },
     "workspace/letzte-dokumente": lambda: {
         "schemaVersion": 1, "id": "workspace/letzte-dokumente", "domain": "workspace", "mode": "list",
         "title": "Letzte Dokumente", "subtitle": "Meine zuletzt geoeffneten ERP-Dokumente",
@@ -4119,6 +4133,7 @@ for _spec in ROLLOUT_WAVES_42_51:
 # Intent-Compiler. Zentral gepflegt statt je SD, damit der Katalog
 # (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
 _AGENT_SYNONYMS: dict[str, list[str]] = {
+    "schnittstelle/legacy-adapter-monitor": ["standard schnittstelle", "unimet", "legacy adapter", "schnittstellen fehlerkorb", "reconciliation"],
     "workspace/letzte-dokumente": ["letzte dokumente", "zuletzt geoeffnet", "recent documents", "belegverlauf"],
     "agrar/duenger": ["duenger", "duengemittel", "kas", "npk"],
     "agrar/harvest-settlement": ["ernteabrechnung", "sammelabrechnung", "gutschrift ernte"],
@@ -4184,6 +4199,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
     "workspace/letzte-dokumente": "/workspace/letzte-dokumente",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "tankstelle/adapter-inbox": "/tankstelle/adapter-inbox",

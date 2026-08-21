@@ -2296,6 +2296,24 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "schnittstelle/legacy-adapter-monitor",
+      "title": "Standard-/Unimet-Adapter",
+      "domain": "integration",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schnittstelle__legacy-adapter-monitor/:entityId",
+      "agent_contract_url": "/api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schnittstelle/legacy-adapter-monitor/screen-definition",
+      "readiness_url": "/api/v1/masks/schnittstelle/legacy-adapter-monitor/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "external_id",
+        "payload_hash",
+        "error_message"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "lager/fremdware",
       "title": "Fremdware und Fremdbestand",
       "domain": "inventory",

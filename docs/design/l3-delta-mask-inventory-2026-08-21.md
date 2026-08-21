@@ -62,7 +62,7 @@ dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 | L3-GAP-TANK-011 | P2 | SCHNITTSTELLE → Tankanlage | weiter teilweise |
 | L3-GAP-REPORT-012 | P2 | Auswertungsgruppen Kunden…Strecke | weiter teilweise |
 | L3-GAP-RECENT-013 | P3 | Letzte Dokumente | weiter offen |
-| L3-GAP-IFACE-014 | P3 | Standard-Schnittstelle | weiter externes Gate |
+| L3-GAP-IFACE-014 | P3 | Standard-Schnittstelle | repo-seitiger Adapterrahmen geschlossen (`L3-LEGACY-INTERFACES-017`); reale Formate/Aktivierung extern |
 
 ### Kein neuer Gap (nur Feindetail)
 

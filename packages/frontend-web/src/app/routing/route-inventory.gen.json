@@ -3961,6 +3961,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/schnittstelle/legacy-adapter-monitor",
+      "path": "schnittstelle/legacy-adapter-monitor",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/schnittstelle/mde-inbox",
       "path": "schnittstelle/mde-inbox",
       "source": "navigation"

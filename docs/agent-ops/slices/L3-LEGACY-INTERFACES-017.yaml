@@ -2,9 +2,10 @@ slice_id: L3-LEGACY-INTERFACES-017
 id: L3-LEGACY-INTERFACES-017
 title: Standard- und Unimet-Adapterrahmen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Die repo-seitigen Format-, Mapping-, Idempotenz-, Fehlerkorb-,
   Reconciliation- und Monitoring-Vertraege fuer L3 Standard und Unimet

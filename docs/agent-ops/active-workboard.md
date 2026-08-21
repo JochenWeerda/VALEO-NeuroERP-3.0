@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-LEGACY-INTERFACES-017 Standard- und Unimet-Adapterrahmen - reserviert 2026-08-21
+## L3-LEGACY-INTERFACES-017 Standard- und Unimet-Adapterrahmen - abgeschlossen 2026-08-21
 
-**Von:** Abschluss des letzten L3-P3-Gaps. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Abschluss des letzten L3-P3-Gaps. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Repo-seitige Format-, Mapping-, Idempotenz-, Fehlerkorb-, Reconciliation- und Monitoring-Vertraege fuer `l3_standard` und `unimet` bereitstellen, ohne unbekannte Kundenformate oder produktive Zielbuchungen vorzutäuschen.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-LEGACY-INTERFACES-017.yaml`, dieser Workboard-Abschnitt, Legacy-Adapter-Service/-Endpoint/-Migration/-Tests, zentrale ScreenDefinition/Route, Integration-Doku, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
 
 **Abnahme:** inaktive versionierte Profile; tenant-/profilgebundene Idempotenz; Payload-Konflikt; Quarantaene/Retry; kanonisches Dry-run-Staging; Reconciliation und Aktivierungs-Gate; native Monitoring-Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Die festen Profile `l3_standard` und `unimet` besitzen versionierte Format-/Mappingvertraege, tenantgebundene externe-ID-/Payload-Hash-Idempotenz, Quarantaene, deterministisches Dry-run-Staging, Mengen-Reconciliation, auditierte Pilotfreigabe und eine native Monitoring-Worklist. Produktive Domaenenbuchung ist explizit deaktiviert, bis reale Kundenformate, Zielmapping und Pilotfreigabe vorliegen. Sieben Backendtests, ein Frontendtest, TypeScript und Ruff sind gruen.
 
 ## L3-FULL-MASK-SHOTS-018 Vollstaendige Masken-Screenshots - reserviert 2026-08-21
 

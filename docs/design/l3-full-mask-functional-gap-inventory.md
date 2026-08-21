@@ -17,13 +17,14 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen P1- oder P2- und einen P3-Gap**. `L3-GAP-MDE-001`,
+**keinen offenen repo-seitigen P1-, P2- oder P3-Gap**. `L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
 `L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009`, `L3-GAP-MAIL-010`,
-`L3-GAP-TANK-011`, `L3-GAP-REPORT-012` und `L3-GAP-RECENT-013` sind ebenfalls
-repo-seitig geschlossen. Das verbleibende P3-Thema betrifft externe Adapter,
-nicht den P1-Kernwechsel.
+`L3-GAP-TANK-011`, `L3-GAP-REPORT-012`, `L3-GAP-RECENT-013` und
+`L3-GAP-IFACE-014` sind ebenfalls repo-seitig geschlossen. Reale
+Standard-/Unimet-Kundenformate, Zielmapping und Produktivpilot bleiben externe
+Aktivierungs-Gates, nicht Funktionsluecken des Repositorys.
 
 Die Kernkette von Kunde/Artikel ueber Angebot, Auftrag, Einkauf, Lieferschein,
 Rechnung, offene Posten, Lagerbewegung, Kontrakt, Ernte und Waage ist in VALEO
@@ -75,7 +76,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Waage/Hofliste | Hofliste, Erst-/Zweitwiegung, Wiegescheine, Vorlagen, Gosse und Waagenreferenz | vorhanden | externes Hardware-Gate |
 | MDE-Uebernahme/Verarbeitung | nativer Eingangskorb, idempotente Mobile-Sync-Queue, Vorvalidierung, Quarantaene und Retry-Audit | vorhanden | L3-GAP-MDE-001 geschlossen |
 | Tankanlage | idempotenter Adaptereingang, Fehlerkorb, Zapfungsuebernahme und regelbasierter Sales-Outbox-Handover | vorhanden | L3-GAP-TANK-011 geschlossen |
-| Standard-Schnittstelle/Unimet | generisches FIBU-Schnittstellencenter vorhanden; L3-spezifische Adapter nicht nachgewiesen | extern/teilweise | L3-GAP-IFACE-014 |
+| Standard-Schnittstelle/Unimet | versionierte Profile, idempotenter Eingang, Quarantaene, Dry-run-Staging, Reconciliation und Monitor vorhanden | repo-seitig vorhanden; Aktivierung extern | L3-GAP-IFACE-014 geschlossen |
 
 ## Priorisierte funktionale Gaps
 
@@ -104,7 +105,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | ID | Gap | Abnahmekriterium |
 |---|---|---|
 | L3-GAP-RECENT-013 | Bereichsuebergreifende Liste „Letzte Dokumente“ fehlt | Personenbezogene, berechtigte Historie mit Dokumenttyp, Nummer, Partner, Zeitpunkt und Deep-Link; keine globale Datenpreisgabe — **repo-seitig geschlossen 2026-08-21** (`L3-RECENT-DOCUMENTS-015`) |
-| L3-GAP-IFACE-014 | L3-spezifische Standard-/Unimet-Adapter fehlen oder sind nicht belegt | Erst nach Kundenentscheidung: Formatvertrag, Mapping, Idempotenz, Fehlerkorb, Reconciliation und Betriebsmonitor je benoetigtem Adapter |
+| L3-GAP-IFACE-014 | L3-spezifische Standard-/Unimet-Adapter fehlen oder sind nicht belegt | Erst nach Kundenentscheidung: Formatvertrag, Mapping, Idempotenz, Fehlerkorb, Reconciliation und Betriebsmonitor je benoetigtem Adapter — **repo-seitiger Rahmen geschlossen 2026-08-21** (`L3-LEGACY-INTERFACES-017`); reale Formatmuster, Zielmapping und Produktivaktivierung extern |
 
 ## Kein Gap beziehungsweise bereits abgedeckt
 

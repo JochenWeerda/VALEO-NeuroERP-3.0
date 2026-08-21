@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-08-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-21T20:14:47Z'
+generated_at: '2026-08-21T20:29:02Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -765,6 +765,7 @@ domains:
     - docs/adr/adr-065-role-scoped-mail-workspace.md
     - docs/adr/adr-066-tank-adapter-intake-outbox.md
     - docs/adr/adr-067-governed-l3-report-catalog.md
+    - docs/adr/adr-069-gated-l3-standard-unimet-adapters.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1577,6 +1578,7 @@ domains:
     - /projekte/:id
     - /projekte/liste
     - /public/verify
+    - /schnittstelle/legacy-adapter-monitor
     - /schnittstelle/mde-inbox
     - /setup/firma
     - /start-dashboard
@@ -1892,8 +1894,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 916
-  frontend_routes_mapped: 916
+  frontend_routes_total: 917
+  frontend_routes_mapped: 917
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406
