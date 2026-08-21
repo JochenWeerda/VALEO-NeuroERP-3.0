@@ -425,6 +425,7 @@ nav:
           - ADR-055 Versionierter Massnahmen-Lifecycle und reproduzierbare Beratungsentwuerfe: adr/adr-055-feeding-measure-lifecycle.md
           - ADR-056 Herstellerneutraler ERP-Gewohnheitsvertrag: adr/adr-056-vendor-neutral-erp-habit-contract.md
           - ADR-057 MDE-Eingangskorb auf dem Mobile-Sync-Kern: adr/adr-057-mde-inbox-on-mobile-sync-core.md
+          - ADR-058 Dokumentenruecklauf auf dem kanonischen Docflow: adr/adr-058-document-return-on-docflow.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

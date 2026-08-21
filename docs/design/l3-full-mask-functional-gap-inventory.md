@@ -5,7 +5,7 @@ audience: [product, fachbereich, entwickler]
 owner: Codex
 status: verifiziert
 last_reviewed: 2026-08-21
-version: 1.1.0
+version: 1.2.0
 description: Datenschutzkonformer Funktionsabgleich der erreichbaren L3-Masken gegen VALEO NeuroERP 3.0.
 ---
 
@@ -17,10 +17,10 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**fuenf offene P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001` wurde mit
-`L3-MDE-INBOX-003` repo-seitig geschlossen. Die groessten verbleibenden
-Wechselrisiken liegen nicht in den Kernbelegen, sondern in Dokumentenruecklauf,
-allgemeiner Produktion, Inventur-Nebenlaeufen und L3-spezifischen
+**vier offene P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001` und
+`L3-GAP-DOCRET-002` wurden repo-seitig geschlossen. Die groessten verbleibenden
+Wechselrisiken liegen nicht in den Kernbelegen, sondern in allgemeiner
+Produktion, Inventur-Nebenlaeufen und L3-spezifischen
 Ausnahme-Worklists.
 
 Die Kernkette von Kunde/Artikel ueber Angebot, Auftrag, Einkauf, Lieferschein,
@@ -67,7 +67,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Produktionsliste, Artikel-Umbuchung, Stapelbuchung, Muehle, Nachbearbeitung | Mischfutter-Produktionsauftrag mit Rezeptur, Charge, Status und Trace; Rezepturgruppen | teilweise | L3-GAP-PROD-003 |
 | Abfrage-Center | feste Reports und Dashboards vorhanden | fehlend | L3-GAP-QUERY-008 |
 | Beleg-Kontrolle | domaenenspezifische Kontrollseiten vorhanden | teilweise | L3-GAP-BELEGCHECK-005 |
-| Dokumenten-Ruecklauf | DMS/Ablage vorhanden, Ruecklauf-Worklist nicht nachgewiesen | fehlend | L3-GAP-DOCRET-002 |
+| Dokumenten-Ruecklauf | native Worklist mit Versand-/Ruecklaufstatus, Vorschau-Metadaten, Schlagworten, Audit und Ursprungsbeleg | vorhanden | L3-GAP-DOCRET-002 geschlossen |
 | Kunden-, Lieferanten-, Artikel-, Lager-, Ernte-, Vertreter- und Streckenberichte | zentrale und domaenenspezifische Reports vorhanden | teilweise | L3-GAP-REPORT-012 |
 | Fuhrpark | Fahrzeugakte inkl. Technik, Fahrer, Wirtschaft, Termine, km, Reifen, Unfall, Schaden und Wartung | vorhanden | - |
 | Waage/Hofliste | Hofliste, Erst-/Zweitwiegung, Wiegescheine, Vorlagen, Gosse und Waagenreferenz | vorhanden | externes Hardware-Gate |
@@ -81,10 +81,9 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 
 | ID | Gap | Belegter Ist-Stand | Abnahmekriterium |
 |---|---|---|---|
-| L3-GAP-DOCRET-002 | Dokumentenruecklauf mit Versandstatus fehlt | DMS und Dokumentablage existieren, aber keine Ruecklauf-Worklist | Filter nach Benutzer, Kontakt, Datum, Kunde/Personal/Vorgang; Vorschau, Schlagworte, Ruecklauf- und Versandstatus; Sprung zum Ursprungsbeleg |
 | L3-GAP-PROD-003 | Allgemeiner Produktionsleitstand ist nur teilweise vorhanden | Mischfutter-Produktion deckt Auftrag, Rezeptur, Charge und Status ab | Produktionsliste mit Druck, allgemeine Artikel-Umbuchung, Stapelbuchung und Nachbearbeitung als auditierte Lifecycles; L3-Muehlenfall als Referenzjourney |
 | L3-GAP-INV-004 | L3-Inventur-Nebenablaeufe fehlen | Grundinventur, PIV, Zaehlen, Abschluss, Differenz und Bewertung sind vorhanden | Zaehllistendruck, kontrollierter Export/Import, Kontrolllauf, vorlaeufige Bewertung und erzeugbare Bestandsvortraege mit Vier-Augen-/Auditregeln |
-| L3-GAP-BELEGCHECK-005 | Einheitlicher Beleg-Kontrollarbeitsplatz fehlt | Einzelne Kontrollen existieren fuer Wareneingang, Auftragspositionen und Auftrag/Lieferschein | Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte/nicht fakturierte Lieferscheine; Filter, Verantwortlicher, Faelligkeit, Deep-Link |
+| L3-GAP-BELEGCHECK-005 | Einheitlicher Beleg-Kontrollarbeitsplatz fehlt | Einzelne Kontrollen existieren fuer Wareneingang, Auftragspositionen und Auftrag/Lieferschein | Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte/nicht fakturierte Lieferscheine; Filter, Verantwortlicher, Faelligkeit, Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-BELEGCHECK-WORKLIST-005`; Live-Projektion Folgeausbau) |
 | L3-GAP-BILLBATCH-006 | Rechnungstapel/Selbstabrechner sind nicht als kompletter Bedienablauf belegt | Faktura-, AP/AR- und Abrechnungsbausteine existieren | Stapel anlegen/pruefen/freigeben/wiederholen; Selbstabrechner fuer Verkauf und Kunden-Zukauf; Fehlerzeile und Belegnachweis |
 
 ### P2 - hohe Produktivitaets- oder Fachparitaet

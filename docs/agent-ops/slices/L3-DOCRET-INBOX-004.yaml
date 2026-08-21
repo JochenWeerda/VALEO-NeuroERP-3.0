@@ -1,0 +1,41 @@
+slice_id: L3-DOCRET-INBOX-004
+id: L3-DOCRET-INBOX-004
+title: Dokumentenruecklauf und Versandstatus
+owner: Codex
+status: abgeschlossen
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+completed_at: "2026-08-21"
+goal: >-
+  Docflow um eine native Ruecklauf-Worklist mit Versandstatus, Vorschau,
+  Schlagworten, Verantwortung und Ursprungsbeleg zu erweitern.
+architecture:
+  decision_level: significant
+  domains: [dms-compliance, finance, crm]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Kanonische Docflow-Headers, Artefakte und Wiedervorlagen wiederverwenden.
+  - Ruecklauf- und Versandstatus mit append-only Audit modellieren.
+  - Serverseitige Worklist-Filter und Deep-Link bereitstellen.
+file_ownership:
+  - app/services/docflow_return_service.py
+  - app/api/v1/endpoints/docflow_return.py
+  - alembic/versions/docflow_returns_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/docflow/dokumenten-ruecklauf.tsx
+  - tests/test_docflow_returns.py
+  - generated route, OpenAPI, architecture and handbook artifacts
+  - DMS domain pack, ADR, gap documentation and workboard
+acceptance:
+  - Tenant-Isolation on every read and mutation.
+  - Server pagination and required L3 filter dimensions.
+  - Audited legal shipping and return transitions.
+  - Artifact preview metadata and source-document deep-link.
+  - Native generator-ready worklist and green repository gates.
+risks:
+  - Provider-specific delivery receipts remain an external adapter gate.
+result:
+  - Native generator-ready worklist docflow/dokumenten-ruecklauf delivered.
+  - Tenant-scoped artifact binding, status machines, evidence preview and append-only audit delivered.
+  - 15 Docflow backend tests, 2 focused frontend tests and TypeScript passed.
+  - OpenAPI, route, architecture, ADR and handbook artifacts regenerated without drift.

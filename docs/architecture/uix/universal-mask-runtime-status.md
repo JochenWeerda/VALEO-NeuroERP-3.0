@@ -73,6 +73,8 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 | L3-MDE-INBOX-003 | Native MDE-Worklist + zentrale statusabhaengige Tabellenzeilen-Aktionen | technisch abgeschlossen, Provider-Pilot extern | `schnittstelle/mde-inbox`, Quarantaene/Retry-Audit, ADR-057 |
 
+| L3-DOCRET-INBOX-004 | Dokumentenruecklauf mit Versandstatus, Audit und Ursprungsbeleg | technisch abgeschlossen, Provider-Pilot extern | `docflow/dokumenten-ruecklauf`, ADR-058 |
+
 ## Architektur (Single Source of Truth)
 
 ```text
