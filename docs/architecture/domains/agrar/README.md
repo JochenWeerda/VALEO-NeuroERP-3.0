@@ -37,3 +37,10 @@ Agrar bleibt fuer Spezialmasken bewusst differenziert. Waage-, Ernteannahme-,
 Silo- und Operator-UIs duerfen Spezialrenderer behalten, muessen aber kuenftig
 ScreenDefinition-kompatible Daten-, Action- und Workflow-Vertraege anbieten.
 Eine Migration erfolgt erst nach CRM-Pilot und nur ueber Adapter-Paritaet.
+
+## Tankanlagen-Adapter
+
+`tankstelle/adapter-inbox` fuehrt idempotenten Adaptereingang, Validierung,
+Fehlerkorb, begruendeten Retry und Einzelnachweis zusammen. Valide Daten werden
+genau einmal zur kanonischen Zapfung; fakturierbarer Kundenverbrauch erzeugt
+einen idempotenten Lieferschein-Outbox-Handover.

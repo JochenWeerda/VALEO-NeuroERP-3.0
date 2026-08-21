@@ -1474,6 +1474,27 @@
       ]
     },
     {
+      "mask_id": "tankstelle/adapter-inbox",
+      "title": "Tankanlagen-Eingang",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/tankstelle__adapter-inbox/:entityId",
+      "agent_contract_url": "/api/v1/masks/tankstelle/adapter-inbox/agent-contract",
+      "screen_definition_url": "/api/v1/masks/tankstelle/adapter-inbox/screen-definition",
+      "readiness_url": "/api/v1/masks/tankstelle/adapter-inbox/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "external_id",
+        "payload_hash",
+        "validation_errors"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "crm/customer-360",
       "title": "Kundenstamm",
       "domain": "crm",

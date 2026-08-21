@@ -17,10 +17,10 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen P1-, zwei P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+**keinen offenen P1-, einen P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
-`L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009` und `L3-GAP-MAIL-010` sind ebenfalls repo-seitig geschlossen. Die verbleibenden
+`L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009`, `L3-GAP-MAIL-010` und `L3-GAP-TANK-011` sind ebenfalls repo-seitig geschlossen. Die verbleibenden
 P2/P3-Themen betreffen Komfort, breite Berichtskatalog-Paritaet und externe
 Adapter, nicht den P1-Kernwechsel.
 
@@ -73,7 +73,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Fuhrpark | Fahrzeugakte inkl. Technik, Fahrer, Wirtschaft, Termine, km, Reifen, Unfall, Schaden und Wartung | vorhanden | - |
 | Waage/Hofliste | Hofliste, Erst-/Zweitwiegung, Wiegescheine, Vorlagen, Gosse und Waagenreferenz | vorhanden | externes Hardware-Gate |
 | MDE-Uebernahme/Verarbeitung | nativer Eingangskorb, idempotente Mobile-Sync-Queue, Vorvalidierung, Quarantaene und Retry-Audit | vorhanden | L3-GAP-MDE-001 geschlossen |
-| Tankanlage | Zapfungen und Tankbestand vorhanden | teilweise | L3-GAP-TANK-011 |
+| Tankanlage | idempotenter Adaptereingang, Fehlerkorb, Zapfungsuebernahme und regelbasierter Sales-Outbox-Handover | vorhanden | L3-GAP-TANK-011 geschlossen |
 | Standard-Schnittstelle/Unimet | generisches FIBU-Schnittstellencenter vorhanden; L3-spezifische Adapter nicht nachgewiesen | extern/teilweise | L3-GAP-IFACE-014 |
 
 ## Priorisierte funktionale Gaps
@@ -95,7 +95,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | L3-GAP-QUERY-008 | Anwender-Abfrage-Center fehlt | Vorgegebene Reports/Dashboards vorhanden | Berechtigter Query-Designer ueber freigegebene Read Models, Vorschau, Ausgabe/Druck, Favoriten und signierter Import/Export ohne beliebiges SQL — **repo-seitig geschlossen 2026-08-21** (`L3-QUERY-CENTER-010`) |
 | L3-GAP-TEAMCAL-009 | Teamkalender-Paritaet ist nicht belegt | Planungskalender aggregiert Prozesslayer und bietet ICS | Mehrbenutzer-/Teamansicht, Frei/Belegt, fremde und abgelehnte Termine, Rechte- und Datenschutzmodell — **repo-seitig geschlossen 2026-08-21** (`L3-TEAM-CALENDAR-011`; IAM-/Datenschutzpilot extern) |
 | L3-GAP-MAIL-010 | Integrierter ERP-Mailarbeitsplatz fehlt | Dokumente und Kommunikationsaktivitaeten koennen abgelegt werden | Rollenbasierter Posteingang, Beleg-/Kontaktzuordnung, Anlagenuebernahme, Entwurf/Senden, revisionssichere Aktivitaet; alternativ verbindlicher externer Mail-Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-MAIL-WORKSPACE-012`; Provider/Virenscan extern) |
-| L3-GAP-TANK-011 | Tankanlagen-Schnittstellenworkflow ist nur teilweise vorhanden | Zapfungen und Tankbestand mit UI/API vorhanden | Adapter-Eingang mit idempotenter Uebernahme, Fehlerkorb, Einzelnachweis und regelbasierter Lieferscheinerzeugung |
+| L3-GAP-TANK-011 | Tankanlagen-Schnittstellenworkflow ist nur teilweise vorhanden | Zapfungen und Tankbestand mit UI/API vorhanden | Adapter-Eingang mit idempotenter Uebernahme, Fehlerkorb, Einzelnachweis und regelbasierter Lieferscheinerzeugung — **repo-seitig geschlossen 2026-08-21** (`L3-TANK-ADAPTER-013`; Anlagen-/Sales-Consumer-Pilot extern) |
 | L3-GAP-REPORT-012 | Exakte L3-Berichtskatalog-Paritaet ist nicht nachgewiesen | allgemeine Umsatz-, Lager-, Finance-, Einkauf- und Dashboardberichte vorhanden | Fachlich priorisierter Berichtskatalog mit Parameter-/Summenparitaet fuer Vertreter, Kunde/Artikel/-gruppe, Charge, Ernte und Strecke; Export und Beleg-Drilldown |
 
 ### P3 - Gewohnheit und Komfort

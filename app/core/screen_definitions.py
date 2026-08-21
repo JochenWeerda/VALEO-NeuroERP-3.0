@@ -3556,6 +3556,20 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "tankstelle/adapter-inbox": lambda: {
+        "schemaVersion": 1, "id": "tankstelle/adapter-inbox", "domain": "agrar", "mode": "list",
+        "title": "Tankanlagen-Eingang", "subtitle": "Adapterdaten pruefen, klaeren und an Zapfung/Lieferschein uebergeben",
+        "adapter": {"type": "native", "sourceId": "tankstelle/adapter-inbox", "temporary": False},
+        "dataSources": [{"key": "entity", "endpoint": "/api/v1/tank-adapter/summary", "staleTimeMs": 10_000}, {"key": "intake", "endpoint": "/api/v1/tank-adapter/intake", "pageSize": 50, "staleTimeMs": 10_000}],
+        "summary": [{"key": "received", "label": "Neu", "tone": "warning"}, {"key": "validated", "label": "Validiert", "tone": "info"}, {"key": "error", "label": "Fehlerkorb", "tone": "danger"}, {"key": "processed", "label": "Uebernommen", "tone": "success"}, {"key": "delivery_handover", "label": "Lieferschein-Handover", "tone": "neutral"}],
+        "tables": [{"key": "intake", "label": "Tankanlagen-Datensaetze", "dataSourceKey": "intake", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [{"key": "received_at", "label": "Eingang", "renderKind": "datetime", "sortable": True, "width": 145}, {"key": "adapter_key", "label": "Adapter", "sortable": True, "filterable": True, "width": 120}, {"key": "external_id", "label": "Externe ID", "filterable": True, "width": 160}, {"key": "payload_hash", "label": "SHA-256", "width": 240}, {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 105}, {"key": "validation_errors", "label": "Fehler", "width": 300}, {"key": "rule_result", "label": "Regelentscheidung", "width": 220}, {"key": "zapfung_id", "label": "Zapfung", "width": 135}, {"key": "delivery_handover_id", "label": "LS-Handover", "width": 145}, {"key": "retry_count", "label": "Versuche", "numeric": True, "width": 80}],
+            "rowActions": [{"key": "validate", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["received"]}}, {"key": "process", "label": "Uebernehmen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["validated"]}}, {"key": "retry", "label": "Wiederholen", "visibleWhen": {"field": "status", "values": ["error"]}}, {"key": "open_source", "label": "Einzelnachweis"}]}],
+        "workflow": {"processKey": "tank-adapter-intake", "status": "error-inbox", "nextActionKey": "validate", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar"},
+        "agentContract": {"businessPurpose": "Tankanlagen-Eingaenge genau einmal und nachvollziehbar uebernehmen.", "examplePrompts": ["Zeige Fehler im Tankadapter.", "Welche Zapfungen erzeugen einen Lieferschein-Handover?"], "sensitiveFields": ["external_id", "payload_hash", "validation_errors"], "forbiddenAgentTasks": ["Fehlerhafte Tankdaten ohne menschlichen Audit-Grund uebernehmen"], "testSelectors": {"screenRoot": "[data-testid='tank-adapter-inbox']"}},
+    },
     "crm/mail-arbeitsplatz": build_mail_workspace_screen_definition,
     "auswertungen/abfrage-center": lambda: {
         "schemaVersion": 1, "id": "auswertungen/abfrage-center", "domain": "reporting", "mode": "list",
@@ -4125,6 +4139,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     ],
     "auswertungen/abfrage-center": ["abfrage center", "query designer", "anwenderabfrage", "favorisierte abfrage", "read model"],
     "produktion/produktionsleitstand": ["produktionsliste", "produktion", "muehle", "stapelbuchung", "nachbearbeitung"],
+    "tankstelle/adapter-inbox": ["tankanlage", "tank adapter", "zapfung import", "tank fehler", "lieferschein tank"],
     "lager/inventur-nebenlaeufe": ["zaehlliste", "inventur import", "kontrolllauf", "bestandsvortrag", "inventurbewertung"],
     "finance/rechnungstapel": ["rechnungstapel", "fakturlauf", "selbstabrechner", "kunden zukauf", "stapelfehler"],
 }
@@ -4139,6 +4154,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "tankstelle/adapter-inbox": "/tankstelle/adapter-inbox",
     "crm/mail-arbeitsplatz": "/crm/mail-arbeitsplatz",
     "auswertungen/abfrage-center": "/auswertungen/abfrage-center",
     "lager/fremdware": "/lager/fremdware",

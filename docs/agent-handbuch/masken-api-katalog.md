@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (55 Masken).
+> Generiert aus `app/core/screen_definitions.py` (56 Masken).
 
 ## Übersicht
 
@@ -67,6 +67,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
+| `tankstelle/adapter-inbox` | Tankanlagen-Eingang | agrar | niedrig | — | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
 | `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
 | `workspace/fibu` | FIBU-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
 | `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
@@ -675,6 +676,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `sync` | Auftraege synchronisieren | moderate | nein | `/api/v1/production-control/sync` |
+
+---
+
+### `tankstelle/adapter-inbox` — Tankanlagen-Eingang
+
+**Zweck:** Tankanlagen-Eingaenge genau einmal und nachvollziehbar uebernehmen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/tankstelle/adapter-inbox/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
+| Readiness | `GET /api/v1/masks/tankstelle/adapter-inbox/readiness` |
+| Rollout-Route | `/mask-rollout/tankstelle__adapter-inbox/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/tank-adapter/summary`
+- `intake` → `/api/v1/tank-adapter/intake`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Fehler im Tankadapter.
+- Welche Zapfungen erzeugen einen Lieferschein-Handover?
+
+**Sensible Felder:** `external_id, payload_hash, validation_errors`
 
 ---
 

@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-TANK-ADAPTER-013 Tankanlagen-Adapter und Fehlerkorb - reserviert 2026-08-21
+## L3-TANK-ADAPTER-013 Tankanlagen-Adapter und Fehlerkorb - abgeschlossen 2026-08-21
 
-**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Tankanlagen-Eingaenge tenantgebunden und idempotent validieren, fehlerhafte Datensaetze in einer Operator-Inbox klaeren, valide Datensaetze genau einmal als Zapfung uebernehmen und regelbasiert einen idempotenten Lieferschein-Handover erzeugen.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-TANK-ADAPTER-013.yaml`, dieser Workboard-Abschnitt, Tank-Adapter-Service/-Endpoint/-Migration/-Tests, zentrale ScreenDefinition/Route, Agrar-/Sales-Domain-Packs, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
 
 **Abnahme:** Tenant-/Adapter-Idempotenz; Payload-Hash; Validierung/Fehlerkorb/Retry; genau eine Zapfung; nachvollziehbare Regelentscheidung und Sales-Outbox; native generatorfaehige Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Tenant/Adapter/External-ID und SHA-256 sichern den Eingang. Validierung, Fehlerkorb und Retry sind getrennt und auditiert. Processing erzeugt genau eine kanonische Zapfung; fakturierbarer Kundenverbrauch erzeugt genau einen `tank.delivery-note.requested`-Outbox-Handover. `L3-GAP-TANK-011` ist repo-seitig geschlossen; Anlagenprotokoll und Sales-Consumer bleiben extern.
 
 ## L3-MAIL-WORKSPACE-012 Rollenbasierter ERP-Mailarbeitsplatz - abgeschlossen 2026-08-21
 

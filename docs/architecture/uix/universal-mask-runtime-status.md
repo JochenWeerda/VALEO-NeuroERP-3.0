@@ -305,6 +305,12 @@ Frei/Belegt redigiert; Teamdetails sind berechtigt und Ablehnungen optional.
 Zuordnung, hashgebundene Anlagen, Entwurf und Provider-Queue. Alle fachlichen
 Statuswechsel laufen begruendet und auditiert.
 
+## L3-TANK-ADAPTER-013
+
+`tankstelle/adapter-inbox` ist eine native Fehler- und Verarbeitungsworklist
+fuer hashgebundene Anlagenmeldungen, kanonische Zapfungen und den
+regelbasierten Lieferschein-Outbox-Handover.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

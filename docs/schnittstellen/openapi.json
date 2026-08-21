@@ -61081,35 +61081,6 @@
         "title": "InstructionUpdate",
         "type": "object"
       },
-      "IntakeIn": {
-        "properties": {
-          "absender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Absender"
-          },
-          "quelle": {
-            "default": "whatsapp",
-            "title": "Quelle",
-            "type": "string"
-          },
-          "raw_text": {
-            "title": "Raw Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "raw_text"
-        ],
-        "title": "IntakeIn",
-        "type": "object"
-      },
       "InteressentCreate": {
         "properties": {
           "adresse": {
@@ -102635,6 +102606,33 @@
         "title": "RetryEventIn",
         "type": "object"
       },
+      "RetryIn": {
+        "properties": {
+          "corrected_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corrected Payload"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RetryIn",
+        "type": "object"
+      },
       "ReturnCaseIn": {
         "properties": {
           "artifact_id": {
@@ -135383,6 +135381,34 @@
         "title": "ReconciliationResult",
         "type": "object"
       },
+      "app__api__v1__endpoints__tank_adapter__IntakeIn": {
+        "properties": {
+          "adapter_key": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "external_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "External Id",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "required": [
+          "adapter_key",
+          "external_id",
+          "payload"
+        ],
+        "title": "IntakeIn",
+        "type": "object"
+      },
       "app__api__v1__endpoints__webhook_system__WebhookCreate": {
         "properties": {
           "bereich": {
@@ -135595,6 +135621,35 @@
           "aktiv"
         ],
         "title": "ConnectorOut",
+        "type": "object"
+      },
+      "app__api__v1__endpoints__whatsapp_intake__IntakeIn": {
+        "properties": {
+          "absender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absender"
+          },
+          "quelle": {
+            "default": "whatsapp",
+            "title": "Quelle",
+            "type": "string"
+          },
+          "raw_text": {
+            "title": "Raw Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "raw_text"
+        ],
+        "title": "IntakeIn",
         "type": "object"
       },
       "app__api__v1__schemas__agrar_schemas__QualityProtocolOut": {
@@ -200219,7 +200274,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IntakeIn"
+                "$ref": "#/components/schemas/app__api__v1__endpoints__whatsapp_intake__IntakeIn"
               }
             }
           },
@@ -350790,6 +350845,452 @@
           "system",
           "metrics",
           "agents"
+        ]
+      }
+    },
+    "/api/v1/tank-adapter/intake": {
+      "get": {
+        "operationId": "list_intake_api_v1_tank_adapter_intake_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Intake Api V1 Tank Adapter Intake Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Intake",
+        "tags": [
+          "tankstelle",
+          "integration"
+        ]
+      },
+      "post": {
+        "operationId": "intake_api_v1_tank_adapter_intake_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__tank_adapter__IntakeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Intake Api V1 Tank Adapter Intake Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Intake",
+        "tags": [
+          "tankstelle",
+          "integration"
+        ]
+      }
+    },
+    "/api/v1/tank-adapter/intake/{intake_id}/process": {
+      "post": {
+        "operationId": "process_api_v1_tank_adapter_intake__intake_id__process_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "intake_id",
+            "required": true,
+            "schema": {
+              "title": "Intake Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Process Api V1 Tank Adapter Intake  Intake Id  Process Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Process",
+        "tags": [
+          "tankstelle",
+          "integration"
+        ]
+      }
+    },
+    "/api/v1/tank-adapter/intake/{intake_id}/retry": {
+      "post": {
+        "operationId": "retry_api_v1_tank_adapter_intake__intake_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "intake_id",
+            "required": true,
+            "schema": {
+              "title": "Intake Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retry Api V1 Tank Adapter Intake  Intake Id  Retry Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retry",
+        "tags": [
+          "tankstelle",
+          "integration"
+        ]
+      }
+    },
+    "/api/v1/tank-adapter/intake/{intake_id}/validate": {
+      "post": {
+        "operationId": "validate_api_v1_tank_adapter_intake__intake_id__validate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "intake_id",
+            "required": true,
+            "schema": {
+              "title": "Intake Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Validate Api V1 Tank Adapter Intake  Intake Id  Validate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Validate",
+        "tags": [
+          "tankstelle",
+          "integration"
+        ]
+      }
+    },
+    "/api/v1/tank-adapter/summary": {
+      "get": {
+        "operationId": "summary_api_v1_tank_adapter_summary_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Summary Api V1 Tank Adapter Summary Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Summary",
+        "tags": [
+          "tankstelle",
+          "integration"
         ]
       }
     },

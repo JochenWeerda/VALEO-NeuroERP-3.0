@@ -4136,6 +4136,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/tankstelle/adapter-inbox",
+      "path": "tankstelle/adapter-inbox",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle/zapfungen",
       "source": "auto"

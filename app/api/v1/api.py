@@ -1057,6 +1057,10 @@ from app.api.v1.endpoints import mail_workspace  # noqa: E402
 
 api_router.include_router(mail_workspace.router)
 
+from app.api.v1.endpoints import tank_adapter  # noqa: E402
+
+api_router.include_router(tank_adapter.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

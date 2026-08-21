@@ -433,6 +433,7 @@ nav:
           - ADR-063 Sicheres Anwender-Abfrage-Center: adr/adr-063-safe-user-query-center.md
           - ADR-064 Teamkalender als datenschutzbewusste Projektion: adr/adr-064-team-calendar-privacy-projection.md
           - ADR-065 Rollenbasierter ERP-Mailarbeitsplatz: adr/adr-065-role-scoped-mail-workspace.md
+          - ADR-066 Tankanlagen-Eingang und Lieferschein-Outbox: adr/adr-066-tank-adapter-intake-outbox.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

@@ -32,6 +32,9 @@ Produktionsleitstand:
 `pytest tests/test_production_control.py -q --no-cov` und
 `vitest run src/__tests__/pages/produktion/produktionsleitstand.test.tsx`.
 
+Tankadapter: `pytest tests/test_tank_adapter.py -q --no-cov` und
+`vitest run src/__tests__/pages/tankstelle/adapter-inbox.test.tsx`.
+
 Frontend: `packages/frontend-web/src/pages/agrar/`
 
 Fuetterungsberatung UX: `packages/frontend-web/src/__tests__/pages/portal/feed-advice-entry.test.tsx`

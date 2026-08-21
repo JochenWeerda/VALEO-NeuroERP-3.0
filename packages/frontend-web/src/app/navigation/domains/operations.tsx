@@ -1135,6 +1135,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
             mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
           },
           {
+            id: 'tank-adapter-inbox',
+            label: 'Tankanlagen-Eingang',
+            icon: Zap,
+            module: '@/pages/tankstelle/adapter-inbox',
+            preferredPath: 'tankstelle/adapter-inbox',
+            keywords: ['tank', 'tankanlage', 'zapfung', 'adapter', 'fehlerkorb', 'lieferschein'],
+            mcp: { businessDomain: 'logistics', scope: 'logistics:write' },
+          },
+          {
             id: 'fuhrpark-stammdaten',
             label: 'Stammdaten',
             icon: Settings,
