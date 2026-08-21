@@ -2,9 +2,10 @@ slice_id: L3-QUERY-CENTER-010
 id: L3-QUERY-CENTER-010
 title: Sicheres Anwender-Abfrage-Center
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Ein L3-vertrautes Abfrage-Center ueber freigegebenen Read Models mit
   Vorschau, Favoriten, Druck und signiertem Austausch bereitzustellen.

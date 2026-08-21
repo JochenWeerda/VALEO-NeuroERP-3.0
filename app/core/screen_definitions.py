@@ -3518,6 +3518,31 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "auswertungen/abfrage-center": lambda: {
+        "schemaVersion": 1, "id": "auswertungen/abfrage-center", "domain": "reporting", "mode": "list",
+        "title": "Abfrage-Center", "subtitle": "Freigegebene Datenmodelle sicher filtern, aggregieren und ausgeben",
+        "adapter": {"type": "native", "sourceId": "auswertungen/abfrage-center", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/query-center/catalog", "staleTimeMs": 60_000},
+            {"key": "definitions", "endpoint": "/api/v1/query-center", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [{"key": "count", "label": "Freigegebene Datenprodukte", "tone": "info"}],
+        "tables": [{"key": "definitions", "label": "Meine Abfragen", "dataSourceKey": "definitions", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "is_favorite", "label": "Favorit", "renderKind": "boolean", "sortable": True, "width": 75},
+                {"key": "name", "label": "Abfrage", "sortable": True, "filterable": True, "width": 220},
+                {"key": "data_product_id", "label": "Read Model", "sortable": True, "filterable": True, "width": 230},
+                {"key": "selected_fields", "label": "Felder", "width": 250},
+                {"key": "filter_spec", "label": "Filter", "width": 260},
+                {"key": "aggregations", "label": "Summen", "width": 180},
+                {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 150}],
+            "rowActions": [{"key": "preview", "label": "Vorschau"}, {"key": "print", "label": "Drucken"}, {"key": "export", "label": "Signiert exportieren"}]}],
+        "actions": [{"key": "create", "label": "Neue Abfrage", "kind": "primary", "permission": "reporting.query.write", "dangerLevel": "low"}, {"key": "import", "label": "Signiert importieren", "kind": "secondary", "permission": "reporting.query.write", "dangerLevel": "moderate"}],
+        "workflow": {"processKey": "safe-query-center", "status": "governed", "nextActionKey": "create", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
+        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "reporting"},
+        "agentContract": {"businessPurpose": "Freigegebene Read Models ohne beliebiges SQL anwendergerecht abfragen.", "examplePrompts": ["Zeige meine favorisierten Abfragen.", "Erstelle eine begrenzte Vorschau offener Rechnungen."], "sensitiveFields": ["filter_spec", "selected_fields"], "forbiddenAgentTasks": ["Beliebiges SQL ausfuehren oder nicht freigegebene Felder abfragen"], "testSelectors": {"screenRoot": "[data-testid='abfrage-center']"}},
+    },
     "lager/fremdware": build_foreign_goods_screen_definition,
     "finance/rechnungstapel": build_billing_batch_screen_definition,
     "lager/inventur-nebenlaeufe": build_inventory_auxiliary_screen_definition,
@@ -4058,6 +4083,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
         "nicht fakturierte lieferscheine",
         "fehlende eingangsbelege",
     ],
+    "auswertungen/abfrage-center": ["abfrage center", "query designer", "anwenderabfrage", "favorisierte abfrage", "read model"],
     "produktion/produktionsleitstand": ["produktionsliste", "produktion", "muehle", "stapelbuchung", "nachbearbeitung"],
     "lager/inventur-nebenlaeufe": ["zaehlliste", "inventur import", "kontrolllauf", "bestandsvortrag", "inventurbewertung"],
     "finance/rechnungstapel": ["rechnungstapel", "fakturlauf", "selbstabrechner", "kunden zukauf", "stapelfehler"],
@@ -4073,6 +4099,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "auswertungen/abfrage-center": "/auswertungen/abfrage-center",
     "lager/fremdware": "/lager/fremdware",
     "finance/rechnungstapel": "/finance/rechnungstapel",
     "lager/inventur-nebenlaeufe": "/lager/inventur-nebenlaeufe",

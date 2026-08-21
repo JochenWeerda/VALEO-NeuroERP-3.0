@@ -36,3 +36,10 @@ Interferenzbereich fuer GoBD, Audit, Freigabe und Export. Generatorfaehige
 Finance-Masken muessen Audit-/Evidence-Anforderungen im `ScreenDefinition`-
 Vertrag ausdruecken und duerfen keine schema-getriebenen Actions ohne
 Permission- und Tenant-Pruefung ausfuehren.
+
+## Sicheres Abfrage-Center
+
+`auswertungen/abfrage-center` stellt ausschliesslich freigegebene
+Read-Model-Datenprodukte, Felder, Filter und Aggregationen bereit. Vorschau,
+persoenliche Favoriten sowie signierter Definitionsaustausch laufen ueber die
+zentrale Runtime; beliebiges SQL ist nicht Bestandteil des Vertrags.

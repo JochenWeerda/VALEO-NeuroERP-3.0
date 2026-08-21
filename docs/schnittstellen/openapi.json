@@ -59224,6 +59224,27 @@
         "title": "ImportFormat",
         "type": "string"
       },
+      "ImportIn": {
+        "properties": {
+          "bundle": {
+            "additionalProperties": true,
+            "title": "Bundle",
+            "type": "object"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bundle",
+          "reason"
+        ],
+        "title": "ImportIn",
+        "type": "object"
+      },
       "ImportJobOut": {
         "properties": {
           "adapter": {
@@ -92901,43 +92922,6 @@
         "title": "PrepListRemark",
         "type": "object"
       },
-      "PreviewIn": {
-        "properties": {
-          "harvest_acceptance_id": {
-            "title": "Harvest Acceptance Id",
-            "type": "string"
-          },
-          "taxation_type": {
-            "default": "regular",
-            "title": "Taxation Type",
-            "type": "string"
-          },
-          "total_gross_amount_eur": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Total Gross Amount Eur",
-            "type": "number"
-          },
-          "total_net_amount_eur": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Total Net Amount Eur",
-            "type": "number"
-          },
-          "vat_rate_percent": {
-            "default": 0,
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Vat Rate Percent",
-            "type": "number"
-          }
-        },
-        "required": [
-          "harvest_acceptance_id"
-        ],
-        "title": "PreviewIn",
-        "type": "object"
-      },
       "PriceAgreement": {
         "properties": {
           "article_number": {
@@ -106846,6 +106830,72 @@
           "aehnlichkeit"
         ],
         "title": "SanktionsTreffer",
+        "type": "object"
+      },
+      "SaveIn": {
+        "properties": {
+          "aggregations": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Aggregations",
+            "type": "array"
+          },
+          "data_product_id": {
+            "title": "Data Product Id",
+            "type": "string"
+          },
+          "filter_spec": {
+            "additionalProperties": true,
+            "title": "Filter Spec",
+            "type": "object"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "is_favorite": {
+            "default": false,
+            "title": "Is Favorite",
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          },
+          "selected_fields": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Selected Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "data_product_id",
+          "selected_fields",
+          "reason"
+        ],
+        "title": "SaveIn",
         "type": "object"
       },
       "ScenarioAdjustment": {
@@ -134935,6 +134985,72 @@
         "title": "QualityProtocolOut",
         "type": "object"
       },
+      "app__api__v1__endpoints__query_center__PreviewIn": {
+        "properties": {
+          "aggregations": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Aggregations",
+            "type": "array"
+          },
+          "data_product_id": {
+            "title": "Data Product Id",
+            "type": "string"
+          },
+          "filter_spec": {
+            "additionalProperties": true,
+            "title": "Filter Spec",
+            "type": "object"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "is_favorite": {
+            "default": false,
+            "title": "Is Favorite",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 100,
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "selected_fields": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Selected Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "data_product_id",
+          "selected_fields"
+        ],
+        "title": "PreviewIn",
+        "type": "object"
+      },
       "app__api__v1__endpoints__sales_storno__StornoIn": {
         "properties": {
           "bediener": {
@@ -134957,6 +135073,43 @@
           "grund"
         ],
         "title": "StornoIn",
+        "type": "object"
+      },
+      "app__api__v1__endpoints__self_billing__PreviewIn": {
+        "properties": {
+          "harvest_acceptance_id": {
+            "title": "Harvest Acceptance Id",
+            "type": "string"
+          },
+          "taxation_type": {
+            "default": "regular",
+            "title": "Taxation Type",
+            "type": "string"
+          },
+          "total_gross_amount_eur": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Total Gross Amount Eur",
+            "type": "number"
+          },
+          "total_net_amount_eur": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Total Net Amount Eur",
+            "type": "number"
+          },
+          "vat_rate_percent": {
+            "default": 0,
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Vat Rate Percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "harvest_acceptance_id"
+        ],
+        "title": "PreviewIn",
         "type": "object"
       },
       "app__api__v1__endpoints__subsidiary_ledger_reconciliation__ReconciliationResult": {
@@ -174482,7 +174635,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PreviewIn"
+                "$ref": "#/components/schemas/app__api__v1__endpoints__self_billing__PreviewIn"
               }
             }
           },
@@ -332266,6 +332419,434 @@
           "Labor",
           "Qualitaet",
           "Labor"
+        ]
+      }
+    },
+    "/api/v1/query-center": {
+      "get": {
+        "operationId": "list_definitions_api_v1_query_center_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "favorite",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Favorite"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Definitions Api V1 Query Center Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Definitions",
+        "tags": [
+          "reporting",
+          "query-center"
+        ]
+      },
+      "post": {
+        "operationId": "save_api_v1_query_center_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Save Api V1 Query Center Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save",
+        "tags": [
+          "reporting",
+          "query-center"
+        ]
+      }
+    },
+    "/api/v1/query-center/catalog": {
+      "get": {
+        "operationId": "catalog_api_v1_query_center_catalog_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Catalog Api V1 Query Center Catalog Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Catalog",
+        "tags": [
+          "reporting",
+          "query-center"
+        ]
+      }
+    },
+    "/api/v1/query-center/import": {
+      "post": {
+        "operationId": "import_definition_api_v1_query_center_import_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Import Definition Api V1 Query Center Import Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import Definition",
+        "tags": [
+          "reporting",
+          "query-center"
+        ]
+      }
+    },
+    "/api/v1/query-center/preview": {
+      "post": {
+        "operationId": "preview_api_v1_query_center_preview_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__query_center__PreviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preview Api V1 Query Center Preview Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preview",
+        "tags": [
+          "reporting",
+          "query-center"
+        ]
+      }
+    },
+    "/api/v1/query-center/{definition_id}/export": {
+      "post": {
+        "operationId": "export_definition_api_v1_query_center__definition_id__export_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definition_id",
+            "required": true,
+            "schema": {
+              "title": "Definition Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export Definition Api V1 Query Center  Definition Id  Export Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Definition",
+        "tags": [
+          "reporting",
+          "query-center"
         ]
       }
     },

@@ -786,6 +786,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/auswertungen/abfrage-center",
+      "path": "auswertungen/abfrage-center",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/auth/Callback",
       "path": "auth/callback",
       "source": "system"

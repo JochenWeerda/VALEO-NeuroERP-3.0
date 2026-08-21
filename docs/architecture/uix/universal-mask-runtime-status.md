@@ -286,6 +286,13 @@ generatorfaehige Operator-Worklist bereit. Mandant/Eigentuemer, Lager und
 Restbestand sind sichtbar; Umbuchung sowie Teil-/Vollauslagerung laufen
 statusvalidiert, begruendet und append-only auditiert.
 
+## L3-QUERY-CENTER-010
+
+`auswertungen/abfrage-center` ist eine native, generatorfaehige Worklist fuer
+allowlistgebundene Read-Model-Abfragen. Vorschau, Favoriten, Druck und
+signierter Import/Export werden zentral gerendert; beliebiges SQL bleibt
+ausgeschlossen.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

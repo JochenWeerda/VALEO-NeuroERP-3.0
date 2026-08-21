@@ -1049,6 +1049,10 @@ from app.api.v1.endpoints import foreign_goods_worklist  # noqa: E402
 
 api_router.include_router(foreign_goods_worklist.router)
 
+from app.api.v1.endpoints import query_center  # noqa: E402
+
+api_router.include_router(query_center.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

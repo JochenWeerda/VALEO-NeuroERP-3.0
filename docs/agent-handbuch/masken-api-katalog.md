@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (53 Masken).
+> Generiert aus `app/core/screen_definitions.py` (54 Masken).
 
 ## Übersicht
 
@@ -32,6 +32,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
 | `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
+| `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
 | `auswertungen/beleg-kontrolle` | Beleg-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
 | `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
@@ -1876,6 +1877,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
 | `abschliessen` | Abschliessen | moderate | nein | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
+
+---
+
+## Domäne: reporting
+
+### `auswertungen/abfrage-center` — Abfrage-Center
+
+**Zweck:** Freigegebene Read Models ohne beliebiges SQL anwendergerecht abfragen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/abfrage-center/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/abfrage-center/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__abfrage-center/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/query-center/catalog`
+- `definitions` → `/api/v1/query-center`
+
+**Beispiel-Prompts:**
+
+- Zeige meine favorisierten Abfragen.
+- Erstelle eine begrenzte Vorschau offener Rechnungen.
+
+**Sensible Felder:** `filter_spec, selected_fields`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create` | Neue Abfrage | low | nein | `—` |
+| `import` | Signiert importieren | moderate | nein | `—` |
 
 ---
 

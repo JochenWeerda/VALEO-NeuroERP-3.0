@@ -421,6 +421,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
+        id: 'abfrage-center',
+        label: 'Abfrage-Center',
+        icon: Search,
+        module: '@/pages/auswertungen/abfrage-center',
+        preferredPath: 'auswertungen/abfrage-center',
+        keywords: ['abfrage', 'query', 'read model', 'favorit', 'auswertung', 'vorschau'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'periodensteuerung',
         label: 'Periodensteuerung',
         icon: Calendar,

@@ -2547,6 +2547,46 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "auswertungen/abfrage-center",
+      "title": "Abfrage-Center",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__abfrage-center/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/abfrage-center/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/abfrage-center/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/abfrage-center/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "create",
+          "label": "Neue Abfrage",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "reporting.query.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "import",
+          "label": "Signiert importieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "reporting.query.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "filter_spec",
+        "selected_fields"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "sales/delivery-note",
       "title": "Lieferschein",
       "domain": "sales",

@@ -89,6 +89,7 @@ domains:
       - export
       - pricing
       - preise
+      - auswertungen
     service_prefixes:
       - finance_
       - finanz
@@ -105,6 +106,7 @@ domains:
       - tse_fiskaly_
       - vies_
       - ist_aggregation_
+      - query_center
     endpoint_prefixes:
       - finance
       - finanz
@@ -168,6 +170,7 @@ domains:
       - export_service
       - accounts
       - banken
+      - query_center
 
   agrar:
     route_segments:
