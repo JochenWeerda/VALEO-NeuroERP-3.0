@@ -2,9 +2,10 @@ slice_id: L3-INVENTORY-AUX-007
 id: L3-INVENTORY-AUX-007
 title: Inventur-Nebenlaeufe
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Bestehende Inventur/PIV um kontrollierten Listen-, Import-, Kontroll-,
   Bewertungs- und Bestandsvortragsablauf zu erweitern.
@@ -33,3 +34,8 @@ acceptance:
   - Native generator-ready worklist and green repository gates.
 risks:
   - Productive file storage and printer adapters remain external rollout gates.
+result:
+  - Native generator-ready inventory auxiliary worklist delivered.
+  - Hash-bound imports, controls, valuation and four-eyes opening balances delivered.
+  - Six backend tests, one focused frontend test, TypeScript and Ruff passed.
+  - OpenAPI, route, architecture, ADR and handbook artifacts regenerated without drift.

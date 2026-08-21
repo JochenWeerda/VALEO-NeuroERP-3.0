@@ -15077,6 +15077,67 @@
         "title": "BasisValueKind",
         "type": "string"
       },
+      "BatchIn": {
+        "properties": {
+          "batch_type": {
+            "enum": [
+              "count_sheet",
+              "count_import",
+              "control_run",
+              "preliminary_valuation",
+              "opening_balance"
+            ],
+            "title": "Batch Type",
+            "type": "string"
+          },
+          "declared_hash": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declared Hash"
+          },
+          "import_rows": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Import Rows"
+          },
+          "inventory_count_id": {
+            "minLength": 1,
+            "title": "Inventory Count Id",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "inventory_count_id",
+          "batch_type",
+          "reason"
+        ],
+        "title": "BatchIn",
+        "type": "object"
+      },
       "BatchOut": {
         "properties": {
           "article_id": {
@@ -133460,6 +133521,32 @@
           "name"
         ],
         "title": "RezeptIn",
+        "type": "object"
+      },
+      "app__api__v1__endpoints__inventory_auxiliary__TransitionIn": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "reviewed",
+              "approved",
+              "applied",
+              "rejected"
+            ],
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "reason"
+        ],
+        "title": "TransitionIn",
         "type": "object"
       },
       "app__api__v1__endpoints__inventory_operations__StornoIn": {
@@ -267092,6 +267179,332 @@
         "tags": [
           "inventory",
           "articles"
+        ]
+      }
+    },
+    "/api/v1/inventory/auxiliary/batches": {
+      "get": {
+        "operationId": "list_batches_api_v1_inventory_auxiliary_batches_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "batch_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Batch Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inventory_count_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Inventory Count Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Batches Api V1 Inventory Auxiliary Batches Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Batches",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
+        ]
+      },
+      "post": {
+        "operationId": "create_batch_api_v1_inventory_auxiliary_batches_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Batch Api V1 Inventory Auxiliary Batches Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Batch",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
+        ]
+      }
+    },
+    "/api/v1/inventory/auxiliary/batches/{batch_id}/transition": {
+      "post": {
+        "operationId": "transition_api_v1_inventory_auxiliary_batches__batch_id__transition_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "title": "Batch Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__inventory_auxiliary__TransitionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transition Api V1 Inventory Auxiliary Batches  Batch Id  Transition Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transition",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
+        ]
+      }
+    },
+    "/api/v1/inventory/auxiliary/summary": {
+      "get": {
+        "operationId": "summary_api_v1_inventory_auxiliary_summary_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Summary Api V1 Inventory Auxiliary Summary Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Summary",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
         ]
       }
     },

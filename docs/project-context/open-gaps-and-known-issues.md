@@ -227,6 +227,13 @@ Quell-Deep-Link und Druckpfad. Damit verbleiben zwei offene P1-Gaps:
 Inventur-Nebenlaeufe und Rechnungstapel/Selbstabrechner. Physische SPS-/
 Muehlenadapter und der Standortpilot bleiben externe Gates.
 
+Nachzug 2026-08-21 (`L3-INVENTORY-AUX-007`): `L3-GAP-INV-004` ist
+repo-seitig geschlossen. Zaehlliste, kontrollierter Import, Kontrolllauf,
+vorlaeufige Bewertung und Bestandsvortrag werden als tenantgebundene,
+SHA-256-gebundene Batches mit abweichendem Pruefer und append-only Audit
+gefuehrt. Damit verbleibt ein offener P1-Gap: Rechnungstapel/
+Selbstabrechner. Produktive Dateiablage, Druckadapter und Pilot bleiben extern.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

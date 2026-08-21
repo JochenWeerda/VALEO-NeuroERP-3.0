@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (50 Masken).
+> Generiert aus `app/core/screen_definitions.py` (51 Masken).
 
 ## Übersicht
 
@@ -54,6 +54,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
+| `lager/inventur-nebenlaeufe` | Inventur-Nebenlaeufe | inventory | hoch | — | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
 | `lager/leitstand` | Lager-Leitstand | lager | niedrig | — | `GET /api/v1/masks/lager/leitstand/agent-contract` |
 | `lager/stock-movement` | Lagerbewegung | lager | hoch | `inventory-to-settlement` | `GET /api/v1/masks/lager/stock-movement/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
@@ -1515,6 +1516,48 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+## Domäne: inventory
+
+### `lager/inventur-nebenlaeufe` — Inventur-Nebenlaeufe
+
+**Zweck:** Inventur-Nebenlaeufe hashgebunden und im Vier-Augen-Prinzip steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/inventur-nebenlaeufe/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/inventur-nebenlaeufe/readiness` |
+| Rollout-Route | `/mask-rollout/lager__inventur-nebenlaeufe/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/inventory/auxiliary/summary`
+- `batches` → `/api/v1/inventory/auxiliary/batches`
+
+**MCP-Tools (Domäne):**
+
+- `wms.lot.trace` — scope `inventory:read`, Risiko niedrig
+- `wms.cell.status` — scope `inventory:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Erzeuge einen Kontrolllauf.
+- Welche Bestandsvortraege warten auf Freigabe?
+
+**Sensible Felder:** `maker, checker, source_hash`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create_count_sheet` | Zaehlliste | low | nein | `—` |
+| `create_control` | Kontrolllauf | low | nein | `—` |
+| `create_valuation` | Vorlaeufig bewerten | low | nein | `—` |
+| `create_opening` | Bestandsvortrag | high | nein | `—` |
 
 ---
 

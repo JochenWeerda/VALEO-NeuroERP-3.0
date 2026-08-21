@@ -3061,6 +3061,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/lager/inventur-nebenlaeufe",
+      "path": "lager/inventur-nebenlaeufe",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/lager/kommissionierung",
       "path": "lager/kommissionierung",
       "source": "alias"

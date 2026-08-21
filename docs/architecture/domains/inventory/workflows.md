@@ -10,6 +10,11 @@ version: 1.0.0
 
 # Inventory — Workflows
 
+Inventur-Nebenlauf: Inventur waehlen -> unveraenderlichen Zaehllisten-,
+Import-, Kontroll-, Bewertungs- oder Vortragsbatch erzeugen -> Hash pruefen ->
+durch abweichenden Benutzer reviewen/freigeben -> Import oder Bestandsvortrag
+idempotent uebernehmen. Kontrolle und Bewertung bleiben nebenwirkungsfrei.
+
 MDE-Inventurzaehlung (`L3-MDE-INBOX-003`): Geraet ->
 Mobile-Sync-Vorvalidierung -> `domain_ops.mobile_event_queue` ->
 Inventory-Handler -> kanonische Bestandsbewegung. Fehler wechseln nach

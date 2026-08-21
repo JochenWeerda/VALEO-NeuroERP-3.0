@@ -2217,6 +2217,72 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "lager/inventur-nebenlaeufe",
+      "title": "Inventur-Nebenlaeufe",
+      "domain": "inventory",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__inventur-nebenlaeufe/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/inventur-nebenlaeufe/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/inventur-nebenlaeufe/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/inventur-nebenlaeufe/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "create_count_sheet",
+          "label": "Zaehlliste",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_control",
+          "label": "Kontrolllauf",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_valuation",
+          "label": "Vorlaeufig bewerten",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_opening",
+          "label": "Bestandsvortrag",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "maker",
+        "checker",
+        "source_hash"
+      ],
+      "mcp_tool_ids": [
+        "wms.lot.trace",
+        "wms.cell.status"
+      ]
+    },
+    {
       "mask_id": "lager/article-stock",
       "title": "Artikelbestand",
       "domain": "lager",

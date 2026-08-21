@@ -267,6 +267,12 @@ Meridian-Worklist zusammen. Die Maske bleibt ein duennes Cockpit ueber der
 zentralen Runtime; Quellfachlogik fuer Bestand, Charge und FIBU wird nicht
 dupliziert.
 
+## L3-INVENTORY-AUX-007
+
+`lager/inventur-nebenlaeufe` nutzt dieselbe zentrale Runtime fuer
+hashgebundene Zaehllisten-/Import-/Kontroll-/Bewertungs-/Vortragsbatches mit
+Vier-Augen-Freigabe und append-only Audit.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

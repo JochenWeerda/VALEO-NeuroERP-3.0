@@ -10,6 +10,14 @@ version: 1.0.0
 
 # Inventory — API
 
+## Inventur-Nebenlaeufe
+
+- `POST|GET /api/v1/inventory/auxiliary/batches`
+- `GET /api/v1/inventory/auxiliary/summary`
+- `POST /api/v1/inventory/auxiliary/batches/{id}/transition`
+
+Entscheidung: [ADR-060](../../../adr/adr-060-governed-inventory-auxiliary-batches.md).
+
 - Endpoints: `inventory*`, `lager*`, `warehouse*`
 - Services: `inventory_*`, `warehouse_*`
 - Microservice: `inventory-service` (docker-compose)

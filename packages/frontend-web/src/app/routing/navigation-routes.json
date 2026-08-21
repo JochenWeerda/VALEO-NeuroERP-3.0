@@ -106,4 +106,5 @@
   ,{ "path": "crm/potential-analyse", "module": "@/pages/crm/potential-analyse" }
   ,{ "path": "docflow/dokumenten-ruecklauf", "module": "@/pages/docflow/dokumenten-ruecklauf" }
   ,{ "path": "produktion/produktionsleitstand", "module": "@/pages/produktion/produktionsleitstand" }
+  ,{ "path": "lager/inventur-nebenlaeufe", "module": "@/pages/lager/inventur-nebenlaeufe" }
 ]

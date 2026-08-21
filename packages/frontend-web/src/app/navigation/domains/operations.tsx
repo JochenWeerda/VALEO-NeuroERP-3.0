@@ -83,6 +83,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
+        id: 'inventur-nebenlaeufe',
+        label: 'Inventur-Nebenlaeufe',
+        icon: ShieldCheck,
+        module: '@/pages/lager/inventur-nebenlaeufe',
+        preferredPath: 'lager/inventur-nebenlaeufe',
+        keywords: ['zaehlliste', 'inventur', 'import', 'kontrolllauf', 'bewertung', 'bestandsvortrag'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
+      },
+      {
         id: 'permanente-inventur',
         label: 'Permanente Inventur (PIV)',
         icon: Scale,

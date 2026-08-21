@@ -19,7 +19,7 @@ Live-Erfassung der angemeldeten Remote-Desktop-Sitzung (`10.200.1.3`, L3/zvoove
 aus [`l3-full-mask-functional-gap-inventory.md`](l3-full-mask-functional-gap-inventory.md)
 bleibt bestätigt; `L3-GAP-MDE-001` ist inzwischen repo-seitig geschlossen
 (`L3-MDE-INBOX-003`). Nach Abschluss von Dokumentenruecklauf und Belegkontrolle
-bleiben nach dem Produktionsleitstand zwei P1-Gaps offen. Neu sind nur Feindetails aus
+bleibt nach den Inventur-Nebenlaeufen ein P1-Gap offen. Neu sind nur Feindetails aus
 dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 
 ## Methode
@@ -52,7 +52,7 @@ dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 | L3-GAP-MDE-001 | P1 | SCHNITTSTELLE → MDE sichtbar | repo-seitig geschlossen (`L3-MDE-INBOX-003`); L3-Menü bleibt Referenz, Geräte-Pilot extern |
 | L3-GAP-DOCRET-002 | P1 | AUSWERTUNGEN → Dokumenten-Rücklauf | repo-seitig geschlossen (`L3-DOCRET-INBOX-004`) |
 | L3-GAP-PROD-003 | P1 | PRODUKTION → Liste/Mühle/Nachbearbeitung | repo-seitig geschlossen (`L3-PRODUCTION-CONTROL-006`) |
-| L3-GAP-INV-004 | P1 | LAGER → Inventur (+ Vortrag/Korrektur) | weiter teilweise; Nebenläufe offen |
+| L3-GAP-INV-004 | P1 | LAGER → Inventur (+ Vortrag/Korrektur) | repo-seitig geschlossen (`L3-INVENTORY-AUX-007`) |
 | L3-GAP-BELEGCHECK-005 | P1 | AUSWERTUNGEN → Beleg-Kontrolle | repo-seitig geschlossen (`L3-BELEGCHECK-WORKLIST-005`) |
 | L3-GAP-BILLBATCH-006 | P1 | ABRECHNUNG Faktur/Abschluss | weiter offen als Bedienablauf |
 | L3-ROHWARE-002 | P2 | LAGER → Fremdware | weiter offen (Operator-UI) |

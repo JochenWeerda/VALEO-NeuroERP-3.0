@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-INVENTORY-AUX-007 Inventur-Nebenlaeufe - reserviert 2026-08-21
+## L3-INVENTORY-AUX-007 Inventur-Nebenlaeufe - abgeschlossen 2026-08-21
 
-**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Den vorhandenen Inventur-, PIV-, Differenz- und Korrekturkern um Zaehllistendruck, kontrollierten Export/Import, Kontrolllauf, vorlaeufige Bewertung und erzeugbare Bestandsvortraege mit Vier-Augen-/Auditregeln erweitern; Bedienung nativ ueber Meridian.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-INVENTORY-AUX-007.yaml`, dieser Workboard-Abschnitt, neue Inventur-Nebenlauf-Service-/Endpoint-/Migrations-/Testdateien, zentrale ScreenDefinition und Route, Inventory-Domain-Pack, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
 
 **Abnahme:** Tenant-Isolation; unveraenderliche Export-/Importbatches mit Hash; Kontrolllauf ohne Buchung; vorlaeufige Bewertung; Vier-Augen-Freigabe fuer Bestandsvortrag; append-only Audit; Druck-/Quellpfad; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Zaehlliste, kontrollierter Import, Kontrolllauf, vorlaeufige Bewertung und Bestandsvortrag sind als tenantgebundene, SHA-256-gebundene Batches umgesetzt. Import und Bestandsvortrag verlangen einen vom Ersteller abweichenden Pruefer; Status und Uebernahme werden append-only auditiert. Die native Worklist bietet Quellpfad und Druck. 6 Backend- und 1 Frontendtest, TypeScript, Ruff, Single-Head-Migration, Generatoren sowie Architektur-Validate/-Drift sind gruen. Dateiablage, Druckadapter und Pilot bleiben extern.
 
 ## L3-PRODUCTION-CONTROL-006 Allgemeiner Produktionsleitstand - abgeschlossen 2026-08-21
 

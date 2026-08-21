@@ -3346,7 +3346,62 @@ def build_production_control_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_inventory_auxiliary_screen_definition() -> dict[str, Any]:
+    """Native governed inventory auxiliary-run worklist."""
+    return {
+        "schemaVersion": 1, "id": "lager/inventur-nebenlaeufe", "domain": "inventory", "mode": "list",
+        "title": "Inventur-Nebenlaeufe", "subtitle": "Zaehlliste, Import, Kontrolle, Bewertung und Bestandsvortrag",
+        "adapter": {"type": "native", "sourceId": "lager/inventur-nebenlaeufe", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/inventory/auxiliary/summary", "staleTimeMs": 10_000},
+            {"key": "batches", "endpoint": "/api/v1/inventory/auxiliary/batches", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "generated", "label": "Erzeugt", "tone": "warning"},
+            {"key": "reviewed", "label": "Geprueft", "tone": "info"},
+            {"key": "approved", "label": "Freigegeben", "tone": "success"},
+            {"key": "with_differences", "label": "Mit Differenzen", "tone": "danger"},
+            {"key": "applied", "label": "Uebernommen", "tone": "neutral"},
+        ],
+        "tables": [{"key": "batches", "label": "Nebenlaeufe", "dataSourceKey": "batches",
+            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "created_at", "label": "Erzeugt", "renderKind": "datetime", "sortable": True, "width": 150},
+                {"key": "batch_type", "label": "Lauf", "sortable": True, "filterable": True, "width": 175},
+                {"key": "inventory_count_id", "label": "Inventur", "filterable": True, "width": 160},
+                {"key": "line_count", "label": "Zeilen", "numeric": True, "sortable": True, "width": 80},
+                {"key": "difference_count", "label": "Differenzen", "numeric": True, "sortable": True, "width": 100},
+                {"key": "preliminary_value", "label": "Vorlaeufiger Wert", "numeric": True, "sortable": True, "width": 145},
+                {"key": "maker", "label": "Ersteller", "filterable": True, "width": 125},
+                {"key": "checker", "label": "Pruefer", "filterable": True, "width": 125},
+                {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 115},
+                {"key": "source_hash", "label": "SHA-256", "width": 230},
+            ],
+            "rowActions": [
+                {"key": "review", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["generated"]}},
+                {"key": "approve", "label": "Freigeben", "visibleWhen": {"field": "status", "values": ["reviewed"]}},
+                {"key": "apply", "label": "Uebernehmen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["approved"]}},
+                {"key": "open_source", "label": "Inventur"}, {"key": "print", "label": "Drucken"},
+            ]}],
+        "actions": [
+            {"key": "create_count_sheet", "label": "Zaehlliste", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
+            {"key": "create_control", "label": "Kontrolllauf", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
+            {"key": "create_valuation", "label": "Vorlaeufig bewerten", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
+            {"key": "create_opening", "label": "Bestandsvortrag", "kind": "primary", "permission": "inventory.aux.write", "dangerLevel": "high", "requiresConfirmation": True},
+        ],
+        "workflow": {"processKey": "inventory-auxiliary", "status": "four-eyes", "nextActionKey": "create_control", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 56, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "inventory"},
+        "agentContract": {"businessPurpose": "Inventur-Nebenlaeufe hashgebunden und im Vier-Augen-Prinzip steuern.",
+            "examplePrompts": ["Erzeuge einen Kontrolllauf.", "Welche Bestandsvortraege warten auf Freigabe?"],
+            "sensitiveFields": ["maker", "checker", "source_hash"],
+            "forbiddenAgentTasks": ["Bestandsvortrag ohne unabhaengigen Pruefer uebernehmen"],
+            "testSelectors": {"screenRoot": "[data-testid='inventur-nebenlaeufe']"}},
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "lager/inventur-nebenlaeufe": build_inventory_auxiliary_screen_definition,
     "produktion/produktionsleitstand": build_production_control_screen_definition,
     "docflow/dokumenten-ruecklauf": build_document_return_screen_definition,
     "auswertungen/beleg-kontrolle": build_document_control_screen_definition,
@@ -3884,6 +3939,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
         "fehlende eingangsbelege",
     ],
     "produktion/produktionsleitstand": ["produktionsliste", "produktion", "muehle", "stapelbuchung", "nachbearbeitung"],
+    "lager/inventur-nebenlaeufe": ["zaehlliste", "inventur import", "kontrolllauf", "bestandsvortrag", "inventurbewertung"],
 }
 
 
@@ -3896,6 +3952,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "lager/inventur-nebenlaeufe": "/lager/inventur-nebenlaeufe",
     "produktion/produktionsleitstand": "/produktion/produktionsleitstand",
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
