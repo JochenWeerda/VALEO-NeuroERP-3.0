@@ -311,6 +311,14 @@ Statuswechsel laufen begruendet und auditiert.
 fuer hashgebundene Anlagenmeldungen, kanonische Zapfungen und den
 regelbasierten Lieferschein-Outbox-Handover.
 
+## L3-REPORT-CATALOG-014
+
+`auswertungen/l3-berichtskatalog` ist eine native, generatorfaehige Worklist
+fuer sieben feste L3-Berichte. Eine tenantgebundene Fact-Projektion liefert
+einheitliche Zeit-/Dimensionsfilter, serverseitige Summen, auditierte
+CSV-Exporte und interne Quellenbeleg-Drilldowns; freie SQL-Ausfuehrung ist
+ausgeschlossen.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

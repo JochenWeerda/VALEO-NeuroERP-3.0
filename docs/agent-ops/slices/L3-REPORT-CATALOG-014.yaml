@@ -2,9 +2,10 @@ slice_id: L3-REPORT-CATALOG-014
 id: L3-REPORT-CATALOG-014
 title: Priorisierter L3-Berichtskatalog
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Einen festen Berichtskatalog mit Parameter-, Summen-, Export- und
   Drilldown-Vertraegen fuer die priorisierten L3-Auswertungsdimensionen bereitzustellen.

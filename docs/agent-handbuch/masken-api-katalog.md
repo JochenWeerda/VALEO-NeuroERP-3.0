@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (56 Masken).
+> Generiert aus `app/core/screen_definitions.py` (57 Masken).
 
 ## Übersicht
 
@@ -34,6 +34,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
 | `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
 | `auswertungen/beleg-kontrolle` | Beleg-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
+| `auswertungen/l3-berichtskatalog` | L3-Berichtskatalog | reporting | niedrig | — | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/agent-contract` |
 | `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
 | `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
@@ -1987,6 +1988,32 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `create` | Neue Abfrage | low | nein | `—` |
 | `import` | Signiert importieren | moderate | nein | `—` |
+
+---
+
+### `auswertungen/l3-berichtskatalog` — L3-Berichtskatalog
+
+**Zweck:** Priorisierte L3-Berichte mit identischen Summen in Ansicht und Export bereitstellen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__l3-berichtskatalog/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/l3-report-catalog`
+- `reports` → `/api/v1/l3-report-catalog`
+
+**Beispiel-Prompts:**
+
+- Zeige Umsatz nach Vertreter.
+- Drille die Chargensumme auf Belege herunter.
+
+**Sensible Felder:** `customer_id, representative_id, source_ref`
 
 ---
 

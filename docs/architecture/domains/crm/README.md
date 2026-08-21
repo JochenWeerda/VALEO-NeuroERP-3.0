@@ -91,3 +91,10 @@ Native ScreenDefinition:
 `crm/mail-arbeitsplatz` verbindet den vorhandenen IMAP-/CRM-Capture mit
 Rollenpostfach, Kontakt-/Belegzuordnung, hashgebundenen Anlagen und
 auditiertem Draft-/Provider-Queue-Lifecycle ueber die zentrale Runtime.
+
+### L3-REPORT-CATALOG-014
+
+Vertreter-, Kunden-, Artikel- und Artikelgruppenwerte werden als
+tenantgebundene Reporting-Facts projiziert. Der feste Berichtskatalog liefert
+Summen, CSV und interne Quellenbeleg-Drilldowns, ohne CRM-Schreibmodelle zu
+duplizieren.

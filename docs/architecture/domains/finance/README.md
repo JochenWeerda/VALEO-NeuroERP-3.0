@@ -43,3 +43,10 @@ Permission- und Tenant-Pruefung ausfuehren.
 Read-Model-Datenprodukte, Felder, Filter und Aggregationen bereit. Vorschau,
 persoenliche Favoriten sowie signierter Definitionsaustausch laufen ueber die
 zentrale Runtime; beliebiges SQL ist nicht Bestandteil des Vertrags.
+
+## Priorisierter L3-Berichtskatalog
+
+`auswertungen/l3-berichtskatalog` stellt sieben feste, tenantgebundene
+Berichtssichten mit gemeinsamer Summen-, Export- und Drilldown-Semantik bereit.
+Die Finance-Domaene konsumiert die freigegebene Reporting-Projektion, ohne
+freie SQL- oder domaenenfremde Schreiblogik einzufuehren.

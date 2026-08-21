@@ -44,3 +44,10 @@ Eine Migration erfolgt erst nach CRM-Pilot und nur ueber Adapter-Paritaet.
 Fehlerkorb, begruendeten Retry und Einzelnachweis zusammen. Valide Daten werden
 genau einmal zur kanonischen Zapfung; fakturierbarer Kundenverbrauch erzeugt
 einen idempotenten Lieferschein-Outbox-Handover.
+
+## L3-Berichtskatalog
+
+Ernte-/Annahme- und Streckenkennzahlen werden ueber eine tenantgebundene
+Reporting-Projektion in festen Berichten aggregiert. CSV und Beleg-Drilldown
+verwenden dieselbe freigegebene Ergebnislogik; Agrar-Schreibmodelle bleiben
+kanonisch in ihrer Domaene.

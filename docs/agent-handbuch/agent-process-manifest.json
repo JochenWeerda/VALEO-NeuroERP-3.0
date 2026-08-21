@@ -2650,6 +2650,24 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "auswertungen/l3-berichtskatalog",
+      "title": "L3-Berichtskatalog",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__l3-berichtskatalog/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/l3-berichtskatalog/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/l3-berichtskatalog/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/l3-berichtskatalog/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "customer_id",
+        "representative_id",
+        "source_ref"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "sales/delivery-note",
       "title": "Lieferschein",
       "domain": "sales",

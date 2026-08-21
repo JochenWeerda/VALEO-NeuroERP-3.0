@@ -791,6 +791,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/auswertungen/l3-berichtskatalog",
+      "path": "auswertungen/l3-berichtskatalog",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/auth/Callback",
       "path": "auth/callback",
       "source": "system"

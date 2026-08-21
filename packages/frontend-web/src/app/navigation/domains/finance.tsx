@@ -430,6 +430,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'l3-berichtskatalog',
+        label: 'L3-Berichtskatalog',
+        icon: BarChart3,
+        module: '@/pages/auswertungen/l3-berichtskatalog',
+        preferredPath: 'auswertungen/l3-berichtskatalog',
+        keywords: ['bericht', 'vertreter', 'kunde', 'artikel', 'charge', 'ernte', 'strecke', 'summen'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'periodensteuerung',
         label: 'Periodensteuerung',
         icon: Calendar,

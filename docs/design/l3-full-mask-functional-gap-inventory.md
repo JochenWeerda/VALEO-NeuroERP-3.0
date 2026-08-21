@@ -17,11 +17,12 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen P1-, einen P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+**keinen offenen P1- oder P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
-`L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009`, `L3-GAP-MAIL-010` und `L3-GAP-TANK-011` sind ebenfalls repo-seitig geschlossen. Die verbleibenden
-P2/P3-Themen betreffen Komfort, breite Berichtskatalog-Paritaet und externe
+`L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009`, `L3-GAP-MAIL-010`,
+`L3-GAP-TANK-011` und `L3-GAP-REPORT-012` sind ebenfalls repo-seitig
+geschlossen. Die verbleibenden P3-Themen betreffen Komfort und externe
 Adapter, nicht den P1-Kernwechsel.
 
 Die Kernkette von Kunde/Artikel ueber Angebot, Auftrag, Einkauf, Lieferschein,
@@ -69,7 +70,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Abfrage-Center | native Allowlist-Worklist ueber freigegebenen Read Models mit Vorschau, Favoriten und signiertem Austausch | vorhanden | L3-GAP-QUERY-008 geschlossen |
 | Beleg-Kontrolle | native Ausnahme-Worklist mit vier Belegarten, Verantwortlichkeit, Audit und Deep-Link | vorhanden | L3-GAP-BELEGCHECK-005 geschlossen |
 | Dokumenten-Ruecklauf | native Worklist mit Versand-/Ruecklaufstatus, Vorschau-Metadaten, Schlagworten, Audit und Ursprungsbeleg | vorhanden | L3-GAP-DOCRET-002 geschlossen |
-| Kunden-, Lieferanten-, Artikel-, Lager-, Ernte-, Vertreter- und Streckenberichte | zentrale und domaenenspezifische Reports vorhanden | teilweise | L3-GAP-REPORT-012 |
+| Kunden-, Lieferanten-, Artikel-, Lager-, Ernte-, Vertreter- und Streckenberichte | fester, tenantgebundener Berichtskatalog mit Summen, CSV und Beleg-Drilldown | vorhanden | L3-GAP-REPORT-012 geschlossen |
 | Fuhrpark | Fahrzeugakte inkl. Technik, Fahrer, Wirtschaft, Termine, km, Reifen, Unfall, Schaden und Wartung | vorhanden | - |
 | Waage/Hofliste | Hofliste, Erst-/Zweitwiegung, Wiegescheine, Vorlagen, Gosse und Waagenreferenz | vorhanden | externes Hardware-Gate |
 | MDE-Uebernahme/Verarbeitung | nativer Eingangskorb, idempotente Mobile-Sync-Queue, Vorvalidierung, Quarantaene und Retry-Audit | vorhanden | L3-GAP-MDE-001 geschlossen |
@@ -96,7 +97,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | L3-GAP-TEAMCAL-009 | Teamkalender-Paritaet ist nicht belegt | Planungskalender aggregiert Prozesslayer und bietet ICS | Mehrbenutzer-/Teamansicht, Frei/Belegt, fremde und abgelehnte Termine, Rechte- und Datenschutzmodell — **repo-seitig geschlossen 2026-08-21** (`L3-TEAM-CALENDAR-011`; IAM-/Datenschutzpilot extern) |
 | L3-GAP-MAIL-010 | Integrierter ERP-Mailarbeitsplatz fehlt | Dokumente und Kommunikationsaktivitaeten koennen abgelegt werden | Rollenbasierter Posteingang, Beleg-/Kontaktzuordnung, Anlagenuebernahme, Entwurf/Senden, revisionssichere Aktivitaet; alternativ verbindlicher externer Mail-Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-MAIL-WORKSPACE-012`; Provider/Virenscan extern) |
 | L3-GAP-TANK-011 | Tankanlagen-Schnittstellenworkflow ist nur teilweise vorhanden | Zapfungen und Tankbestand mit UI/API vorhanden | Adapter-Eingang mit idempotenter Uebernahme, Fehlerkorb, Einzelnachweis und regelbasierter Lieferscheinerzeugung — **repo-seitig geschlossen 2026-08-21** (`L3-TANK-ADAPTER-013`; Anlagen-/Sales-Consumer-Pilot extern) |
-| L3-GAP-REPORT-012 | Exakte L3-Berichtskatalog-Paritaet ist nicht nachgewiesen | allgemeine Umsatz-, Lager-, Finance-, Einkauf- und Dashboardberichte vorhanden | Fachlich priorisierter Berichtskatalog mit Parameter-/Summenparitaet fuer Vertreter, Kunde/Artikel/-gruppe, Charge, Ernte und Strecke; Export und Beleg-Drilldown |
+| L3-GAP-REPORT-012 | Exakte L3-Berichtskatalog-Paritaet ist nicht nachgewiesen | allgemeine Umsatz-, Lager-, Finance-, Einkauf- und Dashboardberichte vorhanden | Fachlich priorisierter Berichtskatalog mit Parameter-/Summenparitaet fuer Vertreter, Kunde/Artikel/-gruppe, Charge, Ernte und Strecke; Export und Beleg-Drilldown — **repo-seitig geschlossen 2026-08-21** (`L3-REPORT-CATALOG-014`; Echtdaten-Summen-UAT extern) |
 
 ### P3 - Gewohnheit und Komfort
 

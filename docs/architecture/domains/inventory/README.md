@@ -54,3 +54,9 @@ Eingangsqueue. Inventurzaehlungen werden erst nach Vorvalidierung und
 idempotenter Queue-Verarbeitung in die Inventory-Domaene delegiert. Die
 Operator-Maske `schnittstelle/mde-inbox` ist eine native, serverseitig
 paginierte Meridian-Worklist; die Queue selbst bleibt in `domain_ops`.
+
+## L3-Berichtskatalog
+
+Chargen- und Artikelbewegungen koennen idempotent in die tenantgebundene
+Reporting-Projektion uebergeben werden. Die Quellroute bleibt fuer den
+Beleg-Drilldown erhalten; der Katalog schreibt nicht in Inventory-Aggregate.

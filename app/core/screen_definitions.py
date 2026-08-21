@@ -3556,6 +3556,20 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "auswertungen/l3-berichtskatalog": lambda: {
+        "schemaVersion": 1, "id": "auswertungen/l3-berichtskatalog", "domain": "reporting", "mode": "list",
+        "title": "L3-Berichtskatalog", "subtitle": "Vertreter, Kunde, Artikel, Gruppe, Charge, Ernte und Strecke",
+        "adapter": {"type": "native", "sourceId": "auswertungen/l3-berichtskatalog", "temporary": False},
+        "dataSources": [{"key": "entity", "endpoint": "/api/v1/l3-report-catalog", "staleTimeMs": 60_000}, {"key": "reports", "endpoint": "/api/v1/l3-report-catalog", "pageSize": 50, "staleTimeMs": 60_000}],
+        "summary": [{"key": "count", "label": "Freigegebene Berichte", "tone": "info"}],
+        "tables": [{"key": "reports", "label": "Berichtskatalog", "dataSourceKey": "reports", "serverPagination": False, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [{"key": "title", "label": "Bericht", "sortable": True, "filterable": True, "width": 250}, {"key": "dimension", "label": "Dimension", "filterable": True, "width": 170}, {"key": "parameters", "label": "Parameter", "width": 330}, {"key": "sums", "label": "Summen", "width": 260}, {"key": "export_formats", "label": "Export", "width": 100}, {"key": "drilldown", "label": "Beleg-Drilldown", "renderKind": "boolean", "width": 120}],
+            "rowActions": [{"key": "run", "label": "Auswerten"}, {"key": "export", "label": "CSV exportieren"}, {"key": "drilldown", "label": "Belege"}]}],
+        "workflow": {"processKey": "l3-report-catalog", "status": "governed", "nextActionKey": "run", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "reporting"},
+        "agentContract": {"businessPurpose": "Priorisierte L3-Berichte mit identischen Summen in Ansicht und Export bereitstellen.", "examplePrompts": ["Zeige Umsatz nach Vertreter.", "Drille die Chargensumme auf Belege herunter."], "sensitiveFields": ["customer_id", "representative_id", "source_ref"], "forbiddenAgentTasks": ["Nicht freigegebene Dimensionen oder freie SQL-Abfragen ausfuehren"], "testSelectors": {"screenRoot": "[data-testid='l3-berichtskatalog']"}},
+    },
     "tankstelle/adapter-inbox": lambda: {
         "schemaVersion": 1, "id": "tankstelle/adapter-inbox", "domain": "agrar", "mode": "list",
         "title": "Tankanlagen-Eingang", "subtitle": "Adapterdaten pruefen, klaeren und an Zapfung/Lieferschein uebergeben",
@@ -4138,6 +4152,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
         "fehlende eingangsbelege",
     ],
     "auswertungen/abfrage-center": ["abfrage center", "query designer", "anwenderabfrage", "favorisierte abfrage", "read model"],
+    "auswertungen/l3-berichtskatalog": ["berichtskatalog", "vertreterumsatz", "kundenumsatz", "artikelgruppe", "chargenbericht", "erntebericht", "streckenbericht"],
     "produktion/produktionsleitstand": ["produktionsliste", "produktion", "muehle", "stapelbuchung", "nachbearbeitung"],
     "tankstelle/adapter-inbox": ["tankanlage", "tank adapter", "zapfung import", "tank fehler", "lieferschein tank"],
     "lager/inventur-nebenlaeufe": ["zaehlliste", "inventur import", "kontrolllauf", "bestandsvortrag", "inventurbewertung"],
@@ -4154,6 +4169,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "tankstelle/adapter-inbox": "/tankstelle/adapter-inbox",
     "crm/mail-arbeitsplatz": "/crm/mail-arbeitsplatz",
     "auswertungen/abfrage-center": "/auswertungen/abfrage-center",
