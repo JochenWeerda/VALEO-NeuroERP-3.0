@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-TEAM-CALENDAR-011 Mehrbenutzer-Teamkalender - reserviert 2026-08-21
+
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Den bestehenden nativen Planungskalender um autorisierte Benutzer-/Teamansichten, Frei/Belegt, fremde/private und abgelehnte Termine sowie explizite Datenschutzregeln erweitern.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-TEAM-CALENDAR-011.yaml`, dieser Workboard-Abschnitt, bestehender Kalender-Service/-Endpoint, additive Migration, zentrale ScreenDefinition, Tests, ADR/Impact-Note und Gap-Dokumentation.
+
+**Abnahme:** serverseitig erzwungene Teamzugehoerigkeit; Benutzer-/Teamfilter; redigierte private Fremdtermine; optional sichtbare Ablehnungen; generatorfaehige native Kalenderdefinition; Backend-/Architektur-/Doku-Gates gruen.
+
 ## L3-QUERY-CENTER-010 Sicheres Anwender-Abfrage-Center - abgeschlossen 2026-08-21
 
 **Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.

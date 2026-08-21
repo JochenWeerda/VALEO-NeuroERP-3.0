@@ -1,0 +1,33 @@
+slice_id: L3-TEAM-CALENDAR-011
+id: L3-TEAM-CALENDAR-011
+title: Mehrbenutzer-Teamkalender
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Den nativen Planungskalender um autorisierte Teamansicht, Frei/Belegt,
+  fremde und abgelehnte Termine sowie Privacy-Regeln zu erweitern.
+architecture:
+  decision_level: significant
+  domains: [platform, crm, hrm]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Vorhandene calendar_items-Projektion erweitern, keinen zweiten Kalender bauen.
+  - Benutzer-, Team-, Sichtbarkeits- und Antwortstatus modellieren.
+  - Fremde private Termine auf Frei/Belegt redigieren.
+  - Teamzugehoerigkeit serverseitig erzwingen.
+file_ownership:
+  - app/services/calendar_projection_service.py
+  - app/api/v1/endpoints/planung_kalender.py
+  - alembic/versions/team_calendar_20260821.py
+  - app/core/screen_definitions.py
+  - tests/test_team_calendar.py
+  - Kalender-Domain-/ADR-/Gap-/Workboard-Dokumentation
+acceptance:
+  - Eigene, fremde und Teamtermine autorisiert filterbar.
+  - Frei/Belegt fuer private Fremdtermine ohne Inhaltsleck.
+  - Abgelehnte Termine optional sichtbar.
+  - Native generator-ready Kalenderdefinition und gruenen Gates.
+risks:
+  - Produktive IAM-Team-Synchronisation bleibt externes Rollout-Gate.
