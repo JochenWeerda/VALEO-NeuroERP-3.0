@@ -187,6 +187,15 @@ Evidenz, Abgrenzung und Abnahmekriterien stehen in
 [`l3-full-mask-functional-gap-inventory.md`](../design/l3-full-mask-functional-gap-inventory.md).
 Originalbilder mit Echtdaten bleiben lokal ausserhalb von Git.
 
+Nachzug 2026-08-21 (`L3-MDE-INBOX-003`): `L3-GAP-MDE-001` ist repo-seitig
+geschlossen. Der vorhandene Mobile-Sync-Kern besitzt nun Payload-Vorvalidierung,
+echte Idempotenzantworten, serverseitige Pagination/Filter, drei
+Verarbeitungsversuche mit Quarantaene, begruendetes Retry und append-only Audit.
+Die native Meridian-Worklist `schnittstelle/mde-inbox` ist navigierbar und
+nutzt zentrale statusabhaengige Tabellenzeilen-Aktionen. Damit verbleiben aus
+der L3-Vollinventur fuenf offene P1-Gaps. Reale Geraete-/Provider-Mappings und
+Pilotbetrieb bleiben externe Gates.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

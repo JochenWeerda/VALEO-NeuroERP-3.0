@@ -65,6 +65,8 @@ def test_mobile_sync_queue_status(monkeypatch: pytest.MonkeyPatch) -> None:
             return {"pending": 0, "processed": 5, "failed": 0}
         def list_queue(self, status=None, limit=50):  # noqa: ANN001
             return []
+        def list_queue_page(self, **kwargs):  # noqa: ANN003
+            return {"items": [], "count": 0, "total": 0, "page": 1, "page_size": 25}
 
     monkeypatch.setattr(ep_mod, "MobileSyncService", _FakeSvc)
     resp = _client.get("/api/v1/mobile/sync-queue", headers=_HEADERS)
@@ -79,7 +81,7 @@ def test_mobile_sync_process_queue(monkeypatch: pytest.MonkeyPatch) -> None:
 
     class _FakeSvc:
         def __init__(self, db, tid): pass  # noqa: ANN001
-        def process_pending(self, limit):  # noqa: ANN001
+        def process_pending(self, limit, **kwargs):  # noqa: ANN001, ANN003
             return {"processed": 0, "failed": 0}
 
     monkeypatch.setattr(ep_mod, "MobileSyncService", _FakeSvc)

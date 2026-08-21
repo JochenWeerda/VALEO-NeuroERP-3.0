@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-08-19
+last_reviewed: 2026-08-21
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (46 Masken).
+> Generiert aus `app/core/screen_definitions.py` (47 Masken).
 
 ## Übersicht
 
@@ -58,6 +58,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
+| `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
 | `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
 | `workspace/fibu` | FIBU-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
 | `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
@@ -1598,6 +1599,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `reproject` | Neu projizieren | moderate | nein | `/api/v1/planung/kalender/reproject` |
+
+---
+
+### `schnittstelle/mde-inbox` — MDE-Eingangskorb
+
+**Zweck:** MDE-Ereignisse mandantenbezogen ueberwachen und fehlgeschlagene Verarbeitung nachvollziehbar behandeln.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/schnittstelle/mde-inbox/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
+| Readiness | `GET /api/v1/masks/schnittstelle/mde-inbox/readiness` |
+| Rollout-Route | `/mask-rollout/schnittstelle__mde-inbox/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/mobile/sync-summary`
+- `queue` → `/api/v1/mobile/sync-queue`
+
+**Beispiel-Prompts:**
+
+- Zeige MDE-Ereignisse in Quarantaene.
+- Welche Inventurzaehlungen sind fehlgeschlagen?
+- Welche Geraete liefern aktuell Fehler?
+
+**Sensible Felder:** `error_message, idempotency_key`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `process_pending` | Ausstehende verarbeiten | moderate | nein | `/api/v1/mobile/sync-process` |
 
 ---
 

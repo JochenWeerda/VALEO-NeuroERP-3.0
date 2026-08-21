@@ -3921,6 +3921,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/schnittstelle/mde-inbox",
+      "path": "schnittstelle/mde-inbox",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/service/abschluss",
       "path": "service/abschluss",
       "source": "auto"

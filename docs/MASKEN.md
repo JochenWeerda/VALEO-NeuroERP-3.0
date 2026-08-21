@@ -1,5 +1,11 @@
 # VALEO NeuroERP - Eingabemasken Standard
 
+**Nachtrag 2026-08-21:** Native Listenmasken koennen statusabhaengige
+`tables[].rowActions` zentral ueber den Single Mask Builder deklarieren. Die
+Referenz `schnittstelle/mde-inbox` nutzt dies fuer begruendete Retry-Aktionen
+auf fehlgeschlagenen oder quarantinierten MDE-Ereignissen; Einzelmasken bauen
+keine eigene Aktionsspalte.
+
 **Version:** 1.0.0
 **Datum:** 2025-01-16
 **Status:** ✅ Aktiv

@@ -97,6 +97,13 @@ export interface ScreenTableDefinition {
   serverPagination?: boolean
   /** Declarative row navigation; placeholders such as {id} resolve from row data. */
   rowRouteTemplate?: string
+  /** Central, data-driven row actions; rendered by FastTableRenderer. */
+  rowActions?: Array<{
+    key: string
+    label: string
+    dangerLevel?: ActionDangerLevel
+    visibleWhen?: { field: string; values: Array<string | number | boolean> }
+  }>
 }
 
 export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'

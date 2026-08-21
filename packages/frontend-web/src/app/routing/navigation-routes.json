@@ -40,6 +40,7 @@
   ,{ "path": "verify/:domain/:number", "module": "@/pages/public/verify" }
   ,{ "path": "verify/:domain/:number/:hash", "module": "@/pages/public/verify" }
   ,{ "path": "workflows/approval/:workflowId", "module": "@/pages/workflows/approval" }
+  ,{ "path": "schnittstelle/mde-inbox", "module": "@/pages/schnittstelle/mde-inbox" }
   ,{ "path": "crm/customers/:id", "module": "@/pages/crm/kunden-stamm" }
   ,{ "path": "crm/customers/:id/articles", "module": "@/pages/crm/kunden-cockpit" }
   ,{ "path": "sales/angebote/neu", "module": "@/pages/sales/angebot-erstellen" }

@@ -94892,6 +94892,19 @@
         "title": "ProcessObservationReadModel",
         "type": "object"
       },
+      "ProcessQueueIn": {
+        "properties": {
+          "reason": {
+            "default": "Manuelle MDE-Verarbeitung",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "title": "ProcessQueueIn",
+        "type": "object"
+      },
       "ProcessSlaOut": {
         "additionalProperties": true,
         "description": "Response schema for process sla endpoints.",
@@ -102080,6 +102093,21 @@
           "message"
         ],
         "title": "RetourResponse",
+        "type": "object"
+      },
+      "RetryEventIn": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RetryEventIn",
         "type": "object"
       },
       "ReturnCreate": {
@@ -288302,6 +288330,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ProcessQueueIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -288343,7 +288388,7 @@
         "operationId": "get_queue_api_v1_mobile_sync_queue_get",
         "parameters": [
           {
-            "description": "pending | processing | done | failed",
+            "description": "pending | processing | done | failed | quarantined",
             "in": "query",
             "name": "status",
             "required": false,
@@ -288356,20 +288401,103 @@
                   "type": "null"
                 }
               ],
-              "description": "pending | processing | done | failed",
+              "description": "pending | processing | done | failed | quarantined",
               "title": "Status"
             }
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "device_id",
             "required": false,
             "schema": {
-              "default": 100,
-              "maximum": 500,
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Device Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "event_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 160,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
               "minimum": 1,
-              "title": "Limit",
+              "title": "Page",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "created_at",
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "default": "desc",
+              "pattern": "^(asc|desc)$",
+              "title": "Sort Dir",
+              "type": "string"
             }
           },
           {
@@ -288419,6 +288547,208 @@
           }
         ],
         "summary": "Queue-Status abrufen",
+        "tags": [
+          "mobile",
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/mobile/sync-queue/{event_id}/audit": {
+      "get": {
+        "operationId": "get_event_audit_api_v1_mobile_sync_queue__event_id__audit_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Get Event Audit Api V1 Mobile Sync Queue  Event Id  Audit Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "MDE-Ereignis-Audit abrufen",
+        "tags": [
+          "mobile",
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/mobile/sync-queue/{event_id}/retry": {
+      "post": {
+        "operationId": "retry_event_api_v1_mobile_sync_queue__event_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryEventIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retry Event Api V1 Mobile Sync Queue  Event Id  Retry Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fehlgeschlagenes MDE-Ereignis wiederholen",
+        "tags": [
+          "mobile",
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/mobile/sync-summary": {
+      "get": {
+        "operationId": "get_queue_summary_api_v1_mobile_sync_summary_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Queue Summary Api V1 Mobile Sync Summary Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "MDE Queue-Zusammenfassung abrufen",
         "tags": [
           "mobile",
           "sync"

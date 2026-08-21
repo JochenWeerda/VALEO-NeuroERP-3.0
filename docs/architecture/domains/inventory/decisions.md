@@ -10,6 +10,9 @@ version: 1.0.0
 
 # Inventory — Entscheidungen
 
+Der MDE-Eingang auf dem Mobile-Sync-Kern ist in
+[ADR-057](../../../adr/adr-057-mde-inbox-on-mobile-sync-core.md) entschieden.
+
 | ADR | Titel |
 |---|---|
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Model |

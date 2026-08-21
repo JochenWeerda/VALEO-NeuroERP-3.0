@@ -173,6 +173,12 @@ export interface RenderTablePlan {
   serverPagination: boolean
   tableProfile: ScreenTableProfile
   rowRouteTemplate?: string
+  rowActions?: Array<{
+    key: string
+    label: string
+    dangerLevel?: 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
+    visibleWhen?: { field: string; values: Array<string | number | boolean> }
+  }>
   /** Aktive Nutzer-Variante (UIX-071 Overlay) */
   activeVariant?: string
   /** Nutzer-definierte Varianten (UIX-071 Overlay) */

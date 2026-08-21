@@ -404,6 +404,7 @@ domains:
 
   platform:
     route_segments:
+      - schnittstelle
       - admin
       - admin-suite
       - auth

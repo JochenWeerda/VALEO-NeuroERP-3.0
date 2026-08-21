@@ -233,6 +233,7 @@ function RenderFromPlan({
             onQueryChange={onTableQueryChange ? (patch) => onTableQueryChange(tableKey, patch) : undefined}
             onVisibleColumnsChange={onOverlayChange ? (visibleColumns) => onOverlayChange({ tables: { [tableKey]: { visibleColumns } } }) : undefined}
             onResetOverlay={onOverlayReset}
+            onRowAction={onAction}
           />
         )
       })}

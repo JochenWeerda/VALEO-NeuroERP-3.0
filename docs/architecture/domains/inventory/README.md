@@ -33,3 +33,11 @@ Tabellen hier besonders gross werden. Neue generatorfaehige Listen muessen
 serverseitige Pagination, Sortierung, Filterung und `VirtualDataTable`-Eignung
 dokumentieren. Bestehende Lager- und Artikelmasken bleiben bis zur Paritaet auf
 ihrem aktuellen Renderer.
+
+## MDE-Eingang
+
+`L3-MDE-INBOX-003` nutzt den plattformseitigen Mobile-Sync-Kern als kanonische
+Eingangsqueue. Inventurzaehlungen werden erst nach Vorvalidierung und
+idempotenter Queue-Verarbeitung in die Inventory-Domaene delegiert. Die
+Operator-Maske `schnittstelle/mde-inbox` ist eine native, serverseitig
+paginierte Meridian-Worklist; die Queue selbst bleibt in `domain_ops`.

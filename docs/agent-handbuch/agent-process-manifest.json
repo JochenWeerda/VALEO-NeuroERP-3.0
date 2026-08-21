@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19",
+  "generatedAt": "2026-08-21",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -2294,6 +2294,35 @@
         }
       ],
       "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "schnittstelle/mde-inbox",
+      "title": "MDE-Eingangskorb",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schnittstelle__mde-inbox/:entityId",
+      "agent_contract_url": "/api/v1/masks/schnittstelle/mde-inbox/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schnittstelle/mde-inbox/screen-definition",
+      "readiness_url": "/api/v1/masks/schnittstelle/mde-inbox/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "process_pending",
+          "label": "Ausstehende verarbeiten",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "mobile.sync.process",
+          "commandEndpoint": "/api/v1/mobile/sync-process",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "error_message",
+        "idempotency_key"
+      ],
       "mcp_tool_ids": []
     },
     {

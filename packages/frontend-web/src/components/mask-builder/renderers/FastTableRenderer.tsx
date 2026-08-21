@@ -18,6 +18,7 @@ interface FastTableRendererProps {
   onQueryChange?: (patch: Partial<TableQueryState>) => void
   onVisibleColumnsChange?: (visibleColumns: string[]) => void | Promise<void>
   onResetOverlay?: () => void | Promise<void>
+  onRowAction?: (_actionKey: string, _row: Record<string, unknown>) => void | Promise<void>
 }
 
 function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
@@ -115,6 +116,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onQueryChange,
   onVisibleColumnsChange,
   onResetOverlay,
+  onRowAction,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
@@ -126,6 +128,50 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   const [columnPickerOpen, setColumnPickerOpen] = useState(false)
   const availableColumns = table.availableColumns ?? table.columns
   const visibleColumnKeys = new Set(table.columns.map((column) => column.key))
+  const dataColumns = table.columns.map((column) => ({
+    key: column.key,
+    label: column.label,
+    width: column.width,
+    numeric: isProfileNumeric(table, column),
+    sortable: column.sortable,
+    render: column.renderKind
+      ? (value: unknown) => formatCellValue(value, column.renderKind)
+      : undefined,
+  }))
+  const renderedColumns = table.rowActions?.length && onRowAction
+    ? [
+        ...dataColumns,
+        {
+          key: '__actions',
+          label: 'Aktionen',
+          width: 170,
+          sortable: false,
+          render: (_value: unknown, row: Record<string, unknown>) => (
+            <span className="flex gap-1">
+              {table.rowActions?.filter((action) => {
+                const condition = action.visibleWhen
+                return !condition || condition.values.includes(row[condition.field] as string | number | boolean)
+              }).map((action) => (
+                <Button
+                  key={action.key}
+                  type="button"
+                  size="sm"
+                  variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
+                  className="h-7 px-2 text-xs"
+                  data-testid={`row-action-${action.key}`}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    void onRowAction(action.key, row)
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </span>
+          ),
+        },
+      ]
+    : dataColumns
 
   function handleRemoveFilter(colKey: string) {
     if (!onQueryChange || !filterPlan) return
@@ -307,16 +353,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 }
               }
             : undefined}
-          columns={table.columns.map((column) => ({
-            key: column.key,
-            label: column.label,
-            width: column.width,
-            numeric: isProfileNumeric(table, column),
-            sortable: column.sortable,
-            render: column.renderKind
-              ? (value: unknown) => formatCellValue(value, column.renderKind)
-              : undefined,
-          }))}
+          columns={renderedColumns}
         />
         {isServerPaged && totalPages !== undefined && totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2 pt-2">

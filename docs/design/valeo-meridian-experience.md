@@ -75,6 +75,10 @@ nicht als herstellerspezifisches Theme. Additive Meridian-Vertraege sind:
   Desktopmasken.
 - `interaction.enterMovesFocus`: Enter folgt dem sichtbaren Feldfluss; Textareas
   und Buttons behalten ihre native Bedeutung.
+- `tables[].rowActions`: statusabhaengige Zeilenaktionen werden im zentralen
+  Fast-Table-Renderer deklariert. Einzelmasken bauen dafuer keine eigene
+  Aktionsspalte; Backend-Berechtigung, Confirmation und Audit bleiben
+  autoritativ.
 
 L3-Referenzfaelle und Datenschutzregeln:
 [`l3-to-meridian-habit-parity.md`](l3-to-meridian-habit-parity.md).

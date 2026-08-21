@@ -3068,9 +3068,107 @@ def build_planung_kalender_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_mde_inbox_screen_definition() -> dict[str, Any]:
+    """Native operator worklist for the hardened mobile/MDE event queue."""
+
+    return {
+        "schemaVersion": 1,
+        "id": "schnittstelle/mde-inbox",
+        "domain": "platform",
+        "mode": "list",
+        "title": "MDE-Eingangskorb",
+        "subtitle": "Mobile Datenerfassung validieren, verarbeiten und nachvollziehen",
+        "adapter": {"type": "native", "sourceId": "schnittstelle/mde-inbox", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/mobile/sync-summary", "staleTimeMs": 10_000},
+            {"key": "queue", "endpoint": "/api/v1/mobile/sync-queue", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "pending", "label": "Ausstehend", "tone": "warning"},
+            {"key": "failed", "label": "Fehlgeschlagen", "tone": "danger"},
+            {"key": "quarantined", "label": "Quarantaene", "tone": "danger"},
+            {"key": "done", "label": "Verarbeitet", "tone": "success"},
+        ],
+        "tables": [
+            {
+                "key": "queue",
+                "label": "MDE-Ereignisse",
+                "dataSourceKey": "queue",
+                "serverPagination": True,
+                "pageSize": 50,
+                "virtualized": True,
+                "rowHeight": 44,
+                "columns": [
+                    {"key": "created_at", "label": "Eingang", "renderKind": "datetime", "sortable": True, "width": 165},
+                    {"key": "device_id", "label": "Geraet / Quelle", "sortable": True, "filterable": True, "width": 150},
+                    {"key": "event_type", "label": "Ereignistyp", "sortable": True, "filterable": True, "width": 180},
+                    {"key": "sync_status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 125},
+                    {"key": "retry_count", "label": "Versuche", "numeric": True, "sortable": True, "width": 85},
+                    {"key": "last_attempt_at", "label": "Letzter Versuch", "renderKind": "datetime", "sortable": True, "width": 165},
+                    {"key": "error_message", "label": "Fehler / Quarantaenegrund", "filterable": True, "width": 360},
+                    {"key": "idempotency_key", "label": "Idempotenz", "width": 220},
+                ],
+                "rowActions": [
+                    {
+                        "key": "retry_event",
+                        "label": "Wiederholen",
+                        "dangerLevel": "moderate",
+                        "visibleWhen": {"field": "sync_status", "values": ["failed", "quarantined"]},
+                    }
+                ],
+            }
+        ],
+        "actions": [
+            {
+                "key": "process_pending",
+                "label": "Ausstehende verarbeiten",
+                "kind": "primary",
+                "permission": "mobile.sync.process",
+                "commandEndpoint": "/api/v1/mobile/sync-process",
+                "method": "POST",
+                "dangerLevel": "moderate",
+                "requiresConfirmation": True,
+                "auditReasonRequired": True,
+                "keyboardShortcut": "Ctrl+Enter",
+            }
+        ],
+        "workflow": {
+            "processKey": "mde-event-processing",
+            "status": "queue",
+            "nextActionKey": "process_pending",
+            "auditRequired": True,
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "expertDense",
+            "contextRail": "audit",
+            "tableProfile": "audit",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 48,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "platform-integrations",
+        },
+        "agentContract": {
+            "businessPurpose": "MDE-Ereignisse mandantenbezogen ueberwachen und fehlgeschlagene Verarbeitung nachvollziehbar behandeln.",
+            "examplePrompts": [
+                "Zeige MDE-Ereignisse in Quarantaene.",
+                "Welche Inventurzaehlungen sind fehlgeschlagen?",
+                "Welche Geraete liefern aktuell Fehler?",
+            ],
+            "sensitiveFields": ["error_message", "idempotency_key"],
+            "forbiddenAgentTasks": ["Quarantaene ohne menschlich angegebenen Grund wiederholen"],
+            "testSelectors": {"screenRoot": "[data-testid='screen-schnittstelle/mde-inbox']"},
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "planung/kalender": build_planung_kalender_screen_definition,
+    "schnittstelle/mde-inbox": build_mde_inbox_screen_definition,
     "lager/leitstand": build_lager_leitstand_screen_definition,
     "workspace/einkauf": build_workspace_einkauf_screen_definition,
     "workspace/verkauf": build_workspace_verkauf_screen_definition,
@@ -3592,6 +3690,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "workspace/fibu": ["fibu cockpit", "finanzbuchhaltung startseite", "finance workspace"],
     "workspace/leitung": ["leitung cockpit", "geschaeftsleitung", "management workspace"],
     "planung/kalender": ["planungskalender", "kalender", "fristenkalender", "was steht naechste woche an"],
+    "schnittstelle/mde-inbox": ["mde", "mobile datenerfassung", "mde eingang", "mde fehler", "mde quarantaene"],
 }
 
 
@@ -3650,6 +3749,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "workspace/fibu": "/workspace/fibu",
     "workspace/leitung": "/workspace/leitung",
     "planung/kalender": "/planung/kalender",
+    "schnittstelle/mde-inbox": "/schnittstelle/mde-inbox",
 }
 
 

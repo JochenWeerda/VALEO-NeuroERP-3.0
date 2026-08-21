@@ -130,9 +130,8 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
               {renderedItems.map((virtualRow) => {
                 const row = data[virtualRow.index]
                 return (
-                  <button
+                  <div
                     key={virtualRow.key}
-                    type="button"
                     className="absolute left-0 grid w-full border-b bg-background text-left text-sm hover:bg-primary/5 focus:outline-hidden focus:ring-2 focus:ring-primary/40"
                     style={{
                       gridTemplateColumns,
@@ -140,6 +139,14 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
                     onClick={() => onRowClick?.(row)}
+                    role={onRowClick ? 'button' : 'row'}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    onKeyDown={onRowClick ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        onRowClick(row)
+                      }
+                    } : undefined}
                   >
                     {columns.map((column) => (
                       <span
@@ -149,7 +156,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                         {renderCell(column, row)}
                       </span>
                     ))}
-                  </button>
+                  </div>
                 )
               })}
             </div>

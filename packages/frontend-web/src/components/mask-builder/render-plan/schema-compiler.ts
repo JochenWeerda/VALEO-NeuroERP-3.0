@@ -71,6 +71,7 @@ function compileTable(
     serverPagination: table.serverPagination ?? true,
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
+    rowActions: table.rowActions,
   }
 }
 

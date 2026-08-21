@@ -1489,6 +1489,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'system', scope: 'system:read' },
     children: [
       {
+        id: 'mde-inbox',
+        label: 'MDE-Eingangskorb',
+        icon: Smartphone,
+        module: '@/pages/schnittstelle/mde-inbox',
+        preferredPath: 'schnittstelle/mde-inbox',
+        keywords: ['mde', 'mobile datenerfassung', 'schnittstelle', 'quarantaene', 'import'],
+        mcp: { businessDomain: 'system', scope: 'system:read' },
+      },
+      {
         id: 'workflow-leitstand',
         label: 'Workflow-Prozessleitstand',
         icon: Monitor,

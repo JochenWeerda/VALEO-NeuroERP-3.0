@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-08-19
+# Architecture Index — generiert 2026-08-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-19T20:16:19Z'
+generated_at: '2026-08-21T16:24:36Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -421,6 +421,7 @@ domains:
     - docs/adr/adr-053-feeding-deviation-measures.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-055-feeding-measure-lifecycle.md
+    - docs/adr/adr-057-mde-inbox-on-mobile-sync-core.md
     status: active
   crm:
     owner: domain/crm
@@ -1370,6 +1371,7 @@ domains:
     - docs/adr/adr-043-feed-readiness-read-model.md
     - docs/adr/adr-046-feeding-reference-data-and-unit-conversion.md
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
+    - docs/adr/adr-057-mde-inbox-on-mobile-sync-core.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1550,6 +1552,7 @@ domains:
     - /projekte/:id
     - /projekte/liste
     - /public/verify
+    - /schnittstelle/mde-inbox
     - /setup/firma
     - /start-dashboard
     - /system/live-monitor
@@ -1862,8 +1865,8 @@ domains:
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
 mapping_stats:
-  frontend_routes_total: 905
-  frontend_routes_mapped: 905
+  frontend_routes_total: 906
+  frontend_routes_mapped: 906
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406
