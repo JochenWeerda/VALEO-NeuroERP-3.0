@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-BELEGCHECK-WORKLIST-005 Zentrale Beleg-Kontroll-Worklist - reserviert 2026-08-21
+
+**Von:** Nutzerauftrag Menue-Drill + Gap-Schliessung; DOCRET bleibt Codex-Besitz. **Owner:** Cursor Agent. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte und nicht fakturierte Lieferscheine mit Verantwortlichem, Faelligkeit, Audit und Deep-Link — nativ Meridian.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-BELEGCHECK-WORKLIST-005.yaml`, dieser Abschnitt, Document-Control-Service/API/Migration/Tests, ScreenDefinition, Seite `auswertungen/beleg-kontrolle`, Navigation und Gap-Doku.
+
+**Abnahme:** Tenant-Isolation; vier Ausnahmearten; auditierte Zuweisung/Erledigung; serverseitige Filter/Pagination; Deep-Link; generatorfaehige Worklist; Tests und Doku gruen.
+
 ## L3-DOCRET-INBOX-004 Dokumentenruecklauf und Versandstatus - reserviert 2026-08-21
 
 **Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
@@ -20,6 +30,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** `docs/agent-ops/slices/L3-DOCRET-INBOX-004.yaml`, dieser Workboard-Abschnitt, neue Dokumentenruecklauf-Service-/Endpoint-/Migrations-/Testdateien, Docflow-ScreenDefinition und Route, DMS/Docflow-Domain-Pack, ADR/Impact-Note, Agent-Handbuch-, OpenAPI-, Architektur- und Gap-Dokumentation.
 
 **Abnahme:** Tenant-Isolation; serverseitige Filter/Pagination nach Benutzer, Kontakt, Datum und Bezugsart; auditierte Versand-/Ruecklaufstatus-Transitionen; Artefaktvorschau und Ursprungsbeleg-Deep-Link; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+## L3-DELTA-MASK-2026-08-21 Live-Delta-Inventur RDP - abgeschlossen 2026-08-21
+
+**Von:** Nutzerauftrag Option 2 (Delta-Inventur, Screenshots selbst). **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-21.
+
+**Ziel:** Laufende L3-RDP-Sitzung read-only erfassen, Ribbonbestand gegen `L3-FULL-MASK-GAP-002` abgleichen, neue Gaps nur bei Evidenz.
+
+**Ergebnis:** 10 Ribbons live bestaetigt (Version 26.07.01-FB); kein neuer P0/Ribbon; P1–P3 unveraendert (MDE repo-seitig bereits geschlossen). Captures lokal `Pictures\L3-Capture-2026-08-21-delta`. Bericht: `docs/design/l3-delta-mask-inventory-2026-08-21.md`.
 
 ## L3-MDE-INBOX-003 MDE-Eingangskorb und Verarbeitung - abgeschlossen 2026-08-21
 

@@ -1,0 +1,38 @@
+slice_id: L3-BELEGCHECK-WORKLIST-005
+id: L3-BELEGCHECK-WORKLIST-005
+title: Zentrale Beleg-Kontroll-Worklist
+owner: Cursor Agent
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Eine mandantenfaehige Ausnahme-Worklist fuer unerledigte Bestellungen,
+  fehlende Eingangsbelege sowie gesperrte und nicht fakturierte Lieferscheine
+  bereitstellen — nativ ueber ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
+architecture:
+  decision_level: significant
+  domains: [finance, sales, procurement]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Ausnahmearten als kanonische Exception-Cases mit Verantwortlichem und Faelligkeit.
+  - Append-only Audit fuer Zuweisung und Statuswechsel.
+  - Serverseitige Filter/Pagination und Deep-Link zum Quellbeleg.
+  - Native Meridian-Worklist unter Auswertungen.
+file_ownership:
+  - app/services/document_control_service.py
+  - app/api/v1/endpoints/document_control.py
+  - alembic/versions/document_control_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/auswertungen/beleg-kontrolle.tsx
+  - packages/frontend-web/src/__tests__/pages/auswertungen/beleg-kontrolle.test.tsx
+  - tests/test_document_control.py
+  - navigation, route generation, workboard, open-gaps, gap inventory
+acceptance:
+  - Tenant-Isolation on every read and mutation.
+  - Exception types cover open PO, missing inbound, blocked DN, uninvoiced DN.
+  - Assign/resolve require audit reason.
+  - Server pagination and filters for type, status, assignee, due, partner.
+  - Deep-link to source document route.
+  - Native generator-ready worklist; backend/frontend tests green.
+risks:
+  - Live-Projektion aus allen Belegtabellen bleibt Folgeausbau; Seed/Register-API deckt Pilot ab.
