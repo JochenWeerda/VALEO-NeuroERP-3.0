@@ -1,0 +1,42 @@
+slice_id: L3-BELEGCHECK-PROJECTION-016
+id: L3-BELEGCHECK-PROJECTION-016
+title: Belegkontrolle Live-Projektion aus Quellbelegen
+owner: Cursor Agent
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Die bestehende Belegkontroll-Worklist um eine tenantgebundene Live-Projektion
+  aus kanonischen Einkaufs-/Verkaufs-Quellbelegen ergaenzen, ohne Codex-Slices
+  zu beruehren.
+architecture:
+  decision_level: significant
+  domains: [finance, sales, procurement]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Bestehende document_control_exceptions und Register-API beibehalten.
+  - Projektion fuer unerledigte Bestellungen, fehlende Eingangsbelege,
+    gesperrte und nicht fakturierte Lieferscheine aus vorhandenen Read-Pfaden.
+  - Idempotente Upserts per source_key; keine Duplikate.
+  - Bestehende Worklist/ScreenDefinition unveraendert nutzen.
+file_ownership:
+  - app/services/document_control_service.py
+  - app/services/document_control_projection.py
+  - app/api/v1/endpoints/document_control.py
+  - tests/test_document_control.py
+  - tests/test_document_control_projection.py
+  - docs/agent-ops/slices/L3-BELEGCHECK-PROJECTION-016.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+non_ownership:
+  - docs/agent-ops/slices/L3-RECENT-DOCUMENTS-015.yaml
+  - app/services/recent_documents_service.py
+  - app/api/v1/endpoints/recent_documents.py
+  - packages/frontend-web/src/pages/workspace/letzte-dokumente.tsx
+acceptance:
+  - Projection refresh is tenant-scoped and idempotent by source_key.
+  - Existing manual register/assign/transition contracts remain green.
+  - At least the four exception types can be projected from fixtures/mocks.
+  - No edits to Codex-owned RECENT files.
+risks:
+  - Heterogene Quelltabellen; fehlende Spalten werden ehrlich als unavailable markiert.

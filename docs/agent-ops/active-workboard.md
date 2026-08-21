@@ -11,15 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-RECENT-DOCUMENTS-015 Persoenliche letzte Dokumente - reserviert 2026-08-21
+## L3-BELEGCHECK-PROJECTION-016 Belegkontrolle Live-Projektion - reserviert 2026-08-21
 
-**Von:** Fortsetzung der L3-P3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Dokumentierter Folgeausbau aus `L3-BELEGCHECK-WORKLIST-005`. **Owner:** Cursor Agent. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Ausnahme-Faelle idempotent aus Einkaufs-/Verkaufs-Quellbelegen in die bestehende Belegkontroll-Worklist projizieren. Keine Aenderung an Codex-Slice `L3-RECENT-DOCUMENTS-015`.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-BELEGCHECK-PROJECTION-016.yaml`, dieser Abschnitt, `document_control_service.py`, neues `document_control_projection.py`, Endpoint-Erweiterung, Tests und Gap-Doku.
+
+**Abnahme:** Tenant-Isolation; Idempotenz per `source_key`; vier Ausnahmearten aus Fixtures/Mocks; bestehende Register-/Assign-/Transition-Tests bleiben gruen; keine RECENT-Dateien.
+
+## L3-RECENT-DOCUMENTS-015 Persoenliche letzte Dokumente - abgeschlossen 2026-08-21
+
+**Von:** Fortsetzung der L3-P3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Eine bereichsuebergreifende, personenbezogene und berechtigte Historie zuletzt geoeffneter ERP-Dokumente mit Typ, Nummer, Partner, Zeitpunkt und internem Deep-Link bereitstellen.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-RECENT-DOCUMENTS-015.yaml`, dieser Workboard-Abschnitt, Recent-Document-Service/-Endpoint/-Migration/-Tests, zentrale ScreenDefinition/Runtime-Integration/Route, Workspace-/Domain-Doku, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
 
 **Abnahme:** Tenant-/Benutzerisolation; Dokumentfamilien-Allowlist und Rollenpruefung; interne Deep-Links; deduplizierte Neuoeffnung; Retention/Mengenlimit/Loeschpfad; native generatorfaehige Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Native Detailmasken erfassen erfolgreiche Dokumentoeffnungen zentral als tenant- und benutzergebundene Projektion. Rollen werden bei Erfassung und Ausgabe erneut geprueft; interne Deep-Links, 90-Tage-Retention, maximal 200 Eintraege, Deduplizierung und persoenliche Loeschpfade verhindern globale Datenpreisgabe. Sechs Backendtests, ein Frontendtest, TypeScript und Ruff sind gruen.
 
 ## L3-REPORT-CATALOG-014 Priorisierter L3-Berichtskatalog - abgeschlossen 2026-08-21
 
