@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-ROHWARE-OPERATOR-009 Fremdware-Operator-Worklist - reserviert 2026-08-21
+
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung nach Abschluss aller P1-Gaps. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Den vorhandenen tenantgebundenen Fremdwaren-Einlagerungs- und Eigentumsbestand in eine native Operator-Worklist mit Einlagerung, Umbuchung, Fremdbestand je Lager, erledigten Faellen, Eigentuemerkontext und Druckpfad ueberfuehren.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-ROHWARE-OPERATOR-009.yaml`, dieser Workboard-Abschnitt, Fremdware-Projektions-/API-/Testdateien, zentrale ScreenDefinition und Route, Procurement-/Inventory-Domain-Pack, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
+
+**Abnahme:** Tenant- und Eigentuemer-Isolation; serverseitige Filter/Pagination; auditierte Status-/Umbuchungsaktionen; Bestandsaggregation je Lager/Eigentuemer; Quell-/Druckpfad; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-BILLING-BATCH-008 Rechnungstapel und Selbstabrechner - abgeschlossen 2026-08-21
 
 **Von:** Abschluss der priorisierten L3-P1-Gaps aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.

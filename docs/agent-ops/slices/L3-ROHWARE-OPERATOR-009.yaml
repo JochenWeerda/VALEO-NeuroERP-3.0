@@ -1,0 +1,35 @@
+slice_id: L3-ROHWARE-OPERATOR-009
+id: L3-ROHWARE-OPERATOR-009
+title: Fremdware-Operator-Worklist
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Bestehende Fremdwaren-Einlagerung und Drittbestandsfuehrung als native,
+  eigentuemersichere Operator-Worklist bereitzustellen.
+architecture:
+  decision_level: significant
+  domains: [procurement, inventory, agrar]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Bestehende FremdwarenEinlagerung als kanonische Quelle wiederverwenden.
+  - Einlagerung, Umbuchung, Erledigung und Druck nachvollziehbar bedienen.
+  - Fremdbestand nach Lager und Eigentuemer aggregieren.
+file_ownership:
+  - app/services/foreign_goods_worklist_service.py
+  - app/api/v1/endpoints/foreign_goods_worklist.py
+  - alembic/versions/foreign_goods_worklist_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/lager/fremdware.tsx
+  - tests/test_foreign_goods_worklist.py
+  - generated route, OpenAPI, architecture and handbook artifacts
+  - Procurement/Inventory domain packs, ADR, gap documentation and workboard
+acceptance:
+  - Tenant and owner scope are visible and enforced.
+  - Server pagination and operator filters.
+  - Audited transfer and completion actions.
+  - Stock aggregation, source/evidence link and print path.
+  - Native generator-ready worklist and green repository gates.
+risks:
+  - Physical warehouse pilot and printer adapter remain external gates.
