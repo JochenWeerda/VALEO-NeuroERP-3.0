@@ -100559,6 +100559,80 @@
         "title": "RebuildRequestBody",
         "type": "object"
       },
+      "RecentDocumentTouch": {
+        "properties": {
+          "document_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Document Id",
+            "type": "string"
+          },
+          "document_number": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Document Number",
+            "type": "string"
+          },
+          "document_type": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Document Type",
+            "type": "string"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "route": {
+            "maxLength": 600,
+            "minLength": 2,
+            "title": "Route",
+            "type": "string"
+          },
+          "screen_id": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen_id",
+          "document_id",
+          "document_type",
+          "document_number",
+          "title",
+          "route"
+        ],
+        "title": "RecentDocumentTouch",
+        "type": "object"
+      },
       "RechnungsFreigabeIn": {
         "properties": {
           "entscheidung": {
@@ -222939,6 +223013,63 @@
         ]
       }
     },
+    "/api/v1/document-control/project": {
+      "post": {
+        "operationId": "project_exceptions_api_v1_document_control_project_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Project Exceptions Api V1 Document Control Project Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Belegausnahmen aus Quellbelegen projizieren",
+        "tags": [
+          "document-control",
+          "finance"
+        ]
+      }
+    },
     "/api/v1/document-control/summary": {
       "get": {
         "operationId": "summary_api_v1_document_control_summary_get",
@@ -334637,6 +334768,291 @@
         "summary": "Wiring subjects abrufen",
         "tags": [
           "read-model-snapshots"
+        ]
+      }
+    },
+    "/api/v1/recent-documents": {
+      "delete": {
+        "operationId": "clear_all_api_v1_recent_documents_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Clear All Api V1 Recent Documents Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Clear All",
+        "tags": [
+          "workspace",
+          "l3-parity"
+        ]
+      },
+      "get": {
+        "operationId": "list_recent_api_v1_recent_documents_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "document_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Document Type"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Recent Api V1 Recent Documents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Recent",
+        "tags": [
+          "workspace",
+          "l3-parity"
+        ]
+      }
+    },
+    "/api/v1/recent-documents/touch": {
+      "post": {
+        "operationId": "touch_api_v1_recent_documents_touch_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecentDocumentTouch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Touch Api V1 Recent Documents Touch Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Touch",
+        "tags": [
+          "workspace",
+          "l3-parity"
+        ]
+      }
+    },
+    "/api/v1/recent-documents/{recent_id}": {
+      "delete": {
+        "operationId": "remove_one_api_v1_recent_documents__recent_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recent_id",
+            "required": true,
+            "schema": {
+              "title": "Recent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove One Api V1 Recent Documents  Recent Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove One",
+        "tags": [
+          "workspace",
+          "l3-parity"
         ]
       }
     },

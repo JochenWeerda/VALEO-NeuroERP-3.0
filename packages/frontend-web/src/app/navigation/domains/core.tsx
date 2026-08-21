@@ -49,6 +49,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'core', scope: 'core:read' },
   },
   {
+    id: 'letzte-dokumente',
+    label: 'Letzte Dokumente',
+    icon: FileText,
+    module: '@/pages/workspace/letzte-dokumente',
+    preferredPath: 'workspace/letzte-dokumente',
+    keywords: ['letzte dokumente', 'zuletzt geoeffnet', 'beleg', 'historie'],
+    mcp: { businessDomain: 'core', scope: 'core:read' },
+  },
+  {
     id: 'workflow',
     label: 'Workflows',
     icon: Zap,

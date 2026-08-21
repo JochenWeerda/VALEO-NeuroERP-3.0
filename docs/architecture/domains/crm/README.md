@@ -98,3 +98,9 @@ Vertreter-, Kunden-, Artikel- und Artikelgruppenwerte werden als
 tenantgebundene Reporting-Facts projiziert. Der feste Berichtskatalog liefert
 Summen, CSV und interne Quellenbeleg-Drilldowns, ohne CRM-Schreibmodelle zu
 duplizieren.
+
+### L3-RECENT-DOCUMENTS-015
+
+Native CRM-Detailmasken melden erfolgreiche Oeffnungen an die persoenliche
+Recent-Document-Projektion. Die Ausgabe bleibt tenant-/benutzergebunden und
+wird bei jedem Lesen gegen die aktuelle `CRM_LESEN`-Rolle geprueft.

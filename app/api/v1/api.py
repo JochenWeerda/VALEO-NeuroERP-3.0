@@ -1065,6 +1065,10 @@ from app.api.v1.endpoints import l3_report_catalog  # noqa: E402
 
 api_router.include_router(l3_report_catalog.router)
 
+from app.api.v1.endpoints import recent_documents  # noqa: E402
+
+api_router.include_router(recent_documents.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

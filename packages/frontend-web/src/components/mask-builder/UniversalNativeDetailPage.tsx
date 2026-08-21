@@ -11,7 +11,7 @@
 
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, AlertCircle, AlertTriangle, ShieldAlert } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
-import { getAxiosErrorMessage } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
@@ -109,6 +109,31 @@ export function UniversalNativeDetailPage({
     schema: schemaQuery.data,
     enabled: Boolean(entityId) && schemaQuery.data?.adapter?.temporary === false,
   })
+  const trackedRecentKey = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!entityId || !schemaQuery.data || !runtime.entityData) return
+    const key = `${screenId}:${entityId}`
+    if (trackedRecentKey.current === key) return
+    const entity = runtime.entityData as Record<string, unknown>
+    const documentNumber = String(
+      entity.document_number ?? entity.number ?? entity.nr ?? entity.belegnummer ?? entityId,
+    )
+    const partnerName = entity.partner_name ?? entity.customer_name ?? entity.supplier_name ?? entity.name
+    trackedRecentKey.current = key
+    void apiClient.post('/api/v1/recent-documents/touch', {
+      screen_id: screenId,
+      document_id: entityId,
+      document_type: schemaQuery.data.title,
+      document_number: documentNumber,
+      partner_id: entity.partner_id ?? entity.customer_id ?? entity.supplier_id,
+      partner_name: partnerName == null ? undefined : String(partnerName),
+      title: `${schemaQuery.data.title} ${documentNumber}`,
+      route: `${window.location.pathname}${window.location.search}`,
+    }).catch(() => {
+      trackedRecentKey.current = null
+    })
+  }, [entityId, runtime.entityData, schemaQuery.data, screenId])
   const actionRuntime = useHumanActionDispatch(schemaQuery.data?.actions ?? [], {
     screenId,
     entityId,

@@ -113,4 +113,5 @@
   ,{ "path": "crm/mail-arbeitsplatz", "module": "@/pages/crm/mail-arbeitsplatz" }
   ,{ "path": "tankstelle/adapter-inbox", "module": "@/pages/tankstelle/adapter-inbox" }
   ,{ "path": "auswertungen/l3-berichtskatalog", "module": "@/pages/auswertungen/l3-berichtskatalog" }
+  ,{ "path": "workspace/letzte-dokumente", "module": "@/pages/workspace/letzte-dokumente" }
 ]

@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (57 Masken).
+> Generiert aus `app/core/screen_definitions.py` (58 Masken).
 
 ## Übersicht
 
@@ -73,6 +73,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `workspace/fibu` | FIBU-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
 | `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
 | `workspace/leitung` | Leitungs-Cockpit | management | niedrig | — | `GET /api/v1/masks/workspace/leitung/agent-contract` |
+| `workspace/letzte-dokumente` | Letzte Dokumente | workspace | niedrig | — | `GET /api/v1/masks/workspace/letzte-dokumente/agent-contract` |
 | `workspace/verkauf` | Verkauf-Cockpit | sales | niedrig | — | `GET /api/v1/masks/workspace/verkauf/agent-contract` |
 
 ---
@@ -2121,5 +2122,33 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Was steht heute in Verkauf-Cockpit an?
 - Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: workspace
+
+### `workspace/letzte-dokumente` — Letzte Dokumente
+
+**Zweck:** Die eigenen zuletzt geoeffneten und weiterhin berechtigten ERP-Dokumente wiederfinden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/letzte-dokumente/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/letzte-dokumente/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/letzte-dokumente/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__letzte-dokumente/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/recent-documents`
+- `documents` → `/api/v1/recent-documents`
+
+**Beispiel-Prompts:**
+
+- Oeffne meinen letzten Lieferschein.
+- Zeige meine zuletzt geoeffneten Rechnungen.
+
+**Sensible Felder:** `partner_name, document_number, route`
 
 ---

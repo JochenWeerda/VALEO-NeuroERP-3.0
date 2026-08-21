@@ -319,6 +319,14 @@ einheitliche Zeit-/Dimensionsfilter, serverseitige Summen, auditierte
 CSV-Exporte und interne Quellenbeleg-Drilldowns; freie SQL-Ausfuehrung ist
 ausgeschlossen.
 
+## L3-RECENT-DOCUMENTS-015
+
+`workspace/letzte-dokumente` ist eine native, serverseitig paginierte
+Meridian-Worklist. Native Detailmasken melden erfolgreiche Oeffnungen zentral;
+die Projektion bleibt auf Tenant und Benutzer begrenzt, prueft die aktuelle
+Dokumentfamilienrolle erneut und entfernt abgelaufene oder ueberzaehlige
+Eintraege automatisch.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

@@ -3556,6 +3556,20 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "workspace/letzte-dokumente": lambda: {
+        "schemaVersion": 1, "id": "workspace/letzte-dokumente", "domain": "workspace", "mode": "list",
+        "title": "Letzte Dokumente", "subtitle": "Meine zuletzt geoeffneten ERP-Dokumente",
+        "adapter": {"type": "native", "sourceId": "workspace/letzte-dokumente", "temporary": False},
+        "dataSources": [{"key": "entity", "endpoint": "/api/v1/recent-documents", "staleTimeMs": 15_000}, {"key": "documents", "endpoint": "/api/v1/recent-documents", "pageSize": 50, "staleTimeMs": 15_000}],
+        "summary": [{"key": "total", "label": "Meine Dokumente", "tone": "info"}],
+        "tables": [{"key": "documents", "label": "Zuletzt geoeffnet", "dataSourceKey": "documents", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [{"key": "document_type", "label": "Dokumenttyp", "filterable": True, "width": 180}, {"key": "document_number", "label": "Nummer", "filterable": True, "width": 150}, {"key": "partner_name", "label": "Partner", "filterable": True, "width": 220}, {"key": "title", "label": "Bezeichnung", "width": 260}, {"key": "opened_at", "label": "Zuletzt geoeffnet", "renderKind": "datetime", "sortable": True, "width": 170}],
+            "rowActions": [{"key": "open", "label": "Oeffnen"}, {"key": "remove", "label": "Aus Liste entfernen"}]}],
+        "workflow": {"processKey": "personal-recent-documents", "status": "personal", "nextActionKey": "open", "auditRequired": False},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "none", "tableProfile": "audit"},
+        "performance": {"initialPayloadBudgetKb": 35, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "workspace"},
+        "agentContract": {"businessPurpose": "Die eigenen zuletzt geoeffneten und weiterhin berechtigten ERP-Dokumente wiederfinden.", "examplePrompts": ["Oeffne meinen letzten Lieferschein.", "Zeige meine zuletzt geoeffneten Rechnungen."], "sensitiveFields": ["partner_name", "document_number", "route"], "forbiddenAgentTasks": ["Historien anderer Benutzer oder nicht mehr berechtigte Dokumente anzeigen"], "testSelectors": {"screenRoot": "[data-testid='letzte-dokumente']"}},
+    },
     "auswertungen/l3-berichtskatalog": lambda: {
         "schemaVersion": 1, "id": "auswertungen/l3-berichtskatalog", "domain": "reporting", "mode": "list",
         "title": "L3-Berichtskatalog", "subtitle": "Vertreter, Kunde, Artikel, Gruppe, Charge, Ernte und Strecke",
@@ -4105,6 +4119,7 @@ for _spec in ROLLOUT_WAVES_42_51:
 # Intent-Compiler. Zentral gepflegt statt je SD, damit der Katalog
 # (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
 _AGENT_SYNONYMS: dict[str, list[str]] = {
+    "workspace/letzte-dokumente": ["letzte dokumente", "zuletzt geoeffnet", "recent documents", "belegverlauf"],
     "agrar/duenger": ["duenger", "duengemittel", "kas", "npk"],
     "agrar/harvest-settlement": ["ernteabrechnung", "sammelabrechnung", "gutschrift ernte"],
     "agrar/kontrakte": ["kontrakt", "vorkontrakt", "liefervertrag", "andienung"],
@@ -4169,6 +4184,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "workspace/letzte-dokumente": "/workspace/letzte-dokumente",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "tankstelle/adapter-inbox": "/tankstelle/adapter-inbox",
     "crm/mail-arbeitsplatz": "/crm/mail-arbeitsplatz",

@@ -2,9 +2,10 @@ slice_id: L3-RECENT-DOCUMENTS-015
 id: L3-RECENT-DOCUMENTS-015
 title: Persoenliche letzte Dokumente
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Eine bereichsuebergreifende, personenbezogene und berechtigte Historie der
   zuletzt geoeffneten ERP-Dokumente mit sicherem Deep-Link bereitzustellen.
@@ -30,4 +31,4 @@ acceptance:
   - Aufbewahrungs- und Mengenlimit mit explizitem Loeschpfad.
   - Native generator-ready Worklist und gruene Gates.
 risks:
-  - Flächendeckende Erfassung ausserhalb nativer Detailmasken bleibt Folgeintegration.
+  - Flaechendeckende Erfassung ausserhalb nativer Detailmasken bleibt Folgeintegration.

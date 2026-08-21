@@ -4551,6 +4551,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/workspace/letzte-dokumente",
+      "path": "workspace/letzte-dokumente",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/workspace/verkauf",
       "path": "workspace/verkauf",
       "source": "alias"

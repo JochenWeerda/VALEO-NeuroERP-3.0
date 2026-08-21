@@ -6322,33 +6322,40 @@ const appRoute0884 = createRoute({
 
 const appRoute0885 = createRoute({
   getParentRoute: () => appLayoutRoute,
+  path: "workspace/letzte-dokumente",
+  component: () => renderPage("@/pages/workspace/letzte-dokumente"),
+  staticData: {"breadcrumb":"Letzte Dokumente","module":"@/pages/workspace/letzte-dokumente","legacyPath":"/workspace/letzte-dokumente"},
+})
+
+const appRoute0886 = createRoute({
+  getParentRoute: () => appLayoutRoute,
   path: "workspace/verkauf",
   component: () => renderPage("@/pages/workspace/verkauf"),
   staticData: {"breadcrumb":"Verkauf","module":"@/pages/workspace/verkauf","legacyPath":"/workspace/verkauf"},
 })
 
-const appRoute0886 = createRoute({
+const appRoute0887 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Zertifikate","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate"},
 })
 
-const appRoute0887 = createRoute({
+const appRoute0888 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/$id",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/:id"},
 })
 
-const appRoute0888 = createRoute({
+const appRoute0889 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/liste",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/liste"},
 })
 
-const appRoute0889 = createRoute({
+const appRoute0890 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/neu",
   component: () => renderPage("@/pages/zertifikate/liste"),
@@ -7421,7 +7428,8 @@ export const routeTree = rootRoute.addChildren([
     appRoute0886,
     appRoute0887,
     appRoute0888,
-    appRoute0889
+    appRoute0889,
+    appRoute0890
   ]),
   portalLayoutRoute.addChildren([
     portalRoute0000,
@@ -12002,6 +12010,11 @@ export const generatedRouteInventory = [
     "module": "@/pages/workspace/leitung",
     "path": "workspace/leitung",
     "source": "alias"
+  },
+  {
+    "module": "@/pages/workspace/letzte-dokumente",
+    "path": "workspace/letzte-dokumente",
+    "source": "navigation"
   },
   {
     "module": "@/pages/workspace/verkauf",

@@ -435,6 +435,7 @@ nav:
           - ADR-065 Rollenbasierter ERP-Mailarbeitsplatz: adr/adr-065-role-scoped-mail-workspace.md
           - ADR-066 Tankanlagen-Eingang und Lieferschein-Outbox: adr/adr-066-tank-adapter-intake-outbox.md
           - ADR-067 Governed L3-Berichtskatalog: adr/adr-067-governed-l3-report-catalog.md
+          - ADR-068 Persoenliche berechtigte Dokumenthistorie: adr/adr-068-personal-authorized-recent-documents.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

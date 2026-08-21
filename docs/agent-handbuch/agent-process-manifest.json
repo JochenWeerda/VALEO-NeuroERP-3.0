@@ -2748,6 +2748,24 @@
         "sales.order.status",
         "sales.invoice.propose"
       ]
+    },
+    {
+      "mask_id": "workspace/letzte-dokumente",
+      "title": "Letzte Dokumente",
+      "domain": "workspace",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__letzte-dokumente/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/letzte-dokumente/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/letzte-dokumente/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/letzte-dokumente/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "document_number",
+        "route"
+      ],
+      "mcp_tool_ids": []
     }
   ],
   "mcp_tools": [
