@@ -92,6 +92,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
       },
       {
+        id: 'fremdware',
+        label: 'Fremdware & Fremdbestand',
+        icon: Building2,
+        module: '@/pages/lager/fremdware',
+        preferredPath: 'lager/fremdware',
+        keywords: ['fremdware', 'fremdbestand', 'kommission', 'poolware', 'eigentuemer'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
+      },
+      {
         id: 'permanente-inventur',
         label: 'Permanente Inventur (PIV)',
         icon: Scale,

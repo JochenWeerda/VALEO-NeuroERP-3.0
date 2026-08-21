@@ -279,6 +279,13 @@ Vier-Augen-Freigabe und append-only Audit.
 Selbstabrechnerarten als native, generatorfaehige Worklist mit Vier-Augen-
 Freigabe, Fehlerzeilen, Retry und Belegnachweis.
 
+## L3-ROHWARE-OPERATOR-009
+
+`lager/fremdware` stellt die vorhandene Fremdwaren-Einlagerung als native,
+generatorfaehige Operator-Worklist bereit. Mandant/Eigentuemer, Lager und
+Restbestand sind sichtbar; Umbuchung sowie Teil-/Vollauslagerung laufen
+statusvalidiert, begruendet und append-only auditiert.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

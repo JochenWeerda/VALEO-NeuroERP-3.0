@@ -24538,23 +24538,6 @@
         "title": "CompensateRequest",
         "type": "object"
       },
-      "CompleteIn": {
-        "properties": {
-          "bediener": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bediener"
-          }
-        },
-        "title": "CompleteIn",
-        "type": "object"
-      },
       "ComplianceDsgvoOut": {
         "additionalProperties": true,
         "description": "Response schema for compliance dsgvo endpoints.",
@@ -118562,6 +118545,40 @@
         "title": "TransferCreate",
         "type": "object"
       },
+      "TransferIn": {
+        "properties": {
+          "location": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          },
+          "warehouse_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "warehouse_id",
+          "reason"
+        ],
+        "title": "TransferIn",
+        "type": "object"
+      },
       "TransferLineCreate": {
         "properties": {
           "article_id": {
@@ -132942,6 +132959,23 @@
         "title": "FreigabeIn",
         "type": "object"
       },
+      "app__api__v1__endpoints__docflow_followup__CompleteIn": {
+        "properties": {
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          }
+        },
+        "title": "CompleteIn",
+        "type": "object"
+      },
       "app__api__v1__endpoints__docflow_return__TransitionIn": {
         "properties": {
           "kind": {
@@ -133278,6 +133312,34 @@
           "action_label"
         ],
         "title": "TransitionRequest",
+        "type": "object"
+      },
+      "app__api__v1__endpoints__foreign_goods_worklist__CompleteIn": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason",
+            "type": "string"
+          },
+          "remaining_quantity": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Remaining Quantity"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "CompleteIn",
         "type": "object"
       },
       "app__api__v1__endpoints__futter_stamm__RezeptIn": {
@@ -220425,7 +220487,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompleteIn"
+                "$ref": "#/components/schemas/app__api__v1__endpoints__docflow_followup__CompleteIn"
               }
             }
           },
@@ -255279,6 +255341,360 @@
         "summary": "Foerderung stats abrufen",
         "tags": [
           "Foerderung"
+        ]
+      }
+    },
+    "/api/v1/foreign-goods": {
+      "get": {
+        "operationId": "list_items_api_v1_foreign_goods_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "owner_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Owner Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouse_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Warehouse Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Items Api V1 Foreign Goods Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Items",
+        "tags": [
+          "inventory",
+          "foreign-goods"
+        ]
+      }
+    },
+    "/api/v1/foreign-goods/summary": {
+      "get": {
+        "operationId": "summary_api_v1_foreign_goods_summary_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Summary Api V1 Foreign Goods Summary Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Summary",
+        "tags": [
+          "inventory",
+          "foreign-goods"
+        ]
+      }
+    },
+    "/api/v1/foreign-goods/{foreign_goods_id}/complete": {
+      "post": {
+        "operationId": "complete_api_v1_foreign_goods__foreign_goods_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "foreign_goods_id",
+            "required": true,
+            "schema": {
+              "title": "Foreign Goods Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__foreign_goods_worklist__CompleteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Api V1 Foreign Goods  Foreign Goods Id  Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete",
+        "tags": [
+          "inventory",
+          "foreign-goods"
+        ]
+      }
+    },
+    "/api/v1/foreign-goods/{foreign_goods_id}/transfer": {
+      "post": {
+        "operationId": "transfer_api_v1_foreign_goods__foreign_goods_id__transfer_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "foreign_goods_id",
+            "required": true,
+            "schema": {
+              "title": "Foreign Goods Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transfer Api V1 Foreign Goods  Foreign Goods Id  Transfer Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transfer",
+        "tags": [
+          "inventory",
+          "foreign-goods"
         ]
       }
     },

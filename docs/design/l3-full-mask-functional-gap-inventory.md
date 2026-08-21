@@ -17,10 +17,10 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+**keinen offenen P1-, fuenf P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
-Die verbleibenden
+`L3-ROHWARE-002` ist ebenfalls repo-seitig geschlossen. Die verbleibenden
 P2/P3-Themen betreffen Komfort, breite Berichtskatalog-Paritaet und externe
 Adapter, nicht den P1-Kernwechsel.
 
@@ -62,7 +62,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Rechnungsein/-ausgang, OP, FIBU-Uebergabe | Finance/AP/AR, offene Posten, e-Rechnung und FIBU-Schnittstellencenter | vorhanden | - |
 | Rechnungstapel und Selbstabrechner | native Vier-Augen-Worklist ueber Faktura-, AP/AR- und Self-Billing-Quellbelegen mit Fehler-Retry | vorhanden | L3-GAP-BILLBATCH-006 geschlossen |
 | Bestand, Vortrag, Korrektur, Lager-zu-Lager | Bestands-, Korrektur-, Bewegungs- und Bewertungsseiten/APIs | vorhanden | - |
-| Fremdware/Fremdbestand | Backend-CRUD fuer Fremdwaren-Einlagerung und Third-Party-Stock-Anteile | teilweise | L3-ROHWARE-002 |
+| Fremdware/Fremdbestand | native tenant-/eigentuemersichere Worklist ueber Fremdwaren-Einlagerung mit Audit, Umbuchung und Abschluss | vorhanden | L3-ROHWARE-002 geschlossen |
 | Inventur | Inventur, PIV, Differenzbuchung plus hashgebundene Nebenlaeufe, Bewertung und Vier-Augen-Bestandsvortrag | vorhanden | L3-GAP-INV-004 geschlossen |
 | Ruest-/Kommissionierliste | FEFO-Kommissionierung und dokumentierter Ruestlisten-Lifecycle | vorhanden | - |
 | Produktionsliste, Artikel-Umbuchung, Stapelbuchung, Muehle, Nachbearbeitung | nativer Leitstand als Projektion der Mischfutter-, Bewegungs- und Operationsquellen mit Audit | vorhanden | L3-GAP-PROD-003 geschlossen |
@@ -91,7 +91,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 
 | ID | Gap | Belegter Ist-Stand | Abnahmekriterium |
 |---|---|---|---|
-| L3-ROHWARE-002 | Fremdware besitzt keine nachgewiesene geschlossene Operator-UI | Backend fuer Fremdwaren-Einlagerung und Bestandsanteile vorhanden | Worklist fuer Einlagerung, automatische Umbuchung, Fremdbestand je Lager, erledigte Faelle und Druck; Mandant/Eigentuemer stets sichtbar |
+| L3-ROHWARE-002 | Fremdware besitzt keine nachgewiesene geschlossene Operator-UI | Backend fuer Fremdwaren-Einlagerung und Bestandsanteile vorhanden | Worklist fuer Einlagerung, automatische Umbuchung, Fremdbestand je Lager, erledigte Faelle und Druck; Mandant/Eigentuemer stets sichtbar — **repo-seitig geschlossen 2026-08-21** (`L3-ROHWARE-OPERATOR-009`; Lager-/Druckpilot extern) |
 | L3-GAP-QUERY-008 | Anwender-Abfrage-Center fehlt | Vorgegebene Reports/Dashboards vorhanden | Berechtigter Query-Designer ueber freigegebene Read Models, Vorschau, Ausgabe/Druck, Favoriten und signierter Import/Export ohne beliebiges SQL |
 | L3-GAP-TEAMCAL-009 | Teamkalender-Paritaet ist nicht belegt | Planungskalender aggregiert Prozesslayer und bietet ICS | Mehrbenutzer-/Teamansicht, Frei/Belegt, fremde und abgelehnte Termine, Rechte- und Datenschutzmodell |
 | L3-GAP-MAIL-010 | Integrierter ERP-Mailarbeitsplatz fehlt | Dokumente und Kommunikationsaktivitaeten koennen abgelegt werden | Rollenbasierter Posteingang, Beleg-/Kontaktzuordnung, Anlagenuebernahme, Entwurf/Senden, revisionssichere Aktivitaet; alternativ verbindlicher externer Mail-Deep-Link |

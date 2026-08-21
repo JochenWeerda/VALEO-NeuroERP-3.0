@@ -25,3 +25,6 @@ Frontend: `packages/frontend-web/src/pages/lager/`
 
 Inventur-Nebenlaeufe: `pytest tests/test_inventory_auxiliary.py -q --no-cov`
 und `vitest run src/__tests__/pages/lager/inventur-nebenlaeufe.test.tsx`.
+
+Fremdware: `pytest tests/test_foreign_goods_worklist.py -q --no-cov` und
+`vitest run src/__tests__/pages/lager/fremdware.test.tsx`.

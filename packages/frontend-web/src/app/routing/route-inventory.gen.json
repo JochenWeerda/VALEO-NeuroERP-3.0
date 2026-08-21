@@ -3056,6 +3056,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/lager/fremdware",
+      "path": "lager/fremdware",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/lager/gs1-scanner",
       "path": "lager/gs1-scanner",
       "source": "auto"

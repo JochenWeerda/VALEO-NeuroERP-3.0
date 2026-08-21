@@ -11,15 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-ROHWARE-OPERATOR-009 Fremdware-Operator-Worklist - reserviert 2026-08-21
+## L3-ROHWARE-OPERATOR-009 Fremdware-Operator-Worklist - abgeschlossen 2026-08-21
 
-**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung nach Abschluss aller P1-Gaps. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Fortsetzung der L3-P2/P3-Gap-Schliessung nach Abschluss aller P1-Gaps. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Den vorhandenen tenantgebundenen Fremdwaren-Einlagerungs- und Eigentumsbestand in eine native Operator-Worklist mit Einlagerung, Umbuchung, Fremdbestand je Lager, erledigten Faellen, Eigentuemerkontext und Druckpfad ueberfuehren.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-ROHWARE-OPERATOR-009.yaml`, dieser Workboard-Abschnitt, Fremdware-Projektions-/API-/Testdateien, zentrale ScreenDefinition und Route, Procurement-/Inventory-Domain-Pack, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
 
 **Abnahme:** Tenant- und Eigentuemer-Isolation; serverseitige Filter/Pagination; auditierte Status-/Umbuchungsaktionen; Bestandsaggregation je Lager/Eigentuemer; Quell-/Druckpfad; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Die kanonische Fremdwaren-Einlagerung wird tenantbegrenzt und
+serverseitig paginiert dargestellt. Mandant, Eigentuemer, Lager und Restbestand
+sind explizit sichtbar. Umbuchung und Teil-/Vollauslagerung sind gesperrt,
+validiert und mit Pflichtgrund append-only auditiert; Quell- und Druckpfad sind
+vorhanden. Damit ist `L3-ROHWARE-002` repo-seitig geschlossen.
 
 ## L3-BILLING-BATCH-008 Rechnungstapel und Selbstabrechner - abgeschlossen 2026-08-21
 

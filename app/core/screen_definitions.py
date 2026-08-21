@@ -3457,7 +3457,68 @@ def build_billing_batch_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_foreign_goods_screen_definition() -> dict[str, Any]:
+    """Native L3-style foreign-goods operator worklist."""
+    return {
+        "schemaVersion": 1,
+        "id": "lager/fremdware",
+        "domain": "inventory",
+        "mode": "list",
+        "title": "Fremdware und Fremdbestand",
+        "subtitle": "Eigentuemerbestand einlagern, umbuchen, auslagern und nachweisen",
+        "adapter": {"type": "native", "sourceId": "lager/fremdware", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/foreign-goods/summary", "staleTimeMs": 10_000},
+            {"key": "items", "endpoint": "/api/v1/foreign-goods", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "stored", "label": "Eingelagert", "tone": "success"},
+            {"key": "partial", "label": "Teil ausgelagert", "tone": "warning"},
+            {"key": "completed", "label": "Erledigt", "tone": "neutral"},
+            {"key": "owners", "label": "Eigentuemer aktiv", "tone": "info"},
+            {"key": "warehouses", "label": "Lager aktiv", "tone": "neutral"},
+        ],
+        "tables": [{
+            "key": "items", "label": "Fremdwaren-Einlagerungen", "dataSourceKey": "items",
+            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "einlagerungsdatum", "label": "Einlagerung", "renderKind": "date", "sortable": True, "width": 110},
+                {"key": "einlagerungs_nr", "label": "Nummer", "sortable": True, "filterable": True, "width": 135},
+                {"key": "tenant_id", "label": "Mandant", "filterable": True, "width": 150},
+                {"key": "eigentuemer_name", "label": "Eigentuemer", "sortable": True, "filterable": True, "width": 190},
+                {"key": "eigentuemer_id", "label": "Eigentuemer-ID", "filterable": True, "width": 135},
+                {"key": "artikel_nr", "label": "Artikel", "filterable": True, "width": 110},
+                {"key": "artikel_bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
+                {"key": "charge", "label": "Charge", "filterable": True, "width": 115},
+                {"key": "menge_aktuell", "label": "Fremdbestand", "numeric": True, "sortable": True, "width": 115},
+                {"key": "einheit", "label": "ME", "width": 55},
+                {"key": "warehouse_id", "label": "Lager", "sortable": True, "filterable": True, "width": 125},
+                {"key": "lagerort", "label": "Lagerort", "filterable": True, "width": 115},
+                {"key": "geplante_auslagerung", "label": "Geplant bis", "renderKind": "date", "sortable": True, "width": 115},
+                {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 120},
+            ],
+            "rowActions": [
+                {"key": "transfer", "label": "Umbuchen", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
+                {"key": "complete", "label": "Auslagern / erledigen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
+                {"key": "open_source", "label": "Ursprung"},
+                {"key": "print", "label": "Drucken"},
+            ],
+        }],
+        "workflow": {"processKey": "foreign-goods", "status": "operator-worklist", "nextActionKey": "transfer", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 56, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "inventory"},
+        "agentContract": {
+            "businessPurpose": "Fremde Ware eigentuemer- und mandantensicher im Lager steuern.",
+            "examplePrompts": ["Zeige Fremdbestand nach Eigentuemer.", "Welche Einlagerungen sind ueberfaellig?"],
+            "sensitiveFields": ["tenant_id", "eigentuemer_id", "eigentuemer_name", "lagerort", "notiz"],
+            "forbiddenAgentTasks": ["Fremdware ohne menschlichen Audit-Grund umbuchen oder erledigen"],
+            "testSelectors": {"screenRoot": "[data-testid='fremdware']"},
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "lager/fremdware": build_foreign_goods_screen_definition,
     "finance/rechnungstapel": build_billing_batch_screen_definition,
     "lager/inventur-nebenlaeufe": build_inventory_auxiliary_screen_definition,
     "produktion/produktionsleitstand": build_production_control_screen_definition,
@@ -3978,6 +4039,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "lager/article-stock": ["artikelbestand", "lagerbestand", "bestand"],
     "lager/leitstand": ["lager leitstand", "silo twin", "silozellen", "hofplan", "silo belegung"],
     "lager/stock-movement": ["lagerbewegung", "warenbewegung", "umbuchung"],
+    "lager/fremdware": ["fremdware", "fremdbestand", "kommissionsware", "poolware", "eigentuemerbestand"],
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
     "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
     "sales/sales-order": ["verkaufsauftrag", "auftrag", "kundenauftrag"],
@@ -4011,6 +4073,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "lager/fremdware": "/lager/fremdware",
     "finance/rechnungstapel": "/finance/rechnungstapel",
     "lager/inventur-nebenlaeufe": "/lager/inventur-nebenlaeufe",
     "produktion/produktionsleitstand": "/produktion/produktionsleitstand",

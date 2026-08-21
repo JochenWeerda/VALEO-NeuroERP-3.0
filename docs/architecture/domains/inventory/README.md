@@ -42,6 +42,13 @@ ihrem aktuellen Renderer.
 Kontrolllauf, vorlaeufige Bewertung und Bestandsvortrag als hashgebundene,
 auditierte Batches ueber der kanonischen Inventur.
 
+## Fremdware und Fremdbestand
+
+`lager/fremdware` projiziert die kanonische Fremdwaren-Einlagerung als
+serverseitig paginierte Meridian-Worklist. Mandant und Eigentuemer bleiben
+sichtbar; Umbuchung und Teil-/Vollauslagerung sind statusvalidiert und mit
+Benutzer, Pflichtgrund sowie Vorher-/Nachherwerten append-only auditiert.
+
 `L3-MDE-INBOX-003` nutzt den plattformseitigen Mobile-Sync-Kern als kanonische
 Eingangsqueue. Inventurzaehlungen werden erst nach Vorvalidierung und
 idempotenter Queue-Verarbeitung in die Inventory-Domaene delegiert. Die

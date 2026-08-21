@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-08-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-21T18:20:13Z'
+generated_at: '2026-08-21T18:40:47Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1289,6 +1289,7 @@ domains:
     - /lager/bestandskorrektur
     - /lager/bestandsuebersicht
     - /lager/einlagerung
+    - /lager/fremdware
     - /lager/gs1-scanner
     - /lager/inventur
     - /lager/inventur-nebenlaeufe
@@ -1383,6 +1384,7 @@ domains:
     - docs/adr/adr-057-mde-inbox-on-mobile-sync-core.md
     - docs/adr/adr-059-production-control-projection.md
     - docs/adr/adr-060-governed-inventory-auxiliary-batches.md
+    - docs/adr/adr-062-foreign-goods-operator-projection.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1875,9 +1877,10 @@ domains:
     - docs/adr/adr-047-canonical-feeding-feed-catalog.md
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
+    - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 910
-  frontend_routes_mapped: 910
+  frontend_routes_total: 911
+  frontend_routes_mapped: 911
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

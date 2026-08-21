@@ -108,4 +108,5 @@
   ,{ "path": "produktion/produktionsleitstand", "module": "@/pages/produktion/produktionsleitstand" }
   ,{ "path": "lager/inventur-nebenlaeufe", "module": "@/pages/lager/inventur-nebenlaeufe" }
   ,{ "path": "finance/rechnungstapel", "module": "@/pages/finance/rechnungstapel" }
+  ,{ "path": "lager/fremdware", "module": "@/pages/lager/fremdware" }
 ]

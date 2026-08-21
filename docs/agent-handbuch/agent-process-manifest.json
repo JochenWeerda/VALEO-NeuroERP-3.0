@@ -2239,6 +2239,29 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "lager/fremdware",
+      "title": "Fremdware und Fremdbestand",
+      "domain": "inventory",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__fremdware/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/fremdware/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/fremdware/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/fremdware/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "tenant_id",
+        "eigentuemer_id",
+        "eigentuemer_name",
+        "lagerort",
+        "notiz"
+      ],
+      "mcp_tool_ids": [
+        "wms.lot.trace",
+        "wms.cell.status"
+      ]
+    },
+    {
       "mask_id": "lager/inventur-nebenlaeufe",
       "title": "Inventur-Nebenlaeufe",
       "domain": "inventory",

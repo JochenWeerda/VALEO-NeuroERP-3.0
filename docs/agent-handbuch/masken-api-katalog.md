@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (52 Masken).
+> Generiert aus `app/core/screen_definitions.py` (53 Masken).
 
 ## Übersicht
 
@@ -55,6 +55,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
+| `lager/fremdware` | Fremdware und Fremdbestand | inventory | niedrig | — | `GET /api/v1/masks/lager/fremdware/agent-contract` |
 | `lager/inventur-nebenlaeufe` | Inventur-Nebenlaeufe | inventory | hoch | — | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
 | `lager/leitstand` | Lager-Leitstand | lager | niedrig | — | `GET /api/v1/masks/lager/leitstand/agent-contract` |
 | `lager/stock-movement` | Lagerbewegung | lager | hoch | `inventory-to-settlement` | `GET /api/v1/masks/lager/stock-movement/agent-contract` |
@@ -1553,6 +1554,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: inventory
+
+### `lager/fremdware` — Fremdware und Fremdbestand
+
+**Zweck:** Fremde Ware eigentuemer- und mandantensicher im Lager steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/fremdware/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/fremdware/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/fremdware/readiness` |
+| Rollout-Route | `/mask-rollout/lager__fremdware/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/foreign-goods/summary`
+- `items` → `/api/v1/foreign-goods`
+
+**MCP-Tools (Domäne):**
+
+- `wms.lot.trace` — scope `inventory:read`, Risiko niedrig
+- `wms.cell.status` — scope `inventory:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Fremdbestand nach Eigentuemer.
+- Welche Einlagerungen sind ueberfaellig?
+
+**Sensible Felder:** `tenant_id, eigentuemer_id, eigentuemer_name, lagerort, notiz`
+
+---
 
 ### `lager/inventur-nebenlaeufe` — Inventur-Nebenlaeufe
 
