@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-LEGACY-INTERFACES-017 Standard- und Unimet-Adapterrahmen - reserviert 2026-08-21
+
+**Von:** Abschluss des letzten L3-P3-Gaps. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+
+**Ziel:** Repo-seitige Format-, Mapping-, Idempotenz-, Fehlerkorb-, Reconciliation- und Monitoring-Vertraege fuer `l3_standard` und `unimet` bereitstellen, ohne unbekannte Kundenformate oder produktive Zielbuchungen vorzutäuschen.
+
+**Dateibesitz:** `docs/agent-ops/slices/L3-LEGACY-INTERFACES-017.yaml`, dieser Workboard-Abschnitt, Legacy-Adapter-Service/-Endpoint/-Migration/-Tests, zentrale ScreenDefinition/Route, Integration-Doku, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
+
+**Abnahme:** inaktive versionierte Profile; tenant-/profilgebundene Idempotenz; Payload-Konflikt; Quarantaene/Retry; kanonisches Dry-run-Staging; Reconciliation und Aktivierungs-Gate; native Monitoring-Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-BELEGCHECK-PROJECTION-016 Belegkontrolle Live-Projektion - abgeschlossen 2026-08-21
 
 **Von:** Dokumentierter Folgeausbau aus `L3-BELEGCHECK-WORKLIST-005`. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-21.
