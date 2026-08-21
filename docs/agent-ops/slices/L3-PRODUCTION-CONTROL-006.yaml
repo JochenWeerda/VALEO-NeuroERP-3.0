@@ -1,0 +1,35 @@
+slice_id: L3-PRODUCTION-CONTROL-006
+id: L3-PRODUCTION-CONTROL-006
+title: Allgemeiner Produktionsleitstand
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Bestehende Produktions-, Ruestlisten-, Chargen- und Lagerbewegungskerne in
+  einer nativen L3-vertrauten Produktions-Worklist zusammenzufuehren.
+architecture:
+  decision_level: significant
+  domains: [agrar, inventory]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Kanonische Mischfutterauftraege, Ruestlisten und Lagerbewegungen projizieren.
+  - Muehlenlauf, Stapelbuchung und Nachbearbeitung als auditierte Operationen modellieren.
+  - Serverseitige Worklist-Filter, Druckpfad und Deep-Links bereitstellen.
+file_ownership:
+  - app/services/production_control_service.py
+  - app/api/v1/endpoints/production_control.py
+  - alembic/versions/production_control_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/produktion/produktionsleitstand.tsx
+  - tests/test_production_control.py
+  - generated route, OpenAPI, architecture and handbook artifacts
+  - Agrar domain pack, ADR, gap documentation and workboard
+acceptance:
+  - Tenant-Isolation on every read and mutation.
+  - Server pagination and L3 production filter dimensions.
+  - Audited legal batch and rework transitions with mandatory reason.
+  - Canonical source-object links and production print path.
+  - Native generator-ready worklist and green repository gates.
+risks:
+  - Physical mill or PLC execution remains behind an external adapter gate.
