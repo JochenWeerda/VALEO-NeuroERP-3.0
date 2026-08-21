@@ -32,12 +32,24 @@ description: Geuebte Gesten zum Oeffnen und Schliessen von L3-Ribbons und Masken
 
 ## Evidenz 2026-08-21
 
-- Captures: `C:\Users\Jochen\Pictures\L3-Capture-2026-08-21-nav-precise`
-- Annotation: `_icons_annotated.png` (rote Kreise = erkannte Icon-Mitten)
-- Fehlermuster: Tab-X zu weit rechts → ABRECHNUNG statt ERFASSUNG;
-  Klick neben Icon → leerer Workspace (kein Maskenfenster).
+- Captures (Delta): `C:\Users\Jochen\Pictures\L3-Capture-2026-08-21-delta`
+- Captures (Nav-Drill): `C:\Users\Jochen\Pictures\L3-Capture-2026-08-21-nav-drill`
+- Captures (praezise Icons): `C:\Users\Jochen\Pictures\L3-Capture-2026-08-21-nav-precise`
+- Captures (Vollmasken 2026-08-21): `C:\Users\Jochen\Pictures\L3-Capture-2026-08-21-full-masks`
+  (~370 PNGs, Logs `full-mask-*.txt`, `final_*`, `submenu_*`)
+- Annotation: `_icons_annotated.png` / `401_icons_annotated.png`
+- Fehlermuster: Tab-X zu weit rechts → falscher Ribbon;
+  Klick neben Icon → leerer Workspace; modaler Dialog (Abfrage-Center)
+  braucht `Alt+S` / Schliessen, nicht nur `Ctrl+F4`;
+  `Alt+F4` riskiert App-Exit-Dialog (Nein!).
 
 ## Abgleich
 
 Siehe [`l3-delta-mask-inventory-2026-08-21.md`](l3-delta-mask-inventory-2026-08-21.md)
 und [`l3-full-mask-functional-gap-inventory.md`](l3-full-mask-functional-gap-inventory.md).
+
+## Kalibrierte Tab-X (Fenster `-8,-8`, 1936x1048, Y≈58)
+
+FAVORITEN ~175, ALLGEMEIN ~265, ERFASSUNG ~370, ABRECHNUNG ~480,
+LAGER ~560, PRODUKTION ~620, AUSWERTUNGEN ~660, SCHNITTSTELLE ~760,
+FENSTER ~900. Icon-Klick Y≈108 (Icon-Mitte).

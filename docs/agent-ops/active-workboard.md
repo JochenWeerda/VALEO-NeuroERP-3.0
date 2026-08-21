@@ -23,15 +23,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Ergebnis:** Die festen Profile `l3_standard` und `unimet` besitzen versionierte Format-/Mappingvertraege, tenantgebundene externe-ID-/Payload-Hash-Idempotenz, Quarantaene, deterministisches Dry-run-Staging, Mengen-Reconciliation, auditierte Pilotfreigabe und eine native Monitoring-Worklist. Produktive Domaenenbuchung ist explizit deaktiviert, bis reale Kundenformate, Zielmapping und Pilotfreigabe vorliegen. Sieben Backendtests, ein Frontendtest, TypeScript und Ruff sind gruen.
 
-## L3-FULL-MASK-SHOTS-018 Vollstaendige Masken-Screenshots - reserviert 2026-08-21
+## L3-FULL-MASK-SHOTS-018 Vollstaendige Masken-Screenshots - abgeschlossen 2026-08-21
 
-**Von:** User-Auftrag: Screenshots aller oeffbaren L3-Masken. **Owner:** Cursor Agent. **Stand:** reserviert 2026-08-21.
+**Von:** User-Auftrag: Screenshots aller oeffbaren L3-Masken. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-21.
 
-**Ziel:** Read-only RDP-Erfassung aller Ribbon-Icons (praeziser Linksklick auf Icon-Mitte) mit lokalem Screenshot je Maske; Captures ausserhalb Git. Slice-ID 018 wegen Codex-017.
+**Ergebnis:** Read-only RDP-Erfassung unter `C:\Users\Jochen\Pictures\L3-Capture-2026-08-21-full-masks` (~370 PNGs, nicht in Git). Ribbons DATEI–FENSTER, Icon-Linksklicks, Dropdowns (Beleg-Kontrolle, MDE, Kontrakt) und Untermenue-Oeffnungen dokumentiert. Codex-Slices unberuehrt.
 
-**Dateibesitz:** `docs/agent-ops/slices/L3-FULL-MASK-SHOTS-018.yaml`, dieser Abschnitt, `docs/design/l3-rdp-navigation-drill.md`. Keine Codex-Dateien.
-
-**Abnahme:** Pro Ribbon Tab aktiviert; je sichtbarem Icon Screenshot nach erfolgreichem Oeffnen; leere Workspaces als Miss geloggt und nachgeklickt; keine Schreibaktionen in L3.
+**Dateibesitz:** Slice-YAML, Workboard, `l3-rdp-navigation-drill.md`.
 
 ## L3-BELEGCHECK-PROJECTION-016 Belegkontrolle Live-Projektion - abgeschlossen 2026-08-21
 
