@@ -259,6 +259,14 @@ Handbuch inventarisiert damit 41 Masken. Alle drei Screens sind
 Domain-Overlays. Das globale Command-Inventar hat unabhaengig davon fuenf offene
 High-Risk-Aktionen auf `agrar/ration`, dokumentiert unter Open Gaps.
 
+## L3-PRODUCTION-CONTROL-006
+
+`produktion/produktionsleitstand` fuehrt Produktionsliste, Muehlenlauf,
+Umbuchung, Stapelbuchung und Nachbearbeitung als native, generatorfaehige
+Meridian-Worklist zusammen. Die Maske bleibt ein duennes Cockpit ueber der
+zentralen Runtime; Quellfachlogik fuer Bestand, Charge und FIBU wird nicht
+dupliziert.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

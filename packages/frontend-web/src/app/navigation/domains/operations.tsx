@@ -1329,6 +1329,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
     children: [
       {
+        id: 'produktionsleitstand',
+        label: 'Produktionsliste',
+        icon: Settings,
+        module: '@/pages/produktion/produktionsleitstand',
+        preferredPath: 'produktion/produktionsleitstand',
+        keywords: ['produktion', 'produktionsliste', 'muehle', 'ruestliste', 'stapelbuchung', 'nachbearbeitung'],
+        mcp: { businessDomain: 'logistics', scope: 'logistics:write' },
+      },
+      {
         id: 'produktions-dokumente-drucken',
         label: 'Produktions-Dokumente drucken',
         icon: FileText,

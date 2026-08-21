@@ -219,6 +219,14 @@ Navigations-Drill dokumentiert in
 Damit verbleiben aus der L3-Vollinventur drei offene P1-Gaps: Produktion,
 Inventur-Nebenlaeufe und Rechnungstapel/Selbstabrechner.
 
+Nachzug 2026-08-21 (`L3-PRODUCTION-CONTROL-006`): `L3-GAP-PROD-003` ist
+repo-seitig geschlossen. Der native Produktionsleitstand projiziert kanonische
+Mischfutterauftraege und fuehrt Muehlenlauf, Umbuchung, Stapelbuchung und
+Nachbearbeitung als tenantgebundene, auditierte Operations-Lifecycles mit
+Quell-Deep-Link und Druckpfad. Damit verbleiben zwei offene P1-Gaps:
+Inventur-Nebenlaeufe und Rechnungstapel/Selbstabrechner. Physische SPS-/
+Muehlenadapter und der Standortpilot bleiben externe Gates.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

@@ -28,6 +28,10 @@ pytest tests/test_feeding_events.py tests/test_feeding_import_monitor_api.py -q 
 pytest tests/test_feeding_measure_lifecycle.py tests/test_feeding_measure_lifecycle_api.py tests/test_feeding_consulting_report_api.py -q --no-cov
 ```
 
+Produktionsleitstand:
+`pytest tests/test_production_control.py -q --no-cov` und
+`vitest run src/__tests__/pages/produktion/produktionsleitstand.test.tsx`.
+
 Frontend: `packages/frontend-web/src/pages/agrar/`
 
 Fuetterungsberatung UX: `packages/frontend-web/src/__tests__/pages/portal/feed-advice-entry.test.tsx`

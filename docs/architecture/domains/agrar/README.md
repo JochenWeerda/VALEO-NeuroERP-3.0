@@ -12,6 +12,10 @@ version: 1.0.0
 
 Ernteannahme, Kontrakte, Trocknung, Selbstabrechnung, Materialfluss, Futtermittel.
 
+Der native Produktionsleitstand projiziert Mischfutterauftraege und allgemeine
+Muehlen-/Umbuchungs-/Stapel-/Nachbearbeitungsvorgaenge, ohne Bestands-, Chargen-
+oder FIBU-Logik zu duplizieren.
+
 ## Navigation
 
 | Thema | Datei |

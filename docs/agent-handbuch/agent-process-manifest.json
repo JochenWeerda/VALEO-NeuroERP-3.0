@@ -1442,6 +1442,38 @@
       ]
     },
     {
+      "mask_id": "produktion/produktionsleitstand",
+      "title": "Produktionsleitstand",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__produktionsleitstand/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/produktionsleitstand/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/produktionsleitstand/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/produktionsleitstand/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "sync",
+          "label": "Auftraege synchronisieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "production.control.write",
+          "commandEndpoint": "/api/v1/production-control/sync",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "assigned_user",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "crm/customer-360",
       "title": "Kundenstamm",
       "domain": "crm",

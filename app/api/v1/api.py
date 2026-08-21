@@ -1033,6 +1033,10 @@ from app.api.v1.endpoints import document_control  # noqa: E402
 
 api_router.include_router(document_control.router)
 
+from app.api.v1.endpoints import production_control  # noqa: E402
+
+api_router.include_router(production_control.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

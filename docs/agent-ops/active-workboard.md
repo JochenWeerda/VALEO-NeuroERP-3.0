@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-PRODUCTION-CONTROL-006 Allgemeiner Produktionsleitstand - reserviert 2026-08-21
+## L3-PRODUCTION-CONTROL-006 Allgemeiner Produktionsleitstand - abgeschlossen 2026-08-21
 
-**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Fortsetzung der priorisierten L3-Gap-Umsetzung aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Den vorhandenen Mischfutter-, Ruestlisten-, Chargen- und Lagerbewegungskern zu einem nativen Produktionsleitstand fuer Produktionsliste, Muehle, Artikel-Umbuchung, Stapelbuchung und Nachbearbeitung verbinden, ohne parallele Produktionslogik einzufuehren.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-PRODUCTION-CONTROL-006.yaml`, dieser Workboard-Abschnitt, neue Produktionsleitstand-Projektions-/API-/Migrations-/Testdateien, zentrale Produktions-ScreenDefinition und Route, Agrar-Domain-Pack, ADR/Impact-Note, generierte Handbuch-/OpenAPI-/Architekturartefakte sowie Gap-Dokumentation.
 
 **Abnahme:** Tenant-Isolation; Projektion auf kanonische Mischfutterauftraege, Ruestlisten und Lagerbewegungen; auditierte Stapel-/Nachbearbeitungstransitionen mit Pflichtgrund; serverseitige Filter/Pagination; Ursprungsobjekt-Deep-Links und Druckpfad; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Der native Produktionsleitstand projiziert Mischfutterauftraege tenantgebunden und fuehrt Produktionsauftrag, Muehlenlauf, Artikel-Umbuchung, Stapelbuchung und Nachbearbeitung in einer serverseitig paginierten Worklist. Geschlossene Statusmaschine, Pflichtgrund, append-only Audit, Ursprungs-Deep-Link und Produktionsdruckpfad sind umgesetzt. 6 Backend- und 1 Frontendtest, TypeScript, Ruff, Single-Head-Migration, OpenAPI-/Route-/Handbuchgeneratoren sowie Architektur-Validate/-Drift sind gruen. Physischer Anlagenadapter und Standortpilot bleiben extern.
 
 ## L3-BELEGCHECK-WORKLIST-005 Zentrale Beleg-Kontroll-Worklist - abgeschlossen 2026-08-21
 

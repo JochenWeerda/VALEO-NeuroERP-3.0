@@ -28,3 +28,4 @@ version: 1.0.0
 | [ADR-050](../../../adr/adr-050-feeding-plan-version-and-publication.md) | Unveraenderliche FeedingPlanVersion und atomare Publikation |
 | [ADR-054](../../../adr/adr-054-schemafeste-feeding-events.md) | Schemafeste Feeding-Events auf der Transactional Outbox |
 | [ADR-055](../../../adr/adr-055-feeding-measure-lifecycle.md) | Versionierter Massnahmen-Lifecycle und reproduzierbare Beratungsentwuerfe |
+| [ADR-059](../../../adr/adr-059-production-control-projection.md) | Produktionsleitstand als Projektion kanonischer ERP-Quellen |

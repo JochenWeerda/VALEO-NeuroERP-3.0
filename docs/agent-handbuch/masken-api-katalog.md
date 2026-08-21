@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (49 Masken).
+> Generiert aus `app/core/screen_definitions.py` (50 Masken).
 
 ## Übersicht
 
@@ -57,6 +57,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `lager/leitstand` | Lager-Leitstand | lager | niedrig | — | `GET /api/v1/masks/lager/leitstand/agent-contract` |
 | `lager/stock-movement` | Lagerbewegung | lager | hoch | `inventory-to-settlement` | `GET /api/v1/masks/lager/stock-movement/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
+| `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
@@ -632,6 +633,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `produktion/produktionsleitstand` — Produktionsleitstand
+
+**Zweck:** Produktionsvorgaenge aus kanonischen Auftraegen und Bewegungen steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/produktion/produktionsleitstand/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
+| Readiness | `GET /api/v1/masks/produktion/produktionsleitstand/readiness` |
+| Rollout-Route | `/mask-rollout/produktion__produktionsleitstand/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/production-control/summary`
+- `operations` → `/api/v1/production-control/operations`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige laufende Muehlenauftraege.
+- Welche Vorgaenge brauchen Nachbearbeitung?
+
+**Sensible Felder:** `assigned_user, notes`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `sync` | Auftraege synchronisieren | moderate | nein | `/api/v1/production-control/sync` |
 
 ---
 

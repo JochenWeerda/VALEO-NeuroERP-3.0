@@ -10,6 +10,17 @@ version: 1.0.0
 
 # Agrar — API
 
+## Produktionsleitstand
+
+- `GET /api/v1/production-control/operations` - tenantgebundene, serverseitig paginierte Produktionsliste.
+- `GET /api/v1/production-control/summary` - Worklist-Zusammenfassung.
+- `POST /api/v1/production-control/operations` - Muehlen-, Umbuchungs-, Stapel- oder Nachbearbeitungsvorgang.
+- `POST /api/v1/production-control/sync` - kanonische Mischfutterauftraege idempotent projizieren.
+- `POST /api/v1/production-control/operations/{id}/transition` - begruendeter, auditierter Statuswechsel.
+- `GET /api/v1/production-control/operations/{id}/audit` - append-only Verlauf.
+
+Entscheidung: [ADR-059](../../../adr/adr-059-production-control-projection.md).
+
 - Endpoints: `agrar*`, `agri*`, `annahme*` — [endpoint-inventory.md](../../../schnittstellen/endpoint-inventory.md)
 - Services: `agrar_*`, `agri_*`, `agribusiness_*`, `annahme_*`
 - Module: `modules/agrar/`

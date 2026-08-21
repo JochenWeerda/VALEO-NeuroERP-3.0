@@ -3601,6 +3601,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/produktion/produktionsleitstand",
+      "path": "produktion/produktionsleitstand",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/projekte/liste",
       "path": "projekte",
       "source": "alias"

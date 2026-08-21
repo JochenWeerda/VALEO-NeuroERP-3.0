@@ -3285,7 +3285,69 @@ def build_document_control_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_production_control_screen_definition() -> dict[str, Any]:
+    """Native L3-style production worklist over canonical source objects."""
+    return {
+        "schemaVersion": 1,
+        "id": "produktion/produktionsleitstand",
+        "domain": "agrar",
+        "mode": "list",
+        "title": "Produktionsleitstand",
+        "subtitle": "Produktionsliste, Muehle, Umbuchung, Stapel und Nachbearbeitung",
+        "adapter": {"type": "native", "sourceId": "produktion/produktionsleitstand", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/production-control/summary", "staleTimeMs": 10_000},
+            {"key": "operations", "endpoint": "/api/v1/production-control/operations", "pageSize": 50, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "waiting", "label": "Wartend / freigegeben", "tone": "warning"},
+            {"key": "running", "label": "In Produktion", "tone": "info"},
+            {"key": "attention", "label": "Nachbearbeitung", "tone": "danger"},
+            {"key": "mill_runs", "label": "Muehlenlaeufe", "tone": "neutral"},
+            {"key": "completed", "label": "Fertig", "tone": "success"},
+        ],
+        "tables": [{
+            "key": "operations", "label": "Produktionsvorgaenge", "dataSourceKey": "operations",
+            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "planned_at", "label": "Plantermin", "renderKind": "datetime", "sortable": True, "width": 150},
+                {"key": "operation_type", "label": "Vorgang", "sortable": True, "filterable": True, "width": 155},
+                {"key": "source_number", "label": "Auftrag / Stapel", "sortable": True, "filterable": True, "width": 150},
+                {"key": "article_name", "label": "Artikel / Rezept", "filterable": True, "width": 190},
+                {"key": "batch_ref", "label": "Charge", "filterable": True, "width": 135},
+                {"key": "quantity", "label": "Menge", "numeric": True, "sortable": True, "width": 90},
+                {"key": "unit", "label": "ME", "width": 60},
+                {"key": "work_center", "label": "Muehle / Arbeitsplatz", "filterable": True, "width": 155},
+                {"key": "assigned_user", "label": "Benutzer", "sortable": True, "filterable": True, "width": 125},
+                {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 115},
+                {"key": "notes", "label": "Hinweis", "width": 220},
+            ],
+            "rowActions": [
+                {"key": "release", "label": "Freigeben", "visibleWhen": {"field": "status", "values": ["queued", "rework"]}},
+                {"key": "start", "label": "Starten", "visibleWhen": {"field": "status", "values": ["released", "paused", "rework"]}},
+                {"key": "complete", "label": "Fertig", "visibleWhen": {"field": "status", "values": ["running", "rework"]}},
+                {"key": "mark_rework", "label": "Nachbearbeitung", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["running", "paused", "completed"]}},
+                {"key": "open_source", "label": "Ursprung"},
+                {"key": "print", "label": "Drucken"},
+            ],
+        }],
+        "actions": [{"key": "sync", "label": "Auftraege synchronisieren", "kind": "secondary",
+            "permission": "production.control.write", "commandEndpoint": "/api/v1/production-control/sync",
+            "method": "POST", "dangerLevel": "moderate", "requiresConfirmation": True, "auditReasonRequired": True}],
+        "workflow": {"processKey": "production-control", "status": "worklist", "nextActionKey": "sync", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 56, "requiresLazyTabs": False, "requiresVirtualTables": True,
+            "lookupMinChars": 2, "bundleGroup": "production"},
+        "agentContract": {"businessPurpose": "Produktionsvorgaenge aus kanonischen Auftraegen und Bewegungen steuern.",
+            "examplePrompts": ["Zeige laufende Muehlenauftraege.", "Welche Vorgaenge brauchen Nachbearbeitung?"],
+            "sensitiveFields": ["assigned_user", "notes"],
+            "forbiddenAgentTasks": ["Produktion ohne menschlichen Audit-Grund starten oder abschliessen"],
+            "testSelectors": {"screenRoot": "[data-testid='produktionsleitstand']"}},
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    "produktion/produktionsleitstand": build_production_control_screen_definition,
     "docflow/dokumenten-ruecklauf": build_document_return_screen_definition,
     "auswertungen/beleg-kontrolle": build_document_control_screen_definition,
     "crm/customer-360": build_crm_customer_360_screen_definition,
@@ -3821,6 +3883,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
         "nicht fakturierte lieferscheine",
         "fehlende eingangsbelege",
     ],
+    "produktion/produktionsleitstand": ["produktionsliste", "produktion", "muehle", "stapelbuchung", "nachbearbeitung"],
 }
 
 
@@ -3833,6 +3896,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "produktion/produktionsleitstand": "/produktion/produktionsleitstand",
     "agrar/feed-advice": "/portal/rationsoptimierung",
     "agrar/rations-lifecycle": "/portal/rationsoptimierung?view=rations",
     "agrar/feeding-businesses": "/portal/rationsoptimierung?view=businesses",

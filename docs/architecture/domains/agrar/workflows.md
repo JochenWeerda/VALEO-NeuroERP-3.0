@@ -10,6 +10,14 @@ version: 1.0.0
 
 # Agrar — Workflows
 
+## Allgemeine Produktion
+
+Quellauftraege synchronisieren oder Muehlen-/Umbuchungs-/Stapelvorgang
+registrieren -> freigeben -> starten -> fertigmelden. Pause und Nachbearbeitung
+sind explizite Status; jeder Wechsel besitzt Bediener und Pflichtgrund.
+Ursprungsobjekt, Druckpfad, Charge und Menge bleiben direkt erreichbar.
+Bestands-, Chargen- und FIBU-Buchungen verbleiben im kanonischen Quellprozess.
+
 ## Fuetterungsberatung
 
 Tiergruppenpflege: berechtigten Betrieb waehlen -> Profil/Leistungsparameter

@@ -105,4 +105,5 @@
   ,{ "path": "agrar/kunden-schlagkartei/:kunden_nr", "module": "@/pages/agrar/kunden-schlagkartei" }
   ,{ "path": "crm/potential-analyse", "module": "@/pages/crm/potential-analyse" }
   ,{ "path": "docflow/dokumenten-ruecklauf", "module": "@/pages/docflow/dokumenten-ruecklauf" }
+  ,{ "path": "produktion/produktionsleitstand", "module": "@/pages/produktion/produktionsleitstand" }
 ]

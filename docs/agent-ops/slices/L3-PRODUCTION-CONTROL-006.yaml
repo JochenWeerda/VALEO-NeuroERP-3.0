@@ -2,9 +2,10 @@ slice_id: L3-PRODUCTION-CONTROL-006
 id: L3-PRODUCTION-CONTROL-006
 title: Allgemeiner Produktionsleitstand
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Bestehende Produktions-, Ruestlisten-, Chargen- und Lagerbewegungskerne in
   einer nativen L3-vertrauten Produktions-Worklist zusammenzufuehren.
@@ -33,3 +34,8 @@ acceptance:
   - Native generator-ready worklist and green repository gates.
 risks:
   - Physical mill or PLC execution remains behind an external adapter gate.
+result:
+  - Native generator-ready production worklist delivered.
+  - Canonical feed-order projection plus audited general operation lifecycle delivered.
+  - Six backend tests, one focused frontend test, TypeScript and Ruff passed.
+  - OpenAPI, route, architecture, ADR and handbook artifacts regenerated without drift.
