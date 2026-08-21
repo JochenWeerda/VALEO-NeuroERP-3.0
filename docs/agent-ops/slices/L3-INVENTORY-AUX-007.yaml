@@ -1,0 +1,35 @@
+slice_id: L3-INVENTORY-AUX-007
+id: L3-INVENTORY-AUX-007
+title: Inventur-Nebenlaeufe
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Bestehende Inventur/PIV um kontrollierten Listen-, Import-, Kontroll-,
+  Bewertungs- und Bestandsvortragsablauf zu erweitern.
+architecture:
+  decision_level: significant
+  domains: [inventory, finance]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Kanonische Inventurkoepfe und Positionen referenzieren.
+  - Export/Import, Kontrolllauf und vorlaeufige Bewertung nachvollziehbar fuehren.
+  - Bestandsvortrag nur mit Vier-Augen-Freigabe erzeugbar machen.
+file_ownership:
+  - app/services/inventory_auxiliary_service.py
+  - app/api/v1/endpoints/inventory_auxiliary.py
+  - alembic/versions/inventory_auxiliary_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/lager/inventur-nebenlaeufe.tsx
+  - tests/test_inventory_auxiliary.py
+  - generated route, OpenAPI, architecture and handbook artifacts
+  - Inventory domain pack, ADR, gap documentation and workboard
+acceptance:
+  - Tenant-Isolation on every read and mutation.
+  - Immutable hash-bound export and import batches.
+  - Dry-run controls and preliminary valuation without stock posting.
+  - Four-eyes approval and audit for opening-balance generation.
+  - Native generator-ready worklist and green repository gates.
+risks:
+  - Productive file storage and printer adapters remain external rollout gates.
