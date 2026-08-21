@@ -1041,6 +1041,10 @@ from app.api.v1.endpoints import inventory_auxiliary  # noqa: E402
 
 api_router.include_router(inventory_auxiliary.router)
 
+from app.api.v1.endpoints import billing_batch  # noqa: E402
+
+api_router.include_router(billing_batch.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(

@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-BILLING-BATCH-008 Rechnungstapel und Selbstabrechner - reserviert 2026-08-21
+## L3-BILLING-BATCH-008 Rechnungstapel und Selbstabrechner - abgeschlossen 2026-08-21
 
-**Von:** Abschluss der priorisierten L3-P1-Gaps aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** reserviert 2026-08-21.
+**Von:** Abschluss der priorisierten L3-P1-Gaps aus `L3-FULL-MASK-GAP-002`. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Vorhandene Faktura-, AP/AR-, Rohware-Sammelabrechnungs- und Self-Billing-Kerne in einem nativen Rechnungstapel-Arbeitsablauf verbinden: anlegen, pruefen, freigeben, ausfuehren, Fehlerzeilen wiederholen und Belegnachweis oeffnen.
 
 **Dateibesitz:** `docs/agent-ops/slices/L3-BILLING-BATCH-008.yaml`, dieser Workboard-Abschnitt, neue Billing-Batch-Projektions-/API-/Migrations-/Testdateien, zentrale ScreenDefinition und Route, Finance-/Agrar-Domain-Pack, ADR/Impact-Note, Generatorartefakte und Gap-Dokumentation.
 
 **Abnahme:** Tenant-Isolation; Stapelarten Ausgang, Eingang, Selbstabrechner Verkauf und Kunden-Zukauf; geschlossener Lifecycle mit Vier-Augen-Freigabe; idempotente Zeilenverarbeitung und begruendeter Retry; Fehlerzeile und Quellbeleg; serverseitige Pagination; generatorfaehige native Worklist; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Vier Stapelarten orchestrieren unveraenderliche kanonische Faktura-/AP-/AR-/Self-Billing-Quellbelege. Pruefung, Vier-Augen-Freigabe, idempotente Ausfuehrung, sichtbare Fehlerzeile, Quell-/Nachweislink und begruendeter Retry sind umgesetzt. 6 Backend- und 1 Frontendtest, TypeScript, Ruff, Single-Head-Migration, Generatoren sowie Architektur-Validate/-Drift sind gruen. Damit sind alle P1-Gaps der L3-Vollinventur repo-seitig geschlossen; Provider-/Fiskal-/Echtdatenpiloten bleiben extern.
 
 ## L3-INVENTORY-AUX-007 Inventur-Nebenlaeufe - abgeschlossen 2026-08-21
 

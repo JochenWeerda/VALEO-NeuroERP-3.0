@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (51 Masken).
+> Generiert aus `app/core/screen_definitions.py` (52 Masken).
 
 ## Übersicht
 
@@ -49,6 +49,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/debitor` | Debitor | finance | niedrig | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
+| `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `futtermittel/analyse` | Futteranalyse | futtermittel | hoch | — | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
 | `futtermittel/analysen` | Futteranalysen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
@@ -1356,6 +1357,38 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `freigeben` | Zahlungslauf freigeben | critical | ja | `/api/v1/finance/payment-runs/{entity_id}/actions/freigeben` |
+
+---
+
+### `finance/rechnungstapel` — Rechnungstapel
+
+**Zweck:** Rechnungs- und Selbstabrechnungsstapel nachvollziehbar abarbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/rechnungstapel/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/rechnungstapel/readiness` |
+| Rollout-Route | `/mask-rollout/finance__rechnungstapel/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/billing-batches/summary`
+- `batches` → `/api/v1/billing-batches`
+- `errors` → `/api/v1/billing-batches/lines?status=failed`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Fehlerzeilen im Rechnungstapel.
+- Welche Selbstabrechner warten auf Freigabe?
+
+**Sensible Felder:** `validation_error, source_ref, maker, checker`
 
 ---
 

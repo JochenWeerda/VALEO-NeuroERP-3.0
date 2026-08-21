@@ -2,9 +2,10 @@ slice_id: L3-BILLING-BATCH-008
 id: L3-BILLING-BATCH-008
 title: Rechnungstapel und Selbstabrechner
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-21"
 started_at: "2026-08-21"
+completed_at: "2026-08-21"
 goal: >-
   Bestehende Rechnungs- und Selbstabrechnungskerne in einem nativen,
   auditierbaren Stapelarbeitsplatz zusammenzufuehren.
@@ -33,3 +34,8 @@ acceptance:
   - Native generator-ready worklist and green repository gates.
 risks:
   - Productive provider delivery and fiscal pilot remain external rollout gates.
+result:
+  - Native generator-ready billing batch worklist delivered.
+  - Four batch types, four-eyes release, idempotent lines and retry delivered.
+  - Six backend tests, one focused frontend test, TypeScript and Ruff passed.
+  - OpenAPI, route, architecture, ADR and handbook artifacts regenerated without drift.

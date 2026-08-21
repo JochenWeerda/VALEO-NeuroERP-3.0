@@ -10,6 +10,8 @@ version: 1.0.0
 
 # Finance — Entscheidungen
 
+- [ADR-061](../../../adr/adr-061-billing-batch-orchestration.md) - Rechnungstapel als Orchestrierung kanonischer Belege
+
 | ADR | Titel |
 |---|---|
 | [ADR-001](../../../adr/adr-001-fibu-domain-reuse-vs-rewrite.md) | FiBu Reuse vs Rewrite |

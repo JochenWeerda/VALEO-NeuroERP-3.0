@@ -19,7 +19,7 @@ Live-Erfassung der angemeldeten Remote-Desktop-Sitzung (`10.200.1.3`, L3/zvoove
 aus [`l3-full-mask-functional-gap-inventory.md`](l3-full-mask-functional-gap-inventory.md)
 bleibt bestätigt; `L3-GAP-MDE-001` ist inzwischen repo-seitig geschlossen
 (`L3-MDE-INBOX-003`). Nach Abschluss von Dokumentenruecklauf und Belegkontrolle
-bleibt nach den Inventur-Nebenlaeufen ein P1-Gap offen. Neu sind nur Feindetails aus
+sind nach dem Rechnungstapel alle P1-Gaps repo-seitig geschlossen. Neu sind nur Feindetails aus
 dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 
 ## Methode
@@ -54,7 +54,7 @@ dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 | L3-GAP-PROD-003 | P1 | PRODUKTION → Liste/Mühle/Nachbearbeitung | repo-seitig geschlossen (`L3-PRODUCTION-CONTROL-006`) |
 | L3-GAP-INV-004 | P1 | LAGER → Inventur (+ Vortrag/Korrektur) | repo-seitig geschlossen (`L3-INVENTORY-AUX-007`) |
 | L3-GAP-BELEGCHECK-005 | P1 | AUSWERTUNGEN → Beleg-Kontrolle | repo-seitig geschlossen (`L3-BELEGCHECK-WORKLIST-005`) |
-| L3-GAP-BILLBATCH-006 | P1 | ABRECHNUNG Faktur/Abschluss | weiter offen als Bedienablauf |
+| L3-GAP-BILLBATCH-006 | P1 | ABRECHNUNG Faktur/Abschluss | repo-seitig geschlossen (`L3-BILLING-BATCH-008`) |
 | L3-ROHWARE-002 | P2 | LAGER → Fremdware | weiter offen (Operator-UI) |
 | L3-GAP-QUERY-008 | P2 | Favoriten/Auswertungen → Abfrage-Center | weiter offen |
 | L3-GAP-TEAMCAL-009 | P2 | ALLGEMEIN → Team Kalender | weiter teilweise |

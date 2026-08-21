@@ -12,6 +12,12 @@ version: 1.0.0
 
 ## Produktionsleitstand
 
+## Rechnungstapel / Selbstabrechner
+
+Die Agrar-Self-Billing- und Sammelabrechnungsbelege werden ueber
+`/api/v1/billing-batches` als unveraenderliche Quellzeilen orchestriert. Die
+fachliche Belegerzeugung bleibt in den vorhandenen Agrar-Services.
+
 - `GET /api/v1/production-control/operations` - tenantgebundene, serverseitig paginierte Produktionsliste.
 - `GET /api/v1/production-control/summary` - Worklist-Zusammenfassung.
 - `POST /api/v1/production-control/operations` - Muehlen-, Umbuchungs-, Stapel- oder Nachbearbeitungsvorgang.

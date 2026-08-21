@@ -10,6 +10,9 @@ version: 1.0.0
 
 # Finance — Tests
 
+Rechnungstapel: `pytest tests/test_billing_batch.py -q --no-cov` und
+`vitest run src/__tests__/pages/finance/rechnungstapel.test.tsx`.
+
 ```bash
 pytest tests/ -k "finance or fibu or ap_invoice or closing" -m "not slow"
 ```

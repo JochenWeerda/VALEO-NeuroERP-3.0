@@ -107,4 +107,5 @@
   ,{ "path": "docflow/dokumenten-ruecklauf", "module": "@/pages/docflow/dokumenten-ruecklauf" }
   ,{ "path": "produktion/produktionsleitstand", "module": "@/pages/produktion/produktionsleitstand" }
   ,{ "path": "lager/inventur-nebenlaeufe", "module": "@/pages/lager/inventur-nebenlaeufe" }
+  ,{ "path": "finance/rechnungstapel", "module": "@/pages/finance/rechnungstapel" }
 ]

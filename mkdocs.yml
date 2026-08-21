@@ -428,6 +428,7 @@ nav:
           - ADR-058 Dokumentenruecklauf auf dem kanonischen Docflow: adr/adr-058-document-return-on-docflow.md
           - ADR-059 Produktionsleitstand als Projektion kanonischer ERP-Quellen: adr/adr-059-production-control-projection.md
           - ADR-060 Kontrollierte Inventur-Nebenlaeufe: adr/adr-060-governed-inventory-auxiliary-batches.md
+          - ADR-061 Rechnungstapel als Orchestrierung kanonischer Belege: adr/adr-061-billing-batch-orchestration.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

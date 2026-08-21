@@ -2067,6 +2067,28 @@
       ]
     },
     {
+      "mask_id": "finance/rechnungstapel",
+      "title": "Rechnungstapel",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__rechnungstapel/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/rechnungstapel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/rechnungstapel/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/rechnungstapel/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "validation_error",
+        "source_ref",
+        "maker",
+        "checker"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "workspace/fibu",
       "title": "FIBU-Cockpit",
       "domain": "finance",

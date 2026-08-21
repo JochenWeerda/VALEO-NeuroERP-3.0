@@ -234,6 +234,14 @@ SHA-256-gebundene Batches mit abweichendem Pruefer und append-only Audit
 gefuehrt. Damit verbleibt ein offener P1-Gap: Rechnungstapel/
 Selbstabrechner. Produktive Dateiablage, Druckadapter und Pilot bleiben extern.
 
+Nachzug 2026-08-21 (`L3-BILLING-BATCH-008`): `L3-GAP-BILLBATCH-006` ist
+repo-seitig geschlossen. Ausgangs-, Eingangs- und beide Selbstabrechnerarten
+laufen ueber einen tenantgebundenen Rechnungstapel mit Pruefung, Vier-Augen-
+Freigabe, idempotenten Zeilen, sichtbarem Fehler, Quell-/Nachweislink und
+begruendetem Retry. Damit sind alle P1-Gaps der L3-Vollinventur repo-seitig
+geschlossen. Providerzustellung, fiskalische Pilotabnahme und Echtdaten-UAT
+bleiben externe Gates.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.

@@ -403,6 +403,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
+        id: 'rechnungstapel',
+        label: 'Rechnungstapel',
+        icon: FileText,
+        module: '@/pages/finance/rechnungstapel',
+        preferredPath: 'finance/rechnungstapel',
+        keywords: ['rechnungstapel', 'faktura', 'selbstabrechner', 'zukauf', 'fehlerzeile'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'beleg-kontrolle',
         label: 'Beleg-Kontrolle',
         icon: ShieldCheck,

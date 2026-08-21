@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-08-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-21T18:04:37Z'
+generated_at: '2026-08-21T18:20:13Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -757,6 +757,7 @@ domains:
     - docs/adr/adr-034-tenant-isolation-klassifizierungssystem.md
     - docs/adr/adr-036-architecture-documentation-stack.md
     - docs/adr/adr-038-address-value-object.md
+    - docs/adr/adr-061-billing-batch-orchestration.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1029,6 +1030,7 @@ domains:
     - /finance/payments
     - /finance/periodenabschluss
     - /finance/periods
+    - /finance/rechnungstapel
     - /finance/reports
     - /finance/skonto-optimizer
     - /finance/steuerschluessel
@@ -1192,6 +1194,7 @@ domains:
     - docs/adr/adr-036-architecture-documentation-stack.md
     - docs/adr/adr-039-repo-layout.md
     - docs/adr/adr-059-production-control-projection.md
+    - docs/adr/adr-061-billing-batch-orchestration.md
     status: active
   hr:
     owner: domain/hr
@@ -1873,8 +1876,8 @@ domains:
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
 mapping_stats:
-  frontend_routes_total: 909
-  frontend_routes_mapped: 909
+  frontend_routes_total: 910
+  frontend_routes_mapped: 910
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

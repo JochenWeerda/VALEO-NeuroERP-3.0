@@ -273,6 +273,12 @@ dupliziert.
 hashgebundene Zaehllisten-/Import-/Kontroll-/Bewertungs-/Vortragsbatches mit
 Vier-Augen-Freigabe und append-only Audit.
 
+## L3-BILLING-BATCH-008
+
+`finance/rechnungstapel` verbindet Ausgangs-/Eingangsrechnung und beide
+Selbstabrechnerarten als native, generatorfaehige Worklist mit Vier-Augen-
+Freigabe, Fehlerzeilen, Retry und Belegnachweis.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

@@ -17,11 +17,12 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**einen offenen P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
-`L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003` und
-`L3-GAP-INV-004` sind repo-seitig geschlossen. Das groesste verbleibende
-P1-Wechselrisiko liegt im L3-spezifischen Rechnungstapel-/Selbstabrechner-
-Bedienablauf.
+**keinen offenen P1-, sechs P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+`L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
+`L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
+Die verbleibenden
+P2/P3-Themen betreffen Komfort, breite Berichtskatalog-Paritaet und externe
+Adapter, nicht den P1-Kernwechsel.
 
 Die Kernkette von Kunde/Artikel ueber Angebot, Auftrag, Einkauf, Lieferschein,
 Rechnung, offene Posten, Lagerbewegung, Kontrakt, Ernte und Waage ist in VALEO
@@ -59,7 +60,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | Bestellung, Wareneingang, Einkaufslieferschein/-rechnung | Einkaufsseiten, Bestellvorschlag, Rechnungspruefung und Wareneingangsabgleich | vorhanden | - |
 | Kontrakte, Strecke, Ernte/Annahme, NaWaRo | Kontrakt-Lifecycle, Disposition, Abrechnung, Ernteannahme und NaWaRo-Funktionen | vorhanden | - |
 | Rechnungsein/-ausgang, OP, FIBU-Uebergabe | Finance/AP/AR, offene Posten, e-Rechnung und FIBU-Schnittstellencenter | vorhanden | - |
-| Rechnungstapel und Selbstabrechner | Beleg- und Rechnungsgrundlage vorhanden; eigene L3-Worklists nicht nachgewiesen | teilweise | L3-GAP-BILLBATCH-006 |
+| Rechnungstapel und Selbstabrechner | native Vier-Augen-Worklist ueber Faktura-, AP/AR- und Self-Billing-Quellbelegen mit Fehler-Retry | vorhanden | L3-GAP-BILLBATCH-006 geschlossen |
 | Bestand, Vortrag, Korrektur, Lager-zu-Lager | Bestands-, Korrektur-, Bewegungs- und Bewertungsseiten/APIs | vorhanden | - |
 | Fremdware/Fremdbestand | Backend-CRUD fuer Fremdwaren-Einlagerung und Third-Party-Stock-Anteile | teilweise | L3-ROHWARE-002 |
 | Inventur | Inventur, PIV, Differenzbuchung plus hashgebundene Nebenlaeufe, Bewertung und Vier-Augen-Bestandsvortrag | vorhanden | L3-GAP-INV-004 geschlossen |
@@ -84,7 +85,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | L3-GAP-PROD-003 | Allgemeiner Produktionsleitstand ist nur teilweise vorhanden | Mischfutter-Produktion deckt Auftrag, Rezeptur, Charge und Status ab | Produktionsliste mit Druck, allgemeine Artikel-Umbuchung, Stapelbuchung und Nachbearbeitung als auditierte Lifecycles; L3-Muehlenfall als Referenzjourney — **repo-seitig geschlossen 2026-08-21** (`L3-PRODUCTION-CONTROL-006`; Anlagenpilot extern) |
 | L3-GAP-INV-004 | L3-Inventur-Nebenablaeufe fehlen | Grundinventur, PIV, Zaehlen, Abschluss, Differenz und Bewertung sind vorhanden | Zaehllistendruck, kontrollierter Export/Import, Kontrolllauf, vorlaeufige Bewertung und erzeugbare Bestandsvortraege mit Vier-Augen-/Auditregeln — **repo-seitig geschlossen 2026-08-21** (`L3-INVENTORY-AUX-007`) |
 | L3-GAP-BELEGCHECK-005 | Einheitlicher Beleg-Kontrollarbeitsplatz fehlt | Einzelne Kontrollen existieren fuer Wareneingang, Auftragspositionen und Auftrag/Lieferschein | Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte/nicht fakturierte Lieferscheine; Filter, Verantwortlicher, Faelligkeit, Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-BELEGCHECK-WORKLIST-005`; Live-Projektion Folgeausbau) |
-| L3-GAP-BILLBATCH-006 | Rechnungstapel/Selbstabrechner sind nicht als kompletter Bedienablauf belegt | Faktura-, AP/AR- und Abrechnungsbausteine existieren | Stapel anlegen/pruefen/freigeben/wiederholen; Selbstabrechner fuer Verkauf und Kunden-Zukauf; Fehlerzeile und Belegnachweis |
+| L3-GAP-BILLBATCH-006 | Rechnungstapel/Selbstabrechner sind nicht als kompletter Bedienablauf belegt | Faktura-, AP/AR- und Abrechnungsbausteine existieren | Stapel anlegen/pruefen/freigeben/wiederholen; Selbstabrechner fuer Verkauf und Kunden-Zukauf; Fehlerzeile und Belegnachweis — **repo-seitig geschlossen 2026-08-21** (`L3-BILLING-BATCH-008`) |
 
 ### P2 - hohe Produktivitaets- oder Fachparitaet
 
