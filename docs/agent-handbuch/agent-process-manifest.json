@@ -2475,7 +2475,13 @@
           "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "owner_id",
+        "team_id",
+        "title",
+        "payload",
+        "object_route"
+      ],
       "mcp_tool_ids": []
     },
     {

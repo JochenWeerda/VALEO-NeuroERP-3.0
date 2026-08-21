@@ -20467,10 +20467,26 @@
             ],
             "title": "Object Type"
           },
+          "owner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Id"
+          },
           "payload": {
             "additionalProperties": true,
             "title": "Payload",
             "type": "object"
+          },
+          "response_status": {
+            "default": "accepted",
+            "title": "Response Status",
+            "type": "string"
           },
           "source": {
             "title": "Source",
@@ -20488,12 +20504,28 @@
             "title": "Status",
             "type": "string"
           },
+          "team_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
           "tenant_id": {
             "title": "Tenant Id",
             "type": "string"
           },
           "title": {
             "title": "Title",
+            "type": "string"
+          },
+          "visibility": {
+            "default": "public",
+            "title": "Visibility",
             "type": "string"
           }
         },
@@ -302866,6 +302898,32 @@
                 }
               ],
               "title": "Layers"
+            }
+          },
+          {
+            "in": "query",
+            "name": "teams",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Teams"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_declined",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Declined",
+              "type": "boolean"
             }
           },
           {

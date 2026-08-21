@@ -293,6 +293,12 @@ allowlistgebundene Read-Model-Abfragen. Vorschau, Favoriten, Druck und
 signierter Import/Export werden zentral gerendert; beliebiges SQL bleibt
 ausgeschlossen.
 
+## L3-TEAM-CALENDAR-011
+
+`planung/kalender` nutzt seine vorhandene native Kalender-Primitive nun fuer
+autorisierte Benutzer-/Teamansichten. Private Fremdtermine werden auf
+Frei/Belegt redigiert; Teamdetails sind berechtigt und Ablehnungen optional.
+
 ## Verweise
 
 - [RenderPlan Architecture](render-plan-architecture.md)

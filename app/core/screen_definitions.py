@@ -3010,7 +3010,7 @@ def build_planung_kalender_screen_definition() -> dict[str, Any]:
         "domain": "platform",
         "mode": "cockpit",
         "title": "Planungskalender",
-        "subtitle": "Zeitprojektionen aus Belegen, Fristen, CRM und Sachkunde",
+        "subtitle": "Eigene und autorisierte Teamtermine mit Frei/Belegt und Datenschutz",
         "adapter": {"type": "native", "sourceId": "planung/kalender", "temporary": False},
         "summary": [
             {"key": "naechste_14_tage", "label": "Fristenband 14 Tage", "tone": "warning"},
@@ -3023,6 +3023,14 @@ def build_planung_kalender_screen_definition() -> dict[str, Any]:
             "icsTokenEndpoint": "/api/v1/planung/kalender/ics-token",
             "defaultView": "agenda",
             "deadlineBandDays": 14,
+            "teamView": True,
+            "teamQueryParam": "teams",
+            "includeDeclinedQueryParam": "include_declined",
+            "privacy": {
+                "privateForeignTitle": "Belegt",
+                "redactObjectLinks": True,
+                "detailPermission": "planung.calendar.team.details",
+            },
             "layers": [
                 {"key": "finanzen", "label": "Finanzen", "defaultVisible": True},
                 {"key": "fristen", "label": "Fristen", "defaultVisible": True},
@@ -3062,7 +3070,11 @@ def build_planung_kalender_screen_definition() -> dict[str, Any]:
                 "Was steht naechste Woche an?",
                 "Zeige Fristen der naechsten 14 Tage.",
                 "Welche OP-Faelligkeiten kommen diese Woche?",
+                "Zeige die Frei/Belegt-Sicht meines Teams.",
+                "Blende abgelehnte Termine ein.",
             ],
+            "sensitiveFields": ["owner_id", "team_id", "title", "payload", "object_route"],
+            "forbiddenAgentTasks": ["Private fremde Termindetails ohne Detailberechtigung offenlegen"],
             "testSelectors": {"screenRoot": "[data-testid='planung-kalender']"},
         },
     }

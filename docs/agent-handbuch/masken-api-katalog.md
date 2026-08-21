@@ -1802,6 +1802,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Was steht naechste Woche an?
 - Zeige Fristen der naechsten 14 Tage.
 - Welche OP-Faelligkeiten kommen diese Woche?
+- Zeige die Frei/Belegt-Sicht meines Teams.
+- Blende abgelehnte Termine ein.
+
+**Sensible Felder:** `owner_id, team_id, title, payload, object_route`
 
 **Actions:**
 
