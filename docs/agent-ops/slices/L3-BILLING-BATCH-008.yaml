@@ -1,0 +1,35 @@
+slice_id: L3-BILLING-BATCH-008
+id: L3-BILLING-BATCH-008
+title: Rechnungstapel und Selbstabrechner
+owner: Codex
+status: reserviert
+created_at: "2026-08-21"
+started_at: "2026-08-21"
+goal: >-
+  Bestehende Rechnungs- und Selbstabrechnungskerne in einem nativen,
+  auditierbaren Stapelarbeitsplatz zusammenzufuehren.
+architecture:
+  decision_level: significant
+  domains: [finance, agrar]
+  canonical_ui_chain: ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer
+scope:
+  - Ausgangs-, Eingangs- und zwei Selbstabrechner-Stapelarten abbilden.
+  - Pruefung, Vier-Augen-Freigabe, Ausfuehrung und Retry auditieren.
+  - Fehlerzeilen, Quellbeleg und Belegnachweis sichtbar machen.
+file_ownership:
+  - app/services/billing_batch_service.py
+  - app/api/v1/endpoints/billing_batch.py
+  - alembic/versions/billing_batch_20260821.py
+  - app/core/screen_definitions.py
+  - packages/frontend-web/src/pages/finance/rechnungstapel.tsx
+  - tests/test_billing_batch.py
+  - generated route, OpenAPI, architecture and handbook artifacts
+  - Finance/Agrar domain packs, ADR, gap documentation and workboard
+acceptance:
+  - Tenant-Isolation on every read and mutation.
+  - Four billing batch types and immutable line source references.
+  - Four-eyes release, idempotent processing and reason-bound retry.
+  - Error details, source document and evidence links.
+  - Native generator-ready worklist and green repository gates.
+risks:
+  - Productive provider delivery and fiscal pilot remain external rollout gates.
