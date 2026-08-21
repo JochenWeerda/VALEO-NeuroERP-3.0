@@ -2,7 +2,8 @@ slice_id: L3-BELEGCHECK-PROJECTION-016
 id: L3-BELEGCHECK-PROJECTION-016
 title: Belegkontrolle Live-Projektion aus Quellbelegen
 owner: Cursor Agent
-status: reserviert
+status: abgeschlossen
+completed_at: "2026-08-21"
 created_at: "2026-08-21"
 started_at: "2026-08-21"
 goal: >-

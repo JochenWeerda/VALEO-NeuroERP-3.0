@@ -17,13 +17,13 @@ Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
 Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen P1- oder P2- und zwei P3-Gaps**. `L3-GAP-MDE-001`,
+**keinen offenen P1- oder P2- und einen P3-Gap**. `L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
 `L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009`, `L3-GAP-MAIL-010`,
-`L3-GAP-TANK-011` und `L3-GAP-REPORT-012` sind ebenfalls repo-seitig
-geschlossen. Die verbleibenden P3-Themen betreffen Komfort und externe
-Adapter, nicht den P1-Kernwechsel.
+`L3-GAP-TANK-011`, `L3-GAP-REPORT-012` und `L3-GAP-RECENT-013` sind ebenfalls
+repo-seitig geschlossen. Das verbleibende P3-Thema betrifft externe Adapter,
+nicht den P1-Kernwechsel.
 
 Die Kernkette von Kunde/Artikel ueber Angebot, Auftrag, Einkauf, Lieferschein,
 Rechnung, offene Posten, Lagerbewegung, Kontrakt, Ernte und Waage ist in VALEO
@@ -56,7 +56,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 |---|---|---:|---|
 | CRM, Kunden, Lieferanten, Artikel, Nachrichten, Wiedervorlage | CRM-360, Stammdaten-, Aktivitaets-, Kontakt-, Lead- und Wiedervorlage-Seiten/APIs | vorhanden | - |
 | Kalender und Teamkalender | native Teamansicht mit Membership-Pruefung, Frei/Belegt-Redaktion, Vorschlaegen und optionalen Ablehnungen | vorhanden | L3-GAP-TEAMCAL-009 geschlossen |
-| Eingebettete E-Mail und letzte Dokumente | nativer Rollen-Mailarbeitsplatz vorhanden; persoenliche letzte Dokumente noch offen | teilweise | L3-GAP-MAIL-010 geschlossen, L3-GAP-RECENT-013 |
+| Eingebettete E-Mail und letzte Dokumente | nativer Rollen-Mailarbeitsplatz und persoenliche, rollenaktuelle Dokumenthistorie vorhanden | vorhanden | L3-GAP-MAIL-010 und L3-GAP-RECENT-013 geschlossen |
 | Angebote, Auftraege, Disposition, Lieferscheine, Faktura | Verkaufsseiten, Belegkette, unerledigte Positionen und Auftrag-Lieferschein-Abgleich | vorhanden | - |
 | Bestellung, Wareneingang, Einkaufslieferschein/-rechnung | Einkaufsseiten, Bestellvorschlag, Rechnungspruefung und Wareneingangsabgleich | vorhanden | - |
 | Kontrakte, Strecke, Ernte/Annahme, NaWaRo | Kontrakt-Lifecycle, Disposition, Abrechnung, Ernteannahme und NaWaRo-Funktionen | vorhanden | - |
@@ -85,7 +85,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 |---|---|---|---|
 | L3-GAP-PROD-003 | Allgemeiner Produktionsleitstand ist nur teilweise vorhanden | Mischfutter-Produktion deckt Auftrag, Rezeptur, Charge und Status ab | Produktionsliste mit Druck, allgemeine Artikel-Umbuchung, Stapelbuchung und Nachbearbeitung als auditierte Lifecycles; L3-Muehlenfall als Referenzjourney — **repo-seitig geschlossen 2026-08-21** (`L3-PRODUCTION-CONTROL-006`; Anlagenpilot extern) |
 | L3-GAP-INV-004 | L3-Inventur-Nebenablaeufe fehlen | Grundinventur, PIV, Zaehlen, Abschluss, Differenz und Bewertung sind vorhanden | Zaehllistendruck, kontrollierter Export/Import, Kontrolllauf, vorlaeufige Bewertung und erzeugbare Bestandsvortraege mit Vier-Augen-/Auditregeln — **repo-seitig geschlossen 2026-08-21** (`L3-INVENTORY-AUX-007`) |
-| L3-GAP-BELEGCHECK-005 | Einheitlicher Beleg-Kontrollarbeitsplatz fehlt | Einzelne Kontrollen existieren fuer Wareneingang, Auftragspositionen und Auftrag/Lieferschein | Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte/nicht fakturierte Lieferscheine; Filter, Verantwortlicher, Faelligkeit, Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-BELEGCHECK-WORKLIST-005`; Live-Projektion Folgeausbau) |
+| L3-GAP-BELEGCHECK-005 | Einheitlicher Beleg-Kontrollarbeitsplatz fehlt | Einzelne Kontrollen existieren fuer Wareneingang, Auftragspositionen und Auftrag/Lieferschein | Gemeinsame Ausnahme-Worklist fuer unerledigte Bestellungen, fehlende Eingangsbelege, gesperrte/nicht fakturierte Lieferscheine; Filter, Verantwortlicher, Faelligkeit, Deep-Link — **repo-seitig geschlossen 2026-08-21** (`L3-BELEGCHECK-WORKLIST-005`; Live-Projektion `L3-BELEGCHECK-PROJECTION-016`) |
 | L3-GAP-BILLBATCH-006 | Rechnungstapel/Selbstabrechner sind nicht als kompletter Bedienablauf belegt | Faktura-, AP/AR- und Abrechnungsbausteine existieren | Stapel anlegen/pruefen/freigeben/wiederholen; Selbstabrechner fuer Verkauf und Kunden-Zukauf; Fehlerzeile und Belegnachweis — **repo-seitig geschlossen 2026-08-21** (`L3-BILLING-BATCH-008`) |
 
 ### P2 - hohe Produktivitaets- oder Fachparitaet
@@ -103,7 +103,7 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 
 | ID | Gap | Abnahmekriterium |
 |---|---|---|
-| L3-GAP-RECENT-013 | Bereichsuebergreifende Liste „Letzte Dokumente“ fehlt | Personenbezogene, berechtigte Historie mit Dokumenttyp, Nummer, Partner, Zeitpunkt und Deep-Link; keine globale Datenpreisgabe |
+| L3-GAP-RECENT-013 | Bereichsuebergreifende Liste „Letzte Dokumente“ fehlt | Personenbezogene, berechtigte Historie mit Dokumenttyp, Nummer, Partner, Zeitpunkt und Deep-Link; keine globale Datenpreisgabe — **repo-seitig geschlossen 2026-08-21** (`L3-RECENT-DOCUMENTS-015`) |
 | L3-GAP-IFACE-014 | L3-spezifische Standard-/Unimet-Adapter fehlen oder sind nicht belegt | Erst nach Kundenentscheidung: Formatvertrag, Mapping, Idempotenz, Fehlerkorb, Reconciliation und Betriebsmonitor je benoetigtem Adapter |
 
 ## Kein Gap beziehungsweise bereits abgedeckt

@@ -11,15 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-BELEGCHECK-PROJECTION-016 Belegkontrolle Live-Projektion - reserviert 2026-08-21
+## L3-BELEGCHECK-PROJECTION-016 Belegkontrolle Live-Projektion - abgeschlossen 2026-08-21
 
-**Von:** Dokumentierter Folgeausbau aus `L3-BELEGCHECK-WORKLIST-005`. **Owner:** Cursor Agent. **Stand:** reserviert 2026-08-21.
+**Von:** Dokumentierter Folgeausbau aus `L3-BELEGCHECK-WORKLIST-005`. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-21.
 
 **Ziel:** Ausnahme-Faelle idempotent aus Einkaufs-/Verkaufs-Quellbelegen in die bestehende Belegkontroll-Worklist projizieren. Keine Aenderung an Codex-Slice `L3-RECENT-DOCUMENTS-015`.
 
-**Dateibesitz:** `docs/agent-ops/slices/L3-BELEGCHECK-PROJECTION-016.yaml`, dieser Abschnitt, `document_control_service.py`, neues `document_control_projection.py`, Endpoint-Erweiterung, Tests und Gap-Doku.
+**Ergebnis:** `DocumentControlProjectionService` mit vier Collectoren und idempotentem `upsert_projected` (resolved/waived = skip). Endpoint `POST /api/v1/document-control/project`. Fehlende Quellrelationen werden soft-geskippt. 4 neue + 5 bestehende Document-Control-Tests gruen. Codex-RECENT-Dateien unberuehrt.
 
-**Abnahme:** Tenant-Isolation; Idempotenz per `source_key`; vier Ausnahmearten aus Fixtures/Mocks; bestehende Register-/Assign-/Transition-Tests bleiben gruen; keine RECENT-Dateien.
+**Dateibesitz:** Slice-YAML, `document_control_projection.py`, Service-/Endpoint-Erweiterung, Projection-Tests, Workboard/Open-Gaps.
 
 ## L3-RECENT-DOCUMENTS-015 Persoenliche letzte Dokumente - abgeschlossen 2026-08-21
 

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.document_control_service import DocumentControlError, DocumentControlService
+from app.services.document_control_projection import DocumentControlProjectionService
 
 router = APIRouter(prefix="/document-control", tags=["document-control", "finance"])
 
@@ -88,6 +89,19 @@ def list_exceptions(
 @router.get("/summary", response_model=dict, summary="Beleg-Kontrolle Zusammenfassung")
 def summary(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return DocumentControlService(db, tenant_id).summary()
+
+
+@router.post("/project", response_model=dict, summary="Belegausnahmen aus Quellbelegen projizieren")
+def project_exceptions(
+    request: Request,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    actor = request.headers.get("X-User-ID") or "document-control-operator"
+    try:
+        return DocumentControlProjectionService(db, tenant_id).refresh(actor=actor)
+    except DocumentControlError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.post("/exceptions/{case_id}/assign", response_model=dict, summary="Ausnahme zuweisen")

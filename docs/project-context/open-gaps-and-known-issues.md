@@ -216,8 +216,11 @@ repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit
 vier Ausnahmearten, Zuweisung/Status-Audit, Filter/Pagination und Deep-Link.
 Navigations-Drill dokumentiert in
 [`l3-rdp-navigation-drill.md`](../design/l3-rdp-navigation-drill.md).
-Damit verbleiben aus der L3-Vollinventur drei offene P1-Gaps: Produktion,
-Inventur-Nebenlaeufe und Rechnungstapel/Selbstabrechner.
+
+Nachzug 2026-08-21 (`L3-BELEGCHECK-PROJECTION-016`): Live-Projektion der vier
+Ausnahmearten aus Einkaufs-/Verkaufs-Quellen via
+`POST /api/v1/document-control/project` (idempotent, resolved/waived bleiben
+unberuehrt). Codex-Slice `L3-RECENT-DOCUMENTS-015` unberuehrt.
 
 Nachzug 2026-08-21 (`L3-PRODUCTION-CONTROL-006`): `L3-GAP-PROD-003` ist
 repo-seitig geschlossen. Der native Produktionsleitstand projiziert kanonische

@@ -90,6 +90,57 @@ class DocumentControlService:
         self.db.commit()
         return {"id": case_id, "status": "open", "duplicate": False}
 
+    def upsert_projected(self, payload: dict[str, Any], *, actor: str) -> dict[str, Any]:
+        """Idempotent projection upsert; never reopens resolved/waived cases."""
+        exception_type = payload.get("exception_type")
+        if exception_type not in EXCEPTION_TYPES:
+            raise DocumentControlError("Unbekannter Ausnahme-Typ")
+        source_key = payload.get("source_key") or f"proj:{exception_type}:{payload.get('document_ref')}"
+        existing = self.db.execute(
+            text("""
+                SELECT id, status FROM domain_ops.document_control_exceptions
+                 WHERE tenant_id=:tid AND source_key=:source_key
+            """),
+            {"tid": self.tenant_id, "source_key": source_key},
+        ).mappings().first()
+        if existing is not None:
+            if existing["status"] in {"resolved", "waived"}:
+                return {"id": existing["id"], "status": existing["status"], "projection": "skipped"}
+            self.db.execute(
+                text("""
+                    UPDATE domain_ops.document_control_exceptions
+                       SET document_number=:document_number,
+                           partner_ref=:partner_ref,
+                           partner_name=:partner_name,
+                           source_route=:source_route,
+                           notes=:notes,
+                           updated_at=NOW()
+                     WHERE id=:id AND tenant_id=:tid
+                """),
+                {
+                    "document_number": payload.get("document_number") or payload["document_ref"],
+                    "partner_ref": payload.get("partner_ref"),
+                    "partner_name": payload.get("partner_name"),
+                    "source_route": payload.get("source_route"),
+                    "notes": payload.get("notes"),
+                    "id": existing["id"],
+                    "tid": self.tenant_id,
+                },
+            )
+            self._audit(
+                existing["id"],
+                "projected_refresh",
+                existing["status"],
+                existing["status"],
+                actor,
+                payload.get("reason") or "Live-Projektion aktualisiert",
+            )
+            self.db.commit()
+            return {"id": existing["id"], "status": existing["status"], "projection": "refreshed"}
+
+        created = self.register_exception({**payload, "source_key": source_key}, actor=actor)
+        return {**created, "projection": "created"}
+
     def list_page(
         self,
         *,
