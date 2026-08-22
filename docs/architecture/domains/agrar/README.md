@@ -16,6 +16,10 @@ Der native Produktionsleitstand projiziert Mischfutterauftraege und allgemeine
 Muehlen-/Umbuchungs-/Stapel-/Nachbearbeitungsvorgaenge, ohne Bestands-, Chargen-
 oder FIBU-Logik zu duplizieren.
 
+`auswertungen/duengemittelmengen` liest die kanonischen Reinnaehrstoffe N,
+P2O5 und K2O aus dem Feldbuch; Altdaten ohne N-Wert nutzen nur den explizit
+gekennzeichneten Produktfaktor-Fallback.
+
 ## Navigation
 
 | Thema | Datei |

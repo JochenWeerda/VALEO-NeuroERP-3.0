@@ -17,3 +17,7 @@ version: 1.1.0
   `GET /api/v1/docflow/returns/summary`,
   `GET /api/v1/docflow/returns/{id}/evidence` und
   `POST /api/v1/docflow/returns/{id}/transition`.
+- DMS-Volltext: `GET /api/v1/dms/search` mit Tenant-, Text-, Typ-, Kategorie-,
+  Artikel- und Seitenfilter; externe Vorschau ist ein Konfigurationsgate.
+- Terrorschutz: `POST /api/v1/compliance/sanctions/pruefen` mit Scope
+  `manual|personal|customers`; `GET .../pruefprotokoll?scope=...` ist tenantgebunden.

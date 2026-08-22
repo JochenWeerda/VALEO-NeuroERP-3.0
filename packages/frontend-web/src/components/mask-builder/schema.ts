@@ -104,6 +104,12 @@ export interface ScreenTableDefinition {
     dangerLevel?: ActionDangerLevel
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
   }>
+  /** Selection-based actions; payload contains selectedRows and selectedIds. */
+  bulkActions?: Array<{
+    key: string
+    label: string
+    dangerLevel?: ActionDangerLevel
+  }>
 }
 
 export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'

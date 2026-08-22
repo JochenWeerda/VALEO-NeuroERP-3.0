@@ -10,6 +10,13 @@ version: 1.0.0
 
 # Agrar — API
 
+## Duengemittelmengen
+
+- `GET /api/v1/feldbuch/duengemittelmengen` - tenantgebundene, paginierte
+  N/P2O5/K2O-Mengen nach Jahr, Kunde und Schlag.
+- `GET /api/v1/feldbuch/duengebilanz` - kanonische Naehrstoffsummen mit
+  gekennzeichnetem N-Fallback fuer historische Massnahmen.
+
 ## Produktionsleitstand
 
 ## Rechnungstapel / Selbstabrechner

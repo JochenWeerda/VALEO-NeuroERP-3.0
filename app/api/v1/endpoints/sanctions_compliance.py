@@ -7,21 +7,20 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import IDResponse
+from app.api.v1.schemas.sanctions_compliance_schemas import SanctionsComplianceOut
 
 logger = logging.getLogger(__name__)
-
-from app.api.v1.schemas.base import BaseSchema, IDResponse
-from app.api.v1.schemas.sanctions_compliance_schemas import SanctionsComplianceOut
 
 
 router = APIRouter(prefix="/compliance/sanctions", tags=["Compliance", "Sanctions"])
@@ -40,7 +39,9 @@ MIGRATION_HINT = (
 class SanktionsEintragCreate(BaseModel):
     name: str
     alias_namen: list[str] = Field(default_factory=list)
-    land_code: str = Field(..., min_length=2, max_length=2, description="ISO 3166-1 alpha-2")
+    land_code: str = Field(
+        ..., min_length=2, max_length=2, description="ISO 3166-1 alpha-2"
+    )
     liste: str = Field(..., description="EU | UN | OFAC | HM_TREASURY")
     eintragstyp: str = Field(
         ..., description="PERSON | ORGANISATION | SCHIFF | ANDERES"
@@ -53,6 +54,8 @@ class SanktionsPruefungInput(BaseModel):
     name: str
     land_code: Optional[str] = None
     adresse: Optional[str] = None
+    scope: Literal["manual", "personal", "customers"] = "manual"
+    entity_ref: Optional[str] = Field(default=None, max_length=120)
 
 
 class SanktionsTreffer(BaseModel):
@@ -67,6 +70,8 @@ class SanktionsPruefungResult(BaseModel):
     treffer: list[SanktionsTreffer]
     status: str  # KEIN_TREFFER | VERDAECHTIG | TREFFER
     empfehlung: str
+    scope: Literal["manual", "personal", "customers"]
+    entity_ref: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -131,8 +136,10 @@ def _status_from_treffer(treffer: list[SanktionsTreffer]) -> str:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/eintraege", summary="Sanktionsliste abfragen",
-    response_model=list[SanctionsComplianceOut]
+@router.get(
+    "/eintraege",
+    summary="Sanktionsliste abfragen",
+    response_model=list[SanctionsComplianceOut],
 )
 def list_eintraege(
     db: Session = Depends(get_db),
@@ -154,8 +161,11 @@ def list_eintraege(
         return []
 
 
-@router.post("/eintraege", status_code=201, summary="Sanktionseintrag anlegen",
-    response_model=IDResponse
+@router.post(
+    "/eintraege",
+    status_code=201,
+    summary="Sanktionseintrag anlegen",
+    response_model=IDResponse,
 )
 def create_eintrag(
     payload: SanktionsEintragCreate,
@@ -183,18 +193,28 @@ def create_eintrag(
             },
         )
         db.commit()
-        return {"id": entry_id, "eintrags_nr": payload.eintrags_nr, "status": "angelegt"}
+        return {
+            "id": entry_id,
+            "eintrags_nr": payload.eintrags_nr,
+            "status": "angelegt",
+        }
     except Exception as exc:
         db.rollback()
         logger.error("Fehler beim Anlegen des Sanktionseintrags: %s", exc)
-        raise HTTPException(status_code=503, detail={"error": str(exc), "migration_hint": MIGRATION_HINT})
+        raise HTTPException(
+            status_code=503,
+            detail={"error": str(exc), "migration_hint": MIGRATION_HINT},
+        )
 
 
-@router.post("/pruefen", summary="Name gegen Sanktionsliste prüfen",
-    response_model=SanktionsPruefungResult
+@router.post(
+    "/pruefen",
+    summary="Name gegen Sanktionsliste prüfen",
+    response_model=SanktionsPruefungResult,
 )
 def pruefen(
     payload: SanktionsPruefungInput,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> SanktionsPruefungResult:
@@ -215,6 +235,8 @@ def pruefen(
             treffer=[],
             status="KEIN_TREFFER",
             empfehlung=f"Prüfung nicht möglich — {MIGRATION_HINT}",
+            scope=payload.scope,
+            entity_ref=payload.entity_ref,
         )
 
     treffer = _fuzzy_match(payload.name, eintraege)
@@ -231,10 +253,18 @@ def pruefen(
         db.execute(
             text(
                 "INSERT INTO domain_compliance.sanctions_checks "
-                "(id, geprueft_name, status, geprueft_am) "
-                "VALUES (:id, :name, :status, NOW())"
+                "(id, tenant_id, geprueft_name, status, scope, entity_ref, checked_by, geprueft_am) "
+                "VALUES (:id, :tenant_id, :name, :status, :scope, :entity_ref, :checked_by, NOW())"
             ),
-            {"id": str(uuid4()), "name": payload.name, "status": status},
+            {
+                "id": str(uuid4()),
+                "tenant_id": tenant_id,
+                "name": payload.name,
+                "status": status,
+                "scope": payload.scope,
+                "entity_ref": payload.entity_ref,
+                "checked_by": request.headers.get("X-User-ID") or "sanctions-operator",
+            },
         )
         db.commit()
     except Exception:
@@ -245,24 +275,32 @@ def pruefen(
         treffer=treffer,
         status=status,
         empfehlung=empfehlungen[status],
+        scope=payload.scope,
+        entity_ref=payload.entity_ref,
     )
 
 
-@router.get("/pruefprotokoll", summary="Sanktionsprüf-Protokoll abrufen",
-    response_model=list[SanctionsComplianceOut]
+@router.get(
+    "/pruefprotokoll",
+    summary="Sanktionsprüf-Protokoll abrufen",
+    response_model=list[SanctionsComplianceOut],
 )
 def pruefprotokoll(
+    scope: Literal["manual", "personal", "customers"] | None = Query(default=None),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
     try:
+        where_scope = " AND scope = :scope" if scope else ""
         rows = db.execute(
             text(
-                "SELECT id, geprueft_name, status, geprueft_am "
+                "SELECT id, geprueft_name, status, scope, entity_ref, checked_by, geprueft_am "
                 "FROM domain_compliance.sanctions_checks "
-                "ORDER BY geprueft_am DESC "
-                "LIMIT 500"
-            )
+                "WHERE tenant_id = :tenant_id"
+                f"{where_scope} "  # nosec B608 -- fixed allow-listed clause
+                "ORDER BY geprueft_am DESC LIMIT 500"
+            ),
+            {"tenant_id": tenant_id, "scope": scope},
         ).fetchall()
         return [_row_to_dict(r) for r in rows]
     except Exception as exc:

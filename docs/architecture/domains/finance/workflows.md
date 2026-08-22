@@ -19,3 +19,7 @@ mit Quellbeleg und Nachweis klaeren -> begruendet wiederholen.
 - Abschluss / Closing: Process Kernel FiBu-Slices
 - UStVA / ELSTER: Frontend `meldewesen`, Open Gaps FIBU-006
 - POS/TSE: [pos-fiscalization-providers.md](../../pos-fiscalization-providers.md)
+
+Bonus: freigegebenen festen Bericht und Periode waehlen -> Basiszeilen
+berechnen -> unveraenderlichen Lauf speichern -> optional Korrekturlauf mit
+Bezug/Grund -> auditierter CSV-Export. Ursprungslauf bleibt unveraendert.

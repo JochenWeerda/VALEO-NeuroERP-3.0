@@ -76,6 +76,7 @@ domains:
 
   finance:
     route_segments:
+      - abrechnung
       - finance
       - fibu
       - finanzplanung

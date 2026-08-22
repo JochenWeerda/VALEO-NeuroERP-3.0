@@ -27,6 +27,22 @@ def test_catalog_covers_all_prioritized_dimensions() -> None:
     assert all(
         item["drilldown"] and item["export_formats"] == ["csv"] for item in catalog
     )
+    report_ids = {item["id"] for item in catalog}
+    assert {
+        "article-account",
+        "batch-number-register",
+        "batch-stock-valuation",
+        "batch-use-trace",
+        "fertilizer-quantities",
+        "bonus-by-customer",
+        "customer-order-disposition",
+        "customer-gifts",
+        "grain-notification",
+        "mvo-notification",
+        "daily-close-journal",
+    }.issubset(report_ids)
+    assert len(catalog) >= 30
+    assert all(item["category"] and item["legacy_menu"] for item in catalog)
 
 
 def test_unknown_report_and_filter_are_rejected() -> None:
@@ -88,3 +104,21 @@ def test_screen_is_native_and_generator_ready() -> None:
     definition = get_screen_definition("auswertungen/l3-berichtskatalog")
     assert definition and definition["layout"]["tableProfile"] == "financial"
     assert _check_readiness(definition)["generatorReady"] is True
+    bonus = get_screen_definition("auswertungen/bonus-berechnung")
+    assert bonus["workflow"]["status"] == "immutable-runs"
+    assert _check_readiness(bonus)["generatorReady"] is True
+
+
+def test_bonus_run_rejects_unapproved_report() -> None:
+    from decimal import Decimal
+
+    service = L3ReportCatalogService(MagicMock(), "tenant-1")
+    with pytest.raises(ReportCatalogError, match="Bonusberichte"):
+        service.create_bonus_run(
+            report_id="sales-by-customer",
+            from_date=date(2026, 1, 1),
+            to_date=date(2026, 12, 31),
+            rate_pct=Decimal("1.5"),
+            actor="tester",
+            reason="Regressionstest",
+        )

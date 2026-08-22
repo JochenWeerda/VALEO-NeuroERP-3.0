@@ -11,15 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-DEEP-MASK-PARITY-020 Live-Untermenues und Funktionsparitaet - reserviert 2026-08-22
+## L3-DEEP-MASK-PARITY-020 Live-Untermenues und Funktionsparitaet - abgeschlossen 2026-08-22
 
-**Von:** User-Auftrag: alle Submenues und Masken bis zur vollstaendigen Gap-Schliessung pruefen. **Owner:** Codex. **Stand:** reserviert 2026-08-22.
+**Von:** User-Auftrag: alle Submenues und Masken bis zur vollstaendigen Gap-Schliessung pruefen. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-22.
 
 **Ziel:** Alle live erreichbaren L3-Ribbon-Dropdowns und Flyouts read-only bis zur Arbeitsmaske verfolgen, gegen VALEO-Seiten/APIs/ScreenDefinitions verifizieren und bestaetigte Funktionsgaps zentral ueber die UniversalMaskRuntime-Kette schliessen.
 
 **Dateibesitz:** Slice-YAML, dieser Workboard-Abschnitt, L3-Leaf-/Vollinventur, Open-Gaps, zentraler Berichtskatalog samt ScreenDefinition/Route/Tests sowie weitere nachweislich erforderliche zentrale Maskenvertraege.
 
 **Abnahme:** belastbare Live-Evidenz statt Dateinamenannahmen; keine Doppel-Gaps; zentrale native Masken und produktive API-Vertraege; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
+**Ergebnis:** Alle live bestaetigten Leaf-Gaps 019 bis 030 sind repo-seitig
+geschlossen. Geliefert wurden 30 feste Berichte, unveraenderbare Bonuslaeufe,
+DMS-Volltext, Aenderungshistorie, getrennte Terrorschutzprotokolle,
+Duengemittelmengen, Auftrags-/Lieferschein-/EB-Kontrollsichten sowie eine
+tenant-sichere Chargen-Operator-Maske mit zentraler Mehrfachauswahl,
+Qualitaetsgate und Audit. Backend 16/16, Frontend 12/12, TypeScript, Ruff,
+ESLint, 927 Navigationstargets, OpenAPI/Handbuch, Single-Head und Architektur-
+Drift sind gruen. Externe DMS-, Rollen- und Echtdaten-UAT-Gates bleiben.
 
 ## L3-DROPDOWN-LEAF-GAP-019 Dropdown-Leaf Gap-Inventur - abgeschlossen 2026-08-22
 

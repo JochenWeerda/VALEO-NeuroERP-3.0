@@ -28,3 +28,6 @@ und `vitest run src/__tests__/pages/lager/inventur-nebenlaeufe.test.tsx`.
 
 Fremdware: `pytest tests/test_foreign_goods_worklist.py -q --no-cov` und
 `vitest run src/__tests__/pages/lager/fremdware.test.tsx`.
+
+Chargen-Operator und zentrale Auswahl: `pytest tests/test_l3_deep_mask_parity.py -q --no-cov`
+und `vitest run src/__tests__/components/mask-builder/mde-row-actions.test.tsx`.

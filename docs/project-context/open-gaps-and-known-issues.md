@@ -211,14 +211,15 @@ dokumentiert. Kanonischer Bericht:
 [`l3-delta-mask-inventory-2026-08-21.md`](../design/l3-delta-mask-inventory-2026-08-21.md).
 Originalbilder lokal unter `Pictures\L3-Capture-2026-08-21-delta`, nicht in Git.
 
-Nachzug 2026-08-22 (`L3-DROPDOWN-LEAF-GAP-019`): Dropdown-Leaf-Tiefenpruefung
-(Beleg-Kontrolle, Weitere, Chargen, EB-LS) ergaenzt **14 neue P2/P3-Gaps**
-(u. a. Chargen-Nummern bearbeiten, Artikel-Konto, Bonus-Berechnung,
-Düngemittelmengen, EB-Lieferschein-Kontrolle, Artikel-/Kunden-Weitere-
-Auswertungen). Ribbon-P1-Schliessungen bleiben gueltig. Kanonischer Bericht:
+Nachzug 2026-08-22 (`L3-DEEP-MASK-PARITY-020`): Die durch die
+Dropdown-Leaf-Tiefenpruefung bestaetigten P2/P3-Gaps sind repo-seitig
+geschlossen. Geliefert sind 30 feste L3-Berichte, DMS-Volltext,
+Aenderungshistorie, getrennte Terrorschutzpruefungen, Duengemittelmengen,
+Bonuslaeufe, tenant-sichere Chargenbearbeitung mit Auswahlfreigabe sowie
+gespeicherte Auftrags-/Lieferschein-/EB-Kontrollsichten. Kanonischer Bericht:
 [`l3-dropdown-leaf-gap-inventory.md`](../design/l3-dropdown-leaf-gap-inventory.md).
-Fehlerhafte `submenu_*`-Captures (Koordinaten → PRODUKTION Chargen) sind
-ausgeschlossen. Live-Leaf-Screenshots: `scripts/l3-dropdown-leaf-capture.ps1`.
+Fehlerhafte Capture-Duplikate bleiben ausgeschlossen; Echtdatenbilder werden
+nicht versioniert. Offen bleiben nur externe DMS-, Rollen- und Echtdaten-UAT-Gates.
 
 Nachzug 2026-08-21 (`L3-BELEGCHECK-WORKLIST-005`): `L3-GAP-BELEGCHECK-005` ist
 repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit

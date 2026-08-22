@@ -63,6 +63,14 @@ def test_document_control_screen_is_native_and_generator_ready() -> None:
     assert definition["tables"][0]["serverPagination"] is True
     assert definition["layout"]["floorplan"] == "worklist"
     assert _check_readiness(definition)["generatorReady"] is True
+    for screen_id, expected_filter in (
+        ("auswertungen/auftrags-kontrolle", "open_purchase_order"),
+        ("auswertungen/lieferschein-kontrolle", "uninvoiced_delivery_note"),
+        ("abrechnung/eb-lieferschein-kontrolle", "missing_inbound_document"),
+    ):
+        variant = get_screen_definition(screen_id)
+        assert expected_filter in variant["dataSources"][1]["endpoint"]
+        assert _check_readiness(variant)["generatorReady"] is True
 
 
 def test_document_control_routes_are_registered(monkeypatch: pytest.MonkeyPatch) -> None:

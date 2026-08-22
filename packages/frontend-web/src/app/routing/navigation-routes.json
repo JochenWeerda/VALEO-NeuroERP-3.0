@@ -113,6 +113,16 @@
   ,{ "path": "crm/mail-arbeitsplatz", "module": "@/pages/crm/mail-arbeitsplatz" }
   ,{ "path": "tankstelle/adapter-inbox", "module": "@/pages/tankstelle/adapter-inbox" }
   ,{ "path": "auswertungen/l3-berichtskatalog", "module": "@/pages/auswertungen/l3-berichtskatalog" }
+  ,{ "path": "auswertungen/dms-volltext", "module": "@/pages/auswertungen/dms-volltext" }
+  ,{ "path": "auswertungen/aenderungshistorie", "module": "@/pages/auswertungen/aenderungshistorie" }
+  ,{ "path": "auswertungen/sanktionspruefung-personal", "module": "@/pages/auswertungen/sanktionspruefung-personal" }
+  ,{ "path": "auswertungen/sanktionspruefung-kunden", "module": "@/pages/auswertungen/sanktionspruefung-kunden" }
+  ,{ "path": "auswertungen/duengemittelmengen", "module": "@/pages/auswertungen/duengemittelmengen" }
+  ,{ "path": "auswertungen/auftrags-kontrolle", "module": "@/pages/auswertungen/auftrags-kontrolle" }
+  ,{ "path": "auswertungen/lieferschein-kontrolle", "module": "@/pages/auswertungen/lieferschein-kontrolle" }
+  ,{ "path": "abrechnung/eb-lieferschein-kontrolle", "module": "@/pages/abrechnung/eb-lieferschein-kontrolle" }
+  ,{ "path": "produktion/chargen-bearbeiten", "module": "@/pages/produktion/chargen-bearbeiten" }
+  ,{ "path": "auswertungen/bonus-berechnung", "module": "@/pages/auswertungen/bonus-berechnung" }
   ,{ "path": "workspace/letzte-dokumente", "module": "@/pages/workspace/letzte-dokumente" }
   ,{ "path": "schnittstelle/legacy-adapter-monitor", "module": "@/pages/schnittstelle/legacy-adapter-monitor" }
 ]

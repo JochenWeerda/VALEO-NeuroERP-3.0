@@ -29,6 +29,13 @@ begruendeten Uebernahme gesetzt; produktiver Virenscan bleibt externes Gate.
 | Tests | [tests.md](tests.md) |
 | Entscheidungen | [decisions.md](decisions.md) |
 
+## L3 Deep-Mask-Paritaet
+
+`auswertungen/dms-volltext` durchsucht lokale Dokumentreferenzen tenantgebunden
+und bietet eine externe Vorschau nur bei konfiguriertem DMS. Die getrennten
+Masken fuer Terrorschutz Personal und Kunden schreiben Scope, Objektbezug,
+Benutzer und Zeitpunkt in ein tenantgebundenes Pruefprotokoll.
+
 ## Sichten
 
 - [C4 DMS/Compliance](../../views/components/c4-dms-compliance.md)

@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-08-21
+# Architecture Index — generiert 2026-08-22
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-21T20:29:02Z'
+generated_at: '2026-08-22T07:44:44Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -251,6 +251,7 @@ domains:
     - /nawaro/raps-profil
     - /nawaro/vertraege
     - /produktion
+    - /produktion/chargen-bearbeiten
     - /produktion/dokumente
     - /produktion/mischfutter
     - /produktion/mischfutter-produktion
@@ -898,6 +899,7 @@ domains:
     - docs/adr/adr-055-feeding-measure-lifecycle.md
     - docs/adr/adr-058-document-return-on-docflow.md
     - docs/adr/adr-065-role-scoped-mail-workspace.md
+    - docs/adr/adr-070-l3-deep-mask-parity.md
     status: active
   finance:
     owner: domain/finance
@@ -921,8 +923,17 @@ domains:
     - domain_finance
     - domain_shared
     frontend_routes:
+    - /abrechnung/eb-lieferschein-kontrolle
     - /auswertungen/abfrage-center
+    - /auswertungen/aenderungshistorie
+    - /auswertungen/auftrags-kontrolle
+    - /auswertungen/bonus-berechnung
+    - /auswertungen/dms-volltext
+    - /auswertungen/duengemittelmengen
     - /auswertungen/l3-berichtskatalog
+    - /auswertungen/lieferschein-kontrolle
+    - /auswertungen/sanktionspruefung-kunden
+    - /auswertungen/sanktionspruefung-personal
     - /banken/konten
     - /banken/konto/:id
     - /banken/konto/neu
@@ -1894,8 +1905,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 917
-  frontend_routes_mapped: 917
+  frontend_routes_total: 927
+  frontend_routes_mapped: 927
   backend_services_total: 210
   backend_services_mapped: 210
   backend_endpoints_total: 406

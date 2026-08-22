@@ -1366,6 +1366,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'logistics', scope: 'logistics:write' },
       },
       {
+        id: 'chargen-bearbeiten',
+        label: 'Chargen-Nummern bearbeiten',
+        icon: Package,
+        module: '@/pages/produktion/chargen-bearbeiten',
+        preferredPath: 'produktion/chargen-bearbeiten',
+        keywords: ['charge', 'chargennummer', 'lieferantencharge', 'anerkennung', 'massenfreigabe'],
+        mcp: { businessDomain: 'logistics', scope: 'logistics:write' },
+      },
+      {
         id: 'produktions-dokumente-drucken',
         label: 'Produktions-Dokumente drucken',
         icon: FileText,

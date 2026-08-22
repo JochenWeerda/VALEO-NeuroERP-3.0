@@ -18,3 +18,5 @@ version: 1.0.0
 | [ADR-002](../../../adr/adr-002-fibu-frontend-api-layer.md) | FiBu Frontend API |
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Domain Model |
 | [ADR-036](../../../adr/adr-036-architecture-documentation-stack.md) | Doku-Stack |
+| [ADR-067](../../../adr/adr-067-governed-l3-report-catalog.md) | Fester L3-Berichtskatalog und Bonuslaeufe |
+| [ADR-070](../../../adr/adr-070-l3-deep-mask-parity.md) | Zentrale L3-Leaf-Masken |

@@ -5,7 +5,7 @@ audience: [agent, entwickler]
 owner: Cursor Agent
 status: aktiv
 last_reviewed: 2026-08-22
-version: 1.2.0
+version: 1.3.0
 description: Geuebte Gesten zum Oeffnen und Schliessen von L3-Ribbons und Masken per Remote Desktop.
 ---
 
@@ -60,7 +60,7 @@ FENSTER ~900. Icon-Klick Y≈108 (Icon-Mitte).
    `menu_*_open.png`.
 2. Menue-Eintraege **nicht** mit festem Offset aus PRODUKTION uebernehmen.
    Kalibrierung aus `final_aw_01_belegkontrolle.png`:
-   - Beleg-Kontrolle Icon X≈218–235 (Gruppe Überwachung; **kalibrieren**)
+   - Beleg-Kontrolle Icon X≈215; Menü-Einträge X≈200, Y ab 133 (+22/Leaf) — bestätigt Live 22.08.
    - Weitere Icon X≈673 (bestätigt Live 22.08.)
    - Erster Eintrag Y≈133, Zeilenhoehe ≈22 px, Klick X≈175
 3. Nach Leaf-Klick 900–1200 ms warten, Screenshot `leaf_*`, dann `Esc` +
@@ -70,8 +70,41 @@ FENSTER ~900. Icon-Klick Y≈108 (Icon-Mitte).
 5. Skript: [`scripts/l3-dropdown-leaf-capture.ps1`](../../scripts/l3-dropdown-leaf-capture.ps1)
 6. Gap-Abgleich: [`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md)
 
-**Live-Captures 22.08.2026:** `C:\Users\Jochen\Pictures\L3-Capture-2026-08-22-dropdown-leaves`
-(46 PNGs). Verlässliches Weitere-Dropdown in `aw_artikel_leaf_7_artikel_konto.png`.
-Beleg-Leafs teils fehlkalibriert (Tab-Fokus/Icon-X) — Nachzug mit doppelten Tab-Klick
-und X≈218–235 für Beleg-Kontrolle.
+**Live-Captures 22.08.2026:** Ordner
+`C:\Users\Jochen\Pictures\L3-Capture-2026-08-22-dropdown-leaves` (63 PNGs).
+
+| Evidenz | Status |
+|---------|--------|
+| `beleg_menu_open.png` | **verlaesslich** — Beleg-Dropdown, Icon X=215 |
+| `aw_artikel_leaf_7_artikel_konto.png` | **verlaesslich** — Weitere-Dropdown, Icon X=673 |
+| `beleg_leaf_*.png`, `beleg_leaf_v3_*` | **ungueltig** — Abfrage-Center-Modal statt Beleg-Arbeitsmaske |
+| `beleg_leaf_v2_*` | **ungueltig** — gleiches Modal-Muster |
+| `beleg_menu_open_v2/v3` | **ungueltig** — kein Dropdown (DATEI/FENSTER/Fremdware offen) |
+
+### Blocker Beleg-Leaf-Arbeitsmasken (22.08. Nachmittag)
+
+1. **Modale Dialoge** (Abfrage-Center, Auswahl Kunden, EMPFANGSSCHEIN) fangen
+   Ribbon-Klicks ab — Leaf-Skripte landen auf falschem UI.
+2. **`SetForegroundWindow`** auf maximiertem RDP haengt intermittierend, wenn
+   modale Fenster offen sind → Skripte mit `MoveWindow`/`SetForegroundWindow`
+   vermeiden; [`l3-beleg-mini.ps1`](../../scripts/l3-beleg-mini.ps1) nutzen.
+3. **Manueller Reset vor Capture:** alle MDI-Fenster schliessen (FENSTER →
+   Alle Fenster **oder** Schliessen-Button im Dialog), dann Tab AUSWERTUNGEN
+   pruefen, **RDP waehrend Skript nicht anfassen**, nur **ein** `mstsc`-Fenster.
+
+### Manuelle Leaf-Reihenfolge (Beleg-Kontrolle)
+
+| Index | Leaf | Flyout |
+|------:|------|--------|
+| 0 | Unerledigte Bestellungen | — |
+| 1 | Eingangslieferschein-Kontrolle | — |
+| 2 | Auftrags-Kontrolle | ▶ separat |
+| 3 | Lieferschein-Kontrolle | ▶ separat |
+| 4 | Gesperrte Lieferscheine | — |
+| 5 | Nicht fakturierte Artikel | — |
+
+Skripte: `l3-beleg-single-leaf.ps1` (ein Leaf), `l3-beleg-mini.ps1` (Reset +
+ein Leaf ohne Foreground-Hang). Gap-Abgleich unveraendert in
+[`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md).
+
 `final_all_05_weitere` landeten auf PRODUKTION → Chargen-Nummern bearbeiten.

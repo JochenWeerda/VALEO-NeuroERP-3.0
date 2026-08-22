@@ -63,9 +63,9 @@ dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 | L3-GAP-REPORT-012 | P2 | Auswertungsgruppen Kunden…Strecke | repo-seitig geschlossen (`L3-REPORT-CATALOG-014`) |
 | L3-GAP-RECENT-013 | P3 | Letzte Dokumente | repo-seitig geschlossen (`L3-RECENT-DOCUMENTS-015`) |
 | L3-GAP-IFACE-014 | P3 | Standard-Schnittstelle | repo-seitig geschlossen (`L3-LEGACY-INTERFACES-017`); reale Formate/Aktivierung extern |
-| L3-GAP-CHARGEN-EDIT-019 | P2 | PRODUKTION → Chargen-Nummern bearbeiten | **neu offen** — Massenfreigabe-Maske fehlt |
-| L3-GAP-ARTKONTO-020 | P2 | FAVORITEN/Artikel → Artikel-Konto | **neu offen** |
-| L3-GAP-BONUS-021 … L3-GAP-KUND-AUSW-028 | P2/P3 | Dropdown-Leafs Weitere/Belegkontrolle | **neu offen** — siehe [`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md) |
+| L3-GAP-CHARGEN-EDIT-019 | P2 | PRODUKTION → Chargen-Nummern bearbeiten | **geschlossen 2026-08-22** — tenant-sichere Operator-Maske mit Auswahlfreigabe/Audit |
+| L3-GAP-ARTKONTO-020 | P2 | FAVORITEN/Artikel → Artikel-Konto | **geschlossen 2026-08-22** — fester Bericht mit Druck/CSV/Drilldown |
+| L3-GAP-BONUS-021 … L3-GAP-KUND-AUSW-028 | P2/P3 | Dropdown-Leafs Weitere/Belegkontrolle | **repo-seitig geschlossen 2026-08-22** — siehe [`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md) |
 
 ### Kein neuer Gap (nur Feindetail)
 

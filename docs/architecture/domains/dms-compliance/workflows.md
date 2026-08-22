@@ -17,3 +17,5 @@ version: 1.1.0
 - Dokumentenruecklauf: Ursprungsbeleg -> Artefakt -> Versandstatus ->
   erwarteter Eingang -> Pruefung -> Abschluss; jeder Statuswechsel mit Grund
   im append-only Ruecklauf-Audit.
+- Terrorschutz: Personal/Kunde waehlen -> Namen/Objektbezug pruefen -> Ergebnis
+  mit Benutzer und Scope protokollieren -> Treffer ausschliesslich manuell klaeren.

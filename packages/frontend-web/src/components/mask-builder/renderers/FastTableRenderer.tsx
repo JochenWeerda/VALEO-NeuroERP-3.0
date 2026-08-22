@@ -126,6 +126,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   const [filterColumn, setFilterColumn] = useState<string>(filterableColumns[0]?.key ?? '')
   const [filterValue, setFilterValue] = useState('')
   const [columnPickerOpen, setColumnPickerOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const availableColumns = table.availableColumns ?? table.columns
   const visibleColumnKeys = new Set(table.columns.map((column) => column.key))
   const dataColumns = table.columns.map((column) => ({
@@ -138,9 +139,37 @@ export const FastTableRenderer = memo(function FastTableRenderer({
       ? (value: unknown) => formatCellValue(value, column.renderKind)
       : undefined,
   }))
+  const selectableColumns = table.bulkActions?.length && onRowAction
+    ? [{
+        key: '__selected',
+        label: '',
+        width: 44,
+        sortable: false,
+        render: (_value: unknown, row: Record<string, unknown>) => {
+          const id = String(row.id ?? '')
+          return (
+            <input
+              type="checkbox"
+              aria-label={`Zeile ${id} auswaehlen`}
+              checked={selectedIds.has(id)}
+              onChange={(event) => {
+                event.stopPropagation()
+                setSelectedIds((current) => {
+                  const next = new Set(current)
+                  if (event.target.checked) next.add(id)
+                  else next.delete(id)
+                  return next
+                })
+              }}
+              onClick={(event) => event.stopPropagation()}
+            />
+          )
+        },
+      }, ...dataColumns]
+    : dataColumns
   const renderedColumns = table.rowActions?.length && onRowAction
     ? [
-        ...dataColumns,
+        ...selectableColumns,
         {
           key: '__actions',
           label: 'Aktionen',
@@ -171,7 +200,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
           ),
         },
       ]
-    : dataColumns
+    : selectableColumns
 
   function handleRemoveFilter(colKey: string) {
     if (!onQueryChange || !filterPlan) return
@@ -215,6 +244,28 @@ export const FastTableRenderer = memo(function FastTableRenderer({
               {profileLabel(table.tableProfile)}
             </p>
           </div>
+          {table.bulkActions?.length && onRowAction ? (
+            <div className="flex items-center gap-1" data-testid={`bulk-actions-${table.key}`}>
+              <span className="mr-1 text-xs text-muted-foreground">{selectedIds.size} gewaehlt</span>
+              {table.bulkActions.map((action) => (
+                <Button
+                  key={action.key}
+                  type="button"
+                  size="sm"
+                  variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
+                  disabled={selectedIds.size === 0}
+                  data-testid={`bulk-action-${action.key}`}
+                  onClick={() => {
+                    const selectedRows = rows.filter((row) => selectedIds.has(String(row.id ?? '')))
+                    void onRowAction(action.key, { selectedIds: [...selectedIds], selectedRows })
+                    setSelectedIds(new Set())
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          ) : null}
           {onQueryChange && (
             <input
               type="search"

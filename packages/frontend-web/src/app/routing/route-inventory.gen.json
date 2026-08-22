@@ -6,6 +6,11 @@
       "source": "system"
     },
     {
+      "module": "@/pages/abrechnung/eb-lieferschein-kontrolle",
+      "path": "abrechnung/eb-lieferschein-kontrolle",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/admin-suite/index",
       "path": "admin-suite",
       "source": "auto"
@@ -791,8 +796,48 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/auswertungen/aenderungshistorie",
+      "path": "auswertungen/aenderungshistorie",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/auftrags-kontrolle",
+      "path": "auswertungen/auftrags-kontrolle",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/bonus-berechnung",
+      "path": "auswertungen/bonus-berechnung",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/dms-volltext",
+      "path": "auswertungen/dms-volltext",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/duengemittelmengen",
+      "path": "auswertungen/duengemittelmengen",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/auswertungen/l3-berichtskatalog",
       "path": "auswertungen/l3-berichtskatalog",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/lieferschein-kontrolle",
+      "path": "auswertungen/lieferschein-kontrolle",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/sanktionspruefung-kunden",
+      "path": "auswertungen/sanktionspruefung-kunden",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/sanktionspruefung-personal",
+      "path": "auswertungen/sanktionspruefung-personal",
       "source": "navigation"
     },
     {
@@ -3609,6 +3654,11 @@
       "module": "@/pages/produktion/mischfutter-produktion",
       "path": "produktion",
       "source": "alias"
+    },
+    {
+      "module": "@/pages/produktion/chargen-bearbeiten",
+      "path": "produktion/chargen-bearbeiten",
+      "source": "navigation"
     },
     {
       "module": "@/pages/produktion/produktions-dokumente-drucken",

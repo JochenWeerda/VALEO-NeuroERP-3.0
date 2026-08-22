@@ -115,18 +115,18 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 
 | ID | Prioritaet | Gap | Kurz-Ist | Abnahme (Auszug) |
 |---|---|---|---|---|
-| L3-GAP-CHARGEN-EDIT-019 | P2 | Chargen-Nummern bearbeiten | Einzel-Freigabe-API | Massenfreigabe-Maske mit Anerkennungs-Nr. |
-| L3-GAP-ARTKONTO-020 | P2 | Artikel-Konto / Druck | verstreute Bewegungen | Periodisches Artikel-Konto je Artikel |
-| L3-GAP-BONUS-021 | P2 | Bonus-Berechnung | nur Stammdaten-Flags | Berechnungslauf mit Export |
-| L3-GAP-DUENG-MENGEN-022 | P2 | Düngemittelmengen | Dünger-Stamm | Mengen-Auswertung/Behoerdenexport |
-| L3-GAP-EB-LS-023 | P2 | EB Lieferschein-Kontrolle | Faktura ohne EB-Vorpruefung | Kontrolle vor Rechnungslauf |
-| L3-GAP-AUDIT-HIST-024 | P2 | Änderungshistorie | Teil-Audits | Einheitliche Feldhistorie |
-| L3-GAP-CHARGEN-AUSW-026 | P2 | Chargen-Lager-Auswertungen | ein Batch-Report | drei L3-Paritaets-Reports |
-| L3-GAP-ART-AUSW-027 | P2 | Artikel-Weitere-Auswertungen | Umsatz einzeln | Verrechnungspreis, Dispo, Meldungen … |
-| L3-GAP-DMS-FULLTEXT-025 | P3 | DMS-Volltext Auswertung | API ohne Maske | Navigierbare Volltext-Worklist |
-| L3-GAP-TERROR-SPLIT-029 | P3 | Terrorschutz Personal/Kunden | generische Sanktion | getrennte gefuehrte Prueflaeufe |
-| L3-GAP-BELEGCHECK-SUB-030 | P3 | Belegkontrolle-Submasken | zentrale Worklist | gespeicherte Sub-Ansichten |
-| L3-GAP-KUND-AUSW-028 | P3 | Kunden-Weitere-Auswertungen | Basis-Kundenreports | Disposition, Bescheinigungen … |
+| L3-GAP-CHARGEN-EDIT-019 | P2 | Chargen-Nummern bearbeiten | Operator-Maske, Metadaten, Massenfreigabe und Audit | **geschlossen** |
+| L3-GAP-ARTKONTO-020 | P2 | Artikel-Konto / Druck | fester Run-/CSV-/Drilldown-Bericht | **geschlossen** |
+| L3-GAP-BONUS-021 | P2 | Bonus-Berechnung | unveraenderliche Laeufe, Korrektur und Export | **geschlossen** |
+| L3-GAP-DUENG-MENGEN-022 | P2 | Duengemittelmengen | N/P2O5/K2O-Auswertung | **geschlossen** |
+| L3-GAP-EB-LS-023 | P2 | EB Lieferschein-Kontrolle | gespeicherte zentrale Worklist | **geschlossen** |
+| L3-GAP-AUDIT-HIST-024 | P2 | Aenderungshistorie | einheitliche Audit-Trail-Maske | **geschlossen** |
+| L3-GAP-CHARGEN-AUSW-026 | P2 | Chargen-Lager-Auswertungen | drei feste Paritaetsberichte | **geschlossen** |
+| L3-GAP-ART-AUSW-027 | P2 | Artikel-Weitere-Auswertungen | elf feste Spezialberichte | **geschlossen** |
+| L3-GAP-DMS-FULLTEXT-025 | P3 | DMS-Volltext Auswertung | tenant-sichere navigierbare Worklist | **geschlossen** |
+| L3-GAP-TERROR-SPLIT-029 | P3 | Terrorschutz Personal/Kunden | getrennte Scopes/Protokolle | **geschlossen** |
+| L3-GAP-BELEGCHECK-SUB-030 | P3 | Belegkontrolle-Submasken | drei gespeicherte Sichten | **geschlossen** |
+| L3-GAP-KUND-AUSW-028 | P3 | Kunden-Weitere-Auswertungen | fuenf feste Spezialberichte | **geschlossen** |
 
 Details, Leaf-Katalog und Evidenzgrenzen:
 [`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md).

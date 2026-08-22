@@ -23,3 +23,7 @@ begruendetem Retry und dem dritten Fehlversuch in `quarantined`.
 - Wareneingang / -ausgang — Process Map Lager
 - Agrar-Materialfluss: Überschneidung mit [agrar](../agrar/workflows.md) (`agri_silo_*`)
 - Einkauf → WE: [c4-procurement-inventory.md](../../views/components/c4-procurement-inventory.md)
+
+Chargenfreigabe: Zeilen auswaehlen -> Qualitaetsstatus aller Chargen pruefen ->
+bei vollstaendiger Freigabe atomar freigeben -> Benutzer, Grund und
+Vorher-/Nachherstatus auditieren.

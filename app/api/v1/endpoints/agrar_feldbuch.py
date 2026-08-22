@@ -647,8 +647,8 @@ async def get_duengebilanz(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     """
-    AGR-COM-01: Berechnet die Nährstoffbilanz (N) für ein Jahr.
-    Basiert auf dokumentierten Düngemaßnahmen im Feldbuch.
+    AGR-COM-01: Berechnet die Nährstoffbilanz (N/P2O5/K2O) für ein Jahr.
+    Basiert auf den kanonischen Reinnährstoffen dokumentierter Düngemaßnahmen.
     """
     from sqlalchemy import extract
 
@@ -680,6 +680,8 @@ async def get_duengebilanz(
                 "schlag_name": schlag_name,
                 "flaeche_ha": m.schlag.flaeche if m.schlag else 0.0,
                 "n_gesamt_kg": 0.0,
+                "p2o5_gesamt_kg": 0.0,
+                "k2o_gesamt_kg": 0.0,
                 "massnahmen_count": 0,
                 "details": [],
             }
@@ -690,9 +692,13 @@ async def get_duengebilanz(
             (v for k, v in _DUENGER_N_GEHALT.items() if k in mittel_key),
             0.0,
         )
-        n_menge = (m.menge or 0.0) * (m.flaeche or 0.0) * n_faktor
+        n_menge = float(m.n_kg) if m.n_kg is not None else (m.menge or 0.0) * (m.flaeche or 0.0) * n_faktor
+        p2o5_menge = float(m.p2o5_kg or 0.0)
+        k2o_menge = float(m.k2o_kg or 0.0)
 
         bilanz_per_schlag[sid]["n_gesamt_kg"] += n_menge
+        bilanz_per_schlag[sid]["p2o5_gesamt_kg"] += p2o5_menge
+        bilanz_per_schlag[sid]["k2o_gesamt_kg"] += k2o_menge
         bilanz_per_schlag[sid]["massnahmen_count"] += 1
         bilanz_per_schlag[sid]["details"].append({
             "datum": m.datum.date().isoformat() if m.datum else None,
@@ -701,6 +707,8 @@ async def get_duengebilanz(
             "einheit": m.einheit,
             "flaeche_ha": m.flaeche,
             "n_kg_berechnet": round(n_menge, 2),
+            "p2o5_kg": round(p2o5_menge, 2),
+            "k2o_kg": round(k2o_menge, 2),
         })
 
         gesamt_n += n_menge
@@ -717,6 +725,8 @@ async def get_duengebilanz(
         n_pro_ha = sb["n_gesamt_kg"] / ha if ha > 0 else 0.0
         sb["n_pro_ha"] = round(n_pro_ha, 2)
         sb["n_gesamt_kg"] = round(sb["n_gesamt_kg"], 2)
+        sb["p2o5_gesamt_kg"] = round(sb["p2o5_gesamt_kg"], 2)
+        sb["k2o_gesamt_kg"] = round(sb["k2o_gesamt_kg"], 2)
         sb["grenzwert_n_ha"] = grenzwert_n_ha
         sb["ueberschreitung"] = n_pro_ha > grenzwert_n_ha
         if sb["ueberschreitung"]:
@@ -735,6 +745,65 @@ async def get_duengebilanz(
         "compliant": ueberschreitungen == 0,
         "schlaege": schlag_bilanzen,
     }
+
+
+@router.get(
+    "/feldbuch/duengemittelmengen",
+    summary="Düngemittelmengen als L3-Auswertung abrufen",
+    response_model=AgrarFeldbuchOut,
+)
+async def get_duengemittelmengen(
+    jahr: int = Query(default=datetime.now().year),
+    customer_id: Optional[str] = Query(default=None),
+    schlag_id: Optional[str] = Query(default=None),
+    q: Optional[str] = Query(default=None, max_length=120),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Mandantensichere, flache Mengenliste für die gleichnamige L3-Maske."""
+    from sqlalchemy import extract
+
+    query = db.query(FeldbuchMassnahme).filter(
+        FeldbuchMassnahme.tenant_id == tenant_id,
+        FeldbuchMassnahme.typ == "duengung",
+        extract("year", FeldbuchMassnahme.datum) == jahr,
+    )
+    if customer_id:
+        query = query.filter(FeldbuchMassnahme.customer_id == customer_id)
+    if schlag_id:
+        query = query.filter(FeldbuchMassnahme.schlag_id == schlag_id)
+    if q:
+        query = query.filter(FeldbuchMassnahme.mittel.ilike(f"%{q}%"))
+
+    all_rows = query.options(selectinload(FeldbuchMassnahme.schlag)).all()
+    totals = {
+        "menge": round(sum(float(row.menge or 0.0) for row in all_rows), 2),
+        "n_kg": round(sum(float(row.n_kg or 0.0) for row in all_rows), 2),
+        "p2o5_kg": round(sum(float(row.p2o5_kg or 0.0) for row in all_rows), 2),
+        "k2o_kg": round(sum(float(row.k2o_kg or 0.0) for row in all_rows), 2),
+    }
+    start = (page - 1) * page_size
+    rows = sorted(all_rows, key=lambda row: row.datum, reverse=True)[start : start + page_size]
+    items = [{
+        "id": row.id,
+        "datum": row.datum.date().isoformat() if row.datum else None,
+        "customer_id": row.customer_id,
+        "schlag_id": row.schlag_id,
+        "schlag_name": row.schlag.name if row.schlag else None,
+        "mittel": row.mittel,
+        "menge": row.menge,
+        "einheit": row.einheit,
+        "flaeche_ha": row.flaeche,
+        "duenger_form": row.duenger_form,
+        "n_kg": row.n_kg,
+        "p2o5_kg": row.p2o5_kg,
+        "k2o_kg": row.k2o_kg,
+        "quelle": row.quelle,
+        "lieferschein_id": row.lieferschein_id,
+    } for row in rows]
+    return {"items": items, "total": len(all_rows), "page": page, "page_size": page_size, "jahr": jahr, **totals}
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -766,7 +835,7 @@ async def get_cross_compliance_report(
         psm_q = psm_q.filter(FeldbuchMassnahme.customer_id == customer_id)
 
     psm_total = psm_q.count()
-    psm_compliant = psm_q.filter(FeldbuchMassnahme.compliant == True).count()
+    psm_compliant = psm_q.filter(FeldbuchMassnahme.compliant.is_(True)).count()
     psm_non_compliant = psm_total - psm_compliant
 
     # 2. Düngemaßnahmen

@@ -20,3 +20,5 @@ Frontend: `packages/frontend-web/src/pages/compliance/`, `dms/`
 pytest tests/test_docflow_returns.py -q --no-cov
 pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/docflow/dokumenten-ruecklauf.test.tsx
 ```
+
+Deep-Mask-Paritaet: `pytest tests/test_dms_fulltext_search.py tests/test_l3_deep_mask_parity.py -q --no-cov`.

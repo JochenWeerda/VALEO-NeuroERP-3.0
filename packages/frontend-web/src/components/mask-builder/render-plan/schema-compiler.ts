@@ -72,6 +72,7 @@ function compileTable(
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
     rowActions: table.rowActions,
+    bulkActions: table.bulkActions,
   }
 }
 

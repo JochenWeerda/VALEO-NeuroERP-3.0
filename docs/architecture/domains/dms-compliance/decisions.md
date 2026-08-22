@@ -15,5 +15,6 @@ version: 1.1.0
 | [dms-paperless-integration.md](../../dms-paperless-integration.md) | Paperless Slave |
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Model |
 | [ADR-058](../../../adr/adr-058-document-return-on-docflow.md) | Dokumentenruecklauf auf Docflow |
+| [ADR-070](../../../adr/adr-070-l3-deep-mask-parity.md) | Tenant-sichere L3-Leaf-Masken |
 
 Regulatory Gaps: [open-gaps-and-known-issues.md](../../../project-context/open-gaps-and-known-issues.md) — Compliance-Slices

@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-22
 version: 1.1.0
 description: C4 Level 2 — Deploybare Container aus docker-compose.yml (Dev) und docker-compose.production.yml (Prod/Observability).
 ---

@@ -27,3 +27,5 @@ Entscheidung: [ADR-060](../../../adr/adr-060-governed-inventory-auxiliary-batche
   `POST /api/v1/mobile/sync-queue/{event_id}/retry` und
   `GET /api/v1/mobile/sync-queue/{event_id}/audit`.
 - Monolith-Routen unter `/api/v1` für compat-Lager
+- Chargen: tenantgebundene CRUD-/Listenpfade unter `/api/v1/chargen` sowie
+  `POST /api/v1/chargen/operator/bulk-release` mit Qualitaetsgate und Auditgrund.

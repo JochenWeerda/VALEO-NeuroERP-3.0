@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21",
+  "generatedAt": "2026-08-22",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1442,6 +1442,27 @@
       ]
     },
     {
+      "mask_id": "auswertungen/duengemittelmengen",
+      "title": "Duengemittelmengen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__duengemittelmengen/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/duengemittelmengen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/duengemittelmengen/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/duengemittelmengen/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "customer_id",
+        "schlag_name",
+        "lieferschein_id"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "produktion/produktionsleitstand",
       "title": "Produktionsleitstand",
       "domain": "agrar",
@@ -1492,6 +1513,88 @@
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/aenderungshistorie",
+      "title": "Aenderungshistorie",
+      "domain": "audit",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__aenderungshistorie/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/aenderungshistorie/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/aenderungshistorie/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/aenderungshistorie/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "user_email",
+        "changes",
+        "entity_id"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/sanktionspruefung-kunden",
+      "title": "Terrorschutzpruefung Kunden",
+      "domain": "compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__sanktionspruefung-kunden/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/sanktionspruefung-kunden/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/sanktionspruefung-kunden/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "check",
+          "label": "Kunden pruefen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "compliance.sanctions.check",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "geprueft_name",
+        "entity_ref",
+        "checked_by"
+      ],
+      "mcp_tool_ids": [
+        "compliance.gate.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/sanktionspruefung-personal",
+      "title": "Terrorschutzpruefung Personal",
+      "domain": "compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__sanktionspruefung-personal/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/sanktionspruefung-personal/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/sanktionspruefung-personal/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "check",
+          "label": "Personal pruefen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "compliance.sanctions.check",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "geprueft_name",
+        "entity_ref",
+        "checked_by"
+      ],
+      "mcp_tool_ids": [
+        "compliance.gate.status"
       ]
     },
     {
@@ -1682,6 +1785,24 @@
         "contact_ref",
         "subject_ref",
         "storage_key"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/dms-volltext",
+      "title": "Volltextsuche Dokumentenverwaltung",
+      "domain": "documents",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__dms-volltext/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/dms-volltext/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/dms-volltext/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/dms-volltext/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "description",
+        "document_name",
+        "article_name"
       ],
       "mcp_tool_ids": []
     },
@@ -1896,6 +2017,48 @@
       ]
     },
     {
+      "mask_id": "abrechnung/eb-lieferschein-kontrolle",
+      "title": "EB-Lieferschein-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/abrechnung__eb-lieferschein-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/abrechnung/eb-lieferschein-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/abrechnung/eb-lieferschein-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/auftrags-kontrolle",
+      "title": "Auftrags-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__auftrags-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/auftrags-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/auftrags-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "auswertungen/beleg-kontrolle",
       "title": "Beleg-Kontrolle",
       "domain": "finance",
@@ -1904,6 +2067,27 @@
       "agent_contract_url": "/api/v1/masks/auswertungen/beleg-kontrolle/agent-contract",
       "screen_definition_url": "/api/v1/masks/auswertungen/beleg-kontrolle/screen-definition",
       "readiness_url": "/api/v1/masks/auswertungen/beleg-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/lieferschein-kontrolle",
+      "title": "Lieferschein-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__lieferschein-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/lieferschein-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/lieferschein-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/lieferschein-kontrolle/readiness",
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [
@@ -2403,6 +2587,27 @@
       ]
     },
     {
+      "mask_id": "produktion/chargen-bearbeiten",
+      "title": "Chargen-Nummern bearbeiten",
+      "domain": "inventory",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__chargen-bearbeiten/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/chargen-bearbeiten/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/chargen-bearbeiten/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/chargen-bearbeiten/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "lieferanten_charge",
+        "anerkennungs_nr",
+        "herkunft"
+      ],
+      "mcp_tool_ids": [
+        "wms.lot.trace",
+        "wms.cell.status"
+      ]
+    },
+    {
       "mask_id": "lager/article-stock",
       "title": "Artikelbestand",
       "domain": "lager",
@@ -2664,6 +2869,37 @@
       "sensitive_fields": [
         "filter_spec",
         "selected_fields"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/bonus-berechnung",
+      "title": "Bonus-Berechnung",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__bonus-berechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/bonus-berechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/bonus-berechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/bonus-berechnung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "calculate",
+          "label": "Bonuslauf berechnen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "reporting.bonus.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "total_basis",
+        "total_bonus",
+        "dimension_id",
+        "actor"
       ],
       "mcp_tool_ids": []
     },

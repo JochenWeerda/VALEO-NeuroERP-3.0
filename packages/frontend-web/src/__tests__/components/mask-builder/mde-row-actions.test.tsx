@@ -44,4 +44,21 @@ describe('FastTableRenderer row actions', () => {
     fireEvent.click(actions[0])
     expect(onRowAction).toHaveBeenCalledWith('retry_event', expect.objectContaining({ id: 'evt-fail' }))
   })
+
+  it('uebergibt zentral ausgewaehlte Zeilen an eine Bulk-Aktion', async () => {
+    const onRowAction = vi.fn()
+    render(
+      <FastTableRenderer
+        table={{ ...table, rowActions: [], bulkActions: [{ key: 'release', label: 'Freigeben' }] }}
+        rows={[{ id: 'lot-1', device_id: 'Charge 1', sync_status: 'ready' }]}
+        onRowAction={onRowAction}
+      />,
+    )
+    fireEvent.click(screen.getByLabelText('Zeile lot-1 auswaehlen'))
+    fireEvent.click(screen.getByTestId('bulk-action-release'))
+    expect(onRowAction).toHaveBeenCalledWith('release', {
+      selectedIds: ['lot-1'],
+      selectedRows: [expect.objectContaining({ id: 'lot-1' })],
+    })
+  })
 })

@@ -74,3 +74,9 @@ vollständiger Datengrundlage berechnet; Methanschätzungen bleiben gekennzeichn
 5. Approver aktiviert die Analyse mit Auditgrund. Eine aktive Analyse desselben
    Feed-/Scopes wird atomar `superseded`; bestehende Rationsversionen bleiben
    unverändert.
+
+### Duengemittelmengen
+
+Feldbuchmassnahmen tenant-/jahresbezogen lesen -> kanonische Reinnaehrstoffe
+N/P2O5/K2O summieren -> nach Kunde/Schlag filtern -> nur lesend in der nativen
+L3-Auswertungsmaske darstellen.

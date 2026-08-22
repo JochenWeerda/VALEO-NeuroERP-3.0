@@ -119,7 +119,7 @@ $TabAw = 660; $TabSi = 760; $TabErf = 370; $TabPrd = 620; $TabFav = 175
 # Icon X @ Y=108 — kalibriert 2026-08-22 (Ribbon mit Gruppe Überwachung)
 $IconsAw = @{
     AbfrageCenter  = 165
-    BelegKontrolle = 218
+    BelegKontrolle = 215
     Dokumenten     = 292
     Kunden         = 358
     Lieferant      = 403
@@ -131,7 +131,7 @@ $IconsAw = @{
     Weitere        = 673
 }
 $IconsPrd = @{ Chargen = 545 }
-$IconsFav = @{ ArtikelKonto = 265 }
+$IconsFav = @{ ArtikelKonto = 290; VerkaufLs = 175; ArtikelStamm = 220 }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $log = Join-Path $OutDir 'leaf-log.txt'

@@ -23,3 +23,6 @@ pytest tests/ -k "finance or fibu or ap_invoice or closing" -m "not slow"
 Frontend: `packages/frontend-web/src/pages/finance/`, `fibu/`, `meldewesen/`, `pos/`
 
 E2E: Playwright Finance/FiBu-Flows in `tests/e2e/`
+
+L3-Berichte, Bonus und Kontrollsichten:
+`pytest tests/test_l3_report_catalog.py tests/test_document_control.py -q --no-cov`.

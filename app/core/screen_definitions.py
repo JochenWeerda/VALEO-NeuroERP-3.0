@@ -3297,6 +3297,26 @@ def build_document_control_screen_definition() -> dict[str, Any]:
     }
 
 
+def _build_document_control_variant(
+    *, screen_id: str, title: str, subtitle: str, exception_type: str
+) -> dict[str, Any]:
+    """Saved L3 worklist view over the central document-control capability."""
+    definition = build_document_control_screen_definition()
+    definition["id"] = screen_id
+    definition["title"] = title
+    definition["subtitle"] = subtitle
+    definition["adapter"]["sourceId"] = screen_id
+    definition["dataSources"] = [
+        {"key": "entity", "endpoint": "/api/v1/document-control/summary", "staleTimeMs": 10_000},
+        {"key": "exceptions", "endpoint": f"/api/v1/document-control/exceptions?exception_type={exception_type}", "pageSize": 50, "staleTimeMs": 10_000},
+    ]
+    definition["agentContract"]["businessPurpose"] = subtitle
+    definition["agentContract"]["testSelectors"] = {
+        "screenRoot": f"[data-testid='{screen_id.replace('/', '-')}']"
+    }
+    return definition
+
+
 def build_production_control_screen_definition() -> dict[str, Any]:
     """Native L3-style production worklist over canonical source objects."""
     return {
@@ -3555,6 +3575,50 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
     }
 
 
+def _build_sanctions_scope_screen_definition(
+    *, screen_id: str, title: str, scope: str, subject_label: str
+) -> dict[str, Any]:
+    """L3-paritaetische, fachlich getrennte Terrorschutz-Pruefliste."""
+    endpoint = f"/api/v1/compliance/sanctions/pruefprotokoll?scope={scope}"
+    return {
+        "schemaVersion": 1,
+        "id": screen_id,
+        "domain": "compliance",
+        "mode": "list",
+        "title": title,
+        "subtitle": f"{subject_label} gegen die freigegebenen Sanktionslisten pruefen und nachweisen",
+        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
+        "dataSources": [
+            {"key": "checks", "endpoint": endpoint, "pageSize": 100, "staleTimeMs": 10_000}
+        ],
+        "tables": [{
+            "key": "checks", "label": "Pruefprotokoll", "dataSourceKey": "checks",
+            "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "geprueft_am", "label": "Geprueft am", "renderKind": "datetime", "sortable": True, "width": 170},
+                {"key": "entity_ref", "label": "Personal-/Kunden-Nr.", "filterable": True, "width": 155},
+                {"key": "geprueft_name", "label": "Name", "filterable": True, "width": 250},
+                {"key": "status", "label": "Ergebnis", "renderKind": "status", "filterable": True, "width": 135},
+                {"key": "checked_by", "label": "Geprueft von", "filterable": True, "width": 180},
+            ],
+        }],
+        "actions": [{
+            "key": "check", "label": f"{subject_label} pruefen", "kind": "primary",
+            "permission": "compliance.sanctions.check", "dangerLevel": "moderate",
+        }],
+        "workflow": {"processKey": f"sanctions-check-{scope}", "status": "audited", "nextActionKey": "check", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
+        "performance": {"initialPayloadBudgetKb": 35, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "compliance"},
+        "agentContract": {
+            "businessPurpose": f"Terrorschutzpruefungen fuer {subject_label} getrennt und mandantensicher nachweisen.",
+            "examplePrompts": [f"Pruefe {subject_label} gegen die Sanktionsliste.", "Zeige verdaechtige Treffer."],
+            "sensitiveFields": ["geprueft_name", "entity_ref", "checked_by"],
+            "forbiddenAgentTasks": ["Treffer automatisch freigeben oder Pruefprotokolle veraendern"],
+            "testSelectors": {"screenRoot": f"[data-testid='{scope}-sanctions-check']"},
+        },
+    }
+
+
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
@@ -3586,17 +3650,169 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     },
     "auswertungen/l3-berichtskatalog": lambda: {
         "schemaVersion": 1, "id": "auswertungen/l3-berichtskatalog", "domain": "reporting", "mode": "list",
-        "title": "L3-Berichtskatalog", "subtitle": "Vertreter, Kunde, Artikel, Gruppe, Charge, Ernte und Strecke",
+        "title": "L3-Berichtskatalog", "subtitle": "Feste L3-Auswertungen fuer Kunde, Artikel, Charge, Meldung, Bonus, Ernte und Strecke",
         "adapter": {"type": "native", "sourceId": "auswertungen/l3-berichtskatalog", "temporary": False},
         "dataSources": [{"key": "entity", "endpoint": "/api/v1/l3-report-catalog", "staleTimeMs": 60_000}, {"key": "reports", "endpoint": "/api/v1/l3-report-catalog", "pageSize": 50, "staleTimeMs": 60_000}],
         "summary": [{"key": "count", "label": "Freigegebene Berichte", "tone": "info"}],
         "tables": [{"key": "reports", "label": "Berichtskatalog", "dataSourceKey": "reports", "serverPagination": False, "pageSize": 50, "virtualized": True, "rowHeight": 44,
-            "columns": [{"key": "title", "label": "Bericht", "sortable": True, "filterable": True, "width": 250}, {"key": "dimension", "label": "Dimension", "filterable": True, "width": 170}, {"key": "parameters", "label": "Parameter", "width": 330}, {"key": "sums", "label": "Summen", "width": 260}, {"key": "export_formats", "label": "Export", "width": 100}, {"key": "drilldown", "label": "Beleg-Drilldown", "renderKind": "boolean", "width": 120}],
+            "columns": [{"key": "category", "label": "Bereich", "sortable": True, "filterable": True, "width": 120}, {"key": "title", "label": "Bericht", "sortable": True, "filterable": True, "width": 250}, {"key": "legacy_menu", "label": "L3-Menuepfad", "filterable": True, "width": 300}, {"key": "description", "label": "Zweck", "width": 330}, {"key": "dimension", "label": "Dimension", "filterable": True, "width": 160}, {"key": "parameters", "label": "Parameter", "width": 300}, {"key": "sums", "label": "Summen", "width": 240}, {"key": "export_formats", "label": "Export", "width": 90}, {"key": "drilldown", "label": "Beleg-Drilldown", "renderKind": "boolean", "width": 120}],
             "rowActions": [{"key": "run", "label": "Auswerten"}, {"key": "export", "label": "CSV exportieren"}, {"key": "drilldown", "label": "Belege"}]}],
         "workflow": {"processKey": "l3-report-catalog", "status": "governed", "nextActionKey": "run", "auditRequired": True},
         "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
         "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "reporting"},
         "agentContract": {"businessPurpose": "Priorisierte L3-Berichte mit identischen Summen in Ansicht und Export bereitstellen.", "examplePrompts": ["Zeige Umsatz nach Vertreter.", "Drille die Chargensumme auf Belege herunter."], "sensitiveFields": ["customer_id", "representative_id", "source_ref"], "forbiddenAgentTasks": ["Nicht freigegebene Dimensionen oder freie SQL-Abfragen ausfuehren"], "testSelectors": {"screenRoot": "[data-testid='l3-berichtskatalog']"}},
+    },
+    "auswertungen/dms-volltext": lambda: {
+        "schemaVersion": 1, "id": "auswertungen/dms-volltext", "domain": "documents", "mode": "list",
+        "title": "Volltextsuche Dokumentenverwaltung", "subtitle": "Dokumente nach Text, Nummer, Typ, Kategorie und Artikel finden",
+        "adapter": {"type": "native", "sourceId": "auswertungen/dms-volltext", "temporary": False},
+        "dataSources": [{"key": "entity", "endpoint": "/api/v1/dms/search", "staleTimeMs": 20_000}, {"key": "documents", "endpoint": "/api/v1/dms/search", "pageSize": 50, "staleTimeMs": 20_000}],
+        "summary": [{"key": "total", "label": "Treffer", "tone": "info"}, {"key": "external_gate", "label": "DMS-Verbindung", "tone": "neutral"}],
+        "tables": [{"key": "documents", "label": "Dokumente", "dataSourceKey": "documents", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [{"key": "document_name", "label": "Dokument", "sortable": True, "filterable": True, "width": 250}, {"key": "document_number", "label": "Nummer", "filterable": True, "width": 130}, {"key": "document_type", "label": "Typ", "filterable": True, "width": 130}, {"key": "document_category", "label": "Kategorie", "filterable": True, "width": 130}, {"key": "article_number", "label": "Artikel-Nr.", "filterable": True, "width": 120}, {"key": "article_name", "label": "Artikel", "filterable": True, "width": 220}, {"key": "valid_from", "label": "Gueltig ab", "renderKind": "date", "width": 110}, {"key": "valid_to", "label": "Gueltig bis", "renderKind": "date", "width": 110}, {"key": "created_at", "label": "Angelegt", "renderKind": "datetime", "sortable": True, "width": 160}],
+            "rowActions": [{"key": "preview", "label": "Vorschau", "visibleWhen": {"field": "preview_url", "truthy": True}}, {"key": "open_source", "label": "Artikel oeffnen"}]}],
+        "workflow": {"processKey": "dms-fulltext-search", "status": "read-only", "nextActionKey": "open_source", "auditRequired": False},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "preview", "tableProfile": "document"},
+        "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "documents"},
+        "agentContract": {"businessPurpose": "Tenant-sicher Dokumente wiederfinden und zum Quellobjekt springen.", "examplePrompts": ["Suche Dokumente mit dieser Belegnummer.", "Zeige Zertifikate zu diesem Artikel."], "sensitiveFields": ["description", "document_name", "article_name"], "forbiddenAgentTasks": ["Dokumentinhalte oder Metadaten anderer Mandanten anzeigen"], "testSelectors": {"screenRoot": "[data-testid='dms-volltext']"}},
+    },
+    "auswertungen/aenderungshistorie": lambda: {
+        "schemaVersion": 1, "id": "auswertungen/aenderungshistorie", "domain": "audit", "mode": "list",
+        "title": "Aenderungshistorie", "subtitle": "Bereichsuebergreifende Feld-, Benutzer- und Zeitstempel-Nachweise",
+        "adapter": {"type": "native", "sourceId": "auswertungen/aenderungshistorie", "temporary": False},
+        "dataSources": [{"key": "trail", "endpoint": "/api/v1/audit/trail", "pageSize": 100, "staleTimeMs": 15_000}],
+        "tables": [{"key": "trail", "label": "Aenderungen", "dataSourceKey": "trail", "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 44,
+            "columns": [{"key": "timestamp", "label": "Zeitstempel", "renderKind": "datetime", "sortable": True, "width": 170}, {"key": "user_email", "label": "Benutzer", "filterable": True, "width": 190}, {"key": "action", "label": "Aktion", "filterable": True, "width": 150}, {"key": "entity_type", "label": "Bereich/Objekt", "filterable": True, "width": 170}, {"key": "entity_id", "label": "Objekt-ID", "filterable": True, "width": 190}, {"key": "changes", "label": "Feld-Aenderungen", "width": 360}, {"key": "correlation_id", "label": "Korrelation", "width": 190}, {"key": "hash", "label": "Hash", "width": 250}],
+            "rowActions": [{"key": "validate_chain", "label": "Hash-Kette pruefen"}]}],
+        "workflow": {"processKey": "cross-domain-change-history", "status": "append-only", "nextActionKey": "validate_chain", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
+        "performance": {"initialPayloadBudgetKb": 50, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "audit"},
+        "agentContract": {"businessPurpose": "Aenderungen an Stammdaten und Belegen bereichsuebergreifend nachvollziehen.", "examplePrompts": ["Wer hat dieses Feld geaendert?", "Zeige Aenderungen an diesem Beleg."], "sensitiveFields": ["user_email", "changes", "entity_id"], "forbiddenAgentTasks": ["Audit-Eintraege veraendern oder loeschen"], "testSelectors": {"screenRoot": "[data-testid='aenderungshistorie']"}},
+    },
+    "auswertungen/sanktionspruefung-personal": lambda: _build_sanctions_scope_screen_definition(
+        screen_id="auswertungen/sanktionspruefung-personal",
+        title="Terrorschutzpruefung Personal",
+        scope="personal",
+        subject_label="Personal",
+    ),
+    "auswertungen/sanktionspruefung-kunden": lambda: _build_sanctions_scope_screen_definition(
+        screen_id="auswertungen/sanktionspruefung-kunden",
+        title="Terrorschutzpruefung Kunden",
+        scope="customers",
+        subject_label="Kunden",
+    ),
+    "auswertungen/duengemittelmengen": lambda: {
+        "schemaVersion": 1, "id": "auswertungen/duengemittelmengen", "domain": "agrar", "mode": "list",
+        "title": "Duengemittelmengen", "subtitle": "Ausgebrachte Mengen und Reinnaehrstoffe nach Jahr, Kunde und Schlag",
+        "adapter": {"type": "native", "sourceId": "auswertungen/duengemittelmengen", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/feldbuch/duengemittelmengen", "staleTimeMs": 30_000},
+            {"key": "amounts", "endpoint": "/api/v1/feldbuch/duengemittelmengen", "pageSize": 50, "staleTimeMs": 30_000},
+        ],
+        "summary": [
+            {"key": "total", "label": "Massnahmen", "tone": "info"},
+            {"key": "menge", "label": "Produktmenge", "tone": "neutral"},
+            {"key": "n_kg", "label": "N kg", "tone": "info"},
+            {"key": "p2o5_kg", "label": "P2O5 kg", "tone": "neutral"},
+            {"key": "k2o_kg", "label": "K2O kg", "tone": "neutral"},
+        ],
+        "tables": [{
+            "key": "amounts", "label": "Duengungsmassnahmen", "dataSourceKey": "amounts",
+            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                {"key": "customer_id", "label": "Kunde", "filterable": True, "width": 140},
+                {"key": "schlag_name", "label": "Schlag", "filterable": True, "width": 180},
+                {"key": "mittel", "label": "Duengemittel", "filterable": True, "width": 220},
+                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "width": 90},
+                {"key": "einheit", "label": "ME", "width": 65},
+                {"key": "flaeche_ha", "label": "ha", "numeric": True, "width": 75},
+                {"key": "duenger_form", "label": "Form", "filterable": True, "width": 75},
+                {"key": "n_kg", "label": "N kg", "numeric": True, "width": 90},
+                {"key": "p2o5_kg", "label": "P2O5 kg", "numeric": True, "width": 100},
+                {"key": "k2o_kg", "label": "K2O kg", "numeric": True, "width": 90},
+                {"key": "quelle", "label": "Quelle", "filterable": True, "width": 120},
+            ],
+            "rowActions": [{"key": "open_source", "label": "Quellbeleg", "visibleWhen": {"field": "quelle", "values": ["erp_service", "erp_lieferschein"]}}],
+        }],
+        "workflow": {"processKey": "fertilizer-amount-report", "status": "read-only", "nextActionKey": "open_source", "auditRequired": False},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "summary", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar"},
+        "agentContract": {"businessPurpose": "Duengemittelmengen aus kanonischen Feldbuchdaten L3-vertraut auswerten.", "examplePrompts": ["Zeige Duengemittelmengen dieses Jahres.", "Summiere N, P2O5 und K2O je Schlag."], "sensitiveFields": ["customer_id", "schlag_name", "lieferschein_id"], "forbiddenAgentTasks": ["Reinnährstoffe ohne Quelldaten schaetzen"], "testSelectors": {"screenRoot": "[data-testid='duengemittelmengen']"}},
+    },
+    "produktion/chargen-bearbeiten": lambda: {
+        "schemaVersion": 1, "id": "produktion/chargen-bearbeiten", "domain": "inventory", "mode": "list",
+        "title": "Chargen-Nummern bearbeiten", "subtitle": "Lieferantencharge, Anerkennungsnummer, Qualitaetsstatus und Freigabe zentral pflegen",
+        "adapter": {"type": "native", "sourceId": "produktion/chargen-bearbeiten", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/chargen/stats/summary", "staleTimeMs": 10_000},
+            {"key": "charges", "endpoint": "/api/v1/chargen", "pageSize": 100, "staleTimeMs": 10_000},
+        ],
+        "summary": [
+            {"key": "total", "label": "Chargen", "tone": "info"},
+            {"key": "in_pruefung", "label": "In Pruefung", "tone": "warning"},
+            {"key": "freigegeben", "label": "Freigegeben", "tone": "success"},
+            {"key": "gesperrt", "label": "Gesperrt", "tone": "danger"},
+        ],
+        "tables": [{
+            "key": "charges", "label": "Chargen", "dataSourceKey": "charges",
+            "serverPagination": True, "pageSize": 100, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "chargenId", "label": "Chargen-Nr.", "sortable": True, "filterable": True, "width": 150},
+                {"key": "lieferanten_charge", "label": "Lief.-Charge", "filterable": True, "width": 145},
+                {"key": "anerkennungs_nr", "label": "Anerkennungs-Nr.", "filterable": True, "width": 165},
+                {"key": "artikel", "label": "Artikel", "filterable": True, "width": 220},
+                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "width": 90},
+                {"key": "lagerort", "label": "Lagerort", "filterable": True, "width": 125},
+                {"key": "qualitaetsstatus", "label": "Qualitaet", "renderKind": "status", "filterable": True, "width": 130},
+                {"key": "status", "label": "Freigabe", "renderKind": "status", "filterable": True, "width": 120},
+                {"key": "freigabeDatum", "label": "Freigegeben am", "renderKind": "datetime", "width": 165},
+            ],
+            "rowActions": [{"key": "edit_metadata", "label": "Kennzeichen pflegen"}, {"key": "open_source", "label": "Charge oeffnen"}],
+            "bulkActions": [{"key": "bulk_release", "label": "Auswahl freigeben", "dangerLevel": "moderate"}],
+        }],
+        "workflow": {"processKey": "charge-operator", "status": "quality-gated", "nextActionKey": "bulk_release", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
+        "performance": {"initialPayloadBudgetKb": 55, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "inventory"},
+        "agentContract": {"businessPurpose": "Chargenkennzeichen pflegen und qualitaetsgepruefte Chargen nachvollziehbar freigeben.", "examplePrompts": ["Zeige nicht freigegebene Chargen.", "Pflege die Anerkennungsnummer."], "sensitiveFields": ["lieferanten_charge", "anerkennungs_nr", "herkunft"], "forbiddenAgentTasks": ["Charge ohne Qualitaetsfreigabe oder menschlichen Audit-Grund freigeben"], "testSelectors": {"screenRoot": "[data-testid='chargen-bearbeiten']"}},
+    },
+    "auswertungen/bonus-berechnung": lambda: {
+        "schemaVersion": 1, "id": "auswertungen/bonus-berechnung", "domain": "reporting", "mode": "list",
+        "title": "Bonus-Berechnung", "subtitle": "Periodische Kunden- und Artikelgruppenboni berechnen, korrigieren und exportieren",
+        "adapter": {"type": "native", "sourceId": "auswertungen/bonus-berechnung", "temporary": False},
+        "dataSources": [
+            {"key": "entity", "endpoint": "/api/v1/l3-report-catalog/bonus-runs", "staleTimeMs": 15_000},
+            {"key": "runs", "endpoint": "/api/v1/l3-report-catalog/bonus-runs", "pageSize": 100, "staleTimeMs": 15_000},
+        ],
+        "summary": [
+            {"key": "total", "label": "Laeufe", "tone": "info"},
+            {"key": "calculated", "label": "Berechnet", "tone": "success"},
+            {"key": "corrections", "label": "Korrekturen", "tone": "warning"},
+            {"key": "total_bonus", "label": "Bonus gesamt", "tone": "info"},
+        ],
+        "tables": [{
+            "key": "runs", "label": "Bonuslaeufe", "dataSourceKey": "runs",
+            "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 44,
+            "columns": [
+                {"key": "created_at", "label": "Erstellt", "renderKind": "datetime", "sortable": True, "width": 165},
+                {"key": "report_id", "label": "Berechnung", "filterable": True, "width": 190},
+                {"key": "from_date", "label": "Von", "renderKind": "date", "width": 105},
+                {"key": "to_date", "label": "Bis", "renderKind": "date", "width": 105},
+                {"key": "rate_pct", "label": "Satz %", "numeric": True, "width": 85},
+                {"key": "total_basis", "label": "Basis", "renderKind": "currency", "numeric": True, "width": 125},
+                {"key": "total_bonus", "label": "Bonus", "renderKind": "currency", "numeric": True, "width": 125},
+                {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 110},
+                {"key": "correction_of", "label": "Korrektur zu", "width": 180},
+                {"key": "actor", "label": "Benutzer", "filterable": True, "width": 150},
+                {"key": "reason", "label": "Grund", "width": 220},
+            ],
+            "rowActions": [{"key": "export", "label": "CSV"}, {"key": "correct", "label": "Korrektur", "visibleWhen": {"field": "status", "values": ["calculated"]}}],
+        }],
+        "actions": [{"key": "calculate", "label": "Bonuslauf berechnen", "kind": "primary", "permission": "reporting.bonus.write", "dangerLevel": "moderate"}],
+        "workflow": {"processKey": "bonus-calculation", "status": "immutable-runs", "nextActionKey": "calculate", "auditRequired": True},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
+        "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "reporting"},
+        "agentContract": {"businessPurpose": "Bonusfaehige Umsaetze reproduzierbar berechnen und Korrekturen unveraenderbar nachweisen.", "examplePrompts": ["Berechne den Kundenbonus fuer dieses Jahr.", "Exportiere diesen Bonuslauf."], "sensitiveFields": ["total_basis", "total_bonus", "dimension_id", "actor"], "forbiddenAgentTasks": ["Berechnete Bonuslaeufe veraendern oder ohne Audit-Grund korrigieren"], "testSelectors": {"screenRoot": "[data-testid='bonus-berechnung']"}},
     },
     "tankstelle/adapter-inbox": lambda: {
         "schemaVersion": 1, "id": "tankstelle/adapter-inbox", "domain": "agrar", "mode": "list",
@@ -3644,6 +3860,24 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "produktion/produktionsleitstand": build_production_control_screen_definition,
     "docflow/dokumenten-ruecklauf": build_document_return_screen_definition,
     "auswertungen/beleg-kontrolle": build_document_control_screen_definition,
+    "auswertungen/auftrags-kontrolle": lambda: _build_document_control_variant(
+        screen_id="auswertungen/auftrags-kontrolle",
+        title="Auftrags-Kontrolle",
+        subtitle="Unerledigte Bestellungen priorisieren und bis zum Quellbeleg verfolgen.",
+        exception_type="open_purchase_order",
+    ),
+    "auswertungen/lieferschein-kontrolle": lambda: _build_document_control_variant(
+        screen_id="auswertungen/lieferschein-kontrolle",
+        title="Lieferschein-Kontrolle",
+        subtitle="Nicht fakturierte Lieferscheine priorisieren und klaeren.",
+        exception_type="uninvoiced_delivery_note",
+    ),
+    "abrechnung/eb-lieferschein-kontrolle": lambda: _build_document_control_variant(
+        screen_id="abrechnung/eb-lieferschein-kontrolle",
+        title="EB-Lieferschein-Kontrolle",
+        subtitle="Fehlende Eingangsbelege und Warenzugaenge kontrollieren.",
+        exception_type="missing_inbound_document",
+    ),
     "crm/customer-360": build_crm_customer_360_screen_definition,
     "planung/kalender": build_planung_kalender_screen_definition,
     "schnittstelle/mde-inbox": build_mde_inbox_screen_definition,
@@ -4039,7 +4273,7 @@ def _build_rollout_screen_definition_from_spec(spec: Any) -> dict[str, Any]:
         "domain": spec.domain,
         "mode": "detail",
         "title": spec.label,
-        "subtitle": f"Rollout Pilot",
+        "subtitle": "Rollout Pilot",
         "adapter": {
             "type": "native",
             "sourceId": spec.screen_id,
@@ -4181,8 +4415,18 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
         "nicht fakturierte lieferscheine",
         "fehlende eingangsbelege",
     ],
+    "auswertungen/auftrags-kontrolle": ["auftrags kontrolle", "unerledigte bestellungen", "bestellkontrolle"],
+    "auswertungen/lieferschein-kontrolle": ["lieferschein kontrolle", "nicht fakturierte lieferscheine", "ls kontrolle"],
+    "abrechnung/eb-lieferschein-kontrolle": ["eb lieferschein kontrolle", "eingangsbeleg kontrolle", "wareneingang fehlt"],
     "auswertungen/abfrage-center": ["abfrage center", "query designer", "anwenderabfrage", "favorisierte abfrage", "read model"],
     "auswertungen/l3-berichtskatalog": ["berichtskatalog", "vertreterumsatz", "kundenumsatz", "artikelgruppe", "chargenbericht", "erntebericht", "streckenbericht"],
+    "auswertungen/dms-volltext": ["dms volltext", "volltextsuche dokumentenverwaltung", "dokument suchen", "archivsuche"],
+    "auswertungen/aenderungshistorie": ["aenderungshistorie", "aenderungen", "audit historie", "wer hat geaendert"],
+    "auswertungen/sanktionspruefung-personal": ["terrorschutz personal", "sanktionspruefung personal", "mitarbeiter pruefen"],
+    "auswertungen/sanktionspruefung-kunden": ["terrorschutz kunden", "sanktionspruefung kunden", "kunde pruefen"],
+    "auswertungen/duengemittelmengen": ["duengemittelmengen", "duengemenge", "naehrstoffmenge", "duengeauswertung"],
+    "produktion/chargen-bearbeiten": ["chargen nummern bearbeiten", "massenfreigabe charge", "lieferanten charge", "anerkennungsnummer"],
+    "auswertungen/bonus-berechnung": ["bonus berechnung", "bonus an kunden", "bonus artikelgruppe", "bonuslauf"],
     "produktion/produktionsleitstand": ["produktionsliste", "produktion", "muehle", "stapelbuchung", "nachbearbeitung"],
     "tankstelle/adapter-inbox": ["tankanlage", "tank adapter", "zapfung import", "tank fehler", "lieferschein tank"],
     "lager/inventur-nebenlaeufe": ["zaehlliste", "inventur import", "kontrolllauf", "bestandsvortrag", "inventurbewertung"],
@@ -4202,6 +4446,13 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
     "workspace/letzte-dokumente": "/workspace/letzte-dokumente",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
+    "auswertungen/dms-volltext": "/auswertungen/dms-volltext",
+    "auswertungen/aenderungshistorie": "/auswertungen/aenderungshistorie",
+    "auswertungen/sanktionspruefung-personal": "/auswertungen/sanktionspruefung-personal",
+    "auswertungen/sanktionspruefung-kunden": "/auswertungen/sanktionspruefung-kunden",
+    "auswertungen/duengemittelmengen": "/auswertungen/duengemittelmengen",
+    "produktion/chargen-bearbeiten": "/produktion/chargen-bearbeiten",
+    "auswertungen/bonus-berechnung": "/auswertungen/bonus-berechnung",
     "tankstelle/adapter-inbox": "/tankstelle/adapter-inbox",
     "crm/mail-arbeitsplatz": "/crm/mail-arbeitsplatz",
     "auswertungen/abfrage-center": "/auswertungen/abfrage-center",
@@ -4258,6 +4509,9 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "schnittstelle/mde-inbox": "/schnittstelle/mde-inbox",
     "docflow/dokumenten-ruecklauf": "/docflow/dokumenten-ruecklauf",
     "auswertungen/beleg-kontrolle": "/auswertungen/beleg-kontrolle",
+    "auswertungen/auftrags-kontrolle": "/auswertungen/auftrags-kontrolle",
+    "auswertungen/lieferschein-kontrolle": "/auswertungen/lieferschein-kontrolle",
+    "abrechnung/eb-lieferschein-kontrolle": "/abrechnung/eb-lieferschein-kontrolle",
 }
 
 

@@ -1,6 +1,7 @@
 """Prioritized fixed L3 report catalog API."""
 
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
@@ -44,6 +45,19 @@ class FactIn(BaseModel):
     currency: str = "EUR"
 
 
+class BonusRunIn(BaseModel):
+    report_id: str
+    from_date: date
+    to_date: date
+    rate_pct: Decimal
+    reason: str
+
+
+class BonusCorrectionIn(BaseModel):
+    amount: Decimal
+    reason: str
+
+
 def guarded(call):  # noqa: ANN001, ANN201
     try:
         return call()
@@ -61,6 +75,72 @@ def catalog(
 ) -> dict[str, Any]:
     items = L3ReportCatalogService(db, tenant_id).catalog()
     return {"items": items, "count": len(items)}
+
+
+@router.get("/bonus-runs", response_model=dict)
+def list_bonus_runs(
+    db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict[str, Any]:
+    return L3ReportCatalogService(db, tenant_id).list_bonus_runs()
+
+
+@router.post("/bonus-runs", response_model=dict, status_code=201)
+def create_bonus_run(
+    body: BonusRunIn,
+    request: Request,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return guarded(
+        lambda: L3ReportCatalogService(db, tenant_id).create_bonus_run(
+            report_id=body.report_id,
+            from_date=body.from_date,
+            to_date=body.to_date,
+            rate_pct=body.rate_pct,
+            actor=actor(request),
+            reason=body.reason,
+        )
+    )
+
+
+@router.post("/bonus-runs/{run_id}/corrections", response_model=dict, status_code=201)
+def correct_bonus_run(
+    run_id: str,
+    body: BonusCorrectionIn,
+    request: Request,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return guarded(
+        lambda: L3ReportCatalogService(db, tenant_id).correct_bonus_run(
+            run_id,
+            amount=body.amount,
+            actor=actor(request),
+            reason=body.reason,
+        )
+    )
+
+
+@router.get("/bonus-runs/{run_id}/export.csv", response_class=Response)
+def export_bonus_run(
+    run_id: str,
+    request: Request,
+    reason: str = Query(min_length=5, max_length=500),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> Response:
+    content = guarded(
+        lambda: L3ReportCatalogService(db, tenant_id).export_bonus_run(
+            run_id,
+            actor=actor(request),
+            reason=reason,
+        )
+    )
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="bonus-{run_id}.csv"'},
+    )
 
 
 @router.post("/facts", response_model=dict, status_code=202)

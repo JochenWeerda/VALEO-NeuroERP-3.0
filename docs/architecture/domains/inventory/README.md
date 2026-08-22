@@ -55,6 +55,12 @@ idempotenter Queue-Verarbeitung in die Inventory-Domaene delegiert. Die
 Operator-Maske `schnittstelle/mde-inbox` ist eine native, serverseitig
 paginierte Meridian-Worklist; die Queue selbst bleibt in `domain_ops`.
 
+## Chargen-Operator
+
+`produktion/chargen-bearbeiten` ist die tenantgebundene Operator-Sicht fuer
+Lieferantencharge und Anerkennungsnummer. Mehrfachfreigaben sind zentral
+selektiert, qualitaetsgegated und append-only auditiert.
+
 ## L3-Berichtskatalog
 
 Chargen- und Artikelbewegungen koennen idempotent in die tenantgebundene

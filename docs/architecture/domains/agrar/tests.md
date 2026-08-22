@@ -53,3 +53,6 @@ Lifecycle Browser-Abnahme:
 
 Massnahmen-/Beratungs-UI:
 `packages/frontend-web/src/__tests__/features/feed-advice/consulting-cases.test.tsx`
+
+Duengemittelmengen und Screen-Readiness:
+`pytest tests/test_l3_deep_mask_parity.py -q --no-cov`.

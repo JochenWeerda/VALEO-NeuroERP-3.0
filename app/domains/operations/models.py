@@ -5,7 +5,7 @@ Models für Waagen, Wiegungen, Fahrzeuge und Fahrer
 
 from uuid import uuid4
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -498,8 +498,11 @@ class Charge(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("CH"))
+    tenant_id = Column(String, nullable=False, server_default=text("'legacy-unassigned'"), index=True)
     chargen_id = Column(String(50), nullable=False, unique=True)
     losnummer = Column(String(50), nullable=True)
+    lieferanten_charge = Column(String(80), nullable=True)
+    anerkennungs_nr = Column(String(100), nullable=True)
     artikel = Column(String(100), nullable=False)
     artikel_id = Column(String(100), nullable=False)
     produktbezeichnung = Column(String(255), nullable=True)
