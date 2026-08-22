@@ -4,8 +4,8 @@ type: reference
 audience: [product, fachbereich, entwickler]
 owner: Cursor Agent
 status: verifiziert
-last_reviewed: 2026-08-21
-version: 1.0.0
+last_reviewed: 2026-08-22
+version: 1.1.0
 description: Live-Delta der L3-/zvoove-Ribbonmasken gegen die Vollinventur vom 19.08.2026 und VALEO NeuroERP.
 ---
 
@@ -55,14 +55,17 @@ dem DATEI-Hauptmodul-Menü und schärfere Ribbon-Listen.
 | L3-GAP-INV-004 | P1 | LAGER → Inventur (+ Vortrag/Korrektur) | repo-seitig geschlossen (`L3-INVENTORY-AUX-007`) |
 | L3-GAP-BELEGCHECK-005 | P1 | AUSWERTUNGEN → Beleg-Kontrolle | repo-seitig geschlossen (`L3-BELEGCHECK-WORKLIST-005`) |
 | L3-GAP-BILLBATCH-006 | P1 | ABRECHNUNG Faktur/Abschluss | repo-seitig geschlossen (`L3-BILLING-BATCH-008`) |
-| L3-ROHWARE-002 | P2 | LAGER → Fremdware | weiter offen (Operator-UI) |
-| L3-GAP-QUERY-008 | P2 | Favoriten/Auswertungen → Abfrage-Center | weiter offen |
-| L3-GAP-TEAMCAL-009 | P2 | ALLGEMEIN → Team Kalender | weiter teilweise |
-| L3-GAP-MAIL-010 | P2 | ALLGEMEIN → E-Mail | weiter offen |
-| L3-GAP-TANK-011 | P2 | SCHNITTSTELLE → Tankanlage | weiter teilweise |
-| L3-GAP-REPORT-012 | P2 | Auswertungsgruppen Kunden…Strecke | weiter teilweise |
-| L3-GAP-RECENT-013 | P3 | Letzte Dokumente | weiter offen |
-| L3-GAP-IFACE-014 | P3 | Standard-Schnittstelle | repo-seitiger Adapterrahmen geschlossen (`L3-LEGACY-INTERFACES-017`); reale Formate/Aktivierung extern |
+| L3-ROHWARE-002 | P2 | LAGER → Fremdware | repo-seitig geschlossen (`L3-ROHWARE-OPERATOR-009`) |
+| L3-GAP-QUERY-008 | P2 | Favoriten/Auswertungen → Abfrage-Center | repo-seitig geschlossen (`L3-QUERY-CENTER-010`) |
+| L3-GAP-TEAMCAL-009 | P2 | ALLGEMEIN → Team Kalender | repo-seitig geschlossen (`L3-TEAM-CALENDAR-011`) |
+| L3-GAP-MAIL-010 | P2 | ALLGEMEIN → E-Mail | repo-seitig geschlossen (`L3-MAIL-WORKSPACE-012`) |
+| L3-GAP-TANK-011 | P2 | SCHNITTSTELLE → Tankanlage | repo-seitig geschlossen (`L3-TANK-ADAPTER-013`) |
+| L3-GAP-REPORT-012 | P2 | Auswertungsgruppen Kunden…Strecke | repo-seitig geschlossen (`L3-REPORT-CATALOG-014`) |
+| L3-GAP-RECENT-013 | P3 | Letzte Dokumente | repo-seitig geschlossen (`L3-RECENT-DOCUMENTS-015`) |
+| L3-GAP-IFACE-014 | P3 | Standard-Schnittstelle | repo-seitig geschlossen (`L3-LEGACY-INTERFACES-017`); reale Formate/Aktivierung extern |
+| L3-GAP-CHARGEN-EDIT-019 | P2 | PRODUKTION → Chargen-Nummern bearbeiten | **neu offen** — Massenfreigabe-Maske fehlt |
+| L3-GAP-ARTKONTO-020 | P2 | FAVORITEN/Artikel → Artikel-Konto | **neu offen** |
+| L3-GAP-BONUS-021 … L3-GAP-KUND-AUSW-028 | P2/P3 | Dropdown-Leafs Weitere/Belegkontrolle | **neu offen** — siehe [`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md) |
 
 ### Kein neuer Gap (nur Feindetail)
 

@@ -4,8 +4,8 @@ type: reference
 audience: [agent, entwickler]
 owner: Cursor Agent
 status: aktiv
-last_reviewed: 2026-08-21
-version: 1.1.0
+last_reviewed: 2026-08-22
+version: 1.2.0
 description: Geuebte Gesten zum Oeffnen und Schliessen von L3-Ribbons und Masken per Remote Desktop.
 ---
 
@@ -53,3 +53,25 @@ und [`l3-full-mask-functional-gap-inventory.md`](l3-full-mask-functional-gap-inv
 FAVORITEN ~175, ALLGEMEIN ~265, ERFASSUNG ~370, ABRECHNUNG ~480,
 LAGER ~560, PRODUKTION ~620, AUSWERTUNGEN ~660, SCHNITTSTELLE ~760,
 FENSTER ~900. Icon-Klick Y≈108 (Icon-Mitte).
+
+## Dropdown-Leaf-Protokoll (2026-08-22)
+
+1. Tab aktivieren → Dropdown-Icon **einmal** klicken (Y≈108) → Screenshot
+   `menu_*_open.png`.
+2. Menue-Eintraege **nicht** mit festem Offset aus PRODUKTION uebernehmen.
+   Kalibrierung aus `final_aw_01_belegkontrolle.png`:
+   - Beleg-Kontrolle Icon X≈218–235 (Gruppe Überwachung; **kalibrieren**)
+   - Weitere Icon X≈673 (bestätigt Live 22.08.)
+   - Erster Eintrag Y≈133, Zeilenhoehe ≈22 px, Klick X≈175
+3. Nach Leaf-Klick 900–1200 ms warten, Screenshot `leaf_*`, dann `Esc` +
+   `Ctrl+F4` (mehrfach bei MDI). **Kein** `Alt+F4` auf Hauptfenster.
+4. Flyout-Untermenues (Auftrags-/Lieferschein-Kontrolle): zuerst Zeile mit Pfeil,
+   dann Flyout-Eintrag separat kalibrieren.
+5. Skript: [`scripts/l3-dropdown-leaf-capture.ps1`](../../scripts/l3-dropdown-leaf-capture.ps1)
+6. Gap-Abgleich: [`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md)
+
+**Live-Captures 22.08.2026:** `C:\Users\Jochen\Pictures\L3-Capture-2026-08-22-dropdown-leaves`
+(46 PNGs). Verlässliches Weitere-Dropdown in `aw_artikel_leaf_7_artikel_konto.png`.
+Beleg-Leafs teils fehlkalibriert (Tab-Fokus/Icon-X) — Nachzug mit doppelten Tab-Klick
+und X≈218–235 für Beleg-Kontrolle.
+`final_all_05_weitere` landeten auf PRODUKTION → Chargen-Nummern bearbeiten.

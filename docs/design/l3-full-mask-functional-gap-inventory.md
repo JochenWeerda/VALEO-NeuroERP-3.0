@@ -4,8 +4,8 @@ type: reference
 audience: [product, fachbereich, entwickler]
 owner: Codex
 status: verifiziert
-last_reviewed: 2026-08-21
-version: 1.2.0
+last_reviewed: 2026-08-22
+version: 1.3.0
 description: Datenschutzkonformer Funktionsabgleich der erreichbaren L3-Masken gegen VALEO NeuroERP 3.0.
 ---
 
@@ -16,8 +16,12 @@ description: Datenschutzkonformer Funktionsabgleich der erreichbaren L3-Masken g
 Die read-only untersuchte L3-Installation zeigt in den zehn Ribbonbereichen
 `Datei`, `Favoriten`, `Allgemein`, `Erfassung`, `Abrechnung`, `Lager`,
 `Produktion`, `Auswertungen`, `Schnittstelle` und `Fenster` ein breites
-Handels-ERP. Der Abgleich ergibt **keinen neu nachgewiesenen P0-Gap**, aber
-**keinen offenen repo-seitigen P1-, P2- oder P3-Gap**. `L3-GAP-MDE-001`,
+Handels-ERP. Der Abgleich ergibt **keinen P0-Gap**. Die Ribbon-Icon-Erfassung
+(19./21.08.2026) schloss P1–P3-Kernluecken repo-seitig. Die Dropdown-Leaf-
+Tiefenpruefung (22.08.2026) ergaenzt **14 neue P2/P3-Gaps** fuer Spezialmasken
+und Auswertungen — siehe
+[`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md).
+`L3-GAP-MDE-001`,
 `L3-GAP-DOCRET-002`, `L3-GAP-BELEGCHECK-005`, `L3-GAP-PROD-003`,
 `L3-GAP-INV-004` und `L3-GAP-BILLBATCH-006` sind repo-seitig geschlossen.
 `L3-ROHWARE-002`, `L3-GAP-QUERY-008`, `L3-GAP-TEAMCAL-009`, `L3-GAP-MAIL-010`,
@@ -105,7 +109,27 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 | ID | Gap | Abnahmekriterium |
 |---|---|---|
 | L3-GAP-RECENT-013 | Bereichsuebergreifende Liste „Letzte Dokumente“ fehlt | Personenbezogene, berechtigte Historie mit Dokumenttyp, Nummer, Partner, Zeitpunkt und Deep-Link; keine globale Datenpreisgabe — **repo-seitig geschlossen 2026-08-21** (`L3-RECENT-DOCUMENTS-015`) |
-| L3-GAP-IFACE-014 | L3-spezifische Standard-/Unimet-Adapter fehlen oder sind nicht belegt | Erst nach Kundenentscheidung: Formatvertrag, Mapping, Idempotenz, Fehlerkorb, Reconciliation und Betriebsmonitor je benoetigtem Adapter — **repo-seitiger Rahmen geschlossen 2026-08-21** (`L3-LEGACY-INTERFACES-017`); reale Formatmuster, Zielmapping und Produktivaktivierung extern |
+| L3-GAP-IFACE-014 | L3-spezifische Standard-/Unimet-Adapter fehlen oder sind nicht belegt | Erst nach Kundenentscheidung: Formatvertrag, Mapping, Idempotenz, Fehlerkorb, Reconciliation und Betriebsmonitor je benoetigtem Adapter — **repo-seitig geschlossen 2026-08-21** (`L3-LEGACY-INTERFACES-017`); reale Formatmuster, Zielmapping und Produktivaktivierung extern |
+
+### P2/P3 — neu aus Dropdown-Leaf-Inventur (22.08.2026)
+
+| ID | Prioritaet | Gap | Kurz-Ist | Abnahme (Auszug) |
+|---|---|---|---|---|
+| L3-GAP-CHARGEN-EDIT-019 | P2 | Chargen-Nummern bearbeiten | Einzel-Freigabe-API | Massenfreigabe-Maske mit Anerkennungs-Nr. |
+| L3-GAP-ARTKONTO-020 | P2 | Artikel-Konto / Druck | verstreute Bewegungen | Periodisches Artikel-Konto je Artikel |
+| L3-GAP-BONUS-021 | P2 | Bonus-Berechnung | nur Stammdaten-Flags | Berechnungslauf mit Export |
+| L3-GAP-DUENG-MENGEN-022 | P2 | Düngemittelmengen | Dünger-Stamm | Mengen-Auswertung/Behoerdenexport |
+| L3-GAP-EB-LS-023 | P2 | EB Lieferschein-Kontrolle | Faktura ohne EB-Vorpruefung | Kontrolle vor Rechnungslauf |
+| L3-GAP-AUDIT-HIST-024 | P2 | Änderungshistorie | Teil-Audits | Einheitliche Feldhistorie |
+| L3-GAP-CHARGEN-AUSW-026 | P2 | Chargen-Lager-Auswertungen | ein Batch-Report | drei L3-Paritaets-Reports |
+| L3-GAP-ART-AUSW-027 | P2 | Artikel-Weitere-Auswertungen | Umsatz einzeln | Verrechnungspreis, Dispo, Meldungen … |
+| L3-GAP-DMS-FULLTEXT-025 | P3 | DMS-Volltext Auswertung | API ohne Maske | Navigierbare Volltext-Worklist |
+| L3-GAP-TERROR-SPLIT-029 | P3 | Terrorschutz Personal/Kunden | generische Sanktion | getrennte gefuehrte Prueflaeufe |
+| L3-GAP-BELEGCHECK-SUB-030 | P3 | Belegkontrolle-Submasken | zentrale Worklist | gespeicherte Sub-Ansichten |
+| L3-GAP-KUND-AUSW-028 | P3 | Kunden-Weitere-Auswertungen | Basis-Kundenreports | Disposition, Bescheinigungen … |
+
+Details, Leaf-Katalog und Evidenzgrenzen:
+[`l3-dropdown-leaf-gap-inventory.md`](l3-dropdown-leaf-gap-inventory.md).
 
 ## Kein Gap beziehungsweise bereits abgedeckt
 

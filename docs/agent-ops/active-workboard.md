@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-DROPDOWN-LEAF-GAP-019 Dropdown-Leaf Gap-Inventur - abgeschlossen 2026-08-22
+
+**Von:** User-Auftrag: Dropdown-Untermenues bis Arbeitsmaske pruefen und fehlende VALEO-Funktionen in Gap-Liste. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-22.
+
+**Ziel:** L3-Dropdown-Leafs (Beleg-Kontrolle, Weitere, Chargen, EB-LS) gegen VALEO abgleichen; 14 neue P2/P3-Gaps dokumentieren; RDP-Leaf-Protokoll und Capture-Skript bereitstellen.
+
+**Ergebnis:** Kanonische Leaf-Inventur in `docs/design/l3-dropdown-leaf-gap-inventory.md`; Vollinventur v1.3 und Delta-Inventur v1.1 nachgezogen. Fehlgeschlagene `submenu_*`-Captures als Koordinaten-Blocker dokumentiert. Live-RDP zum Abschlusszeitpunkt nicht aktiv — OCR/E05/final_aw_01 als Evidenz. Capture-Skript: `scripts/l3-dropdown-leaf-capture.ps1`.
+
+**Dateibesitz:** Slice-YAML, Workboard, Gap-/Nav-Doku, open-gaps-Nachzug.
+
 ## L3-LEGACY-INTERFACES-017 Standard- und Unimet-Adapterrahmen - abgeschlossen 2026-08-21
 
 **Von:** Abschluss des letzten L3-P3-Gaps. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-21.
