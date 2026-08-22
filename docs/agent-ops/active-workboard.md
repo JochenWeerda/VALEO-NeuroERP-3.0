@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-RUNTIME-HARDENING-021 Laufzeit- und Integrationshaertung - reserviert 2026-08-22
+
+**Von:** Autonome Fortsetzung der vollstaendigen L3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-22.
+
+**Ziel:** Die neu geschlossenen L3-Maskengaps gegen reale Router-, Datenbank-, Tenant-, Paging- und UniversalMaskRuntime-Vertraege haerten und alle nachweislich gefundenen Integrationsgaps zentral schliessen.
+
+**Dateibesitz:** Slice-YAML, dieser Workboard-Abschnitt, betroffene L3-Endpunkte/Services/Modelle/Migrationen, zentrale ScreenDefinition-/Runtime-/Renderer-Vertraege, Regressionstests und erforderlicher Doku-Nachzug. Parallele RDP-Capture-Skripte und lokale Exporte sind ausgeschlossen.
+
+**Abnahme:** gueltige Request-URLs und Response-Shapes; konsistentes Paging und Mehrfachauswahlverhalten; tenant-sichere, schemasynchrone Datenpfade; gruene Backend-/Frontend-/TypeScript-/Architektur-/Doku-Gates.
+
 ## L3-DEEP-MASK-PARITY-020 Live-Untermenues und Funktionsparitaet - abgeschlossen 2026-08-22
 
 **Von:** User-Auftrag: alle Submenues und Masken bis zur vollstaendigen Gap-Schliessung pruefen. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-22.

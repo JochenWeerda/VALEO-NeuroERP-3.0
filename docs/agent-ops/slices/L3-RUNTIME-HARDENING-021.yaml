@@ -1,0 +1,42 @@
+slice_id: L3-RUNTIME-HARDENING-021
+id: L3-RUNTIME-HARDENING-021
+title: L3 Runtime-Haertung
+owner: Codex
+status: reserviert
+created_at: "2026-08-22"
+started_at: "2026-08-22"
+goal: >-
+  Die neu geschlossenen L3-Maskengaps gegen reale Router-, Datenbank-,
+  Tenant-, Paging- und UniversalMaskRuntime-Vertraege haerten und alle dabei
+  nachweislich gefundenen Integrationsgaps schliessen.
+scope:
+  - Laufzeit- und API-Vertraege der neu gelieferten L3-Masken
+  - Tenant-Isolation, Datenbankschema, Migration und Transaktionssemantik
+  - Zentrale URL-, Sichtbarkeits-, Paging- und Mehrfachauswahl-Vertraege
+  - Backend-/Frontend-Regressionstests, Generatoren, Architektur und Doku
+file_ownership:
+  - docs/agent-ops/slices/L3-RUNTIME-HARDENING-021.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/api/v1/endpoints/dms_images.py
+  - app/api/v1/endpoints/agrar_feldbuch.py
+  - app/api/v1/endpoints/charges.py
+  - app/api/v1/endpoints/sanctions_compliance.py
+  - app/services/l3_report_catalog_service.py
+  - app/core/screen_definitions.py
+  - app/domains/operations/models.py
+  - app/domains/operations/repository.py
+  - packages/frontend-web/src/components/mask-builder/
+  - tests/
+  - packages/frontend-web/src/__tests__/
+  - alembic/versions/
+  - docs/architecture/domains/
+  - docs/architecture/agents/impact-notes/L3-RUNTIME-HARDENING-021.md
+acceptance:
+  - Alle neuen Masken bauen gueltige Request-URLs und verarbeiten reale Response-Shapes
+  - Paging und Mehrfachauswahl bleiben bei Fehlern und Seitenwechseln konsistent
+  - Neue Datenpfade sind tenant-sicher und zum aktuellen Datenbankschema kompatibel
+  - Migration, Backend, Frontend, TypeScript, Architektur und Doku-Gates sind gruen
+risks:
+  - Echtdaten- und Rollen-UAT bleibt ohne produktive Testmandanten extern
+  - Parallele RDP-Capture-Artefakte liegen ausserhalb dieses Dateibesitzes
