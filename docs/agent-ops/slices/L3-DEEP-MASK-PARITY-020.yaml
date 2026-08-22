@@ -1,0 +1,38 @@
+slice_id: L3-DEEP-MASK-PARITY-020
+id: L3-DEEP-MASK-PARITY-020
+title: L3 Deep-Mask Parity
+owner: Codex
+status: reserviert
+created_at: "2026-08-22"
+started_at: "2026-08-22"
+goal: >-
+  Alle live erreichbaren L3-Dropdowns, Flyouts und Arbeitsmasken belastbar gegen
+  VALEO abgleichen und bestaetigte Funktionsgaps zentral schliessen.
+scope:
+  - Live-RDP-Navigation aller Ribbon-Tabs und Untermenue-Ebenen, ausschliesslich read-only
+  - Korrektur falscher oder unvollstaendiger Leaf-Gap-Befunde
+  - Zentrale Umsetzung ueber ScreenDefinition, RenderPlan, Runtime und Renderer
+  - Backend-/Frontend-Vertraege, Tests, Navigation, Doku und Workboard
+file_ownership:
+  - docs/agent-ops/slices/L3-DEEP-MASK-PARITY-020.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/design/l3-dropdown-leaf-gap-inventory.md
+  - docs/design/l3-full-mask-functional-gap-inventory.md
+  - docs/design/l3-delta-mask-inventory-2026-08-21.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/core/screen_definitions.py
+  - app/services/l3_report_catalog_service.py
+  - app/api/v1/endpoints/l3_report_catalog.py
+  - packages/frontend-web/src/pages/auswertungen/
+  - packages/frontend-web/src/app/navigation/
+  - packages/frontend-web/src/app/routing/
+  - tests/test_l3_report_catalog.py
+  - packages/frontend-web/src/__tests__/pages/auswertungen/
+acceptance:
+  - Jeder Gap-Befund ist durch eine live geoeffnete Maske oder belastbare Code-Evidenz belegt
+  - Bereits vorhandene Funktionen sind aus der offenen Gap-Liste entfernt
+  - Bestaetigte Gaps besitzen produktive zentrale Masken-/API-Vertraege und Tests
+  - Generator-, Backend-, Frontend-, Architektur- und Doku-Gates sind gruen
+risks:
+  - Rollen- oder lizenzbedingt nicht sichtbare L3-Funktionen bleiben als Evidenzgrenze markiert
+  - Screenshots koennen Echtdaten enthalten und bleiben deshalb ausserhalb von Git

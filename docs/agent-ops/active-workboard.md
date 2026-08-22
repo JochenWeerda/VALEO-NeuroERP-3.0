@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-DEEP-MASK-PARITY-020 Live-Untermenues und Funktionsparitaet - reserviert 2026-08-22
+
+**Von:** User-Auftrag: alle Submenues und Masken bis zur vollstaendigen Gap-Schliessung pruefen. **Owner:** Codex. **Stand:** reserviert 2026-08-22.
+
+**Ziel:** Alle live erreichbaren L3-Ribbon-Dropdowns und Flyouts read-only bis zur Arbeitsmaske verfolgen, gegen VALEO-Seiten/APIs/ScreenDefinitions verifizieren und bestaetigte Funktionsgaps zentral ueber die UniversalMaskRuntime-Kette schliessen.
+
+**Dateibesitz:** Slice-YAML, dieser Workboard-Abschnitt, L3-Leaf-/Vollinventur, Open-Gaps, zentraler Berichtskatalog samt ScreenDefinition/Route/Tests sowie weitere nachweislich erforderliche zentrale Maskenvertraege.
+
+**Abnahme:** belastbare Live-Evidenz statt Dateinamenannahmen; keine Doppel-Gaps; zentrale native Masken und produktive API-Vertraege; Backend-/Frontend-/Architektur-/Doku-Gates gruen.
+
 ## L3-DROPDOWN-LEAF-GAP-019 Dropdown-Leaf Gap-Inventur - abgeschlossen 2026-08-22
 
 **Von:** User-Auftrag: Dropdown-Untermenues bis Arbeitsmaske pruefen und fehlende VALEO-Funktionen in Gap-Liste. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-22.
