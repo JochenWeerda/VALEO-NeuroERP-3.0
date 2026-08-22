@@ -2,7 +2,7 @@ slice_id: L3-RUNTIME-HARDENING-021
 id: L3-RUNTIME-HARDENING-021
 title: L3 Runtime-Haertung
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-22"
 started_at: "2026-08-22"
 goal: >-
@@ -22,10 +22,19 @@ file_ownership:
   - app/api/v1/endpoints/agrar_feldbuch.py
   - app/api/v1/endpoints/charges.py
   - app/api/v1/endpoints/sanctions_compliance.py
+  - app/api/v1/endpoints/compliance.py
+  - app/api/v1/endpoints/compat.py
+  - app/api/v1/endpoints/produktion_mischfutter.py
   - app/services/l3_report_catalog_service.py
+  - app/services/feed_production_chain_service.py
+  - app/services/inventory_compat_service.py
   - app/core/screen_definitions.py
   - app/domains/operations/models.py
   - app/domains/operations/repository.py
+  - app/infrastructure/models/__init__.py
+  - app/integrations/dms_client.py
+  - app/routers/admin_dms_router.py
+  - app/api/v1/endpoints/admin_dms.py
   - packages/frontend-web/src/components/mask-builder/
   - tests/
   - packages/frontend-web/src/__tests__/
@@ -40,3 +49,21 @@ acceptance:
 risks:
   - Echtdaten- und Rollen-UAT bleibt ohne produktive Testmandanten extern
   - Parallele RDP-Capture-Artefakte liegen ausserhalb dieses Dateibesitzes
+completed_at: "2026-08-22"
+result: >-
+  Query-Komposition, DataSource-Laden, Bulk-Auswahl, DMS-Metadaten,
+  Duengemittel-Paging, Bonuskorrekturexport und alle direkten Chargenzugriffe
+  sind laufzeitgehaertet. Dokument- und Chargenidentitaeten sind tenantgebunden;
+  die lokale Datenbank steht auf dem neuen Single Head. Ein zusaetzlich
+  entdeckter UUIDv7-Praefix-Konflikt bei Produktionsjournalnummern ist behoben.
+verification:
+  - "Backend: 24 passed"
+  - "Frontend: 14 passed"
+  - "TypeScript: passed"
+  - "Ruff fuer neue/geaenderte Kernmodule: passed; Legacy-Gesamtdateien besitzen bestehende Warnungen"
+  - "ESLint fokussiert: passed"
+  - "Navigation: 927 targets passed"
+  - "Architecture: 927/927 routes, 210/210 services, 406/406 endpoints; drift passed"
+  - "OpenAPI: 2752 paths current"
+  - "Agent-Handbuch: 69 masks current"
+  - "Alembic: local DB and single head l3_runtime_hardening_20260822"

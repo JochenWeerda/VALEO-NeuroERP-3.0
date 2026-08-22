@@ -6,7 +6,7 @@ import io
 import json
 import logging
 import uuid as _uuid_mod
-from typing import Any, Optional
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -129,7 +129,7 @@ class InventoryCompatService:
     # ── MHD / Lot analytics ───────────────────────────────────────────────────
 
     def get_mhd_warnings(self) -> dict:
-        items = self.db.query(Charge).order_by(Charge.eingang.asc()).limit(200).all()
+        items = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id).order_by(Charge.eingang.asc()).limit(200).all()
         return {
             "items": [
                 {
@@ -174,7 +174,7 @@ class InventoryCompatService:
         }
 
     def list_lots(self, search: Optional[str] = None) -> dict:
-        query = self.db.query(Charge)
+        query = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id)
         if search:
             like = f"%{search}%"
             query = query.filter((Charge.chargen_id.ilike(like)) | (Charge.artikel.ilike(like)))
@@ -197,7 +197,8 @@ class InventoryCompatService:
 
     def get_lot(self, lot_id: str) -> dict:
         lot = self.db.query(Charge).filter(
-            (Charge.id == lot_id) | (Charge.chargen_id == lot_id)
+            Charge.tenant_id == self.tenant_id,
+            (Charge.id == lot_id) | (Charge.chargen_id == lot_id),
         ).first()
         if not lot:
             raise EntityNotFoundError(f"Lot {lot_id} not found")
@@ -381,7 +382,7 @@ class FutterCompatService:
     # ── Charge-backed lists ───────────────────────────────────────────────────
 
     def list_chargen(self) -> list:
-        lots = self.db.query(Charge).order_by(Charge.eingang.desc()).limit(500).all()
+        lots = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id).order_by(Charge.eingang.desc()).limit(500).all()
         return [
             {
                 "id": c.id,
@@ -395,7 +396,7 @@ class FutterCompatService:
         ]
 
     def list_qualitaetskontrolle(self) -> list:
-        lots = self.db.query(Charge).order_by(Charge.updated_at.desc()).limit(500).all()
+        lots = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id).order_by(Charge.updated_at.desc()).limit(500).all()
         return [
             {
                 "id": c.id,
@@ -409,7 +410,7 @@ class FutterCompatService:
         ]
 
     def get_statistik(self) -> dict:
-        lots = self.db.query(Charge).all()
+        lots = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id).all()
         return {
             "gesamtChargen": len(lots),
             "gesamtMenge": round(sum(float(c.menge or 0) for c in lots), 3),

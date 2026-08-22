@@ -71,10 +71,16 @@ def upload_document(
         config = json.loads(CONFIG_PATH.read_text())
         doc_types = config.get("document_types", {})
         
-        if domain not in doc_types:
+        resolved_domain = domain
+        if domain == "article" and domain not in doc_types:
+            resolved_domain = next(
+                (candidate for candidate in ("Artikel", "Sonstiges") if candidate in doc_types),
+                domain,
+            )
+        if resolved_domain not in doc_types:
             raise ValueError(f"Document type not found: {domain}")
-        
-        doc_type_id = doc_types[domain]
+
+        doc_type_id = doc_types[resolved_domain]
         
         with get_client() as client:
             # Upload file

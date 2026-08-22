@@ -221,6 +221,18 @@ gespeicherte Auftrags-/Lieferschein-/EB-Kontrollsichten. Kanonischer Bericht:
 Fehlerhafte Capture-Duplikate bleiben ausgeschlossen; Echtdatenbilder werden
 nicht versioniert. Offen bleiben nur externe DMS-, Rollen- und Echtdaten-UAT-Gates.
 
+Nachzug 2026-08-22 (`L3-RUNTIME-HARDENING-021`): Der Laufzeit-Nachtest hat
+die repo-seitigen Integrationsgaps der neuen Masken geschlossen. Bestehende
+Queryparameter bleiben beim Runtime-Paging erhalten; auch clientseitig
+paginierten Tabellen mit eigener DataSource werden geladen. Bulk-Auswahlen
+bleiben nach Fehlern erhalten und werden bei Seitenwechsel bereinigt.
+DMS-Metadaten verwenden das kanonische Artikeldokument-Schema mit Tenant-Link,
+Duengemittelmengen werden in der Datenbank paginiert, Bonuskorrekturen sind
+exportierbar und Chargen-IDs sind pro Tenant eindeutig. Die lokale
+Entwicklungsdatenbank wurde bis `l3_runtime_hardening_20260822` migriert. Es
+entsteht kein neues offenes Repo-Gap; externe DMS-/Rollen-/Echtdaten-UAT-Gates
+bleiben unveraendert.
+
 Nachzug 2026-08-21 (`L3-BELEGCHECK-WORKLIST-005`): `L3-GAP-BELEGCHECK-005` ist
 repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit
 vier Ausnahmearten, Zuweisung/Status-Audit, Filter/Pagination und Deep-Link.

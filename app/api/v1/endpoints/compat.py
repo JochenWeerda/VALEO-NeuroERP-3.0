@@ -540,8 +540,10 @@ async def einkauf_goods_receipts_create(
 
 
 @router.get("/einkauf/bestellvorschlaege", response_model=list[CompatBridgeOut], summary="Bestellvorschlaege einkauf")
-async def einkauf_bestellvorschlaege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    rows = db.query(Charge).order_by(Charge.eingang.desc()).limit(200).all()
+async def einkauf_bestellvorschlaege(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    rows = db.query(Charge).filter(Charge.tenant_id == tenant_id).order_by(Charge.eingang.desc()).limit(200).all()
     return [
         {
             "id": r.id,

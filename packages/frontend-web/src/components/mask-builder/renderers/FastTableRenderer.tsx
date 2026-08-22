@@ -1,4 +1,4 @@
-import { memo, useState, type ReactNode } from 'react'
+import { memo, useEffect, useState, type ReactNode } from 'react'
 import { Columns3, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -127,6 +127,17 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   const [filterValue, setFilterValue] = useState('')
   const [columnPickerOpen, setColumnPickerOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkActionPending, setBulkActionPending] = useState<string | null>(null)
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [page, sort, sortDir, q, filterPlan])
+  useEffect(() => {
+    const visibleIds = new Set(rows.flatMap((row) => row.id == null ? [] : [String(row.id)]))
+    setSelectedIds((current) => {
+      const next = new Set([...current].filter((id) => visibleIds.has(id)))
+      return next.size === current.size ? current : next
+    })
+  }, [rows])
   const availableColumns = table.availableColumns ?? table.columns
   const visibleColumnKeys = new Set(table.columns.map((column) => column.key))
   const dataColumns = table.columns.map((column) => ({
@@ -147,11 +158,13 @@ export const FastTableRenderer = memo(function FastTableRenderer({
         sortable: false,
         render: (_value: unknown, row: Record<string, unknown>) => {
           const id = String(row.id ?? '')
+          const selectable = row.id != null && id.length > 0
           return (
             <input
               type="checkbox"
               aria-label={`Zeile ${id} auswaehlen`}
               checked={selectedIds.has(id)}
+              disabled={!selectable}
               onChange={(event) => {
                 event.stopPropagation()
                 setSelectedIds((current) => {
@@ -253,12 +266,19 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                   type="button"
                   size="sm"
                   variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
-                  disabled={selectedIds.size === 0}
+                  disabled={selectedIds.size === 0 || bulkActionPending !== null}
                   data-testid={`bulk-action-${action.key}`}
-                  onClick={() => {
+                  onClick={async () => {
                     const selectedRows = rows.filter((row) => selectedIds.has(String(row.id ?? '')))
-                    void onRowAction(action.key, { selectedIds: [...selectedIds], selectedRows })
-                    setSelectedIds(new Set())
+                    setBulkActionPending(action.key)
+                    try {
+                      await onRowAction(action.key, { selectedIds: [...selectedIds], selectedRows })
+                      setSelectedIds(new Set())
+                    } catch {
+                      // The action runtime owns user-facing error reporting; retain selection for retry.
+                    } finally {
+                      setBulkActionPending(null)
+                    }
                   }}
                 >
                   {action.label}

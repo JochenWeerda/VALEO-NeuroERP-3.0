@@ -4,12 +4,18 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-08-19
-version: 2.2.0
+last_reviewed: 2026-08-22
+version: 2.3.0
 description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Nachtrag 2026-08-22 (`L3-RUNTIME-HARDENING-021`):** Jede Tabelle mit
+> aufgeloester DataSource wird geladen, unabhaengig von server- oder
+> clientseitigem Paging. Runtime-Paging erhaelt feste Endpoint-Queryparameter.
+> Deklarative Bulk-Auswahl ist seitengebunden, ignoriert Zeilen ohne ID und
+> bleibt nach einer fehlgeschlagenen Aktion fuer den Retry erhalten.
 
 > **Nachtrag 2026-08-19 (`L3-HABIT-BRIDGE-001`):** Der Single Mask Builder
 > transportiert herstellerneutrale ERP-Gewohnheitsvertraege fuer Aktionszonen,

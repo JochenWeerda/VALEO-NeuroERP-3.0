@@ -106,6 +106,7 @@ _DOCUMENT_TYPES = [
     "Angebot",
     "Bestellung",
     "Gutschrift",
+    "Artikel",
     "Sonstiges",
 ]
 

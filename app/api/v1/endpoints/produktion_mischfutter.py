@@ -32,7 +32,6 @@ from app.services.feed_production_chain_service import (
 )
 
 
-from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter(prefix="/produktion/mischfutter", tags=["Produktion - Mischfutter"])
@@ -341,7 +340,10 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
             return  # Kein Snapshot → keine Buchung möglich
 
         now = datetime.utcnow()
-        journal_ref = f"JE-PROD-{now.strftime('%Y%m%d')}-{auftrag.id[:8].upper()}"
+        # UUIDv7 prefixes encode time and collide for orders created close
+        # together. Use the stable random tail for the unique journal number.
+        journal_suffix = auftrag.id.replace("-", "")[-12:].upper()
+        journal_ref = f"JE-PROD-{now.strftime('%Y%m%d')}-{journal_suffix}"
         menge_t = float(auftrag.menge_t or 0)
 
         # Standardkonten (Fallback-Nummern nach SKR03-Landhandel)
@@ -350,8 +352,6 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
         KONTO_FERTIGWARENLAGER = "3200"   # Dr: Fertigwarenlager-Zugang
 
         lines: list[dict] = []
-        gesamt_herstellkosten = 0.0
-
         for komp in verbrauch:
             # Schätzwert: 0 EUR — echte Kosten kommen aus Einkaufspreis des Einzelfutters
             # Wird hier als Mengenbuchung ohne Betrag erfasst (Anpassung via KST möglich)

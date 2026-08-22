@@ -7,6 +7,7 @@ import { applyOverlay, hashOverlay, type ScreenOverlay } from '../render-plan/ov
 import type { DataBindingPlan, LookupBinding, TableQueryState } from './types'
 import { compileDataBindingPlan } from './compile-data-binding-plan'
 import { defaultTableQueryState, toQueryParams } from './table-query-state'
+import { appendQueryParams } from './data-source-resolver'
 import { apiClient } from '@/lib/api-client'
 import { deleteUserOverlay, overlayKeys, saveUserOverlay, useUserScreenOverlay } from '@/lib/api/ux-overlays'
 
@@ -195,7 +196,7 @@ export function useUniversalMaskRuntime({
       queryKey: [screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
       queryFn: async () => {
         const params = toQueryParams(resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
-        const url = `${tb.endpoint  }?${  new URLSearchParams(params).toString()}`
+        const url = appendQueryParams(tb.endpoint, params)
         const res = await apiClient.get<{ items?: Record<string, unknown>[]; total?: number } | Record<string, unknown>[]>(url)
         return res.data
       },

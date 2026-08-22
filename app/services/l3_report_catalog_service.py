@@ -721,6 +721,19 @@ class L3ReportCatalogService:
                 "actor": actor,
             },
         )
+        self.db.execute(
+            text("""INSERT INTO domain_reporting.l3_bonus_run_lines
+                (id,tenant_id,run_id,line_no,dimension_id,dimension_name,document_count,basis_amount,bonus_amount,currency)
+                VALUES (:id,:tid,:run_id,1,'correction',:reason,0,0,:amount,:currency)"""),
+            {
+                "id": str(uuid7()),
+                "tid": self.tenant_id,
+                "run_id": correction_id,
+                "reason": reason,
+                "amount": amount,
+                "currency": source["currency"],
+            },
+        )
         self.db.commit()
         return {
             "id": correction_id,

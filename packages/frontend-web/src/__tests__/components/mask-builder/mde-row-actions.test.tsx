@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { FastTableRenderer } from '@/components/mask-builder/renderers/FastTableRenderer'
 import type { RenderTablePlan } from '@/components/mask-builder/render-plan/types'
@@ -56,9 +56,27 @@ describe('FastTableRenderer row actions', () => {
     )
     fireEvent.click(screen.getByLabelText('Zeile lot-1 auswaehlen'))
     fireEvent.click(screen.getByTestId('bulk-action-release'))
-    expect(onRowAction).toHaveBeenCalledWith('release', {
-      selectedIds: ['lot-1'],
-      selectedRows: [expect.objectContaining({ id: 'lot-1' })],
-    })
+    await waitFor(() => expect(onRowAction).toHaveBeenCalledWith('release', {
+        selectedIds: ['lot-1'],
+        selectedRows: [expect.objectContaining({ id: 'lot-1' })],
+      }))
+    await waitFor(() => expect(screen.getByTestId('bulk-action-release')).toBeDisabled())
+  })
+
+  it('behaelt die Auswahl bei fehlgeschlagenen Bulk-Aktionen und leert sie beim Seitenwechsel', async () => {
+    const onRowAction = vi.fn().mockRejectedValue(new Error('quality gate'))
+    const props = {
+      table: { ...table, rowActions: [], bulkActions: [{ key: 'release', label: 'Freigeben' }] },
+      rows: [{ id: 'lot-1', device_id: 'Charge 1', sync_status: 'ready' }],
+      onRowAction,
+    }
+    const { rerender } = render(<FastTableRenderer {...props} page={1} />)
+    fireEvent.click(screen.getByLabelText('Zeile lot-1 auswaehlen'))
+    fireEvent.click(screen.getByTestId('bulk-action-release'))
+    await waitFor(() => expect(onRowAction).toHaveBeenCalled())
+    await waitFor(() => expect(screen.getByLabelText('Zeile lot-1 auswaehlen')).toBeChecked())
+
+    rerender(<FastTableRenderer {...props} page={2} />)
+    await waitFor(() => expect(screen.getByLabelText('Zeile lot-1 auswaehlen')).not.toBeChecked())
   })
 })

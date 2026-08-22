@@ -370,9 +370,13 @@ async def export_naehrstoffstrom_csv(
 @router.get("/exports/chargen-trace/{lot_id}", response_model=ComplianceOut, summary="Chargen trace report exportieren")
 async def export_chargen_trace_report(
     lot_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    lot = db.query(Charge).filter((Charge.id == lot_id) | (Charge.chargen_id == lot_id)).first()
+    lot = db.query(Charge).filter(
+        Charge.tenant_id == tenant_id,
+        (Charge.id == lot_id) | (Charge.chargen_id == lot_id),
+    ).first()
     if not lot:
         return {"error": "lot not found", "lot_id": lot_id}
     deliveries = _list_sales_deliveries(db)

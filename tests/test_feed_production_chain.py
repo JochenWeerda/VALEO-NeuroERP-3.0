@@ -307,11 +307,11 @@ class TestFeedProductionChainIntegration:
             db.execute(
                 text(
                     "INSERT INTO domain_ops.ops_chargen "
-                    "(id, chargen_id, artikel, artikel_id, menge, lagerort, eingang, status, produktionsprozess) "
-                    "VALUES (:i, :c, 'Fremdware', 'X', 1, 'Halle 1', NOW(), 'erfasst', "
+                    "(id, tenant_id, chargen_id, artikel, artikel_id, menge, lagerort, eingang, status, produktionsprozess) "
+                    "VALUES (:i, :tid, :c, 'Fremdware', 'X', 1, 'Halle 1', NOW(), 'erfasst', "
                     "jsonb_build_object('rezept_id', :r))"
                 ),
-                {"i": f"CH-IT-{uuid.uuid4().hex[:8]}", "c": fremd_chargen_id, "r": feed_seed["rezept"]},
+                {"i": f"CH-IT-{uuid.uuid4().hex[:8]}", "tid": TENANT_ID, "c": fremd_chargen_id, "r": feed_seed["rezept"]},
             )
             db.commit()
         finally:

@@ -122,3 +122,25 @@ def test_bonus_run_rejects_unapproved_report() -> None:
             actor="tester",
             reason="Regressionstest",
         )
+
+
+def test_bonus_correction_creates_exportable_line() -> None:
+    from decimal import Decimal
+
+    db = MagicMock()
+    source = MagicMock()
+    source.mappings.return_value.first.return_value = {
+        "report_id": "bonus-by-customer",
+        "from_date": date(2026, 1, 1),
+        "to_date": date(2026, 12, 31),
+        "currency": "EUR",
+    }
+    db.execute.side_effect = [source, MagicMock(), MagicMock()]
+    result = L3ReportCatalogService(db, "tenant-1").correct_bonus_run(
+        "run-1", amount=Decimal("-12.50"), actor="tester", reason="Reklamation"
+    )
+    assert result["status"] == "correction"
+    line_sql = str(db.execute.call_args_list[2].args[0])
+    line_params = db.execute.call_args_list[2].args[1]
+    assert "l3_bonus_run_lines" in line_sql
+    assert line_params["tid"] == "tenant-1" and line_params["amount"] == Decimal("-12.50")

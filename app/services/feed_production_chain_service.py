@@ -144,14 +144,20 @@ class FeedProductionChainService:
         """
         if auftrag.charge_id:
             existing = (
-                self.db.query(Charge).filter(Charge.id == auftrag.charge_id).first()
+                self.db.query(Charge).filter(
+                    Charge.id == auftrag.charge_id,
+                    Charge.tenant_id == self.tenant_id,
+                ).first()
             )
             if existing is not None:
                 return existing
 
         by_chargen_id = (
             self.db.query(Charge)
-            .filter(Charge.chargen_id == auftrag.chargen_id)
+            .filter(
+                Charge.chargen_id == auftrag.chargen_id,
+                Charge.tenant_id == self.tenant_id,
+            )
             .first()
         )
         if by_chargen_id is not None:
@@ -172,6 +178,7 @@ class FeedProductionChainService:
 
         charge = Charge(
             id=prefixed_id("CH"),
+            tenant_id=self.tenant_id,
             chargen_id=auftrag.chargen_id,
             artikel=auftrag.rezept_name,
             artikel_id=auftrag.rezept_id or "MISCHFUTTER",
@@ -257,12 +264,18 @@ class FeedProductionChainService:
         charge = None
         if auftrag.charge_id:
             charge = (
-                self.db.query(Charge).filter(Charge.id == auftrag.charge_id).first()
+                self.db.query(Charge).filter(
+                    Charge.id == auftrag.charge_id,
+                    Charge.tenant_id == self.tenant_id,
+                ).first()
             )
         if charge is None:
             charge = (
                 self.db.query(Charge)
-                .filter(Charge.chargen_id == auftrag.chargen_id)
+                .filter(
+                    Charge.chargen_id == auftrag.chargen_id,
+                    Charge.tenant_id == self.tenant_id,
+                )
                 .first()
             )
 

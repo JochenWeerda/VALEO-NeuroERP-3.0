@@ -46,7 +46,8 @@ DOCUMENT_TYPES = [
     "purchase_order",
     "goods_receipt",
     "supplier_invoice",
-    "contract"
+    "contract",
+    "article",
 ]
 
 # VALEO-Preset: Metadata Fields

@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-RUNTIME-HARDENING-021 Laufzeit- und Integrationshaertung - reserviert 2026-08-22
+## L3-RUNTIME-HARDENING-021 Laufzeit- und Integrationshaertung - abgeschlossen 2026-08-22
 
-**Von:** Autonome Fortsetzung der vollstaendigen L3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-22.
+**Von:** Autonome Fortsetzung der vollstaendigen L3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-22.
 
 **Ziel:** Die neu geschlossenen L3-Maskengaps gegen reale Router-, Datenbank-, Tenant-, Paging- und UniversalMaskRuntime-Vertraege haerten und alle nachweislich gefundenen Integrationsgaps zentral schliessen.
 
 **Dateibesitz:** Slice-YAML, dieser Workboard-Abschnitt, betroffene L3-Endpunkte/Services/Modelle/Migrationen, zentrale ScreenDefinition-/Runtime-/Renderer-Vertraege, Regressionstests und erforderlicher Doku-Nachzug. Parallele RDP-Capture-Skripte und lokale Exporte sind ausgeschlossen.
 
 **Abnahme:** gueltige Request-URLs und Response-Shapes; konsistentes Paging und Mehrfachauswahlverhalten; tenant-sichere, schemasynchrone Datenpfade; gruene Backend-/Frontend-/TypeScript-/Architektur-/Doku-Gates.
+
+**Ergebnis:** Feste Queryparameter und client-paginierte DataSources funktionieren zentral. Bulk-Auswahl ist retry- und seitenfest. DMS-Metadaten, Duengemittel-Paging, Bonuskorrekturexport und direkte Chargenzugriffe sind schema- und tenant-sicher; Chargen-IDs sind je Tenant eindeutig. Der Produktionsjournal-UUIDv7-Konflikt ist behoben. Backend 24/24, Frontend 14/14, TypeScript, fokussiertes Lint, 927 Navigationstargets, Architekturdrift, OpenAPI/Handbuch und lokaler Alembic-Single-Head sind gruen. Externe DMS-, Rollen- und Echtdaten-UAT-Gates bleiben.
 
 ## L3-DEEP-MASK-PARITY-020 Live-Untermenues und Funktionsparitaet - abgeschlossen 2026-08-22
 

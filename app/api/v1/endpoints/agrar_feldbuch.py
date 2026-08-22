@@ -13,6 +13,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
@@ -669,7 +670,6 @@ async def get_duengebilanz(
 
     bilanz_per_schlag: dict[str, dict[str, Any]] = {}
     gesamt_n = 0.0
-    gesamt_flaeche = 0.0
 
     for m in massnahmen:
         sid = m.schlag_id or "unbekannt"
@@ -678,7 +678,7 @@ async def get_duengebilanz(
             bilanz_per_schlag[sid] = {
                 "schlag_id": sid,
                 "schlag_name": schlag_name,
-                "flaeche_ha": m.schlag.flaeche if m.schlag else 0.0,
+                "flaeche_ha": m.schlag.flaeche if m.schlag else (m.flaeche or 0.0),
                 "n_gesamt_kg": 0.0,
                 "p2o5_gesamt_kg": 0.0,
                 "k2o_gesamt_kg": 0.0,
@@ -712,9 +712,6 @@ async def get_duengebilanz(
         })
 
         gesamt_n += n_menge
-        if m.flaeche:
-            gesamt_flaeche += m.flaeche
-
     # DüV-Grenzwert: 170 kg N/ha (organisch) bzw. bedarfsgerecht (mineralisch)
     grenzwert_n_ha = 170.0
 
@@ -733,6 +730,9 @@ async def get_duengebilanz(
             ueberschreitungen += 1
         schlag_bilanzen.append(sb)
 
+    # Flaeche je Schlag nur einmal zaehlen; mehrere Massnahmen vergroessern die
+    # bewirtschaftete Flaeche nicht.
+    gesamt_flaeche = sum(float(sb["flaeche_ha"] or 0.0) for sb in schlag_bilanzen)
     return {
         "jahr": jahr,
         "tenant_id": tenant_id,
@@ -777,15 +777,27 @@ async def get_duengemittelmengen(
     if q:
         query = query.filter(FeldbuchMassnahme.mittel.ilike(f"%{q}%"))
 
-    all_rows = query.options(selectinload(FeldbuchMassnahme.schlag)).all()
+    total = query.count()
+    aggregate = query.with_entities(
+        func.coalesce(func.sum(FeldbuchMassnahme.menge), 0),
+        func.coalesce(func.sum(FeldbuchMassnahme.n_kg), 0),
+        func.coalesce(func.sum(FeldbuchMassnahme.p2o5_kg), 0),
+        func.coalesce(func.sum(FeldbuchMassnahme.k2o_kg), 0),
+    ).one()
     totals = {
-        "menge": round(sum(float(row.menge or 0.0) for row in all_rows), 2),
-        "n_kg": round(sum(float(row.n_kg or 0.0) for row in all_rows), 2),
-        "p2o5_kg": round(sum(float(row.p2o5_kg or 0.0) for row in all_rows), 2),
-        "k2o_kg": round(sum(float(row.k2o_kg or 0.0) for row in all_rows), 2),
+        "menge": round(float(aggregate[0] or 0.0), 2),
+        "n_kg": round(float(aggregate[1] or 0.0), 2),
+        "p2o5_kg": round(float(aggregate[2] or 0.0), 2),
+        "k2o_kg": round(float(aggregate[3] or 0.0), 2),
     }
     start = (page - 1) * page_size
-    rows = sorted(all_rows, key=lambda row: row.datum, reverse=True)[start : start + page_size]
+    rows = (
+        query.options(selectinload(FeldbuchMassnahme.schlag))
+        .order_by(FeldbuchMassnahme.datum.desc(), FeldbuchMassnahme.id.desc())
+        .offset(start)
+        .limit(page_size)
+        .all()
+    )
     items = [{
         "id": row.id,
         "datum": row.datum.date().isoformat() if row.datum else None,
@@ -803,7 +815,7 @@ async def get_duengemittelmengen(
         "quelle": row.quelle,
         "lieferschein_id": row.lieferschein_id,
     } for row in rows]
-    return {"items": items, "total": len(all_rows), "page": page, "page_size": page_size, "jahr": jahr, **totals}
+    return {"items": items, "total": total, "page": page, "page_size": page_size, "jahr": jahr, **totals}
 
 
 # ────────────────────────────────────────────────────────────────────────────

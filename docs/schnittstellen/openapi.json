@@ -32540,16 +32540,22 @@
             "type": "integer"
           },
           "url": {
-            "title": "Url",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
           }
         },
         "required": [
           "id",
           "filename",
           "mime_type",
-          "size",
-          "url"
+          "size"
         ],
         "title": "DMSDocumentOut",
         "type": "object"
@@ -32659,6 +32665,10 @@
             ],
             "title": "Document Type"
           },
+          "external_gate": {
+            "title": "External Gate",
+            "type": "string"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -32708,7 +32718,8 @@
           "article_id",
           "article_number",
           "article_name",
-          "source_route"
+          "source_route",
+          "external_gate"
         ],
         "title": "DMSSearchItem",
         "type": "object"
@@ -193661,6 +193672,22 @@
               "title": "Lot Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -220947,7 +220974,7 @@
     },
     "/api/v1/dms/documents": {
       "get": {
-        "description": "Dokumente aus article_documents oder generischem Document-Store.",
+        "description": "List canonical metadata without hiding database contract errors.",
         "operationId": "list_dms_documents_api_v1_dms_documents_get",
         "parameters": [
           {
@@ -220983,6 +221010,22 @@
               ],
               "title": "Entity Id"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -221016,14 +221059,14 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Dms documents auflisten",
+        "summary": "DMS documents auflisten",
         "tags": [
           "documents",
           "dms"
         ]
       },
       "post": {
-        "description": "Upload a document to the DMS store.",
+        "description": "Upload externally first, then persist a canonical tenant-owned link.",
         "operationId": "upload_dms_document_api_v1_dms_documents_post",
         "parameters": [
           {
@@ -221080,7 +221123,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Dms document hochladen",
+        "summary": "DMS document hochladen",
         "tags": [
           "documents",
           "dms"
@@ -221089,7 +221132,7 @@
     },
     "/api/v1/dms/documents/{doc_id}": {
       "delete": {
-        "description": "Delete a document from the DMS store.",
+        "description": "Unlink tenant-owned metadata; the immutable external original remains.",
         "operationId": "delete_dms_document_api_v1_dms_documents__doc_id__delete",
         "parameters": [
           {
@@ -221138,7 +221181,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Dms document löschen",
+        "summary": "DMS document loeschen",
         "tags": [
           "documents",
           "dms"
@@ -221147,7 +221190,7 @@
     },
     "/api/v1/dms/images": {
       "get": {
-        "description": "Bilder zu einem Dokument — filtert nach Bild-MIME-Typen.",
+        "description": "Resolve a tenant-owned image reference only when the DMS is available.",
         "operationId": "list_dms_images_api_v1_dms_images_get",
         "parameters": [
           {
@@ -221164,6 +221207,22 @@
                 }
               ],
               "title": "Document Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -221198,7 +221257,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Dms images auflisten",
+        "summary": "DMS images auflisten",
         "tags": [
           "documents",
           "dms"
@@ -221338,7 +221397,7 @@
     },
     "/api/v1/dms/search": {
       "get": {
-        "description": "Tenant-sichere lokale Metadaten-/Volltextsuche mit optionalem Mayan-Deep-Link.",
+        "description": "Search local metadata and provide an optional external DMS deep link.",
         "operationId": "search_dms_documents_api_v1_dms_search_get",
         "parameters": [
           {
