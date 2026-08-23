@@ -180,7 +180,6 @@ async def list_credit_notes(
         params["cid"] = customer_id
 
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, credit_note_number, customer_id, customer_name,
                    invoice_reference, reason, total_amount, currency, status, notes,
@@ -188,7 +187,7 @@ async def list_credit_notes(
             FROM domain_sales.sales_credit_notes
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -405,7 +404,6 @@ async def list_returns(
         params["status"] = status
 
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, return_number, customer_id, customer_name,
                    delivery_note_reference, invoice_reference, reason,
@@ -413,7 +411,7 @@ async def list_returns(
             FROM domain_sales.sales_returns
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [

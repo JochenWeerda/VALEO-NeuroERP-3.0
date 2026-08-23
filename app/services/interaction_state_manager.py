@@ -134,13 +134,12 @@ def list_interactions(tenant_id: str, db: Session, state: Optional[str] = None, 
         if state:
             where += " AND state = :state"
             params["state"] = state
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT id, channel, entity_id, state, created_at, updated_at
             FROM domain_shared.interactions
             {where}
             ORDER BY updated_at DESC LIMIT :lim
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         return [
             {"id": r.id, "channel": r.channel, "entity_id": r.entity_id,
              "state": r.state, "created_at": str(r.created_at), "updated_at": str(r.updated_at)}

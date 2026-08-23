@@ -2,47 +2,205 @@
 """
 CI-Gate: SQL f-string Injection Check.
 
-Prüft ob neue SQL f-Strings ohne # nosec S608 Kommentar eingefügt wurden.
-Alle existierenden Stellen wurden manuell gereviewed und mit # nosec S608
-oder einem erklärenden Kommentar versehen.
+Prueft, ob SQL-f-Strings ohne wirksames ``# nosec S608`` eingefuegt wurden.
 
-Exit 0 = OK, Exit 1 = neue unflagged SQL f-strings gefunden.
+WICHTIG — Platzierung des Kommentars:
+    Bandit (Regel B608) unterdrueckt nur, wenn der ``# nosec``-Kommentar auf
+    einer Zeile des gemeldeten Ausdrucks steht. Ein Kommentar auf einer Zeile
+    *darueber* wirkt nicht. Genau das hat die fruehere Fassung dieses Gates
+    akzeptiert (``lines[i-3:i+1]``) und damit repo-weit eine Platzierung
+    antrainiert, die Bandit ignoriert.
+
+    Dieses Gate bildet deshalb Bandits Semantik nach: es sucht den Kommentar im
+    Zeilenbereich des Aufrufknotens (``lineno``..``end_lineno``).
+
+    Bei mehrzeiligen f-Strings ist die schliessende Klammerzeile die richtige
+    Stelle:
+
+        rows = db.execute(text(f\"\"\"
+            SELECT ... WHERE {where}
+        \"\"\"), params)  # nosec S608 - reviewed-safe: <Begruendung>
+
+    An die oeffnende Zeile angehaengt landet der Text *im String* und
+    veraendert das SQL.
+
+Exit 0 = OK, Exit 1 = SQL-f-Strings ohne wirksames nosec.
 """
 from __future__ import annotations
 
-import re
+import argparse
+import ast
+import io
+import json
 import sys
+import tokenize
 from pathlib import Path
 
+SUCHPFADE = ("app",)
+BASELINE = Path("config/sql_fstring_review_baseline.json")
 
-def check() -> int:
-    violations: list[str] = []
-    for py_file in Path("app").rglob("*.py"):
-        try:
-            lines = py_file.read_text(encoding="utf-8", errors="replace").splitlines()
-            for i, line in enumerate(lines):
-                if re.search(r'text\s*\(\s*f["\']|\.execute\s*\(\s*f["\']', line):
-                    # Flagged with nosec or reviewed comment on current or preceding line?
-                    review_context = "\n".join(lines[max(0, i - 3):i + 1])
-                    if (
-                        "nosec" not in review_context
-                        and "# reviewed-safe" not in review_context
-                    ):
-                        violations.append(f"{py_file}:{i + 1}: {line.strip()[:100]}")
-        except Exception:
-            pass
 
-    if violations:
-        print(f"[FAIL] {len(violations)} ungeflagged SQL f-string(s) gefunden:")
-        for v in violations:
-            print(f"  {v}")
-        print("\nBehebung: Entweder auf parametrisierte Queries umstellen oder")
-        print("  # nosec S608 — <Begründung warum safe> hinzufügen wenn reviewed.")
+def _nosec_zeilen(pfad: Path) -> set[int]:
+    """Zeilennummern, die einen ``# nosec``-Kommentar tragen."""
+    treffer: set[int] = set()
+    try:
+        with tokenize.open(pfad) as fh:
+            for tok in tokenize.generate_tokens(fh.readline):
+                if tok.type == tokenize.COMMENT and "nosec" in tok.string:
+                    treffer.add(tok.start[0])
+    except (OSError, SyntaxError, tokenize.TokenError, UnicodeDecodeError):
+        return treffer
+    return treffer
+
+
+def _ist_dynamisch(knoten: ast.AST) -> bool:
+    """True, wenn der Ausdruck zur Laufzeit zusammengesetzten SQL-Text ergibt.
+
+    Erfasst beide Bauformen, die Bandit meldet:
+      * f-String mit eingesetzten Ausdruecken  — f"... {where}"
+      * String-Konkatenation mit Nicht-Konstante — \"\"\"...\"\"\" + suffix
+    """
+    if isinstance(knoten, ast.JoinedStr):
+        return any(isinstance(teil, ast.FormattedValue) for teil in knoten.values)
+    if isinstance(knoten, ast.BinOp) and isinstance(knoten.op, ast.Add):
+        for seite in (knoten.left, knoten.right):
+            if isinstance(seite, ast.Constant):
+                continue
+            if _ist_dynamisch(seite):
+                return True
+            # Name/Attribute/Call auf einer Seite einer String-Addition
+            if isinstance(seite, (ast.Name, ast.Attribute, ast.Call, ast.IfExp)):
+                return True
+    return False
+
+
+def _hat_fstring_arg(knoten: ast.Call) -> bool:
+    """True, wenn ein Argument dynamisch zusammengesetzten SQL-Text traegt."""
+    return any(_ist_dynamisch(arg) for arg in knoten.args)
+
+
+def _ist_sql_aufruf(knoten: ast.Call) -> bool:
+    func = knoten.func
+    if isinstance(func, ast.Name) and func.id == "text":
+        return True
+    if isinstance(func, ast.Attribute) and func.attr in ("execute", "exec_driver_sql"):
+        return True
+    return False
+
+
+def pruefe_datei(pfad: Path) -> list[str]:
+    try:
+        quelle = io.open(pfad, encoding="utf-8", errors="replace").read()
+        baum = ast.parse(quelle)
+    except (OSError, SyntaxError, ValueError):
+        return []
+
+    nosec = _nosec_zeilen(pfad)
+    zeilen = quelle.splitlines()
+    verstoesse: list[str] = []
+
+    for knoten in ast.walk(baum):
+        if not isinstance(knoten, ast.Call) or not _ist_sql_aufruf(knoten):
+            continue
+        if not _hat_fstring_arg(knoten):
+            continue
+        start = knoten.lineno
+        ende = getattr(knoten, "end_lineno", start) or start
+        # Bandit-Semantik: nosec irgendwo im Zeilenbereich des Knotens.
+        if any(z in nosec for z in range(start, ende + 1)):
+            continue
+        text_zeile = zeilen[start - 1].strip()[:100] if start <= len(zeilen) else ""
+        verstoesse.append(f"{pfad}:{start}: {text_zeile}")
+    return verstoesse
+
+
+def _lade_baseline() -> set[str]:
+    """Bekannte, noch ungereviewte Stellen (SPEC-P1-05-Restschuld).
+
+    Die Baseline darf nur schrumpfen: neue Stellen lassen das Gate fallen,
+    abgearbeitete werden mit ``--update-baseline`` ausgetragen.
+    """
+    if not BASELINE.exists():
+        return set()
+    daten = json.loads(BASELINE.read_text(encoding="utf-8"))
+    return set(daten.get("offen", []))
+
+
+def _schluessel(verstoss: str) -> str:
+    """Datei:Zeile ohne Codeausschnitt — der Ausschnitt aendert sich zu leicht."""
+    datei, zeile, _ = verstoss.split(":", 2)
+    return f"{datei.replace(chr(92), '/')}:{zeile}"
+
+
+def check(update_baseline: bool = False) -> int:
+    verstoesse: list[str] = []
+    for wurzel in SUCHPFADE:
+        for py in sorted(Path(wurzel).rglob("*.py")):
+            verstoesse.extend(pruefe_datei(py))
+
+    # Ein Aufruf kann verschachtelt doppelt erfasst werden (db.execute(text(f"...")));
+    # nach Datei:Zeile deduplizieren.
+    eindeutig = sorted(set(verstoesse))
+    bekannt = _lade_baseline()
+    aktuell = {_schluessel(v) for v in eindeutig}
+
+    if update_baseline:
+        BASELINE.parent.mkdir(parents=True, exist_ok=True)
+        BASELINE.write_text(
+            json.dumps(
+                {
+                    "_hinweis": (
+                        "SPEC-P1-05-Restschuld: SQL-f-Strings ohne Security-Review. "
+                        "Die Liste darf nur schrumpfen. Eintrag entfernen, sobald die "
+                        "Stelle reviewed und mit wirksamem '# nosec S608' versehen ist."
+                    ),
+                    "offen": sorted(aktuell),
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        print(f"[OK] Baseline geschrieben: {len(aktuell)} offene Stellen")
+        return 0
+
+    neu = sorted(aktuell - bekannt)
+    erledigt = sorted(bekannt - aktuell)
+
+    if erledigt:
+        print(f"[INFO] {len(erledigt)} Baseline-Stellen sind erledigt — bitte mit")
+        print("       'python scripts/check_sql_fstrings.py --update-baseline' austragen.")
+
+    if neu:
+        print(f"[FAIL] {len(neu)} NEUE SQL-f-String(s) ohne wirksames nosec:")
+        for v in eindeutig:
+            if _schluessel(v) in set(neu):
+                print(f"  {v}")
+        print()
+        print("Behebung: parametrisierte Query verwenden — oder, wenn reviewed,")
+        print("  # nosec S608 - <Begruendung> auf eine Zeile DES AUFRUFS setzen.")
+        print("  Bei mehrzeiligen f-Strings gehoert der Kommentar an die")
+        print("  schliessende Klammerzeile, nicht an die oeffnende (dort landet")
+        print("  er im String und veraendert das SQL).")
         return 1
 
-    print(f"[OK] Alle SQL f-strings sind reviewed (nosec/reviewed-safe kommentiert).")
+    if aktuell:
+        print(
+            f"[OK] Keine neuen Stellen. Offene SPEC-P1-05-Restschuld: "
+            f"{len(aktuell)} (Baseline {BASELINE})."
+        )
+    else:
+        print("[OK] Alle SQL-f-Strings tragen ein wirksames nosec S608.")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(check())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--update-baseline",
+        action="store_true",
+        help="Baseline neu schreiben (nur nach bewusster Abarbeitung)",
+    )
+    args = parser.parse_args()
+    sys.exit(check(update_baseline=args.update_baseline))

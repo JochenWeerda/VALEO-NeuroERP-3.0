@@ -283,13 +283,12 @@ async def update_ingredient(
     try:
         _ensure_tables(db)
         set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         sql = text(f"""
             UPDATE domain_futtermittel.recipe_ingredients
             SET {set_clauses}
             WHERE id = :id AND recipe_id = :recipe_id AND tenant_id = :tenant_id
             RETURNING *
-        """)
+        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         row = db.execute(sql, {"id": ingredient_id, "recipe_id": rezept_id, "tenant_id": tenant_id, **updates}).fetchone()
         db.commit()
     except Exception as exc:

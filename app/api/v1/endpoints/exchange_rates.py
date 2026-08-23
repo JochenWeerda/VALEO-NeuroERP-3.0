@@ -312,14 +312,13 @@ async def update_exchange_rate(
         
         update_fields.append("updated_at = NOW()")
         
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         update_query = text(f"""
             UPDATE domain_erp.exchange_rates
             SET {', '.join(update_fields)}
             WHERE id = :rate_id AND tenant_id = :tenant_id
             RETURNING id, from_currency, to_currency, rate, rate_date, rate_type, source, active,
                       created_at, updated_at
-        """)
+        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
         

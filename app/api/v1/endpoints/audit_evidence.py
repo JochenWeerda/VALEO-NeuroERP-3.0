@@ -63,14 +63,13 @@ async def list_evidence_entries(
             clauses.append("aggregate_id = :aid")
             params["aid"] = aggregate_id
         where = " AND ".join(clauses)
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         result = db.execute(text(f"""
             SELECT audit_entry_id, tenant_id, aggregate_type, aggregate_id,
                    action, evidence_refs, schema_version, created_at
             FROM domain_shared.audit_evidence
             WHERE {where}
             ORDER BY created_at DESC
-        """), params)
+        """), params)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = result.fetchall()
         entries = []
         for row in rows:

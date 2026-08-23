@@ -474,7 +474,7 @@ def list_carrier_invoices(
         params["carrier_id"] = carrier_id
 
     try:
-        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        rows = db.execute(text(f"""
             SELECT id, tour_id, carrier_id, invoice_number, invoice_date,
                    net_amount_eur, tax_amount_eur, gross_amount_eur,
                    fibu_journal_ref, status, created_at
@@ -482,7 +482,7 @@ def list_carrier_invoices(
              WHERE {where}
              ORDER BY created_at DESC
              LIMIT :limit
-        """), params).mappings().all()
+        """), params).mappings().all()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         items = [dict(r) for r in rows]
         for item in items:
             for k, v in item.items():

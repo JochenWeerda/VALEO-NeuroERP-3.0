@@ -115,13 +115,12 @@ async def list_whistleblower_reports(
         params["status"] = status
     try:
         rows = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT id, category, anonymous, status, created_at, updated_at
                 FROM domain_compliance.whistleblower_reports
                 WHERE {' AND '.join(where)}
                 ORDER BY created_at DESC
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
     except Exception as exc:
@@ -211,13 +210,12 @@ async def list_lksg_supplier_risk_assessments(
         params["risk_level"] = risk_level
     try:
         rows = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT id, supplier_id, country_code, risk_score, risk_level, mitigation_note, created_at
                 FROM domain_compliance.lksg_supplier_risk_assessments
                 WHERE {' AND '.join(where)}
                 ORDER BY risk_score DESC, created_at DESC
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
     except Exception as exc:

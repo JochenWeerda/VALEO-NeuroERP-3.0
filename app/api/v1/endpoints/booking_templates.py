@@ -524,14 +524,13 @@ async def update_booking_template(
         
         update_fields.append("updated_at = NOW()")
         
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         update_query = text(f"""
             UPDATE domain_erp.booking_templates
             SET {', '.join(update_fields)}
             WHERE id = :template_id AND tenant_id = :tenant_id
             RETURNING id, name, description, category, trigger_type, trigger_config, lines,
                       default_amount, currency, active, created_at, updated_at
-        """)
+        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
         

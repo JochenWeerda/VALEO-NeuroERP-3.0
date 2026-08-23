@@ -1,0 +1,77 @@
+slice_id: SPEC-P1-05-NOSEC-WIRKSAMKEIT
+id: SPEC-P1-05-NOSEC-WIRKSAMKEIT
+title: S608-Suppressions wirksam machen, Gate und Review auf Bandit-Semantik umstellen
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Die im S608-Review als geprueft gefuehrten Stellen tatsaechlich wirksam
+  unterdruecken, das CI-Gate auf Bandits Platzierungsregel umstellen und das
+  Review-Verdikt aus dem Scanner statt aus dem Kommentartext ableiten.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-05-NOSEC-WIRKSAMKEIT.yaml
+  - scripts/check_sql_fstrings.py
+  - scripts/generate_s608_review.py
+  - docs/operations/appsec-s608-review.md
+  - config/sql_fstring_review_baseline.json
+  - "app/**: ausschliesslich Kommentarposition (62 Dateien)"
+ausloeser: >-
+  Beim Pruefen von billing_batch_service fiel auf, dass zwei frisch gesetzte
+  nosec-Kommentare nichts unterdrueckten. Der Bandit-Lauf bestaetigte es:
+  "Total lines skipped (#nosec): 0" trotz beider Kommentare.
+befund:
+  ursache: >-
+    Bandits nosec ist an die Zeilen des gemeldeten Ausdrucks gebunden. Das alte
+    Gate akzeptierte den Kommentar in den drei Zeilen DAVOR
+    (lines[i-3:i+1]) und hat damit repo-weit eine Platzierung antrainiert, die
+    der Scanner ignoriert.
+  fehlerbilder:
+    - "Kommentar auf eigener Zeile ueber dem Aufruf: ausserhalb des Knotens"
+    - >-
+      '-- nosec' hinter text(f\"\"\" : liegt IM SQL-String, ist gar kein
+      Python-Kommentar und wird zusaetzlich als SQL-Kommentar an Postgres
+      geschickt
+    - >-
+      'nosec' nicht direkt hinter dem '#': Bandit erkennt nur '# nosec ...',
+      nicht '# noqa: S608 ... nosec ...'
+  messung_vorher:
+    bandit_b608_befunde: 244
+    wirksame_nosec_zeilen: 62
+    review_verdikt_ok_documented: 132
+  messung_nachher:
+    bandit_b608_befunde: 164
+    wirksame_nosec_zeilen: 142
+    suppressed: 172
+    unsuppressed: 0
+    unreviewed: 136
+result: >-
+  72 fehlplatzierte Suppressions auf die wirksame Zeile verschoben, 6 aus dem
+  SQL-String entfernt, 5 mit kollidierendem noqa umsortiert. Gate bildet jetzt
+  Bandits Semantik ab (AST-Knotenbereich statt Zeilenfenster) und erkennt
+  zusaetzlich String-Konkatenation, nicht nur f-Strings. Der Generator fragt
+  den Scanner statt die Prosa.
+sicherheitsbewertung: >-
+  Kein Injection-Pfad gefunden. Alle gepruefteten Stellen bauen ihre Fragmente
+  aus festen Literalen, Allowlists oder Pydantic-Feldnamen; Werte sind
+  durchgaengig gebunden. Der Mangel war ausschliesslich die Wirksamkeit der
+  Unterdrueckung — und damit die Belastbarkeit des Reviews.
+verifikation_codeaenderung: >-
+  Token-Vergleich HEAD gegen Arbeitsstand ueber alle 62 app/-Dateien: 56
+  identisch bis auf Kommentare; bei 6 Dateien genau ein STRING-Token, das sich
+  nur um den entfernten SQL-Kommentar unterscheidet. Keine Logikaenderung.
+open:
+  - >-
+    136 SQL-f-Strings ohne jedes Review (config/sql_fstring_review_baseline.json).
+    Das ist der eigentliche fachliche Rest von SPEC-P1-05 und bewusst nicht
+    pauschal mit nosec versehen worden. Die Baseline darf nur schrumpfen.
+  - >-
+    Repo-weite Konvention '# nosec S608' nennt die Ruff-Kennung; Bandits Regel
+    heisst B608. Da keine Kennung passt, wirkt die Zeile als pauschales nosec
+    und unterdrueckt dort alle Bandit-Checks. Eigener Slice waere sinnvoll.
+verification:
+  - "python scripts/check_sql_fstrings.py"
+  - "python scripts/generate_s608_review.py --fail-on-unsuppressed"
+  - "python -m bandit -r app/ -t B608 -f json -o /tmp/b608.json"
+  - "python -c \"from app.main import app; print(len(app.routes))\""

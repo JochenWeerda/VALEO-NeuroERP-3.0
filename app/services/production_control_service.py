@@ -107,7 +107,7 @@ class ProductionControlService:
             where.append("(source_number ILIKE :q OR article_name ILIKE :q OR batch_ref ILIKE :q OR notes ILIKE :q)")
             params["q"] = f"%{q}%"
         where_sql = " AND ".join(where)
-        total = self.db.execute(text(f"SELECT COUNT(*) FROM domain_ops.production_operations WHERE {where_sql}"), params).scalar_one()
+        total = self.db.execute(text(f"SELECT COUNT(*) FROM domain_ops.production_operations WHERE {where_sql}"), params).scalar_one()  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         params.update(limit=page_size, offset=(page - 1) * page_size)
         sort_col = _SORT_COLUMNS.get(sort, "planned_at")
         direction = "ASC" if sort_dir.lower() == "asc" else "DESC"
@@ -116,7 +116,7 @@ class ProductionControlService:
                    article_ref,article_name,batch_ref,quantity,unit,assigned_user,planned_at,notes,created_at,updated_at
               FROM domain_ops.production_operations WHERE {where_sql}
              ORDER BY {sort_col} {direction} NULLS LAST, created_at DESC LIMIT :limit OFFSET :offset
-        """), params).mappings().all()
+        """), params).mappings().all()  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         return {"items": [dict(row) for row in rows], "total": int(total), "page": page, "page_size": page_size}
 
     def summary(self) -> dict[str, int]:

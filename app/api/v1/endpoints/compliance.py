@@ -911,12 +911,12 @@ async def list_artikel_sperren(
         params["sperrgrund"] = sperrgrund
 
     try:
-        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        rows = db.execute(text(f"""
             SELECT id, artikel_id, sperrgrund, gesperrt_bis, bemerkung, gesperrt_am
               FROM domain_shared.artikel_sperren
              WHERE {where}
              ORDER BY gesperrt_am DESC
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         return {
             "items": [
                 {

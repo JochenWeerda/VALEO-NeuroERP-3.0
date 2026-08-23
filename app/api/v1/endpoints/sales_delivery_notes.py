@@ -442,12 +442,11 @@ async def update_delivery_note(
         updates["id"] = ls_id
         updates["tenant_id"] = tenant_id
         db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 UPDATE domain_sales.delivery_notes
                 SET {set_clause}, updated_at = NOW()
                 WHERE id = :id AND tenant_id = :tenant_id
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             updates,
         )
 

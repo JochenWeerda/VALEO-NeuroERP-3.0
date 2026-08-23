@@ -415,7 +415,7 @@ class L3ReportCatalogService:
           ON CONFLICT (tenant_id,source_type,source_ref,fact_type) DO UPDATE SET
             source_number=EXCLUDED.source_number,source_route=EXCLUDED.source_route,occurred_on=EXCLUDED.occurred_on,
             {",".join(c + "=EXCLUDED." + c for c in columns)},payload_hash=EXCLUDED.payload_hash
-        """),
+        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             params,
         )
         self.db.commit()
@@ -482,7 +482,7 @@ class L3ReportCatalogService:
             FROM domain_reporting.l3_report_facts WHERE {where_sql}
            GROUP BY {spec.dimension_id},{spec.dimension_name}
            ORDER BY gross_amount DESC,dimension_name LIMIT :limit OFFSET :offset
-        """),
+        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
                 params,
             )
             .mappings()
@@ -524,7 +524,7 @@ class L3ReportCatalogService:
            WHERE tenant_id=:tid AND occurred_on BETWEEN :from_date AND :to_date
              AND fact_type = ANY(:fact_types) AND {spec.dimension_id}=:dimension_value
            ORDER BY occurred_on DESC,source_number LIMIT :limit
-        """),
+        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
                 {
                     "tid": self.tenant_id,
                     "from_date": from_date,

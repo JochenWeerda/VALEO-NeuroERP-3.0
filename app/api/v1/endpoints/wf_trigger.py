@@ -63,14 +63,14 @@ def get_trigger_log(
         where += " AND entity_id = :eid"
         params["eid"] = entity_id
     try:
-        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        rows = db.execute(text(f"""
             SELECT id, entity_type, entity_id, trigger_status,
                    actions AS action, result, error_detail AS error_message, fired_at
               FROM domain_ops.wf_trigger_log
              WHERE {where}
              ORDER BY fired_at DESC
              LIMIT :lim
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         return {
             "items": [
                 {"id": str(r[0]), "entity_type": r[1], "entity_id": r[2],

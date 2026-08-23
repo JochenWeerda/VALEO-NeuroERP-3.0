@@ -166,12 +166,11 @@ async def update_branch(
     updates["tenant_id"] = tenant_id
     
     db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             UPDATE domain_shared.branches 
             SET {set_clause}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         updates
     )
     db.commit()

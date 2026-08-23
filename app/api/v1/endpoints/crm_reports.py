@@ -152,21 +152,19 @@ async def get_win_loss_report(
             params["to"] = period_to
 
         won = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT COUNT(*), COALESCE(SUM(estimated_value), 0)
                 FROM domain_crm.crm_opportunities
                 WHERE {' AND '.join(where)} AND stage = 'closed_won'
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchone()
         lost = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT COUNT(*), COALESCE(SUM(estimated_value), 0)
                 FROM domain_crm.crm_opportunities
                 WHERE {' AND '.join(where)} AND stage = 'closed_lost'
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchone()
 

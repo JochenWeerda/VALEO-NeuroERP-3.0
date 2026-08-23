@@ -879,7 +879,6 @@ def get_statistics(
         where = " AND ".join(tour_conds)
 
         stats = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT
                     COUNT(DISTINCT t.id)                                        AS total_tours,
@@ -894,20 +893,19 @@ def get_statistics(
                 FROM domain_logistics.tours t
                 LEFT JOIN domain_logistics.tour_stops s ON s.tour_id = t.id
                 WHERE {where}
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().first()
 
         # km aus GPS-Events (Haversine-Summe)
         gps_rows = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT e.lat, e.lng, e.event_ts
                 FROM domain_logistics.tour_events e
                 JOIN domain_logistics.tours t ON t.id = e.tour_id
                 WHERE e.event_type = 'GPS' AND {where}
                 ORDER BY e.tour_id, e.event_ts
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
 

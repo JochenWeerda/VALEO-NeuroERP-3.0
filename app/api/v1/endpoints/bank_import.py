@@ -290,13 +290,13 @@ def list_statements(
         where += " AND iban = :iban"
         params["iban"] = iban
     try:
-        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        rows = db.execute(text(f"""
             SELECT id, iban, format, filename, line_count, imported_at
               FROM domain_finance.bank_statements
              WHERE {where}
              ORDER BY imported_at DESC
              LIMIT :lim
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         return {
             "items": [{"id": str(r[0]), "iban": r[1], "format": r[2],
                        "filename": r[3], "line_count": r[4],

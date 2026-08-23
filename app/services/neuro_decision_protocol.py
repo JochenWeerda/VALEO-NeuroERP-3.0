@@ -114,14 +114,13 @@ def list_decisions(
         params["risk"] = risk_class
 
     try:
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT id, intent, confidence_score, risk_class,
                    human_approval, actor, created_at
             FROM domain_shared.neuro_decision_protocol
             {where}
             ORDER BY created_at DESC LIMIT :lim
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         return [
             {
                 "decision_id": r.id, "intent": r.intent,

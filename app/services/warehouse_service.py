@@ -603,7 +603,6 @@ class WarehouseService:
             filters.append("wb.warehouse_id = :wid")
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = self.db.execute(text(f"""
             SELECT bs.article_id, bs.batch_number,
                    SUM(bs.quantity_kg) as total_qty,
@@ -614,7 +613,7 @@ class WarehouseService:
             WHERE {where}
             GROUP BY bs.article_id, bs.batch_number
             ORDER BY bs.article_id
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         return [{"article_id": r.article_id, "batch_number": r.batch_number,
                  "total_quantity_kg": float(r.total_qty),
                  "total_value_eur": float(r.total_value),

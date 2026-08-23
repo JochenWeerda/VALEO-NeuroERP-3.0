@@ -164,14 +164,13 @@ def query_audit_trail(
         params["to_dt"] = to_date
 
     try:
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT id, timestamp, user_id, user_email, action, entity_type,
                    entity_id, changes, prev_hash, hash, correlation_id
             FROM domain_shared.audit_logs
             {where}
             ORDER BY timestamp DESC LIMIT :lim
-        """), params).fetchall()
+        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         return [
             {
                 "id": r.id, "timestamp": str(r.timestamp), "user_id": r.user_id,

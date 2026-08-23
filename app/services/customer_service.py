@@ -345,14 +345,13 @@ class CustomerService:
         params["limit"] = limit
         params["offset"] = skip
         rows = self.db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT id, tenant_id, customer_number, company_name, contact_person,
                        email, phone, address, customer_type, credit_limit, payment_terms,
                        is_active, chefanweisung, business_partner_id, created_at, updated_at
                 FROM domain_crm.customers WHERE {where_sql}
                 ORDER BY company_name DESC LIMIT :limit OFFSET :offset
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
         items: list[dict[str, Any]] = []

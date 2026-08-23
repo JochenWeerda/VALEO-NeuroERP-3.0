@@ -70,14 +70,13 @@ async def list_accruals_provisions(
         params["atype"] = accrual_type
 
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, description, amount, account_number, counterpart_account,
                    period, accrual_type, status, created_at
             FROM domain_erp.accruals_provisions
             WHERE {' AND '.join(where)}
             ORDER BY period DESC, created_at DESC
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [

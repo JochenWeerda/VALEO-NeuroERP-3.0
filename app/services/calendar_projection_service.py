@@ -838,7 +838,7 @@ class CalendarProjectionService:
              AND (owner_id=:user_ref OR visibility='public' OR team_id = ANY(:team_ids))
              AND (:include_declined OR response_status<>'declined') {layer_clause}
            ORDER BY starts_at,team_id NULLS LAST,owner_id NULLS LAST,title
-        """),
+        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
                 params,
             )
             .mappings()

@@ -695,7 +695,7 @@ async def get_periodenvergleich(
         if konto_klasse:
             params["konto_klasse"] = f"{konto_klasse}%"
 
-        sql = text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        sql = text(f"""
             WITH saldi AS (
                 SELECT
                     coa.account_number,
@@ -726,7 +726,7 @@ async def get_periodenvergleich(
             GROUP BY account_number, account_name, account_type
             ORDER BY account_number
             LIMIT :lim
-        """)
+        """)  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         rows = db.execute(sql, params).fetchall()
         result = []
         for r in rows:

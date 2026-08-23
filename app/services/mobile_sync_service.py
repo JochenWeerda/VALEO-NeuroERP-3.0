@@ -489,6 +489,7 @@ class MobileSyncService:
             params,
         ).scalar_one()
         rows = self.db.execute(
+            # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             text(f"""
                 SELECT id, device_id, event_type, sync_status, error_message,
                        retry_count, idempotency_key, created_at, last_attempt_at, processed_at

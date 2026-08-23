@@ -112,12 +112,11 @@ def transition_tagesabschluss(
             params["fehler_grund"] = payload["fehler_grund"]
 
     db.execute(
-        # nosec S608 — extra_fields is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"""
             UPDATE domain_pos.pos_tagesabschluesse
             SET status = :new_status{extra_fields}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tid
-        """),
+        """),  # nosec S608 — extra_fields is assembled only from fixed code-controlled fragments; values are parameterized.
         params,
     )
     _log_abschluss_event(db, abschluss_id, tenant_id, old_status, new_status, operator)

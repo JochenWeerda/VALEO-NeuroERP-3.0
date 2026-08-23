@@ -216,7 +216,7 @@ class QueryCenterService:
           SELECT id,name,data_product_id,selected_fields,filter_spec,aggregations,is_favorite,created_at,updated_at
             FROM domain_reporting.query_definitions WHERE {where_sql}
            ORDER BY is_favorite DESC,updated_at DESC LIMIT :limit OFFSET :offset
-        """),
+        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
                 params,
             )
             .mappings()

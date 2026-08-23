@@ -619,8 +619,7 @@ async def update_schaden(
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = schaden_id
     db.execute(
-        # nosec S608 -- reviewed-safe: set_clause is built only from Pydantic model field names.
-        text(f"UPDATE domain_ops.ops_fahrzeug_schaeden SET {set_clause}, updated_at = NOW() WHERE id = :id"),
+        text(f"UPDATE domain_ops.ops_fahrzeug_schaeden SET {set_clause}, updated_at = NOW() WHERE id = :id"),  # nosec S608 - reviewed-safe: set_clause is built only from Pydantic model field names.
         updates,
     )
     db.commit()
@@ -723,8 +722,7 @@ async def update_bussgeld(
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = bg_id
     db.execute(
-        # nosec S608 -- reviewed-safe: set_clause is built only from Pydantic model field names.
-        text(f"UPDATE domain_ops.ops_fahrzeug_bussgeld SET {set_clause}, updated_at = NOW() WHERE id = :id"),
+        text(f"UPDATE domain_ops.ops_fahrzeug_bussgeld SET {set_clause}, updated_at = NOW() WHERE id = :id"),  # nosec S608 - reviewed-safe: set_clause is built only from Pydantic model field names.
         updates,
     )
     db.commit()

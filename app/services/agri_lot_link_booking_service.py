@@ -389,7 +389,6 @@ class AgriLotLinkBookingService:
             wid_clause = " AND warehouse_id = :wid"
             cell_filter["wid"] = warehouse_id
 
-        # nosec S608 - wid_clause is code-controlled and only adds a static
         # parameterized warehouse predicate; all values remain bound params.
         rows = self.db.execute(
             text(f"""
@@ -402,7 +401,7 @@ class AgriLotLinkBookingService:
                   AND is_active = true
                   {wid_clause}
                 ORDER BY cell_code
-            """),  # noqa: S608 — column names code-controlled
+            """),  # nosec S608 - wid_clause is code-controlled and only adds a static  # noqa: S608
             cell_filter,
         ).fetchall()
 

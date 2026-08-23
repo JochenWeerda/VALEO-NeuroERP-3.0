@@ -455,7 +455,6 @@ async def list_korrekturen(
 
     where = " AND ".join(conditions)
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, article_id, warehouse_id, quantity, charge, reference_number,
                    movement_date, notes, created_at
@@ -463,7 +462,7 @@ async def list_korrekturen(
             WHERE {where}
             ORDER BY created_at DESC
             OFFSET :skip LIMIT :limit
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).mappings().all()
 
@@ -763,7 +762,6 @@ async def get_bestaende(
 
     try:
         rows = db.execute(
-            # nosec S608 — where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
             text(f"""
                 SELECT
                     sm.article_id,
@@ -786,7 +784,7 @@ async def get_bestaende(
                 GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.unit, sm.charge
                 {having}
                 ORDER BY a.name, sm.warehouse_id
-            """),
+            """),  # nosec S608 — where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
             params,
         ).mappings().all()
     except Exception as exc:  # noqa: BLE001

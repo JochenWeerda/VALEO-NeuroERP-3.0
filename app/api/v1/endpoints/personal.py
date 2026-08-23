@@ -2757,7 +2757,6 @@ async def get_driver_time_absence_collisions(
         params["date_to"] = date_to
     where = " AND ".join(filters)
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT e.id as event_id, e.employee_ref, e.event_ts::text, e.absence_ref,
                    CASE WHEN a.id IS NULL THEN 'absence_not_found'
@@ -2767,7 +2766,7 @@ async def get_driver_time_absence_collisions(
             LEFT JOIN domain_hr.time_entries a ON a.id::text = e.absence_ref AND a.tenant_id = e.tenant_id
             WHERE {where}
             ORDER BY e.event_ts DESC
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [DriverTimeCollisionOut(**dict(r._mapping)) for r in rows]

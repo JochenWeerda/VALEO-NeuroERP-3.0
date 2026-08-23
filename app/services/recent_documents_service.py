@@ -135,7 +135,7 @@ class RecentDocumentsService:
             params["document_type"] = document_type
         where_sql = " AND ".join(where)
         total = self.db.execute(
-            text(f"SELECT COUNT(*) FROM domain_ops.recent_documents WHERE {where_sql}"),
+            text(f"SELECT COUNT(*) FROM domain_ops.recent_documents WHERE {where_sql}"),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             params,
         ).scalar_one()
         params.update(limit=page_size, offset=(page - 1) * page_size)
@@ -146,7 +146,7 @@ class RecentDocumentsService:
                          partner_id,partner_name,title,route,opened_at
                     FROM domain_ops.recent_documents WHERE {where_sql}
                    ORDER BY opened_at DESC LIMIT :limit OFFSET :offset
-                """),
+                """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
                 params,
             )
             .mappings()

@@ -205,12 +205,12 @@ def zusammenfuehren(
         raise HTTPException(status_code=422, detail=f"Unbekannter entity_type: {entity_type}")
 
     try:
-        result = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        result = db.execute(text(f"""
             UPDATE {table}
                SET is_active = false,
                    notes = COALESCE(notes, '') || ' [ZUSAMMENGEFUEHRT → ' || :master || ']'
              WHERE id = :dup AND tenant_id = :tid
-        """), {"master": master_id, "dup": duplikat_id, "tid": tenant_id})
+        """), {"master": master_id, "dup": duplikat_id, "tid": tenant_id})  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         db.commit()
         if result.rowcount == 0:
             raise HTTPException(status_code=404, detail="Duplikat nicht gefunden")

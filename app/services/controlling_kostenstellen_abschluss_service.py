@@ -63,8 +63,7 @@ def advance_kst_abschluss(
             set_clauses += ", abgeschlossen_am = NOW()"
 
         db.execute(
-            # nosec S608 — set_clauses is assembled only from fixed code-controlled fragments; values are parameterized.
-            text(f"UPDATE domain_controlling.controlling_kst_abschluss SET {set_clauses} WHERE id = :id"),
+            text(f"UPDATE domain_controlling.controlling_kst_abschluss SET {set_clauses} WHERE id = :id"),  # nosec S608 — set_clauses is assembled only from fixed code-controlled fragments; values are parameterized.
             params,
         )
         db.commit()

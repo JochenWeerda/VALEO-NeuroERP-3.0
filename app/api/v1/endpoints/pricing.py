@@ -287,8 +287,7 @@ async def list_staffelrabatte(
 
     where = " AND ".join(conditions)
     rows = db.execute(
-        # nosec S608 — where besteht nur aus festen Literalen dieser Funktion, alle Werte via Bind-Params
-        text(f"SELECT * FROM domain_pricing.staffelrabatte WHERE {where} ORDER BY created_at DESC"),
+        text(f"SELECT * FROM domain_pricing.staffelrabatte WHERE {where} ORDER BY created_at DESC"),  # nosec S608 — where besteht nur aus festen Literalen dieser Funktion, alle Werte via Bind-Params
         params,
     ).mappings().all()
 

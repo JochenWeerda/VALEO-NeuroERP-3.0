@@ -774,14 +774,13 @@ async def list_consents(
         where.append("channel = :ch")
         params["ch"] = channel
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, partner_id, channel, purpose, granted, source,
                    ip_address, notes, granted_at, revoked_at, created_at
             FROM domain_crm.crm_consents
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),
+        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [

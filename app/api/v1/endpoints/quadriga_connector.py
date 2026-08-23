@@ -108,12 +108,11 @@ async def put_quadriga_config(
             updates.append("is_active = :is_active")
             params["is_active"] = payload.is_active
         db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 UPDATE domain_erp.connector_configs
                 SET {", ".join(updates)}
                 WHERE tenant_id = :tenant_id AND connector_code = :code
-            """),
+            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()

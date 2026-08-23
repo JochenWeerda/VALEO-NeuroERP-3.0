@@ -276,7 +276,7 @@ class TankAdapterService:
             params["status"] = status
         sql = " AND ".join(where)
         total = self.db.execute(
-            text(f"SELECT COUNT(*) FROM domain_ops.tank_adapter_intake WHERE {sql}"),
+            text(f"SELECT COUNT(*) FROM domain_ops.tank_adapter_intake WHERE {sql}"),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             params,
         ).scalar_one()
         params.update(limit=page_size, offset=(page - 1) * page_size)
