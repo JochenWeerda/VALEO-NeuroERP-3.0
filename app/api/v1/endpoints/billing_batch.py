@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.billing_batch_schemas import (
+    BatchActionOut,
+    BatchCreatedOut,
+    BatchLineOut,
+    BatchPageOut,
+    BatchSummaryOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.billing_batch_service import BillingBatchError, BillingBatchService
@@ -48,7 +55,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "billing-operator"
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=BatchCreatedOut, status_code=201)
 def create(
     body: BatchIn,
     request: Request,
@@ -63,7 +70,7 @@ def create(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=BatchPageOut)
 def list_batches(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -77,14 +84,14 @@ def list_batches(
     )
 
 
-@router.get("/summary", response_model=dict)
+@router.get("/summary", response_model=BatchSummaryOut)
 def summary(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, int]:
     return BillingBatchService(db, tenant_id).summary()
 
 
-@router.get("/lines", response_model=list[dict])
+@router.get("/lines", response_model=list[BatchLineOut])
 def lines(
     status: str | None = None,
     batch_id: str | None = None,
@@ -116,7 +123,7 @@ def _batch_action(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/{batch_id}/validate", response_model=dict)
+@router.post("/{batch_id}/validate", response_model=BatchActionOut)
 def validate(
     batch_id: str,
     body: ReasonIn,
@@ -127,7 +134,7 @@ def validate(
     return _batch_action("validate", batch_id, body, request, db, tenant_id)
 
 
-@router.post("/{batch_id}/release", response_model=dict)
+@router.post("/{batch_id}/release", response_model=BatchActionOut)
 def release(
     batch_id: str,
     body: ReasonIn,
@@ -138,7 +145,7 @@ def release(
     return _batch_action("release", batch_id, body, request, db, tenant_id)
 
 
-@router.post("/{batch_id}/execute", response_model=dict)
+@router.post("/{batch_id}/execute", response_model=BatchActionOut)
 def execute(
     batch_id: str,
     body: ReasonIn,
@@ -149,7 +156,7 @@ def execute(
     return _batch_action("execute", batch_id, body, request, db, tenant_id)
 
 
-@router.post("/lines/{line_id}/retry", response_model=dict)
+@router.post("/lines/{line_id}/retry", response_model=BatchActionOut)
 def retry(
     line_id: str,
     body: ReasonIn,

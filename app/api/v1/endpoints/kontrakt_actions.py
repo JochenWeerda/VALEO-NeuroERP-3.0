@@ -7,6 +7,12 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
+from app.api.v1.schemas.kontrakt_actions_schemas import (
+    KontraktFixingOut,
+    KontraktFixingSummaryOut,
+    KontraktLifecycleOut,
+    KontraktSettlementOut,
+)
 from app.core.database import get_db
 
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte-lifecycle"])
@@ -55,7 +61,7 @@ class SettlementTransitionRequest(BaseModel):
     storno_grund: str = ""
 
 
-@router.post("/lifecycle", response_model=Dict[str, Any], summary="Kontrakt-Lifecycle anlegen")
+@router.post("/lifecycle", response_model=KontraktLifecycleOut, summary="Kontrakt-Lifecycle anlegen")
 def create_kontrakt_lifecycle(
     req: KontraktCreateRequest,
     x_tenant_id: str = Header(...),
@@ -85,7 +91,7 @@ def create_kontrakt_lifecycle(
 
 @router.post(
     "/lifecycle/{kontrakt_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=KontraktLifecycleOut,
     summary="Kontraktstatus wechseln",
 )
 def transition_kontrakt(
@@ -111,7 +117,7 @@ def transition_kontrakt(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/lifecycle/{kontrakt_id}", response_model=Dict[str, Any], summary="Kontrakt-Lifecycle abrufen")
+@router.get("/lifecycle/{kontrakt_id}", response_model=KontraktLifecycleOut, summary="Kontrakt-Lifecycle abrufen")
 def get_kontrakt_lifecycle(
     kontrakt_id: str,
     x_tenant_id: str = Header(...),
@@ -124,7 +130,7 @@ def get_kontrakt_lifecycle(
     return rec
 
 
-@router.post("/fixing", response_model=Dict[str, Any], summary="Kontrakt-Fixing anlegen")
+@router.post("/fixing", response_model=KontraktFixingOut, summary="Kontrakt-Fixing anlegen")
 def create_fixing(
     req: FixingCreateRequest,
     x_tenant_id: str = Header(...),
@@ -149,7 +155,7 @@ def create_fixing(
 
 @router.get(
     "/fixing/{kontrakt_id}/summary",
-    response_model=Dict[str, Any],
+    response_model=KontraktFixingSummaryOut,
     summary="Kontrakt-Fixing-Zusammenfassung abrufen",
 )
 def get_fixing_summary(
@@ -161,7 +167,7 @@ def get_fixing_summary(
     return svc(db=db, kontrakt_id=kontrakt_id, tenant_id=x_tenant_id)
 
 
-@router.post("/settlement", response_model=Dict[str, Any], summary="Kontrakt-Settlement anlegen")
+@router.post("/settlement", response_model=KontraktSettlementOut, summary="Kontrakt-Settlement anlegen")
 def create_settlement(
     req: SettlementCreateRequest,
     x_tenant_id: str = Header(...),
@@ -188,7 +194,7 @@ def create_settlement(
 
 @router.post(
     "/settlement/{settlement_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=KontraktSettlementOut,
     summary="Kontrakt-Settlement-Status wechseln",
 )
 def transition_settlement(

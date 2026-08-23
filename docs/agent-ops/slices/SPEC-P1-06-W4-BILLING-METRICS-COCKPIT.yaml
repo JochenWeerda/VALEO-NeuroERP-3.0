@@ -1,0 +1,53 @@
+slice_id: SPEC-P1-06-W4-BILLING-METRICS-COCKPIT
+id: SPEC-P1-06-W4-BILLING-METRICS-COCKPIT
+title: Legacy-Routen response_model typisieren — Welle 4 (Abrechnungsstapel, AI-Metriken, Workflow-Cockpit, Kontraktaktionen)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Vierte Welle von SPEC-P1-06 inklusive des aus Welle 3 zurueckgestellten
+  billing_batch — 29 Endpunkte in vier Dateien auf echte Pydantic-Schemas.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W4-BILLING-METRICS-COCKPIT.yaml
+  - app/api/v1/schemas/billing_batch_schemas.py
+  - app/api/v1/schemas/ai_engineering_metrics_schemas.py
+  - app/api/v1/schemas/wf_cockpit_persist_schemas.py
+  - app/api/v1/schemas/kontrakt_actions_schemas.py
+  - app/api/v1/endpoints/billing_batch.py
+  - app/api/v1/endpoints/ai_engineering_metrics.py
+  - app/api/v1/endpoints/wf_cockpit_persist.py
+  - app/api/v1/endpoints/kontrakt_actions.py
+  - tests/test_welle4_response_models.py
+acceptance:
+  - Alle 29 Endpunkte tragen ein echtes response_model
+  - Kein Feldverlust gegenueber Service-Rueckgaben bzw. Tabellen-DDL
+  - Bestandstests der vier Bereiche bleiben gruen
+result: >-
+  Schwache response_model-Typen repo-weit 372 -> 343, betroffene Dateien
+  107 -> 103. Nach vier Wellen: 447 -> 343 (104 Endpunkte, 23 Prozent).
+befunde:
+  - >-
+    wf_cockpit_instances und wf_cockpit_blockers werden von ZWEI Migrationen
+    angelegt, mit abweichenden Spaltensaetzen: wf_cockpit_persist_20260625
+    (kanonisch: created_at bzw. message/external_system/retryable/since) und
+    feed_qs_wf_cockpit_repair_20260626 (started_at/finished_at bzw.
+    reason/context/resolved_by/created_at). Die Reparatur nutzt
+    CREATE TABLE IF NOT EXISTS plus ALTER, sodass je nach Installationsalter
+    beide Formen vorkommen. Der Detail-Endpunkt liest SELECT * — die Schemas
+    fuehren deshalb die Vereinigung, alles optional. Die DDL-Divergenz selbst
+    bleibt offen und waere ein eigener Slice.
+  - >-
+    owner-distribution liefert ein Mapping mit dynamischen Schluesseln
+    (Eigentuemernamen) und ist als dict[str, int] typisiert — ein echter Typ,
+    kein schwacher. Der Weak-Check flaggt nur dict[str, Any] und bare dict.
+open:
+  - >-
+    Verbleibende 7er-Gruppe: finance_actions (817 Zeilen), hrm_abwesenheit,
+    legacy_interface_adapters, rations_integrations.
+verification:
+  - "python -m pytest tests/test_welle4_response_models.py -q --no-cov"
+  - "python -m pytest tests/test_billing_batch.py tests/test_ai_engineering_metrics.py tests/test_wf_cockpit_persist.py tests/test_kontrakte_services.py tests/test_kontrakte_api.py -q --no-cov"
+  - "python scripts/check_response_models.py --threshold 20"
+  - "python scripts/check_weak_response_models.py"

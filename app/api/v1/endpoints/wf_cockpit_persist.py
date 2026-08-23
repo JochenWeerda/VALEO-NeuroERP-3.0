@@ -6,6 +6,14 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.wf_cockpit_persist_schemas import (
+    BlockerResolvedOut,
+    CockpitInstanceDetailOut,
+    CockpitInstanceListOut,
+    DeadLetterViewOut,
+    InstanceStatusOut,
+    InstanceUpsertOut,
+)
 from app.core.database import get_db
 from app.services.wf_cockpit_persist_service import WorkflowCockpitPersistService
 
@@ -21,7 +29,7 @@ def _svc(
     return WorkflowCockpitPersistService(db=db, tenant_id=x_tenant_id)
 
 
-@router.get("/instances", response_model=dict[str, Any], summary="Cockpit-Instanzen (DB)")
+@router.get("/instances", response_model=CockpitInstanceListOut, summary="Cockpit-Instanzen (DB)")
 def list_instances(
     status: str | None = Query(None),
     process_key: str | None = Query(None),
@@ -35,7 +43,7 @@ def list_instances(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/instances/{process_instance_id}", response_model=dict[str, Any], summary="Cockpit-Instanz-Detail")
+@router.get("/instances/{process_instance_id}", response_model=CockpitInstanceDetailOut, summary="Cockpit-Instanz-Detail")
 def get_instance(
     process_instance_id: str,
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -46,7 +54,7 @@ def get_instance(
     return detail
 
 
-@router.get("/dead-letter", response_model=dict[str, Any], summary="Dead-Letter-Sicht: FAILED / BLOCKED_EXTERNAL_GATE")
+@router.get("/dead-letter", response_model=DeadLetterViewOut, summary="Dead-Letter-Sicht: FAILED / BLOCKED_EXTERNAL_GATE")
 def dead_letter(
     limit: int = Query(100, ge=1, le=500),
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -54,7 +62,7 @@ def dead_letter(
     return svc.dead_letter_view(limit=limit)
 
 
-@router.post("/instances", response_model=dict[str, Any], summary="Cockpit-Instanz manuell anlegen/aktualisieren")
+@router.post("/instances", response_model=InstanceUpsertOut, summary="Cockpit-Instanz manuell anlegen/aktualisieren")
 def upsert_instance(
     body: dict[str, Any],
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -76,7 +84,7 @@ def upsert_instance(
 
 @router.post(
     "/instances/{process_instance_id}/blockers/{blocker_id}/resolve",
-    response_model=dict[str, Any],
+    response_model=BlockerResolvedOut,
     summary="Blocker als resolved markieren",
 )
 def resolve_blocker(
@@ -92,7 +100,7 @@ def resolve_blocker(
 
 @router.post(
     "/instances/{process_instance_id}/retry",
-    response_model=dict[str, Any],
+    response_model=InstanceStatusOut,
     summary="FAILED/blocked Instanz kontrolliert neu starten (WF-COCKPIT-RETRY-001)",
 )
 def retry_instance(
@@ -115,7 +123,7 @@ def retry_instance(
 
 @router.post(
     "/instances/{process_instance_id}/compensate",
-    response_model=dict[str, Any],
+    response_model=InstanceStatusOut,
     summary="Instanz als kompensiert/storniert markieren (Kompensationspfad)",
 )
 def compensate_instance(
