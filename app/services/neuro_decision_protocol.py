@@ -120,7 +120,7 @@ def list_decisions(
             FROM domain_shared.neuro_decision_protocol
             {where}
             ORDER BY created_at DESC LIMIT :lim
-        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """), params).fetchall()  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         return [
             {
                 "decision_id": r.id, "intent": r.intent,

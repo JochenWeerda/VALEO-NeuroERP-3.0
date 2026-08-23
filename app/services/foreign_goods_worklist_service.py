@@ -68,7 +68,7 @@ class ForeignGoodsWorklistService:
                  ORDER BY CASE WHEN status='ausgelagert' THEN 1 ELSE 0 END,
                           geplante_auslagerung NULLS LAST, einlagerungsdatum DESC
                  LIMIT :limit OFFSET :offset
-                """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+                """),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
                 params,
             )
             .mappings()

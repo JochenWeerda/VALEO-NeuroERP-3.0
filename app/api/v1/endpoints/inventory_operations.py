@@ -462,12 +462,12 @@ async def list_korrekturen(
             WHERE {where}
             ORDER BY created_at DESC
             OFFSET :skip LIMIT :limit
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).mappings().all()
 
     total = db.execute(
-        text(f"SELECT COUNT(*) FROM domain_inventory.inventory_stock_movements WHERE {where}"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT COUNT(*) FROM domain_inventory.inventory_stock_movements WHERE {where}"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).scalar() or 0
 
@@ -784,7 +784,7 @@ async def get_bestaende(
                 GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.unit, sm.charge
                 {having}
                 ORDER BY a.name, sm.warehouse_id
-            """),  # nosec S608 — where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
+            """),  # nosec B608  # where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
             params,
         ).mappings().all()
     except Exception as exc:  # noqa: BLE001

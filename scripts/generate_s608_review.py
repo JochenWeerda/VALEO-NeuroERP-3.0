@@ -26,7 +26,7 @@ import argparse
 import ast
 import io
 import json
-import subprocess  # nosec B404 - fester Aufruf ohne Shell, Argumente aus dem Code
+import subprocess  # nosec B404  # fester Aufruf ohne Shell, Argumente aus dem Code
 import sys
 import tempfile
 from datetime import date
@@ -49,7 +49,7 @@ def bandit_befunde() -> set[tuple[str, int]]:
     """(relativer Pfad, Zeile) aller offenen B608-Befunde."""
     with tempfile.TemporaryDirectory() as tmp:
         bericht = Path(tmp) / "b608.json"
-        subprocess.run(  # nosec B603 - feste Argumentliste, keine Shell
+        subprocess.run(  # nosec B603  # feste Argumentliste, keine Shell
             [
                 sys.executable, "-m", "bandit", "-r", str(APP),
                 "-t", "B608", "-f", "json", "-o", str(bericht), "-q",
@@ -187,7 +187,7 @@ def main() -> int:
         "Ausdrucks** steht. Zwei Formen wirken nicht:",
         "",
         "```python",
-        "# nosec S608 - Begruendung          <- Zeile darueber: wirkungslos",
+        "# nosec B608  # Begruendung        <- Zeile DARUEBER: wirkungslos",
         'rows = db.execute(text(f"SELECT ... {where}"), params)',
         "",
         'rows = db.execute(text(f"""  -- nosec S608 ...   <- im SQL-String: wirkungslos',
@@ -200,7 +200,7 @@ def main() -> int:
         "```python",
         'rows = db.execute(text(f"""',
         "    SELECT ... {where}",
-        '"""), params)  # nosec S608 - reviewed-safe: <Begruendung>',
+        '"""), params)  # nosec B608  # reviewed-safe: <Begruendung>',
         "```",
         "",
         "## Gate",

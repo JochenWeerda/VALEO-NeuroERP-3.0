@@ -70,7 +70,7 @@ def get_trigger_log(
              WHERE {where}
              ORDER BY fired_at DESC
              LIMIT :lim
-        """), params).fetchall()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
+        """), params).fetchall()  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         return {
             "items": [
                 {"id": str(r[0]), "entity_type": r[1], "entity_id": r[2],

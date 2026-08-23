@@ -91,7 +91,7 @@ async def search_dms_documents(
         params["article_id"] = article_id
     where_sql = " AND ".join(where)
     total = db.execute(
-        text(f"SELECT COUNT(*) FROM domain_inventory.article_documents ad JOIN domain_inventory.articles a ON a.id=ad.article_id WHERE {where_sql}"),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+        text(f"SELECT COUNT(*) FROM domain_inventory.article_documents ad JOIN domain_inventory.articles a ON a.id=ad.article_id WHERE {where_sql}"),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         params,
     ).scalar_one()
     query_params = {**params, "limit": page_size, "offset": (page - 1) * page_size}
@@ -106,7 +106,7 @@ async def search_dms_documents(
            WHERE {where_sql}
            ORDER BY ad.created_at DESC,ad.document_name
            LIMIT :limit OFFSET :offset
-        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+        """),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         query_params,
     ).mappings().all()
     configured = is_configured()
@@ -147,7 +147,7 @@ async def list_dms_documents(
             FROM domain_inventory.article_documents ad
             JOIN domain_inventory.articles a ON a.id=ad.article_id
            WHERE {' AND '.join(where)} ORDER BY ad.created_at DESC LIMIT 100
-        """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+        """),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         params,
     ).mappings().all()
     configured = is_configured()

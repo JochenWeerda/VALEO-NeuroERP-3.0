@@ -222,7 +222,7 @@ async def list_creditors(
             where.append("(name ILIKE :search OR creditor_number ILIKE :search)")
             params["search"] = f"%{search}%"
         where_sql = " AND ".join(where)
-        total = db.execute(text(f"SELECT COUNT(*) FROM domain_erp.creditors WHERE {where_sql}"), params).scalar()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        total = db.execute(text(f"SELECT COUNT(*) FROM domain_erp.creditors WHERE {where_sql}"), params).scalar()  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params["limit"] = limit
         params["skip"] = skip
         rows = db.execute(

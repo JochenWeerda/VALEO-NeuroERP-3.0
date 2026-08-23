@@ -203,7 +203,7 @@ def list_tours(
             params["status"] = status
         where = " AND ".join(conditions)
         rows = db.execute(
-            text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         tour_rows = [dict(r) for r in rows]
@@ -213,7 +213,7 @@ def list_tours(
             placeholders = ", ".join(f":id{i}" for i in range(len(ids)))
             counts = db.execute(
                 text(
-                    f"SELECT tour_id, COUNT(*)::int AS stop_count FROM domain_logistics.tour_stops "  # nosec S608
+                    f"SELECT tour_id, COUNT(*)::int AS stop_count FROM domain_logistics.tour_stops "  # nosec B608
                     f"WHERE tour_id IN ({placeholders}) GROUP BY tour_id"
                 ),
                 bind,
@@ -430,7 +430,7 @@ def patch_stop(
         if not updates:
             raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
         db.execute(
-            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()
@@ -893,7 +893,7 @@ def get_statistics(
                 FROM domain_logistics.tours t
                 LEFT JOIN domain_logistics.tour_stops s ON s.tour_id = t.id
                 WHERE {where}
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().first()
 
@@ -905,7 +905,7 @@ def get_statistics(
                 JOIN domain_logistics.tours t ON t.id = e.tour_id
                 WHERE e.event_type = 'GPS' AND {where}
                 ORDER BY e.tour_id, e.event_ts
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
 

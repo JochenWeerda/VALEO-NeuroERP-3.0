@@ -297,7 +297,7 @@ def pruefprotokoll(
                 "SELECT id, geprueft_name, status, scope, entity_ref, checked_by, geprueft_am "
                 "FROM domain_compliance.sanctions_checks "
                 "WHERE tenant_id = :tenant_id"
-                f"{where_scope} "  # nosec B608 -- fixed allow-listed clause
+                f"{where_scope} "  # nosec B608  # fixed allow-listed clause
                 "ORDER BY geprueft_am DESC LIMIT 500"
             ),
             {"tenant_id": tenant_id, "scope": scope},

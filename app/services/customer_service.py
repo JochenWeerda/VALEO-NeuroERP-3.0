@@ -340,7 +340,7 @@ class CustomerService:
             params["search"] = f"%{search}%"
         where_sql = " AND ".join(where_clauses)
         total = self.db.execute(
-            text(f"SELECT COUNT(*) FROM domain_crm.customers WHERE {where_sql}"), params  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT COUNT(*) FROM domain_crm.customers WHERE {where_sql}"), params  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         ).scalar_one()
         params["limit"] = limit
         params["offset"] = skip
@@ -351,7 +351,7 @@ class CustomerService:
                        is_active, chefanweisung, business_partner_id, created_at, updated_at
                 FROM domain_crm.customers WHERE {where_sql}
                 ORDER BY company_name DESC LIMIT :limit OFFSET :offset
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
         items: list[dict[str, Any]] = []

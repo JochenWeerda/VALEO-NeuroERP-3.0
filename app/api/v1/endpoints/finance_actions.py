@@ -576,7 +576,7 @@ async def buchungsuebergabe_export(
                 LEFT JOIN domain_erp.chart_of_accounts ca ON ca.id = jel.account_id
                 WHERE {where_sql}
                 ORDER BY {sort_clause}, jel.line_number
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
     except Exception:

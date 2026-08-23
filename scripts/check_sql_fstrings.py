@@ -2,7 +2,7 @@
 """
 CI-Gate: SQL f-string Injection Check.
 
-Prueft, ob SQL-f-Strings ohne wirksames ``# nosec S608`` eingefuegt wurden.
+Prueft, ob SQL-f-Strings ohne wirksames ``# nosec B608  # `` eingefuegt wurden.
 
 WICHTIG — Platzierung des Kommentars:
     Bandit (Regel B608) unterdrueckt nur, wenn der ``# nosec``-Kommentar auf
@@ -19,10 +19,21 @@ WICHTIG — Platzierung des Kommentars:
 
         rows = db.execute(text(f\"\"\"
             SELECT ... WHERE {where}
-        \"\"\"), params)  # nosec S608 - reviewed-safe: <Begruendung>
+        \"\"\"), params)  # nosec B608  # reviewed-safe: <Begruendung>
 
     An die oeffnende Zeile angehaengt landet der Text *im String* und
     veraendert das SQL.
+
+WICHTIG — Kennung und Begruendung:
+    Die Regel heisst bei Bandit ``B608``; ``S608`` ist die Ruff-Kennung. Bandit
+    liest alles nach ``nosec`` bis zum naechsten ``#`` als Liste von Test-IDs
+    (``NOSEC_COMMENT = r"#\s*nosec:?\s*(?P<tests>[^#]+)?#?"``). Steht dort keine
+    gueltige ID, wirkt die Zeile als *pauschales* nosec und unterdrueckt jeden
+    Bandit-Check darauf.
+
+    Deshalb: Kennung zuerst, Begruendung hinter einem zweiten ``#`` —
+    ``# nosec B608  # reviewed-safe: <Begruendung>``. So wird genau eine Regel
+    unterdrueckt und die Prosa nicht als ID-Liste fehlgelesen.
 
 Exit 0 = OK, Exit 1 = SQL-f-Strings ohne wirksames nosec.
 """
@@ -152,7 +163,7 @@ def check(update_baseline: bool = False) -> int:
                     "_hinweis": (
                         "SPEC-P1-05-Restschuld: SQL-f-Strings ohne Security-Review. "
                         "Die Liste darf nur schrumpfen. Eintrag entfernen, sobald die "
-                        "Stelle reviewed und mit wirksamem '# nosec S608' versehen ist."
+                        "Stelle reviewed und mit wirksamem '# nosec B608  # ' versehen ist."
                     ),
                     "offen": sorted(aktuell),
                 },
@@ -179,7 +190,7 @@ def check(update_baseline: bool = False) -> int:
                 print(f"  {v}")
         print()
         print("Behebung: parametrisierte Query verwenden — oder, wenn reviewed,")
-        print("  # nosec S608 - <Begruendung> auf eine Zeile DES AUFRUFS setzen.")
+        print("  # nosec B608  # <Begruendung> auf eine Zeile DES AUFRUFS setzen.")
         print("  Bei mehrzeiligen f-Strings gehoert der Kommentar an die")
         print("  schliessende Klammerzeile, nicht an die oeffnende (dort landet")
         print("  er im String und veraendert das SQL).")
@@ -191,7 +202,7 @@ def check(update_baseline: bool = False) -> int:
             f"{len(aktuell)} (Baseline {BASELINE})."
         )
     else:
-        print("[OK] Alle SQL-f-Strings tragen ein wirksames nosec S608.")
+        print("[OK] Alle SQL-f-Strings tragen ein wirksames nosec B608.")
     return 0
 
 

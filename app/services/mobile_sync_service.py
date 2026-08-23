@@ -485,11 +485,11 @@ class MobileSyncService:
             params["q"] = f"%{q}%"
         where = " AND ".join(filters)
         total = self.db.execute(
-            text(f"SELECT COUNT(*) FROM domain_ops.mobile_event_queue WHERE {where}"),  # nosec B608 -- clauses and sort are allowlisted
+            text(f"SELECT COUNT(*) FROM domain_ops.mobile_event_queue WHERE {where}"),  # nosec B608  # clauses and sort are allowlisted
             params,
         ).scalar_one()
         rows = self.db.execute(
-            # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+            # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             text(f"""
                 SELECT id, device_id, event_type, sync_status, error_message,
                        retry_count, idempotency_key, created_at, last_attempt_at, processed_at
@@ -497,7 +497,7 @@ class MobileSyncService:
                  WHERE {where}
                  ORDER BY {sort_column} {direction}, id DESC
                  LIMIT :limit OFFSET :offset
-            """),  # nosec B608 -- clauses and sort are allowlisted
+            """),  # nosec B608  # clauses and sort are allowlisted
             params,
         ).mappings().all()
         return {

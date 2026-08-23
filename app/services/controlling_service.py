@@ -51,7 +51,7 @@ class ControllingService:
 
     def _fetch_one(self, table: str, item_id: str) -> dict[str, Any]:
         row = self.db.execute(
-            text(f"SELECT * FROM {table} WHERE tenant_id=:tenant_id AND id=:id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM {table} WHERE tenant_id=:tenant_id AND id=:id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             {"tenant_id": self.tenant_id, "id": item_id},
         ).mappings().first()
         return _clean(dict(row)) if row else {}

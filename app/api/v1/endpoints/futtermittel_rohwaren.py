@@ -307,7 +307,7 @@ async def update_rohware(
             SET {set_clauses}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
             RETURNING *
-        """)  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         row = db.execute(sql, {"id": rohware_id, "tenant_id": tenant_id, **updates}).fetchone()
         db.commit()
     except Exception as exc:

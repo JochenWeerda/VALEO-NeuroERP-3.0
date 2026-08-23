@@ -241,7 +241,7 @@ async def update_blanket_order(
     data["tenant_id"] = tenant_id
     try:
         db.execute(
-            text(f"UPDATE domain_sales.blanket_orders SET {sets} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_sales.blanket_orders SET {sets} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             data,
         )
         db.commit()

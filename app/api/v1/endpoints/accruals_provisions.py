@@ -76,7 +76,7 @@ async def list_accruals_provisions(
             FROM domain_erp.accruals_provisions
             WHERE {' AND '.join(where)}
             ORDER BY period DESC, created_at DESC
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -184,7 +184,7 @@ async def update_accrual_provision(
     updates["id"] = item_id
     updates["tid"] = tenant_id
     db.execute(
-        text(f"UPDATE domain_erp.accruals_provisions SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_erp.accruals_provisions SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     db.commit()

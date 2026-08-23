@@ -187,7 +187,7 @@ async def list_credit_notes(
             FROM domain_sales.sales_credit_notes
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -411,7 +411,7 @@ async def list_returns(
             FROM domain_sales.sales_returns
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [

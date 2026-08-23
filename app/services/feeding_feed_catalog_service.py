@@ -163,7 +163,7 @@ class FeedingFeedCatalogService:
             assignments = ",".join(f"{key}=:{key}" for key in changes)
             self.db.execute(text(f"""UPDATE domain_shared.futtermittel_einzelfutter
               SET {assignments},revision=revision+1,updated_by=:actor,updated_at=now()
-              WHERE tenant_id=:tenant_id AND id=:feed_id"""),  # nosec S608 - Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)  # noqa: S608
+              WHERE tenant_id=:tenant_id AND id=:feed_id"""),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)  # noqa: S608
               {**changes, "actor": self.actor, "tenant_id": self.tenant_id, "feed_id": feed_id})
         revision = expected + 1
         self._append_revision(feed_id, revision, reason)

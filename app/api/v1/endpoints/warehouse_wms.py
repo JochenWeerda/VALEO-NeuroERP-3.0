@@ -316,7 +316,7 @@ def list_pick_lists(
         params["st"] = status_filter
     where = " AND ".join(filters)
     rows = svc.db.execute(
-        text(f"SELECT * FROM domain_inventory.pick_lists WHERE {where} ORDER BY created_at DESC LIMIT 100"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_inventory.pick_lists WHERE {where} ORDER BY created_at DESC LIMIT 100"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [dict(r._mapping) for r in rows]

@@ -210,7 +210,7 @@ def zusammenfuehren(
                SET is_active = false,
                    notes = COALESCE(notes, '') || ' [ZUSAMMENGEFUEHRT → ' || :master || ']'
              WHERE id = :dup AND tenant_id = :tid
-        """), {"master": master_id, "dup": duplikat_id, "tid": tenant_id})  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
+        """), {"master": master_id, "dup": duplikat_id, "tid": tenant_id})  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         db.commit()
         if result.rowcount == 0:
             raise HTTPException(status_code=404, detail="Duplikat nicht gefunden")

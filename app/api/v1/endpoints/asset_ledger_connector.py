@@ -114,7 +114,7 @@ async def put_asset_ledger_config(
                 UPDATE domain_erp.connector_configs
                 SET {", ".join(updates)}
                 WHERE tenant_id = :tenant_id AND connector_code = :code
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()

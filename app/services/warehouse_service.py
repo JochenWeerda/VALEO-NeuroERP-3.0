@@ -88,7 +88,7 @@ class WarehouseService:
             filters.append("is_active = true")
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.warehouse_bins WHERE {where} ORDER BY bin_code"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_inventory.warehouse_bins WHERE {where} ORDER BY bin_code"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -613,7 +613,7 @@ class WarehouseService:
             WHERE {where}
             GROUP BY bs.article_id, bs.batch_number
             ORDER BY bs.article_id
-        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """), params).fetchall()  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         return [{"article_id": r.article_id, "batch_number": r.batch_number,
                  "total_quantity_kg": float(r.total_qty),
                  "total_value_eur": float(r.total_value),

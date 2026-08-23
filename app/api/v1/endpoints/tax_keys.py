@@ -442,7 +442,7 @@ async def update_tax_key(
                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                       debit_account, credit_account, country, region, active,
                       created_at, updated_at
-        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
         

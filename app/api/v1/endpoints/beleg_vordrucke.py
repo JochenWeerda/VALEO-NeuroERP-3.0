@@ -122,7 +122,7 @@ def list_vordrucke(
     if kategorie:
         params["kat"] = kategorie
     rows = db.execute(
-        text(f"SELECT * FROM domain_shared.beleg_vordrucke WHERE {where} ORDER BY kategorie, name"),  # nosec B608 — where aus Code-Konstanten
+        text(f"SELECT * FROM domain_shared.beleg_vordrucke WHERE {where} ORDER BY kategorie, name"),  # nosec B608  # where aus Code-Konstanten
         params,
     ).mappings().all()
     return [_row_to_out(r) for r in rows]

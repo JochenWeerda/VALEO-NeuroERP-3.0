@@ -726,7 +726,7 @@ async def get_periodenvergleich(
             GROUP BY account_number, account_name, account_type
             ORDER BY account_number
             LIMIT :lim
-        """)  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
+        """)  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         rows = db.execute(sql, params).fetchall()
         result = []
         for r in rows:

@@ -401,7 +401,7 @@ class AgriLotLinkBookingService:
                   AND is_active = true
                   {wid_clause}
                 ORDER BY cell_code
-            """),  # nosec S608 - wid_clause is code-controlled and only adds a static  # noqa: S608
+            """),  # nosec B608  # wid_clause is code-controlled and only adds a static  # noqa: S608
             cell_filter,
         ).fetchall()
 

@@ -74,7 +74,7 @@ def _fetch_po_amount(db: Session, po_id: str, tenant_id: str) -> Optional[float]
     ]:
         try:
             row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": po_id, "tid": tenant_id},
             ).fetchone()
             if row:
@@ -93,7 +93,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
     ]:
         try:
             row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": gr_id, "tid": tenant_id},
             ).fetchone()
             if row:
@@ -112,7 +112,7 @@ def _fetch_invoice_amount(db: Session, invoice_id: str, tenant_id: str) -> Optio
     ]:
         try:
             row = db.execute(
-                text(f"SELECT {col} FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT {col} FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": invoice_id, "tid": tenant_id},
             ).fetchone()
             if row:

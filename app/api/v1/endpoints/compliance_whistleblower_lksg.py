@@ -120,7 +120,7 @@ async def list_whistleblower_reports(
                 FROM domain_compliance.whistleblower_reports
                 WHERE {' AND '.join(where)}
                 ORDER BY created_at DESC
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
     except Exception as exc:
@@ -215,7 +215,7 @@ async def list_lksg_supplier_risk_assessments(
                 FROM domain_compliance.lksg_supplier_risk_assessments
                 WHERE {' AND '.join(where)}
                 ORDER BY risk_score DESC, created_at DESC
-            """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
     except Exception as exc:

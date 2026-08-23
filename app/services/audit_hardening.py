@@ -170,7 +170,7 @@ def query_audit_trail(
             FROM domain_shared.audit_logs
             {where}
             ORDER BY timestamp DESC LIMIT :lim
-        """), params).fetchall()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """), params).fetchall()  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         return [
             {
                 "id": r.id, "timestamp": str(r.timestamp), "user_id": r.user_id,

@@ -296,7 +296,7 @@ def list_statements(
              WHERE {where}
              ORDER BY imported_at DESC
              LIMIT :lim
-        """), params).fetchall()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
+        """), params).fetchall()  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         return {
             "items": [{"id": str(r[0]), "iban": r[1], "format": r[2],
                        "filename": r[3], "line_count": r[4],

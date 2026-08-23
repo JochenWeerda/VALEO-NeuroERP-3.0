@@ -175,7 +175,7 @@ class DocumentControlService:
         sort_col = _SORT_COLUMNS.get(sort, "due_at")
         direction = "ASC" if sort_dir.lower() == "asc" else "DESC"
         total = self.db.execute(
-            text(f"SELECT COUNT(*) FROM domain_ops.document_control_exceptions WHERE {where_sql}"),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+            text(f"SELECT COUNT(*) FROM domain_ops.document_control_exceptions WHERE {where_sql}"),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             params,
         ).scalar_one()
         params["limit"] = page_size
@@ -188,7 +188,7 @@ class DocumentControlService:
                  WHERE {where_sql}
                  ORDER BY {sort_col} {direction} NULLS LAST, created_at DESC
                  LIMIT :limit OFFSET :offset
-            """),  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+            """),  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
             params,
         ).mappings().all()
         return {"items": [dict(row) for row in rows], "total": int(total), "page": page, "page_size": page_size}

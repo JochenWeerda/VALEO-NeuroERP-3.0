@@ -161,7 +161,7 @@ def list_tariffs(
             conditions.append("tenant_id IS NULL")
         where = " AND ".join(conditions)
         rows = db.execute(
-            text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]
@@ -482,7 +482,7 @@ def list_carrier_invoices(
              WHERE {where}
              ORDER BY created_at DESC
              LIMIT :limit
-        """), params).mappings().all()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
+        """), params).mappings().all()  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         items = [dict(r) for r in rows]
         for item in items:
             for k, v in item.items():

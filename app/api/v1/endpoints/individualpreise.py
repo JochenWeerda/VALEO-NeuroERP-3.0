@@ -196,7 +196,7 @@ def preis_lookup(
               {partner_filter}
             ORDER BY staffel_menge DESC
             LIMIT 1
-        """), {  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """), {  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             "tid": tenant_id, "pt": preis_typ, "anr": artikel_nr,
             "datum": check_datum, "menge": menge,
             **({"pnr": partner_nr} if with_partner else {}),

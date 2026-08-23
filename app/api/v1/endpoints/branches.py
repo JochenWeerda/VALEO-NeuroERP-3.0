@@ -170,7 +170,7 @@ async def update_branch(
             UPDATE domain_shared.branches 
             SET {set_clause}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates
     )
     db.commit()

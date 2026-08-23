@@ -120,7 +120,7 @@ def list_assets(
             params["ia"] = is_active
         where = " AND ".join(conditions)
         rows = db.execute(
-            text(f"SELECT * FROM {_TABLE_ASSETS} WHERE {where} ORDER BY asset_number"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM {_TABLE_ASSETS} WHERE {where} ORDER BY asset_number"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return {"items": [dict(r) for r in rows], "total": len(rows)}

@@ -116,7 +116,7 @@ class BillingBatchService:
         where_sql = " AND ".join(where)
         total = self.db.execute(
             text(
-                f"SELECT COUNT(*) FROM domain_finance.billing_batches WHERE {where_sql}"  # nosec S608 - reviewed-safe: WHERE-Fragmente aus festen Literalen, Werte nur gebunden
+                f"SELECT COUNT(*) FROM domain_finance.billing_batches WHERE {where_sql}"  # nosec B608  # reviewed-safe: WHERE-Fragmente aus festen Literalen, Werte nur gebunden
             ),
             params,
         ).scalar_one()
@@ -128,7 +128,7 @@ class BillingBatchService:
                    processed_lines,failed_lines,total_amount,created_at,updated_at
               FROM domain_finance.billing_batches WHERE {where_sql}
              ORDER BY created_at DESC LIMIT :limit OFFSET :offset
-        """),  # nosec S608 - reviewed-safe: WHERE-Fragmente aus festen Literalen, Werte nur gebunden
+        """),  # nosec B608  # reviewed-safe: WHERE-Fragmente aus festen Literalen, Werte nur gebunden
                 params,
             )
             .mappings()
@@ -162,7 +162,7 @@ class BillingBatchService:
                    status,validation_error,retry_count,processed_at,created_at
               FROM domain_finance.billing_batch_lines WHERE {" AND ".join(where)}
              ORDER BY created_at DESC LIMIT :limit
-        """),  # nosec S608 - reviewed-safe: WHERE-Fragmente aus festen Literalen, Werte nur gebunden
+        """),  # nosec B608  # reviewed-safe: WHERE-Fragmente aus festen Literalen, Werte nur gebunden
                 params,
             )
             .mappings()

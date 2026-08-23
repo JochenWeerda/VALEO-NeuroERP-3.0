@@ -329,7 +329,7 @@ async def update_contract(
     data["tenant_id"] = tenant_id
     try:
         db.execute(
-            text(f"UPDATE domain_contracts.contracts SET {sets} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_contracts.contracts SET {sets} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             data,
         )
         ver_no = _next_version_number(db, contract_id, tenant_id)
@@ -407,7 +407,7 @@ async def list_obligations(
     where_sql = " AND ".join(where)
     try:
         rows = db.execute(
-            text(f"SELECT * FROM domain_contracts.contract_obligations WHERE {where_sql} ORDER BY due_date ASC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_contracts.contract_obligations WHERE {where_sql} ORDER BY due_date ASC"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
     except Exception:

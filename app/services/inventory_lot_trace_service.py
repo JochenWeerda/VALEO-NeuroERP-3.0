@@ -101,7 +101,7 @@ def list_lots_fefo(
     where = " AND ".join(conditions)
     rows = db.execute(
         text(
-            f"SELECT * FROM domain_inventory.inventory_lots "  # nosec S608 — reviewed-safe
+            f"SELECT * FROM domain_inventory.inventory_lots "  # nosec B608  # reviewed-safe
             f"WHERE {where} ORDER BY mhd ASC NULLS LAST, created_at ASC"
         ),
         params,

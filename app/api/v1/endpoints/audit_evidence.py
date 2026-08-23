@@ -69,7 +69,7 @@ async def list_evidence_entries(
             FROM domain_shared.audit_evidence
             WHERE {where}
             ORDER BY created_at DESC
-        """), params)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """), params)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         rows = result.fetchall()
         entries = []
         for row in rows:

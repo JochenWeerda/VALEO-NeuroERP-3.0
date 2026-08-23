@@ -273,7 +273,7 @@ def list_match_results(
         params["status"] = match_status
     where = " AND ".join(filters)
     rows = db.execute(
-        text(f"SELECT * FROM domain_procurement.procurement_match_results WHERE {where} ORDER BY created_at DESC LIMIT :limit"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
+        text(f"SELECT * FROM domain_procurement.procurement_match_results WHERE {where} ORDER BY created_at DESC LIMIT :limit"),  # nosec B608  # reviewed-safe: where fragments are code-controlled, values parameterized
         params,
     ).mappings().all()
     return {"items": [dict(r) for r in rows]}

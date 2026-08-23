@@ -165,7 +165,7 @@ async def list_price_lists(
             FROM domain_pricing.price_lists pl
             WHERE {' AND '.join(where)}
             ORDER BY name
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -250,7 +250,7 @@ async def update_price_list(
             params[field] = val
 
     db.execute(
-        text(f"UPDATE domain_pricing.price_lists SET {', '.join(set_parts)} WHERE id = :id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_pricing.price_lists SET {', '.join(set_parts)} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     )
 

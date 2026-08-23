@@ -183,7 +183,7 @@ def update_mengenzeitraum(
         db.execute(text(f"""
             UPDATE domain_shared.kontrakt_mengenzeitraeume
             SET {', '.join(updates)} WHERE id = :id
-        """), params)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """), params)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         db.commit()
     row = db.execute(text("""
         SELECT * FROM domain_shared.kontrakt_mengenzeitraeume WHERE id = :id

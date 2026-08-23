@@ -74,7 +74,7 @@ class AgriSiloMaterialFlowService:
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.silo_systems WHERE {where} ORDER BY system_code"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
+            text(f"SELECT * FROM domain_inventory.silo_systems WHERE {where} ORDER BY system_code"),  # nosec B608  # reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -125,7 +125,7 @@ class AgriSiloMaterialFlowService:
             params["ssid"] = silo_system_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.silo_cells WHERE {where} ORDER BY cell_code"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
+            text(f"SELECT * FROM domain_inventory.silo_cells WHERE {where} ORDER BY cell_code"),  # nosec B608  # reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -222,7 +222,7 @@ class AgriSiloMaterialFlowService:
                 SET {", ".join(set_parts)}
                 WHERE id = :cid AND warehouse_id = :wid AND tenant_id = :tid AND is_active = true
                 RETURNING *
-            """),  # nosec S608 - reviewed-safe: set_parts are built only from explicit allowlisted payload keys.  # noqa: S608
+            """),  # nosec B608  # reviewed-safe: set_parts are built only from explicit allowlisted payload keys.  # noqa: S608
             params,
         ).fetchone()
         if not row:
@@ -257,7 +257,7 @@ class AgriSiloMaterialFlowService:
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.material_flow_nodes WHERE {where} ORDER BY code"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
+            text(f"SELECT * FROM domain_inventory.material_flow_nodes WHERE {where} ORDER BY code"),  # nosec B608  # reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -338,7 +338,7 @@ class AgriSiloMaterialFlowService:
                 SET {", ".join(set_parts)}
                 WHERE id = :nid AND warehouse_id = :wid AND tenant_id = :tid AND is_active = true
                 RETURNING *
-            """),  # nosec S608 - reviewed-safe: set_parts are built only from explicit allowlisted payload keys.  # noqa: S608
+            """),  # nosec B608  # reviewed-safe: set_parts are built only from explicit allowlisted payload keys.  # noqa: S608
             params,
         ).fetchone()
         if not row:
@@ -416,7 +416,7 @@ class AgriSiloMaterialFlowService:
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.material_flow_edges WHERE {where} ORDER BY created_at"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
+            text(f"SELECT * FROM domain_inventory.material_flow_edges WHERE {where} ORDER BY created_at"),  # nosec B608  # reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -503,7 +503,7 @@ class AgriSiloMaterialFlowService:
                 SET {", ".join(set_parts)}
                 WHERE id = :eid AND warehouse_id = :wid AND tenant_id = :tid
                 RETURNING *
-            """),  # nosec S608 - reviewed-safe: set_parts are built only from explicit allowlisted payload keys.  # noqa: S608
+            """),  # nosec B608  # reviewed-safe: set_parts are built only from explicit allowlisted payload keys.  # noqa: S608
             params,
         ).fetchone()
         if not row:

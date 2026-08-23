@@ -2651,7 +2651,7 @@ async def create_auslagerung(
                 SELECT batch_number, warehouse_id FROM domain_inventory.article_batches
                 WHERE tenant_id = :tid AND article_id = :art AND quantity > 0
                 ORDER BY {order_col} LIMIT 1
-            """),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             {"tid": tenant_id, "art": payload.artikel},
         ).first()
         if row:

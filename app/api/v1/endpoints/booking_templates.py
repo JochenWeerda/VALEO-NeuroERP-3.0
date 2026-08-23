@@ -530,7 +530,7 @@ async def update_booking_template(
             WHERE id = :template_id AND tenant_id = :tenant_id
             RETURNING id, name, description, category, trigger_type, trigger_config, lines,
                       default_amount, currency, active, created_at, updated_at
-        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
         

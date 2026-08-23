@@ -216,7 +216,7 @@ async def list_templates(
         filters += " AND is_active = :active"
         params["active"] = is_active
     rows = db.execute(
-        text(f"SELECT * FROM domain_crm.crm_campaign_templates {filters} ORDER BY name"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_crm.crm_campaign_templates {filters} ORDER BY name"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [_row_to_template(r) for r in rows]
@@ -293,7 +293,7 @@ async def update_template(
     updates["tid"] = tenant_id
     updates["now"] = datetime.utcnow()
     db.execute(
-        text(f"UPDATE domain_crm.crm_campaign_templates SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaign_templates SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     db.commit()
@@ -420,7 +420,7 @@ async def list_campaigns(
         filters += " AND campaign_type = :ctype"
         params["ctype"] = campaign_type
     rows = db.execute(
-        text(f"SELECT * FROM domain_crm.crm_campaigns {filters} ORDER BY created_at DESC"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_crm.crm_campaigns {filters} ORDER BY created_at DESC"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [_row_to_campaign(r) for r in rows]
@@ -515,7 +515,7 @@ async def update_campaign(
     updates["tid"] = tenant_id
     updates["now"] = datetime.utcnow()
     db.execute(
-        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     db.commit()
@@ -571,7 +571,7 @@ def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> d
     ts_fields["id"] = campaign_id
     ts_fields["tid"] = tenant_id
     db.execute(
-        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         ts_fields,
     )
     db.commit()
@@ -701,7 +701,7 @@ async def update_recipient_status(
     if payload.bounce_reason:
         params["bounce"] = payload.bounce_reason
     result = db.execute(
-        text(f"UPDATE domain_crm.crm_campaign_recipients SET status = :status{extra}{bounce} WHERE campaign_id = :cid AND recipient_id = :rid AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaign_recipients SET status = :status{extra}{bounce} WHERE campaign_id = :cid AND recipient_id = :rid AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     )
     if result.rowcount == 0:

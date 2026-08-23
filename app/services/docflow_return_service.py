@@ -103,7 +103,7 @@ class DocflowReturnService:
             raise DocumentReturnError(f"Unzulaessiger Statuswechsel {current} -> {target}")
         timestamp = ", sent_at=NOW()" if kind == "shipping" and target == "sent" else ", returned_at=NOW()" if kind == "return" and target == "received" else ""
         self.db.execute(
-            text(f"UPDATE domain_docflow.document_return_cases SET {field}=:target, updated_at=NOW(){timestamp} WHERE id=:id AND tenant_id=:tid"),  # nosec B608 -- field and timestamp are closed constants
+            text(f"UPDATE domain_docflow.document_return_cases SET {field}=:target, updated_at=NOW(){timestamp} WHERE id=:id AND tenant_id=:tid"),  # nosec B608  # field and timestamp are closed constants
             {"target": target, "id": case_id, "tid": self.tenant_id},
         )
         self._audit(case_id, f"{kind}_status", current, target, actor, reason)

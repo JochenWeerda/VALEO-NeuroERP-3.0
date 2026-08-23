@@ -212,7 +212,7 @@ async def list_sales_orders(
         params["status"] = status_filter
 
     where_sql = " AND ".join(where)
-    total = db.execute(text(f"SELECT COUNT(*) FROM domain_crm.sales_orders WHERE {where_sql}"), params).scalar() or 0  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+    total = db.execute(text(f"SELECT COUNT(*) FROM domain_crm.sales_orders WHERE {where_sql}"), params).scalar() or 0  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     rows = db.execute(
         text(
             f"""

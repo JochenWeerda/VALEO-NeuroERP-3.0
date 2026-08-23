@@ -228,7 +228,7 @@ async def list_debtors(
         # Count total
         count_query = text(f"""
             SELECT COUNT(*) FROM domain_erp.debitors WHERE {where_sql}
-        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         total = db.execute(count_query, params).scalar()
         
         # Get paginated results
@@ -239,7 +239,7 @@ async def list_debtors(
             WHERE {where_sql}
             ORDER BY debitor_number
             LIMIT :limit OFFSET :skip
-        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params.update({"limit": limit, "skip": skip})
         
         rows = db.execute(list_query, params).fetchall()
@@ -392,7 +392,7 @@ async def update_debtor(
             WHERE id = :debtor_id
             RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                       is_active, created_at, updated_at
-        """)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         result = db.execute(update_query, params).fetchone()
         db.commit()

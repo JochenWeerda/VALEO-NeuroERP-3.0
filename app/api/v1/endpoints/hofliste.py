@@ -168,7 +168,7 @@ def status_aendern(
         UPDATE domain_shared.waage_hofliste
         SET status = :status {extra_sql}, updated_at = now()
         WHERE id = :id
-    """), updates)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+    """), updates)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     db.commit()
     row = db.execute(text("""
         SELECT * FROM domain_shared.waage_hofliste WHERE id = :id

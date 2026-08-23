@@ -109,7 +109,7 @@ def transition_dokument(
             UPDATE domain_nachweisraum.nachweisraum_dokumente
             SET status = :new_status{extra}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tid
-        """),  # nosec S608 — extra is assembled only from fixed code-controlled fragments; values are parameterized.
+        """),  # nosec B608  # extra is assembled only from fixed code-controlled fragments; values are parameterized.
         params,
     )
     db.execute(
@@ -207,7 +207,7 @@ def transition_gobd_export(
             UPDATE domain_nachweisraum.gobd_exporte
             SET status = :new_status{extra}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tid
-        """),  # nosec S608 — extra is assembled only from fixed code-controlled fragments; values are parameterized.
+        """),  # nosec B608  # extra is assembled only from fixed code-controlled fragments; values are parameterized.
         params,
     )
     db.commit()

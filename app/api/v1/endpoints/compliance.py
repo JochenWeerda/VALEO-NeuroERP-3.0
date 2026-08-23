@@ -916,7 +916,7 @@ async def list_artikel_sperren(
               FROM domain_shared.artikel_sperren
              WHERE {where}
              ORDER BY gesperrt_am DESC
-        """), params).fetchall()  # nosec S608 - reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
+        """), params).fetchall()  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         return {
             "items": [
                 {

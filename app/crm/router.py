@@ -780,7 +780,7 @@ async def list_consents(
             FROM domain_crm.crm_consents
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -1034,7 +1034,7 @@ async def update_segment(
         params["stype"] = update.segment_type
 
     db.execute(
-        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     )
     db.commit()

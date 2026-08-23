@@ -93,14 +93,14 @@ class InventoryAuxiliaryService:
                 where.append(f"{key}=:{key}")
                 params[key] = value
         where_sql = " AND ".join(where)
-        total = self.db.execute(text(f"SELECT COUNT(*) FROM domain_inventory.inventory_auxiliary_batches WHERE {where_sql}"), params).scalar_one()  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+        total = self.db.execute(text(f"SELECT COUNT(*) FROM domain_inventory.inventory_auxiliary_batches WHERE {where_sql}"), params).scalar_one()  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         params.update(limit=page_size, offset=(page - 1) * page_size)
         rows = self.db.execute(text(f"""
             SELECT id,inventory_count_id,batch_type,status,source_hash,line_count,difference_count,
                    preliminary_value,maker,checker,source_route,notes,created_at,updated_at
               FROM domain_inventory.inventory_auxiliary_batches WHERE {where_sql}
              ORDER BY created_at DESC LIMIT :limit OFFSET :offset
-        """), params).mappings().all()  # nosec S608 — Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
+        """), params).mappings().all()  # nosec B608  # Identifier aus Allowlist/festen Literalen; Werte nur gebunden (:params)
         return {"items": [dict(row) for row in rows], "total": int(total), "page": page, "page_size": page_size}
 
     def summary(self) -> dict[str, int]:

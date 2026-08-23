@@ -71,7 +71,7 @@ def list_frachtbriefe(
         params["tour_id"] = tour_id
     rows = db.execute(
         text(
-            f"SELECT * FROM domain_logistics.frachtbriefe"  # nosec S608 — column names code-controlled, values parameterized
+            f"SELECT * FROM domain_logistics.frachtbriefe"  # nosec B608  # column names code-controlled, values parameterized
             f" WHERE {where} ORDER BY datum DESC, created_at DESC LIMIT :limit"
         ),
         {**params, "limit": limit},
