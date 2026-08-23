@@ -1,7 +1,7 @@
 """Contracts for the vendor-neutral L3 habit bridge reference screens."""
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness
-from app.core.screen_definitions import get_screen_definition
+from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
 
 
 def _action(screen: dict, key: str) -> dict:
@@ -68,3 +68,32 @@ def test_readiness_rejects_duplicate_shortcuts_and_unknown_zones() -> None:
     assert schema_gate["passed"] is False
     assert "invalid zone" in schema_gate["detail"]
     assert "duplicated" in schema_gate["detail"]
+
+
+def test_all_native_screens_use_renderer_supported_layout_vocabulary() -> None:
+    allowed_floorplans = {"worklist", "objectPage", "transaction", "cockpit", "wizard"}
+    allowed_profiles = {"standard", "financial", "inventory", "audit"}
+    allowed_rails = {"none", "audit", "copilot", "workflow", "combined"}
+    allowed_danger_levels = {"safe", "moderate", "high", "critical"}
+
+    for screen_id in SCREEN_DEFINITION_BUILDERS:
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        if screen.get("adapter", {}).get("temporary"):
+            continue
+        layout = screen.get("layout", {})
+        assert layout.get("floorplan") in allowed_floorplans, screen_id
+        assert layout.get("contextRail") in allowed_rails, screen_id
+        has_tables = bool(screen.get("tables")) or any(
+            tab.get("tables") for tab in screen.get("tabs", [])
+        )
+        if has_tables:
+            assert layout.get("tableProfile") in allowed_profiles, screen_id
+        for action in screen.get("actions", []):
+            level = action.get("dangerLevel")
+            assert level in allowed_danger_levels, (screen_id, action.get("key"), level)
+            if level in {"high", "critical"}:
+                assert action.get("humanApprovalRequired") is True, (
+                    screen_id,
+                    action.get("key"),
+                )

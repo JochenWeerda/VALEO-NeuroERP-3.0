@@ -2,7 +2,7 @@ slice_id: L3-VISUAL-PARITY-AUDIT-031
 id: L3-VISUAL-PARITY-AUDIT-031
 title: L3 Visual-Parity Vollabnahme
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-23"
 started_at: "2026-08-23"
 goal: >-
@@ -22,9 +22,14 @@ file_ownership:
   - docs/design/l3-to-meridian-habit-parity.md
   - docs/design/l3-full-mask-functional-gap-inventory.md
   - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/adr/adr-058-document-return-on-docflow.md
+  - app/core/screen_definitions.py
   - packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts
   - packages/frontend-web/src/components/mask-builder/
   - packages/frontend-web/src/__tests__/
+  - tests/test_l3_habit_bridge_screen_definitions.py
+  - tests/test_uix046_048_command_endpoints_safety.py
 acceptance:
   - Capture-Bestand ist nachvollziehbar gezaehlt und datenschutzkonform nur abstrakt dokumentiert
   - Alle nativen ScreenDefinitions werden gegen die zentralen L3-Gewohnheitsvertraege geprueft
@@ -35,3 +40,17 @@ risks:
   - Bilder enthalten moegliche Echtdaten und duerfen nicht versioniert werden
   - Rollen-, Lizenz- und Echtdaten-UAT bleibt ein externes Rollout-Gate
   - Parallel veraenderte Dateien ausserhalb des Dateibesitzes bleiben unberuehrt
+completed_at: "2026-08-23"
+result: >-
+  1.022 lokale L3-PNGs in acht Capture-Verzeichnissen inventarisiert. Alle 69
+  produktiven nativen ScreenDefinitions sind generator-ready und verwenden
+  nach zentraler Normalisierung nur renderbare Meridian-Vertraege. Dichte wirkt
+  nun auch in Root-/Registertabellen; alte Floorplan-, Rail-, Tabellenprofil-
+  und Gefahrenstufen-Aliasse sowie fehlende Human-Freigaben sind geschlossen.
+verification:
+  - "Registry und Agent Safety: 503 passed"
+  - "Frontend Unit/Component: 18 passed"
+  - "Playwright Visual-Audit: 12 passed"
+  - "TypeScript: passed"
+  - "ESLint fokussiert: passed"
+  - "Ruff fokussiert: passed"

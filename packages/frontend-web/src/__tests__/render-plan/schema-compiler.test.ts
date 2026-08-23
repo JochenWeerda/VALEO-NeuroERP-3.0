@@ -152,6 +152,33 @@ describe('schema-compiler', () => {
     expect(plan.shell.contextRailSections).toEqual(['audit'])
     expect(plan.shell.tableProfile).toBe('financial')
     expect(plan.tablesByKey.positionen?.tableProfile).toBe('financial')
+    expect(plan.tablesByKey.positionen?.rowHeight).toBe(36)
+  })
+
+  it('applies the screen density to root and tab table row heights', () => {
+    const plan = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      layout: { density: 'expertDense', tableProfile: 'standard' },
+      tables: [{
+        key: 'rootRows',
+        label: 'Root rows',
+        rowHeight: 44,
+        columns: [{ key: 'name', label: 'Name' }],
+      }],
+      tabs: [{
+        key: 'details',
+        label: 'Details',
+        tables: [{
+          key: 'tabRows',
+          label: 'Tab rows',
+          rowHeight: 52,
+          columns: [{ key: 'name', label: 'Name' }],
+        }],
+      }],
+    })
+
+    expect(plan.tablesByKey.rootRows?.rowHeight).toBe(36)
+    expect(plan.tablesByKey.tabRows?.rowHeight).toBe(36)
   })
 
   it('compiles familiar desktop work patterns without a vendor-specific mode', () => {

@@ -4,8 +4,8 @@ type: reference
 audience: [fachlich, design, entwickler, qa, agent]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-08-19
-version: 1.0.0
+last_reviewed: 2026-08-23
+version: 1.1.0
 description: Redigierte, datenfreie Ableitung von L3-Arbeitsgewohnheiten in herstellerneutrale Meridian-Vertraege.
 ---
 
@@ -19,6 +19,12 @@ Geschaefts- und Personendaten und bleiben deshalb ausschliesslich im lokalen,
 nicht versionierten Bildordner. In Git werden weder Bilder noch Feldwerte,
 Kundenbezeichnungen oder andere Identifikatoren abgelegt. Dieses Dokument
 enthaelt nur abstrahierte Bedienmuster.
+
+Die Vollabnahme vom 23.08.2026 hat acht lokale Capture-Verzeichnisse mit
+insgesamt 1.022 PNG-Dateien wiedergefunden: 373 Vollmasken, 216
+Dropdown-/Leaf-Aufnahmen und 433 fruehere Referenz-, Navigations- und
+Kalibrierbilder. Diese Zahlen beschreiben nur den lokalen Evidenzbestand; die
+Bilder selbst und darin sichtbare Werte werden weiterhin nicht versioniert.
 
 ## Leitentscheidung
 
@@ -42,6 +48,23 @@ zentral ueber:
 | Verkaufs-Lieferschein | Drucken als direkter Tastaturweg | `keyboardShortcut=Ctrl+P` | `sales/delivery-note` | umgesetzt; ActionRuntime bleibt autoritativ |
 | Alle drei | Enter folgt dem sichtbaren Feldfluss | `interaction.enterMovesFocus=true` | alle drei nativen ScreenDefinitions | umgesetzt |
 
+## Vollabnahme 2026-08-23
+
+- Alle 69 produktiven nativen ScreenDefinitions sind `generatorReady` und
+  verwenden nach zentraler Normalisierung nur renderbare Floorplans,
+  Context-Rails und Tabellenprofile.
+- Historische Aliaswerte (`listReport`, `crm`, `document`, `preview`,
+  `summary`, `findings`) werden an einer Stelle in den kanonischen
+  Meridian-Vertrag uebersetzt.
+- `expertDense` wirkt nun auch tatsaechlich auf Root- und Registertabellen:
+  die zentrale RenderPlan-Kompilierung begrenzt deren Zeilenhoehe auf 36 px;
+  `compact` bleibt bei 44 px und `comfortable` bei mindestens 52 px.
+- Alte Gefahrenstufen werden zentral normalisiert; hohe und kritische Aktionen
+  erhalten zwingend Bestaetigung und Human-Freigabe.
+- Der Browser-Audit prueft an allen drei Zielaufloesungen nicht nur Container,
+  sondern sichtbare Datenzeilen, deren Dichte und horizontalen Viewport-
+  Ueberlauf. Ergebnis: 12/12 gruen.
+
 ## Bewusste Nicht-Uebernahmen
 
 - Keine L3-Farbcodierung als VALEO-Theme und keine Marken-/Icon-Kopie.
@@ -54,8 +77,10 @@ zentral ueber:
 
 - Unit: Compiler transportiert alle Interaktionsmetadaten verlustfrei.
 - Component: Header-/Footer-/Commit-Zonen, Shortcut-Dispatch und Enter-Fokus.
-- Backend: die drei ausgelieferten ScreenDefinitions bleiben `generatorReady=true`.
+- Backend: alle produktiven nativen ScreenDefinitions bleiben `generatorReady=true`
+  und nutzen das renderbare Meridian-Vertragsvokabular.
 - Visual: CRM, Artikelbestand und Verkaufs-Lieferschein bei 1366x768,
-  1440x900 und 1920x1080 ohne horizontalen Viewport-Ueberlauf.
+  1440x900 und 1920x1080 mit sichtbaren Datenzeilen, korrekter Dichte und ohne
+  horizontalen Viewport-Ueberlauf; Finance ergaenzt die Referenzmatrix.
 - Rollout: fachliche Pilotabnahme durch erfahrene L3-Anwender bleibt ein
   externes Gate; sie ist kein Grund, technische Paritaet vorzutäuschen.

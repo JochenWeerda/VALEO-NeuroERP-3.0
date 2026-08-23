@@ -10,6 +10,10 @@ version: 1.0.0
 
 # ADR-058 Dokumentenruecklauf auf dem kanonischen Docflow
 
+## Status
+
+Proposed, 2026-08-21.
+
 ## Kontext
 
 VALEO besitzt Docflow-Headers, versionierte Artefakte und Wiedervorlagen, aber

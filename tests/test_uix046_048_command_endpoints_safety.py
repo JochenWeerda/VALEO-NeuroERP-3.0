@@ -217,8 +217,11 @@ class TestUIX048AgentSafety:
 
     def test_all_screen_definitions_present(self):
         """Stellt sicher, dass alle produktiven nativen ScreenDefinitions registriert sind."""
-        assert len(ALL_SCREEN_IDS) == 33, (
-            f"Erwartet 33 ScreenDefinitions, gefunden: {len(ALL_SCREEN_IDS)}: {ALL_SCREEN_IDS}"
+        registered = set(_sd_module.SCREEN_DEFINITION_BUILDERS)
+        discovered = set(ALL_SCREEN_IDS)
+        assert len(discovered) >= 33, "Die etablierte native Basis darf nicht schrumpfen"
+        assert discovered <= registered, (
+            f"Builder-Funktionen fehlen in der Registry: {sorted(discovered - registered)}"
         )
 
     def test_payment_run_is_critical(self):

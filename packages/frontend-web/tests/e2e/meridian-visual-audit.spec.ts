@@ -386,6 +386,10 @@ for (const viewport of VIEWPORTS) {
         await expect(table).toBeVisible()
         await expect(table).toHaveAttribute('data-table-profile', c.tableProfile)
         await expect(table.getByText(`${c.tableProfile[0].toUpperCase()}${c.tableProfile.slice(1)} Table Profile`)).toBeVisible()
+        const firstDataRow = table.locator('[role="row"]').first()
+        await expect(firstDataRow).toBeVisible()
+        const rowBox = await firstDataRow.boundingBox()
+        expect(rowBox?.height).toBe(c.density === 'expertDense' ? 36 : 44)
 
         await page.getByRole('tab', { name: c.contextRail === 'audit' ? 'Audit' : 'Kontext' }).click()
         await expect(page.getByText(c.primaryActionLabel).first()).toBeVisible()

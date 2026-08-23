@@ -4,8 +4,8 @@ type: reference
 audience: [product, fachbereich, entwickler]
 owner: Codex
 status: verifiziert
-last_reviewed: 2026-08-22
-version: 1.3.0
+last_reviewed: 2026-08-23
+version: 1.4.0
 description: Datenschutzkonformer Funktionsabgleich der erreichbaren L3-Masken gegen VALEO NeuroERP 3.0.
 ---
 
@@ -30,6 +30,14 @@ und Auswertungen — siehe
 Standard-/Unimet-Kundenformate, Zielmapping und Produktivpilot bleiben externe
 Aktivierungs-Gates, nicht Funktionsluecken des Repositorys.
 
+Die anschliessende Vollabnahme `L3-VISUAL-PARITY-AUDIT-031` hat den gesamten
+lokalen Evidenzbestand (1.022 PNGs in acht Capture-Verzeichnissen) erneut
+inventarisiert und alle 69 produktiven nativen ScreenDefinitions gegen das
+tatsaechlich renderbare Meridian-Vokabular geprueft. Dabei gefundene zentrale
+Vertragsdrift bei Floorplans, Context-Rails, Tabellenprofilen, Dichte und
+Aktionsrisiken ist geschlossen. Es verbleibt kein weiterer aus den erreichbaren
+Screenshots belegbarer repo-seitiger Funktions- oder zentraler GUI-Gap.
+
 Die Kernkette von Kunde/Artikel ueber Angebot, Auftrag, Einkauf, Lieferschein,
 Rechnung, offene Posten, Lagerbewegung, Kontrakt, Ernte und Waage ist in VALEO
 bereits funktional vertreten. Diese vorhandenen Funktionen werden nicht als
@@ -39,10 +47,12 @@ Gap umetikettiert, nur weil Navigation oder Feldanordnung in L3 anders ist.
 
 - Erfassung am 19.08.2026 in der bereits angemeldeten Remote-Desktop-Sitzung,
   ausschliesslich lesend; keine Speicherung, Buchung, Freigabe oder Loeschung.
-- 10 Haupt-Ribbonbilder, 37 Dropdown-Zustaende und 8 vorhandene
-  Referenzaufnahmen wurden ausgewertet. Zusaetzlich wurden 53 Einstiegspfade
-  geprueft. Reine Menuezustaende, lizenzbedingte Fehler und visuelle Duplikate
-  zaehlen nicht als eigenstaendige Fachmaske.
+- Die Ausgangsinventur wertete 10 Haupt-Ribbonbilder, 37 Dropdown-Zustaende,
+  8 Referenzaufnahmen und 53 Einstiegspfade aus. Die Vollabnahme vom 23.08.
+  zaehlte darueber hinaus 1.022 lokale PNGs: 373 Vollmasken, 216
+  Dropdown-/Leaf-Aufnahmen und 433 fruehere Referenz-/Navigationsbilder. Reine
+  Menuezustaende, Fehlklicks, lizenzbedingte Fehler und visuelle Duplikate
+  zaehlen weiterhin nicht als eigenstaendige Fachmaske.
 - Lokaler Belegbestand:
   `C:\Users\Jochen\Pictures\L3-Capture-2026-08-19`. Er ist absichtlich nicht
   versioniert, weil einzelne Bilder Personen-, Kunden- oder Belegdaten zeigen.

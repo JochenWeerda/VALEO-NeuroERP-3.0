@@ -28,7 +28,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   onResetOverlay?: () => void | Promise<void>
 }): JSX.Element {
   const content = plan.tabContent[tabKey]
-  const classes = layoutClasses(plan.shell.layoutMode)
+  const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
 
   return (
     <div data-tab-key={tabKey}>

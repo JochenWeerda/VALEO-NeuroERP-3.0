@@ -3,6 +3,7 @@ import {
   type ScreenActionDefinition,
   type ScreenDefinition,
   type ScreenFieldDefinition,
+  type ScreenDensity,
   type ScreenTabDefinition,
   type ScreenTableDefinition,
   type ScreenTableProfile,
@@ -47,9 +48,16 @@ function compileField(
 function compileTable(
   table: ScreenTableDefinition,
   tableProfile: ScreenTableProfile,
+  density: ScreenDensity,
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
+  const declaredRowHeight = table.rowHeight ?? (density === 'expertDense' ? 36 : density === 'compact' ? 44 : 52)
+  const rowHeight = density === 'expertDense'
+    ? Math.min(declaredRowHeight, 36)
+    : density === 'compact'
+      ? Math.min(declaredRowHeight, 44)
+      : Math.max(declaredRowHeight, 52)
   return {
     key: table.key,
     label: table.label,
@@ -67,7 +75,7 @@ function compileTable(
     dataSourceKey: table.dataSourceKey,
     pageSize,
     virtualized: table.virtualized ?? true,
-    rowHeight: table.rowHeight ?? 52,
+    rowHeight,
     serverPagination: table.serverPagination ?? true,
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
@@ -210,7 +218,7 @@ export function compileRenderPlan(
     fieldsByKey[field.key] = field
   }
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile))
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -233,7 +241,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table

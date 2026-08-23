@@ -4,12 +4,20 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-08-22
-version: 2.3.0
+last_reviewed: 2026-08-23
+version: 2.4.0
 description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Nachtrag 2026-08-23 (`L3-VISUAL-PARITY-AUDIT-031`):** Alle 69
+> produktiven nativen ScreenDefinitions sind generator-ready und werden auf
+> das renderbare Meridian-Vokabular normalisiert. `expertDense` wirkt zentral
+> auf Root- und Registertabellen (36 px); alte Floorplan-, Rail-, Profil- und
+> Gefahrenstufen-Aliasse koennen nicht mehr am Frontend-Vertrag vorbeilaufen.
+> Der gehaertete Visual-Audit prueft sichtbare Datenzeilen und effektive Dichte:
+> 12/12 bei 1366x768, 1440x900 und 1920x1080.
 
 > **Nachtrag 2026-08-22 (`L3-RUNTIME-HARDENING-021`):** Jede Tabelle mit
 > aufgeloester DataSource wird geladen, unabhaengig von server- oder
@@ -30,7 +38,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 > **Nachtrag 2026-07-05:** Meridian ist als Builder-Capability im Single Mask Builder verankert. `ScreenDefinition.layout` liefert `floorplan`, `density`, `contextRail` und `tableProfile`; `RenderPlan.shell` uebernimmt diese Felder zentral; Frontend- und Backend-Readiness blockieren fehlende Meridian-Metadaten.
 
-> **Visual-Audit 2026-07-05:** `tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-Screenshot-Helfer (`waitUntilRenderable`, Content-QC, Capture-Locator) fuer Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080. Lokal gruen: `pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium` (9 passed). Der Playwright-Global-Teardown meldet bestehende Repo-weite Visual-Tour-Console-Issues, nicht den fokussierten Meridian-Audit.
+> **Visual-Audit 2026-08-23:** `tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-Screenshot-Helfer (`waitUntilRenderable`, Content-QC, Capture-Locator) fuer Finance, CRM 360, Lager und Sales bei 1366x768, 1440x900 und 1920x1080. Der Audit prueft Container, sichtbare Datenzeilen, effektive Zeilenhoehe und Viewport-Ueberlauf. Lokal gruen: 12/12.
 
 ## Lieferstand
 

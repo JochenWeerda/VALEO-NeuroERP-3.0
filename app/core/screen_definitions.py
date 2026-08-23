@@ -4333,6 +4333,24 @@ def _has_tables(definition: dict[str, Any]) -> bool:
     return any(tab.get("tables") for tab in definition.get("tabs") or [])
 
 
+_MERIDIAN_TABLE_PROFILE_ALIASES = {
+    "crm": "standard",
+    "document": "standard",
+}
+
+_MERIDIAN_FLOORPLAN_ALIASES = {
+    "listReport": "worklist",
+}
+
+_MERIDIAN_CONTEXT_RAIL_ALIASES = {
+    # Specialized content stays in the mask body; the rail declares only the
+    # centrally renderable collaboration/audit contract.
+    "preview": "audit",
+    "summary": "combined",
+    "findings": "audit",
+}
+
+
 def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
     """Adds the Meridian layout contract without changing existing builders."""
 
@@ -4341,12 +4359,40 @@ def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
     layout.setdefault("preferredMode", "desktopDense")
     layout.setdefault("mobileMode", "mobileStack")
     layout.setdefault("touchTargetPx", 44)
-    layout["floorplan"] = floorplan
+    layout["floorplan"] = _MERIDIAN_FLOORPLAN_ALIASES.get(floorplan, floorplan)
     layout.setdefault("density", "expertDense" if _infer_meridian_table_profile(definition) in {"financial", "inventory"} else "compact")
     layout.setdefault("contextRail", "none" if floorplan == "worklist" else ("audit" if definition.get("domain") == "finance" else "combined"))
     if _has_tables(definition):
         layout.setdefault("tableProfile", _infer_meridian_table_profile(definition))
+    layout["contextRail"] = _MERIDIAN_CONTEXT_RAIL_ALIASES.get(
+        layout["contextRail"], layout["contextRail"]
+    )
+    if layout.get("tableProfile"):
+        layout["tableProfile"] = _MERIDIAN_TABLE_PROFILE_ALIASES.get(
+            layout["tableProfile"], layout["tableProfile"]
+        )
     definition["layout"] = layout
+    return definition
+
+
+_MERIDIAN_DANGER_LEVEL_ALIASES = {
+    "low": "safe",
+    "confirm": "moderate",
+}
+
+
+def _with_meridian_action_contract(definition: dict[str, Any]) -> dict[str, Any]:
+    """Normalizes legacy action vocabulary to the shared runtime safety contract."""
+
+    for action in definition.get("actions") or []:
+        level = _MERIDIAN_DANGER_LEVEL_ALIASES.get(
+            action.get("dangerLevel"), action.get("dangerLevel")
+        )
+        if level:
+            action["dangerLevel"] = level
+        if level in {"high", "critical"}:
+            action.setdefault("requiresConfirmation", True)
+            action.setdefault("humanApprovalRequired", True)
     return definition
 
 
@@ -4560,7 +4606,7 @@ def get_screen_definition(mask_id: str, *, today: str | None = None) -> dict[str
     builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is None:
         return None
-    definition = _with_meridian_layout(builder())
+    definition = _with_meridian_action_contract(_with_meridian_layout(builder()))
     contract = definition.setdefault("agentContract", {})
     contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))

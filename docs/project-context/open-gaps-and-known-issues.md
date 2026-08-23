@@ -233,6 +233,17 @@ Entwicklungsdatenbank wurde bis `l3_runtime_hardening_20260822` migriert. Es
 entsteht kein neues offenes Repo-Gap; externe DMS-/Rollen-/Echtdaten-UAT-Gates
 bleiben unveraendert.
 
+Nachzug 2026-08-23 (`L3-VISUAL-PARITY-AUDIT-031`): Acht lokale
+Capture-Verzeichnisse mit 1.022 PNGs wurden wiedergefunden und
+datenschutzkonform nur abstrakt inventarisiert. Alle 69 produktiven nativen
+ScreenDefinitions sind generator-ready und verwenden nach zentraler
+Normalisierung renderbare Floorplans, Context-Rails, Tabellenprofile und
+Aktionsrisiken. `expertDense` wirkt mit 36-px-Zeilen auch in Registertabellen;
+der Visual-Audit prueft sichtbare Datenzeilen und ist an drei Zielaufloesungen
+12/12 gruen. Es verbleibt kein aus den erreichbaren L3-Screenshots belegbarer
+repo-seitiger Funktions- oder zentraler GUI-Gap; Rollen-, Echtdaten-, Hardware-
+und Provider-UAT bleiben externe Gates.
+
 Nachzug 2026-08-21 (`L3-BELEGCHECK-WORKLIST-005`): `L3-GAP-BELEGCHECK-005` ist
 repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit
 vier Ausnahmearten, Zuweisung/Status-Audit, Filter/Pagination und Deep-Link.
