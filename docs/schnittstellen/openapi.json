@@ -1672,6 +1672,135 @@
         "title": "ActionSurface",
         "type": "string"
       },
+      "ActiveRationOut": {
+        "description": "``GET /active-rations`` — was aktuell im Stall gefuettert wird.",
+        "properties": {
+          "activated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated At"
+          },
+          "animal_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Animal Count"
+          },
+          "feeding_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding Start"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "ration_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ration Id"
+          },
+          "snapshot": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Solver-Snapshot (JSONB)",
+            "title": "Snapshot"
+          },
+          "snapshot_checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Checksum"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          },
+          "version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version No"
+          }
+        },
+        "title": "ActiveRationOut",
+        "type": "object"
+      },
       "ActivitiesOut": {
         "additionalProperties": true,
         "description": "Response schema for activities endpoints.",
@@ -1999,6 +2128,350 @@
         "title": "ActualComponentIn",
         "type": "object"
       },
+      "ActualComponentOut": {
+        "description": "Zeile aus ``domain_agrar.feeding_actual_components``.",
+        "properties": {
+          "actual_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Kg"
+          },
+          "actual_record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Record Id"
+          },
+          "delta_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Kg"
+          },
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Pct"
+          },
+          "feed_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Id"
+          },
+          "feed_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "instruction_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Id"
+          },
+          "target_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Kg"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "value_consequences": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kosten-/Naehrstofffolgen der Abweichung (JSONB)",
+            "title": "Value Consequences"
+          }
+        },
+        "title": "ActualComponentOut",
+        "type": "object"
+      },
+      "ActualComponentRowOut": {
+        "description": "``GET /components`` — flache Komponentensicht ueber alle Ist-Datensaetze.\n\nBewusst eigene, aufbereitete Form: Kosten- und Naehrstofffolgen sind hier\nzu Textzusammenfassungen verdichtet.",
+        "properties": {
+          "actual_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Kg"
+          },
+          "actual_record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Record Id"
+          },
+          "cause_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cause Class"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "cost_delta_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Delta Eur"
+          },
+          "delta_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Kg"
+          },
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Pct"
+          },
+          "feed_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Id"
+          },
+          "feed_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Name"
+          },
+          "feeding_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding At"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "missing_value_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Missing Value Summary"
+          },
+          "nutrient_delta_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nutrient Delta Summary"
+          },
+          "plan_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version Id"
+          },
+          "plan_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version No"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "target_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Kg"
+          }
+        },
+        "title": "ActualComponentRowOut",
+        "type": "object"
+      },
       "ActualMeasureIn": {
         "properties": {
           "actual_component_id": {
@@ -2046,6 +2519,261 @@
           "idempotency_key"
         ],
         "title": "ActualMeasureIn",
+        "type": "object"
+      },
+      "ActualMeasureOut": {
+        "description": "Massnahme zu einer Abweichung.\n\n``feeding_actual_measures.*``; ``list_measures`` ergaenzt die Felder der\njeweils juengsten Zeile aus ``feeding_measure_versions``.",
+        "properties": {
+          "actual_component_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Component Id"
+          },
+          "actual_record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Record Id"
+          },
+          "changed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed At"
+          },
+          "changed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "effectiveness": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "effective | partial | ineffective",
+            "title": "Effectiveness"
+          },
+          "effectiveness_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effectiveness Result"
+          },
+          "escalation_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "none | attention | escalated",
+            "title": "Escalation Status"
+          },
+          "finding": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausloesender Befund (JSONB)",
+            "title": "Finding"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "owner_subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Subject"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reminder_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reminder Date"
+          },
+          "request_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Hash"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "open | in_progress | review_due | completed | cancelled",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "title": "ActualMeasureOut",
         "type": "object"
       },
       "ActualRecordIn": {
@@ -2144,6 +2872,210 @@
           "components"
         ],
         "title": "ActualRecordIn",
+        "type": "object"
+      },
+      "ActualRecordOut": {
+        "description": "Ist-Fuetterung mit Gruppenkontext und Komponenten.\n\n``feeding_actual_records.*`` plus ``group_name`` und ``plan_version_no``\naus dem Join.",
+        "properties": {
+          "cause_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "normal | stock_substitution | dosing_error | feed_quality | animal_intake | technical | other",
+            "title": "Cause Class"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ActualComponentOut"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "context": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Freier Kontext (JSONB)",
+            "title": "Context"
+          },
+          "feeding_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding At"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "plan_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version Id"
+          },
+          "plan_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version No"
+          },
+          "recorded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded At"
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded By"
+          },
+          "request_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Hash"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "manual | mixing_wagon | import",
+            "title": "Source"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Id"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "ActualRecordOut",
         "type": "object"
       },
       "Address": {
@@ -5317,6 +6249,87 @@
         "title": "AgentContextCreateRequest",
         "type": "object"
       },
+      "AgentContextOut": {
+        "description": "``POST /context`` — Lesezugriff ohne Schreibwirkung.",
+        "properties": {
+          "action_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Type"
+          },
+          "context": {
+            "additionalProperties": true,
+            "description": "Aktionsspezifischer Lesekontext",
+            "title": "Context",
+            "type": "object"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "human_approval_required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn die Aktion eine menschliche Freigabe braucht",
+            "title": "Human Approval Required"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "risk_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Risikostufe der Aktion",
+            "title": "Risk Level"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "AgentContextOut",
+        "type": "object"
+      },
       "AgentDispatchRequest": {
         "properties": {
           "command_name": {
@@ -5343,6 +6356,63 @@
           "resource_tenant_id"
         ],
         "title": "AgentDispatchRequest",
+        "type": "object"
+      },
+      "AgentExecutionOut": {
+        "description": "``POST /proposals/{id}/execute`` — nur fuer genehmigte LOW-Risiko-Aktionen.",
+        "properties": {
+          "action_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Type"
+          },
+          "executed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executed At"
+          },
+          "executed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executed By"
+          },
+          "proposal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Id"
+          },
+          "result": {
+            "additionalProperties": true,
+            "description": "Aktionsspezifisches Ausfuehrungsergebnis",
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "title": "AgentExecutionOut",
         "type": "object"
       },
       "AgentHeartbeatUpdateRequest": {
@@ -5903,6 +6973,213 @@
           }
         },
         "title": "AgentProfileUpdateRequest",
+        "type": "object"
+      },
+      "AgentProposalOut": {
+        "description": "Agent-Proposal — Ergebnis von Anlage, Detail, Freigabe und Ablehnung.\n\nEntspricht ``AgentProposal.to_dict``.",
+        "properties": {
+          "action_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Type"
+          },
+          "approval_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Status"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "audit_event_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anzahl der Audit-Ereignisse am Proposal",
+            "title": "Audit Event Count"
+          },
+          "context_summary": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Summary"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "human_approval_required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Human Approval Required"
+          },
+          "proposal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Id"
+          },
+          "proposed_action": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposed Action"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason"
+          },
+          "risk_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Level"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "AgentProposalOut",
+        "type": "object"
+      },
+      "AgentProposalSummaryOut": {
+        "description": "``GET /proposals/summary``",
+        "properties": {
+          "by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Anzahl je Freigabestatus",
+            "title": "By Status",
+            "type": "object"
+          },
+          "pending_high_risk": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Offene Vorschlaege mit hoher Risikostufe",
+            "title": "Pending High Risk"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "total_proposals": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Proposals"
+          }
+        },
+        "title": "AgentProposalSummaryOut",
         "type": "object"
       },
       "AgentSkillPackUpdateRequest": {
@@ -22742,6 +24019,68 @@
         "title": "CentralContractsOut",
         "type": "object"
       },
+      "ChainCancelOut": {
+        "description": "``POST /supply-chain/traceability/cancel`` — durchgaengiger Ketten-Storno.",
+        "properties": {
+          "event": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChainEventOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "stornierte_lots": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Stornierte Lots",
+            "type": "array"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "ticket_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Nr"
+          }
+        },
+        "title": "ChainCancelOut",
+        "type": "object"
+      },
       "ChainCompletenessReport": {
         "description": "Bericht ueber Vollstaendigkeit aller E2E-Ketten eines Tenants.",
         "properties": {
@@ -22788,6 +24127,40 @@
           "gaps"
         ],
         "title": "ChainCompletenessReport",
+        "type": "object"
+      },
+      "ChainEventAckOut": {
+        "description": "``POST /supply-chain/events``",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Begruendung, wenn ok=false",
+            "title": "Detail"
+          },
+          "event": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChainEventOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ok": {
+            "default": false,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "title": "ChainEventAckOut",
         "type": "object"
       },
       "ChainEventIn": {
@@ -22877,6 +24250,442 @@
           "ticketId"
         ],
         "title": "ChainEventIn",
+        "type": "object"
+      },
+      "ChainEventOut": {
+        "description": "Zeile aus ``domain_inventory.supply_chain_events``.\n\nFeldliste = Konstante ``_COLS`` im Event-Service (ohne ``tenant_id``).",
+        "properties": {
+          "abweichung_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichung Grund"
+          },
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "event_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "erfasst | freigegeben | eingelagert | abgerechnet | abweichung | korrektur | storniert | notiz",
+            "title": "Event Type"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "menge_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kg"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "payload": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Freies JSONB-Nutzlastfeld",
+            "title": "Payload"
+          },
+          "ref_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Id"
+          },
+          "ref_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Label"
+          },
+          "ref_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "weighing_ticket | harvest_acceptance | silo_lot | settlement",
+            "title": "Ref Type"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "backfill | auto | manual",
+            "title": "Source"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "status_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status From"
+          },
+          "status_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status To"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          }
+        },
+        "title": "ChainEventOut",
+        "type": "object"
+      },
+      "ChainLueckeOut": {
+        "description": "Fehlendes oder nicht freigegebenes Folgeobjekt in der Kette.",
+        "properties": {
+          "schwere": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "info | warnung",
+            "title": "Schwere"
+          },
+          "stufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stufe"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "ChainLueckeOut",
+        "type": "object"
+      },
+      "ChainNodeOut": {
+        "description": "Eine Stufe der Lieferkette.",
+        "properties": {
+          "facts": {
+            "additionalProperties": true,
+            "description": "Stufenspezifische Detailwerte — je Stufe unterschiedlich belegt",
+            "title": "Facts",
+            "type": "object"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anzeigename der Stufe",
+            "title": "Label"
+          },
+          "menge_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kg"
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Belegnummer der Stufe",
+            "title": "Ref"
+          },
+          "ref_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Id"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "wiegung | annahme | lager | abrechnung",
+            "title": "Stage"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "zeitpunkt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Zeitstempel der Stufe",
+            "title": "Zeitpunkt"
+          }
+        },
+        "title": "ChainNodeOut",
+        "type": "object"
+      },
+      "ChainSummaryOut": {
+        "description": "Kopfkennzahlen der Kettensicht.",
+        "properties": {
+          "hat_mengen_abweichung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Mengen Abweichung"
+          },
+          "offene_luecken": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offene Luecken"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "stufen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stufen"
+          },
+          "vollstaendig": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vollstaendig"
+          }
+        },
+        "title": "ChainSummaryOut",
+        "type": "object"
+      },
+      "ChainSyncOut": {
+        "description": "``POST /supply-chain/traceability/sync`` — idempotenter Backfill.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Begruendung, wenn nichts lief",
+            "title": "Detail"
+          },
+          "synced": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Neu geschriebene Ereignisse",
+            "title": "Synced"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ereignisse nach dem Lauf",
+            "title": "Total"
+          }
+        },
+        "title": "ChainSyncOut",
         "type": "object"
       },
       "ChangePasswordRequest": {
@@ -36959,6 +38768,201 @@
         "title": "DepreciationRunRequest",
         "type": "object"
       },
+      "DeviationFindingOut": {
+        "description": "``GET /findings`` — bewertete Abweichung je Komponente.\n\nOhne passende Schwellenkonfiguration liefert der Service\n``severity=\"unconfigured\"`` und nur den Identitaetsteil; sonst kommen die\nKennzahlen aus ``evaluate_deviation`` dazu.",
+        "properties": {
+          "actual_component_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Component Id"
+          },
+          "actual_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Kg"
+          },
+          "actual_record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Record Id"
+          },
+          "delta_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Kg"
+          },
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Pct"
+          },
+          "feed_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Class"
+          },
+          "feed_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Id"
+          },
+          "feed_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Name"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "plan_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version Id"
+          },
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "remedy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remedy"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "unconfigured | warning | critical",
+            "title": "Severity"
+          },
+          "target_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Kg"
+          },
+          "threshold_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Pct"
+          }
+        },
+        "title": "DeviationFindingOut",
+        "type": "object"
+      },
       "DeviationPolicyIn": {
         "properties": {
           "critical_pct": {
@@ -37020,6 +39024,125 @@
           "reason"
         ],
         "title": "DeviationPolicyIn",
+        "type": "object"
+      },
+      "DeviationPolicyOut": {
+        "description": "Zeile aus ``domain_agrar.feeding_deviation_policies`` (append-only).",
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "critical_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Pct"
+          },
+          "feed_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feed Class"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "warning_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning Pct"
+          }
+        },
+        "title": "DeviationPolicyOut",
         "type": "object"
       },
       "DeviceCapabilityOut": {
@@ -65753,6 +67876,36 @@
         "title": "KalkulationsSchritt",
         "type": "object"
       },
+      "KanonStatusOut": {
+        "description": "Kanonischer Uebergabestatus der Kette, abgeleitet aus dem Ereignis-Log.",
+        "properties": {
+          "rang": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rang zur Statusableitung, 0 = storniert/offen",
+            "title": "Rang"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "KanonStatusOut",
+        "type": "object"
+      },
       "KasseUebernahmeRequest": {
         "description": "Datentypen die aus der ServiceERP-Kasse übernommen werden sollen.",
         "properties": {
@@ -75490,6 +77643,63 @@
         "title": "LohnImportTrigger",
         "type": "object"
       },
+      "LotActionOut": {
+        "description": "Antwort der Lot-Folgeaktionen Sperre / QS-Freigabe / Schwund.\n\n``bestand_kg`` liefert nur die Schwundbuchung.",
+        "properties": {
+          "bestand_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Restbestand nach Schwundbuchung",
+            "title": "Bestand Kg"
+          },
+          "event": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChainEventOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lot": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Virtuelle Lot-Nummer",
+            "title": "Lot"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "LotActionOut",
+        "type": "object"
+      },
       "LotCellLinkIn": {
         "properties": {
           "booked_by": {
@@ -79203,6 +81413,102 @@
           "grossAmount"
         ],
         "title": "MemoItem",
+        "type": "object"
+      },
+      "MengenCheckOut": {
+        "description": "Mengenvergleich zweier benachbarter Stufen (Schwund-/Differenzpruefung).",
+        "properties": {
+          "abweichung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn die Differenz die Toleranz ueberschreitet",
+            "title": "Abweichung"
+          },
+          "differenz_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Differenz Kg"
+          },
+          "differenz_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Differenz Pct"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "menge_nach_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Nach Kg"
+          },
+          "menge_von_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Von Kg"
+          },
+          "nach": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nach"
+          },
+          "von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Von"
+          }
+        },
+        "title": "MengenCheckOut",
         "type": "object"
       },
       "MengenbedarfResult": {
@@ -103176,6 +105482,134 @@
         "title": "RatenzahlungPlanIn",
         "type": "object"
       },
+      "RationAuditEventOut": {
+        "description": "Zeile aus ``domain_agrar.ration_audit_events``.",
+        "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "delta": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Aenderungsdelta (JSONB)",
+            "title": "Delta"
+          },
+          "event_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Type"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "ration_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ration Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          }
+        },
+        "title": "RationAuditEventOut",
+        "type": "object"
+      },
       "RationContext": {
         "properties": {
           "benoetigt_rohwaren": {
@@ -103269,6 +105703,240 @@
           "snapshot"
         ],
         "title": "RationCreateIn",
+        "type": "object"
+      },
+      "RationDetailOut": {
+        "description": "``GET /rations/{id}`` sowie die Antwort von Anlage und neuer Version.\n\nKopf aus ``domain_agrar.rations`` plus Gruppenkontext, Versionsliste,\nAudit und die abgeleiteten ``latest_*``-Felder.",
+        "properties": {
+          "animal_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Animal Count"
+          },
+          "audit": {
+            "items": {
+              "$ref": "#/components/schemas/RationAuditEventOut"
+            },
+            "title": "Audit",
+            "type": "array"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "feeding_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding System"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "latest_feeding_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Feeding Start"
+          },
+          "latest_readiness_blockers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Readiness Blockers"
+          },
+          "latest_readiness_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Readiness aus dem Snapshot, sonst not_checked",
+            "title": "Latest Readiness Status"
+          },
+          "latest_readiness_warnings": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Readiness Warnings"
+          },
+          "latest_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Status"
+          },
+          "latest_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Version Id"
+          },
+          "latest_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Version No"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/RationVersionOut"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "title": "RationDetailOut",
         "type": "object"
       },
       "RationDraftEvaluateIn": {
@@ -103496,6 +106164,237 @@
         "title": "RationTransitionIn",
         "type": "object"
       },
+      "RationTransitionOut": {
+        "description": "``POST /versions/{id}/transitions``.\n\nDie aktualisierte Lebenszyklus-Zeile plus Versionskontext und die durch\nden Wechsel abgeloesten Versionen.",
+        "properties": {
+          "activated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated At"
+          },
+          "activated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated By"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "archived_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived By"
+          },
+          "feeding_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding Start"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "ration_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ration Id"
+          },
+          "retired_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retired At"
+          },
+          "retired_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retired By"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          },
+          "snapshot_checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Checksum"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "superseded_version_ids": {
+            "description": "Versionen, die durch diesen Wechsel abgeloest wurden",
+            "items": {
+              "type": "string"
+            },
+            "title": "Superseded Version Ids",
+            "type": "array"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          },
+          "version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version No"
+          }
+        },
+        "title": "RationTransitionOut",
+        "type": "object"
+      },
       "RationVersionCreateIn": {
         "properties": {
           "based_on_version_id": {
@@ -103552,6 +106451,461 @@
           "expected_latest_version_no"
         ],
         "title": "RationVersionCreateIn",
+        "type": "object"
+      },
+      "RationVersionOut": {
+        "description": "Unveraenderliche Rationsversion samt Lebenszyklus-Stempeln.\n\n``ration_versions.*`` plus die Statusfelder aus\n``ration_version_lifecycle``.",
+        "properties": {
+          "activated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated At"
+          },
+          "activated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated By"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "archived_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived By"
+          },
+          "based_on_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Based On Version Id"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "feeding_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding Start"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "ration_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ration Id"
+          },
+          "retired_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retired At"
+          },
+          "retired_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retired By"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          },
+          "snapshot": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Solver-Snapshot (JSONB)",
+            "title": "Snapshot"
+          },
+          "snapshot_checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Checksum"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Herkunft, z. B. solver",
+            "title": "Source"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "draft | in_review | approved | scheduled | active | retired | archived",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version No"
+          }
+        },
+        "title": "RationVersionOut",
+        "type": "object"
+      },
+      "RationWorklistItemOut": {
+        "description": "``GET /rations`` — Ration mit ihrer jeweils juengsten Version.",
+        "properties": {
+          "animal_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Animal Count"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "feeding_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding Start"
+          },
+          "feeding_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feeding System"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "snapshot_checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Checksum"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "version_created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Created At"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          },
+          "version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version No"
+          }
+        },
+        "title": "RationWorklistItemOut",
         "type": "object"
       },
       "RationsOptimizationOut": {
@@ -121545,6 +124899,137 @@
         "title": "ThreeWayValueOut",
         "type": "object"
       },
+      "TicketOverviewItemOut": {
+        "description": "Wiegeschein in der Ketten-Uebersicht (Picker).",
+        "properties": {
+          "allokation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allokation"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "hat_abrechnung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Abrechnung"
+          },
+          "hat_annahme": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Annahme"
+          },
+          "hat_lager": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Lager"
+          },
+          "menge_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kg"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "ticket_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Nr"
+          },
+          "vollstaendig": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vollstaendig"
+          }
+        },
+        "title": "TicketOverviewItemOut",
+        "type": "object"
+      },
+      "TicketOverviewOut": {
+        "description": "``GET /supply-chain/traceability/tickets``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TicketOverviewItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "TicketOverviewOut",
+        "type": "object"
+      },
       "TimeAccountAdjustIn": {
         "properties": {
           "adjustment_date": {
@@ -122757,6 +126242,100 @@
           }
         },
         "title": "TourTotals",
+        "type": "object"
+      },
+      "TraceabilityOut": {
+        "description": "``GET /supply-chain/traceability``.\n\nIm Nichttrefferfall sind nur ``found=false`` und ``detail`` gesetzt.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Begruendung im Nichttrefferfall",
+            "title": "Detail"
+          },
+          "ereignisse": {
+            "items": {
+              "$ref": "#/components/schemas/ChainEventOut"
+            },
+            "title": "Ereignisse",
+            "type": "array"
+          },
+          "found": {
+            "default": false,
+            "title": "Found",
+            "type": "boolean"
+          },
+          "kanon_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KanonStatusOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kette": {
+            "items": {
+              "$ref": "#/components/schemas/ChainNodeOut"
+            },
+            "title": "Kette",
+            "type": "array"
+          },
+          "luecken": {
+            "items": {
+              "$ref": "#/components/schemas/ChainLueckeOut"
+            },
+            "title": "Luecken",
+            "type": "array"
+          },
+          "mengen_konsistenz": {
+            "items": {
+              "$ref": "#/components/schemas/MengenCheckOut"
+            },
+            "title": "Mengen Konsistenz",
+            "type": "array"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChainSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "ticket_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Nr"
+          }
+        },
+        "title": "TraceabilityOut",
         "type": "object"
       },
       "TrackingStatusGesamtlage": {
@@ -153606,9 +157185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Read Context Api V1 Agent Operator Context Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentContextOut"
                 }
               }
             },
@@ -153698,8 +157275,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/AgentProposalOut"
                   },
                   "title": "Response List Proposals Api V1 Agent Operator Proposals Get",
                   "type": "array"
@@ -153783,9 +157359,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Proposal Api V1 Agent Operator Proposals Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentProposalOut"
                 }
               }
             },
@@ -153858,9 +157432,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Summary Api V1 Agent Operator Proposals Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentProposalSummaryOut"
                 }
               }
             },
@@ -153942,9 +157514,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Proposal Api V1 Agent Operator Proposals  Proposal Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentProposalOut"
                 }
               }
             },
@@ -154036,9 +157606,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Approve Proposal Api V1 Agent Operator Proposals  Proposal Id  Approve Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentProposalOut"
                 }
               }
             },
@@ -154130,9 +157698,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Execute Proposal Api V1 Agent Operator Proposals  Proposal Id  Execute Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentExecutionOut"
                 }
               }
             },
@@ -154224,9 +157790,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Reject Proposal Api V1 Agent Operator Proposals  Proposal Id  Reject Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AgentProposalOut"
                 }
               }
             },
@@ -169091,8 +172655,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/ActualRecordOut"
                   },
                   "title": "Response List Actuals Api V1 Agrar Rations Optimization Feeding Actuals Get",
                   "type": "array"
@@ -169162,9 +172725,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Record Actual Api V1 Agrar Rations Optimization Feeding Actuals Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ActualRecordOut"
                 }
               }
             },
@@ -169224,8 +172785,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/ActualComponentRowOut"
                   },
                   "title": "Response List Actual Components Api V1 Agrar Rations Optimization Feeding Actuals Components Get",
                   "type": "array"
@@ -169288,8 +172848,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/DeviationPolicyOut"
                   },
                   "title": "Response List Deviation Policies Api V1 Agrar Rations Optimization Feeding Actuals Deviation Policies Get",
                   "type": "array"
@@ -169359,9 +172918,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Deviation Policy Api V1 Agrar Rations Optimization Feeding Actuals Deviation Policies Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DeviationPolicyOut"
                 }
               }
             },
@@ -169478,8 +173035,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/DeviationFindingOut"
                   },
                   "title": "Response List Deviation Findings Api V1 Agrar Rations Optimization Feeding Actuals Findings Get",
                   "type": "array"
@@ -169542,8 +173098,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/ActualMeasureOut"
                   },
                   "title": "Response List Actual Measures Api V1 Agrar Rations Optimization Feeding Actuals Measures Get",
                   "type": "array"
@@ -169613,9 +173168,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Actual Measure Api V1 Agrar Rations Optimization Feeding Actuals Measures Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ActualMeasureOut"
                 }
               }
             },
@@ -176460,8 +180013,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/ActiveRationOut"
                   },
                   "title": "Response List Active Rations Api V1 Agrar Rations Optimization Lifecycle Active Rations Get",
                   "type": "array"
@@ -176924,8 +180476,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/RationWorklistItemOut"
                   },
                   "title": "Response List Rations Api V1 Agrar Rations Optimization Lifecycle Rations Get",
                   "type": "array"
@@ -176995,9 +180546,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Ration Api V1 Agrar Rations Optimization Lifecycle Rations Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RationDetailOut"
                 }
               }
             },
@@ -177065,9 +180614,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Ration Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RationDetailOut"
                 }
               }
             },
@@ -177136,8 +180683,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/RationAuditEventOut"
                   },
                   "title": "Response List Ration Audit Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Audit Get",
                   "type": "array"
@@ -177209,8 +180755,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/RationVersionOut"
                   },
                   "title": "Response List Ration Versions Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Versions Get",
                   "type": "array"
@@ -177289,9 +180834,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Ration Version Api V1 Agrar Rations Optimization Lifecycle Rations  Ration Id  Versions Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RationVersionOut"
                 }
               }
             },
@@ -177369,9 +180912,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Ration Version Api V1 Agrar Rations Optimization Lifecycle Versions  Version Id  Transitions Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RationTransitionOut"
                 }
               }
             },
@@ -356091,9 +359632,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Add Event Api V1 Supply Chain Events Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ChainEventAckOut"
                 }
               }
             },
@@ -356171,9 +359710,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Block Lot Api V1 Supply Chain Lots  Lot Id  Block Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LotActionOut"
                 }
               }
             },
@@ -356393,9 +359930,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Release Lot Api V1 Supply Chain Lots  Lot Id  Release Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LotActionOut"
                 }
               }
             },
@@ -356473,9 +360008,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Shrinkage Lot Api V1 Supply Chain Lots  Lot Id  Shrinkage Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LotActionOut"
                 }
               }
             },
@@ -356675,9 +360208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Traceability Api V1 Supply Chain Traceability Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TraceabilityOut"
                 }
               }
             },
@@ -356757,9 +360288,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Cancel Chain Api V1 Supply Chain Traceability Cancel Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ChainCancelOut"
                 }
               }
             },
@@ -356829,9 +360358,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Sync Events Api V1 Supply Chain Traceability Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ChainSyncOut"
                 }
               }
             },
@@ -356902,9 +360429,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Tickets Api V1 Supply Chain Traceability Tickets Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TicketOverviewOut"
                 }
               }
             },
