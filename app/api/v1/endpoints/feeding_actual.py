@@ -20,6 +20,13 @@ from app.agrar.rations.authz import (
     require_roles,
 )
 from app.auth.deps import User, get_current_user
+from app.api.v1.schemas.feeding_actual_schemas import (
+    ActualComponentRowOut,
+    ActualMeasureOut,
+    ActualRecordOut,
+    DeviationFindingOut,
+    DeviationPolicyOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.feeding_actual_service import (
@@ -141,7 +148,7 @@ def _translate(exc: Exception) -> HTTPException:
     )
 
 
-@router.post("", response_model=dict[str, Any], status_code=201)
+@router.post("", response_model=ActualRecordOut, status_code=201)
 async def record_actual(
     body: ActualRecordIn,
     db: Session = Depends(get_db),
@@ -165,7 +172,7 @@ async def record_actual(
         raise _translate(exc) from exc
 
 
-@router.get("", response_model=list[dict[str, Any]])
+@router.get("", response_model=list[ActualRecordOut])
 async def list_actuals(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -175,7 +182,7 @@ async def list_actuals(
     return _service(db, tenant_id, user).list(group_ids=_groups(db, tenant_id, user))
 
 
-@router.get("/components", response_model=list[dict[str, Any]])
+@router.get("/components", response_model=list[ActualComponentRowOut])
 async def list_actual_components(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -203,7 +210,7 @@ async def export_actuals_csv(
     )
 
 
-@router.post("/deviation-policies", response_model=dict[str, Any], status_code=201)
+@router.post("/deviation-policies", response_model=DeviationPolicyOut, status_code=201)
 async def create_deviation_policy(
     body: DeviationPolicyIn,
     db: Session = Depends(get_db),
@@ -220,7 +227,7 @@ async def create_deviation_policy(
         raise _translate(exc) from exc
 
 
-@router.get("/deviation-policies", response_model=list[dict[str, Any]])
+@router.get("/deviation-policies", response_model=list[DeviationPolicyOut])
 async def list_deviation_policies(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -230,7 +237,7 @@ async def list_deviation_policies(
     return FeedingActualMeasureService(db, tenant_id, _actor(user)).list_policies()
 
 
-@router.get("/findings", response_model=list[dict[str, Any]])
+@router.get("/findings", response_model=list[DeviationFindingOut])
 async def list_deviation_findings(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -242,7 +249,7 @@ async def list_deviation_findings(
     )
 
 
-@router.post("/measures", response_model=dict[str, Any], status_code=201)
+@router.post("/measures", response_model=ActualMeasureOut, status_code=201)
 async def create_actual_measure(
     body: ActualMeasureIn,
     db: Session = Depends(get_db),
@@ -260,7 +267,7 @@ async def create_actual_measure(
         raise _translate(exc) from exc
 
 
-@router.get("/measures", response_model=list[dict[str, Any]])
+@router.get("/measures", response_model=list[ActualMeasureOut])
 async def list_actual_measures(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

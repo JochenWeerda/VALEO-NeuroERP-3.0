@@ -1,0 +1,57 @@
+slice_id: SPEC-P1-06-W3-CHAIN-RATIONS-AGENT
+id: SPEC-P1-06-W3-CHAIN-RATIONS-AGENT
+title: Legacy-Routen response_model typisieren — Welle 3 (Lieferkette, Rations-Lebenszyklus, Ist-Fuetterung, Operator-Agent)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Dritte Welle von SPEC-P1-06: die 8er-Gruppe der Endpoint-Dateien auf echte
+  Pydantic-Schemas heben — supply_chain, rations_lifecycle, feeding_actual,
+  operator_agent.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W3-CHAIN-RATIONS-AGENT.yaml
+  - app/api/v1/schemas/supply_chain_schemas.py
+  - app/api/v1/schemas/rations_lifecycle_schemas.py
+  - app/api/v1/schemas/feeding_actual_schemas.py
+  - app/api/v1/schemas/operator_agent_schemas.py
+  - app/api/v1/endpoints/supply_chain.py
+  - app/api/v1/endpoints/rations_lifecycle.py
+  - app/api/v1/endpoints/feeding_actual.py
+  - app/api/v1/endpoints/operator_agent.py
+  - tests/test_welle3_response_models.py
+acceptance:
+  - Alle 32 Endpunkte der vier Dateien tragen ein echtes Pydantic-response_model
+  - Kein Feldverlust gegenueber Service-Rueckgaben bzw. Tabellen-DDL
+  - Nichttrefferfaelle und Zweigformen (found=false, ok=false, unconfigured) bleiben uebertragbar
+  - Bestandstests der vier Bereiche bleiben gruen
+result: >-
+  Schwache response_model-Typen repo-weit 404 -> 372, betroffene Dateien
+  111 -> 107. OpenAPI erzeugt fuer die betroffenen Routen $ref statt freier
+  Objekte.
+notes:
+  - >-
+    Gefundener Fehler in dieser Welle: POST /lifecycle/rations/{id}/versions
+    liefert die neue Versionszeile, nicht das Rations-Detail wie POST /rations.
+    Mit RationDetailOut fiel version_no aus der Antwort und
+    test_rations_lifecycle_api brach. Korrigiert auf RationVersionOut, mit
+    eigener Regressionsklammer im Welle-3-Test.
+  - >-
+    Bewusste Entscheidung: heterogene Nutzlastfelder bleiben offene dict-Felder
+    (ChainNodeOut.facts je Kettenstufe, AgentContextOut.context und
+    AgentExecutionOut.result je action_type, snapshot/delta/value_consequences
+    als JSONB). Das ist etwas anderes als ein schwaches response_model — Rahmen
+    und Struktur der Antwort sind vollstaendig typisiert, nur der fachlich
+    variable Kern bleibt offen.
+  - >-
+    billing_batch (8 Endpunkte) wurde aus dieser Welle herausgenommen: der
+    zugehoerige billing_batch_service war zeitgleich in fremder Bearbeitung,
+    seine Rueckgabeformen also nicht stabil. Nachzuholen in Welle 4.
+open:
+  - billing_batch.py (8 Endpunkte) — Nachzug Welle 4
+verification:
+  - "python -m pytest tests/test_welle3_response_models.py -q --no-cov"
+  - "python -m pytest tests/test_feeding_actual.py tests/test_feeding_actual_api.py tests/test_feeding_actual_measures.py tests/test_operator_agent.py tests/test_operator_agent_persist.py tests/test_rations_lifecycle_api.py tests/test_rations_lifecycle_domain.py tests/test_supply_chain_lot.py tests/test_supply_chain_trace.py tests/test_supply_chain_blockchain.py -q --no-cov"
+  - "python scripts/check_response_models.py --threshold 20"
+  - "python scripts/check_weak_response_models.py"

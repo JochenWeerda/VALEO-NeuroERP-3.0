@@ -11,6 +11,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.repositories.agent_proposal_repository import AgentProposalRepository
+from app.api.v1.schemas.operator_agent_schemas import (
+    AgentContextOut,
+    AgentExecutionOut,
+    AgentProposalOut,
+    AgentProposalSummaryOut,
+)
 from app.services.operator_agent_service import (
     AgentActionType,
     ApprovalStatus,
@@ -58,7 +64,7 @@ class ExecuteRequest(BaseModel):
     executed_by: str
 
 
-@router.post("/context", summary="Kontext fuer Agent-Aktion lesen", response_model=dict[str, Any])
+@router.post("/context", summary="Kontext fuer Agent-Aktion lesen", response_model=AgentContextOut)
 async def read_context(
     req: ContextRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -76,7 +82,7 @@ async def read_context(
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
-@router.post("/proposals", summary="Agent-Proposal erstellen", response_model=dict[str, Any])
+@router.post("/proposals", summary="Agent-Proposal erstellen", response_model=AgentProposalOut)
 async def create_proposal(
     req: ProposalRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -98,7 +104,7 @@ async def create_proposal(
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
-@router.get("/proposals", summary="Agent-Proposals listen", response_model=list[dict[str, Any]])
+@router.get("/proposals", summary="Agent-Proposals listen", response_model=list[AgentProposalOut])
 async def list_proposals(
     status: ApprovalStatus | None = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -112,7 +118,7 @@ async def list_proposals(
     return [p.to_dict() for p in svc.list_proposals(tenant_id=tenant_id, status=status)]
 
 
-@router.get("/proposals/summary", summary="Proposal-Zusammenfassung", response_model=dict[str, Any])
+@router.get("/proposals/summary", summary="Proposal-Zusammenfassung", response_model=AgentProposalSummaryOut)
 async def get_summary(
     tenant_id: str = Depends(get_tenant_id),
     roles: set[str] = Depends(_roles),
@@ -125,7 +131,7 @@ async def get_summary(
     return svc.summary(tenant_id=tenant_id)
 
 
-@router.get("/proposals/{proposal_id}", summary="Agent-Proposal Detail", response_model=dict[str, Any])
+@router.get("/proposals/{proposal_id}", summary="Agent-Proposal Detail", response_model=AgentProposalOut)
 async def get_proposal(
     proposal_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -143,7 +149,7 @@ async def get_proposal(
 
 @router.post(
     "/proposals/{proposal_id}/approve",
-    response_model=dict[str, Any],
+    response_model=AgentProposalOut,
     summary="Agent-Proposal freigeben (Human Approval)",
 )
 async def approve_proposal(
@@ -171,7 +177,7 @@ async def approve_proposal(
 @router.post(
     "/proposals/{proposal_id}/reject",
     summary="Agent-Proposal ablehnen",
-    response_model=dict[str, Any],
+    response_model=AgentProposalOut,
 )
 async def reject_proposal(
     proposal_id: str,
@@ -199,7 +205,7 @@ async def reject_proposal(
 @router.post(
     "/proposals/{proposal_id}/execute",
     summary="Genehmigte LOW-Risiko-Aktion direkt ausfuehren",
-    response_model=dict[str, Any],
+    response_model=AgentExecutionOut,
 )
 async def execute_proposal(
     proposal_id: str,

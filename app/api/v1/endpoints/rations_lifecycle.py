@@ -13,6 +13,14 @@ from app.agrar.rations.authz import APPROVE_ROLES, READ_ROLES, WRITE_ROLES, requ
 from app.agrar.rations.groups import GroupProfile, GroupRiskLevel, PregnancyStatus, validate_group_parameters
 from app.agrar.rations.lifecycle import RationStatus, TransitionError
 from app.auth.deps import User, get_current_user
+from app.api.v1.schemas.rations_lifecycle_schemas import (
+    ActiveRationOut,
+    RationAuditEventOut,
+    RationDetailOut,
+    RationTransitionOut,
+    RationVersionOut,
+    RationWorklistItemOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.rations_lifecycle_service import (
@@ -293,7 +301,7 @@ async def list_feeding_group_history(
         raise _translate_error(exc) from exc
 
 
-@router.post("/rations", response_model=dict, status_code=201, summary="Ration mit Version 1 anlegen")
+@router.post("/rations", response_model=RationDetailOut, status_code=201, summary="Ration mit Version 1 anlegen")
 async def create_ration(
     body: RationCreateIn,
     db: Session = Depends(get_db),
@@ -308,7 +316,7 @@ async def create_ration(
         raise _translate_error(exc) from exc
 
 
-@router.get("/rations", response_model=list[dict], summary="Rationen als Worklist auflisten")
+@router.get("/rations", response_model=list[RationWorklistItemOut], summary="Rationen als Worklist auflisten")
 async def list_rations(
     group_id: str | None = Query(default=None),
     status: RationStatus | None = Query(default=None),
@@ -321,7 +329,7 @@ async def list_rations(
     return _service(db, tenant_id, user).list_rations(group_id=group_id, status=status, limit=limit)
 
 
-@router.get("/active-rations", response_model=list[dict], summary="Aktive Rationen fuer die Stallausfuehrung")
+@router.get("/active-rations", response_model=list[ActiveRationOut], summary="Aktive Rationen fuer die Stallausfuehrung")
 async def list_active_rations(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -331,7 +339,7 @@ async def list_active_rations(
     return _service(db, tenant_id, user).list_active_rations()
 
 
-@router.get("/rations/{ration_id}", response_model=dict, summary="Ration mit Versionen und Audit lesen")
+@router.get("/rations/{ration_id}", response_model=RationDetailOut, summary="Ration mit Versionen und Audit lesen")
 async def get_ration(
     ration_id: str,
     db: Session = Depends(get_db),
@@ -345,7 +353,7 @@ async def get_ration(
         raise _translate_error(exc) from exc
 
 
-@router.post("/rations/{ration_id}/versions", response_model=dict, status_code=201, summary="Neue unveraenderliche Rationsversion anlegen")
+@router.post("/rations/{ration_id}/versions", response_model=RationVersionOut, status_code=201, summary="Neue unveraenderliche Rationsversion anlegen")
 async def create_ration_version(
     ration_id: str,
     body: RationVersionCreateIn,
@@ -361,7 +369,7 @@ async def create_ration_version(
         raise _translate_error(exc) from exc
 
 
-@router.get("/rations/{ration_id}/versions", response_model=list[dict], summary="Rationsversionen auflisten")
+@router.get("/rations/{ration_id}/versions", response_model=list[RationVersionOut], summary="Rationsversionen auflisten")
 async def list_ration_versions(
     ration_id: str,
     db: Session = Depends(get_db),
@@ -375,7 +383,7 @@ async def list_ration_versions(
         raise _translate_error(exc) from exc
 
 
-@router.post("/versions/{version_id}/transitions", response_model=dict, summary="Rationsstatus kontrolliert wechseln")
+@router.post("/versions/{version_id}/transitions", response_model=RationTransitionOut, summary="Rationsstatus kontrolliert wechseln")
 async def transition_ration_version(
     version_id: str,
     body: RationTransitionIn,
@@ -397,7 +405,7 @@ async def transition_ration_version(
         raise _translate_error(exc) from exc
 
 
-@router.get("/rations/{ration_id}/audit", response_model=list[dict], summary="Rations-Audit lesen")
+@router.get("/rations/{ration_id}/audit", response_model=list[RationAuditEventOut], summary="Rations-Audit lesen")
 async def list_ration_audit(
     ration_id: str,
     db: Session = Depends(get_db),
