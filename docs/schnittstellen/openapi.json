@@ -14376,6 +14376,84 @@
         "title": "BankAccountsOut",
         "type": "object"
       },
+      "BankCamtImportOut": {
+        "description": "``POST /dev/external-mocks/bank/camt-import``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "buchungen": {
+            "items": {
+              "$ref": "#/components/schemas/CamtBookingOut"
+            },
+            "title": "Buchungen",
+            "type": "array"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
+          "kontoauszug_nr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontoauszug Nr"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          }
+        },
+        "title": "BankCamtImportOut",
+        "type": "object"
+      },
       "BankCamtRequest": {
         "properties": {
           "iban": {
@@ -21309,6 +21387,68 @@
           }
         },
         "title": "CampaignUpdate",
+        "type": "object"
+      },
+      "CamtBookingOut": {
+        "description": "Buchung aus dem simulierten CAMT.053-Import.",
+        "properties": {
+          "betrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag Eur"
+          },
+          "buchungs_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buchungs Id"
+          },
+          "gegenkonto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gegenkonto"
+          },
+          "valuta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valuta"
+          },
+          "verwendungszweck": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verwendungszweck"
+          }
+        },
+        "title": "CamtBookingOut",
         "type": "object"
       },
       "CandidateVersionOut": {
@@ -33438,6 +33578,226 @@
         "title": "DatevExportRequest",
         "type": "object"
       },
+      "DatevExportStartOut": {
+        "description": "``POST /dev/external-mocks/datev/export``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "estimated_completion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Voraussichtlicher Abschluss (ISO)",
+            "title": "Estimated Completion"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "mandant_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mandant Nr"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "zeitraum_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zeitraum Bis"
+          },
+          "zeitraum_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zeitraum Von"
+          }
+        },
+        "title": "DatevExportStartOut",
+        "type": "object"
+      },
+      "DatevExportStatusOut": {
+        "description": "``GET /dev/external-mocks/datev/export/{job_id}``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "datei_groesse_kb": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datei Groesse Kb"
+          },
+          "datei_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datei Name"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "uebertragen_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebertragen Am"
+          }
+        },
+        "title": "DatevExportStatusOut",
+        "type": "object"
+      },
       "DauerauftragCreate": {
         "properties": {
           "bezeichnung": {
@@ -38203,6 +38563,102 @@
         "title": "DmsConnectionRequest",
         "type": "object"
       },
+      "DmsSearchHitOut": {
+        "description": "Treffer der simulierten DMS-Suche.",
+        "properties": {
+          "dokument_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dokument Id"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "titel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titel"
+          }
+        },
+        "title": "DmsSearchHitOut",
+        "type": "object"
+      },
+      "DmsSearchOut": {
+        "description": "``GET /dev/external-mocks/dms/search``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "treffer": {
+            "items": {
+              "$ref": "#/components/schemas/DmsSearchHitOut"
+            },
+            "title": "Treffer",
+            "type": "array"
+          }
+        },
+        "title": "DmsSearchOut",
+        "type": "object"
+      },
       "DmsStatusResponse": {
         "properties": {
           "base": {
@@ -38293,6 +38749,110 @@
           "ok"
         ],
         "title": "DmsTestResponse",
+        "type": "object"
+      },
+      "DmsUploadOut": {
+        "description": "``POST /dev/external-mocks/dms/upload``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "archiviert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archiviert Am"
+          },
+          "dokument_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dokument Id"
+          },
+          "dokument_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dokument Typ"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "titel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titel"
+          }
+        },
+        "title": "DmsUploadOut",
         "type": "object"
       },
       "DmsUploadRequest": {
@@ -41987,114 +42547,6 @@
         "title": "DryingRuleSetUpdate",
         "type": "object"
       },
-      "DsfinvkExportOut": {
-        "properties": {
-          "checksum_sha256": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Checksum Sha256"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "error_message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error Message"
-          },
-          "file_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Path"
-          },
-          "generated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Generated At"
-          },
-          "generated_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Generated By"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "period_from": {
-            "format": "date",
-            "title": "Period From",
-            "type": "string"
-          },
-          "period_to": {
-            "format": "date",
-            "title": "Period To",
-            "type": "string"
-          },
-          "row_count": {
-            "title": "Row Count",
-            "type": "integer"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "tenant_id",
-          "period_from",
-          "period_to",
-          "status",
-          "row_count",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "DsfinvkExportOut",
-        "type": "object"
-      },
       "DuengeBilanzRequest": {
         "properties": {
           "bedarf_k_kg_ha": {
@@ -43763,6 +44215,215 @@
           "status"
         ],
         "title": "EligibleDeliveryNoteOut",
+        "type": "object"
+      },
+      "ElsterStatusOut": {
+        "description": "``GET /dev/external-mocks/elster/status/{ticket_id}``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "bearbeitet_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bearbeitet Am"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          }
+        },
+        "title": "ElsterStatusOut",
+        "type": "object"
+      },
+      "ElsterSubmitOut": {
+        "description": "``POST /dev/external-mocks/elster/submit``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "eingegangen_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eingegangen Am"
+          },
+          "formular_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formular Typ"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "rueckgabe_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ERiC-Rueckgabecode, '0' = ok",
+            "title": "Rueckgabe Code"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "steuer_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuer Nr"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "zeitraum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zeitraum"
+          }
+        },
+        "title": "ElsterSubmitOut",
         "type": "object"
       },
       "ElsterSubmitRequest": {
@@ -50771,6 +51432,158 @@
         "title": "FinishTransactionCommand",
         "type": "object"
       },
+      "FiscalConfigOut": {
+        "description": "``GET`` und ``PUT /pos/fiscalization/config``.\n\n``settings`` ist bereits um Secret-Pfade bereinigt (``_public_settings``);\n``updated_at`` fehlt, solange der Mandant keine Konfiguration hat.",
+        "properties": {
+          "cash_register_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kassen-/TSS-ID",
+            "title": "Cash Register Id"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "configured": {
+            "default": false,
+            "description": "False, solange der Mandant keine Konfiguration hinterlegt hat",
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "dsfinvk_provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "fiskaly | simulation",
+            "title": "Dsfinvk Provider"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "fiskaly | swissbit_cloud | swissbit_gateway | simulation",
+            "title": "Provider"
+          },
+          "settings": {
+            "additionalProperties": true,
+            "description": "Oeffentliche Einstellungen ohne Provider-Secrets",
+            "title": "Settings",
+            "type": "object"
+          },
+          "simulation_allowed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Allowed"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "FiscalConfigOut",
+        "type": "object"
+      },
+      "FiscalDailySummaryOut": {
+        "description": "``GET /pos/fiscalization/daily-summary`` — signierte Tageswerte.",
+        "properties": {
+          "card_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Card Total"
+          },
+          "cash_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cash Total"
+          },
+          "gross_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gross Total"
+          },
+          "incomplete_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Transaktionen, die nicht im Zustand FINISHED sind",
+            "title": "Incomplete Count"
+          },
+          "transaction_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction Count"
+          }
+        },
+        "title": "FiscalDailySummaryOut",
+        "type": "object"
+      },
       "FiscalLine": {
         "properties": {
           "gross_amount": {
@@ -50818,6 +51631,46 @@
           "vat_rate"
         ],
         "title": "FiscalLine",
+        "type": "object"
+      },
+      "FiscalProductReadiness": {
+        "properties": {
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "product": {
+            "enum": [
+              "submit_de",
+              "receipt",
+              "safe"
+            ],
+            "title": "Product",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "product",
+          "label",
+          "ready"
+        ],
+        "title": "FiscalProductReadiness",
         "type": "object"
       },
       "FiscalProviderConfigIn": {
@@ -50870,6 +51723,191 @@
           "client_id"
         ],
         "title": "FiscalProviderConfigIn",
+        "type": "object"
+      },
+      "FiscalReadinessOut": {
+        "description": "``GET /pos/fiscalization/readiness``",
+        "properties": {
+          "config_blockers": {
+            "description": "Fehlende Mandantenkonfiguration",
+            "items": {
+              "type": "string"
+            },
+            "title": "Config Blockers",
+            "type": "array"
+          },
+          "configured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Configured"
+          },
+          "dsfinvk": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProviderReadiness"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "DSFinV-K-Provider"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/FiscalProductReadiness"
+            },
+            "title": "Products",
+            "type": "array"
+          },
+          "ready": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True nur ohne Config-Blocker und mit beiden Providern bereit",
+            "title": "Ready"
+          },
+          "sign": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProviderReadiness"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "TSE-Signaturprovider"
+          }
+        },
+        "title": "FiscalReadinessOut",
+        "type": "object"
+      },
+      "FiscalTransactionResult": {
+        "properties": {
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "provider": {
+            "enum": [
+              "fiskaly",
+              "swissbit_cloud",
+              "swissbit_gateway",
+              "simulation"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "provider_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Reference"
+          },
+          "qr_code_data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qr Code Data"
+          },
+          "raw": {
+            "additionalProperties": true,
+            "title": "Raw",
+            "type": "object"
+          },
+          "serial_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serial Number"
+          },
+          "signature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature"
+          },
+          "signature_counter": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature Counter"
+          },
+          "simulated": {
+            "default": false,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "transaction_id": {
+            "title": "Transaction Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "transaction_id",
+          "state"
+        ],
+        "title": "FiscalTransactionResult",
         "type": "object"
       },
       "FixingCreateRequest": {
@@ -56605,6 +57643,135 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HaccpPlanOut": {
+        "description": "Zeile aus ``domain_shared.futtermittel_haccp_plaene``.",
+        "properties": {
+          "aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aktiv"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "ccp_liste": {
+            "description": "Kritische Lenkungspunkte (JSONB)",
+            "items": {},
+            "title": "Ccp Liste",
+            "type": "array"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "geaendert_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geaendert Am"
+          },
+          "gefahrenanalyse": {
+            "description": "Gefahrenanalyse (JSONB)",
+            "items": {},
+            "title": "Gefahrenanalyse",
+            "type": "array"
+          },
+          "gueltigkeit_bis": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltigkeit Bis"
+          },
+          "gueltigkeit_von": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltigkeit Von"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "korrekturen": {
+            "description": "Korrekturmassnahmen (JSONB)",
+            "items": {},
+            "title": "Korrekturen",
+            "type": "array"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "ueberwachung": {
+            "description": "Ueberwachungsmassnahmen (JSONB)",
+            "items": {},
+            "title": "Ueberwachung",
+            "type": "array"
+          },
+          "verifizierung": {
+            "additionalProperties": true,
+            "description": "Verifizierung (JSONB)",
+            "title": "Verifizierung",
+            "type": "object"
+          }
+        },
+        "title": "HaccpPlanOut",
         "type": "object"
       },
       "HandoverIn": {
@@ -79870,6 +81037,46 @@
         "title": "MobileEvent",
         "type": "object"
       },
+      "MockSystemOut": {
+        "description": "Eintrag der Systemuebersicht.",
+        "properties": {
+          "beschreibung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschreibung"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "System"
+          },
+          "verfuegbar": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verfuegbar"
+          }
+        },
+        "title": "MockSystemOut",
+        "type": "object"
+      },
       "ModelCheckRequest": {
         "properties": {
           "category_id": {
@@ -99275,6 +100482,115 @@
         "title": "ProtokollPayload",
         "type": "object"
       },
+      "ProviderReadiness": {
+        "properties": {
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "live": {
+            "title": "Live",
+            "type": "boolean"
+          },
+          "provider": {
+            "enum": [
+              "fiskaly",
+              "swissbit_cloud",
+              "swissbit_gateway",
+              "simulation"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider",
+          "ready",
+          "live"
+        ],
+        "title": "ProviderReadiness",
+        "type": "object"
+      },
+      "ProviderResult": {
+        "properties": {
+          "download_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Download Url"
+          },
+          "operation": {
+            "title": "Operation",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "fiskaly",
+              "swissbit_cloud",
+              "swissbit_gateway",
+              "simulation"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "provider_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Reference"
+          },
+          "raw": {
+            "additionalProperties": true,
+            "title": "Raw",
+            "type": "object"
+          },
+          "simulated": {
+            "default": false,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "operation",
+          "status"
+        ],
+        "title": "ProviderResult",
+        "type": "object"
+      },
       "ProvisionsGruppeCreate": {
         "properties": {
           "bezeichnung": {
@@ -99522,6 +100838,25 @@
           "provisionssatz"
         ],
         "title": "ProvisionsStaffelZeileOut",
+        "type": "object"
+      },
+      "PruefpunktBestaetigtOut": {
+        "description": "``POST /futtermittel/qs/leitfaden-pruefpunkte/{id}/bestaetigen``",
+        "properties": {
+          "bestaetigt": {
+            "default": true,
+            "title": "Bestaetigt",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "PruefpunktBestaetigtOut",
         "type": "object"
       },
       "PsmProtokolleintragRequest": {
@@ -100068,6 +101403,180 @@
           "qs_status"
         ],
         "title": "QSUpdateIn",
+        "type": "object"
+      },
+      "QsAnlageOut": {
+        "description": "Bestaetigung einer Neuanlage oder Aktualisierung.",
+        "properties": {
+          "id": {
+            "description": "ID des angelegten oder geaenderten Datensatzes",
+            "title": "Id",
+            "type": "string"
+          },
+          "ok": {
+            "default": true,
+            "description": "True bei erfolgreicher Persistierung",
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "QsAnlageOut",
+        "type": "object"
+      },
+      "QsPruefpunktOut": {
+        "description": "Zeile aus ``domain_shared.futtermittel_qs_pruefpunkte``.",
+        "properties": {
+          "abweichung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichung"
+          },
+          "anforderung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anforderung"
+          },
+          "bestaetigt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestaetigt"
+          },
+          "bestaetigt_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestaetigt Am"
+          },
+          "bestaetigt_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestaetigt Von"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kategorie": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kategorie"
+          },
+          "massnahme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Massnahme"
+          },
+          "periode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "YYYY-MM oder YYYY",
+            "title": "Periode"
+          },
+          "punkt_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Punkt Nr"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "QsPruefpunktOut",
         "type": "object"
       },
       "QuadrigaConnectorOut": {
@@ -118013,6 +119522,62 @@
         "title": "SystemStatusEvidenceOut",
         "type": "object"
       },
+      "SystemsOverviewOut": {
+        "description": "``GET /dev/external-mocks/``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "systems": {
+            "items": {
+              "$ref": "#/components/schemas/MockSystemOut"
+            },
+            "title": "Systems",
+            "type": "array"
+          }
+        },
+        "title": "SystemsOverviewOut",
+        "type": "object"
+      },
       "TagesabschlussAktuell": {
         "properties": {
           "barverkauf": {
@@ -121628,6 +123193,121 @@
           "amount_cents"
         ],
         "title": "TseFinishRequest",
+        "type": "object"
+      },
+      "TseSignOut": {
+        "description": "``POST /dev/external-mocks/tse/sign``",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "bon_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bon Nr"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "kasse_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kasse Id"
+          },
+          "signatur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signatur"
+          },
+          "signiert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signiert Am"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          },
+          "transaktions_nr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaktions Nr"
+          },
+          "zertifikat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zertifikat Id"
+          }
+        },
+        "title": "TseSignOut",
         "type": "object"
       },
       "TseSignRequest": {
@@ -126300,6 +127980,164 @@
           "detail"
         ],
         "title": "ViolationOut",
+        "type": "object"
+      },
+      "VlogMeldungOut": {
+        "description": "Zeile aus ``domain_shared.futtermittel_vlog_meldungen``.",
+        "properties": {
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "geaendert_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geaendert Am"
+          },
+          "gvo_frei": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gvo Frei"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "meldedatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meldedatum"
+          },
+          "menge_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kg"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "rezeptur_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rezeptur Id"
+          },
+          "rohstoff_liste": {
+            "description": "Rohstoffe (JSONB)",
+            "items": {},
+            "title": "Rohstoff Liste",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "erstellt | gesendet | bestaetigt | abgelehnt",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "zertifikat_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zertifikat Nr"
+          }
+        },
+        "title": "VlogMeldungOut",
+        "type": "object"
+      },
+      "VlogStatusOut": {
+        "description": "``PATCH /futtermittel/qs/vlog-meldungen/{id}/status``",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "description": "Gesetzter Status",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "VlogStatusOut",
         "type": "object"
       },
       "VoiceResolveIn": {
@@ -134436,6 +136274,114 @@
         "title": "_StringListItem",
         "type": "object"
       },
+      "app__api__v1__endpoints__admin_pos__DsfinvkExportOut": {
+        "properties": {
+          "checksum_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checksum Sha256"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Path"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "generated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated By"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "period_from": {
+            "format": "date",
+            "title": "Period From",
+            "type": "string"
+          },
+          "period_to": {
+            "format": "date",
+            "title": "Period To",
+            "type": "string"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "period_from",
+          "period_to",
+          "status",
+          "row_count",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DsfinvkExportOut",
+        "type": "object"
+      },
       "app__api__v1__endpoints__admin_pos__DsfinvkExportRequest": {
         "properties": {
           "generated_by": {
@@ -138736,6 +140682,107 @@
           "tenant_id"
         ],
         "title": "Customer",
+        "type": "object"
+      },
+      "app__api__v1__schemas__external_mock_harness_schemas__DsfinvkExportOut": {
+        "description": "``POST /dev/external-mocks/dsfinvk/export``",
+        "properties": {
+          "abschluss_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abschluss Datum"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausgefuehrte Mock-Operation",
+            "title": "Action"
+          },
+          "dateien": {
+            "description": "Dateien des DSFinV-K-Pakets",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dateien",
+            "type": "array"
+          },
+          "export_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Export Id"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Klartext-Hinweis, dass kein echtes Fremdsystem beteiligt war",
+            "title": "Hinweis"
+          },
+          "kasse_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kasse Id"
+          },
+          "simulated": {
+            "default": true,
+            "description": "Immer true — kennzeichnet die Antwort als simuliert",
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "datev | tse | dsfinvk | elster | dms | bank_camt",
+            "title": "System"
+          }
+        },
+        "title": "DsfinvkExportOut",
         "type": "object"
       },
       "app__api__v1__schemas__finance_schemas__CreditLimitOut": {
@@ -147030,7 +149077,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/DsfinvkExportOut"
+                    "$ref": "#/components/schemas/app__api__v1__endpoints__admin_pos__DsfinvkExportOut"
                   },
                   "title": "Response List Dsfinvk Exports Api V1 Admin Pos Dsfinvk Exports Get",
                   "type": "array"
@@ -147098,7 +149145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DsfinvkExportOut"
+                  "$ref": "#/components/schemas/app__api__v1__endpoints__admin_pos__DsfinvkExportOut"
                 }
               }
             },
@@ -222164,9 +224211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Systems Overview Api V1 Dev External Mocks  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SystemsOverviewOut"
                 }
               }
             },
@@ -222205,9 +224250,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bank Camt Import Api V1 Dev External Mocks Bank Camt Import Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BankCamtImportOut"
                 }
               }
             },
@@ -222256,9 +224299,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Datev Export Start Api V1 Dev External Mocks Datev Export Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DatevExportStartOut"
                 }
               }
             },
@@ -222308,9 +224349,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Datev Export Status Api V1 Dev External Mocks Datev Export  Job Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DatevExportStatusOut"
                 }
               }
             },
@@ -222361,9 +224400,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dms Search Api V1 Dev External Mocks Dms Search Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DmsSearchOut"
                 }
               }
             },
@@ -222412,9 +224449,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dms Upload Api V1 Dev External Mocks Dms Upload Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DmsUploadOut"
                 }
               }
             },
@@ -222463,9 +224498,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dsfinvk Export Api V1 Dev External Mocks Dsfinvk Export Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__external_mock_harness_schemas__DsfinvkExportOut"
                 }
               }
             },
@@ -222515,9 +224548,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Elster Status Api V1 Dev External Mocks Elster Status  Ticket Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ElsterStatusOut"
                 }
               }
             },
@@ -222566,9 +224597,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Elster Submit Api V1 Dev External Mocks Elster Submit Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ElsterSubmitOut"
                 }
               }
             },
@@ -222617,9 +224646,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Tse Sign Api V1 Dev External Mocks Tse Sign Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TseSignOut"
                 }
               }
             },
@@ -263023,8 +265050,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/HaccpPlanOut"
                   },
                   "title": "Response List Haccp Plaene Api V1 Futtermittel Qs Haccp Plaene Get",
                   "type": "array"
@@ -263092,9 +265118,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Haccp Plan Api V1 Futtermittel Qs Haccp Plaene Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/QsAnlageOut"
                 }
               }
             },
@@ -263158,9 +265182,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Haccp Plan Api V1 Futtermittel Qs Haccp Plaene  Plan Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/HaccpPlanOut"
                 }
               }
             },
@@ -263234,9 +265256,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Update Haccp Plan Api V1 Futtermittel Qs Haccp Plaene  Plan Id  Patch",
-                  "type": "object"
+                  "$ref": "#/components/schemas/QsAnlageOut"
                 }
               }
             },
@@ -263338,8 +265358,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/QsPruefpunktOut"
                   },
                   "title": "Response List Pruefpunkte Api V1 Futtermittel Qs Leitfaden Pruefpunkte Get",
                   "type": "array"
@@ -263407,9 +265426,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Pruefpunkt Api V1 Futtermittel Qs Leitfaden Pruefpunkte Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/QsAnlageOut"
                 }
               }
             },
@@ -263485,9 +265502,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bestaetigen Pruefpunkt Api V1 Futtermittel Qs Leitfaden Pruefpunkte  Punkt Id  Bestaetigen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PruefpunktBestaetigtOut"
                 }
               }
             },
@@ -263571,8 +265586,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/VlogMeldungOut"
                   },
                   "title": "Response List Vlog Meldungen Api V1 Futtermittel Qs Vlog Meldungen Get",
                   "type": "array"
@@ -263640,9 +265654,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Vlog Meldung Api V1 Futtermittel Qs Vlog Meldungen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/QsAnlageOut"
                 }
               }
             },
@@ -263718,9 +265730,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Set Vlog Status Api V1 Futtermittel Qs Vlog Meldungen  Meldung Id  Status Patch",
-                  "type": "object"
+                  "$ref": "#/components/schemas/VlogStatusOut"
                 }
               }
             },
@@ -314200,9 +316210,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Close Cash Point Api V1 Pos Fiscalization Cash Point Closings Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ProviderResult"
                 }
               }
             },
@@ -314257,9 +316265,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Config Api V1 Pos Fiscalization Config Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FiscalConfigOut"
                 }
               }
             },
@@ -314322,9 +316328,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Put Config Api V1 Pos Fiscalization Config Put",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FiscalConfigOut"
                 }
               }
             },
@@ -314405,9 +316409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Daily Summary Api V1 Pos Fiscalization Daily Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FiscalDailySummaryOut"
                 }
               }
             },
@@ -314472,9 +316474,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Request Export Api V1 Pos Fiscalization Exports Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ProviderResult"
                 }
               }
             },
@@ -314571,9 +316571,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Request Generated Export Api V1 Pos Fiscalization Exports  Export Type  Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ProviderResult"
                 }
               }
             },
@@ -314628,9 +316626,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Readiness Api V1 Pos Fiscalization Readiness Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FiscalReadinessOut"
                 }
               }
             },
@@ -314695,9 +316691,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Finish Transaction Api V1 Pos Fiscalization Transactions Finish Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FiscalTransactionResult"
                 }
               }
             },
@@ -314762,9 +316756,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Start Transaction Api V1 Pos Fiscalization Transactions Start Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FiscalTransactionResult"
                 }
               }
             },
