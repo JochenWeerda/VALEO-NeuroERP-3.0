@@ -10,6 +10,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 ---
 
 # Active Workboard
+## L3-CUTOVER-UAT-032 Evidenzbasiertes Pilot- und Cutover-Programm - reserviert 2026-08-23
+
+**Von:** Autonome Umsetzung der empfohlenen Folgeschritte nach L3-Gap-Schliessung. **Owner:** Codex. **Stand:** reserviert 2026-08-23.
+
+**Ziel:** Rollen-UAT, End-to-End-Journeys, Echtdaten-/Migrationsproben, Reconciliation, externe Integrationspiloten, Gewohnheitsbruecke, Parallelbetrieb und Go/No-Go als ausfuehrbaren, fail-closed Cutover-Vertrag zusammenfuehren.
+
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, zentraler Cutover-Vertrag/Validator/Tests, UAT-Plan, Betriebsrunbook und erforderlicher Open-Gaps-Nachzug. Produktivdaten, Hardwarezugriffe und parallele Fremdaenderungen sind ausgeschlossen.
+
+**Abnahme:** messbare Rollen-/Journey-Abnahme; zwei Migrationsproben; harte Reconciliation- und Integrationsgates; Severity- und KPI-basiertes Go/No-Go; ohne externe Evidenz kein produktives Go; gruene Tests und Governance.
+
 ## L3-VISUAL-PARITY-AUDIT-031 Vollabnahme der L3-Gewohnheitsparitaet - abgeschlossen 2026-08-23
 
 **Von:** Autonome Fortsetzung der L3-Gap-Schliessung anhand der vollstaendigen lokalen Screenshot-Sammlung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-23.

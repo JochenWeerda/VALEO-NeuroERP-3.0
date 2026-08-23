@@ -1,0 +1,38 @@
+slice_id: L3-CUTOVER-UAT-032
+id: L3-CUTOVER-UAT-032
+title: L3 Cutover UAT und Pilotprogramm
+owner: Codex
+status: reserviert
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+goal: >-
+  Ein vollstaendig ausfuehrbares, evidenzbasiertes L3-zu-VALEO-Cutover-Programm
+  fuer Rollen-UAT, End-to-End-Prozesse, Migrationsproben, Reconciliation,
+  externe Integrationen, Gewohnheitsbruecke, Parallelbetrieb und Go/No-Go
+  bereitstellen.
+scope:
+  - Maschinenlesbarer Cutover-, Rollen-, Journey-, Gate- und Metrikvertrag
+  - Read-only/dry-run Validator und reproduzierbarer Evidenzreport
+  - Migrations- und Reconciliation-Proben fuer Stammdaten, offene Belege, OP, Bestand und Charge
+  - Pilotvertraege fuer Waage, MDE, Tank, DMS/Mail, L3-Standard/Unimet und Druck
+  - UAT-Plan, Defect-Triage, Schulung, Parallelbetrieb und Rollout
+file_ownership:
+  - docs/agent-ops/slices/L3-CUTOVER-UAT-032.yaml
+  - docs/agent-ops/active-workboard.md
+  - config/l3-cutover-uat.yaml
+  - scripts/l3_cutover_readiness.py
+  - tests/test_l3_cutover_readiness.py
+  - docs/quality-assurance/l3-cutover-uat-plan.md
+  - docs/operations/l3-cutover-uat-runbook.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance:
+  - Alle empfohlenen Rollen und Kernjourneys besitzen messbare Abnahmekriterien
+  - Zwei Migrationsproben und Reconciliation sind als harte Gates modelliert
+  - Externe Integrationen besitzen Probe, Owner, Evidenz und fail-closed Status
+  - Pilotmetriken und Severity-basierte Defect-Grenzen erzeugen deterministisches Go/No-Go
+  - Ohne reale Freigaben oder Evidenz kann kein produktives Go entstehen
+  - Validator-, Doku-, Architektur- und Handbuch-Gates sind gruen
+risks:
+  - Reale Anwenderunterschriften, Hardware, Provider und Produktivdaten bleiben externe Gates
+  - Das Programm darf keine produktiven Buchungen oder Migrationen automatisch ausfuehren
+  - Parallel bearbeitete Dateien ausserhalb des Dateibesitzes bleiben unberuehrt
