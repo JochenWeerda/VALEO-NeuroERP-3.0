@@ -13627,6 +13627,79 @@
         "title": "AutoMatchIn",
         "type": "object"
       },
+      "AutoMatchOut": {
+        "description": "``POST /procurement/match/auto`` (PROC-3WM-001).",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ThreeWayMatchOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Vollstaendiges Match-Ergebnis zur Nachvollziehbarkeit"
+          },
+          "discrepancy_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discrepancy Reason"
+          },
+          "drei_wege_abgeglichen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drei Wege Abgeglichen"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "match_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "MATCH_OK | MISMATCH | PENDING | CANCELLED",
+            "title": "Match Status"
+          },
+          "tolerance_check": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToleranceCheckOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "AutoMatchOut",
+        "type": "object"
+      },
       "AutoMatchRequest": {
         "description": "Request to perform automatic matching",
         "properties": {
@@ -45343,6 +45416,263 @@
         "title": "ErsCreditIn",
         "type": "object"
       },
+      "ErsCreditListOut": {
+        "description": "``GET /procurement/match/ers``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ErsCreditOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "ErsCreditListOut",
+        "type": "object"
+      },
+      "ErsCreditOut": {
+        "description": "Persistierte ERS-Gutschrift.",
+        "properties": {
+          "ausnahme_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ausnahme Code"
+          },
+          "betrag_netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag Netto"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "gutschrift_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gutschrift Nummer"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/ErsPreviewLineOut"
+            },
+            "title": "Positionen",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "ErsCreditOut",
+        "type": "object"
+      },
+      "ErsPreviewLineOut": {
+        "description": "Zeile der ERS-Gutschriftvorschau.\n\nZwei Auspraegungen: ``ueberlieferung`` (mit Position/Menge/Preis) und\n``rechnungsueberzahlung`` (mit Bezug/Fakturiert).",
+        "properties": {
+          "artikel_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Nr"
+          },
+          "betrag_netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag Netto"
+          },
+          "bezug": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezug"
+          },
+          "einzelpreis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einzelpreis"
+          },
+          "fakturiert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fakturiert"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "pos_nr": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pos Nr"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ueberlieferung | rechnungsueberzahlung",
+            "title": "Typ"
+          }
+        },
+        "title": "ErsPreviewLineOut",
+        "type": "object"
+      },
+      "ErsPreviewOut": {
+        "description": "Berechnete ERS-Gutschrift (rein rechnerisch, nicht persistiert).",
+        "properties": {
+          "anzahl_zeilen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl Zeilen"
+          },
+          "berechtigt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Berechtigt"
+          },
+          "betrag_netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag Netto"
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/ErsPreviewLineOut"
+            },
+            "title": "Positionen",
+            "type": "array"
+          }
+        },
+        "title": "ErsPreviewOut",
+        "type": "object"
+      },
       "ErsRunRequest": {
         "properties": {
           "gr_id": {
@@ -51049,6 +51379,106 @@
         "title": "FollowUpIn",
         "type": "object"
       },
+      "FollowUpListOut": {
+        "description": "``GET /procurement/match/follow-up``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FollowUpOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "FollowUpListOut",
+        "type": "object"
+      },
+      "FollowUpOut": {
+        "description": "Append-only Folgeaktion zu einer Bestellung.",
+        "properties": {
+          "action_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "nachforderung | reklamation | eskalation | freigabe",
+            "title": "Action Type"
+          },
+          "ausnahme_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ausnahme Code"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Zeitstempel",
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "eskalationsstufe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eskalationsstufe"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          }
+        },
+        "title": "FollowUpOut",
+        "type": "object"
+      },
       "FollowupIn": {
         "properties": {
           "art": {
@@ -55102,6 +55532,71 @@
           "doc"
         ],
         "title": "GobdExportIn",
+        "type": "object"
+      },
+      "GoodsReceiptOut": {
+        "description": "Wareneingangskopf zur Bestellung.",
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Eingangsdatum (ISO)",
+            "title": "Datum"
+          },
+          "gr_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Wareneingangsnummer",
+            "title": "Gr Number"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "lieferschein": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Lieferscheinnummer",
+            "title": "Lieferschein"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "GoodsReceiptOut",
         "type": "object"
       },
       "GrantIn": {
@@ -62775,6 +63270,102 @@
           "created_at"
         ],
         "title": "InventurgruppeOut",
+        "type": "object"
+      },
+      "InvoiceOut": {
+        "description": "Eingangsrechnung, die der Bestellung zugeordnet ist.",
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rechnungsdatum (ISO)",
+            "title": "Datum"
+          },
+          "gesamt_brutto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamt Brutto"
+          },
+          "gesamt_netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamt Netto"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "rechnungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungsnummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "zugeordneter_auftrag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zugeordneter Auftrag"
+          },
+          "zugeordneter_lieferschein": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zugeordneter Lieferschein"
+          }
+        },
+        "title": "InvoiceOut",
         "type": "object"
       },
       "InvoiceXmlCreate": {
@@ -75908,6 +76499,306 @@
         "title": "MasterDataOut",
         "type": "object"
       },
+      "MatchHinweisOut": {
+        "description": "Luecke oder Ausnahme aus dem Abgleich.\n\n``luecken`` fuehren ``pos_nr``/``schwere``/``text``; ``ausnahmen`` fuehren\nzusaetzlich einen ``code``.",
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ausnahme-Code, z. B. keine_rechnung",
+            "title": "Code"
+          },
+          "pos_nr": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pos Nr"
+          },
+          "schwere": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "info | warnung | blocker",
+            "title": "Schwere"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "MatchHinweisOut",
+        "type": "object"
+      },
+      "MatchOut": {
+        "description": "``GET /procurement/match`` — Bestellung vs. Wareneingang.\n\nIm Nichttrefferfall sind nur ``found=false`` und ``detail`` gesetzt.",
+        "properties": {
+          "bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellnummer"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Begruendung im Nichttrefferfall",
+            "title": "Detail"
+          },
+          "found": {
+            "default": false,
+            "description": "False, wenn die Bestellung nicht aufloesbar ist",
+            "title": "Found",
+            "type": "boolean"
+          },
+          "lieferant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Id"
+          },
+          "luecken": {
+            "items": {
+              "$ref": "#/components/schemas/MatchHinweisOut"
+            },
+            "title": "Luecken",
+            "type": "array"
+          },
+          "netto_summe": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto Summe"
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/MatchPositionOut"
+            },
+            "title": "Positionen",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wareneingaenge": {
+            "items": {
+              "$ref": "#/components/schemas/GoodsReceiptOut"
+            },
+            "title": "Wareneingaenge",
+            "type": "array"
+          }
+        },
+        "title": "MatchOut",
+        "type": "object"
+      },
+      "MatchPositionOut": {
+        "description": "Positionszeile aus ``match_position()`` plus Beleg-/Preiskontext.",
+        "properties": {
+          "abweichung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True bei teil-/ueberliefert",
+            "title": "Abweichung"
+          },
+          "abweichung_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mengenabweichung in Prozent",
+            "title": "Abweichung Pct"
+          },
+          "artikel_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Artikelnummer",
+            "title": "Artikel Nr"
+          },
+          "bestellt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bestellte Menge",
+            "title": "Bestellt"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Artikelbezeichnung",
+            "title": "Bezeichnung"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mengeneinheit",
+            "title": "Einheit"
+          },
+          "einzelpreis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Einzelpreis netto",
+            "title": "Einzelpreis"
+          },
+          "geliefert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Gelieferte Menge",
+            "title": "Geliefert"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Differenz bestellt minus geliefert",
+            "title": "Offen"
+          },
+          "pos_nr": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Positionsnummer am Beleg",
+            "title": "Pos Nr"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "offen | teilgeliefert | vollstaendig | ueberliefert | ohne_menge",
+            "title": "Status"
+          },
+          "wert_offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Offener Wert (offen x Einzelpreis)",
+            "title": "Wert Offen"
+          }
+        },
+        "title": "MatchPositionOut",
+        "type": "object"
+      },
       "MatchRequest": {
         "properties": {
           "gr_id": {
@@ -75934,6 +76825,211 @@
           "invoice_id"
         ],
         "title": "MatchRequest",
+        "type": "object"
+      },
+      "MatchResultListOut": {
+        "description": "``GET /procurement/match/results``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MatchResultRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "MatchResultListOut",
+        "type": "object"
+      },
+      "MatchResultRowOut": {
+        "description": "Zeile aus ``domain_procurement.procurement_match_results``.",
+        "properties": {
+          "ap_invoice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ap Invoice Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "discrepancy_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discrepancy Reason"
+          },
+          "gr_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gr Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "match_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Status"
+          },
+          "matched_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Zeitpunkt des Matches",
+            "title": "Matched At"
+          },
+          "matched_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched By"
+          },
+          "po_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Po Id"
+          },
+          "price_ap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Ap"
+          },
+          "price_po": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Po"
+          },
+          "price_tolerance_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Tolerance Pct"
+          },
+          "qty_ap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Ap"
+          },
+          "qty_gr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Gr"
+          },
+          "qty_po": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Po"
+          },
+          "qty_tolerance_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Tolerance Pct"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "MatchResultRowOut",
         "type": "object"
       },
       "MatchSuggestion": {
@@ -75992,6 +77088,101 @@
           "match_reason"
         ],
         "title": "MatchSuggestion",
+        "type": "object"
+      },
+      "MatchSummaryOut": {
+        "description": "Kopfkennzahlen des Abgleichs.\n\nDie drei letzten Felder liefert nur der 3-Wege-Match.",
+        "properties": {
+          "drei_wege_abgeglichen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drei Wege Abgeglichen"
+          },
+          "hat_abweichung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Abweichung"
+          },
+          "hat_ausnahme": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Ausnahme"
+          },
+          "offene_luecken": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offene Luecken"
+          },
+          "positionen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Positionen"
+          },
+          "rechnungen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungen"
+          },
+          "vollstaendig_geliefert": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vollstaendig Geliefert"
+          },
+          "wareneingaenge": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wareneingaenge"
+          }
+        },
+        "title": "MatchSummaryOut",
         "type": "object"
       },
       "MatchingRule": {
@@ -83816,6 +85007,95 @@
           "soll_components"
         ],
         "title": "OrderOut",
+        "type": "object"
+      },
+      "OrderPickerItemOut": {
+        "description": "Bestellung in der Auswahlliste des Match-Pickers.",
+        "properties": {
+          "bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellnummer"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bestelldatum (ISO)",
+            "title": "Datum"
+          },
+          "hat_wareneingang": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hat Wareneingang"
+          },
+          "netto_summe": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto Summe"
+          },
+          "positionen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anzahl Positionen",
+            "title": "Positionen"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "OrderPickerItemOut",
+        "type": "object"
+      },
+      "OrderPickerListOut": {
+        "description": "``GET /procurement/match/orders``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderPickerItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "OrderPickerListOut",
         "type": "object"
       },
       "OrderResponse": {
@@ -101042,6 +102322,168 @@
           "we_menge"
         ],
         "title": "RechnungspruefungIn",
+        "type": "object"
+      },
+      "RechnungspruefungOut": {
+        "description": "``POST /procurement/bestellungen/{id}/rechnungspruefung`` und\n``POST /procurement/rechnungspruefungen/{id}/freigabe``.\n\nFelder entsprechen ``domain_procurement.proc_rechnungspruefungen``;\n``soll_betrag_eur`` liefert zusaetzlich der Neuanlagepfad.",
+        "properties": {
+          "abweichung_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichung Pct"
+          },
+          "bestell_wert_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestell Wert Eur"
+          },
+          "bestellung_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellung Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "freigabe_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freigabe Grund"
+          },
+          "freigabe_operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freigabe Operator"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn die Pruefung bereits existierte",
+            "title": "Idempotent"
+          },
+          "rechnungs_betrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungs Betrag Eur"
+          },
+          "rechnungs_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungs Nr"
+          },
+          "soll_betrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Errechneter Sollbetrag (Bestellpreis x WE-Menge)",
+            "title": "Soll Betrag Eur"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "FREIGEGEBEN | GESPERRT",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "we_menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "We Menge"
+          }
+        },
+        "title": "RechnungspruefungOut",
         "type": "object"
       },
       "RecipeApproveIn": {
@@ -118272,6 +119714,272 @@
         "title": "TextRequest",
         "type": "object"
       },
+      "ThreeWayMatchOut": {
+        "description": "``GET /procurement/match/three-way`` und ``.../match/ers/preview``.\n\nErweitert den Basis-Match um Rechnungsstufe, Folgeaktionen und ERS.",
+        "properties": {
+          "ausnahmen": {
+            "items": {
+              "$ref": "#/components/schemas/MatchHinweisOut"
+            },
+            "title": "Ausnahmen",
+            "type": "array"
+          },
+          "bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellnummer"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Begruendung im Nichttrefferfall",
+            "title": "Detail"
+          },
+          "ers_credits": {
+            "items": {
+              "$ref": "#/components/schemas/ErsCreditOut"
+            },
+            "title": "Ers Credits",
+            "type": "array"
+          },
+          "ers_preview": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErsPreviewOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "follow_ups": {
+            "items": {
+              "$ref": "#/components/schemas/FollowUpOut"
+            },
+            "title": "Follow Ups",
+            "type": "array"
+          },
+          "found": {
+            "default": false,
+            "description": "False, wenn die Bestellung nicht aufloesbar ist",
+            "title": "Found",
+            "type": "boolean"
+          },
+          "lieferant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Id"
+          },
+          "luecken": {
+            "items": {
+              "$ref": "#/components/schemas/MatchHinweisOut"
+            },
+            "title": "Luecken",
+            "type": "array"
+          },
+          "netto_summe": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto Summe"
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/MatchPositionOut"
+            },
+            "title": "Positionen",
+            "type": "array"
+          },
+          "rechnungen": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceOut"
+            },
+            "title": "Rechnungen",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "three_way": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ThreeWayValueOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wareneingaenge": {
+            "items": {
+              "$ref": "#/components/schemas/GoodsReceiptOut"
+            },
+            "title": "Wareneingaenge",
+            "type": "array"
+          }
+        },
+        "title": "ThreeWayMatchOut",
+        "type": "object"
+      },
+      "ThreeWayValueOut": {
+        "description": "Wertabgleich gelieferter Bezug vs. fakturierter Betrag.",
+        "properties": {
+          "abweichung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichung"
+          },
+          "abweichung_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichung Pct"
+          },
+          "bestellt_wert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellt Wert"
+          },
+          "bezug": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezug"
+          },
+          "differenz": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Differenz"
+          },
+          "drei_wege_abgeglichen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drei Wege Abgeglichen"
+          },
+          "fakturiert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fakturiert"
+          },
+          "fakturiert_netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fakturiert Netto"
+          },
+          "geliefert_wert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geliefert Wert"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "abgeglichen | wertabweichung | ohne_bezug | rechnung_ohne_bezug",
+            "title": "Status"
+          }
+        },
+        "title": "ThreeWayValueOut",
+        "type": "object"
+      },
       "TimeAccountAdjustIn": {
         "properties": {
           "adjustment_date": {
@@ -118906,6 +120614,87 @@
           }
         },
         "title": "TimeWindow",
+        "type": "object"
+      },
+      "ToleranceCheckOut": {
+        "description": "Toleranzauswertung des automatischen 3-Wege-Matches.",
+        "properties": {
+          "missing_context": {
+            "description": "Fehlende Belegstufen, z. B. Wareneingang / Eingangsrechnung",
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Context",
+            "type": "array"
+          },
+          "price_tolerance_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Tolerance Pct"
+          },
+          "qty_delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Delta Pct"
+          },
+          "qty_ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Ok"
+          },
+          "qty_tolerance_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Tolerance Pct"
+          },
+          "value_delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Delta Pct"
+          },
+          "value_ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Ok"
+          }
+        },
+        "title": "ToleranceCheckOut",
         "type": "object"
       },
       "TopArticle": {
@@ -125867,6 +127656,131 @@
           "lager_id"
         ],
         "title": "WareneingangIn",
+        "type": "object"
+      },
+      "WareneingangOut": {
+        "description": "``POST /procurement/bestellungen/{id}/wareneingang`` und\n``POST /procurement/wareneingaenge/{id}/qs``.\n\nFelder entsprechen ``domain_procurement.proc_wareneingaenge``; ``idempotent``\nkennzeichnet den Wiederholfall.",
+        "properties": {
+          "bestellung_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellung Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "gebucht_am": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gebucht Am"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn der Wareneingang bereits gebucht war",
+            "title": "Idempotent"
+          },
+          "lager_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lager Id"
+          },
+          "menge_erhalten": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Erhalten"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "qs_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "WareneingangOut",
         "type": "object"
       },
       "WarengruppeCreate": {
@@ -330902,9 +332816,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Rechnungspruefung Endpoint Api V1 Procurement Bestellungen  Bestellung Id  Rechnungspruefung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RechnungspruefungOut"
                 }
               }
             },
@@ -330926,7 +332838,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Rechnungsprüfung (response_model=dict[str, Any], 3-Way-Match)",
+        "summary": "Rechnungsprüfung (3-Wege-Match)",
         "tags": [
           "procurement",
           "einkauf",
@@ -331058,9 +332970,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Buche Wareneingang Endpoint Api V1 Procurement Bestellungen  Bestellung Id  Wareneingang Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/WareneingangOut"
                 }
               }
             },
@@ -331128,9 +333038,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Match Api V1 Procurement Match Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MatchOut"
                 }
               }
             },
@@ -331198,9 +333106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Auto Match And Persist Api V1 Procurement Match Auto Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AutoMatchOut"
                 }
               }
             },
@@ -331268,9 +333174,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Ers Credits Api V1 Procurement Match Ers Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ErsCreditListOut"
                 }
               }
             },
@@ -331335,9 +333239,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Ers Credit Api V1 Procurement Match Ers Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ErsCreditOut"
                 }
               }
             },
@@ -331405,9 +333307,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Preview Ers Api V1 Procurement Match Ers Preview Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ThreeWayMatchOut"
                 }
               }
             },
@@ -331475,9 +333375,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Follow Ups Api V1 Procurement Match Follow Up Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FollowUpListOut"
                 }
               }
             },
@@ -331542,9 +333440,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Follow Up Api V1 Procurement Match Follow Up Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FollowUpOut"
                 }
               }
             },
@@ -331613,9 +333509,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Orders Api V1 Procurement Match Orders Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/OrderPickerListOut"
                 }
               }
             },
@@ -331716,9 +333610,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Match Results Api V1 Procurement Match Results Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MatchResultListOut"
                 }
               }
             },
@@ -331786,9 +333678,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Match Three Way Api V1 Procurement Match Three Way Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ThreeWayMatchOut"
                 }
               }
             },
@@ -331864,9 +333754,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Rechnungsfreigabe Endpoint Api V1 Procurement Rechnungspruefungen  Pruefung Id  Freigabe Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RechnungspruefungOut"
                 }
               }
             },
@@ -331942,9 +333830,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Update We Qs Endpoint Api V1 Procurement Wareneingaenge  We Id  Qs Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/WareneingangOut"
                 }
               }
             },
