@@ -580,6 +580,241 @@
         "title": "AbwesenheitTransitionRequest",
         "type": "object"
       },
+      "AbwesenheitsantragListeOut": {
+        "description": "``GET /antraege``",
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AbwesenheitsantragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "AbwesenheitsantragListeOut",
+        "type": "object"
+      },
+      "AbwesenheitsantragOut": {
+        "description": "Ein Abwesenheitsantrag samt abgeleiteter Kennzeichen.",
+        "properties": {
+          "abgeschlossen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True bei Endstatus (genehmigt/abgelehnt/zurueckgezogen)",
+            "title": "Abgeschlossen"
+          },
+          "ablehnung_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ablehnung Grund"
+          },
+          "antrag_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Antrag Id"
+          },
+          "arbeitstage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arbeitstage"
+          },
+          "beantragt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beantragt Am"
+          },
+          "beantragt_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beantragt Von"
+          },
+          "bis_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Datum",
+            "title": "Bis Datum"
+          },
+          "eau_nachweis_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nachweis der elektronischen Arbeitsunfaehigkeit",
+            "title": "Eau Nachweis Id"
+          },
+          "eau_pflicht": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True bei Typen, die einen eAU-Nachweis verlangen",
+            "title": "Eau Pflicht"
+          },
+          "genehmigt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genehmigt Am"
+          },
+          "genehmigt_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genehmigt Von"
+          },
+          "kommentar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kommentar"
+          },
+          "mitarbeiter_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mitarbeiter Nr"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "vertretung_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vertretung Durch"
+          },
+          "von_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Datum",
+            "title": "Von Datum"
+          }
+        },
+        "title": "AbwesenheitsantragOut",
+        "type": "object"
+      },
       "Account": {
         "description": "Full account schema",
         "properties": {
@@ -3076,6 +3311,551 @@
           }
         },
         "title": "ActualRecordOut",
+        "type": "object"
+      },
+      "AdapterBatchActionOut": {
+        "description": "Antwort von ``stage``, ``reconcile`` und ``approve``.\n\n``reconcile`` liefert zusaetzlich ``record_count``, ``approve``\nzusaetzlich ``next_gate``.",
+        "properties": {
+          "execution_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Enabled"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "mismatch_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mismatch Count"
+          },
+          "next_gate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Naechstes externes Gate vor der Ausfuehrung",
+            "title": "Next Gate"
+          },
+          "record_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Count"
+          },
+          "staged_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staged Count"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "AdapterBatchActionOut",
+        "type": "object"
+      },
+      "AdapterBatchOut": {
+        "description": "Zeile aus ``domain_integration.legacy_adapter_batches``.",
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "mapping_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapping Version"
+          },
+          "mismatch_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mismatch Count"
+          },
+          "payload_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload Hash"
+          },
+          "profile_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Key"
+          },
+          "record_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Count"
+          },
+          "staged_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staged Count"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "AdapterBatchOut",
+        "type": "object"
+      },
+      "AdapterConfigureOut": {
+        "description": "``PUT /profiles/{profile_key}``",
+        "properties": {
+          "execution_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Enabled"
+          },
+          "profile_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Key"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "AdapterConfigureOut",
+        "type": "object"
+      },
+      "AdapterIntakeOut": {
+        "description": "``POST /{profile_key}/intake`` — Annahme eines Fremdbelegs.",
+        "properties": {
+          "duplicate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn derselbe Payload-Hash schon vorlag",
+            "title": "Duplicate"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "payload_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload Hash"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "AdapterIntakeOut",
+        "type": "object"
+      },
+      "AdapterMonitorOut": {
+        "description": "``GET /batches`` — Stapeluebersicht mit Profilkatalog.",
+        "properties": {
+          "execution_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Enabled"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdapterBatchOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "profiles": {
+            "items": {
+              "$ref": "#/components/schemas/AdapterProfileOut"
+            },
+            "title": "Profiles",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "AdapterMonitorOut",
+        "type": "object"
+      },
+      "AdapterProfileListOut": {
+        "description": "``GET /profiles``",
+        "properties": {
+          "execution_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Enabled"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdapterProfileOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "AdapterProfileListOut",
+        "type": "object"
+      },
+      "AdapterProfileOut": {
+        "description": "Profil aus dem Adapterkatalog.\n\nDer Katalog mischt die statische Spezifikation (``profile_key``, ``title``,\n``required_contract_fields``) mit der Mandantenkonfiguration; ohne\nKonfiguration steht nur ``status: inactive``.",
+        "properties": {
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "execution_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Enabled"
+          },
+          "format_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format Version"
+          },
+          "mapping_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapping Version"
+          },
+          "profile_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Key"
+          },
+          "required_contract_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Contract Fields",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "AdapterProfileOut",
         "type": "object"
       },
       "Address": {
@@ -63422,6 +64202,156 @@
         "title": "HerdDataConnectionIn",
         "type": "object"
       },
+      "HerdDataConnectionOut": {
+        "description": "Zeile aus ``domain_agrar.herd_data_connections``.\n\nZugangsdaten werden nie zurueckgegeben — nur der Schluesselname der\nUmgebungsvariablen (``credential_env_key``).",
+        "properties": {
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "consent_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Einwilligungsnachweis",
+            "title": "Consent Ref"
+          },
+          "contract_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Ref"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "credential_env_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name der Umgebungsvariablen, nicht das Geheimnis selbst",
+            "title": "Credential Env Key"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "endpoint_templates": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint Templates"
+          },
+          "herd_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Herd Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "live_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Live Enabled"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "query_parameters": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query Parameters"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "HerdDataConnectionOut",
+        "type": "object"
+      },
       "HerdDataMockImport": {
         "properties": {
           "connection_id": {
@@ -63455,6 +64385,255 @@
           "payload"
         ],
         "title": "HerdDataMockImport",
+        "type": "object"
+      },
+      "HerdDataMockImportOut": {
+        "description": "``POST /herd-data/mock-import`` — Normalisierung ohne Fremdsystem.",
+        "properties": {
+          "imported_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "0, wenn nicht persistiert wurde",
+            "title": "Imported Count"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "normalized_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Normalized Count"
+          },
+          "observations": {
+            "description": "Normalisierte Beobachtungen",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Observations",
+            "type": "array"
+          }
+        },
+        "title": "HerdDataMockImportOut",
+        "type": "object"
+      },
+      "HerdDataObservationOut": {
+        "description": "Zeile aus ``domain_agrar.herd_data_observations``.",
+        "properties": {
+          "effective_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective At"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "herd_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Herd Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "imported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported At"
+          },
+          "is_deleted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Deleted"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "payload": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rohbeobachtung (JSONB)",
+            "title": "Payload"
+          },
+          "previous_group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Group Id"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "provider_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Updated At"
+          }
+        },
+        "title": "HerdDataObservationOut",
+        "type": "object"
+      },
+      "HerdDataSyncOut": {
+        "description": "``POST /herd-data/connections/{id}/sync`` — Delta-Sync-Lauf.",
+        "properties": {
+          "cursor_from": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor From"
+          },
+          "cursor_to": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor To"
+          },
+          "imported_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported Count"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "HerdDataSyncOut",
         "type": "object"
       },
       "HerdDataSyncRequest": {
@@ -80035,6 +81214,138 @@
           }
         },
         "title": "MahnstufeIn",
+        "type": "object"
+      },
+      "MahnstufeOut": {
+        "description": "``POST /mahnstufe/{rechnungsnr}/eskalieren``.",
+        "properties": {
+          "bearbeitungsgebuehr_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bearbeitungsgebuehr Eur"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "rechnungsnr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungsnr"
+          },
+          "stufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stufe"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "vorherige_stufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vorherige Stufe"
+          }
+        },
+        "title": "MahnstufeOut",
+        "type": "object"
+      },
+      "MahnstufenTrailOut": {
+        "description": "``GET /mahnstufe/{rechnungsnr}/trail`` — chronologischer Verlauf.",
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "rechnungsnr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungsnr"
+          },
+          "trail": {
+            "items": {
+              "$ref": "#/components/schemas/MahnstufeOut"
+            },
+            "title": "Trail",
+            "type": "array"
+          }
+        },
+        "title": "MahnstufenTrailOut",
         "type": "object"
       },
       "MailCaptureIn": {
@@ -107308,6 +108619,150 @@
         "title": "RateBuchenIn",
         "type": "object"
       },
+      "RateOut": {
+        "description": "``POST /ratenzahlung/raten/{id}/buchen``.\n\nZeile aus ``domain_finance.finance_raten`` plus der Planfortschreibung.",
+        "properties": {
+          "betrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag Eur"
+          },
+          "bezahlt_am": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezahlt Am"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "faellig_am": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faellig Am"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotent"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "plan_restbetrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Restbetrag des Plans nach dieser Buchung",
+            "title": "Plan Restbetrag Eur"
+          },
+          "plan_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Status"
+          },
+          "rate_nr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate Nr"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "OFFEN | BEZAHLT",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "RateOut",
+        "type": "object"
+      },
       "RatenzahlungPlanIn": {
         "properties": {
           "anzahl_raten": {
@@ -107334,6 +108789,122 @@
           "erste_faelligkeit"
         ],
         "title": "RatenzahlungPlanIn",
+        "type": "object"
+      },
+      "RatenzahlungsplanOut": {
+        "description": "``POST /ratenzahlung/plaene``.\n\nDer Idempotenzpfad liefert die gespeicherte Planzeile, der Neuanlagepfad\nzusaetzlich ``rate_ids``.",
+        "properties": {
+          "anzahl_raten": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl Raten"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "gesamt_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamt Eur"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotent"
+          },
+          "op_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Offener Posten",
+            "title": "Op Id"
+          },
+          "rate_ids": {
+            "description": "IDs der angelegten Raten",
+            "items": {
+              "type": "string"
+            },
+            "title": "Rate Ids",
+            "type": "array"
+          },
+          "restbetrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restbetrag Eur"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "RatenzahlungsplanOut",
         "type": "object"
       },
       "RationAuditEventOut": {
@@ -108760,6 +110331,102 @@
           }
         },
         "title": "RationWorklistItemOut",
+        "type": "object"
+      },
+      "RationsImportOut": {
+        "description": "Eintrag im Importjournal ``domain_agrar.rations_integration_imports``.\n\n``duplicate`` kennzeichnet den Idempotenzpfad: bei bereits bekannter\n``external_id`` liefert der Endpunkt die gespeicherte Zeile zurueck.",
+        "properties": {
+          "adapter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adapter"
+          },
+          "duplicate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn die external_id bereits importiert war",
+            "title": "Duplicate"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "imported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported At"
+          },
+          "result": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Normalisiertes Zielmodell (JSONB)",
+            "title": "Result"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "target_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Model"
+          }
+        },
+        "title": "RationsImportOut",
         "type": "object"
       },
       "RationsOptimizationOut": {
@@ -118003,6 +119670,225 @@
           }
         },
         "title": "SendRequest",
+        "type": "object"
+      },
+      "SepaBatchOut": {
+        "description": "``POST /sepa/batches`` — erzeugter Lastschrift-Stapel.",
+        "properties": {
+          "anzahl_eintraege": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl Eintraege"
+          },
+          "faellig_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faellig Am"
+          },
+          "gesamt_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamt Eur"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "xml_payload": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "pain.008-Nutzlast",
+            "title": "Xml Payload"
+          }
+        },
+        "title": "SepaBatchOut",
+        "type": "object"
+      },
+      "SepaMandatOut": {
+        "description": "SEPA-Mandat — Anlage und Widerruf.\n\nDer Widerruf spreizt die gespeicherte Zeile aus\n``domain_finance.finance_sepa_mandate`` und ergaenzt ``idempotent``.",
+        "properties": {
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "erteilung_am": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erteilung Am"
+          },
+          "glaeubiger_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glaeubiger Id"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True, wenn das Mandat bereits widerrufen war",
+            "title": "Idempotent"
+          },
+          "mandat_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mandat Ref"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "AKTIV | WIDERRUFEN",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "CORE oder B2B",
+            "title": "Typ"
+          },
+          "widerruf_am": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Widerruf Am"
+          }
+        },
+        "title": "SepaMandatOut",
         "type": "object"
       },
       "ServiceAnfrageCreate": {
@@ -129852,6 +131738,79 @@
           "rules"
         ],
         "title": "UpsertRequest",
+        "type": "object"
+      },
+      "UrlaubskontoOut": {
+        "description": "``GET /urlaubskonto/{mitarbeiter_nr}``",
+        "properties": {
+          "anspruch_tage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anspruch Tage"
+          },
+          "genehmigte_antraege": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genehmigte Antraege"
+          },
+          "jahr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jahr"
+          },
+          "mitarbeiter_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mitarbeiter Nr"
+          },
+          "resturlaub_tage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resturlaub Tage"
+          },
+          "verbraucht_tage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verbraucht Tage"
+          }
+        },
+        "title": "UrlaubskontoOut",
         "type": "object"
       },
       "User": {
@@ -181694,8 +183653,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/HerdDataConnectionOut"
                   },
                   "title": "Response List Herd Data Connections Api V1 Agrar Rations Optimization Integrations Herd Data Connections Get",
                   "type": "array"
@@ -181765,9 +183723,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Upsert Herd Data Connection Api V1 Agrar Rations Optimization Integrations Herd Data Connections Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/HerdDataConnectionOut"
                 }
               }
             },
@@ -181845,9 +183801,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Sync Herd Data Connection Api V1 Agrar Rations Optimization Integrations Herd Data Connections  Connection Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/HerdDataSyncOut"
                 }
               }
             },
@@ -181916,9 +183870,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Import Herd Data Mock Api V1 Agrar Rations Optimization Integrations Herd Data Mock Import Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/HerdDataMockImportOut"
                 }
               }
             },
@@ -182027,8 +183979,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/HerdDataObservationOut"
                   },
                   "title": "Response List Herd Data Observations Api V1 Agrar Rations Optimization Integrations Herd Data Observations Get",
                   "type": "array"
@@ -182124,8 +184075,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/RationsImportOut"
                   },
                   "title": "Response List Rations Imports Api V1 Agrar Rations Optimization Integrations Imports Get",
                   "type": "array"
@@ -182211,9 +184161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Import Rations Data Api V1 Agrar Rations Optimization Integrations  Adapter  Import Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RationsImportOut"
                 }
               }
             },
@@ -260173,9 +262121,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Eskaliere Mahnstufe Endpoint Api V1 Finance Mahnstufe  Rechnungsnr  Eskalieren Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MahnstufeOut"
                 }
               }
             },
@@ -260241,9 +262187,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mahnstufe Trail Endpoint Api V1 Finance Mahnstufe  Rechnungsnr  Trail Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MahnstufenTrailOut"
                 }
               }
             },
@@ -263400,9 +265344,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Ratenzahlungsplan Endpoint Api V1 Finance Ratenzahlung Plaene Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RatenzahlungsplanOut"
                 }
               }
             },
@@ -263478,9 +265420,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Buche Rate Endpoint Api V1 Finance Ratenzahlung Raten  Rate Id  Buchen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RateOut"
                 }
               }
             },
@@ -264167,9 +266107,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Sepa Batch Endpoint Api V1 Finance Sepa Batches Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SepaBatchOut"
                 }
               }
             },
@@ -264236,9 +266174,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Sepa Mandat Endpoint Api V1 Finance Sepa Mandate Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SepaMandatOut"
                 }
               }
             },
@@ -264304,9 +266240,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Widerruf Sepa Mandat Endpoint Api V1 Finance Sepa Mandate  Mandat Id  Widerruf Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SepaMandatOut"
                 }
               }
             },
@@ -297111,9 +299045,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Monitor Api V1 Legacy Interface Adapters Batches Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterMonitorOut"
                 }
               }
             },
@@ -297187,9 +299119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Approve Api V1 Legacy Interface Adapters Batches  Batch Id  Approve Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterBatchActionOut"
                 }
               }
             },
@@ -297263,9 +299193,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Reconcile Api V1 Legacy Interface Adapters Batches  Batch Id  Reconcile Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterBatchActionOut"
                 }
               }
             },
@@ -297339,9 +299267,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Stage Api V1 Legacy Interface Adapters Batches  Batch Id  Stage Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterBatchActionOut"
                 }
               }
             },
@@ -297396,9 +299322,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Profiles Api V1 Legacy Interface Adapters Profiles Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterProfileListOut"
                 }
               }
             },
@@ -297472,9 +299396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Configure Api V1 Legacy Interface Adapters Profiles  Profile Key  Put",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterConfigureOut"
                 }
               }
             },
@@ -297548,9 +299470,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Intake Api V1 Legacy Interface Adapters  Profile Key  Intake Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AdapterIntakeOut"
                 }
               }
             },
@@ -311018,9 +312938,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Antraege Api V1 Personal Abwesenheit Antraege Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AbwesenheitsantragListeOut"
                 }
               }
             },
@@ -311085,9 +313003,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Antrag Stellen Api V1 Personal Abwesenheit Antraege Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AbwesenheitsantragOut"
                 }
               }
             },
@@ -311153,9 +313069,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Antrag Api V1 Personal Abwesenheit Antraege  Antrag Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AbwesenheitsantragOut"
                 }
               }
             },
@@ -311231,9 +313145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Ablehnen Api V1 Personal Abwesenheit Antraege  Antrag Id  Ablehnen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AbwesenheitsantragOut"
                 }
               }
             },
@@ -311309,9 +313221,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Genehmigen Api V1 Personal Abwesenheit Antraege  Antrag Id  Genehmigen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AbwesenheitsantragOut"
                 }
               }
             },
@@ -311387,9 +313297,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Zurueckziehen Api V1 Personal Abwesenheit Antraege  Antrag Id  Zurueckziehen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AbwesenheitsantragOut"
                 }
               }
             },
@@ -311466,9 +313374,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Urlaubskonto Api V1 Personal Abwesenheit Urlaubskonto  Mitarbeiter Nr  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/UrlaubskontoOut"
                 }
               }
             },
