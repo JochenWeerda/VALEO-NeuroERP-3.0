@@ -16575,17 +16575,51 @@
         "title": "BasisValueKind",
         "type": "string"
       },
-      "BatchOut": {
+      "BatchActionOut": {
+        "description": "Antwort der Statusaktionen.\n\n``validate`` liefert zusaetzlich ``failed_lines``, ``execute`` zusaetzlich\n``processed_lines`` und ``failed_lines``; ``release`` und ``retry`` nur\n``id`` und ``status``.",
         "properties": {
-          "article_id": {
-            "title": "Article Id",
+          "failed_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failed Lines"
+          },
+          "id": {
+            "title": "Id",
             "type": "string"
           },
+          "processed_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processed Lines"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "BatchActionOut",
+        "type": "object"
+      },
+      "BatchCreatedOut": {
+        "description": "``POST /billing-batches`` — Antwort der Neuanlage.",
+        "properties": {
           "batch_number": {
-            "title": "Batch Number",
-            "type": "string"
-          },
-          "expiry_date": {
             "anyOf": [
               {
                 "type": "string"
@@ -16594,29 +16628,249 @@
                 "type": "null"
               }
             ],
-            "title": "Expiry Date"
+            "title": "Batch Number"
           },
           "id": {
             "title": "Id",
             "type": "string"
           },
-          "quantity": {
-            "default": 0,
-            "title": "Quantity",
-            "type": "number"
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
           },
-          "warehouse_id": {
-            "title": "Warehouse Id",
-            "type": "string"
+          "total_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Amount"
+          },
+          "total_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Lines"
           }
         },
         "required": [
-          "id",
-          "article_id",
-          "batch_number",
-          "warehouse_id"
+          "id"
         ],
-        "title": "BatchOut",
+        "title": "BatchCreatedOut",
+        "type": "object"
+      },
+      "BatchLineOut": {
+        "description": "Positionszeile eines Abrechnungsstapels.",
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "batch_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "evidence_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Route"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "processed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processed At"
+          },
+          "retry_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry Count"
+          },
+          "source_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Number"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Route"
+          },
+          "source_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Type"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "validation_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validation Error"
+          }
+        },
+        "title": "BatchLineOut",
+        "type": "object"
+      },
+      "BatchPageOut": {
+        "description": "``GET /billing-batches`` — seitenweise Stapelliste.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/app__api__v1__schemas__billing_batch_schemas__BatchOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "BatchPageOut",
         "type": "object"
       },
       "BatchRequest": {
@@ -16721,6 +16975,80 @@
           "errors"
         ],
         "title": "BatchSettleResponse",
+        "type": "object"
+      },
+      "BatchSummaryOut": {
+        "description": "``GET /billing-batches/summary`` — Zaehlung je Status.",
+        "properties": {
+          "draft": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft"
+          },
+          "failed_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Summe fehlgeschlagener Positionen ueber alle Stapel",
+            "title": "Failed Lines"
+          },
+          "partial_failed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partial Failed"
+          },
+          "released": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Released"
+          },
+          "running": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Running"
+          },
+          "validated": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validated"
+          }
+        },
+        "title": "BatchSummaryOut",
         "type": "object"
       },
       "BenchmarkApiOut": {
@@ -19032,6 +19360,25 @@
           "utilization_percent"
         ],
         "title": "BlockedCustomerOut",
+        "type": "object"
+      },
+      "BlockerResolvedOut": {
+        "description": "``POST .../blockers/{id}/resolve``",
+        "properties": {
+          "blocker_id": {
+            "title": "Blocker Id",
+            "type": "string"
+          },
+          "resolved": {
+            "default": true,
+            "title": "Resolved",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "blocker_id"
+        ],
+        "title": "BlockerResolvedOut",
         "type": "object"
       },
       "BodenDaten": {
@@ -26296,6 +26643,584 @@
         "title": "ClosingRunRequest",
         "type": "object"
       },
+      "CockpitBlockerOut": {
+        "description": "Zeile aus ``domain_workflow.wf_cockpit_blockers`` (Vereinigung beider DDLs).",
+        "properties": {
+          "blocker_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocker Type"
+          },
+          "context": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Context"
+          },
+          "created_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Created At"
+          },
+          "external_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External System"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Reason"
+          },
+          "resolved": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "resolved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Resolved By"
+          },
+          "retryable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retryable"
+          },
+          "since": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Since"
+          }
+        },
+        "title": "CockpitBlockerOut",
+        "type": "object"
+      },
+      "CockpitEventOut": {
+        "description": "Zeile aus ``domain_workflow.wf_cockpit_events``.",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "payload": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ereignis-Nutzlast (JSONB)",
+            "title": "Payload"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "title": "CockpitEventOut",
+        "type": "object"
+      },
+      "CockpitInstanceDetailOut": {
+        "description": "``GET /workflow/cockpit-db/instances/{id}`` — Kopf plus Verlauf.",
+        "properties": {
+          "active_blocker_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Blocker Count"
+          },
+          "audit_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Ref"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/CockpitBlockerOut"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "business_object_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Object Ref"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "kanonische Migration",
+            "title": "Created At"
+          },
+          "current_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Step"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/CockpitEventOut"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "finished_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Finished At"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "process_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process Key"
+          },
+          "replayable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replayable"
+          },
+          "started_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Started At"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "CockpitInstanceDetailOut",
+        "type": "object"
+      },
+      "CockpitInstanceListOut": {
+        "description": "``GET /workflow/cockpit-db/instances``",
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CockpitInstanceOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "CockpitInstanceListOut",
+        "type": "object"
+      },
+      "CockpitInstanceOut": {
+        "description": "Zeile aus ``domain_workflow.wf_cockpit_instances``.",
+        "properties": {
+          "active_blocker_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Blocker Count"
+          },
+          "audit_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Ref"
+          },
+          "business_object_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Object Ref"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "kanonische Migration",
+            "title": "Created At"
+          },
+          "current_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Step"
+          },
+          "finished_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Finished At"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "process_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process Key"
+          },
+          "replayable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replayable"
+          },
+          "started_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reparaturmigration",
+            "title": "Started At"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "CockpitInstanceOut",
+        "type": "object"
+      },
       "CollateralOut": {
         "additionalProperties": true,
         "description": "Security / collateral item (Pfandrecht, Bürgschaft).",
@@ -30497,6 +31422,87 @@
         "title": "CoverageMonitorResponse",
         "type": "object"
       },
+      "CoverageSummaryOut": {
+        "description": "``GET /ai-engineering/metrics/coverage``.\n\nOhne ``coverage.xml`` liefert der Service nur ``status`` mit einem Hinweis;\ndie Kennzahlen bleiben dann leer.",
+        "properties": {
+          "avg_coverage_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Coverage Pct"
+          },
+          "files_below_50pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files Below 50Pct"
+          },
+          "files_below_70pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files Below 70Pct"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nur gesetzt, wenn coverage.xml fehlt",
+            "title": "Status"
+          },
+          "top_3_lowest": {
+            "description": "Die drei schwaechsten Dateien als (Pfad, Prozent)",
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Top 3 Lowest",
+            "type": "array"
+          },
+          "total_files": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Files"
+          }
+        },
+        "title": "CoverageSummaryOut",
+        "type": "object"
+      },
       "CpdAccount": {
         "properties": {
           "area_code": {
@@ -34543,6 +35549,90 @@
         "title": "CustomersOut",
         "type": "object"
       },
+      "CycleTimeSummaryOut": {
+        "description": "``GET /ai-engineering/metrics/cycle-time``",
+        "properties": {
+          "avg_cycle_time_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Cycle Time Days"
+          },
+          "completed_slices": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Slices"
+          },
+          "max_cycle_time_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Cycle Time Days"
+          },
+          "min_cycle_time_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Cycle Time Days"
+          },
+          "slices_missing_harness": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slices Missing Harness"
+          },
+          "slices_without_tests": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slices Without Tests"
+          },
+          "total_slices": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Slices"
+          }
+        },
+        "title": "CycleTimeSummaryOut",
+        "type": "object"
+      },
       "DMSDocumentOut": {
         "properties": {
           "filename": {
@@ -35895,6 +36985,137 @@
           "preis_eur"
         ],
         "title": "DauerauftragPositionOut",
+        "type": "object"
+      },
+      "DeadLetterItemOut": {
+        "description": "Instanz in FAILED oder BLOCKED_EXTERNAL_GATE.",
+        "properties": {
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "current_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Step"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "open_blocker_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Blocker Count"
+          },
+          "process_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process Key"
+          },
+          "replayable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replayable"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "DeadLetterItemOut",
+        "type": "object"
+      },
+      "DeadLetterViewOut": {
+        "description": "``GET /workflow/cockpit-db/dead-letter``",
+        "properties": {
+          "dead_letter_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dead Letter Count"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DeadLetterItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "DeadLetterViewOut",
         "type": "object"
       },
       "DeadlineInfo": {
@@ -57537,6 +58758,46 @@
         "title": "GapPipelineResponse",
         "type": "object"
       },
+      "GateBlockerSummaryOut": {
+        "description": "``GET /ai-engineering/metrics/gate-blockers`` — Heuristik aus dem Workboard.",
+        "properties": {
+          "external_gate_mentions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Gate Mentions"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "workboard_open_items": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workboard Open Items"
+          }
+        },
+        "title": "GateBlockerSummaryOut",
+        "type": "object"
+      },
       "Gdpr": {
         "properties": {
           "anonymized_at": {
@@ -64990,6 +66251,26 @@
         "title": "InstanceSaveRequest",
         "type": "object"
       },
+      "InstanceStatusOut": {
+        "description": "``POST .../retry`` und ``.../compensate``",
+        "properties": {
+          "process_instance_id": {
+            "title": "Process Instance Id",
+            "type": "string"
+          },
+          "status": {
+            "description": "retry_pending | compensated",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "process_instance_id",
+          "status"
+        ],
+        "title": "InstanceStatusOut",
+        "type": "object"
+      },
       "InstanceUpdateRequest": {
         "properties": {
           "assigned_owner": {
@@ -65149,6 +66430,25 @@
           }
         },
         "title": "InstanceUpdateRequest",
+        "type": "object"
+      },
+      "InstanceUpsertOut": {
+        "description": "``POST /workflow/cockpit-db/instances``",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "process_instance_id": {
+            "title": "Process Instance Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "process_instance_id"
+        ],
+        "title": "InstanceUpsertOut",
         "type": "object"
       },
       "Instruction": {
@@ -69192,6 +70492,199 @@
         "title": "KontraktCreateRequest",
         "type": "object"
       },
+      "KontraktFixingOut": {
+        "description": "Zeile aus ``domain_kontrakte.kontrakt_fixings``.",
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "fixing_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing Datum"
+          },
+          "fixing_preis_eur_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing Preis Eur T"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "markt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "KASSA und weitere Maerkte",
+            "title": "Markt"
+          },
+          "menge_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge T"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenz"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "KontraktFixingOut",
+        "type": "object"
+      },
+      "KontraktFixingSummaryOut": {
+        "description": "``GET /fixing/{kontrakt_id}/summary`` — Fixierungsstand des Kontrakts.",
+        "properties": {
+          "anzahl_fixings": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl Fixings"
+          },
+          "avg_fixing_preis_eur_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mengengewichteter Durchschnittspreis",
+            "title": "Avg Fixing Preis Eur T"
+          },
+          "gefixte_menge_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gefixte Menge T"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "offene_menge_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offene Menge T"
+          },
+          "vollstaendig_gefixt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vollstaendig Gefixt"
+          }
+        },
+        "title": "KontraktFixingSummaryOut",
+        "type": "object"
+      },
       "KontraktKlasseCreate": {
         "properties": {
           "beschreibung": {
@@ -69319,6 +70812,148 @@
         "title": "KontraktKlasseOut",
         "type": "object"
       },
+      "KontraktLifecycleOut": {
+        "description": "Zeile aus ``domain_kontrakte.kontrakt_lifecycle``.",
+        "properties": {
+          "artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "kontrakt_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Nr"
+          },
+          "lieferant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Id"
+          },
+          "menge_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge T"
+          },
+          "periode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periode"
+          },
+          "preis_eur_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Eur T"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ENTWURF und Folgestatus",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "KontraktLifecycleOut",
+        "type": "object"
+      },
       "KontraktMengenzeitraumOut": {
         "additionalProperties": true,
         "description": "Response schema for kontrakt mengenzeitraum endpoints.",
@@ -69438,6 +71073,159 @@
           "menge"
         ],
         "title": "KontraktPosCreate",
+        "type": "object"
+      },
+      "KontraktSettlementOut": {
+        "description": "Zeile aus ``domain_kontrakte.kontrakt_settlements``.",
+        "properties": {
+          "abrechnungspreis_eur_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abrechnungspreis Eur T"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "gelieferte_menge_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gelieferte Menge T"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "lieferung_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferung Datum"
+          },
+          "netto_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto Eur"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenz"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "OFFEN und Folgestatus",
+            "title": "Status"
+          },
+          "storno_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storno Grund"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "KontraktSettlementOut",
         "type": "object"
       },
       "KontraktTransitionRequest": {
@@ -82166,6 +83954,72 @@
         "title": "MetricDiffOut",
         "type": "object"
       },
+      "MetricsDashboardOut": {
+        "description": "``GET /ai-engineering/metrics/dashboard`` — alle Teilauswertungen.",
+        "properties": {
+          "coverage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoverageSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cycle_time": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CycleTimeSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gate_blockers": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GateBlockerSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "owner_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Anzahl Slices je Eigentuemer",
+            "title": "Owner Distribution",
+            "type": "object"
+          },
+          "rework": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReworkIndicatorOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "MetricsDashboardOut",
+        "type": "object"
+      },
       "MhdAbschreibungIn": {
         "properties": {
           "article_id": {
@@ -90919,7 +92773,7 @@
           "items": {
             "description": "List of items",
             "items": {
-              "$ref": "#/components/schemas/BatchOut"
+              "$ref": "#/components/schemas/app__api__v1__endpoints__article_extensions__BatchOut"
             },
             "title": "Items",
             "type": "array"
@@ -109937,6 +111791,82 @@
         "title": "RevokeResultOut",
         "type": "object"
       },
+      "ReworkDetailOut": {
+        "description": "Slice mit unvollstaendigem Harness oder ohne Tests.",
+        "properties": {
+          "has_all_harness_fields": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has All Harness Fields"
+          },
+          "has_tests": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has Tests"
+          },
+          "slice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slice Id"
+          }
+        },
+        "title": "ReworkDetailOut",
+        "type": "object"
+      },
+      "ReworkIndicatorOut": {
+        "description": "``GET /ai-engineering/metrics/rework``",
+        "properties": {
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ReworkDetailOut"
+            },
+            "title": "Details",
+            "type": "array"
+          },
+          "rework_rate_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rework Rate Pct"
+          },
+          "slices_with_incomplete_harness_or_tests": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slices With Incomplete Harness Or Tests"
+          }
+        },
+        "title": "ReworkIndicatorOut",
+        "type": "object"
+      },
       "RezeptKomponenteIn": {
         "properties": {
           "anteil": {
@@ -118708,6 +120638,126 @@
         "description": "Response schema for sla escalation api endpoints.",
         "properties": {},
         "title": "SlaEscalationApiOut",
+        "type": "object"
+      },
+      "SliceMetricOut": {
+        "description": "Kennzahlen eines einzelnen Slice-YAML.",
+        "properties": {
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Datum",
+            "title": "Closed At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Datum",
+            "title": "Created At"
+          },
+          "cycle_time_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Time Days"
+          },
+          "has_all_harness_fields": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Alle sieben Vertrags-Ebenen im YAML vorhanden",
+            "title": "Has All Harness Fields"
+          },
+          "has_tests": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has Tests"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "slice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slice Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "test_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Count"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "SliceMetricOut",
         "type": "object"
       },
       "SnapshotOut": {
@@ -140078,6 +142128,50 @@
         "title": "StornoIn",
         "type": "object"
       },
+      "app__api__v1__endpoints__article_extensions__BatchOut": {
+        "properties": {
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "batch_number": {
+            "title": "Batch Number",
+            "type": "string"
+          },
+          "expiry_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiry Date"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "quantity": {
+            "default": 0,
+            "title": "Quantity",
+            "type": "number"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "article_id",
+          "batch_number",
+          "warehouse_id"
+        ],
+        "title": "BatchOut",
+        "type": "object"
+      },
       "app__api__v1__endpoints__auto_matching__MatchResult": {
         "description": "Result of matching operation",
         "properties": {
@@ -143794,6 +145888,172 @@
         "additionalProperties": true,
         "properties": {},
         "title": "QualityProtocolOut",
+        "type": "object"
+      },
+      "app__api__v1__schemas__billing_batch_schemas__BatchOut": {
+        "description": "Kopfzeile eines Abrechnungsstapels.",
+        "properties": {
+          "batch_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch Number"
+          },
+          "batch_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch Type"
+          },
+          "checker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Freigebender",
+            "title": "Checker"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "failed_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failed Lines"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "maker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ersteller (Vier-Augen-Prinzip)",
+            "title": "Maker"
+          },
+          "processed_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processed Lines"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "draft | validated | released | running | partial_failed | completed",
+            "title": "Status"
+          },
+          "total_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Amount"
+          },
+          "total_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Lines"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "BatchOut",
         "type": "object"
       },
       "app__api__v1__schemas__crm__ContactCreate": {
@@ -187508,9 +189768,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Coverage Api V1 Ai Engineering Metrics Coverage Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CoverageSummaryOut"
                 }
               }
             },
@@ -187539,9 +189797,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Cycle Time Api V1 Ai Engineering Metrics Cycle Time Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CycleTimeSummaryOut"
                 }
               }
             },
@@ -187570,9 +189826,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Full Dashboard Api V1 Ai Engineering Metrics Dashboard Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MetricsDashboardOut"
                 }
               }
             },
@@ -187601,9 +189855,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Gate Blockers Api V1 Ai Engineering Metrics Gate Blockers Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/GateBlockerSummaryOut"
                 }
               }
             },
@@ -187632,7 +189884,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
                   "title": "Response Owner Distribution Api V1 Ai Engineering Metrics Owner Distribution Get",
                   "type": "object"
                 }
@@ -187663,9 +189917,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Rework Api V1 Ai Engineering Metrics Rework Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReworkIndicatorOut"
                 }
               }
             },
@@ -187695,8 +189947,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/SliceMetricOut"
                   },
                   "title": "Response Slice Metrics Api V1 Ai Engineering Metrics Slices Get",
                   "type": "array"
@@ -190654,7 +192905,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BatchOut"
+                  "$ref": "#/components/schemas/app__api__v1__endpoints__article_extensions__BatchOut"
                 }
               }
             },
@@ -196884,9 +199135,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Batches Api V1 Billing Batches Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchPageOut"
                 }
               }
             },
@@ -196950,9 +199199,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Api V1 Billing Batches Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchCreatedOut"
                 }
               }
             },
@@ -197053,8 +199300,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/BatchLineOut"
                   },
                   "title": "Response Lines Api V1 Billing Batches Lines Get",
                   "type": "array"
@@ -197132,9 +199378,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Retry Api V1 Billing Batches Lines  Line Id  Retry Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchActionOut"
                 }
               }
             },
@@ -197190,9 +199434,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Summary Api V1 Billing Batches Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchSummaryOut"
                 }
               }
             },
@@ -197267,9 +199509,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Execute Api V1 Billing Batches  Batch Id  Execute Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchActionOut"
                 }
               }
             },
@@ -197344,9 +199584,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Release Api V1 Billing Batches  Batch Id  Release Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchActionOut"
                 }
               }
             },
@@ -197421,9 +199659,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Validate Api V1 Billing Batches  Batch Id  Validate Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BatchActionOut"
                 }
               }
             },
@@ -284205,9 +286441,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Fixing Api V1 Kontrakte Fixing Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktFixingOut"
                 }
               }
             },
@@ -284264,9 +286498,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Fixing Summary Api V1 Kontrakte Fixing  Kontrakt Id  Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktFixingSummaryOut"
                 }
               }
             },
@@ -284324,9 +286556,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Kontrakt Lifecycle Api V1 Kontrakte Lifecycle Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktLifecycleOut"
                 }
               }
             },
@@ -284383,9 +286613,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Kontrakt Lifecycle Api V1 Kontrakte Lifecycle  Kontrakt Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktLifecycleOut"
                 }
               }
             },
@@ -284452,9 +286680,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Kontrakt Api V1 Kontrakte Lifecycle  Kontrakt Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktLifecycleOut"
                 }
               }
             },
@@ -284660,9 +286886,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Settlement Api V1 Kontrakte Settlement Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktSettlementOut"
                 }
               }
             },
@@ -284729,9 +286953,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Settlement Api V1 Kontrakte Settlement  Settlement Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontraktSettlementOut"
                 }
               }
             },
@@ -374628,9 +376850,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dead Letter Api V1 Workflow Cockpit Db Dead Letter Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DeadLetterViewOut"
                 }
               }
             },
@@ -374742,9 +376962,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Instances Api V1 Workflow Cockpit Db Instances Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CockpitInstanceListOut"
                 }
               }
             },
@@ -374811,9 +377029,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Upsert Instance Api V1 Workflow Cockpit Db Instances Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/InstanceUpsertOut"
                 }
               }
             },
@@ -374879,9 +377095,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Instance Api V1 Workflow Cockpit Db Instances  Process Instance Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CockpitInstanceDetailOut"
                 }
               }
             },
@@ -374956,9 +377170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Resolve Blocker Api V1 Workflow Cockpit Db Instances  Process Instance Id  Blockers  Blocker Id  Resolve Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BlockerResolvedOut"
                 }
               }
             },
@@ -375036,9 +377248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Compensate Instance Api V1 Workflow Cockpit Db Instances  Process Instance Id  Compensate Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/InstanceStatusOut"
                 }
               }
             },
@@ -375116,9 +377326,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Retry Instance Api V1 Workflow Cockpit Db Instances  Process Instance Id  Retry Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/InstanceStatusOut"
                 }
               }
             },
