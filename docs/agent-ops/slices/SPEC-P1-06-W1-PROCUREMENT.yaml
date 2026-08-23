@@ -1,0 +1,44 @@
+slice_id: SPEC-P1-06-W1-PROCUREMENT
+id: SPEC-P1-06-W1-PROCUREMENT
+title: Legacy-Routen response_model typisieren — Welle 1 (P2P / procurement_match)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Erste Welle von SPEC-P1-06: die 15 schwach typisierten Endpunkte in
+  procurement_match.py (groesste Einzeldatei mit response_model=dict[str, Any])
+  auf echte Pydantic-Schemas heben, ohne Felder aus den Service-Rueckgaben zu
+  verlieren.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W1-PROCUREMENT.yaml
+  - app/api/v1/schemas/procurement_match_schemas.py
+  - app/api/v1/endpoints/procurement_match.py
+  - tests/test_procurement_match_response_models.py
+acceptance:
+  - 14 von 15 Endpunkten tragen ein echtes Pydantic-response_model
+  - Kein Feldverlust gegenueber den Service-Rueckgabe-Dicts (FastAPI filtert gegen response_model)
+  - Nichttrefferfall {"found": false, "detail": ...} bleibt uebertragbar
+  - Bestehende Tests test_dom_proc_004 und test_einkauf_3way_match_ers_rfq bleiben gruen
+  - check_response_models.py --threshold 20 bleibt gruen
+result: >-
+  Schwache response_model-Typen repo-weit 447 -> 433. Neues Schema-Modul mit 20
+  Schemas, Feldlisten aus procurement_match_service, proc_wareneingang_service,
+  proc_rechnungspruefung_service und den Alembic-DDLs abgeleitet.
+  Nebenbefund behoben: ein frueherer automatisierter Ersetzungslauf hatte
+  "response_model=dict[str, Any]" in die OpenAPI-summary von
+  POST /bestellungen/{id}/rechnungspruefung geschrieben.
+open:
+  - >-
+    POST /procurement/bestellungen/{bestellung_id}/transition bleibt bewusst
+    untypisiert: der Service liefert SELECT * ueber die Legacy-Tabelle
+    domain_procurement.proc_purchase_orders, deren Spaltenbreite je Installation
+    abweicht (Migration legt nur id/tenant_id/status additiv an). Ein striktes
+    response_model wuerde dort Felder still verwerfen. Typisierung erst nach
+    verbindlichem Tabellenschema.
+verification:
+  - "python -m pytest tests/test_procurement_match_response_models.py -q --no-cov"
+  - "python -m pytest tests/test_dom_proc_004.py tests/test_einkauf_3way_match_ers_rfq.py -q --no-cov"
+  - "python scripts/check_response_models.py --threshold 20"
+  - "python scripts/check_weak_response_models.py"

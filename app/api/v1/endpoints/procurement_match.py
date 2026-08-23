@@ -15,6 +15,19 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.procurement_match_schemas import (
+    AutoMatchOut,
+    ErsCreditListOut,
+    ErsCreditOut,
+    FollowUpListOut,
+    FollowUpOut,
+    MatchOut,
+    MatchResultListOut,
+    OrderPickerListOut,
+    RechnungspruefungOut,
+    ThreeWayMatchOut,
+    WareneingangOut,
+)
 from app.services.procurement_match_service import ProcurementMatchService
 
 router = APIRouter(prefix="/procurement", tags=["procurement", "einkauf"])
@@ -34,7 +47,7 @@ class ErsCreditIn(BaseModel):
     created_by: Optional[str] = None
 
 
-@router.get("/match/orders", response_model=dict[str, Any], summary="Bestellungen mit Match-Übersicht (Picker)")
+@router.get("/match/orders", response_model=OrderPickerListOut, summary="Bestellungen mit Match-Übersicht (Picker)")
 def list_orders(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -43,7 +56,7 @@ def list_orders(
     return {"items": ProcurementMatchService(db, tenant_id).list_orders(limit=limit)}
 
 
-@router.get("/match", response_model=dict[str, Any], summary="3-Wege-Match je Bestellung (Bestellung ↔ Wareneingang)")
+@router.get("/match", response_model=MatchOut, summary="3-Wege-Match je Bestellung (Bestellung ↔ Wareneingang)")
 def match(
     bestellung: str = Query(..., description="Bestellnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -52,7 +65,7 @@ def match(
     return ProcurementMatchService(db, tenant_id).match(bestellung)
 
 
-@router.get("/match/three-way", response_model=dict[str, Any], summary="3-Wege-Match inkl. Eingangsrechnung")
+@router.get("/match/three-way", response_model=ThreeWayMatchOut, summary="3-Wege-Match inkl. Eingangsrechnung")
 def match_three_way(
     bestellung: str = Query(..., description="Bestellnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -61,7 +74,7 @@ def match_three_way(
     return ProcurementMatchService(db, tenant_id).match_three_way(bestellung)
 
 
-@router.get("/match/follow-up", response_model=dict[str, Any], summary="Folgeaktionen je Bestellung (append-only)")
+@router.get("/match/follow-up", response_model=FollowUpListOut, summary="Folgeaktionen je Bestellung (append-only)")
 def list_follow_ups(
     bestellung: str = Query(..., description="Bestellnummer"),
     db: Session = Depends(get_db),
@@ -72,7 +85,7 @@ def list_follow_ups(
     }
 
 
-@router.post("/match/follow-up", response_model=dict[str, Any], summary="Folgeaktion erfassen (append-only)", status_code=201)
+@router.post("/match/follow-up", response_model=FollowUpOut, summary="Folgeaktion erfassen (append-only)", status_code=201)
 def create_follow_up(
     body: FollowUpIn,
     db: Session = Depends(get_db),
@@ -94,7 +107,7 @@ def create_follow_up(
         raise HTTPException(status_code=503, detail=f"Folgeaktion konnte nicht gespeichert werden: {exc}") from exc
 
 
-@router.get("/match/ers/preview", response_model=dict[str, Any], summary="ERS-Gutschrift-Vorschau je Bestellung")
+@router.get("/match/ers/preview", response_model=ThreeWayMatchOut, summary="ERS-Gutschrift-Vorschau je Bestellung")
 def preview_ers(
     bestellung: str = Query(..., description="Bestellnummer"),
     db: Session = Depends(get_db),
@@ -103,7 +116,7 @@ def preview_ers(
     return ProcurementMatchService(db, tenant_id).preview_ers(bestellung)
 
 
-@router.get("/match/ers", response_model=dict[str, Any], summary="Erfasste ERS-Gutschriften je Bestellung")
+@router.get("/match/ers", response_model=ErsCreditListOut, summary="Erfasste ERS-Gutschriften je Bestellung")
 def list_ers_credits(
     bestellung: str = Query(..., description="Bestellnummer"),
     db: Session = Depends(get_db),
@@ -139,7 +152,7 @@ def _max_abs_position_delta_pct(positionen: list[dict[str, Any]]) -> Decimal:
     return max(deltas, default=Decimal("0"))
 
 
-@router.post("/match/auto", response_model=dict[str, Any], summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
+@router.post("/match/auto", response_model=AutoMatchOut, summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
 def auto_match_and_persist(
     body: AutoMatchIn,
     db: Session = Depends(get_db),
@@ -241,7 +254,7 @@ def auto_match_and_persist(
     }
 
 
-@router.get("/match/results", response_model=dict[str, Any], summary="Gespeicherte Match-Ergebnisse abrufen")
+@router.get("/match/results", response_model=MatchResultListOut, summary="Gespeicherte Match-Ergebnisse abrufen")
 def list_match_results(
     po_id: Optional[str] = Query(None),
     match_status: Optional[str] = Query(None),
@@ -266,7 +279,7 @@ def list_match_results(
     return {"items": [dict(r) for r in rows]}
 
 
-@router.post("/match/ers", response_model=dict[str, Any], summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201)
+@router.post("/match/ers", response_model=ErsCreditOut, summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201)
 def create_ers_credit(
     body: ErsCreditIn,
     db: Session = Depends(get_db),
@@ -327,6 +340,11 @@ class RechnungsFreigabeIn(_BM):
     grund: _Opt[str] = None
 
 
+# SPEC-P1-06: bewusst noch untypisiert. Der Service liefert `SELECT *` ueber
+# die Legacy-Tabelle domain_procurement.proc_purchase_orders, deren Spaltenbreite
+# je Installation abweicht (die Migration legt sie nur additiv mit id/tenant_id/
+# status an). Ein striktes response_model wuerde dort Felder still verwerfen.
+# Erst typisieren, wenn die Tabelle ein verbindliches Schema hat.
 @router.post("/bestellungen/{bestellung_id}/transition", response_model=dict[str, Any], summary="Bestellungs-Status wechseln")
 def bestellung_transition_endpoint(
     bestellung_id: str,
@@ -343,7 +361,7 @@ def bestellung_transition_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=dict[str, Any], status_code=201, summary="Wareneingang buchen")
+@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=WareneingangOut, status_code=201, summary="Wareneingang buchen")
 def buche_wareneingang_endpoint(
     bestellung_id: str,
     body: WareneingangIn,
@@ -360,7 +378,7 @@ def buche_wareneingang_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/wareneingaenge/{we_id}/qs", response_model=dict[str, Any], summary="QS-Status eines Wareneingangs aktualisieren")
+@router.post("/wareneingaenge/{we_id}/qs", response_model=WareneingangOut, summary="QS-Status eines Wareneingangs aktualisieren")
 def update_we_qs_endpoint(
     we_id: str,
     body: QSUpdateIn,
@@ -375,7 +393,7 @@ def update_we_qs_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=dict[str, Any], status_code=201, summary="Rechnungsprüfung (response_model=dict[str, Any], 3-Way-Match)")
+@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=RechnungspruefungOut, status_code=201, summary="Rechnungsprüfung (3-Wege-Match)")
 def rechnungspruefung_endpoint(
     bestellung_id: str,
     body: RechnungspruefungIn,
@@ -392,7 +410,7 @@ def rechnungspruefung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=dict[str, Any], summary="Rechnungsprüfung manuell freigeben")
+@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=RechnungspruefungOut, summary="Rechnungsprüfung manuell freigeben")
 def rechnungsfreigabe_endpoint(
     pruefung_id: str,
     body: RechnungsFreigabeIn,
