@@ -244,6 +244,16 @@ der Visual-Audit prueft sichtbare Datenzeilen und ist an drei Zielaufloesungen
 repo-seitiger Funktions- oder zentraler GUI-Gap; Rollen-, Echtdaten-, Hardware-
 und Provider-UAT bleiben externe Gates.
 
+Nachzug 2026-08-23 (`L3-CUTOVER-UAT-032`): Die zuvor nur benannten externen
+Gates besitzen jetzt einen maschinenlesbaren, fail-closed Cutover-Vertrag und
+einen reproduzierbaren Go/No-Go-Runner. Sechs Rollen und Kernjourneys, zwei
+getrennte Import-Dry-runs, Reconciliation fuer sechs Migrationsdomaenen, sieben
+reale Integrationspiloten, Gewohnheitsbruecke, Defect-Grenzen, KPI und zehn
+Geschaeftstage Parallelbetrieb sind harte Gates. Repo-seitig ist das Programm
+vollstaendig ausfuehrbar; bis echte Key-User-, Echtdaten-, Hardware-/Provider-
+und finale Betriebsfreigaben als aktuelle Artefakte vorliegen, bleibt der
+Status bestimmungsgemaess `NO_GO` und damit ein externes Rollout-Gate.
+
 Nachzug 2026-08-21 (`L3-BELEGCHECK-WORKLIST-005`): `L3-GAP-BELEGCHECK-005` ist
 repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit
 vier Ausnahmearten, Zuweisung/Status-Audit, Filter/Pagination und Deep-Link.

@@ -2,7 +2,7 @@ slice_id: L3-CUTOVER-UAT-032
 id: L3-CUTOVER-UAT-032
 title: L3 Cutover UAT und Pilotprogramm
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created_at: "2026-08-23"
 started_at: "2026-08-23"
 goal: >-
@@ -24,6 +24,7 @@ file_ownership:
   - tests/test_l3_cutover_readiness.py
   - docs/quality-assurance/l3-cutover-uat-plan.md
   - docs/operations/l3-cutover-uat-runbook.md
+  - docs/training/l3-to-valeo-habit-bridge.md
   - docs/project-context/open-gaps-and-known-issues.md
 acceptance:
   - Alle empfohlenen Rollen und Kernjourneys besitzen messbare Abnahmekriterien
@@ -36,3 +37,12 @@ risks:
   - Reale Anwenderunterschriften, Hardware, Provider und Produktivdaten bleiben externe Gates
   - Das Programm darf keine produktiven Buchungen oder Migrationen automatisch ausfuehren
   - Parallel bearbeitete Dateien ausserhalb des Dateibesitzes bleiben unberuehrt
+completed_at: "2026-08-23"
+verification:
+  - "31 fokussierte Tests bestanden"
+  - "Contract-Validator und zwei sichere Repo-Probes gruen"
+  - "Agent-Handbuch und Architekturvalidierung gruen"
+result: >-
+  Repo-seitiges Pilot- und Cutover-Programm vollstaendig implementiert. Reale
+  Key-User-, Echtdaten-, Hardware-/Provider- und finale Betriebsfreigaben bleiben
+  absichtlich externe, fail-closed Gates und koennen nicht automatisiert ersetzt werden.

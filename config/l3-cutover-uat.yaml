@@ -1,0 +1,119 @@
+schema_version: 1
+program_id: L3-CUTOVER-UAT-032
+title: L3 zu VALEO NeuroERP Pilot und Cutover
+fail_closed: true
+
+phases:
+  - {id: preparation, sequence: 1, required: true}
+  - {id: rehearsal_1, sequence: 2, required: true}
+  - {id: rehearsal_2, sequence: 3, required: true}
+  - {id: parallel_operation, sequence: 4, required: true, minimum_business_days: 10}
+  - {id: go_live, sequence: 5, required: true}
+
+roles:
+  - {id: sales, label: Verkauf, minimum_signoffs: 1}
+  - {id: purchasing, label: Einkauf, minimum_signoffs: 1}
+  - {id: warehouse, label: Lager und Logistik, minimum_signoffs: 1}
+  - {id: finance, label: Finanzbuchhaltung, minimum_signoffs: 1}
+  - {id: agrar, label: Agrar und Kontrakte, minimum_signoffs: 1}
+  - {id: operations, label: IT und Betrieb, minimum_signoffs: 1}
+
+journeys:
+  - id: sales_to_cash
+    label: Angebot bis Zahlungseingang
+    roles: [sales, warehouse, finance]
+    critical: true
+    evidence: [test_protocol, document_chain, role_signoff]
+  - id: procure_to_pay
+    label: Bestellung bis Zahlungsausgang
+    roles: [purchasing, warehouse, finance]
+    critical: true
+    evidence: [test_protocol, document_chain, role_signoff]
+  - id: contract_to_settlement
+    label: Kontrakt bis Ernteannahme und Abrechnung
+    roles: [agrar, warehouse, finance]
+    critical: true
+    evidence: [test_protocol, document_chain, role_signoff]
+  - id: inventory_lot_trace
+    label: Bestandsbewegung bis Chargenrueckverfolgung und Inventur
+    roles: [warehouse, agrar]
+    critical: true
+    evidence: [test_protocol, trace_report, role_signoff]
+  - id: production_transfer_postprocessing
+    label: Produktion bis Umlagerung und Nachbearbeitung
+    roles: [warehouse, agrar]
+    critical: true
+    evidence: [test_protocol, posting_report, role_signoff]
+  - id: document_return_control
+    label: Dokumentenruecklauf und Dokumentenkontrolle
+    roles: [sales, purchasing, finance]
+    critical: true
+    evidence: [test_protocol, document_archive, role_signoff]
+
+migration_domains:
+  - {id: master_data, balances: [record_count, checksum, critical_orphans]}
+  - {id: open_documents, balances: [record_count, amount_cents, critical_orphans]}
+  - {id: contracts, balances: [record_count, quantity, amount_cents, critical_orphans]}
+  - {id: open_items, balances: [record_count, amount_cents, critical_orphans]}
+  - {id: inventory_lots, balances: [record_count, quantity, critical_orphans]}
+  - {id: document_links, balances: [record_count, checksum, critical_orphans]}
+
+integrations:
+  - {id: scale, label: Waage, owner_role: operations, external: true, required: true}
+  - {id: mde, label: MDE, owner_role: operations, external: true, required: true}
+  - {id: tank, label: Tankautomation, owner_role: operations, external: true, required: true}
+  - {id: dms_mail, label: DMS und Mail, owner_role: operations, external: true, required: true}
+  - {id: l3_standard, label: L3 Standard-Schnittstelle, owner_role: operations, external: true, required: true}
+  - {id: unimet, label: Unimet, owner_role: operations, external: true, required: true}
+  - {id: print, label: Druck und Formulare, owner_role: operations, external: true, required: true}
+
+habit_bridge:
+  - {id: terminology_map, label: L3-zu-VALEO-Begriffsmatrix, required: true}
+  - {id: role_start_pages, label: Rollenbezogene Startseiten und Favoriten, required: true}
+  - {id: keyboard_shortcuts, label: Tastatur- und Bedienkonzept, required: true}
+  - {id: quick_guides, label: Prozessbezogene Kurzanleitungen, required: true}
+  - {id: training, label: Schulung und betreute Uebung, required: true}
+
+thresholds:
+  critical_journey_pass_rate: 1.0
+  overall_journey_pass_rate: 0.95
+  maximum_open_defects: {p0: 0, p1: 0, p2: 5}
+  record_count_variance: 0
+  amount_variance_cents: 0
+  quantity_variance: 0.001
+  critical_orphans: 0
+  median_task_duration_ratio: 1.20
+  user_error_rate: 0.02
+  minimum_parallel_business_days: 10
+
+evidence_policy:
+  required_fields: [status, approver, timestamp, artifact]
+  accepted_statuses: [pass, fail, blocked, pending]
+  maximum_age_days: 90
+  artifact_must_be_reference: true
+
+repo_probes:
+  - id: integration_bootstrap_plan
+    command: [python, scripts/check_integration_bootstrap.py, --probe-plan]
+    safe: true
+    live: false
+    required: true
+  - id: cutover_contract
+    command: [python, scripts/l3_cutover_readiness.py, --contract-only]
+    safe: true
+    live: false
+    required: true
+
+migration_rehearsal:
+  required_ids: [rehearsal_1, rehearsal_2]
+  dry_run_command:
+    - python
+    - scripts/import_l3.py
+    - --dry-run
+    - --mapping
+    - "{mapping}"
+    - --source
+    - "{source}"
+    - --report-json
+    - "{report}"
+  productive_execution_allowed: false
