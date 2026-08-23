@@ -7,6 +7,11 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.v1.schemas.hrm_abwesenheit_schemas import (
+    AbwesenheitsantragListeOut,
+    AbwesenheitsantragOut,
+    UrlaubskontoOut,
+)
 from app.services.hrm_abwesenheit_service import (
     AbwesenheitKonfliktError,
     AbwesenheitStatus,
@@ -51,7 +56,7 @@ class ZurueckziehenBody(BaseModel):
 
 @router.post(
     "/antraege",
-    response_model=dict[str, Any],
+    response_model=AbwesenheitsantragOut,
     status_code=201,
     summary="Abwesenheitsantrag stellen",
 )
@@ -77,7 +82,7 @@ def antrag_stellen(body: AntragCreate, x_tenant_id: Annotated[str | None, Header
 
 @router.get(
     "/antraege",
-    response_model=dict[str, Any],
+    response_model=AbwesenheitsantragListeOut,
     summary="Abwesenheitsantraege listen",
 )
 def list_antraege(
@@ -100,7 +105,7 @@ def list_antraege(
 
 @router.get(
     "/antraege/{antrag_id}",
-    response_model=dict[str, Any],
+    response_model=AbwesenheitsantragOut,
     summary="Abwesenheitsantrag abrufen",
 )
 def get_antrag(antrag_id: str, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
@@ -114,7 +119,7 @@ def get_antrag(antrag_id: str, x_tenant_id: Annotated[str | None, Header()] = No
 
 @router.post(
     "/antraege/{antrag_id}/genehmigen",
-    response_model=dict[str, Any],
+    response_model=AbwesenheitsantragOut,
     summary="Abwesenheitsantrag genehmigen",
 )
 def genehmigen(
@@ -132,7 +137,7 @@ def genehmigen(
 
 @router.post(
     "/antraege/{antrag_id}/ablehnen",
-    response_model=dict[str, Any],
+    response_model=AbwesenheitsantragOut,
     summary="Abwesenheitsantrag ablehnen",
 )
 def ablehnen(
@@ -150,7 +155,7 @@ def ablehnen(
 
 @router.post(
     "/antraege/{antrag_id}/zurueckziehen",
-    response_model=dict[str, Any],
+    response_model=AbwesenheitsantragOut,
     summary="Abwesenheitsantrag zurueckziehen",
 )
 def zurueckziehen(
@@ -168,7 +173,7 @@ def zurueckziehen(
 
 @router.get(
     "/urlaubskonto/{mitarbeiter_nr}",
-    response_model=dict[str, Any],
+    response_model=UrlaubskontoOut,
     summary="Urlaubskonto abrufen",
 )
 def urlaubskonto(

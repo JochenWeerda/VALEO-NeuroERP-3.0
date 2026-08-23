@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.legacy_interface_adapters_schemas import (
+    AdapterBatchActionOut,
+    AdapterConfigureOut,
+    AdapterIntakeOut,
+    AdapterMonitorOut,
+    AdapterProfileListOut,
+)
 from app.auth.deps import require_roles
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -51,7 +58,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/profiles", response_model=dict)
+@router.get("/profiles", response_model=AdapterProfileListOut)
 def profiles(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -59,7 +66,7 @@ def profiles(
     return {"items": items, "total": len(items), "execution_enabled": False}
 
 
-@router.put("/profiles/{profile_key}", response_model=dict)
+@router.put("/profiles/{profile_key}", response_model=AdapterConfigureOut)
 def configure(
     profile_key: str,
     body: ProfileIn,
@@ -78,7 +85,7 @@ def configure(
 
 
 @router.post(
-    "/{profile_key}/intake", response_model=dict, status_code=status.HTTP_202_ACCEPTED
+    "/{profile_key}/intake", response_model=AdapterIntakeOut, status_code=status.HTTP_202_ACCEPTED
 )
 def intake(
     profile_key: str,
@@ -94,7 +101,7 @@ def intake(
     )
 
 
-@router.get("/batches", response_model=dict)
+@router.get("/batches", response_model=AdapterMonitorOut)
 def monitor(
     batch_status: str | None = Query(default=None, alias="status"),
     page: int = Query(1, ge=1),
@@ -109,7 +116,7 @@ def monitor(
     )
 
 
-@router.post("/batches/{batch_id}/stage", response_model=dict)
+@router.post("/batches/{batch_id}/stage", response_model=AdapterBatchActionOut)
 def stage(
     batch_id: str,
     body: ReasonIn,
@@ -124,7 +131,7 @@ def stage(
     )
 
 
-@router.post("/batches/{batch_id}/reconcile", response_model=dict)
+@router.post("/batches/{batch_id}/reconcile", response_model=AdapterBatchActionOut)
 def reconcile(
     batch_id: str,
     body: ReasonIn,
@@ -139,7 +146,7 @@ def reconcile(
     )
 
 
-@router.post("/batches/{batch_id}/approve", response_model=dict)
+@router.post("/batches/{batch_id}/approve", response_model=AdapterBatchActionOut)
 def approve(
     batch_id: str,
     body: ReasonIn,

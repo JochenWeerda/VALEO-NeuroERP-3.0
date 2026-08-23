@@ -12,6 +12,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel, Field
 
+from app.api.v1.schemas.finance_actions_schemas import (
+    MahnstufeOut,
+    MahnstufenTrailOut,
+    RateOut,
+    RatenzahlungsplanOut,
+    SepaBatchOut,
+    SepaMandatOut,
+)
 from ....core.database import get_db
 from ....core import endpoint_gateways
 from ....core.tenant import get_tenant_id
@@ -715,7 +723,7 @@ class MahnstufeIn(_BM):
     operator: _Opt[str] = "system"
 
 
-@router.post("/sepa/mandate", response_model=dict[str, Any], status_code=201, summary="SEPA-Mandat anlegen")
+@router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen")
 def create_sepa_mandat_endpoint(
     body: SEPAMandatIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -730,7 +738,7 @@ def create_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=dict[str, Any], summary="SEPA-Mandat widerrufen")
+@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen")
 def widerruf_sepa_mandat_endpoint(
     mandat_id: str,
     x_tenant_id: _Opt[str] = Header(None),
@@ -744,7 +752,7 @@ def widerruf_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/batches", response_model=dict[str, Any], status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
+@router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
 def create_sepa_batch_endpoint(
     body: SEPABatchIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -759,7 +767,7 @@ def create_sepa_batch_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/plaene", response_model=dict[str, Any], status_code=201, summary="Ratenzahlungsplan anlegen")
+@router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen")
 def create_ratenzahlungsplan_endpoint(
     body: RatenzahlungPlanIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -774,7 +782,7 @@ def create_ratenzahlungsplan_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=dict[str, Any], summary="Rate als bezahlt buchen")
+@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=RateOut, summary="Rate als bezahlt buchen")
 def buche_rate_endpoint(
     rate_id: str,
     body: RateBuchenIn,
@@ -789,7 +797,7 @@ def buche_rate_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=dict[str, Any], status_code=201, summary="Mahnstufe eskalieren")
+@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=MahnstufeOut, status_code=201, summary="Mahnstufe eskalieren")
 def eskaliere_mahnstufe_endpoint(
     rechnungsnr: str,
     body: MahnstufeIn,
@@ -804,7 +812,7 @@ def eskaliere_mahnstufe_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=dict[str, Any], summary="Mahnstufen-Trail abrufen")
+@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen")
 def get_mahnstufe_trail_endpoint(
     rechnungsnr: str,
     x_tenant_id: _Opt[str] = Header(None),
