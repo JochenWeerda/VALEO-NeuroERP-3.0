@@ -7,6 +7,14 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.futtermittel_qs_schemas import (
+    HaccpPlanOut,
+    PruefpunktBestaetigtOut,
+    QsAnlageOut,
+    QsPruefpunktOut,
+    VlogMeldungOut,
+    VlogStatusOut,
+)
 from app.core.database import get_db
 
 router = APIRouter(prefix="/futtermittel/qs", tags=["futtermittel", "qs"])
@@ -20,7 +28,7 @@ def _tenant(x_tenant_id: str | None = Header(None)) -> str:
 
 # ── HACCP-Plaene ──────────────────────────────────────────────────────────────
 
-@router.get("/haccp-plaene", response_model=list[dict[str, Any]], summary="HACCP-Plaene auflisten")
+@router.get("/haccp-plaene", response_model=list[HaccpPlanOut], summary="HACCP-Plaene auflisten")
 def list_haccp_plaene(
     aktiv: bool | None = Query(None),
     limit: int = Query(50, ge=1, le=500),
@@ -41,7 +49,7 @@ def list_haccp_plaene(
         return []
 
 
-@router.get("/haccp-plaene/{plan_id}", response_model=dict[str, Any], summary="HACCP-Plan Detail")
+@router.get("/haccp-plaene/{plan_id}", response_model=HaccpPlanOut, summary="HACCP-Plan Detail")
 def get_haccp_plan(
     plan_id: str,
     db: Session = Depends(get_db),
@@ -56,7 +64,7 @@ def get_haccp_plan(
     return dict(row)
 
 
-@router.post("/haccp-plaene", response_model=dict[str, Any], status_code=201, summary="HACCP-Plan anlegen")
+@router.post("/haccp-plaene", response_model=QsAnlageOut, status_code=201, summary="HACCP-Plan anlegen")
 def create_haccp_plan(
     body: dict[str, Any],
     db: Session = Depends(get_db),
@@ -86,7 +94,7 @@ def create_haccp_plan(
     return {"id": plan_id, "ok": True}
 
 
-@router.patch("/haccp-plaene/{plan_id}", response_model=dict[str, Any], summary="HACCP-Plan aktualisieren")
+@router.patch("/haccp-plaene/{plan_id}", response_model=QsAnlageOut, summary="HACCP-Plan aktualisieren")
 def update_haccp_plan(
     plan_id: str,
     body: dict[str, Any],
@@ -134,7 +142,7 @@ def update_haccp_plan(
 
 # ── VLOG-Meldungen ────────────────────────────────────────────────────────────
 
-@router.get("/vlog-meldungen", response_model=list[dict[str, Any]], summary="VLOG-Meldungen auflisten")
+@router.get("/vlog-meldungen", response_model=list[VlogMeldungOut], summary="VLOG-Meldungen auflisten")
 def list_vlog_meldungen(
     status: str | None = Query(None),
     limit: int = Query(50, ge=1, le=500),
@@ -155,7 +163,7 @@ def list_vlog_meldungen(
         return []
 
 
-@router.post("/vlog-meldungen", response_model=dict[str, Any], status_code=201, summary="VLOG-Meldung erstellen")
+@router.post("/vlog-meldungen", response_model=QsAnlageOut, status_code=201, summary="VLOG-Meldung erstellen")
 def create_vlog_meldung(
     body: dict[str, Any],
     db: Session = Depends(get_db),
@@ -184,7 +192,7 @@ def create_vlog_meldung(
     return {"id": meldung_id, "ok": True}
 
 
-@router.patch("/vlog-meldungen/{meldung_id}/status", response_model=dict[str, Any], summary="VLOG-Meldung Status setzen")
+@router.patch("/vlog-meldungen/{meldung_id}/status", response_model=VlogStatusOut, summary="VLOG-Meldung Status setzen")
 def set_vlog_status(
     meldung_id: str,
     body: dict[str, Any],
@@ -204,7 +212,7 @@ def set_vlog_status(
 
 # ── QS-Leitfaden-Pruefpunkte ──────────────────────────────────────────────────
 
-@router.get("/leitfaden-pruefpunkte", response_model=list[dict[str, Any]], summary="QS-Leitfaden-Pruefpunkte auflisten")
+@router.get("/leitfaden-pruefpunkte", response_model=list[QsPruefpunktOut], summary="QS-Leitfaden-Pruefpunkte auflisten")
 def list_pruefpunkte(
     periode: str | None = Query(None, description="YYYY-MM oder YYYY"),
     bestaetigt: bool | None = Query(None),
@@ -229,7 +237,7 @@ def list_pruefpunkte(
         return []
 
 
-@router.post("/leitfaden-pruefpunkte", response_model=dict[str, Any], status_code=201, summary="QS-Pruefpunkt anlegen")
+@router.post("/leitfaden-pruefpunkte", response_model=QsAnlageOut, status_code=201, summary="QS-Pruefpunkt anlegen")
 def create_pruefpunkt(
     body: dict[str, Any],
     db: Session = Depends(get_db),
@@ -255,7 +263,7 @@ def create_pruefpunkt(
     return {"id": punkt_id, "ok": True}
 
 
-@router.post("/leitfaden-pruefpunkte/{punkt_id}/bestaetigen", response_model=dict[str, Any], summary="QS-Pruefpunkt bestaetigen")
+@router.post("/leitfaden-pruefpunkte/{punkt_id}/bestaetigen", response_model=PruefpunktBestaetigtOut, summary="QS-Pruefpunkt bestaetigen")
 def bestaetigen_pruefpunkt(
     punkt_id: str,
     body: dict[str, Any],

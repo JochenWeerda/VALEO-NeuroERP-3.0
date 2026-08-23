@@ -1,0 +1,45 @@
+slice_id: SPEC-P1-06-W2-MOCK-QS-POS
+id: SPEC-P1-06-W2-MOCK-QS-POS
+title: Legacy-Routen response_model typisieren — Welle 2 (Mock-Harness, Futtermittel-QS, POS-Fiskalisierung)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Zweite Welle von SPEC-P1-06: die naechsten drei Endpoint-Dateien mit den
+  meisten schwachen response_model-Typen auf echte Pydantic-Schemas heben —
+  external_mock_harness (10), futtermittel_qs (10), pos_fiscalization (9).
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W2-MOCK-QS-POS.yaml
+  - app/api/v1/schemas/external_mock_harness_schemas.py
+  - app/api/v1/schemas/futtermittel_qs_schemas.py
+  - app/api/v1/schemas/pos_fiscalization_schemas.py
+  - app/api/v1/endpoints/external_mock_harness.py
+  - app/api/v1/endpoints/futtermittel_qs.py
+  - app/api/v1/endpoints/pos_fiscalization.py
+  - tests/test_welle2_response_models.py
+acceptance:
+  - Alle 29 Endpunkte der drei Dateien tragen ein echtes Pydantic-response_model
+  - Kein Feldverlust gegenueber Service-Rueckgaben bzw. Tabellen-DDL
+  - "simulated: true" bleibt in jeder Mock-Antwort erhalten
+  - OpenAPI erzeugt $ref statt freier Objekte
+  - Bestandstests der drei Bereiche bleiben gruen
+result: >-
+  Schwache response_model-Typen repo-weit 433 -> 404, betroffene Dateien
+  114 -> 111. Bei der Fiskalisierung genuegte es, die bereits existierenden
+  Vertraege FiscalTransactionResult und ProviderResult zu deklarieren statt
+  eigene Kopien anzulegen — sechs der neun Endpunkte liefern sie ohnehin.
+  Futtermittel-QS-Schemas folgen exakt der Migration
+  feed_qs_wf_cockpit_repair_20260626; spaetere ALTERs auf diese Tabellen
+  existieren nicht.
+notes:
+  - >-
+    Fallstrick fuer Folgewellen: list[EchtesSchema].__name__ ist in Python 3.11
+    ebenfalls "list". Eine Pruefung auf schwache Typen muss die Textform des
+    Typs auswerten, sonst meldet sie korrekt typisierte Listen falsch.
+verification:
+  - "python -m pytest tests/test_welle2_response_models.py -q --no-cov"
+  - "python -m pytest tests/test_external_mock_harness.py tests/test_futtermittel_qs.py tests/test_pos_fiscalization_providers.py tests/test_pos_fiscalization_security_contract.py tests/test_pos_fiscal_documents_accounting.py -q --no-cov"
+  - "python scripts/check_response_models.py --threshold 20"
+  - "python scripts/check_weak_response_models.py"

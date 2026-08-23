@@ -7,6 +7,18 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from app.api.v1.schemas.external_mock_harness_schemas import (
+    BankCamtImportOut,
+    DatevExportStartOut,
+    DatevExportStatusOut,
+    DmsSearchOut,
+    DmsUploadOut,
+    DsfinvkExportOut,
+    ElsterStatusOut,
+    ElsterSubmitOut,
+    SystemsOverviewOut,
+    TseSignOut,
+)
 from app.services.external_mock_harness_service import external_mock_harness_service
 
 router = APIRouter(prefix="/dev/external-mocks", tags=["dev", "mock"])
@@ -47,12 +59,12 @@ class BankCamtRequest(BaseModel):
     kontoauszug_nr: int = 1
 
 
-@router.get("/", summary="Verfuegbare Mock-Systeme auflisten", response_model=dict[str, Any])
+@router.get("/", summary="Verfuegbare Mock-Systeme auflisten", response_model=SystemsOverviewOut)
 async def systems_overview() -> dict[str, Any]:
     return external_mock_harness_service.systems_overview()
 
 
-@router.post("/datev/export", response_model=dict[str, Any], summary="DATEV-Export starten (simuliert)")
+@router.post("/datev/export", response_model=DatevExportStartOut, summary="DATEV-Export starten (simuliert)")
 async def datev_export_start(req: DatevExportRequest) -> dict[str, Any]:
     return external_mock_harness_service.datev_export_start(
         mandant_nr=req.mandant_nr,
@@ -61,12 +73,12 @@ async def datev_export_start(req: DatevExportRequest) -> dict[str, Any]:
     )
 
 
-@router.get("/datev/export/{job_id}", response_model=dict[str, Any], summary="DATEV-Exportstatus (simuliert)")
+@router.get("/datev/export/{job_id}", response_model=DatevExportStatusOut, summary="DATEV-Exportstatus (simuliert)")
 async def datev_export_status(job_id: str) -> dict[str, Any]:
     return external_mock_harness_service.datev_export_status(job_id=job_id)
 
 
-@router.post("/tse/sign", response_model=dict[str, Any], summary="TSE-Signatur (simuliert)")
+@router.post("/tse/sign", response_model=TseSignOut, summary="TSE-Signatur (simuliert)")
 async def tse_sign(req: TseSignRequest) -> dict[str, Any]:
     return external_mock_harness_service.tse_sign_transaction(
         kasse_id=req.kasse_id,
@@ -75,7 +87,7 @@ async def tse_sign(req: TseSignRequest) -> dict[str, Any]:
     )
 
 
-@router.post("/dsfinvk/export", response_model=dict[str, Any], summary="DSFinV-K-Export (simuliert)")
+@router.post("/dsfinvk/export", response_model=DsfinvkExportOut, summary="DSFinV-K-Export (simuliert)")
 async def dsfinvk_export(req: DsfinvkExportRequest) -> dict[str, Any]:
     return external_mock_harness_service.dsfinvk_export(
         kasse_id=req.kasse_id,
@@ -83,7 +95,7 @@ async def dsfinvk_export(req: DsfinvkExportRequest) -> dict[str, Any]:
     )
 
 
-@router.post("/elster/submit", response_model=dict[str, Any], summary="ELSTER-Uebermittlung (simuliert)")
+@router.post("/elster/submit", response_model=ElsterSubmitOut, summary="ELSTER-Uebermittlung (simuliert)")
 async def elster_submit(req: ElsterSubmitRequest) -> dict[str, Any]:
     return external_mock_harness_service.elster_submit(
         steuer_nr=req.steuer_nr,
@@ -93,12 +105,12 @@ async def elster_submit(req: ElsterSubmitRequest) -> dict[str, Any]:
     )
 
 
-@router.get("/elster/status/{ticket_id}", response_model=dict[str, Any], summary="ELSTER-Status (simuliert)")
+@router.get("/elster/status/{ticket_id}", response_model=ElsterStatusOut, summary="ELSTER-Status (simuliert)")
 async def elster_status(ticket_id: str) -> dict[str, Any]:
     return external_mock_harness_service.elster_status(ticket_id=ticket_id)
 
 
-@router.post("/dms/upload", response_model=dict[str, Any], summary="DMS-Upload (simuliert)")
+@router.post("/dms/upload", response_model=DmsUploadOut, summary="DMS-Upload (simuliert)")
 async def dms_upload(req: DmsUploadRequest) -> dict[str, Any]:
     return external_mock_harness_service.dms_upload(
         titel=req.titel,
@@ -107,14 +119,14 @@ async def dms_upload(req: DmsUploadRequest) -> dict[str, Any]:
     )
 
 
-@router.get("/dms/search", response_model=dict[str, Any], summary="DMS-Suche (simuliert)")
+@router.get("/dms/search", response_model=DmsSearchOut, summary="DMS-Suche (simuliert)")
 async def dms_search(q: str = "") -> dict[str, Any]:
     if not q:
         raise HTTPException(status_code=400, detail="Suchbegriff 'q' ist erforderlich")
     return external_mock_harness_service.dms_search(suchbegriff=q)
 
 
-@router.post("/bank/camt-import", response_model=dict[str, Any], summary="CAMT-Import (simuliert)")
+@router.post("/bank/camt-import", response_model=BankCamtImportOut, summary="CAMT-Import (simuliert)")
 async def bank_camt_import(req: BankCamtRequest) -> dict[str, Any]:
     return external_mock_harness_service.bank_camt_import(
         iban=req.iban,
