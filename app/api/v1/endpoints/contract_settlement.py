@@ -8,6 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.contract_spine_schemas import (
+    HandoverOut,
+    SettlementStatusOut,
+    StornoOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_settlement_service import ContractSettlementService, SettlementError
@@ -15,7 +20,7 @@ from app.services.contract_settlement_service import ContractSettlementService, 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
 
-@router.get("/settlement/status", response_model=dict[str, Any], summary="Settlement-Status je Kontrakt (Bewegungen + Fixierungen)")
+@router.get("/settlement/status", response_model=SettlementStatusOut, summary="Settlement-Status je Kontrakt (Bewegungen + Fixierungen)")
 def settlement_status(
     kontrakt: str = Query(..., description="Kontraktnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -31,7 +36,7 @@ class HandoverIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/settlement", response_model=dict[str, Any], summary="Bewegung(en) an die Abrechnung übergeben")
+@router.post("/settlement", response_model=HandoverOut, summary="Bewegung(en) an die Abrechnung übergeben")
 def handover(
     body: HandoverIn,
     db: Session = Depends(get_db),
@@ -51,7 +56,7 @@ class StornoIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/movements/{movement_id}/storno", response_model=dict[str, Any], summary="Abruf-Bewegung stornieren (frei werdender Abruf)")
+@router.post("/movements/{movement_id}/storno", response_model=StornoOut, summary="Abruf-Bewegung stornieren (frei werdender Abruf)")
 def storno_movement(
     movement_id: str,
     body: StornoIn,
@@ -64,7 +69,7 @@ def storno_movement(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/fixings/{fixing_id}/storno", response_model=dict[str, Any], summary="Fixierung stornieren (frei werdende Fixiermenge)")
+@router.post("/fixings/{fixing_id}/storno", response_model=StornoOut, summary="Fixierung stornieren (frei werdende Fixiermenge)")
 def storno_fixing(
     fixing_id: str,
     body: StornoIn,

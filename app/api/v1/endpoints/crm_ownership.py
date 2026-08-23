@@ -8,6 +8,12 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.crm_bundle_schemas import (
+    ByOwnerOut,
+    OwnershipHistoryOut,
+    OwnershipOut,
+    UnassignedOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_ownership_service import CrmOwnershipService
@@ -22,7 +28,7 @@ class OwnershipIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.get("/ownership/unassigned", response_model=dict[str, Any], summary="Kunden ohne Außendienst-Zuordnung (Worklist)")
+@router.get("/ownership/unassigned", response_model=UnassignedOut, summary="Kunden ohne Außendienst-Zuordnung (Worklist)")
 def unassigned(
     limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
@@ -31,7 +37,7 @@ def unassigned(
     return CrmOwnershipService(db, tenant_id).unassigned(limit=limit)
 
 
-@router.get("/ownership/by-owner", response_model=dict[str, Any], summary="Kunden eines Außendienst-Owners (Workload)")
+@router.get("/ownership/by-owner", response_model=ByOwnerOut, summary="Kunden eines Außendienst-Owners (Workload)")
 def by_owner(
     salesRep: str = Query(..., description="Außendienst-Kürzel"),
     db: Session = Depends(get_db),
@@ -40,7 +46,7 @@ def by_owner(
     return CrmOwnershipService(db, tenant_id).by_owner(salesRep)
 
 
-@router.get("/{kunden_nr}/ownership", response_model=dict[str, Any], summary="Ownership eines Kunden abrufen")
+@router.get("/{kunden_nr}/ownership", response_model=OwnershipOut, summary="Ownership eines Kunden abrufen")
 def get_ownership(
     kunden_nr: str,
     db: Session = Depends(get_db),
@@ -49,7 +55,7 @@ def get_ownership(
     return CrmOwnershipService(db, tenant_id).get(kunden_nr)
 
 
-@router.put("/{kunden_nr}/ownership", response_model=dict[str, Any], summary="Ownership setzen/übergeben")
+@router.put("/{kunden_nr}/ownership", response_model=OwnershipOut, summary="Ownership setzen/übergeben")
 def set_ownership(
     kunden_nr: str,
     body: OwnershipIn,
@@ -62,7 +68,7 @@ def set_ownership(
     )
 
 
-@router.get("/{kunden_nr}/ownership/history", response_model=dict[str, Any], summary="Übergabe-Historie eines Kunden")
+@router.get("/{kunden_nr}/ownership/history", response_model=OwnershipHistoryOut, summary="Übergabe-Historie eines Kunden")
 def ownership_history(
     kunden_nr: str,
     db: Session = Depends(get_db),

@@ -12,6 +12,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.contract_spine_schemas import (
+    FixingCreatedOut,
+    FixingListOut,
+    FixingWorkspaceOut,
+    QuoteUpsertOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_fixing_service import ContractFixingService, FixingActionError
@@ -19,7 +25,7 @@ from app.services.contract_fixing_service import ContractFixingService, FixingAc
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
 
-@router.get("/fixing/workspace", response_model=dict[str, Any], summary="Fixierungs-Arbeitsraum je Kontrakt (fixiert/offen + Bewertung)")
+@router.get("/fixing/workspace", response_model=FixingWorkspaceOut, summary="Fixierungs-Arbeitsraum je Kontrakt (fixiert/offen + Bewertung)")
 def workspace(
     kontrakt: str = Query(..., description="Kontraktnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -28,7 +34,7 @@ def workspace(
     return ContractFixingService(db, tenant_id).workspace(kontrakt)
 
 
-@router.get("/fixing/list", response_model=dict[str, Any], summary="Fixierungen eines Kontrakts")
+@router.get("/fixing/list", response_model=FixingListOut, summary="Fixierungen eines Kontrakts")
 def list_fixings(
     kontrakt: str = Query(..., description="Kontraktnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -48,7 +54,7 @@ class FixingIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/fixing", response_model=dict[str, Any], summary="Teilfixierung anlegen (Menge zu MATIF-Preis + Prämie)")
+@router.post("/fixing", response_model=FixingCreatedOut, summary="Teilfixierung anlegen (Menge zu MATIF-Preis + Prämie)")
 def create_fixing(
     body: FixingIn,
     db: Session = Depends(get_db),
@@ -72,7 +78,7 @@ class QuoteIn(BaseModel):
     quelle: Optional[str] = None
 
 
-@router.post("/matif-quote", response_model=dict[str, Any], summary="MATIF-Notierung erfassen/aktualisieren (Bewertungsbasis)")
+@router.post("/matif-quote", response_model=QuoteUpsertOut, summary="MATIF-Notierung erfassen/aktualisieren (Bewertungsbasis)")
 def upsert_quote(
     body: QuoteIn,
     db: Session = Depends(get_db),

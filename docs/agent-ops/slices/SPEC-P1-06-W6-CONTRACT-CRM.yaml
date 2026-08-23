@@ -1,0 +1,63 @@
+slice_id: SPEC-P1-06-W6-CONTRACT-CRM
+id: SPEC-P1-06-W6-CONTRACT-CRM
+title: Legacy-Routen response_model typisieren — Welle 6 (Kontrakt-Spine + CRM-Buendel)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Sechste Welle von SPEC-P1-06, erstmals fachlich statt nach Dateigroesse
+  geschnitten: der Kontrakt-Spine (DOM-CON-004) und das CRM-Buendel.
+schnittwechsel: >-
+  Ab 6 Vorkommen je Datei traegt der Groessenschnitt nicht mehr. Fachliche
+  Buendel erlauben gemeinsame Schemas: FixingOut wird von drei
+  Kontrakt-Endpunkten geteilt (Liste, Arbeitsraum, Settlement-Status), das
+  CRM-Buendel teilt sich ein Modul ueber fuenf Dateien.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W6-CONTRACT-CRM.yaml
+  - app/api/v1/schemas/contract_spine_schemas.py
+  - app/api/v1/schemas/crm_bundle_schemas.py
+  - app/api/v1/endpoints/contract_fixing.py
+  - app/api/v1/endpoints/contract_engagement.py
+  - app/api/v1/endpoints/contract_settlement.py
+  - app/api/v1/endpoints/crm_lead_gen.py
+  - app/api/v1/endpoints/crm_ownership.py
+  - app/api/v1/endpoints/crm_gifts.py
+  - app/api/v1/endpoints/crm_kontakte.py
+  - app/api/v1/endpoints/crm_contacts_ext.py
+  - tests/test_welle6_response_models.py
+  - tests/test_crm_stammdaten_uat.py
+befund_500er:
+  schwere: hoch
+  beschreibung: >-
+    Drei Endpunkte fuehrten response_model=dict[str, Any], gaben aber eine
+    Liste zurueck. FastAPI validiert die Antwort gegen das Modell; bei einer
+    Liste schlaegt das immer fehl. Die Endpunkte lieferten in JEDEM Aufruf
+    einen 500er — auch bei leerer Liste. Kein Test deckte sie ab.
+  betroffen:
+    - "GET /api/v1/crm/kunden-kontakte/{kunden_nr}"
+    - "GET /api/v1/crm/kim/customers/{kunden_nr}/gifts"
+    - "GET /api/v1/crm/kim/contacts/{contact_id}/marketing-prefs"
+  nachweis: >-
+    Minimal-App mit response_model=dict[str, Any] und Listenrueckgabe liefert
+    reproduzierbar 500. Am echten App-Objekt bestaetigt.
+  behoben: Alle drei tragen jetzt list[...]-Modelle.
+  klammer: >-
+    tests/test_welle6_response_models.py prueft repo-weit ueber alle 3580
+    Routen, dass response_model und Rueckgabetyp sich nicht widersprechen.
+    Wichtig dabei: bei "from __future__ import annotations" sind Annotationen
+    Strings — eine naive typing.get_origin-Pruefung findet nichts.
+nebenbefund: >-
+  tests/test_crm_stammdaten_uat.py versprach im Docstring, ohne laufendes
+  Backend zu ueberspringen, fing aber nur UatFailure. Ein Socket-Timeout wirft
+  TimeoutError und entkam — der Test war ohne Backend rot statt uebersprungen.
+  Vorbestehend, um TimeoutError/OSError ergaenzt.
+result: >-
+  Schwache response_model-Typen repo-weit 315 -> 282, betroffene Dateien
+  99 -> 92. Nach sechs Wellen: 447 -> 282 (165 Endpunkte, 37 Prozent).
+verification:
+  - "python -m pytest tests/test_welle6_response_models.py -q --no-cov"
+  - "python -m pytest tests/test_contract_fixing.py tests/test_contract_engagement.py tests/test_contract_settlement.py -q --no-cov"
+  - "python scripts/check_response_models.py --threshold 20"
+  - "python scripts/check_weak_response_models.py"
