@@ -34,11 +34,11 @@ P0-Specs aus dem Audit:
 |---|---|---|
 | SPEC-P0-01 | erledigt 2026-07-05 (main) | quality-gate, security-scan, universal-mask-ci grün — Evidenz `artifacts/ci-green-evidence.md`, Run 28732436888 |
 | SPEC-P0-02 | erledigt 2026-07-05 | Runtime-Sweep Nightly-Gate 0×5xx (`scripts/api_runtime_sweep.py`, Repair-Migration `runtime_sweep_repair_20260702`) |
-| SPEC-P0-03 | offen | Kat.-B/D-Produktionsentscheidung und `/readyz` |
+| SPEC-P0-03 | erledigt 2026-08-23 | Kat.-B/D-Matrix + `/ready`/`/readyz`; Finance-/Bestands-Listen liefern bei DB-Fehler 503+Metrik (Nachzug OP/Matching/Bank) |
 | SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
-| SPEC-P0-05 | offen | Coverage-Ratchet nur noch steigend, kritische Pfade hochziehen |
+| SPEC-P0-05 | teilweise | only-up-Ratchet aktiv (`coverage_ratchet_baseline.json`); Zielwerte ≥70% fuer kritische Pfade bleiben COVERAGE-001-Folgearbeit |
 | SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
-| SPEC-P0-07 | offen | SOC-2-Prueferprofil ergaenzen |
+| SPEC-P0-07 | erledigt 2026-08-23 | SOC-2-Profil in `simulate_external_assessors.py` + `config/audit/soc2-tsc-matrix.yaml`; Type-II-/AVV-Gates bleiben extern |
 | SPEC-P0-08 | offen/external_gate | Restore-/Backup-Drill reproduzierbar vorbereiten |
 
 P1-Specs aus dem Audit:
@@ -47,11 +47,11 @@ P1-Specs aus dem Audit:
 |---|---|---|
 | SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
 | SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
-| SPEC-P1-05 | offen | SQL-Injection-Review fuer `nosec S608`-Stellen |
+| SPEC-P1-05 | teilweise 2026-08-23 | S608-Inventar `docs/operations/appsec-s608-review.md`; 23 neue Stellen annotated; `check_sql_fstrings.py` gruen; 15 `needs_recheck` fuer Core-Umbau offen |
 | SPEC-P1-06 | offen | Legacy-Routen mit `response_model` typisieren |
 | SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
 | SPEC-P1-08 | erledigt 2026-07-06 | Chargen-Tiefenmodell: Lot-Attribute (herkunft, sperrgrund, qs_status, received_at); FEFO-Pick sortiert `mhd ASC NULLS LAST, created_at ASC`; Migration `inv_lot_depth_spec_p1_08` |
-| SPEC-P1-09 | offen | Lizenzinventar und THIRD_PARTY_NOTICES |
+| SPEC-P1-09 | erledigt 2026-08-23 | Lizenzinventar (`docs/operations/license-inventory.md`) + erweiterte `THIRD_PARTY_NOTICES.md`; SBOM weiter via CI CycloneDX |
 | SPEC-P1-10 | offen | Erntepeak-Lasttest lokal reproduzierbar |
 
 Priorisierte Sequenz: A0 Verifikation und A2 PII parallel/sofort, danach

@@ -1,0 +1,27 @@
+slice_id: SPEC-P1-09-LICENSE
+id: SPEC-P1-09-LICENSE
+title: Lizenzinventar und THIRD_PARTY_NOTICES
+owner: Cursor Agent
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Lizenzinventar aus Requirements und bekannten Sidecars erzeugen und
+  THIRD_PARTY_NOTICES fuer kommerziellen Vertrieb vervollstaendigen.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-09-LICENSE.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/operations/license-inventory.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - THIRD_PARTY_NOTICES.md
+  - scripts/generate_license_inventory.py
+acceptance:
+  - docs/operations/license-inventory.md listet Requirements und Sidecars
+  - THIRD_PARTY_NOTICES.md verweist auf Inventar und CycloneDX-SBOM
+  - Generator lauffaehig
+result: >-
+  63 Requirements-Pakete inventarisiert; Sidecar-Tabelle und Notices erweitert;
+  CI-SBOM bleibt massgeblich fuer transitive Lizenzen.
+verification:
+  - "python scripts/generate_license_inventory.py"

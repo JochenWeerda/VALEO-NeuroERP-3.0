@@ -31,6 +31,6 @@ function C($x,$y,$ms=400){[L1]::Click($ox+$x,$oy+$y);Start-Sleep -Milliseconds $
 C 660 58 300; C 660 58 200; Shot "$OutDir\_tab_aw.png"
 C 215 108 550; Shot "$OutDir\_beleg_menu_tmp.png"
 $y = $MenuY + ($LeafIndex * 22)
-C 215 $y 1800
+C 175 $y 1800
 Shot "$OutDir\beleg_leaf_${LeafIndex}_${LeafName}.png"
 Write-Host "saved leaf $LeafIndex y=$y"

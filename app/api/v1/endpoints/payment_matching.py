@@ -270,8 +270,15 @@ async def get_unmatched_payments(
             for r in rows
         ]
     except Exception as e:
-        logger.debug(f"get_unmatched_payments: {e}")
-        return []
+        # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
+        from app.core.critical_data_path import raise_critical_data_unavailable
+
+        logger.error("get_unmatched_payments failed: %s", e)
+        raise_critical_data_unavailable(
+            endpoint="payments_unmatched",
+            exc=e,
+            label="Unmatched-Zahlungen",
+        )
 
 
 @router.get("/open-items/{customer_id}", response_model=List[OpenItemMatch], summary="Open items for matching abrufen")
@@ -313,11 +320,17 @@ async def get_open_items_for_matching(
             )
             for r in results
         ]
-        
+
     except Exception as e:
-        logger.error(f"Error fetching open items: {e}")
-        # Return empty list if table doesn't exist yet
-        return []
+        # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
+        from app.core.critical_data_path import raise_critical_data_unavailable
+
+        logger.error("Error fetching open items for matching: %s", e)
+        raise_critical_data_unavailable(
+            endpoint="payments_open_items_match",
+            exc=e,
+            label="Offene Posten fuer Matching",
+        )
 
 
 @router.post("/match/{payment_id}", response_model=MatchResult, summary="Payment match")
@@ -683,9 +696,15 @@ async def get_match_suggestions(
             )
             for r in op_results
         ]
-        
+
     except Exception as e:
-        logger.error(f"Error getting match suggestions: {e}")
-        # Return empty list if error (table may not exist)
-        return []
+        # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
+        from app.core.critical_data_path import raise_critical_data_unavailable
+
+        logger.error("Error getting match suggestions: %s", e)
+        raise_critical_data_unavailable(
+            endpoint="payments_match_suggestions",
+            exc=e,
+            label="Matching-Vorschlaege",
+        )
 

@@ -4,8 +4,8 @@ type: reference
 audience: [betrieb, lead, entwickler]
 owner: Claude
 status: aktiv
-last_reviewed: 2026-07-03
-version: 1.0.0
+last_reviewed: 2026-08-23
+version: 1.1.0
 description: Produktionsentscheidung je 503-by-design- und Fallback-Modul (SPEC-P0-03) — AKTIV/AUS, Voraussetzungen, readyz-Verdrahtung, Fallback-Semantik.
 ---
 
@@ -63,6 +63,14 @@ durchgereicht. Betroffen: `activities`, `cases`, `contacts`, `leads`, `farm-prof
 |---|---|---|
 | `GET /journal-entries/` (FIBU-Journal) | leere Liste bei `SQLAlchemyError` | 503 + Problem-Details + Metrik |
 | `GET /lager/bestaende` (Bestandsaggregat) | leere Liste bei jedem DB-Fehler | 503 + Problem-Details + Metrik |
+| `GET /finance/open-items/{id}/settlements` | leere Liste bei Exception | 503 + Problem-Details + Metrik (2026-08-23) |
+| `GET /finance/payments/unmatched` | leere Liste bei Exception | 503 + Problem-Details + Metrik (2026-08-23) |
+| `GET /finance/payments/open-items/{customer}` | leere Liste bei Exception | 503 + Problem-Details + Metrik (2026-08-23) |
+| `GET /finance/payments/match-suggestions/{id}` | leere Liste bei Exception | 503 + Problem-Details + Metrik (2026-08-23) |
+| `GET /finance/bank-statements/{id}/lines` | leere Liste bei Exception | 503 + Problem-Details + Metrik (2026-08-23) |
+
+Gemeinsamer Helper: `app/core/critical_data_path.py` (`raise_critical_data_unavailable`).
+Regression: `tests/test_critical_data_path_errors.py` (7 Cases).
 
 Weitere Kandidaten werden ueber den nightly Runtime-Sweep sichtbar (jede neue stille
 Degradierung faellt als Abweichung zwischen frischer DB und Bestandsverhalten auf).

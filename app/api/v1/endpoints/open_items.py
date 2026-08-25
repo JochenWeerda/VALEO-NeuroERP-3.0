@@ -822,9 +822,15 @@ async def get_settlements(
             }
             for row in rows
         ]
-    except Exception:
-        # If table doesn't exist, return empty list
-        return []
+    except Exception as e:
+        # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
+        from app.core.critical_data_path import raise_critical_data_unavailable
+
+        raise_critical_data_unavailable(
+            endpoint="open_items_settlements",
+            exc=e,
+            label="OP-Ausgleichshistorie",
+        )
 
 
 @router.post("/{op_id}/reverse-settlement", response_model=OpenItemsOut, summary="Settlement reverse")

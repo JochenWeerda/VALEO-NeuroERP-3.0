@@ -628,7 +628,13 @@ async def get_statement_lines(
             for row in rows
         ]
     except Exception as e:
-        # If table doesn't exist, return empty list
-        logger.warning(f"Error fetching statement lines (table may not exist): {e}")
-        return []
+        # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
+        from app.core.critical_data_path import raise_critical_data_unavailable
+
+        logger.error("Error fetching statement lines: %s", e)
+        raise_critical_data_unavailable(
+            endpoint="bank_statement_lines",
+            exc=e,
+            label="Kontoauszugszeilen",
+        )
 

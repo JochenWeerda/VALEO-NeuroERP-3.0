@@ -10,6 +10,37 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 ---
 
 # Active Workboard
+
+## SPEC-P1-05-S608 SQL-f-String Gate Nachzug - in Arbeit 2026-08-23
+
+**Von:** Gap-Abwicklung. **Owner:** Cursor Agent. **Stand:** teilweise.
+
+**Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Offen: 15 `needs_recheck` auf Core-Umbau und Hypothesis-Tests.
+
+## SPEC-P1-09-LICENSE Lizenzinventar - abgeschlossen 2026-08-23
+
+**Von:** Gap-Abwicklung ohne RDP. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-23.
+
+**Ziel:** Lizenzinventar aus Requirements und bekannten Sidecars erzeugen, `THIRD_PARTY_NOTICES.md` vervollstaendigen, SPEC-P1-09 schliessen.
+
+**Ergebnis:** Generator `scripts/generate_license_inventory.py` → `docs/operations/license-inventory.md` (63 Requirements-Pakete + Sidecar-Tabelle); Notices erweitert; CycloneDX bleibt CI-SBOM-Quelle.
+
+## SPEC-P0-07-SOC2 SOC-2-Prueferprofil - abgeschlossen 2026-08-23 (Nachweis)
+
+**Von:** Gap-Abwicklung. **Owner:** Cursor Agent (Verifikation). **Stand:** abgeschlossen — Profil `soc2` und `config/audit/soc2-tsc-matrix.yaml` waren bereits vorhanden; Simulator laeuft ohne fail (nur external_gate/conditional). Open-Gaps auf erledigt gesetzt. Type-II-Evidenz und AVV bleiben Betriebsgates.
+
+## SPEC-P0-03-CLOSE Finance-Leer-Fallback Nachzug - abgeschlossen 2026-08-23
+
+**Von:** User-Auftrag Gap-Abwicklung ohne RDP. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-08-23.
+
+**Ziel:** Verbliebene stille `[]`-Fallbacks auf Finance-Listen (OP-Settlements, Payment-Matching, Bank-Statement-Lines) durch 503 + `critical_data_path_errors_total` ersetzen und SPEC-P0-03 repo-seitig schliessen.
+
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `critical_data_path.py`, open_items/payment_matching/bank_statement_import, Tests, Modul-Aktivierungsmatrix, Open-Gaps.
+
+**Abnahme:** `pytest tests/test_critical_data_path_errors.py` → 7 passed.
+
+**Ergebnis:** Helper `raise_critical_data_unavailable`; fuenf zusaetzliche Finance-Listen gehaertet; Open-Gaps SPEC-P0-03 auf erledigt gesetzt. Betreiber-Entscheidungen fuer AUS-Module bleiben Betriebsgates.
+
 ## L3-CUTOVER-UAT-032 Evidenzbasiertes Pilot- und Cutover-Programm - abgeschlossen 2026-08-23
 
 **Von:** Autonome Umsetzung der empfohlenen Folgeschritte nach L3-Gap-Schliessung. **Owner:** Codex. **Stand:** abgeschlossen 2026-08-23.
@@ -33,7 +64,6 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Abnahme:** nachvollziehbares Capture-Inventar; native Masken gegen Gewohnheitsvertraege geprueft; 1366x768, 1440x900 und 1920x1080 ohne Viewport-Ueberlauf; nur zentrale Renderer-Aenderungen; gruene Frontend-, Architektur- und Doku-Gates.
 
 **Ergebnis:** 1.022 lokale L3-PNGs in acht Capture-Verzeichnissen wiedergefunden und abstrakt inventarisiert. Alle 69 produktiven nativen ScreenDefinitions sind generator-ready und auf renderbare Meridian-Vertraege normalisiert. `expertDense` wirkt mit 36-px-Zeilen auch in Registern; alte Floorplan-, Rail-, Profil- und Gefahrenstufen-Aliasse sowie fehlende Human-Freigaben sind zentral geschlossen. Registry/Safety 503/503, Frontend 18/18, Playwright 12/12, TypeScript, ESLint und Ruff sind gruen. Verbleibend sind nur externe Rollen-, Echtdaten- und Hardware-/Provider-UAT-Gates.
-
 
 ## L3-RUNTIME-HARDENING-021 Laufzeit- und Integrationshaertung - abgeschlossen 2026-08-22
 

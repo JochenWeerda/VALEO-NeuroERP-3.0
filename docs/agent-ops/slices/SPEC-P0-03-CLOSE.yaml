@@ -1,0 +1,39 @@
+slice_id: SPEC-P0-03-CLOSE
+id: SPEC-P0-03-CLOSE
+title: SPEC-P0-03 Finance-Leer-Fallback Nachzug
+owner: Cursor Agent
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Verbliebene stille leere Listen bei DB-Fehlern auf Finance-Matching-/OP-/Bank-
+  Endpoints durch 503 + Alerting-Metrik ersetzen und SPEC-P0-03 repo-seitig
+  schliessen.
+scope:
+  - open_items Settlements-Liste
+  - payment_matching Unmatched/Open-Items/Suggestions
+  - bank_statement_import Statement-Lines
+  - zentrale Helper + Regressionstests
+  - Modul-Aktivierungsmatrix und Open-Gaps
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P0-03-CLOSE.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/operations/module-activation-matrix.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/core/critical_data_path.py
+  - app/api/v1/endpoints/open_items.py
+  - app/api/v1/endpoints/payment_matching.py
+  - app/api/v1/endpoints/bank_statement_import.py
+  - tests/test_critical_data_path_errors.py
+acceptance:
+  - Kein stilles [] mehr bei DB-Fehlern auf den genannten Finance-Listen
+  - Metrik critical_data_path_errors_total wird erhoeht
+  - tests/test_critical_data_path_errors.py gruen
+risks:
+  - Betreiber-Entscheidungen fuer AUS-Module bleiben Fach-/Betriebsgates
+result: >-
+  Helper raise_critical_data_unavailable; fuenf Finance-Listen liefern bei
+  simuliertem DB-Ausfall 503 statt []; 7/7 Tests gruen.
+verification:
+  - "pytest tests/test_critical_data_path_errors.py --noconftest -p no:cacheprovider --no-cov: 7 passed"
