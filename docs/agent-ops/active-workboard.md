@@ -11,17 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOM-INV-005-MOVEMENT-DIRECTION Kanonische Bewegungsrichtung - in Arbeit 2026-08-25
+## DOM-INV-005-MOVEMENT-DIRECTION Kanonische Bewegungsrichtung - abgeschlossen 2026-08-25
 
-**Von:** Nachzug des in SPEC-P1-06-W8 bewusst zurueckgestellten Lese-Modell-Fehlers. **Owner:** Claude Code. **Stand:** in Arbeit.
+**Von:** Nachzug des in SPEC-P1-06-W8 bewusst zurueckgestellten Lese-Modell-Fehlers. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-08-25.
 
 **Ziel:** Die Bewegungsrichtung von `domain_inventory.inventory_stock_movements` einmal zentral definieren und alle Aggregationen darauf umstellen.
 
-**Vorab-Befund:** Es sind nicht zwei Vokabulare, sondern sieben. Geschrieben werden `in`/`out`, `wareneingang`/`warenausgang`/`umbuchung_eingang`/`umbuchung_ausgang`/`inventur`, `ZUGANG`/`ABGANG`, `EINLAGERUNG`, `RETOURE`, `pick_out`, `opening_balance`, `adjustment`/`adjustment_in`/`adjustment_out`, `reservation`, `inventory_count`. Gelesen wird das von sechs unabhaengigen CASE-Ausdruecken, jeder blind fuer die Vokabulare der anderen: `articles.py` verwirft mit `ELSE 0` alle deutschen Typen, `compat.py` zaehlt mit `ELSE -quantity` jeden Wareneingang als Abgang, `inventory_operations.py` und `scan.py` zaehlen mit `ELSE quantity` jeden ABGANG als Zugang. Zusaetzlich traegt `inventory_count` einen absoluten Zaehlwert statt eines Deltas.
+**Befund:** Es waren nicht zwei Vokabulare, sondern zwoelf Werte aus sieben Quellen — `in`/`out`, `wareneingang`/`warenausgang`/`umbuchung_eingang`/`umbuchung_ausgang`/`inventur`/`umbuchung`, `ZUGANG`/`ABGANG`, `EINLAGERUNG`, `RETOURE`, `pick_out`, `opening_balance`, `adjustment`/`adjustment_in`/`adjustment_out`, `reservation`, `inventory_count`. Gelesen wurde das von sechs unabhaengigen CASE-Ausdruecken mit drei verschiedenen Raten-Zweigen: `ELSE 0` (Zeile verschwindet), `ELSE quantity` (jeder Abgang zaehlt positiv), `ELSE -quantity` (jeder Zugang zaehlt negativ). Auf denselben Zeilen desselben Tenants der Dev-DB ergab das compat **-1569**, lager **+1669**, articles **-90**; kanonisch korrekt sind **+1389** (774 EINLAGERUNG + 50 in + 705 wareneingang - 140 out).
 
 **Dateibesitz:** Slice-YAML, dieser Abschnitt, `inventory_movement_direction.py`, `inventory_stock_balance.py`, `inventory_operations.py`, `scan.py`, `articles.py`, `compat.py`, `tests/test_inventory_movement_direction.py`. Nicht: Datenmigration bestehender Zeilen.
 
-**Abnahme:** eine Richtungsdefinition; alle sechs Aggregationen darauf umgestellt; kein stilles Vorzeichen fuer unbekannte Typen; Waechtertest gegen neue Vokabulare; Bestandstests gruen.
+**Abnahme:** `pytest tests/test_inventory_movement_direction.py` → 25 passed; neun Suiten zusammen → 126 passed; `architecture_drift_check.py` und `check_weak_response_models.py --threshold 246` gruen; vier betroffene Endpunkte per TestClient 200.
+
+**Ergebnis:** Eine Richtungsdefinition, sechs Aggregationen darauf umgestellt. Drei weitere Fehler derselben Klasse mitgefixt: der Bestandswert in `GET /lager/bestaende` wurde unsigniert summiert (jeder Warenausgang erhoehte den Lagerwert), das `HAVING` filterte auf `SUM(quantity)` statt auf der zurueckgegebenen Menge, und `POST /lager/bewegungen` erlaubte per Payload den Typ `umbuchung`, den keine Aggregation kannte. Zusaetzlich aufgefallen: `articles.py` hat `text` nie importiert — alle vier `text()`-Aufrufe in `get_article_position_context` liefen in NameError, der Endpunkt war dauerhaft defekt und antwortet jetzt 200. Der Repository-Waechter hat zwei Netze (Schluesselwort- und positionaler INSERT-Stil), weil das erste Netz allein `wareneingang`, `RETOURE` und `opening_balance` nicht gesehen haette — genau so ist die Doppelung entstanden.
+
+**Offen (external_gates):** Vereinheitlichung der geschriebenen `movement_type`-Werte per Migration; fachliche Klaerung, wie ein Mobile-Zaehlergebnis (`counted_qty`, absoluter Bestand) in ein Delta uebersetzt gehoert — bis dahin geht es mit Faktor 0 ein; Abgleich der neuen Bestandszahlen gegen die Betriebserwartung, bevor sie als Inventurgrundlage dienen.
 
 ## SPEC-P1-06-W8-INVENTORY-SILO Legacy-Routen typisieren Welle 8 - abgeschlossen 2026-08-25
 

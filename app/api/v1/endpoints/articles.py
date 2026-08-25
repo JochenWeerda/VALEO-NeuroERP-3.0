@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel as PydanticBaseModel
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
@@ -17,6 +17,7 @@ from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartn
 from ....infrastructure.models import StockMovement
 from ..schemas.base import PaginatedResponse
 from ..schemas.inventory import Article, ArticleCreate, ArticleUpdate
+from app.services.inventory_movement_direction import direction_sql
 from app.services.articles_service import (
     resolve_article_tenant as _resolve_article_tenant,
     get_article_or_404 as _get_article_or_404,
@@ -630,16 +631,15 @@ async def get_article_position_context(
     # ------------------------------------------------------------------
     batches: list = []
     try:
+        # DOM-INV-005: Richtung zentral aus inventory_movement_direction,
+        # nicht mehr als eigener CASE mit ELSE 0 (der alle deutschen
+        # Bewegungstypen stillschweigend verworfen hat).
+        richtung = direction_sql()
         rows = db.execute(
             text(
-                """
+                f"""
                 SELECT charge AS batch_number,
-                       SUM(CASE
-                             WHEN movement_type IN ('in', 'return') THEN quantity
-                             WHEN movement_type = 'out' THEN -ABS(quantity)
-                             WHEN movement_type = 'adjustment' THEN quantity
-                             ELSE 0
-                           END) AS qty,
+                       SUM({richtung}) AS qty,
                        NULL::date AS expiry_date,
                        warehouse_id
                 FROM domain_inventory.inventory_stock_movements
@@ -648,14 +648,9 @@ async def get_article_position_context(
                   AND charge IS NOT NULL
                   AND charge <> ''
                 GROUP BY charge, warehouse_id
-                HAVING SUM(CASE
-                             WHEN movement_type IN ('in', 'return') THEN quantity
-                             WHEN movement_type = 'out' THEN -ABS(quantity)
-                             WHEN movement_type = 'adjustment' THEN quantity
-                             ELSE 0
-                           END) > 0
+                HAVING SUM({richtung}) > 0
                 ORDER BY charge
-                """
+                """  # nosec B608 - Fragment aus Modulkonstanten, Werte via Bind-Params
             ),
             {"article_id": article_id, "tenant_id": effective_tenant},
         ).fetchall()

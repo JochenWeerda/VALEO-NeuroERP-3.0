@@ -2,9 +2,10 @@ slice_id: DOM-INV-005-MOVEMENT-DIRECTION
 id: DOM-INV-005-MOVEMENT-DIRECTION
 title: Kanonische Bewegungsrichtung fuer inventory_stock_movements
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-08-25"
 started_at: "2026-08-25"
+completed_at: "2026-08-25"
 goal: >-
   Die Bewegungsrichtung von domain_inventory.inventory_stock_movements einmal
   zentral definieren und alle Aggregationen darauf umstellen. Heute schreiben
@@ -44,6 +45,9 @@ tests:
   - tests/test_inventory_stock_movements_canonical.py
   - tests/test_welle8_response_models.py
   - tests/test_welle8_schema_drift.py
+  - tests/test_agri_silo_material_flow.py
+  - tests/test_inventory_auxiliary.py
+  - tests/test_inventory_seed.py
 risks:
   - >-
     Bestandszahlen aendern sich. Das ist der Zweck des Slices, aber es heisst
@@ -101,3 +105,37 @@ verification:
   - "python -m pytest tests/test_inventory_movement_direction.py -q --no-cov"
   - "python -m pytest tests/test_inventory_operations.py tests/test_inventory_counts.py tests/test_inventory_stock_movements_canonical.py tests/test_welle8_response_models.py tests/test_welle8_schema_drift.py -q --no-cov"
   - "python scripts/architecture_drift_check.py"
+befunde:
+  - >-
+    Es waren nicht zwei Vokabulare, sondern zwoelf Werte aus sieben Quellen:
+    in/out, wareneingang/warenausgang/umbuchung_eingang/umbuchung_ausgang/
+    inventur/umbuchung, ZUGANG/ABGANG, EINLAGERUNG, RETOURE, pick_out,
+    opening_balance, adjustment/adjustment_in/adjustment_out, reservation,
+    inventory_count.
+  - >-
+    Gelesen wurde das von sechs unabhaengigen CASE-Ausdruecken mit drei
+    verschiedenen Raten-Zweigen. Auf denselben Zeilen desselben Tenants der
+    Dev-Datenbank ergab das: compat -1569, lager +1669, articles -90.
+    Kanonisch korrekt sind +1389 (774 EINLAGERUNG + 50 in + 705 wareneingang
+    - 140 out).
+  - >-
+    POST /lager/bewegungen erlaubt per Payload den Typ 'umbuchung', den keine
+    der Aggregationen kannte. Der Wert ist jetzt in der Richtungstabelle, und
+    ein Test prueft die Whitelist des Endpunkts gegen die Tabelle.
+  - >-
+    articles.py hat 'text' nie importiert. Alle vier text()-Aufrufe in
+    get_article_position_context liefen damit in NameError - GET
+    /articles/{id}/position-context war dauerhaft defekt, nicht nur falsch
+    aggregiert. Beim Umbau derselben Query mitgefixt; der Endpunkt antwortet
+    jetzt 200.
+  - >-
+    GET /lager/bestaende hat den Bestandswert unsigniert summiert, jeder
+    Warenausgang hat den Lagerwert also erhoeht. Ebenso hat HAVING auf
+    SUM(quantity) gefiltert, also auf einer anderen Zahl als der
+    zurueckgegebenen Menge. Beides nutzt jetzt dieselbe Richtung.
+result: >-
+  Eine Richtungsdefinition in app/services/inventory_movement_direction.py,
+  sechs Aggregationen darauf umgestellt, zwei weitere Fehler derselben Klasse
+  (unsignierter Bestandswert, HAVING auf anderer Zahl) und ein dauerhaft
+  defekter Endpunkt mitgefixt. 25 neue Tests, davon ein Repository-Waechter mit
+  zwei Netzen und ein Laufzeit-Diagnosepfad gegen die Datenbank.

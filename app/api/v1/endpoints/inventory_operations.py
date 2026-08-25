@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.inventory_operations_schemas import InventoryOperationsOut
+from app.services.inventory_movement_direction import direction_sql, signed_quantity
+from app.services.inventory_stock_balance import current_stock
 from app.api.v1.schemas.inventory_lot_bundle_schemas import (
     InventoryLotOut,
     InventurDifferenzOut,
@@ -763,8 +765,20 @@ async def get_bestaende(
         filters.append("sm.charge = :charge")
         params["charge"] = charge
 
-    having = "HAVING SUM(sm.quantity) > 0" if only_positive else ""
     where_clause = " AND ".join(filters)
+
+    # DOM-INV-005: Richtung zentral. Vorher hat der ELSE-Zweig jeden nicht
+    # aufgezaehlten Typ positiv gezaehlt - ZUGANG und ABGANG landeten damit
+    # beide als Zugang im Bestand, und der Bestandswert addierte jeden
+    # Warenausgang statt ihn abzuziehen.
+    richtung = direction_sql("sm.movement_type", "sm.quantity")
+    wert = direction_sql(
+        "sm.movement_type",
+        "sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)",
+    )
+    # HAVING muss dieselbe Richtung kennen wie die Menge, sonst filtert es
+    # auf einer anderen Zahl als es zurueckgibt.
+    having = f"HAVING SUM({richtung}) > 0" if only_positive else ""
 
     try:
         rows = db.execute(
@@ -775,14 +789,10 @@ async def get_bestaende(
                     a.name AS article_name,
                     sm.warehouse_id,
                     w.name AS warehouse_name,
-                    SUM(CASE WHEN sm.movement_type IN ('wareneingang','inventur','umbuchung_eingang')
-                             THEN sm.quantity
-                             WHEN sm.movement_type IN ('warenausgang','umbuchung_ausgang')
-                             THEN -sm.quantity
-                             ELSE sm.quantity END) AS menge,
+                    SUM({richtung}) AS menge,
                     a.unit AS einheit,
                     sm.charge,
-                    SUM(sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)) AS bestandswert
+                    SUM({wert}) AS bestandswert
                 FROM domain_inventory.inventory_stock_movements sm
                 LEFT JOIN domain_inventory.articles a ON a.id = sm.article_id
                 LEFT JOIN domain_inventory.warehouses w ON w.id = sm.warehouse_id
@@ -872,20 +882,15 @@ async def create_lagerbewegung(
     if not article:
         raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
 
-    # previous_stock und new_stock sind NOT NULL in der Tabelle
-    prev_stock_row = db.execute(
-        text("""
-            SELECT COALESCE(SUM(CASE
-                WHEN movement_type IN ('wareneingang','inventur') THEN quantity
-                WHEN movement_type IN ('warenausgang') THEN -quantity
-                ELSE quantity END), 0)
-            FROM domain_inventory.inventory_stock_movements
-            WHERE tenant_id = :tid AND article_id = :aid AND warehouse_id = :wid
-        """),
-        {"tid": t_id, "aid": payload.article_id, "wid": payload.warehouse_id},
-    ).scalar() or 0
-    direction = -1 if payload.movement_type == "warenausgang" else 1
-    new_stock = float(prev_stock_row) + direction * payload.quantity
+    # previous_stock und new_stock sind NOT NULL in der Tabelle. Saldo und
+    # Vorzeichen kommen aus derselben Quelle wie alle anderen Aggregationen.
+    prev_stock_row = current_stock(
+        db,
+        tenant_id=t_id,
+        article_id=payload.article_id,
+        warehouse_id=payload.warehouse_id,
+    )
+    new_stock = prev_stock_row + signed_quantity(payload.movement_type, payload.quantity)
 
     db.execute(
         text("""

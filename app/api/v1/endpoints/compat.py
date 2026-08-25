@@ -42,6 +42,11 @@ from app.integrations.crm_core_client import (
 from app.routers.contracts_router import get_contract as get_contract_via_router
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.einkauf_compat_service import EinkaufCompatService
+from app.services.inventory_movement_direction import (
+    direction_sql,
+    inbound_sql,
+    outbound_sql,
+)
 from app.services.pos_compat_service import PosCompatService
 from app.services.inventory_compat_service import InventoryCompatService, FutterCompatService
 from app.services.annahme_service import AnnahmeService
@@ -2459,18 +2464,24 @@ async def lager_dashboard(
     db: Session = Depends(get_db),
 ) -> dict:
     """Echte Bestands-KPIs aus StockMovements aggregiert."""
+    # DOM-INV-005: Zu- und Abgang zentral bestimmt. Vorher zaehlten hier nur
+    # 'in' und 'out' - jede deutsche Buchung, jedes ZUGANG/ABGANG und jede
+    # Retoure fiel aus den KPIs heraus.
+    zugang = inbound_sql()
+    abgang = outbound_sql()
+    zugang_wert = inbound_sql(quantity="quantity * COALESCE(unit_cost, 0)")
+    abgang_wert = outbound_sql(quantity="quantity * COALESCE(unit_cost, 0)")
     row = db.execute(
-        text("""
+        text(f"""
             SELECT
                 COUNT(DISTINCT article_id) AS total_articles,
-                COALESCE(SUM(CASE WHEN movement_type = 'in' THEN quantity ELSE 0 END), 0) AS total_in,
-                COALESCE(SUM(CASE WHEN movement_type = 'out' THEN quantity ELSE 0 END), 0) AS total_out,
-                COALESCE(SUM(CASE WHEN movement_type = 'in' THEN quantity * COALESCE(unit_cost, 0) ELSE 0 END)
-                       - SUM(CASE WHEN movement_type = 'out' THEN quantity * COALESCE(unit_cost, 0) ELSE 0 END), 0) AS total_value,
+                COALESCE(SUM({zugang}), 0) AS total_in,
+                COALESCE(SUM({abgang}), 0) AS total_out,
+                COALESCE(SUM({zugang_wert}) - SUM({abgang_wert}), 0) AS total_value,
                 COUNT(CASE WHEN movement_date = CURRENT_DATE THEN 1 END) AS movements_today
             FROM domain_inventory.inventory_stock_movements
             WHERE tenant_id = :tid
-        """),
+        """),  # nosec B608 - Fragmente aus Modulkonstanten, Werte via Bind-Params
         {"tid": tenant_id},
     ).first()
 
@@ -2481,19 +2492,20 @@ async def lager_dashboard(
     total_value = float(row[3]) if row else 0
     movements_today = row[4] if row else 0
 
+    richtung = direction_sql()
     low_stock_row = db.execute(
-        text("""
+        text(f"""
             SELECT COUNT(DISTINCT sm.article_id)
             FROM (
                 SELECT article_id,
-                       SUM(CASE WHEN movement_type = 'in' THEN quantity ELSE -quantity END) AS bestand
+                       SUM({richtung}) AS bestand
                 FROM domain_inventory.inventory_stock_movements
                 WHERE tenant_id = :tid
                 GROUP BY article_id
             ) sm
             JOIN domain_inventory.articles a ON a.id = sm.article_id
             WHERE sm.bestand > 0 AND sm.bestand < COALESCE(a.min_stock, 10)
-        """),
+        """),  # nosec B608 - Fragment aus Modulkonstanten, Werte via Bind-Params
         {"tid": tenant_id},
     ).scalar() or 0
 

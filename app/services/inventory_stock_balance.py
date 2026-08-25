@@ -1,41 +1,43 @@
-"""SPEC-P1-06 Welle 8 — Bestandssaldo fuer die NOT-NULL-Snapshotspalten.
+"""Bestandssaldo aus inventory_stock_movements.
 
-``domain_inventory.inventory_stock_movements`` fuehrt ``previous_stock`` und
-``new_stock`` als NOT NULL ohne Default. Jeder Schreibpfad muss sie also selbst
-liefern; ``create_lagerbewegung`` tut das laengst, die Storno- und
-Inventurdifferenz-Pfade bisher nicht.
+Entstanden in SPEC-P1-06-W8, weil ``previous_stock`` und ``new_stock`` in
+``domain_inventory.inventory_stock_movements`` NOT NULL ohne Default sind und
+jeder Schreibpfad sie selbst liefern muss.
 
-Vokabular-Befund: die Tabelle traegt zwei Bewegungsvokabulare nebeneinander —
-kleingeschriebene Belegtypen (``wareneingang``/``warenausgang``/``umbuchung_*``)
-aus ``POST /lager/bewegungen`` und grossgeschriebene Richtungen
-(``ZUGANG``/``ABGANG``) aus den Korrekturdiensten. Diese Funktion kennt beide.
-``GET /lager/bestaende`` aggregiert bis heute mit ``ELSE quantity`` und zaehlt
-``ABGANG`` damit positiv; das ist ein eigener Fehler im Lese-Modell und wird
-hier bewusst nicht mitverbogen, weil die Snapshotspalten und die Aggregation
-unabhaengig voneinander sind.
+Seit DOM-INV-005 fuehrt dieses Modul die Vokabularlisten nicht mehr selbst,
+sondern holt Richtung und SQL-Fragment aus
+:mod:`app.services.inventory_movement_direction` - der einen Stelle, die
+festlegt, welcher ``movement_type`` den Bestand erhoeht, senkt oder unberuehrt
+laesst.
 """
 from __future__ import annotations
 
-from sqlalchemy import bindparam, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-INBOUND_TYPES = ("wareneingang", "inventur", "umbuchung_eingang", "ZUGANG")
-OUTBOUND_TYPES = ("warenausgang", "umbuchung_ausgang", "ABGANG")
+from app.services.inventory_movement_direction import (
+    INBOUND_TYPES,
+    OUTBOUND_TYPES,
+    direction_sql,
+    signed_quantity,
+)
+
+__all__ = [
+    "INBOUND_TYPES",
+    "OUTBOUND_TYPES",
+    "current_stock",
+    "signed_delta",
+    "signed_quantity",
+]
 
 _BALANCE_SQL = text(
-    """
-    SELECT COALESCE(SUM(CASE
-        WHEN movement_type IN :inbound THEN quantity
-        WHEN movement_type IN :outbound THEN -quantity
-        ELSE quantity END), 0)
+    f"""
+    SELECT COALESCE(SUM({direction_sql()}), 0)
     FROM domain_inventory.inventory_stock_movements
     WHERE tenant_id = :tenant_id
       AND article_id = :article_id
       AND warehouse_id = :warehouse_id
-    """
-).bindparams(
-    bindparam("inbound", expanding=True),
-    bindparam("outbound", expanding=True),
+    """  # nosec B608 - Fragment aus Modulkonstanten, Werte via Bind-Params
 )
 
 
@@ -46,22 +48,22 @@ def current_stock(
     article_id: str,
     warehouse_id: str,
 ) -> float:
-    """Aktueller Buchbestand einer Artikel-/Lager-Kombination."""
+    """Aktueller Buchbestand einer Artikel-/Lagerkombination."""
     value = db.execute(
         _BALANCE_SQL,
         {
             "tenant_id": tenant_id,
             "article_id": article_id,
             "warehouse_id": warehouse_id,
-            "inbound": list(INBOUND_TYPES),
-            "outbound": list(OUTBOUND_TYPES),
         },
     ).scalar()
     return float(value or 0)
 
 
 def signed_delta(movement_type: str, quantity: float) -> float:
-    """Vorzeichenbehafteter Bestandseffekt einer Bewegung."""
-    if movement_type in OUTBOUND_TYPES:
-        return -abs(quantity)
-    return abs(quantity)
+    """Bestandswirksame Menge einer Bewegung.
+
+    Alias auf :func:`~app.services.inventory_movement_direction.signed_quantity`;
+    bleibt erhalten, weil die Korrekturdienste ihn unter diesem Namen nutzen.
+    """
+    return signed_quantity(movement_type, quantity)
