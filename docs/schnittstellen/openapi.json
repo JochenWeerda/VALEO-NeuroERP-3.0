@@ -22842,6 +22842,42 @@
         "title": "BussgeldUpdatePayload",
         "type": "object"
       },
+      "ByOwnerOut": {
+        "description": "``GET /crm/kunden/ownership/by-owner``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OwnershipKundeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "sales_rep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Rep"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "ByOwnerOut",
+        "type": "object"
+      },
       "CalendarEventIn": {
         "properties": {
           "conflictLevel": {
@@ -46718,6 +46754,126 @@
         "title": "DuengeBilanzRequest",
         "type": "object"
       },
+      "DunningCandidateListOut": {
+        "description": "``GET /contracts/dunning/candidates``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DunningCandidateOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "DunningCandidateListOut",
+        "type": "object"
+      },
+      "DunningCandidateOut": {
+        "description": "Ueberfaelliger, untererfuellter Kontrakt.",
+        "properties": {
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "letzte_mahnstufe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzte Mahnstufe"
+          },
+          "naechste_mahnstufe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Naechste Mahnstufe"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "tage_ueberfaellig": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tage Ueberfaellig"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "title": "DunningCandidateOut",
+        "type": "object"
+      },
       "DunningCreate": {
         "description": "Schema for creating a dunning notice",
         "properties": {
@@ -49360,6 +49516,202 @@
         "additionalProperties": false,
         "properties": {},
         "title": "EmptyBody",
+        "type": "object"
+      },
+      "EngagementArticleOut": {
+        "description": "Offene Menge je Artikel mit Nettoposition.",
+        "properties": {
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "einkauf_offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einkauf Offen"
+          },
+          "kontrakte": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakte"
+          },
+          "netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Einkauf minus Verkauf — die Nettoposition",
+            "title": "Netto"
+          },
+          "verkauf_offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verkauf Offen"
+          }
+        },
+        "title": "EngagementArticleOut",
+        "type": "object"
+      },
+      "EngagementOut": {
+        "description": "``GET /contracts/engagement``",
+        "properties": {
+          "by_article": {
+            "items": {
+              "$ref": "#/components/schemas/EngagementArticleOut"
+            },
+            "title": "By Article",
+            "type": "array"
+          },
+          "by_party": {
+            "items": {
+              "$ref": "#/components/schemas/EngagementPartyOut"
+            },
+            "title": "By Party",
+            "type": "array"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EngagementSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "EngagementOut",
+        "type": "object"
+      },
+      "EngagementPartyOut": {
+        "description": "Offene Menge je Vertragspartei.",
+        "properties": {
+          "kontrakte": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakte"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          }
+        },
+        "title": "EngagementPartyOut",
+        "type": "object"
+      },
+      "EngagementSummaryOut": {
+        "description": "Gesamtposition ueber alle Kontrakte.",
+        "properties": {
+          "artikel_anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Anzahl"
+          },
+          "einkauf_offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einkauf Offen"
+          },
+          "netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto"
+          },
+          "parteien_anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parteien Anzahl"
+          },
+          "verkauf_offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verkauf Offen"
+          }
+        },
+        "title": "EngagementSummaryOut",
         "type": "object"
       },
       "EnrichImagesResponse": {
@@ -56077,6 +56429,118 @@
         "title": "FixingCreateRequest",
         "type": "object"
       },
+      "FixingCreatedOut": {
+        "description": "``POST /contracts/fixing`` — angelegte Teilfixierung.",
+        "properties": {
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "effektiv_preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effektiv Preis"
+          },
+          "fixing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing Id"
+          },
+          "fixing_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing No"
+          },
+          "matif_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matif Price"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "offen_nach": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Restmenge zur Fixierung nach dieser Buchung",
+            "title": "Offen Nach"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "position_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position No"
+          },
+          "praemie": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie"
+          }
+        },
+        "title": "FixingCreatedOut",
+        "type": "object"
+      },
       "FixingIn": {
         "properties": {
           "bediener": {
@@ -56153,6 +56617,582 @@
           "matifPreis"
         ],
         "title": "FixingIn",
+        "type": "object"
+      },
+      "FixingListOut": {
+        "description": "``GET /contracts/fixing/list``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FixingOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "FixingListOut",
+        "type": "object"
+      },
+      "FixingOut": {
+        "description": "Eine Teilfixierung.\n\n``GET /fixing/list`` und der Arbeitsraum liefern die volle Form; der\nSettlement-Status eine reduzierte mit ``fixing_id`` und ``status``.",
+        "properties": {
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "effektiv_preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "MATIF-Preis plus Praemie",
+            "title": "Effektiv Preis"
+          },
+          "fixing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing Id"
+          },
+          "fixing_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing No"
+          },
+          "line_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Id"
+          },
+          "matif_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matif Price"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "praemie": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie"
+          },
+          "referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "MATIF-Referenz",
+            "title": "Referenz"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "aktiv | storniert",
+            "title": "Status"
+          },
+          "storno_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storno Grund"
+          }
+        },
+        "title": "FixingOut",
+        "type": "object"
+      },
+      "FixingPositionOut": {
+        "description": "Kontraktposition im Fixierungs-Arbeitsraum.",
+        "properties": {
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "avg_fixpreis_effektiv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Fixpreis Effektiv"
+          },
+          "bewertung_fixiert_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung Fixiert Eur"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "fixiert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixiert"
+          },
+          "fixierungsgrad_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixierungsgrad Pct"
+          },
+          "fixings": {
+            "items": {
+              "$ref": "#/components/schemas/FixingOut"
+            },
+            "title": "Fixings",
+            "type": "array"
+          },
+          "is_matif": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Matif"
+          },
+          "line_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Id"
+          },
+          "marktwert_offen_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marktwert Offen Eur"
+          },
+          "menge_kontrakt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kontrakt"
+          },
+          "notierung": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuoteOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "offen_zu_fixieren": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen Zu Fixieren"
+          },
+          "position_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position No"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          }
+        },
+        "title": "FixingPositionOut",
+        "type": "object"
+      },
+      "FixingPricingOut": {
+        "description": "Preismodell des Kontrakts.",
+        "properties": {
+          "basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Basis-/MATIF-Referenz",
+            "title": "Basis"
+          },
+          "modell": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modell"
+          },
+          "praemie_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie Typ"
+          },
+          "praemie_wert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie Wert"
+          }
+        },
+        "title": "FixingPricingOut",
+        "type": "object"
+      },
+      "FixingSummaryOut": {
+        "description": "Kopfkennzahlen des Arbeitsraums.",
+        "properties": {
+          "bewertbar": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "False ohne Marktnotierung",
+            "title": "Bewertbar"
+          },
+          "bewertung_fixiert_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung Fixiert Eur"
+          },
+          "fixiert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixiert"
+          },
+          "fixierungsgrad_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixierungsgrad Pct"
+          },
+          "marktwert_offen_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marktwert Offen Eur"
+          },
+          "menge_kontrakt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kontrakt"
+          },
+          "offen_zu_fixieren": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen Zu Fixieren"
+          }
+        },
+        "title": "FixingSummaryOut",
+        "type": "object"
+      },
+      "FixingWorkspaceOut": {
+        "description": "``GET /contracts/fixing/workspace``.\n\nIm Nichttrefferfall sind nur ``found=false`` und ``detail`` gesetzt.",
+        "properties": {
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Type"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "found": {
+            "default": false,
+            "title": "Found",
+            "type": "boolean"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/FixingPositionOut"
+            },
+            "title": "Positionen",
+            "type": "array"
+          },
+          "pricing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FixingPricingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FixingSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "FixingWorkspaceOut",
         "type": "object"
       },
       "FlowSpineOut": {
@@ -60639,6 +61679,178 @@
         "title": "GiftIn",
         "type": "object"
       },
+      "GiftOut": {
+        "description": "Zeile aus ``public.crm_gifts``.",
+        "properties": {
+          "contact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "gift_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gift Date"
+          },
+          "gift_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gift Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "occasion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occasion"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "representative_officer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Representative Officer"
+          },
+          "sales_rep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Rep"
+          },
+          "sequence_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sequence Number"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "title": "GiftOut",
+        "type": "object"
+      },
       "GoBDExportCreateRequest": {
         "properties": {
           "operator": {
@@ -61982,6 +63194,87 @@
           "kontrakt"
         ],
         "title": "HandoverIn",
+        "type": "object"
+      },
+      "HandoverMovementOut": {
+        "description": "Uebergebene Bewegung mit vergebener Rechnungsnummer.",
+        "properties": {
+          "invoice_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice No"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "movement_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Id"
+          }
+        },
+        "title": "HandoverMovementOut",
+        "type": "object"
+      },
+      "HandoverOut": {
+        "description": "``POST /contracts/settlement`` — Uebergabe an die Abrechnung.",
+        "properties": {
+          "bewegungen": {
+            "items": {
+              "$ref": "#/components/schemas/HandoverMovementOut"
+            },
+            "title": "Bewegungen",
+            "type": "array"
+          },
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "uebergeben": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebergeben"
+          }
+        },
+        "title": "HandoverOut",
         "type": "object"
       },
       "HarvestAcceptanceCreate": {
@@ -71455,6 +72748,171 @@
         "title": "KontaktIn",
         "type": "object"
       },
+      "KontaktOut": {
+        "description": "Zeile aus ``public.kunden_kontakte``.\n\nDie Wiedervorlagen-Sicht ergaenzt ``kunde`` (Kundenname) und\n``ueberfaellig``.",
+        "properties": {
+          "art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "telefon, mail, besuch, …",
+            "title": "Art"
+          },
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "erledigt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erledigt"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kunde": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kundenname, nur in der Wiedervorlagen-Sicht",
+            "title": "Kunde"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "kurzinfo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kurzinfo"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "richtung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ein | aus",
+            "title": "Richtung"
+          },
+          "ueberfaellig": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nur in der Wiedervorlagen-Sicht",
+            "title": "Ueberfaellig"
+          },
+          "verweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verweis"
+          },
+          "weiterleitung_an": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weiterleitung An"
+          },
+          "wiedervorlage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiedervorlage"
+          }
+        },
+        "title": "KontaktOut",
+        "type": "object"
+      },
       "KontoLookupResult": {
         "properties": {
           "ekz_nr": {
@@ -76346,6 +77804,64 @@
         "title": "Lead",
         "type": "object"
       },
+      "LeadConvertOut": {
+        "description": "``POST /crm/lead-gen/leads/{id}/convert``",
+        "properties": {
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "lead_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "LeadConvertOut",
+        "type": "object"
+      },
+      "LeadCountOut": {
+        "description": "``GET /crm/lead-gen/leads-count``",
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          }
+        },
+        "title": "LeadCountOut",
+        "type": "object"
+      },
       "LeadCreate": {
         "description": "Schema for creating a lead",
         "properties": {
@@ -76526,6 +78042,337 @@
         "title": "LeadKandidatIn",
         "type": "object"
       },
+      "LeadKandidatOut": {
+        "description": "Kandidat aus GAP- oder LKV-Daten.\n\nBeide Quellen liefern dieselben fuenf Spalten; ``score_label`` benennt,\nwas der ``score`` misst (Foerdersumme oder Milchleistung).",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          },
+          "quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "gap | lkv",
+            "title": "Quelle"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "score_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bedeutung des Scores, z. B. Foerdersumme EUR",
+            "title": "Score Label"
+          },
+          "strasse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strasse"
+          }
+        },
+        "title": "LeadKandidatOut",
+        "type": "object"
+      },
+      "LeadListOut": {
+        "description": "``GET /crm/lead-gen/leads``",
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/LeadOut"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "LeadListOut",
+        "type": "object"
+      },
+      "LeadOut": {
+        "description": "Uebernommener CRM-Lead in der Frontend-Form.\n\nDie Liste liefert ``contact_person``, das Detail zusaetzlich die\ncamelCase-Variante ``contactPerson`` sowie Notizen und Adresse — beide\nFormen sind hier vereinigt.",
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "contactPerson": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contactperson"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "expectedCloseDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expectedclosedate"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "potential": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "new | qualified | lost",
+            "title": "Status"
+          }
+        },
+        "title": "LeadOut",
+        "type": "object"
+      },
+      "LeadPreviewOut": {
+        "description": "``GET /crm/lead-gen/preview``",
+        "properties": {
+          "anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl"
+          },
+          "kandidaten": {
+            "items": {
+              "$ref": "#/components/schemas/LeadKandidatOut"
+            },
+            "title": "Kandidaten",
+            "type": "array"
+          },
+          "plz_max": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz Max"
+          },
+          "plz_min": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz Min"
+          },
+          "quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quelle"
+          },
+          "top_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Pct"
+          }
+        },
+        "title": "LeadPreviewOut",
+        "type": "object"
+      },
       "LeadSourceSummary": {
         "properties": {
           "conversion_rate": {
@@ -76552,6 +78399,47 @@
           "conversion_rate"
         ],
         "title": "LeadSourceSummary",
+        "type": "object"
+      },
+      "LeadUebernahmeOut": {
+        "description": "``POST /crm/lead-gen/uebernehmen``",
+        "properties": {
+          "leads_gesamt": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leads Gesamt"
+          },
+          "uebernommen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebernommen"
+          },
+          "uebersprungen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kandidaten, die schon als Lead existierten",
+            "title": "Uebersprungen"
+          }
+        },
+        "title": "LeadUebernahmeOut",
         "type": "object"
       },
       "LeadUpdate": {
@@ -81772,6 +83660,141 @@
         "title": "MarketingPrefIn",
         "type": "object"
       },
+      "MarketingPrefOut": {
+        "description": "Werbe-/Marketingpraeferenz eines Kontakts.",
+        "properties": {
+          "category_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Code"
+          },
+          "category_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Label"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "preference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preference"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "MarketingPrefOut",
+        "type": "object"
+      },
+      "MarketingPrefSetOut": {
+        "description": "``PUT /crm/kim/contacts/{contact_id}/marketing-prefs``",
+        "properties": {
+          "category_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Code"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "preference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preference"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "MarketingPrefSetOut",
+        "type": "object"
+      },
       "MaschineCreate": {
         "properties": {
           "baujahr": {
@@ -86948,6 +88971,91 @@
           "quantity"
         ],
         "title": "MovementItemOut",
+        "type": "object"
+      },
+      "MovementOut": {
+        "description": "Abruf-Bewegung am Kontrakt.",
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "invoice_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice No"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "movement_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Id"
+          },
+          "settled_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Settled At"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "offen | abgerechnet | storniert",
+            "title": "Status"
+          },
+          "storno_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storno Grund"
+          }
+        },
+        "title": "MovementOut",
         "type": "object"
       },
       "NVECreate": {
@@ -92426,6 +94534,93 @@
         "title": "OverrideRequestIn",
         "type": "object"
       },
+      "OwnershipHistoryEntryOut": {
+        "description": "Eintrag der Uebergabe-Historie.",
+        "properties": {
+          "alt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alt"
+          },
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "feld": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feld"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "neu": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Neu"
+          }
+        },
+        "title": "OwnershipHistoryEntryOut",
+        "type": "object"
+      },
+      "OwnershipHistoryOut": {
+        "description": "``GET /crm/kunden/{kunden_nr}/ownership/history``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OwnershipHistoryEntryOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "OwnershipHistoryOut",
+        "type": "object"
+      },
       "OwnershipIn": {
         "properties": {
           "bediener": {
@@ -92474,6 +94669,128 @@
           }
         },
         "title": "OwnershipIn",
+        "type": "object"
+      },
+      "OwnershipKundeOut": {
+        "description": "Kunde in den Ownership-Worklisten.",
+        "properties": {
+          "dispatcher_disp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nur in der Owner-Sicht gesetzt",
+            "title": "Dispatcher Disp"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "name1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name1"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          }
+        },
+        "title": "OwnershipKundeOut",
+        "type": "object"
+      },
+      "OwnershipOut": {
+        "description": "``GET`` und ``PUT /crm/kunden/{kunden_nr}/ownership``.\n\nDas PUT ergaenzt ``ok`` und ``geaendert``.",
+        "properties": {
+          "dispatcher": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dispatcher"
+          },
+          "geaendert": {
+            "description": "Tatsaechlich geaenderte Felder",
+            "items": {
+              "type": "string"
+            },
+            "title": "Geaendert",
+            "type": "array"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ok"
+          },
+          "sales_rep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Rep"
+          }
+        },
+        "title": "OwnershipOut",
         "type": "object"
       },
       "PCNCreateIn": {
@@ -107695,6 +110012,103 @@
         "title": "QuoteIn",
         "type": "object"
       },
+      "QuoteOut": {
+        "description": "Marktnotierung als Bewertungsbasis.",
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "markt_effektiv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Notierung plus Praemie",
+            "title": "Markt Effektiv"
+          },
+          "preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis"
+          },
+          "quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quelle"
+          }
+        },
+        "title": "QuoteOut",
+        "type": "object"
+      },
+      "QuoteUpsertOut": {
+        "description": "``POST /contracts/matif-quote``",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "quote_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote Date"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          }
+        },
+        "title": "QuoteUpsertOut",
+        "type": "object"
+      },
       "RabattgruppeCreate": {
         "properties": {
           "bezeichnung": {
@@ -112098,6 +114512,62 @@
         "title": "RemainingOut",
         "type": "object"
       },
+      "ReminderCreatedOut": {
+        "description": "``POST /contracts/dunning``",
+        "properties": {
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "mahnstufe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mahnstufe"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "reminder_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reminder Id"
+          }
+        },
+        "title": "ReminderCreatedOut",
+        "type": "object"
+      },
       "ReminderIn": {
         "properties": {
           "bediener": {
@@ -112142,6 +114612,82 @@
           "kontrakt"
         ],
         "title": "ReminderIn",
+        "type": "object"
+      },
+      "ReminderListOut": {
+        "description": "``GET /contracts/dunning/list``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReminderOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "ReminderListOut",
+        "type": "object"
+      },
+      "ReminderOut": {
+        "description": "Erfasste Kontraktmahnung (append-only).",
+        "properties": {
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "mahnstufe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mahnstufe"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "ReminderOut",
         "type": "object"
       },
       "RenderRequest": {
@@ -120927,6 +123473,126 @@
         "title": "SettlementResult",
         "type": "object"
       },
+      "SettlementStatusOut": {
+        "description": "``GET /contracts/settlement/status``",
+        "properties": {
+          "bewegungen": {
+            "items": {
+              "$ref": "#/components/schemas/MovementOut"
+            },
+            "title": "Bewegungen",
+            "type": "array"
+          },
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "fixierungen": {
+            "items": {
+              "$ref": "#/components/schemas/FixingOut"
+            },
+            "title": "Fixierungen",
+            "type": "array"
+          },
+          "found": {
+            "default": false,
+            "title": "Found",
+            "type": "boolean"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SettlementSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "SettlementStatusOut",
+        "type": "object"
+      },
+      "SettlementSummaryOut": {
+        "description": "Abruf- und Abrechnungsstand des Kontrakts.",
+        "properties": {
+          "abgerechnet": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abgerechnet"
+          },
+          "abgerufen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abgerufen"
+          },
+          "fixiert_aktiv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixiert Aktiv"
+          },
+          "offen_abruf": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen Abruf"
+          }
+        },
+        "title": "SettlementSummaryOut",
+        "type": "object"
+      },
       "SettlementTransitionRequest": {
         "properties": {
           "new_status": {
@@ -125108,6 +127774,62 @@
           "created_at"
         ],
         "title": "StoredProposalOut",
+        "type": "object"
+      },
+      "StornoOut": {
+        "description": "Storno einer Bewegung oder Fixierung.\n\n``movement_id`` bzw. ``fixing_id`` ist je nach Endpunkt gesetzt;\n``frei_menge`` ist die wieder verfuegbare Menge.",
+        "properties": {
+          "fixing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixing Id"
+          },
+          "frei_menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frei Menge"
+          },
+          "movement_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Id"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "StornoOut",
         "type": "object"
       },
       "StreckeSpeditionenOut": {
@@ -131530,6 +134252,31 @@
           "umlagebetrag_eur"
         ],
         "title": "UmlageOut",
+        "type": "object"
+      },
+      "UnassignedOut": {
+        "description": "``GET /crm/kunden/ownership/unassigned``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OwnershipKundeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "UnassignedOut",
         "type": "object"
       },
       "UnfallAnzeigePayload": {
@@ -138717,6 +141464,20 @@
           "status"
         ],
         "title": "WhistleblowerStatusIn",
+        "type": "object"
+      },
+      "WiedervorlagenOut": {
+        "description": "``GET /crm/kunden-kontakte/wiedervorlagen``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontaktOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "WiedervorlagenOut",
         "type": "object"
       },
       "WiegescheinMitDoppelwiegung": {
@@ -208493,9 +211254,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Reminder Api V1 Contracts Dunning Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReminderCreatedOut"
                 }
               }
             },
@@ -208554,9 +211313,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dunning Candidates Api V1 Contracts Dunning Candidates Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DunningCandidateListOut"
                 }
               }
             },
@@ -208626,9 +211383,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Reminders Api V1 Contracts Dunning List Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReminderListOut"
                 }
               }
             },
@@ -208687,9 +211442,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Engagement Api V1 Contracts Engagement Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/EngagementOut"
                 }
               }
             },
@@ -208830,9 +211583,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Fixing Api V1 Contracts Fixing Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FixingCreatedOut"
                 }
               }
             },
@@ -208902,9 +211653,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Fixings Api V1 Contracts Fixing List Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FixingListOut"
                 }
               }
             },
@@ -208974,9 +211723,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Workspace Api V1 Contracts Fixing Workspace Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FixingWorkspaceOut"
                 }
               }
             },
@@ -209054,9 +211801,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Storno Fixing Api V1 Contracts Fixings  Fixing Id  Storno Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StornoOut"
                 }
               }
             },
@@ -209282,9 +212027,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Upsert Quote Api V1 Contracts Matif Quote Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/QuoteUpsertOut"
                 }
               }
             },
@@ -209362,9 +212105,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Storno Movement Api V1 Contracts Movements  Movement Id  Storno Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StornoOut"
                 }
               }
             },
@@ -209433,9 +212174,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Handover Api V1 Contracts Settlement Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/HandoverOut"
                 }
               }
             },
@@ -209505,9 +212244,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Settlement Status Api V1 Contracts Settlement Status Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SettlementStatusOut"
                 }
               }
             },
@@ -225392,9 +228129,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "$ref": "#/components/schemas/MarketingPrefOut"
+                  },
                   "title": "Response List Marketing Api V1 Crm Kim Contacts  Contact Id  Marketing Prefs Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -225470,9 +228209,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Set Marketing Api V1 Crm Kim Contacts  Contact Id  Marketing Prefs Put",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MarketingPrefSetOut"
                 }
               }
             },
@@ -226337,9 +229074,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "$ref": "#/components/schemas/GiftOut"
+                  },
                   "title": "Response List Gifts Api V1 Crm Kim Customers  Kunden Nr  Gifts Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -226415,9 +229154,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Gift Api V1 Crm Kim Customers  Kunden Nr  Gifts Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/GiftOut"
                 }
               }
             },
@@ -226702,9 +229439,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Delete Gift Api V1 Crm Kim Gifts  Gift Id  Delete",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusOut"
                 }
               }
             },
@@ -226780,9 +229515,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Update Gift Api V1 Crm Kim Gifts  Gift Id  Put",
-                  "type": "object"
+                  "$ref": "#/components/schemas/GiftOut"
                 }
               }
             },
@@ -227321,9 +230054,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Kontakt Api V1 Crm Kunden Kontakte Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontaktOut"
                 }
               }
             },
@@ -227392,9 +230123,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Wiedervorlagen Api V1 Crm Kunden Kontakte Wiedervorlagen Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/WiedervorlagenOut"
                 }
               }
             },
@@ -227477,9 +230206,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Erledigt Api V1 Crm Kunden Kontakte  Kontakt Id  Erledigt Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/KontaktOut"
                 }
               }
             },
@@ -227545,9 +230272,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "$ref": "#/components/schemas/KontaktOut"
+                  },
                   "title": "Response List Kontakte Api V1 Crm Kunden Kontakte  Kunden Nr  Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -227696,9 +230425,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Leads Api V1 Crm Lead Generierung Leads Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeadListOut"
                 }
               }
             },
@@ -227755,9 +230482,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Leads Count Api V1 Crm Lead Generierung Leads Count Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeadCountOut"
                 }
               }
             },
@@ -227823,9 +230548,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Lead Api V1 Crm Lead Generierung Leads  Lead Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeadOut"
                 }
               }
             },
@@ -227891,9 +230614,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Convert Lead Api V1 Crm Lead Generierung Leads  Lead Id  Convert Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeadConvertOut"
                 }
               }
             },
@@ -228008,9 +230729,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Lead Preview Api V1 Crm Lead Generierung Preview Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeadPreviewOut"
                 }
               }
             },
@@ -228077,9 +230796,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Uebernehmen Api V1 Crm Lead Generierung Uebernehmen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeadUebernahmeOut"
                 }
               }
             },
@@ -229284,9 +232001,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response By Owner Api V1 Crm Ownership By Owner Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ByOwnerOut"
                 }
               }
             },
@@ -229355,9 +232070,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Unassigned Api V1 Crm Ownership Unassigned Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/UnassignedOut"
                 }
               }
             },
@@ -231375,9 +234088,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Ownership Api V1 Crm  Kunden Nr  Ownership Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/OwnershipOut"
                 }
               }
             },
@@ -231451,9 +234162,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Set Ownership Api V1 Crm  Kunden Nr  Ownership Put",
-                  "type": "object"
+                  "$ref": "#/components/schemas/OwnershipOut"
                 }
               }
             },
@@ -231519,9 +234228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Ownership History Api V1 Crm  Kunden Nr  Ownership History Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/OwnershipHistoryOut"
                 }
               }
             },
