@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOM-INV-006-GOB-MOVEMENT-LEDGER Bestandshauptbuch nach GoB - in Arbeit 2026-08-25
+
+**Von:** User-Auftrag, die aus DOM-INV-005 offen gelassenen Punkte nach Best Practice / ordentlicher Buchfuehrung zu schliessen. **Owner:** Claude Code. **Stand:** in Arbeit.
+
+**Ziel:** Belegarten registrieren und erzwingen statt Werte zu ueberschreiben (Radierverbot, HGB 239 Abs. 3); mobile Inventurzaehlung als Differenzbuchung mit Beleg statt Absolutwert im Delta-Hauptbuch (HGB 240, Belegprinzip); Bestandsabgleich als ausfuehrbarer Bericht statt als Zusicherung (Nachvollziehbarkeit).
+
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, Migration `inv_movement_type_register_20260825`, `inventory_movement_direction.py`, `mobile_sync_service.py`, `inventory_balance_reconciliation.py` (Service + Skript), zwei Testdateien. Nicht: Umschreiben bestehender `movement_type`-Werte, keine automatischen Korrekturbuchungen ohne Freigabe.
+
+**Abnahme:** Register mit Richtung und Begruendung je Belegart; unbekannte Belegart nicht mehr schreibbar; Register und Code-Map deckungsgleich; Zaehlung bucht Differenz mit Beleg; Zaehlung ohne Abweichung bucht nicht; Bericht weist nicht bestandswirksame Zeilen getrennt aus; Bestandszeilen unveraendert.
+
 ## DOM-INV-005-MOVEMENT-DIRECTION Kanonische Bewegungsrichtung - abgeschlossen 2026-08-25
 
 **Von:** Nachzug des in SPEC-P1-06-W8 bewusst zurueckgestellten Lese-Modell-Fehlers. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-08-25.

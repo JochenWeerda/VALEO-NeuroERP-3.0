@@ -1,0 +1,129 @@
+slice_id: DOM-INV-006-GOB-MOVEMENT-LEDGER
+id: DOM-INV-006-GOB-MOVEMENT-LEDGER
+title: Bestandshauptbuch nach Grundsaetzen ordnungsmaessiger Buchfuehrung
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-08-25"
+started_at: "2026-08-25"
+goal: >-
+  Die drei aus DOM-INV-005 offen gelassenen Punkte nach GoB/GoBD schliessen:
+  die Belegarten des Bestandshauptbuchs registrieren und erzwingen statt sie
+  per Migration zu ueberschreiben, die mobile Inventurzaehlung als
+  Differenzbuchung mit Beleg statt als absoluten Wert im Delta-Hauptbuch
+  fuehren, und den Bestandsabgleich als ausfuehrbaren Bericht liefern statt
+  als Zusicherung.
+grundsaetze:
+  radierverbot: >-
+    HGB 239 Abs. 3 und GoBD: eine Buchung darf nicht so veraendert werden, dass
+    ihr urspruenglicher Inhalt nicht mehr feststellbar ist. Deshalb wird
+    movement_type bestehender Zeilen NICHT per Migration umgeschrieben. Die
+    Vereinheitlichung passiert ueber ein Register, das jede tatsaechlich
+    verwendete Belegart mit ihrer Richtung fuehrt.
+  belegprinzip: >-
+    Keine Buchung ohne Beleg. Die mobile Zaehlung erzeugt bisher eine Bewegung
+    ohne Belegverweis und mit einem absoluten Wert. Kuenftig traegt sie
+    source_document_type/source_document_id und bucht die Differenz.
+  vollstaendigkeit: >-
+    Keine Bewegung darf still aus dem Saldo fallen. DOM-INV-005 hat unbekannte
+    Belegarten auf Faktor 0 gesetzt - richtig gegenueber dem Raten, aber auf
+    Dauer eine stille Luecke. Sie wird geschlossen, indem unbekannte Belegarten
+    gar nicht erst geschrieben werden koennen.
+  nachvollziehbarkeit: >-
+    Ein sachverstaendiger Dritter muss den Bestand in angemessener Zeit
+    nachvollziehen koennen. Dafuer der Abstimmbericht: Saldo je Artikel und
+    Lager, Herkunft nach Belegart, und alles, was nicht bestandswirksam ist,
+    explizit ausgewiesen statt verschwiegen.
+  einzelbewertung_inventur: >-
+    HGB 240: die Inventur ermittelt den Ist-Bestand; gebucht wird die Differenz
+    zum Buchbestand, nicht der Ist-Bestand selbst.
+file_ownership:
+  - docs/agent-ops/slices/DOM-INV-006-GOB-MOVEMENT-LEDGER.yaml
+  - alembic/versions/inv_movement_type_register_20260825.py
+  - app/services/inventory_movement_direction.py
+  - app/services/mobile_sync_service.py
+  - app/services/inventory_balance_reconciliation.py
+  - scripts/inventory_balance_reconciliation.py
+  - tests/test_inventory_movement_register.py
+  - tests/test_inventory_balance_reconciliation.py
+ausgeschlossen:
+  - >-
+    Umschreiben bestehender movement_type-Werte. Das waere ein Verstoss gegen
+    das Radierverbot, nicht seine Umsetzung.
+  - >-
+    Automatische Korrekturbuchungen fuer historische inventory_count-Zeilen
+    ohne Betreiberfreigabe. Der Bericht weist sie aus; ob und wie sie
+    nachgebucht werden, ist eine Entscheidung des Betriebs mit Beleg.
+acceptance:
+  - Jede verwendete Belegart ist im Register mit Richtung und Begruendung gefuehrt
+  - Eine unbekannte Belegart kann nicht mehr geschrieben werden
+  - Register und Python-Richtungstabelle sind nachweislich deckungsgleich
+  - Die mobile Zaehlung bucht eine Differenz mit Belegverweis, keinen Absolutwert
+  - Eine Zaehlung ohne Abweichung erzeugt keine Buchung
+  - Der Abstimmbericht weist nicht bestandswirksame Zeilen getrennt aus
+  - Bestehende Bewegungszeilen bleiben unveraendert
+tests:
+  - tests/test_inventory_movement_register.py
+  - tests/test_inventory_balance_reconciliation.py
+  - tests/test_inventory_movement_direction.py
+  - tests/test_inventory_operations.py
+  - tests/test_inventory_counts.py
+  - tests/test_welle8_response_models.py
+  - tests/test_welle8_schema_drift.py
+risks:
+  - >-
+    Die Schreibsperre fuer unbekannte Belegarten macht aus einem bisher stillen
+    Fehler einen lauten. Ein Importpfad, der eine unregistrierte Belegart
+    schreibt, schlaegt ab jetzt fehl, statt den Bestand leise zu verfaelschen.
+    Das ist gewollt, aendert aber das Verhalten solcher Pfade.
+  - >-
+    Die mobile Zaehlung braucht den Buchbestand zum Zaehlzeitpunkt. Bei
+    verzoegerter Synchronisation aus dem Offline-Puffer ist das der Bestand zum
+    Verarbeitungszeitpunkt, nicht zum Zaehlzeitpunkt. Der Beleg haelt beide
+    Zeitpunkte fest, damit die Abweichung sichtbar bleibt.
+  - >-
+    Der Abstimmbericht liest das gesamte Hauptbuch. Auf grossen Bestaenden ist
+    er ein Batchlauf, kein Request.
+ai_harness:
+  fachlicher_vertrag: >-
+    Das Bestandshauptbuch fuehrt Deltas mit Beleg. Eine Zaehlung ist kein
+    Delta, sondern ein Beleg, aus dem ein Delta entsteht. Belegarten sind
+    registriert, nicht erfunden.
+  architektur_vertrag: >-
+    Das Register liegt als Tabelle in der Datenbank und als Map im Code; ein
+    Test bindet beide aneinander. Die Erzwingung liegt in der Datenbank, weil
+    sie fuer alle Schreibpfade gelten muss, auch fuer die, die nicht durch die
+    Anwendung laufen.
+  daten_vertrag: >-
+    domain_inventory.inventory_movement_types fuehrt jede Belegart mit
+    Richtung, Delta-Eigenschaft und Begruendung. Ein Trigger prueft
+    case-insensitiv gegen dieses Register. Bestehende Zeilen bleiben
+    unangetastet.
+  test_vertrag: >-
+    Register gegen Code, Schreibsperre gegen einen echten Insert-Versuch,
+    Zaehlung mit und ohne Abweichung, Abstimmbericht gegen eine bekannte
+    Bewegungsprobe.
+  security_vertrag: >-
+    Keine neuen Endpunkte. Der Trigger arbeitet ohne dynamisches SQL; das
+    Register ist reine Stammdatenhaltung ohne Nutzereingabe.
+  betriebs_vertrag: >-
+    Der Abstimmbericht ist als Skript und als Servicefunktion nutzbar und
+    liefert Saldo, Herkunft nach Belegart und die nicht bestandswirksamen
+    Zeilen. Damit ist das Abgleich-Gate aus DOM-INV-005 ausfuehrbar statt
+    behauptet.
+  dokumentations_vertrag: >-
+    Diese YAML haelt die angewandten Grundsaetze und ihre Begruendung fest,
+    der Workboard-Abschnitt das Ergebnis.
+external_gates:
+  - >-
+    Entscheidung des Betriebs ueber historische inventory_count-Zeilen: der
+    Bericht weist sie aus, die Nachbuchung braucht einen Beleg und eine
+    Freigabe.
+  - >-
+    Zielbild vollstaendiger Inventurbeleg (inventory_counts plus Zeilen) fuer
+    die mobile Zaehlung statt Direktbuchung der Differenz. Setzt einen
+    Benutzerbezug voraus, den der mobile Sync heute nicht mitliefert.
+verification:
+  - "python -m alembic upgrade head"
+  - "python -m pytest tests/test_inventory_movement_register.py -q --no-cov"
+  - "python -m pytest tests/test_inventory_balance_reconciliation.py -q --no-cov"
+  - "python -m pytest tests/test_inventory_movement_direction.py tests/test_inventory_operations.py tests/test_inventory_counts.py tests/test_welle8_response_models.py tests/test_welle8_schema_drift.py -q --no-cov"
