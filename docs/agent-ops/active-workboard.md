@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOM-INV-005-MOVEMENT-DIRECTION Kanonische Bewegungsrichtung - in Arbeit 2026-08-25
+
+**Von:** Nachzug des in SPEC-P1-06-W8 bewusst zurueckgestellten Lese-Modell-Fehlers. **Owner:** Claude Code. **Stand:** in Arbeit.
+
+**Ziel:** Die Bewegungsrichtung von `domain_inventory.inventory_stock_movements` einmal zentral definieren und alle Aggregationen darauf umstellen.
+
+**Vorab-Befund:** Es sind nicht zwei Vokabulare, sondern sieben. Geschrieben werden `in`/`out`, `wareneingang`/`warenausgang`/`umbuchung_eingang`/`umbuchung_ausgang`/`inventur`, `ZUGANG`/`ABGANG`, `EINLAGERUNG`, `RETOURE`, `pick_out`, `opening_balance`, `adjustment`/`adjustment_in`/`adjustment_out`, `reservation`, `inventory_count`. Gelesen wird das von sechs unabhaengigen CASE-Ausdruecken, jeder blind fuer die Vokabulare der anderen: `articles.py` verwirft mit `ELSE 0` alle deutschen Typen, `compat.py` zaehlt mit `ELSE -quantity` jeden Wareneingang als Abgang, `inventory_operations.py` und `scan.py` zaehlen mit `ELSE quantity` jeden ABGANG als Zugang. Zusaetzlich traegt `inventory_count` einen absoluten Zaehlwert statt eines Deltas.
+
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `inventory_movement_direction.py`, `inventory_stock_balance.py`, `inventory_operations.py`, `scan.py`, `articles.py`, `compat.py`, `tests/test_inventory_movement_direction.py`. Nicht: Datenmigration bestehender Zeilen.
+
+**Abnahme:** eine Richtungsdefinition; alle sechs Aggregationen darauf umgestellt; kein stilles Vorzeichen fuer unbekannte Typen; Waechtertest gegen neue Vokabulare; Bestandstests gruen.
+
 ## SPEC-P1-06-W8-INVENTORY-SILO Legacy-Routen typisieren Welle 8 - abgeschlossen 2026-08-25
 
 **Von:** Fortsetzung SPEC-P1-06 nach Welle 7. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-08-25.

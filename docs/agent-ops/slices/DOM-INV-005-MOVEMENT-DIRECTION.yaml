@@ -1,0 +1,103 @@
+slice_id: DOM-INV-005-MOVEMENT-DIRECTION
+id: DOM-INV-005-MOVEMENT-DIRECTION
+title: Kanonische Bewegungsrichtung fuer inventory_stock_movements
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-08-25"
+started_at: "2026-08-25"
+goal: >-
+  Die Bewegungsrichtung von domain_inventory.inventory_stock_movements einmal
+  zentral definieren und alle Aggregationen darauf umstellen. Heute schreiben
+  sieben Vokabulare in dieselbe Spalte und sechs voneinander unabhaengige
+  CASE-Ausdruecke lesen sie, jeder blind fuer die Vokabulare der anderen. Das
+  Ergebnis sind Bestandszahlen, die je nach Endpunkt unterschiedlich falsch
+  sind.
+file_ownership:
+  - docs/agent-ops/slices/DOM-INV-005-MOVEMENT-DIRECTION.yaml
+  - app/services/inventory_movement_direction.py
+  - app/services/inventory_stock_balance.py
+  - app/api/v1/endpoints/inventory_operations.py
+  - app/api/v1/endpoints/scan.py
+  - app/api/v1/endpoints/articles.py
+  - app/api/v1/endpoints/compat.py
+  - tests/test_inventory_movement_direction.py
+ausgeschlossen:
+  - >-
+    Datenmigration bestehender Bewegungszeilen auf ein einheitliches Vokabular.
+    Die Zeilen bleiben, wie sie geschrieben wurden; nur die Auswertung wird
+    einheitlich. Eine Vereinheitlichung der geschriebenen Werte ist ein
+    Folgeslice mit Migration und Betreiberfreigabe.
+  - >-
+    Die Frage, wie ein Mobile-Zaehlergebnis (absoluter Bestand) in eine
+    Delta-Bewegung umgerechnet gehoert. Hier wird es nur aufhoert, still als
+    Delta mitgezaehlt zu werden.
+acceptance:
+  - Genau eine Stelle definiert die Richtung je movement_type
+  - Alle sechs Aggregationen nutzen diese eine Definition
+  - Kein Aggregat vergibt fuer unbekannte Typen still ein Vorzeichen
+  - Ein Test faellt an, sobald irgendwo ein movement_type geschrieben wird, den die Definition nicht kennt
+  - Bestandstests bleiben gruen
+tests:
+  - tests/test_inventory_movement_direction.py
+  - tests/test_inventory_operations.py
+  - tests/test_inventory_counts.py
+  - tests/test_inventory_stock_movements_canonical.py
+  - tests/test_welle8_response_models.py
+  - tests/test_welle8_schema_drift.py
+risks:
+  - >-
+    Bestandszahlen aendern sich. Das ist der Zweck des Slices, aber es heisst
+    auch: wer bisherige Werte als Referenz genommen hat, sieht Abweichungen.
+    Betroffen sind vor allem Bestaende mit ABGANG-, pick_out-, RETOURE- und
+    inventory_count-Zeilen.
+  - >-
+    Die Richtungstabelle ist nur so gut wie die Inventur der Schreibpfade. Der
+    Waechtertest deckt Literale ab, die im Repository stehen; ein Wert, der
+    aus einer Konfiguration oder von aussen kommt, faellt erst zur Laufzeit
+    auf. Deshalb zusaetzlich der Laufzeit-Diagnosepfad.
+  - >-
+    lower() auf movement_type verhindert keine Indexnutzung, weil auf der
+    Spalte kein Index liegt. Kommt spaeter einer dazu, muss er ein
+    Ausdrucksindex sein.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Zugang erhoeht den Bestand, ein Abgang senkt ihn, eine Reservierung
+    aendert ihn nicht, und ein absoluter Zaehlwert ist kein Delta. Diese vier
+    Saetze gelten ab jetzt in jedem Endpunkt gleich.
+  architektur_vertrag: >-
+    Die Richtung lebt in app/services/inventory_movement_direction.py als
+    Datenstruktur plus SQL-Fragment. Rohe SQL-Leser bekommen das Fragment,
+    Python-Leser die Map. Kein Endpunkt formuliert die Fallunterscheidung noch
+    einmal selbst.
+  daten_vertrag: >-
+    movement_type wird case-insensitiv ausgewertet. Bekannte Werte sind in der
+    Map abschliessend aufgezaehlt. Unbekannte Werte gehen mit Faktor 0 in
+    Aggregate ein statt still ein Vorzeichen zu erben, und sind ueber
+    unknown_movement_types() sichtbar.
+  test_vertrag: >-
+    Drei Ebenen: die Richtungstabelle selbst, ein Repository-Waechter gegen neue
+    Vokabulare, und Aggregationstests gegen die Datenbank mit je einer Zeile
+    pro Richtungsklasse.
+  security_vertrag: >-
+    Das SQL-Fragment wird aus einer Konstante gebaut, nicht aus Eingaben;
+    die Typlisten sind Code, alle Werte bleiben Bind-Parameter.
+  betriebs_vertrag: >-
+    GET /lager/bestaende, die Artikel-Bestandssichten, der Scan-Bestand und die
+    Compat-Sichten liefern ab jetzt dieselbe Zahl fuer dieselbe Ware.
+  dokumentations_vertrag: >-
+    Workboard-Abschnitt und diese YAML halten die Richtungstabelle, die
+    gefundenen Vokabulare und die bewusst offen gelassene Zaehlwert-Frage fest.
+external_gates:
+  - >-
+    Betreiberentscheidung, ob die geschriebenen movement_type-Werte per
+    Migration auf ein Vokabular vereinheitlicht werden.
+  - >-
+    Fachliche Klaerung, wie ein Mobile-Zaehlergebnis (counted_qty, absoluter
+    Bestand) in eine Delta-Bewegung uebersetzt gehoert.
+  - >-
+    Abgleich der neuen Bestandszahlen gegen die Erwartung des Betriebs, bevor
+    sie als Inventurgrundlage dienen.
+verification:
+  - "python -m pytest tests/test_inventory_movement_direction.py -q --no-cov"
+  - "python -m pytest tests/test_inventory_operations.py tests/test_inventory_counts.py tests/test_inventory_stock_movements_canonical.py tests/test_welle8_response_models.py tests/test_welle8_schema_drift.py -q --no-cov"
+  - "python scripts/architecture_drift_check.py"
