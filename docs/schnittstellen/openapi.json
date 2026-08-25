@@ -15807,6 +15807,395 @@
         "title": "AutoMatchRequest",
         "type": "object"
       },
+      "AuxiliaryBatchCreatedOut": {
+        "description": "``POST /inventory/auxiliary/batches``.\n\nDer Idempotenzpfad liefert nur ``id``, ``status``, ``duplicate`` und\n``source_hash``; die Neuanlage zusaetzlich die Zaehlwerte.",
+        "properties": {
+          "difference_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference Count"
+          },
+          "duplicate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "line_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Count"
+          },
+          "preliminary_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preliminary Value"
+          },
+          "source_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Hash"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "AuxiliaryBatchCreatedOut",
+        "type": "object"
+      },
+      "AuxiliaryBatchOut": {
+        "description": "Zeile aus ``domain_inventory.inventory_auxiliary_batches``.",
+        "properties": {
+          "batch_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch Type"
+          },
+          "checker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checker"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "difference_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference Count"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "inventory_count_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inventory Count Id"
+          },
+          "line_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Count"
+          },
+          "maker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ersteller (Vier-Augen-Prinzip)",
+            "title": "Maker"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "preliminary_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preliminary Value"
+          },
+          "source_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hash der Quelldaten — Grundlage der Idempotenz",
+            "title": "Source Hash"
+          },
+          "source_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Route"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "generated | reviewed | approved | applied | rejected",
+            "title": "Status"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "AuxiliaryBatchOut",
+        "type": "object"
+      },
+      "AuxiliaryBatchPageOut": {
+        "description": "``GET /inventory/auxiliary/batches``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuxiliaryBatchOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "AuxiliaryBatchPageOut",
+        "type": "object"
+      },
+      "AuxiliarySummaryOut": {
+        "description": "``GET /inventory/auxiliary/summary`` — Zaehlung je Status.",
+        "properties": {
+          "applied": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied"
+          },
+          "approved": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved"
+          },
+          "generated": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated"
+          },
+          "reviewed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed"
+          },
+          "with_differences": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Noch offene Stapel mit Differenzen",
+            "title": "With Differences"
+          }
+        },
+        "title": "AuxiliarySummaryOut",
+        "type": "object"
+      },
+      "AuxiliaryTransitionOut": {
+        "description": "``POST /inventory/auxiliary/batches/{id}/transition``",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "AuxiliaryTransitionOut",
+        "type": "object"
+      },
       "BABReport": {
         "properties": {
           "gesamt_kosten_eur": {
@@ -31378,6 +31767,46 @@
         "title": "ContractUpdate",
         "type": "object"
       },
+      "ControlAssignOut": {
+        "description": "``POST /document-control/exceptions/{id}/assign``",
+        "properties": {
+          "assigned_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned User"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "ControlAssignOut",
+        "type": "object"
+      },
       "ControlCenterIncidentActionRequest": {
         "properties": {
           "action": {
@@ -31464,6 +31893,426 @@
           "status"
         ],
         "title": "ControlCenterPlanItemRequest",
+        "type": "object"
+      },
+      "ControlExceptionOut": {
+        "description": "Zeile aus ``domain_ops.document_control_exceptions``.",
+        "properties": {
+          "assigned_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned User"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "document_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Number"
+          },
+          "document_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Ref"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "exception_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "open_purchase_order | missing_inbound_document | blocked_delivery_note | uninvoiced_delivery_note",
+            "title": "Exception Type"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "partner_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Ref"
+          },
+          "source_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Frontend-Route zum Quellbeleg",
+            "title": "Source Route"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "open | assigned | in_progress | resolved | waived",
+            "title": "Status"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "ControlExceptionOut",
+        "type": "object"
+      },
+      "ControlProjectionOut": {
+        "description": "``POST /document-control/project`` — Projektion aus den Quellbelegen.",
+        "properties": {
+          "collected": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Aus Quellbelegen eingesammelte Kandidaten",
+            "title": "Collected"
+          },
+          "created": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created"
+          },
+          "refreshed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refreshed"
+          },
+          "skipped": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bereits geloeste oder verzichtete Faelle",
+            "title": "Skipped"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "title": "ControlProjectionOut",
+        "type": "object"
+      },
+      "ControlRegisteredOut": {
+        "description": "``POST /document-control/exceptions``.\n\n``duplicate`` kennzeichnet den Idempotenzpfad; ``projection`` setzt nur der\nProjektionslauf (created | refreshed | skipped).",
+        "properties": {
+          "duplicate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "projection": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projection"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "ControlRegisteredOut",
+        "type": "object"
+      },
+      "ControlSummaryOut": {
+        "description": "``GET /document-control/summary`` — Zaehlung je Ausnahmetyp.",
+        "properties": {
+          "blocked_delivery_note": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked Delivery Note"
+          },
+          "missing_inbound_document": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Missing Inbound Document"
+          },
+          "open_purchase_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Purchase Order"
+          },
+          "open_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Total"
+          },
+          "overdue": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overdue"
+          },
+          "uninvoiced_delivery_note": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uninvoiced Delivery Note"
+          }
+        },
+        "title": "ControlSummaryOut",
+        "type": "object"
+      },
+      "ControlTransitionOut": {
+        "description": "``POST /document-control/exceptions/{id}/transition``",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "ControlTransitionOut",
+        "type": "object"
+      },
+      "ControlWorklistOut": {
+        "description": "``GET /document-control/exceptions``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ControlExceptionOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "ControlWorklistOut",
         "type": "object"
       },
       "ControllingOut": {
@@ -57681,6 +58530,85 @@
         "title": "FollowUpOut",
         "type": "object"
       },
+      "FollowupCompletedOut": {
+        "description": "``POST /docflow/followups/{id}/complete``",
+        "properties": {
+          "followup_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Followup Id"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "FollowupCompletedOut",
+        "type": "object"
+      },
+      "FollowupCreatedOut": {
+        "description": "``POST /docflow/followups``",
+        "properties": {
+          "art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Art"
+          },
+          "doc_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Number"
+          },
+          "followup_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Followup Id"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "title": "FollowupCreatedOut",
+        "type": "object"
+      },
       "FollowupIn": {
         "properties": {
           "art": {
@@ -57735,6 +58663,228 @@
           "betreff"
         ],
         "title": "FollowupIn",
+        "type": "object"
+      },
+      "FollowupListOut": {
+        "description": "``GET /docflow/followups``.\n\nIm Nichttrefferfall sind nur ``found=false`` und ``detail`` gesetzt.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "doc_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Number"
+          },
+          "followups": {
+            "items": {
+              "$ref": "#/components/schemas/FollowupOut"
+            },
+            "title": "Followups",
+            "type": "array"
+          },
+          "found": {
+            "default": false,
+            "title": "Found",
+            "type": "boolean"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FollowupSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "FollowupListOut",
+        "type": "object"
+      },
+      "FollowupOut": {
+        "description": "Followup zu einem Vorgang.",
+        "properties": {
+          "art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "bescheid | rueckmeldung | wiedervorlage",
+            "title": "Art"
+          },
+          "betreff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betreff"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "erledigt_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erledigt At"
+          },
+          "erledigt_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erledigt Von"
+          },
+          "faellig_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faellig Am"
+          },
+          "followup_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Followup Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "offen | erledigt",
+            "title": "Status"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "ueberfaellig": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Berechnet gegen das Tagesdatum",
+            "title": "Ueberfaellig"
+          }
+        },
+        "title": "FollowupOut",
+        "type": "object"
+      },
+      "FollowupSummaryOut": {
+        "description": "Kopfzahlen der Followups eines Vorgangs.",
+        "properties": {
+          "anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "ueberfaellig": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ueberfaellig"
+          }
+        },
+        "title": "FollowupSummaryOut",
         "type": "object"
       },
       "FootprintComponentOut": {
@@ -61946,6 +63096,126 @@
           "doc"
         ],
         "title": "GobdExportIn",
+        "type": "object"
+      },
+      "GobdExportOut": {
+        "description": "Zeile aus ``domain_nachweisraum.gobd_exporte``.",
+        "properties": {
+          "anzahl_dokumente": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anzahl Dokumente"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "export_pfad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Export Pfad"
+          },
+          "fehler_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fehler Grund"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "periode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periode"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "OFFEN und Folgestatus",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "title": "GobdExportOut",
         "type": "object"
       },
       "GoodsReceiptOut": {
@@ -89172,6 +90442,159 @@
         "title": "NVEOut",
         "type": "object"
       },
+      "NachweisDokumentOut": {
+        "description": "Zeile aus ``domain_nachweisraum.nachweisraum_dokumente``.",
+        "properties": {
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "datei_pfad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datei Pfad"
+          },
+          "dokument_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dokument Typ"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "referenz_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenz Id"
+          },
+          "referenz_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenz Typ"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "EINGEGANGEN und Folgestatus",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "wiedervorlage_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiedervorlage Datum"
+          }
+        },
+        "title": "NachweisDokumentOut",
+        "type": "object"
+      },
       "NaehrwertBerechnungRequest": {
         "properties": {
           "fan": {
@@ -100559,6 +101982,79 @@
         "title": "PlcDeviceStatusIn",
         "type": "object"
       },
+      "PlcDeviceStatusOut": {
+        "description": "``POST /plc/device-status`` — Heartbeat eines Feldgeraets.",
+        "properties": {
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PlcDeviceStatusOut",
+        "type": "object"
+      },
+      "PlcInfoOut": {
+        "description": "``GET /plc/info`` — Selbstauskunft des Stubs.\n\n``stub: true`` ist der Vertrag dieses Endpunkts: die Anbindung ist noch\nnicht produktiv, die Antwort nennt die Schritte dorthin.",
+        "properties": {
+          "endpoints": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Endpoints",
+            "type": "array"
+          },
+          "production_extensions": {
+            "description": "Schritte zur produktiven OPC-UA-Anbindung",
+            "items": {
+              "type": "string"
+            },
+            "title": "Production Extensions",
+            "type": "array"
+          },
+          "stub": {
+            "default": true,
+            "description": "Immer true — noch keine Live-Anbindung",
+            "title": "Stub",
+            "type": "boolean"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "title": "PlcInfoOut",
+        "type": "object"
+      },
       "PlcIngestIn": {
         "description": "Batch-Payload: ein Geraet sendet mehrere Datenpunkte in einem Aufruf.",
         "properties": {
@@ -100602,6 +102098,62 @@
           "data_points"
         ],
         "title": "PlcIngestIn",
+        "type": "object"
+      },
+      "PlcIngestOut": {
+        "description": "``POST /plc/ingest`` — Batch von Datenpunkten.\n\nDatenpunkte mit ``quality=\"bad\"`` werden verworfen und in\n``skipped_bad_quality`` gezaehlt.",
+        "properties": {
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "processed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processed"
+          },
+          "received": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received"
+          },
+          "skipped_bad_quality": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skipped Bad Quality"
+          }
+        },
+        "title": "PlcIngestOut",
         "type": "object"
       },
       "PlcSiloLevelIn": {
@@ -100661,6 +102213,85 @@
           "level_pct"
         ],
         "title": "PlcSiloLevelIn",
+        "type": "object"
+      },
+      "PlcSiloLevelOut": {
+        "description": "``POST /plc/silo-level`` — Fuellstandsmessung einer Silozelle.",
+        "properties": {
+          "cell_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cell Code"
+          },
+          "cell_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cell Id"
+          },
+          "estimated_stock_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Aus Fuellstand und Zellvolumen geschaetzt",
+            "title": "Estimated Stock Kg"
+          },
+          "level_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level Pct"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "qs_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Status"
+          },
+          "temperature_celsius": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature Celsius"
+          }
+        },
+        "title": "PlcSiloLevelOut",
         "type": "object"
       },
       "PodIn": {
@@ -115640,6 +117271,91 @@
         "title": "RetryIn",
         "type": "object"
       },
+      "ReturnAuditEntryOut": {
+        "description": "Auditzeile eines Ruecklauffalls.",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "new_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Value"
+          },
+          "old_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Value"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "ReturnAuditEntryOut",
+        "type": "object"
+      },
       "ReturnCaseIn": {
         "properties": {
           "artifact_id": {
@@ -115745,6 +117461,193 @@
         "title": "ReturnCaseIn",
         "type": "object"
       },
+      "ReturnCaseOut": {
+        "description": "Ruecklauffall mit Belegkopf und optionalem Artefakt.",
+        "properties": {
+          "assigned_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned User"
+          },
+          "contact_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Ref"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "doc_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Number"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "return_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "expected | received | closed | waived",
+            "title": "Return Status"
+          },
+          "returned_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Returned At"
+          },
+          "sent_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sent At"
+          },
+          "shipping_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "not_sent | sent",
+            "title": "Shipping Status"
+          },
+          "source_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Route"
+          },
+          "storage_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Key"
+          },
+          "subject_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Ref"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "tags": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          }
+        },
+        "title": "ReturnCaseOut",
+        "type": "object"
+      },
       "ReturnCreate": {
         "properties": {
           "customer_id": {
@@ -115835,6 +117738,171 @@
           "reason"
         ],
         "title": "ReturnCreate",
+        "type": "object"
+      },
+      "ReturnCreatedOut": {
+        "description": "``POST /docflow/returns``",
+        "properties": {
+          "doc_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Number"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "return_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Return Status"
+          },
+          "shipping_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Status"
+          }
+        },
+        "title": "ReturnCreatedOut",
+        "type": "object"
+      },
+      "ReturnEvidenceOut": {
+        "description": "``GET /docflow/returns/{id}/evidence`` — Vorschau und Auditnachweis.",
+        "properties": {
+          "artifact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Id"
+          },
+          "artifact_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Type"
+          },
+          "audit": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnAuditEntryOut"
+            },
+            "title": "Audit",
+            "type": "array"
+          },
+          "content_hash_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Inhaltshash des Artefakts (Nachweiskette)",
+            "title": "Content Hash Sha256"
+          },
+          "doc_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Number"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "preview_available": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview Available"
+          },
+          "source_route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Route"
+          },
+          "storage_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Key"
+          }
+        },
+        "title": "ReturnEvidenceOut",
         "type": "object"
       },
       "ReturnOut": {
@@ -115989,6 +118057,155 @@
           "return_date"
         ],
         "title": "ReturnPaymentRequest",
+        "type": "object"
+      },
+      "ReturnSummaryOut": {
+        "description": "``GET /docflow/returns/summary``",
+        "properties": {
+          "expected": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected"
+          },
+          "not_sent": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Not Sent"
+          },
+          "overdue": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overdue"
+          },
+          "received": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "ReturnSummaryOut",
+        "type": "object"
+      },
+      "ReturnTransitionOut": {
+        "description": "``POST /docflow/returns/{id}/transition``.\n\nDer Service setzt je nach ``kind`` entweder ``shipping_status`` oder\n``return_status`` — der Schluessel ist dynamisch, deshalb beide optional.",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "return_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Return Status"
+          },
+          "shipping_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Status"
+          }
+        },
+        "title": "ReturnTransitionOut",
+        "type": "object"
+      },
+      "ReturnWorklistOut": {
+        "description": "``GET /docflow/returns``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnCaseOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "title": "ReturnWorklistOut",
         "type": "object"
       },
       "RevokeResultOut": {
@@ -141464,6 +143681,93 @@
           "status"
         ],
         "title": "WhistleblowerStatusIn",
+        "type": "object"
+      },
+      "WiedervorlageOut": {
+        "description": "Offene Wiedervorlage in der uebergreifenden Worklist.",
+        "properties": {
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "betreff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betreff"
+          },
+          "doc_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Number"
+          },
+          "faellig_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faellig Am"
+          },
+          "followup_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Followup Id"
+          },
+          "ueberfaellig": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ueberfaellig"
+          }
+        },
+        "title": "WiedervorlageOut",
+        "type": "object"
+      },
+      "WiedervorlagenListOut": {
+        "description": "``GET /docflow/wiedervorlagen``",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WiedervorlageOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "WiedervorlagenListOut",
         "type": "object"
       },
       "WiedervorlagenOut": {
@@ -236460,9 +238764,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Followups Api V1 Docflow Evidence Followups Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FollowupListOut"
                 }
               }
             },
@@ -236529,9 +238831,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Followup Api V1 Docflow Evidence Followups Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FollowupCreatedOut"
                 }
               }
             },
@@ -236609,9 +238909,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Complete Followup Api V1 Docflow Evidence Followups  Followup Id  Complete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FollowupCompletedOut"
                 }
               }
             },
@@ -236814,9 +239112,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Wiedervorlagen Api V1 Docflow Evidence Wiedervorlagen Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/WiedervorlagenListOut"
                 }
               }
             },
@@ -237034,9 +239330,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Returns Api V1 Docflow Returns Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReturnWorklistOut"
                 }
               }
             },
@@ -237099,9 +239393,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Return Api V1 Docflow Returns Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReturnCreatedOut"
                 }
               }
             },
@@ -237156,9 +239448,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Return Summary Api V1 Docflow Returns Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReturnSummaryOut"
                 }
               }
             },
@@ -237222,9 +239512,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Return Evidence Api V1 Docflow Returns  Case Id  Evidence Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReturnEvidenceOut"
                 }
               }
             },
@@ -237298,9 +239586,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Return Api V1 Docflow Returns  Case Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReturnTransitionOut"
                 }
               }
             },
@@ -238171,9 +240457,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Exceptions Api V1 Document Control Exceptions Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ControlWorklistOut"
                 }
               }
             },
@@ -238236,9 +240520,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Register Exception Api V1 Document Control Exceptions Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ControlRegisteredOut"
                 }
               }
             },
@@ -238312,9 +240594,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Assign Exception Api V1 Document Control Exceptions  Case Id  Assign Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ControlAssignOut"
                 }
               }
             },
@@ -238388,9 +240668,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Exception Api V1 Document Control Exceptions  Case Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ControlTransitionOut"
                 }
               }
             },
@@ -238445,9 +240723,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Project Exceptions Api V1 Document Control Project Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ControlProjectionOut"
                 }
               }
             },
@@ -238502,9 +240778,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Summary Api V1 Document Control Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ControlSummaryOut"
                 }
               }
             },
@@ -284626,9 +286900,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Batches Api V1 Inventory Auxiliary Batches Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AuxiliaryBatchPageOut"
                 }
               }
             },
@@ -284691,9 +286963,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Batch Api V1 Inventory Auxiliary Batches Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AuxiliaryBatchCreatedOut"
                 }
               }
             },
@@ -284767,9 +287037,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Api V1 Inventory Auxiliary Batches  Batch Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AuxiliaryTransitionOut"
                 }
               }
             },
@@ -284824,9 +287092,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Summary Api V1 Inventory Auxiliary Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AuxiliarySummaryOut"
                 }
               }
             },
@@ -299401,9 +301667,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Plc Device Status Api V1 Lager Wms Agri Plc Device Status Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PlcDeviceStatusOut"
                 }
               }
             },
@@ -299445,9 +301709,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Plc Info Api V1 Lager Wms Agri Plc Info Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PlcInfoOut"
                 }
               }
             },
@@ -299507,9 +301769,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Plc Ingest Api V1 Lager Wms Agri Plc Ingest Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PlcIngestOut"
                 }
               }
             },
@@ -299579,9 +301839,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Plc Silo Level Api V1 Lager Wms Agri Plc Silo Level Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PlcSiloLevelOut"
                 }
               }
             },
@@ -309803,9 +312061,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Dokument Api V1 Nachweisraum Dokumente Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/NachweisDokumentOut"
                 }
               }
             },
@@ -309872,9 +312128,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Dokument Api V1 Nachweisraum Dokumente  Dokument Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/NachweisDokumentOut"
                 }
               }
             },
@@ -309932,9 +312186,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Gobd Export Api V1 Nachweisraum Gobd Exporte Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/GobdExportOut"
                 }
               }
             },
@@ -310001,9 +312253,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Gobd Export Api V1 Nachweisraum Gobd Exporte  Export Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/GobdExportOut"
                 }
               }
             },
