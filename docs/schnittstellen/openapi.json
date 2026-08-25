@@ -71443,6 +71443,143 @@
         "title": "InventoryCountOut",
         "type": "object"
       },
+      "InventoryLotOut": {
+        "description": "Eine Zeile aus ``domain_inventory.inventory_lots``.\n\n``GET /lager/lots`` liefert ``SELECT *`` — deshalb bildet dieses Modell alle\n15 Spalten ab. ``POST /lager/lots`` gibt nur die zehn Felder zurueck, die es\nselbst gesetzt hat; die uebrigen bleiben leer.",
+        "properties": {
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "current_qty": {
+            "title": "Current Qty",
+            "type": "string"
+          },
+          "herkunft": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Herkunft"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "initial_qty": {
+            "title": "Initial Qty",
+            "type": "string"
+          },
+          "lot_number": {
+            "title": "Lot Number",
+            "type": "string"
+          },
+          "mhd": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mindesthaltbarkeitsdatum, FEFO-Sortierschluessel",
+            "title": "Mhd"
+          },
+          "qs_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Status"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "sperrgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sperrgrund"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "AKTIV | ERSCHOEPFT",
+            "title": "Status"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "article_id",
+          "warehouse_id",
+          "lot_number",
+          "initial_qty",
+          "current_qty"
+        ],
+        "title": "InventoryLotOut",
+        "type": "object"
+      },
       "InventoryOperationsOut": {
         "additionalProperties": true,
         "description": "Response schema for inventory operations endpoints.",
@@ -71454,6 +71591,38 @@
         "additionalProperties": true,
         "properties": {},
         "title": "InventoryOut",
+        "type": "object"
+      },
+      "InventurDifferenzOut": {
+        "description": "Ergebnis von ``POST /lager/inventur/{count_id}/differenz-buchen``.\n\n``lines_skipped_idempotent`` zaehlt Zeilen, fuer die bereits ein\nDifferenzbeleg existierte — der Endpunkt ist idempotent.",
+        "properties": {
+          "correction_line_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Correction Line Ids",
+            "type": "array"
+          },
+          "corrections_created": {
+            "title": "Corrections Created",
+            "type": "integer"
+          },
+          "count_id": {
+            "title": "Count Id",
+            "type": "string"
+          },
+          "lines_skipped_idempotent": {
+            "title": "Lines Skipped Idempotent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count_id",
+          "corrections_created",
+          "lines_skipped_idempotent",
+          "correction_line_ids"
+        ],
+        "title": "InventurDifferenzOut",
         "type": "object"
       },
       "InventurPivOut": {
@@ -83920,6 +84089,36 @@
         "title": "LotConsumeIn",
         "type": "object"
       },
+      "LotConsumeOut": {
+        "description": "Ergebnis eines FEFO-Verbrauchs (``POST /lager/lots/{lot_id}/consume``).",
+        "properties": {
+          "consumed_qty": {
+            "title": "Consumed Qty",
+            "type": "number"
+          },
+          "lot_id": {
+            "title": "Lot Id",
+            "type": "string"
+          },
+          "remaining_qty": {
+            "title": "Remaining Qty",
+            "type": "number"
+          },
+          "status": {
+            "description": "AKTIV | ERSCHOEPFT nach dem Verbrauch",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lot_id",
+          "consumed_qty",
+          "remaining_qty",
+          "status"
+        ],
+        "title": "LotConsumeOut",
+        "type": "object"
+      },
       "LotCreateIn": {
         "properties": {
           "article_id": {
@@ -87162,6 +87361,83 @@
         "title": "MaterialFlowEdgeIn",
         "type": "object"
       },
+      "MaterialFlowEdgeOut": {
+        "description": "Eine Foerderstrecke (``domain_inventory.material_flow_edges``).\n\n``contamination_guard_enabled`` und ``flush_required`` steuern die\nVerschleppungspruefung in ``POST /material-flow/validate-route``.",
+        "properties": {
+          "contamination_guard_enabled": {
+            "title": "Contamination Guard Enabled",
+            "type": "boolean"
+          },
+          "conveyor_type": {
+            "title": "Conveyor Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "flush_required": {
+            "title": "Flush Required",
+            "type": "boolean"
+          },
+          "from_node_id": {
+            "title": "From Node Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "max_capacity_kg_h": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Capacity Kg H"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "to_node_id": {
+            "title": "To Node Id",
+            "type": "string"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "warehouse_id",
+          "from_node_id",
+          "to_node_id",
+          "conveyor_type",
+          "status",
+          "contamination_guard_enabled",
+          "flush_required",
+          "tenant_id"
+        ],
+        "title": "MaterialFlowEdgeOut",
+        "type": "object"
+      },
       "MaterialFlowEdgePatch": {
         "properties": {
           "contamination_guard_enabled": {
@@ -87330,6 +87606,139 @@
           "name"
         ],
         "title": "MaterialFlowNodeIn",
+        "type": "object"
+      },
+      "MaterialFlowNodeOut": {
+        "description": "Ein Knoten des Materialflussgraphen (``domain_inventory.material_flow_nodes``).",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "geo_lat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geo Lat"
+          },
+          "geo_lng": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geo Lng"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "layout_x": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout X"
+          },
+          "layout_y": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Y"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "node_type": {
+            "title": "Node Type",
+            "type": "string"
+          },
+          "ref_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Id"
+          },
+          "ref_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Type"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "warehouse_id",
+          "node_type",
+          "code",
+          "name",
+          "status",
+          "tenant_id"
+        ],
+        "title": "MaterialFlowNodeOut",
         "type": "object"
       },
       "MaterialFlowNodePatch": {
@@ -126435,6 +126844,196 @@
         "title": "SiloCellIn",
         "type": "object"
       },
+      "SiloCellOut": {
+        "description": "Eine Zeile aus ``domain_inventory.silo_cells``.\n\n``current_stock_kg`` und ``capacity_kg`` sind in der DDL NOT NULL, die\nLayoutkoordinaten und die Verschneidung mit Zone/Gang/Platz sind optional.\n``legacy_silo_id`` traegt die Herkunft aus dem Altsystem.",
+        "properties": {
+          "aisle_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aisle Id"
+          },
+          "bin_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bin Id"
+          },
+          "capacity_kg": {
+            "title": "Capacity Kg",
+            "type": "string"
+          },
+          "cell_code": {
+            "title": "Cell Code",
+            "type": "string"
+          },
+          "contamination_risk_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Verschleppungs-Risikoklasse fuer die Spuelchargen-Logik",
+            "title": "Contamination Risk Class"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "current_lot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Lot Id"
+          },
+          "current_material_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Material Id"
+          },
+          "current_stock_kg": {
+            "title": "Current Stock Kg",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "layout_x": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout X"
+          },
+          "layout_y": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Y"
+          },
+          "legacy_silo_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Silo Id"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "qs_status": {
+            "description": "frei | gesperrt | pruefung",
+            "title": "Qs Status",
+            "type": "string"
+          },
+          "silo_system_id": {
+            "title": "Silo System Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          },
+          "zone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone Id"
+          }
+        },
+        "required": [
+          "id",
+          "silo_system_id",
+          "warehouse_id",
+          "cell_code",
+          "name",
+          "capacity_kg",
+          "current_stock_kg",
+          "qs_status",
+          "tenant_id"
+        ],
+        "title": "SiloCellOut",
+        "type": "object"
+      },
       "SiloCellPatch": {
         "properties": {
           "capacity_kg": {
@@ -126827,6 +127426,74 @@
           "name"
         ],
         "title": "SiloSystemIn",
+        "type": "object"
+      },
+      "SiloSystemOut": {
+        "description": "Eine Zeile aus ``domain_inventory.silo_systems``.",
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "system_code": {
+            "title": "System Code",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "warehouse_id",
+          "system_code",
+          "name",
+          "tenant_id"
+        ],
+        "title": "SiloSystemOut",
         "type": "object"
       },
       "SiloZelleCreateRequest": {
@@ -129991,6 +130658,379 @@
           "created_at"
         ],
         "title": "StoredProposalOut",
+        "type": "object"
+      },
+      "StornoKorrekturOut": {
+        "description": "Ergebnis von ``POST /lager/korrekturen/{korrektur_id}/storno``.\n\nDer Endpunkt hat zwei Zweige mit unterschiedlicher Feldmenge:\n\n* Neues Storno — die neun Felder, die der Service selbst zusammenstellt.\n* Idempotenter Treffer — die komplette bestehende Bewegungszeile aus\n  ``inventory_stock_movements`` plus ``idempotent=True``.\n\nDamit im idempotenten Fall kein Feld still wegfaellt, deckt dieses Modell\nalle 35 Spalten der Tabelle ab. Nur ``id``, ``article_id``,\n``warehouse_id``, ``movement_type``, ``quantity`` und ``tenant_id`` sind in\nbeiden Zweigen sicher gesetzt.",
+        "properties": {
+          "agrar_contract_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agrar Contract Id"
+          },
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "auto_created": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auto Created"
+          },
+          "bin_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bin Id"
+          },
+          "booking_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking User"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "idempotent": {
+            "description": "True, wenn ein bestehendes Storno zurueckgegeben wurde",
+            "title": "Idempotent",
+            "type": "boolean"
+          },
+          "linked_order_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked Order Id"
+          },
+          "movement_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Date"
+          },
+          "movement_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Number"
+          },
+          "movement_time": {
+            "anyOf": [
+              {
+                "format": "time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Time"
+          },
+          "movement_type": {
+            "title": "Movement Type",
+            "type": "string"
+          },
+          "new_stock": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Stock"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "owner_partner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Partner Id"
+          },
+          "ownership_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ownership Type"
+          },
+          "previous_stock": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Stock"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "string"
+          },
+          "reference_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Number"
+          },
+          "source_document_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Document Id"
+          },
+          "source_document_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Belegtyp, fuer Stornos 'STORNO'",
+            "title": "Source Document Type"
+          },
+          "storage_fee_last_charged_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Fee Last Charged Until"
+          },
+          "storage_fee_monthly_rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Fee Monthly Rate"
+          },
+          "storage_fee_relevant": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Fee Relevant"
+          },
+          "storage_fee_start_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Fee Start Date"
+          },
+          "storno_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID der stornierten Ursprungsbewegung",
+            "title": "Storno Ref"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "total_cost": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Cost"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Cost"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "warehouse_id": {
+            "title": "Warehouse Id",
+            "type": "string"
+          },
+          "warehouse_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warehouse Location"
+          },
+          "weighing_ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighing Ticket Id"
+          }
+        },
+        "required": [
+          "idempotent",
+          "id",
+          "tenant_id",
+          "article_id",
+          "warehouse_id",
+          "movement_type",
+          "quantity"
+        ],
+        "title": "StornoKorrekturOut",
         "type": "object"
       },
       "StornoOut": {
@@ -298717,9 +299757,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Inventur Differenz Buchen Api V1 Lager Inventur  Count Id  Differenz Buchen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/InventurDifferenzOut"
                 }
               }
             },
@@ -298975,9 +300013,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Storno Bestandskorrektur Api V1 Lager Korrekturen  Korrektur Id  Storno Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StornoKorrekturOut"
                 }
               }
             },
@@ -299079,8 +300115,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/InventoryLotOut"
                   },
                   "title": "Response List Inventory Lots Api V1 Lager Lots Get",
                   "type": "array"
@@ -299150,9 +300185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Inventory Lot Api V1 Lager Lots Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/InventoryLotOut"
                 }
               }
             },
@@ -299230,9 +300263,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Consume Inventory Lot Api V1 Lager Lots  Lot Id  Consume Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/LotConsumeOut"
                 }
               }
             },
@@ -300585,8 +301616,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/MaterialFlowEdgeOut"
                   },
                   "title": "Response List Flow Edges Api V1 Lager Wms Agri Material Flow Edges Get",
                   "type": "array"
@@ -301223,8 +302253,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/MaterialFlowNodeOut"
                   },
                   "title": "Response List Flow Nodes Api V1 Lager Wms Agri Material Flow Nodes Get",
                   "type": "array"
@@ -301931,8 +302960,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/SiloCellOut"
                   },
                   "title": "Response List Silo Cells Api V1 Lager Wms Agri Silo Cells Get",
                   "type": "array"
@@ -302261,8 +303289,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/SiloSystemOut"
                   },
                   "title": "Response List Silo Systems Api V1 Lager Wms Agri Silo Systems Get",
                   "type": "array"
