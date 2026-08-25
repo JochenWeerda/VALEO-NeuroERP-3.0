@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-06-W8-INVENTORY-SILO Legacy-Routen typisieren Welle 8 - in Arbeit 2026-08-25
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 7. **Owner:** Claude Code. **Stand:** in Arbeit.
+
+**Ziel:** Die beiden aus Welle 7 bewusst zurueckgestellten Dateien `inventory_operations` (5) und `agri_silo_material_flow` (4) typisieren. Spaltenlisten aus `information_schema.columns` einer auf head migrierten DB statt aus Migrationen rekonstruiert, verankert als Schema-Drift-Test.
+
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, zwei neue Schema-Module, die beiden Endpoint-Dateien, `inventory_correction_service.py`, `inventory_count_close_service.py`, zwei Testdateien. Nicht: `EXPORT/`, `SKILL.md`, fremde Migrationen.
+
+**Vorab-Befund:** `domain_inventory.inventory_stock_movements` hat 35 Spalten, aber kein `reference_type`/`reference_id` — kanonisch sind `source_document_type`/`source_document_id`. Storno- und Inventurdifferenz-Service schreiben trotzdem darauf und laufen produktiv in UndefinedColumn; zusaetzlich fehlen fuenf NOT-NULL-Spalten ohne Default. Wird in dieser Welle mitgefixt.
+
+**Abnahme:** 9 Endpunkte mit echtem response_model; kein Feldverlust gegen die Live-DDL; Drift-Test gruen; schwache Typen 255 -> 246.
+
 ## SPEC-P1-05-S608 SQL-f-String Gate Nachzug - in Arbeit 2026-08-23
 
 **Von:** Gap-Abwicklung. **Owner:** Cursor Agent. **Stand:** teilweise.
