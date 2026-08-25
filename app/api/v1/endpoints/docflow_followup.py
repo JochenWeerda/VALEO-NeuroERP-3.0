@@ -9,6 +9,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.docflow_bundle_schemas import (
+    FollowupCompletedOut,
+    FollowupCreatedOut,
+    FollowupListOut,
+    WiedervorlagenListOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_followup_service import DocflowFollowupService, FollowupError
@@ -16,7 +22,7 @@ from app.services.docflow_followup_service import DocflowFollowupService, Follow
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
 
-@router.get("/wiedervorlagen", response_model=dict[str, Any], summary="Offene Wiedervorlagen (Worklist, überfällig markiert)")
+@router.get("/wiedervorlagen", response_model=WiedervorlagenListOut, summary="Offene Wiedervorlagen (Worklist, überfällig markiert)")
 def wiedervorlagen(
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -25,7 +31,7 @@ def wiedervorlagen(
     return {"items": DocflowFollowupService(db, tenant_id).open_wiedervorlagen(limit=limit)}
 
 
-@router.get("/followups", response_model=dict[str, Any], summary="Bescheide/Rückmeldungen/Wiedervorlagen eines Vorgangs")
+@router.get("/followups", response_model=FollowupListOut, summary="Bescheide/Rückmeldungen/Wiedervorlagen eines Vorgangs")
 def list_followups(
     doc: str = Query(..., description="Dokumentnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -43,7 +49,7 @@ class FollowupIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/followups", response_model=dict[str, Any], summary="Bescheid/Rückmeldung/Wiedervorlage erfassen")
+@router.post("/followups", response_model=FollowupCreatedOut, summary="Bescheid/Rückmeldung/Wiedervorlage erfassen")
 def create_followup(
     body: FollowupIn,
     db: Session = Depends(get_db),
@@ -68,7 +74,7 @@ class CompleteIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/followups/{followup_id}/complete", response_model=dict[str, Any], summary="Followup erledigen")
+@router.post("/followups/{followup_id}/complete", response_model=FollowupCompletedOut, summary="Followup erledigen")
 def complete_followup(
     followup_id: str,
     body: CompleteIn,

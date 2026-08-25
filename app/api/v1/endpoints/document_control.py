@@ -7,6 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.docflow_bundle_schemas import (
+    ControlAssignOut,
+    ControlProjectionOut,
+    ControlRegisteredOut,
+    ControlSummaryOut,
+    ControlTransitionOut,
+    ControlWorklistOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.document_control_service import DocumentControlError, DocumentControlService
@@ -45,7 +53,7 @@ class TransitionIn(BaseModel):
     reason: str = Field(min_length=5, max_length=500)
 
 
-@router.post("/exceptions", response_model=dict, status_code=201, summary="Beleg-Ausnahme registrieren")
+@router.post("/exceptions", response_model=ControlRegisteredOut, status_code=201, summary="Beleg-Ausnahme registrieren")
 def register_exception(
     body: ExceptionIn,
     request: Request,
@@ -59,7 +67,7 @@ def register_exception(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/exceptions", response_model=dict, summary="Beleg-Kontrolle Worklist")
+@router.get("/exceptions", response_model=ControlWorklistOut, summary="Beleg-Kontrolle Worklist")
 def list_exceptions(
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=200),
@@ -86,12 +94,12 @@ def list_exceptions(
     )
 
 
-@router.get("/summary", response_model=dict, summary="Beleg-Kontrolle Zusammenfassung")
+@router.get("/summary", response_model=ControlSummaryOut, summary="Beleg-Kontrolle Zusammenfassung")
 def summary(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return DocumentControlService(db, tenant_id).summary()
 
 
-@router.post("/project", response_model=dict, summary="Belegausnahmen aus Quellbelegen projizieren")
+@router.post("/project", response_model=ControlProjectionOut, summary="Belegausnahmen aus Quellbelegen projizieren")
 def project_exceptions(
     request: Request,
     db: Session = Depends(get_db),
@@ -104,7 +112,7 @@ def project_exceptions(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/exceptions/{case_id}/assign", response_model=dict, summary="Ausnahme zuweisen")
+@router.post("/exceptions/{case_id}/assign", response_model=ControlAssignOut, summary="Ausnahme zuweisen")
 def assign_exception(
     case_id: str,
     body: AssignIn,
@@ -126,7 +134,7 @@ def assign_exception(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/exceptions/{case_id}/transition", response_model=dict, summary="Ausnahmestatus wechseln")
+@router.post("/exceptions/{case_id}/transition", response_model=ControlTransitionOut, summary="Ausnahmestatus wechseln")
 def transition_exception(
     case_id: str,
     body: TransitionIn,

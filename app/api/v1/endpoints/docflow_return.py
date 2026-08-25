@@ -7,6 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.docflow_bundle_schemas import (
+    ReturnCreatedOut,
+    ReturnEvidenceOut,
+    ReturnSummaryOut,
+    ReturnTransitionOut,
+    ReturnWorklistOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_return_service import DocflowReturnService, DocumentReturnError
@@ -33,7 +40,7 @@ class TransitionIn(BaseModel):
     reason: str = Field(min_length=5, max_length=500)
 
 
-@router.post("", response_model=dict, status_code=201, summary="Dokumentenruecklauf anlegen")
+@router.post("", response_model=ReturnCreatedOut, status_code=201, summary="Dokumentenruecklauf anlegen")
 def create_return(body: ReturnCaseIn, request: Request, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     actor = request.headers.get("X-User-ID") or "docflow-operator"
     try:
@@ -42,7 +49,7 @@ def create_return(body: ReturnCaseIn, request: Request, db: Session = Depends(ge
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("", response_model=dict, summary="Dokumentenruecklauf-Worklist")
+@router.get("", response_model=ReturnWorklistOut, summary="Dokumentenruecklauf-Worklist")
 def list_returns(page: int = Query(1, ge=1), page_size: int = Query(25, ge=1, le=200),
                  assigned_user: str | None = None, contact_ref: str | None = None,
                  subject_type: str | None = None, date_from: str | None = None, date_to: str | None = None,
@@ -54,12 +61,12 @@ def list_returns(page: int = Query(1, ge=1), page_size: int = Query(25, ge=1, le
         status=status, q=q, sort=sort, sort_dir=sort_dir)
 
 
-@router.get("/summary", response_model=dict, summary="Dokumentenruecklauf-Zusammenfassung")
+@router.get("/summary", response_model=ReturnSummaryOut, summary="Dokumentenruecklauf-Zusammenfassung")
 def return_summary(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return DocflowReturnService(db, tenant_id).summary()
 
 
-@router.get("/{case_id}/evidence", response_model=dict, summary="Ruecklaufvorschau und Auditnachweis")
+@router.get("/{case_id}/evidence", response_model=ReturnEvidenceOut, summary="Ruecklaufvorschau und Auditnachweis")
 def return_evidence(case_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     try:
         return DocflowReturnService(db, tenant_id).case_evidence(case_id)
@@ -67,7 +74,7 @@ def return_evidence(case_id: str, db: Session = Depends(get_db), tenant_id: str 
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/{case_id}/transition", response_model=dict, summary="Versand- oder Ruecklaufstatus aktualisieren")
+@router.post("/{case_id}/transition", response_model=ReturnTransitionOut, summary="Versand- oder Ruecklaufstatus aktualisieren")
 def transition_return(case_id: str, body: TransitionIn, request: Request, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     try:
         return DocflowReturnService(db, tenant_id).transition(case_id, kind=body.kind, target=body.target,
