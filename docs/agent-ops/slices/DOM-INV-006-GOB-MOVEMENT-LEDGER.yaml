@@ -2,9 +2,10 @@ slice_id: DOM-INV-006-GOB-MOVEMENT-LEDGER
 id: DOM-INV-006-GOB-MOVEMENT-LEDGER
 title: Bestandshauptbuch nach Grundsaetzen ordnungsmaessiger Buchfuehrung
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-08-25"
 started_at: "2026-08-25"
+completed_at: "2026-08-25"
 goal: >-
   Die drei aus DOM-INV-005 offen gelassenen Punkte nach GoB/GoBD schliessen:
   die Belegarten des Bestandshauptbuchs registrieren und erzwingen statt sie
@@ -44,6 +45,7 @@ file_ownership:
   - app/services/inventory_balance_reconciliation.py
   - scripts/inventory_balance_reconciliation.py
   - tests/test_inventory_movement_register.py
+  - tests/test_inventory_mobile_count_booking.py
   - tests/test_inventory_balance_reconciliation.py
 ausgeschlossen:
   - >-
@@ -63,6 +65,7 @@ acceptance:
   - Bestehende Bewegungszeilen bleiben unveraendert
 tests:
   - tests/test_inventory_movement_register.py
+  - tests/test_inventory_mobile_count_booking.py
   - tests/test_inventory_balance_reconciliation.py
   - tests/test_inventory_movement_direction.py
   - tests/test_inventory_operations.py
@@ -127,3 +130,38 @@ verification:
   - "python -m pytest tests/test_inventory_movement_register.py -q --no-cov"
   - "python -m pytest tests/test_inventory_balance_reconciliation.py -q --no-cov"
   - "python -m pytest tests/test_inventory_movement_direction.py tests/test_inventory_operations.py tests/test_inventory_counts.py tests/test_welle8_response_models.py tests/test_welle8_schema_drift.py -q --no-cov"
+befunde:
+  - >-
+    Das Register fuehrt 20 Belegarten. Die Bestandsdaten selbst kennen davon
+    vier (out, EINLAGERUNG, wareneingang, in); die uebrigen stehen als
+    Schreibpfade im Code. Keine Bestandszeile wurde geaendert.
+  - >-
+    Die Schreibsperre ist ein Trigger und kein Fremdschluessel. Ein
+    Fremdschluessel waere case-sensitiv; die Bestandsdaten fuehren dieselbe
+    Belegart aber gross und klein (EINLAGERUNG neben wareneingang). Ein
+    Fremdschluessel haette also entweder Altzeilen blockiert oder das Register
+    mit Schreibvarianten aufgeblaeht.
+  - >-
+    Das Register erlaubte 64 Zeichen, inventory_stock_movements.movement_type
+    speichert 20. Ohne Schranke haette man eine Belegart registrieren koennen,
+    die sich nie buchen laesst. Eine CHECK-Constraint und ein Test schliessen
+    das.
+  - >-
+    Beim Umbau der mobilen Zaehlung kam heraus, dass dieser Pfad ohnehin nie
+    funktioniert hat: der INSERT lieferte storage_fee_relevant nicht mit, das
+    NOT NULL ohne Default ist. _handle_inventory_count lief also bei jedem
+    Aufruf in eine NotNullViolation - dieselbe Fehlerklasse wie in
+    SPEC-P1-06-W8. Mitgefixt.
+  - >-
+    Der Abstimmbericht ueber die Dev-Datenbank: 95 Buchungen, Saldo 1389,0,
+    vollstaendig erklaerbar. Herkunft einlagerung +774, wareneingang +705,
+    in +50, out -140. Das ist dieselbe Zahl, die GET /lager/bestaende und
+    GET /lager/dashboard liefern - der Saldo ist damit gegen seine Buchungen
+    nachgerechnet und nicht nur behauptet.
+result: >-
+  Alle drei offenen Punkte aus DOM-INV-005 geschlossen, ohne eine einzige
+  bestehende Buchung zu veraendern. Belegartenregister mit Richtung und
+  Begruendung plus Schreibsperre in der Datenbank; mobile Inventurzaehlung
+  bucht die Differenz mit Beleg statt eines Absolutwerts und bucht bei
+  Nulldifferenz gar nicht; Abstimmbericht als Service und Skript mit
+  Exit-Code-Gate. 21 neue Tests, zusammen mit den Bestandssuiten 154 passed.

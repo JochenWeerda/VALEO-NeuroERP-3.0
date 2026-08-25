@@ -79,6 +79,45 @@ NEUTRAL_TYPES: tuple[str, ...] = (
     "inventory_count",
 )
 
+#: Begruendung je Belegart, wortgleich in das Datenbank-Register uebernommen.
+#:
+#: GoBD verlangt, dass ein sachverstaendiger Dritter die Buchfuehrung in
+#: angemessener Zeit nachvollziehen kann. Eine Richtungstabelle ohne Begruendung
+#: erfuellt das nicht - man saehe, *dass* ``pick_out`` abzieht, aber nicht,
+#: warum. Deshalb traegt jede Belegart ihren Satz mit.
+MOVEMENT_TYPE_NOTES: dict[str, str] = {
+    "in": "Allgemeiner Zugang aus den Artikel- und Compat-Pfaden.",
+    "wareneingang": "Zugang aus der generischen Lagerbuchung, Menge vorzeichenbehaftet.",
+    "umbuchung_eingang": "Zugangsseite einer Umlagerung zwischen Lagerorten.",
+    "zugang": "Zugang aus den Korrekturdiensten (Storno einer Abgangsbuchung).",
+    "einlagerung": "Zugang aus dem Wareneingang zum Lieferschein.",
+    "return": "Ruecklauf aus den Artikelpfaden.",
+    "retoure": "Warenrueckgabe aus der Kasse.",
+    "adjustment_in": "Positive Bestandskorrektur.",
+    "opening_balance": "Freigegebener Bestandsvortrag; eroeffnet den Bestand.",
+    "inventur": "Inventurbuchung aus der generischen Lagerbuchung, Menge vorzeichenbehaftet.",
+    "adjustment": "Bestandskorrektur, Menge vorzeichenbehaftet.",
+    "umbuchung": "Umlagerung ohne getrennte Zu-/Abgangsseite, Menge vorzeichenbehaftet.",
+    "out": "Allgemeiner Abgang aus den Artikel- und Compat-Pfaden.",
+    "warenausgang": "Abgang aus der generischen Lagerbuchung.",
+    "umbuchung_ausgang": "Abgangsseite einer Umlagerung zwischen Lagerorten.",
+    "abgang": "Abgang aus den Korrekturdiensten (Storno einer Zugangsbuchung).",
+    "adjustment_out": "Negative Bestandskorrektur.",
+    "pick_out": "Entnahme durch Kommissionierung.",
+    "reservation": "Reservierung; bindet Ware, bewegt sie nicht.",
+    "inventory_count": (
+        "Altbestand: absoluter Zaehlwert der mobilen Inventur. Kein Delta und "
+        "damit nicht bestandswirksam. Seit DOM-INV-006 bucht die mobile Zaehlung "
+        "die Differenz; diese Belegart bleibt nur fuer Altzeilen im Register."
+    ),
+}
+
+#: Belegarten, deren Menge ein Delta ist und damit in den Saldo eingeht.
+#: ``False`` heisst: die Zeile dokumentiert etwas, bewegt aber keinen Bestand.
+MOVEMENT_TYPE_IS_DELTA: dict[str, bool] = {
+    name: name not in NEUTRAL_TYPES for name in (*INBOUND_TYPES, *OUTBOUND_TYPES, *NEUTRAL_TYPES)
+}
+
 MOVEMENT_DIRECTION: dict[str, Direction] = {
     **{name: 1 for name in INBOUND_TYPES},
     **{name: -1 for name in OUTBOUND_TYPES},
@@ -170,3 +209,21 @@ def unknown_movement_types(db: Session, tenant_id: str | None = None) -> dict[st
 
     stmt = text(sql).bindparams(bindparam("known", expanding=True))
     return {row[0]: int(row[1]) for row in db.execute(stmt, params).all()}
+
+
+def register_rows() -> list[dict[str, object]]:
+    """Das Register als Zeilen - Quelle fuer Migration und Abgleichstest.
+
+    Migration und Code duerfen nicht auseinanderlaufen; deshalb erzeugt diese
+    Funktion beides aus derselben Struktur, und
+    ``tests/test_inventory_movement_register.py`` prueft die Datenbank dagegen.
+    """
+    return [
+        {
+            "movement_type": name,
+            "direction": MOVEMENT_DIRECTION[name],
+            "is_delta": MOVEMENT_TYPE_IS_DELTA[name],
+            "note": MOVEMENT_TYPE_NOTES[name],
+        }
+        for name in sorted(MOVEMENT_DIRECTION)
+    ]

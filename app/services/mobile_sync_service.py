@@ -19,6 +19,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.uuid7 import uuid7
+from app.services.inventory_stock_balance import current_stock
 
 logger = logging.getLogger(__name__)
 
@@ -289,26 +290,79 @@ class MobileSyncService:
             raise ValueError("Tourstopp nicht gefunden oder nicht fuer den Mandanten freigegeben")
 
     def _handle_inventory_count(self, payload: dict) -> None:
+        """Mobile Inventurzaehlung als Differenzbuchung (DOM-INV-006).
+
+        HGB 240: die Inventur ermittelt den Ist-Bestand; gebucht wird die
+        Differenz zum Buchbestand, nicht der Ist-Bestand selbst. Vorher landete
+        hier ``counted_qty`` - ein absoluter Wert - als Menge im Delta-Hauptbuch
+        und hat den Bestand je nach Auswertung verdoppelt, negiert oder gar
+        nicht beeinflusst.
+
+        Ergibt die Zaehlung keine Abweichung, wird nichts gebucht: keine
+        Buchung ohne Geschaeftsvorfall.
+        """
         warehouse_id = payload.get("warehouse_id")
         article_id = payload.get("article_id")
         counted_qty = payload.get("counted_qty")
         if not all([warehouse_id, article_id, counted_qty is not None]):
             raise ValueError("inventory_count erfordert warehouse_id, article_id, counted_qty")
-        movement_id = str(uuid7())
+
+        gezaehlt = float(counted_qty)
+        buchbestand = current_stock(
+            self.db,
+            tenant_id=self.tenant_id,
+            article_id=str(article_id),
+            warehouse_id=str(warehouse_id),
+        )
+        differenz = round(gezaehlt - buchbestand, 3)
+
+        beleg_id = str(uuid7())
+        beleg_nr = f"INV-MOB-{beleg_id[:8].upper()}"
+        # Der Zaehlzeitpunkt kommt aus dem Geraet, der Buchbestand ist der zum
+        # Verarbeitungszeitpunkt. Bei verzoegerter Offline-Synchronisation sind
+        # das zwei verschiedene Momente; beide gehoeren in den Beleg, damit die
+        # Abweichung nachvollziehbar bleibt.
+        gezaehlt_am = payload.get("counted_at") or payload.get("recorded_at")
+        beleg_text = (
+            f"Inventurzaehlung via Mobile, Beleg {beleg_nr}: "
+            f"gezaehlt {gezaehlt:g}, Buchbestand {buchbestand:g}, "
+            f"Differenz {differenz:+g}"
+        )
+        if gezaehlt_am:
+            beleg_text += f", Zaehlzeitpunkt {gezaehlt_am}"
+
+        if differenz == 0:
+            logger.info(
+                "inventory_count %s: keine Abweichung (%.3f), keine Buchung", beleg_nr, gezaehlt
+            )
+            return
+
         self.db.execute(
             text("""
                 INSERT INTO domain_inventory.inventory_stock_movements
                     (id, article_id, warehouse_id, movement_type, quantity, unit,
-                     reference_number, movement_date, movement_time,
-                     notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
-                VALUES (:id, :art, :wid, 'inventory_count', :qty, 'EA',
-                        :ref, CURRENT_DATE, NOW()::time,
-                        'Inventurzählung via Mobile', 'mobile_app', true, 'owned', :tid, NOW())
+                     reference_number, source_document_type, source_document_id,
+                     movement_date, movement_time, notes, booking_user,
+                     previous_stock, new_stock,
+                     auto_created, ownership_type, storage_fee_relevant,
+                     tenant_id, created_at)
+                VALUES (:id, :art, :wid, :mt, :qty, 'EA',
+                        :ref, 'INVENTUR_MOBIL', :ref,
+                        CURRENT_DATE, NOW()::time, :notes, 'mobile_app',
+                        :vorher, :nachher,
+                        true, 'owned', false,
+                        :tid, NOW())
             """),
             {
-                "id": movement_id, "art": article_id, "wid": warehouse_id,
-                "qty": float(counted_qty),
-                "ref": f"INV-MOB-{movement_id[:8].upper()}",
+                "id": beleg_id,
+                "art": article_id,
+                "wid": warehouse_id,
+                "mt": "ZUGANG" if differenz > 0 else "ABGANG",
+                "qty": abs(differenz),
+                "ref": beleg_nr,
+                "notes": beleg_text,
+                "vorher": buchbestand,
+                "nachher": gezaehlt,
                 "tid": self.tenant_id,
             },
         )

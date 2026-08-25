@@ -11,15 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOM-INV-006-GOB-MOVEMENT-LEDGER Bestandshauptbuch nach GoB - in Arbeit 2026-08-25
+## DOM-INV-006-GOB-MOVEMENT-LEDGER Bestandshauptbuch nach GoB - abgeschlossen 2026-08-25
 
-**Von:** User-Auftrag, die aus DOM-INV-005 offen gelassenen Punkte nach Best Practice / ordentlicher Buchfuehrung zu schliessen. **Owner:** Claude Code. **Stand:** in Arbeit.
+**Von:** User-Auftrag, die aus DOM-INV-005 offen gelassenen Punkte nach Best Practice / ordentlicher Buchfuehrung zu schliessen. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-08-25.
 
-**Ziel:** Belegarten registrieren und erzwingen statt Werte zu ueberschreiben (Radierverbot, HGB 239 Abs. 3); mobile Inventurzaehlung als Differenzbuchung mit Beleg statt Absolutwert im Delta-Hauptbuch (HGB 240, Belegprinzip); Bestandsabgleich als ausfuehrbarer Bericht statt als Zusicherung (Nachvollziehbarkeit).
+**Leitentscheidung:** Die Vereinheitlichung der Belegarten passiert ueber ein Register, **nicht** ueber eine Migration, die bestehende Buchungen umschreibt. HGB 239 Abs. 3 und GoBD verlangen, dass der urspruengliche Inhalt einer Buchung feststellbar bleibt — ein UPDATE auf historische `movement_type`-Werte waere ein Verstoss gegen das Radierverbot, nicht seine Umsetzung. Die Migration aendert daher keine einzige Bestandszeile.
 
-**Dateibesitz:** Slice-YAML, dieser Abschnitt, Migration `inv_movement_type_register_20260825`, `inventory_movement_direction.py`, `mobile_sync_service.py`, `inventory_balance_reconciliation.py` (Service + Skript), zwei Testdateien. Nicht: Umschreiben bestehender `movement_type`-Werte, keine automatischen Korrekturbuchungen ohne Freigabe.
+**Ergebnis je Grundsatz:**
+- *Radierverbot:* `domain_inventory.inventory_movement_types` fuehrt 20 Belegarten mit Richtung, Delta-Eigenschaft und Begruendung. Bestandszeilen unveraendert (out 34, EINLAGERUNG 27, wareneingang 24, in 10).
+- *Vollstaendigkeit:* Trigger `trg_pruefe_belegart` lehnt unregistrierte Belegarten beim Schreiben ab — case-insensitiv, damit `EINLAGERUNG` neben `wareneingang` weiter buchbar bleibt. Aus dem stillen Faktor 0 wird ein lauter Fehler. Bewusst Trigger statt Fremdschluessel: ein FK waere case-sensitiv und haette entweder Altzeilen blockiert oder das Register mit Schreibvarianten aufgeblaeht.
+- *Belegprinzip + HGB 240:* Die mobile Inventurzaehlung bucht die **Differenz** zum Buchbestand mit `source_document_type='INVENTUR_MOBIL'`, Belegnummer, `previous_stock`/`new_stock` und einem Belegtext, der Zaehlwert, Buchbestand, Differenz und Zaehlzeitpunkt festhaelt. Nulldifferenz bucht gar nicht (keine Buchung ohne Geschaeftsvorfall).
+- *Nachvollziehbarkeit:* `scripts/inventory_balance_reconciliation.py` rechnet den Saldo gegen seine Buchungen nach — Herkunft nach Belegart und getrennt ausgewiesen, was im Hauptbuch steht, aber nicht in den Saldo eingeht. Exit-Code 1, wenn der Saldo nicht vollstaendig erklaerbar ist, damit der Bericht als Betriebs-Gate taugt.
 
-**Abnahme:** Register mit Richtung und Begruendung je Belegart; unbekannte Belegart nicht mehr schreibbar; Register und Code-Map deckungsgleich; Zaehlung bucht Differenz mit Beleg; Zaehlung ohne Abweichung bucht nicht; Bericht weist nicht bestandswirksame Zeilen getrennt aus; Bestandszeilen unveraendert.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, Migration `inv_movement_type_register_20260825`, `inventory_movement_direction.py`, `mobile_sync_service.py`, `inventory_balance_reconciliation.py` (Service + Skript), drei Testdateien.
+
+**Abnahme:** `alembic upgrade head` (auch downgrade/upgrade geprueft); 21 neue Tests; zusammen mit den Bestandssuiten **154 passed**; `architecture_drift_check` und `check_weak_response_models --threshold 246` gruen; `/lager/bestaende` und `/lager/dashboard` 200. Abstimmbericht Dev-DB: 95 Buchungen, Saldo 1389,0, vollstaendig erklaerbar — dieselbe Zahl wie beide Endpunkte liefern.
+
+**Nebenbefund:** `_handle_inventory_count` hat `storage_fee_relevant` (NOT NULL ohne Default) nie mitgeliefert und lief bei jedem Aufruf in NotNullViolation — der mobile Zaehlpfad war ohnehin tot, dieselbe Fehlerklasse wie in Welle 8. Mitgefixt. Ausserdem versprach das Register 64 Zeichen, waehrend `movement_type` nur 20 speichert; CHECK-Constraint und Test schliessen das.
+
+**Verbleibende external_gates:** Entscheidung des Betriebs ueber historische `inventory_count`-Zeilen (der Bericht weist sie aus; eine Nachbuchung braucht Beleg und Freigabe) und das Zielbild vollstaendiger Inventurbeleg fuer die mobile Zaehlung, das einen Benutzerbezug voraussetzt, den der mobile Sync heute nicht mitliefert.
 
 ## DOM-INV-005-MOVEMENT-DIRECTION Kanonische Bewegungsrichtung - abgeschlossen 2026-08-25
 
