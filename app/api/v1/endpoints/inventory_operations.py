@@ -22,6 +22,12 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.inventory_operations_schemas import InventoryOperationsOut
+from app.api.v1.schemas.inventory_lot_bundle_schemas import (
+    InventoryLotOut,
+    InventurDifferenzOut,
+    LotConsumeOut,
+    StornoKorrekturOut,
+)
 
 
 router = APIRouter()
@@ -553,7 +559,7 @@ class LotConsumeIn(BaseModel):
 @router.post(
     "/lots",
     status_code=201,
-    response_model=dict,
+    response_model=InventoryLotOut,
     tags=["lager", "inventory", "lots"],
     summary="Inventory-Lot anlegen (DOM-INV-004.2)",
 )
@@ -584,7 +590,7 @@ async def create_inventory_lot(
 
 @router.get(
     "/lots",
-    response_model=list[dict],
+    response_model=list[InventoryLotOut],
     tags=["lager", "inventory", "lots"],
     summary="Inventory-Lots (FEFO) auflisten (DOM-INV-004.2)",
 )
@@ -612,7 +618,7 @@ async def list_inventory_lots(
 
 @router.post(
     "/lots/{lot_id}/consume",
-    response_model=dict,
+    response_model=LotConsumeOut,
     tags=["lager", "inventory", "lots"],
     summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)",
 )
@@ -646,7 +652,7 @@ async def consume_inventory_lot(
 
 @router.post(
     "/inventur/{count_id}/differenz-buchen",
-    response_model=dict,
+    response_model=InventurDifferenzOut,
     status_code=201,
     tags=["lager", "inventory", "inventur"],
     summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)",
@@ -680,7 +686,7 @@ class StornoIn(BaseModel):
 
 @router.post(
     "/korrekturen/{korrektur_id}/storno",
-    response_model=dict,
+    response_model=StornoKorrekturOut,
     status_code=201,
     tags=["lager", "inventory", "korrekturen"],
     summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)",

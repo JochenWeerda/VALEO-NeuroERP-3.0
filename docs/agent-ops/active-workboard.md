@@ -11,17 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SPEC-P1-06-W8-INVENTORY-SILO Legacy-Routen typisieren Welle 8 - in Arbeit 2026-08-25
+## SPEC-P1-06-W8-INVENTORY-SILO Legacy-Routen typisieren Welle 8 - abgeschlossen 2026-08-25
 
-**Von:** Fortsetzung SPEC-P1-06 nach Welle 7. **Owner:** Claude Code. **Stand:** in Arbeit.
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 7. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-08-25.
 
-**Ziel:** Die beiden aus Welle 7 bewusst zurueckgestellten Dateien `inventory_operations` (5) und `agri_silo_material_flow` (4) typisieren. Spaltenlisten aus `information_schema.columns` einer auf head migrierten DB statt aus Migrationen rekonstruiert, verankert als Schema-Drift-Test.
+**Ziel:** Die beiden aus Welle 7 bewusst zurueckgestellten Dateien `inventory_operations` (5 Endpunkte) und `agri_silo_material_flow` (4) typisieren. Spaltenlisten aus `information_schema.columns` einer auf head migrierten DB statt aus Migrationen rekonstruiert, verankert als Drift-Test.
 
-**Dateibesitz:** Slice-YAML, dieser Abschnitt, zwei neue Schema-Module, die beiden Endpoint-Dateien, `inventory_correction_service.py`, `inventory_count_close_service.py`, zwei Testdateien. Nicht: `EXPORT/`, `SKILL.md`, fremde Migrationen.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `inventory_lot_bundle_schemas.py`, `silo_material_flow_schemas.py`, die beiden Endpoint-Dateien, `inventory_stock_balance.py`, `inventory_correction_service.py`, `inventory_count_close_service.py`, `tests/test_welle8_response_models.py`, `tests/test_welle8_schema_drift.py`. Nicht: `EXPORT/`, `SKILL.md`, fremde Migrationen, das Aggregat in `GET /lager/bestaende`.
 
-**Vorab-Befund:** `domain_inventory.inventory_stock_movements` hat 35 Spalten, aber kein `reference_type`/`reference_id` — kanonisch sind `source_document_type`/`source_document_id`. Storno- und Inventurdifferenz-Service schreiben trotzdem darauf und laufen produktiv in UndefinedColumn; zusaetzlich fehlen fuenf NOT-NULL-Spalten ohne Default. Wird in dieser Welle mitgefixt.
+**Abnahme:** `pytest tests/test_welle8_response_models.py` → 10 passed; `tests/test_welle8_schema_drift.py` → 7 passed gegen Dev-DB; sieben Bestandssuiten → 109 passed gesamt; `check_weak_response_models.py --threshold 246` und `architecture_drift_check.py` gruen.
 
-**Abnahme:** 9 Endpunkte mit echtem response_model; kein Feldverlust gegen die Live-DDL; Drift-Test gruen; schwache Typen 255 -> 246.
+**Ergebnis:** Schwache response_model-Typen 255 → 246, Dateien 86 → 84. Nach acht Wellen 447 → 246 (201 Endpunkte, 45 Prozent). Die Typisierung gegen die reale DDL hat vier Fehler aufgedeckt, die aus Migrationen rekonstruiert unsichtbar geblieben waeren: `inventory_stock_movements` hat kein `reference_type`/`reference_id` (kanonisch `source_document_type`/`source_document_id`), `inventory_count_lines` heisst `inventory_count_id`/`expected_qty`/`counted_qty`, und fuenf NOT-NULL-Spalten ohne Default wurden von beiden INSERTs nicht geliefert. `POST /lager/korrekturen/{id}/storno` und `POST /lager/inventur/{id}/differenz-buchen` liefen dadurch dauerhaft in ihren 503-Zweig; beide sind repariert und gegen die Dev-DB end-to-end inklusive Idempotenz verifiziert. W8 ist die erste Welle, deren Slice-YAML das Readiness-Gate mit allen sieben Vertrags-Ebenen erfuellt.
+
+**Offen/Nachbar-Slice:** `GET /lager/bestaende` zaehlt `ABGANG` ueber `ELSE quantity` positiv — Fehler im Lese-Modell, bewusst nicht in dieser Welle mitverbogen. Ebenso offen: die Vokabular-Doppelung `wareneingang/warenausgang` vs. `ZUGANG/ABGANG` in `movement_type`.
 
 ## SPEC-P1-05-S608 SQL-f-String Gate Nachzug - in Arbeit 2026-08-23
 

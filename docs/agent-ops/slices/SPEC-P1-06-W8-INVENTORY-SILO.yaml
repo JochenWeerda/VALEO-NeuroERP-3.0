@@ -2,21 +2,23 @@ slice_id: SPEC-P1-06-W8-INVENTORY-SILO
 id: SPEC-P1-06-W8-INVENTORY-SILO
 title: Legacy-Routen response_model typisieren — Welle 8 (Inventur/Lots + Silo/Materialfluss)
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-08-25"
 started_at: "2026-08-25"
+completed_at: "2026-08-25"
 goal: >-
   Achte Welle von SPEC-P1-06: die beiden aus Welle 7 bewusst zurueckgestellten
   Dateien inventory_operations und agri_silo_material_flow. Die Spaltenlisten
   werden nicht aus Migrationen rekonstruiert, sondern aus
   information_schema.columns einer auf head migrierten Datenbank gezogen und
-  als Test gegen die laufende DB verankert.
+  als Drift-Test gegen die laufende DB verankert.
 file_ownership:
   - docs/agent-ops/slices/SPEC-P1-06-W8-INVENTORY-SILO.yaml
   - app/api/v1/schemas/inventory_lot_bundle_schemas.py
   - app/api/v1/schemas/silo_material_flow_schemas.py
   - app/api/v1/endpoints/inventory_operations.py
   - app/api/v1/endpoints/agri_silo_material_flow.py
+  - app/services/inventory_stock_balance.py
   - app/services/inventory_correction_service.py
   - app/services/inventory_count_close_service.py
   - tests/test_welle8_response_models.py
@@ -24,33 +26,123 @@ file_ownership:
 ausgeschlossen:
   - EXPORT/ und SKILL.md (fremde untracked Arbeitsstaende)
   - alembic-Migrationen fremder Straenge
+  - >-
+    Das Aggregat in GET /lager/bestaende. Es zaehlt ABGANG ueber ELSE quantity
+    positiv. Das ist ein eigener Fehler im Lese-Modell und beruehrt die
+    Snapshotspalten nicht; er gehoert in einen eigenen Slice.
 acceptance:
   - 9 Endpunkte tragen ein echtes response_model
   - >-
     Kein Feldverlust: jedes Feld der 35-/21-/15-/15-/11-/8-Spalten-DDL der
     gelesenen Tabellen ist im Schema abgedeckt
-  - Schema-Drift-Test vergleicht Modellfelder gegen information_schema.columns
+  - Drift-Test vergleicht Modellfelder gegen information_schema.columns
+  - Storno und Inventurdifferenz laufen gegen die reale DDL statt in 503
   - Bestandstests von Inventur, Lots und Materialfluss bleiben gruen
   - Schwache response_model-Typen sinken von 255 auf 246
-befunde_vorab:
+tests:
+  - tests/test_welle8_response_models.py
+  - tests/test_welle8_schema_drift.py
+  - tests/test_inventory_operations.py
+  - tests/test_inventory_counts.py
+  - tests/test_inventory_stock_movements_canonical.py
+  - tests/test_agri_silo_material_flow.py
+  - tests/test_agri_silo_lot_link.py
+  - tests/test_spec_p1_08_lot_fefo_pick.py
+  - tests/test_silo_operations_api.py
+risks:
   - >-
-    `domain_inventory.inventory_stock_movements` hat in der auf head migrierten
-    DB 35 Spalten, aber weder `reference_type` noch `reference_id`. Kanonisch
-    sind `source_document_type` und `source_document_id`
-    (siehe create_lagerbewegung). inventory_correction_service.storno_korrektur
-    und inventory_count_close_service.differenz_buchen schreiben und filtern
-    trotzdem auf `reference_type`/`reference_id` — beide Endpunkte laufen
-    produktiv in UndefinedColumn und damit in ihren 503-Zweig.
+    Die Modelle sind gegen genau eine migrierte Datenbank abgeleitet. Zieht
+    eine spaetere Migration Spalten nach, ohne die Modelle zu aktualisieren,
+    faellt das nur auf, wenn test_welle8_schema_drift gegen eine Datenbank
+    laeuft. Ohne DB wird der Test uebersprungen — das ist der bewusste Preis
+    dafuer, dass er ueberhaupt existiert.
   - >-
-    Zusaetzlich sind `auto_created`, `ownership_type`, `storage_fee_relevant`,
-    `previous_stock` und `new_stock` NOT NULL ohne Default. Beide INSERTs
-    liefern sie nicht mit und wuerden auch nach reiner Spaltenumbenennung an
-    NotNullViolation scheitern.
+    Die Korrekturdienste schreiben nun previous_stock/new_stock. Diese
+    Snapshotwerte sind nur so gut wie der Saldo zum Buchungszeitpunkt; bei
+    Parallelbuchungen auf dieselbe Artikel-/Lagerkombination koennen sie
+    auseinanderlaufen. Sie werden von keinem Lesepfad ausgewertet, sind aber
+    NOT NULL und muessen deshalb plausibel belegt sein.
   - >-
-    Genau das ist der Grund, warum Welle 7 diese Dateien zurueckgestellt hat:
-    aus den Migrationen rekonstruiert waere der Fehler nicht sichtbar geworden.
-    Die Typisierung deckt ihn auf, also wird er in dieser Welle mitgefixt.
+    Die Bewegungstabelle traegt zwei Vokabulare (wareneingang/warenausgang vs.
+    ZUGANG/ABGANG). Solange beide koexistieren, muss jeder neue Schreib- oder
+    Lesepfad beide kennen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Chargen-, Inventurdifferenz-, Storno- und Materialfluss-Antworten sind
+    vollstaendig typisiert. Der Storno-Endpunkt hat zwei Antwortzweige (neu
+    und idempotent) mit unterschiedlicher Feldmenge; beide bleiben verlustfrei.
+  architektur_vertrag: >-
+    Antwortschemata liegen in app/api/v1/schemas, nicht in den Endpoint-Dateien.
+    Die Saldoberechnung fuer die NOT-NULL-Snapshotspalten liegt einmal in
+    app/services/inventory_stock_balance.py und wird von beiden Korrektur-
+    diensten geteilt, statt zweimal kopiert zu werden.
+  daten_vertrag: >-
+    Kanonische Spalten der Bewegungstabelle sind source_document_type und
+    source_document_id; reference_type/reference_id existieren nicht. Die
+    Zaehlzeilen heissen inventory_count_id, expected_qty und counted_qty.
+    Feldlisten stammen aus information_schema.columns, nicht aus Migrationen.
+  test_vertrag: >-
+    Zwei Ebenen: Feldverlust-Tests ohne DB (Unit) und ein Drift-Waechter gegen
+    information_schema (Integration, ohne DB uebersprungen). Beide Storno-
+    Zweige und der idempotente Zweit-Lauf der Inventurdifferenz sind abgedeckt.
+  security_vertrag: >-
+    Keine neuen Endpunkte, keine geaenderte Tenant-Pruefung. Die Storno-
+    Tenantpruefung und der Selbst-Storno-Riegel bleiben unveraendert; nur die
+    Spalte, auf der der Riegel prueft, ist korrigiert. Alle Werte bleiben
+    Bind-Parameter.
+  betriebs_vertrag: >-
+    Zwei bisher dauerhaft in 503 laufende Endpunkte werden funktionsfaehig:
+    POST /lager/korrekturen/{id}/storno und
+    POST /lager/inventur/{id}/differenz-buchen. Beide sind idempotent und gegen
+    die Dev-Datenbank end-to-end verifiziert.
+  dokumentations_vertrag: >-
+    Workboard-Abschnitt und diese YAML halten Befunde und Zurueckstellungen
+    fest. OpenAPI wird durch den bestehenden CI-Job nachgezogen.
+external_gates:
+  - >-
+    Echtdaten-UAT fuer Storno und Inventurdifferenz. Beide Pfade waren
+    produktiv nie erfolgreich, es kann also keine Bestandshistorie geben, die
+    sie erzeugt haetten. Ob in Bestandsdatenbanken Zaehlungen auf einen
+    Differenzbeleg warten, ist eine Betreiberfrage.
+  - >-
+    Entscheidung des Betreibers, ob die Vokabular-Doppelung in
+    movement_type bereinigt wird und ob GET /lager/bestaende dabei
+    mitgezogen wird.
+befunde:
+  - >-
+    domain_inventory.inventory_stock_movements hat in der auf head migrierten
+    DB 35 Spalten, aber weder reference_type noch reference_id. Kanonisch sind
+    source_document_type und source_document_id (so macht es
+    create_lagerbewegung seit jeher). inventory_correction_service.
+    storno_korrektur und inventory_count_close_service.differenz_buchen haben
+    trotzdem auf reference_type/reference_id geschrieben und gefiltert — beide
+    Endpunkte liefen dadurch in UndefinedColumn und damit in ihren 503-Zweig.
+  - >-
+    inventory_count_lines heisst die Fremdschluesselspalte
+    inventory_count_id, nicht count_id, und die Mengen heissen expected_qty
+    und counted_qty, nicht expected_quantity/counted_quantity.
+    differenz_buchen hat alle drei falsch adressiert.
+  - >-
+    auto_created, ownership_type, storage_fee_relevant, previous_stock und
+    new_stock sind NOT NULL ohne Default. Beide INSERTs haben sie nicht
+    geliefert und waeren auch nach reiner Spaltenumbenennung an
+    NotNullViolation gescheitert.
+  - >-
+    Genau darum hat Welle 7 diese Dateien zurueckgestellt: aus den Migrationen
+    rekonstruiert waere keiner dieser vier Fehler sichtbar geworden. Die
+    Typisierung gegen die reale DDL hat sie aufgedeckt.
+  - >-
+    GET /lager/bestaende aggregiert mit ELSE quantity und zaehlt ABGANG damit
+    positiv. Nicht in dieser Welle geaendert, weil es das Lese-Modell und
+    nicht die Typisierung betrifft — als eigener Slice vorzumerken.
 verification:
-  - "python -m pytest tests/test_welle8_response_models.py -q --no-cov"
-  - "python -m pytest tests/test_welle8_schema_drift.py -q --no-cov"
+  - "python -m pytest tests/test_welle8_response_models.py -q --no-cov  # 10 passed"
+  - "python -m pytest tests/test_welle8_schema_drift.py -q --no-cov  # 7 passed gegen Dev-DB"
+  - "python -m pytest tests/test_inventory_operations.py tests/test_inventory_counts.py tests/test_inventory_stock_movements_canonical.py tests/test_agri_silo_material_flow.py tests/test_agri_silo_lot_link.py tests/test_spec_p1_08_lot_fefo_pick.py tests/test_silo_operations_api.py -q --no-cov  # 109 passed gesamt"
   - "python scripts/check_weak_response_models.py --threshold 246"
+  - "python scripts/architecture_drift_check.py"
+result: >-
+  Schwache response_model-Typen repo-weit 255 -> 246, betroffene Dateien
+  86 -> 84. Nach acht Wellen: 447 -> 246 (201 Endpunkte, 45 Prozent).
+  Zusaetzlich sind zwei dauerhaft defekte Endpunkte repariert und gegen die
+  Dev-Datenbank end-to-end verifiziert.

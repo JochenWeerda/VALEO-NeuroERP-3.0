@@ -10,6 +10,12 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.silo_material_flow_schemas import (
+    MaterialFlowEdgeOut,
+    MaterialFlowNodeOut,
+    SiloCellOut,
+    SiloSystemOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
@@ -113,7 +119,7 @@ class ValidateRouteIn(BaseModel):
 # ── Siloanlagen ────────────────────────────────────────────────────────────
 
 
-@router.get("/silo-systems", response_model=list[dict[str, Any]], summary="GET /silo-systems")
+@router.get("/silo-systems", response_model=list[SiloSystemOut], summary="GET /silo-systems")
 def list_silo_systems(
     warehouse_id: Optional[str] = Query(None),
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -136,7 +142,7 @@ def create_silo_system(
 # ── Silozellen ──────────────────────────────────────────────────────────────
 
 
-@router.get("/silo-cells", response_model=list[dict[str, Any]], summary="GET /silo-cells")
+@router.get("/silo-cells", response_model=list[SiloCellOut], summary="GET /silo-cells")
 def list_silo_cells(
     warehouse_id: Optional[str] = Query(None),
     silo_system_id: Optional[str] = Query(None),
@@ -175,7 +181,7 @@ def patch_silo_cell(
 # ── Materialfluss ───────────────────────────────────────────────────────────
 
 
-@router.get("/material-flow/nodes", response_model=list[dict[str, Any]], summary="GET /material-flow/nodes")
+@router.get("/material-flow/nodes", response_model=list[MaterialFlowNodeOut], summary="GET /material-flow/nodes")
 def list_flow_nodes(
     warehouse_id: Optional[str] = Query(None),
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -209,7 +215,7 @@ def patch_flow_node(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.get("/material-flow/edges", response_model=list[dict[str, Any]], summary="GET /material-flow/edges")
+@router.get("/material-flow/edges", response_model=list[MaterialFlowEdgeOut], summary="GET /material-flow/edges")
 def list_flow_edges(
     warehouse_id: Optional[str] = Query(None),
     svc: AgriSiloMaterialFlowService = Depends(_svc),
