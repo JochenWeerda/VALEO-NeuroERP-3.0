@@ -5,7 +5,7 @@ type: reference
 audience: [entwickler, lead]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-08-24
+last_reviewed: 2026-08-31
 version: 3.0.0
 ---
 
@@ -18,25 +18,29 @@ version: 3.0.0
 
 | Metrik | Wert |
 |---|---|
-| Gesamter Drift | **3** |
-| Status | **GELB** |
-| Stand | 2026-08-24 05:36 UTC |
+| Gesamter Drift | **7** |
+| Status | **ROT** |
+| Stand | 2026-08-31 11:21 UTC |
 | Gate | `--fail-over 0` (DOC-DRIFT-GATE-002) |
 
 ## Dimensionen
 
 | Dimension | Anzahl | Status |
 |---|---|---|
-| Endpoints ohne Doku | 1 | GELB |
+| Endpoints ohne Doku | 2 | GELB |
 | Migrationen ohne Runbook | 0 | GRUEN |
-| Services ohne Doku | 0 | GRUEN |
+| Services ohne Doku | 3 | GELB |
 | Frontend-Seiten ohne Route/Nav | 2 | GELB |
 
 ## Offene Punkte
 
 | Typ | Datei/Stem |
 |---|---|
-| `endpoint_no_doc` | `app/api/v1/endpoints/legacy_interface_adapters.py` |
+| `endpoint_no_doc` | `app/api/v1/endpoints/feeding_feed_analyses.py` |
+| `endpoint_no_doc` | `app/api/v1/endpoints/feeding_measures.py` |
+| `service_no_doc` | `app/services/feeding_consulting_report_service.py` |
+| `service_no_doc` | `app/services/feeding_ration_template_service.py` |
+| `service_no_doc` | `app/services/rations_reference_data_service.py` |
 | `page_no_route_or_nav` | `packages/frontend-web/src/pages/auswertungen/DocumentControlScopePage.tsx` |
 | `page_no_route_or_nav` | `packages/frontend-web/src/pages/auswertungen/SanktionsScopePage.tsx` |
 
@@ -59,4 +63,4 @@ Bei neuem Drift sofort beheben:
 > Historische Drift-Reports werden als CI-Artefakte unter `.github/workflows/doc-drift-report.yml`
 > für 90 Tage aufbewahrt (retention-days: 90).
 
-*Stand: 2026-08-24 05:36 UTC · 3 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
+*Stand: 2026-08-31 11:21 UTC · 7 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
