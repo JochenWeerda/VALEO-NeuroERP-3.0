@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-DRIFT-RESUME-20260908 - reserviert 2026-09-08
+
+**Von:** User-Auftrag Weiterarbeit und Doku-Drift. **Owner:** Codex. **Stand:** reserviert (neu angelegter offener Slice uebernommen).
+
+**Ziel:** Dokumentierten Arbeitsstand uebergeben und aktuellen Doku-Drift mit Tests schliessen.
+
+**Dateibesitz:** Dieser Abschnitt, zugehoerige Slice-YAML und Uebergabe, Doku-Inventare/Dashboard, erforderliche Governance-/Status-/Open-Gaps-Nachzuege und Drift-Regressionstests.
+
+**Abnahme:** Drift-Gate 0, passende Tests und Doku-Governance gruen; bestehende unversionierte Dateien unveraendert.
+
+**Risiken:** Historische Testzahlen sind kein aktueller Vollsuite-Nachweis; externe Betriebsgates bleiben bestehen. Fremde reservierte Slices werden nicht uebernommen.
+
+
 ## DOM-INV-006-GOB-MOVEMENT-LEDGER Bestandshauptbuch nach GoB - abgeschlossen 2026-08-25
 
 **Von:** User-Auftrag, die aus DOM-INV-005 offen gelassenen Punkte nach Best Practice / ordentlicher Buchfuehrung zu schliessen. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-08-25.
