@@ -1,0 +1,50 @@
+slice_id: DOC-DRIFT-RESUME-20260908
+title: Wiederaufnahme und Doku-Drift beheben
+owner: Codex
+status: abgeschlossen
+completed_at: "2026-09-08"
+created_at: "2026-09-08"
+coordination: >-
+  Eigener Doku-Slice; keine Uebernahme reservierter Fremdarbeit.
+  Unversionierte Skills, EXPORT und SKILL.md bleiben unveraendert.
+goal: Dokumentierten Stand uebergeben und sieben Drift-Befunde beheben.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/handoff-2026-09-08.md
+  - docs/agent-ops/slices/DOC-DRIFT-RESUME-20260908.yaml
+  - docs/schnittstellen/endpoint-inventory.md
+  - docs/entwickler/service-inventory.md
+  - docs/admin/migration-inventory.md
+  - docs/entwickler/drift-dashboard.md
+  - docs/dokumentation/governance.md
+  - docs/architecture/process-kernel/STATUS.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - scripts/doc_drift_report.py
+  - tests/test_doc_drift_report.py
+acceptance:
+  - Drift-Gate meldet null Items und Inventar-Check ist gruen.
+  - Regressionstests erkennen weiterhin echte ungeroutete Seiten.
+  - Uebergabe trennt historische Evidenz und aktuelle Verifikation.
+tests:
+  - python -m pytest tests/test_doc_drift_report.py tests/test_generate_code_inventories.py -q --no-cov
+  - python scripts/doc_drift_report.py --fail-over 0
+  - python scripts/generate_code_inventories.py --check
+  - node scripts/docs-governance-check.cjs
+risks:
+  - Lokales Node 24 weicht vom CI-Pin Node 20 ab.
+  - Doku-Heuristik ersetzt keine fachliche oder produktive Freigabe.
+ai_harness:
+  fachlicher_vertrag: Sieben konkrete Drift-Befunde schliessen, bestehende Arbeit erhalten.
+  architektur_vertrag: Bestehende Doku-Generatoren und eng begrenzte indirekte Seitenliste nutzen.
+  daten_vertrag: Keine Schema- oder Geschaeftsdaten-Aenderung; nur Doku und Prueflogik.
+  test_vertrag: Positive und negative Seitenfaelle sowie Inventar- und Governance-Gates.
+  security_vertrag: Keine Secrets oder Exportinhalte in Uebergabe aufnehmen.
+  betriebs_vertrag: Lokale Pruefung, kein Deployment; Ruecknahme ueber gezielten Ergebniscommit.
+  dokumentations_vertrag: Workboard, Uebergabe, Inventare, Dashboard, Status und Open-Gaps synchronisieren.
+external_gates:
+  - not_applicable
+verification:
+  - 13 Drift- und Inventartests bestanden.
+  - Drift-Gate 0, drei Inventare und fuenf Handbuchartefakte aktuell.
+  - Geaenderte Dokumente bestehen Markdown und Governance; eigener Slice besteht Readiness.
+  - Globale Alt-Slice-Readiness-Befunde als offener Folge-Slice dokumentiert.

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOC-DRIFT-RESUME-20260908 - reserviert 2026-09-08
+## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08
 
-**Von:** User-Auftrag Weiterarbeit und Doku-Drift. **Owner:** Codex. **Stand:** reserviert (neu angelegter offener Slice uebernommen).
+**Von:** User-Auftrag Weiterarbeit und Doku-Drift. **Owner:** Codex. **Stand:** abgeschlossen.
 
 **Ziel:** Dokumentierten Arbeitsstand uebergeben und aktuellen Doku-Drift mit Tests schliessen.
 
@@ -22,6 +22,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Abnahme:** Drift-Gate 0, passende Tests und Doku-Governance gruen; bestehende unversionierte Dateien unveraendert.
 
 **Risiken:** Historische Testzahlen sind kein aktueller Vollsuite-Nachweis; externe Betriebsgates bleiben bestehen. Fremde reservierte Slices werden nicht uebernommen.
+
+**Ergebnis / Handoff:** [Uebergabe 2026-09-08](handoff-2026-09-08.md).
+Drift 7 auf 0, drei Inventare regeneriert, zwei indirekte Auswertungskomponenten
+mit drei Regressionstestfaellen abgesichert. 13 Tests bestanden; Inventar-,
+Handbuch-, Markdown-/Governance- und eigener Slice-Check gruen. Elf vorhandene
+unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
+
+## DOC-SLICE-HARNESS-20260908 - offen
+
+**Von:** Zusatzbefund der Wiederaufnahme. **Owner:** unbesetzt. **Stand:** offen.
+
+**Ziel:** Bestehende Pflichtfeld-/Workboard-Luecken des globalen
+`ai-slice-readiness-check.cjs` anhand der dokumentierten Ursprungsarbeit klaeren.
+
+**Dateibesitz:** Nach Claim konkret betroffene Alt-Slice-YAMLs und Workboard-Verweise.
+**Abnahme:** Globale Readiness gruen ohne erfundene Vertraege oder Testnachweise.
+**Risiken:** Historische Slices und bestehende fremde Zustaendigkeiten beachten.
 
 
 ## DOM-INV-006-GOB-MOVEMENT-LEDGER Bestandshauptbuch nach GoB - abgeschlossen 2026-08-25

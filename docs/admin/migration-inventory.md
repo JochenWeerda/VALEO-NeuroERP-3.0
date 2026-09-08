@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-13
+last_reviewed: 2026-09-08
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -105,6 +105,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
+| `billing_batch_20260821` | Billing batch orchestration and audit. |
 | `bp_merge_tab23_json_20260330` | Merge heads + domain_crm.business_partners.tab_23 JSONB (Tab-23 Stammdaten) |
 | `business_partner_contacts_instructions_20260214` | Add business partner contacts and instructions tables. |
 | `business_partner_discount_price_tables_20260214` | Add normalized discount and price agreement tables for business partners. |
@@ -147,6 +148,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `docflow_pos_admin_dsfinvk_20260215` | docflow pos admin and dsfinvk export tables |
 | `docflow_pos_tse_compliance_20260215` | docflow pos tse compliance table |
 | `docflow_print_event_20260301` | Docflow: Druck/Export als Ereignis (printed_at, print_count) — GoBD Schritt 3 |
+| `docflow_returns_20260821` | Document return worklist and immutable status audit. |
+| `document_control_20260821` | Document control exception worklist and audit. |
 | `domain_schemas_baseline_20260409` | domain_* PostgreSQL-Schemas: idempotent anlegen (Baseline fuer ORM/create_all) |
 | `driver_time_events_20260516` | add driver_time_events table |
 | `e7238c2e17a1_merge_inventory_operations_and_` | merge inventory_operations and futtermittel heads |
@@ -183,12 +186,41 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `fachliche_vertiefung_wave9_20260521` | Fachliche Vertiefung Wave 9: Betriebsstätten/Filialen, Individuelle Artikelnummern, Versandprofile |
 | `faf00a6bfc11_006_missing_tenant_indexes` | 006 missing tenant indexes |
 | `fc82677c98b4_add_documents_tables` | add_documents_tables |
+| `feed_actual_feeding_20260716` | Component actual feeding records (FEED-ACT-029). |
+| `feed_actual_measures_20260716` | Deviation policies, findings measures and IOFC projection (FEED-ACT-030). |
+| `feed_advice_connectors_20260714` | Herd-data connector configuration, observations and delta-sync journal. |
+| `feed_advice_controlling_20260714` | Daily feeding controlling observations. |
+| `feed_advice_lifecycle_20260714` | Persistent feeding groups and immutable ration versions. |
+| `feed_assist_20260717` | Audited deterministic assist proposals (FEED-AI-046). |
+| `feed_benchmark_20260717` | Benchmark report type (FEED-PERF-044). |
 | `feed_chain_article_map_20260623` | FEED-CHAIN-004: Einzelfuttermittel → inventory.articles Mapping-Spalte. |
 | `feed_chain_quality_lot_20260613` | FEED-CHAIN-003 — quality_lot_profiles + quality_release_decisions (domain_ops). |
 | `feed_chain_verbrauch_20260612` | Futtermittel-Produktionsauftrag: Verbrauchs-Snapshot + Charge-Referenz. |
+| `feed_consulting_20260716` | Consulting cases and observations (FEED-CONS-031). |
+| `feed_consulting_measures_20260716` | Versioned measure lifecycle, notifications and report drafts (FEED-CONS-032). |
+| `feed_core_business_20260715` | Feeding businesses, farm sites, herds and business grants (FEED-CORE-015). |
+| `feed_core_feed_analyses_20260715` | FEED-CORE-019: versioned feed analyses and provenance. |
+| `feed_core_feed_catalog_20260715` | Canonical feed catalog, products, values and revisions (FEED-CORE-018). |
+| `feed_core_groups_20260715` | Versioned feeding-group profiles and parameter history (FEED-CORE-016). |
+| `feed_core_reference_data_20260715` | Versioned feeding nutrient and unit reference data (FEED-CORE-017). |
+| `feed_core_requirements_20260715` | Evaluation systems, requirement profiles and optimization runs (FEED-CORE-020). |
+| `feed_editor_evaluations_20260715` | Persisted ration version evaluations (FEED-EDITOR-022). |
+| `feed_editor_templates_20260716` | Immutable ration templates (FEED-EDITOR-025). |
+| `feed_herd_snapshots_20260717` | Animal group snapshots + parameter confirmation (FEED-HERD-043). |
+| `feed_import_jobs_20260716` | Feeding import jobs for the integration monitor (FEED-INT-034). |
+| `feed_mixer_feedback_20260716` | Mixer feedback on feeding plan versions (FEED-INT-035). |
+| `feed_perf_mlp_20260716` | MLP/Milchguete metrics on the daily feeding series (FEED-PERF-033). |
+| `feed_plan_versions_20260716` | Immutable feeding plan versions (FEED-PLAN-026). |
 | `feed_produktion_lifecycle_20260623` | DOM-FEED-PROD-004 — Mischfutter Produktionsauftrag, Rezeptur, QS-Log |
 | `feed_qs_wf_cockpit_repair_20260626` | FEED-QS-001 + WF-COCKPIT-002: Futtermittel-QS-Tabellen + domain_workflow sicherstellen. |
+| `feed_rbac_audit_20260717` | Unified master-data audit + tenant four-eyes policy (FEED-RBAC-048). |
+| `feed_recipes_20260717` | Customer recipe cycle: recipes, versions, orders, deliveries (FEED-RECIPE-052). |
+| `feed_reports_20260716` | Revision-safe feeding reports (FEED-REP-039). |
+| `feed_reports_types_20260716` | Report types consulting/target_actual/trend (FEED-REP-040). |
+| `feed_supply_handoffs_20260716` | Controlled feeding supply procurement handoffs (FEED-SUP-028). |
 | `feldbuch_acker_waves_20260713` | Ackerschlagkartei wave fields (AS-W1/W2/W4/W5/W6). |
+| `feldbuch_inkrement1_20260716` | Ackerschlagkartei Inkrement-1: Wirtschaftsjahr am Schlag. |
+| `feldbuch_open_gaps_20260716` | Ackerschlagkartei open-gaps: Register, AUM, Lager, Offline client_ref. |
 | `feldbuch_schlag_massnahme_20260226` | Add feldbuch_schlaege and feldbuch_massnahmen to domain_agrar |
 | `ff7b1a7899b4_add_customer_inquiries_table` | add_customer_inquiries_table |
 | `fibu_connector_asset_ledger_rename_20260301` | FIBU Connector: QUADRIGA → ASSET_LEDGER (geschützter Name entfernt) |
@@ -200,6 +232,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
 | `flow_spine_instances_20260326` | Flow Spine Instance persistence table |
 | `flow_spine_lifecycle_20260417` | Extend flow spine instances with lifecycle state and timeline events |
+| `foreign_goods_worklist_20260821` | Audit trail for the foreign-goods operator worklist. |
 | `fuhrpark_tables_speditionen_20260225` | Add Fuhrpark sub-tables and Speditionen Frachttarife |
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
@@ -216,6 +249,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `hrm_zeiterfassung_abwesenheit_20260623` | DOM-HRM-004 — HRM Zeiterfassung, Abwesenheit, Arbeitszeitkonto |
 | `inv_lot_depth_spec_p1_08` | SPEC-P1-08: Chargen-Tiefenmodell — Herkunft, Sperrgrund, QS-Status, received_at. |
 | `inv_lot_trace_20260623` | DOM-INV-004.2/.4: inventory_lots + inventory_lot_movements + storno_ref column |
+| `inv_movement_type_register_20260825` | Belegartenregister fuer das Bestandshauptbuch (DOM-INV-006). |
+| `inventory_auxiliary_20260821` | Inventory auxiliary batch governance. |
 | `inventory_charge_lineage_20260215` | inventory charge lineage links |
 | `inventory_operations_20260409` | Add source_document fields to stock_movements |
 | `inventory_stock_movements_consignment_ownership_20260215` | add ownership/consignment fields to inventory_stock_movements |
@@ -237,6 +272,11 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `kunden_lookup_view_20260602` | kunden_lookup View für schnelle Kundenauswahl (Phase 2D, Decomposition). |
 | `kunden_milchvieh_profil_20260602` | Milchvieh-Profil je Kunde (Herde/Leistung/Zellzahl) — Agrar-Anreicherung. |
 | `kunden_produktgruppen_bezug_20260603` | Ist-Bezug je Betrieb × Produktgruppe (rollierend 12 M) — Durchdringungs-CRM. |
+| `l3_deep_mask_parity_20260822` | Tenant-safe L3 deep-mask parity foundations. |
+| `l3_legacy_interfaces_20260821` | Governed L3 Standard and Unimet adapter contracts. |
+| `l3_recent_documents_20260821` | Personal authorized recent-document projection. |
+| `l3_report_catalog_20260821` | Governed L3 report catalog fact projection. |
+| `l3_runtime_hardening_20260822` | L3 runtime tenant and uniqueness hardening. |
 | `lkw_annahme_queue_article_reference_20260328` | LKW-Annahme-Queue article reference |
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |
 | `log_carrier_invoices_20260618` | LOG-FRACHT-001: Spediteur-Rechnungen (carrier_invoices) |
@@ -245,6 +285,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_freight_tariff_storno_20260613` | Fracht-Tarif: Storno-Spalten (soft, auditierbar). |
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
+| `mail_workspace_20260821` | Role based ERP mail workspace. |
+| `mde_inbox_hardening_20260821` | Harden the existing mobile sync queue for the MDE operator inbox. |
 | `meldewesen_lifecycle_20260623` | DOM-MEL-004 — Meldewesen Lifecycle Tabellen (Intrastat/ELSTER/ATLAS) |
 | `merge_agent_job_runner_20260626` | Merge Alembic heads: agent_proposals + job_runner_tables_repair. |
 | `merge_crm_capture_pos_fiscal_20260609` | Merge CRM capture inbox and POS fiscal provider branches. |
@@ -289,7 +331,9 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `proc_rfq_20260611` | RFQ tables for procurement quotation process. |
 | `proc_three_way_invoice_20260611` | Ensure finance_erechnungen for procurement three-way match. |
 | `prod_fibu_journal_ref_20260618` | PROD-FIBU-001: fibu_journal_ref auf ProduktionsAuftrag |
+| `production_control_20260821` | Production control worklist and audit. |
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
+| `query_center_20260821` | Safe query-center definitions and audit. |
 | `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_integrations_20260712` | Rations integration import journal. |
 | `rations_zugang_dsgvo_20260420` | rations_zugang DSGVO access control table |
@@ -312,7 +356,9 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
+| `tank_adapter_20260821` | Tank adapter inbox and delivery-note handover. |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
+| `team_calendar_20260821` | Team calendar ownership and privacy model. |
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |

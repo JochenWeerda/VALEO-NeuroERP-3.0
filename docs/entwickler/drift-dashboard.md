@@ -5,7 +5,7 @@ type: reference
 audience: [entwickler, lead]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-08-24
+last_reviewed: 2026-09-08
 version: 3.0.0
 ---
 
@@ -18,27 +18,23 @@ version: 3.0.0
 
 | Metrik | Wert |
 |---|---|
-| Gesamter Drift | **3** |
-| Status | **GELB** |
-| Stand | 2026-08-24 05:36 UTC |
+| Gesamter Drift | **0** |
+| Status | **GRUEN** |
+| Stand | 2026-09-08 14:33 UTC |
 | Gate | `--fail-over 0` (DOC-DRIFT-GATE-002) |
 
 ## Dimensionen
 
 | Dimension | Anzahl | Status |
 |---|---|---|
-| Endpoints ohne Doku | 1 | GELB |
+| Endpoints ohne Doku | 0 | GRUEN |
 | Migrationen ohne Runbook | 0 | GRUEN |
 | Services ohne Doku | 0 | GRUEN |
-| Frontend-Seiten ohne Route/Nav | 2 | GELB |
+| Frontend-Seiten ohne Route/Nav | 0 | GRUEN |
 
 ## Offene Punkte
 
-| Typ | Datei/Stem |
-|---|---|
-| `endpoint_no_doc` | `app/api/v1/endpoints/legacy_interface_adapters.py` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/auswertungen/DocumentControlScopePage.tsx` |
-| `page_no_route_or_nav` | `packages/frontend-web/src/pages/auswertungen/SanktionsScopePage.tsx` |
+Kein Drift erkannt — Gate ist grün.
 
 ## Gate-Verhalten
 
@@ -59,4 +55,4 @@ Bei neuem Drift sofort beheben:
 > Historische Drift-Reports werden als CI-Artefakte unter `.github/workflows/doc-drift-report.yml`
 > für 90 Tage aufbewahrt (retention-days: 90).
 
-*Stand: 2026-08-24 05:36 UTC · 3 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
+*Stand: 2026-09-08 14:33 UTC · 0 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*

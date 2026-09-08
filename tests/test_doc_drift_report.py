@@ -66,6 +66,44 @@ def test_page_to_module() -> None:
 
 
 @pytest.mark.unit
+def test_shared_scope_components_do_not_hide_unrouted_pages(tmp_path, monkeypatch):
+    import scripts.doc_drift_report as mod
+
+    pages = tmp_path / "pages"
+    scope = pages / "auswertungen"
+    scope.mkdir(parents=True)
+    for name in (
+        "DocumentControlScopePage", "SanktionsScopePage",
+        "UnknownScopePage", "auftrags-kontrolle",
+    ):
+        (scope / f"{name}.tsx").write_text("export {}", encoding="utf-8")
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(mod, "PAGES_DIR", pages)
+    issues = mod.check_pages_without_route_or_nav(
+        "", {"@/pages/auswertungen/auftrags-kontrolle"}, set(),
+    )
+    assert [issue["module"] for issue in issues] == [
+        "@/pages/auswertungen/UnknownScopePage",
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("component,wrappers", [
+    ("DocumentControlScopePage", ["auftrags-kontrolle", "lieferschein-kontrolle"]),
+    ("SanktionsScopePage", ["sanktionspruefung-kunden", "sanktionspruefung-personal"]),
+])
+def test_scope_exceptions_are_imported_by_routed_wrappers(component, wrappers):
+    import scripts.doc_drift_report as mod
+
+    modules, _ = mod._route_inventory()
+    for wrapper in wrappers:
+        assert f"@/pages/auswertungen/{wrapper}" in modules
+        source = (PAGES / "auswertungen" / f"{wrapper}.tsx").read_text(encoding="utf-8")
+        assert f"from './{component}'" in source
+        assert f"<{component} " in source
+
+
+@pytest.mark.unit
 def test_fail_over_exit_code(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import sys
 

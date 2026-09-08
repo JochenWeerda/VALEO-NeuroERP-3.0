@@ -59,6 +59,12 @@ A1 CI-Gruen, SPEC-P0-06 Governance, A3 Runtime-Sweep und A5 Modulaktivierung.
 
 ## A10-DOKU-EVIDENZ-001 — Doku-Drift & Evidenzkette (Prompt A10, Teilstand 2026-07-06)
 
+Nachverifikation 2026-09-08: `doc_drift_report.py --fail-over 0` erneut gruen
+mit **0 Items** (zuvor 7). Alle drei Code-Inventare und das Drift-Dashboard
+erneuert; indirekt eingebundene Auswertungskomponenten durch Tests abgesichert.
+Die historische Release-/CI-Evidenz unten wurde dabei nicht neu erhoben.
+Details: [Uebergabe](../agent-ops/handoff-2026-09-08.md).
+
 Status: **teilweise**. Nach A8 umsetzbar ohne A9-Abschluss:
 
 | Check | Stand 2026-07-06 |

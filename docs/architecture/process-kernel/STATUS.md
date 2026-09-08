@@ -33,6 +33,17 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 `abgeschlossen` - 2026-03-26 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
 
+## Verifikation der Wiederaufnahme 2026-09-08
+
+- Ausgangsstand `893408a2d` auf `main`; neueste dokumentierte Querschnittslieferung:
+  DOM-INV-006 vom 2026-08-25 (Bestandshauptbuch, siehe Workboard und Slice-YAML).
+- Doku-Code-Drift erneut lokal gemessen: **0 Items**, zuvor 7; drei Code-Inventare
+  regeneriert und mit `--check` bestaetigt. Dashboard aktualisiert.
+- Historische Gesamtsuite-, Coverage- und Release-Evidence-Zahlen unten bleiben
+  datierte Nachweise; diese Doku-Pruefung ersetzt keinen aktuellen Vollsuite-Lauf.
+- Arbeitsstand, Testumgebung und offene Betriebsgates:
+  [Uebergabe 2026-09-08](../../agent-ops/handoff-2026-09-08.md).
+
 ## Gesamtstatus
 
 - Stand: `2026-07-06` (SPEC-P1-04/08 Mask-ActionRuntime + FEFO; A10 Evidenzkette Teilstand)

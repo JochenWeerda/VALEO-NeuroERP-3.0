@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-13
+last_reviewed: 2026-09-08
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -44,6 +44,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `atlas_customs_service` | ATLAS Zollausfuhr Service — Implementierung nach Zollkodex der Union (UZK). |
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
+| `billing_batch_service` | Billing-batch orchestration over canonical invoice and self-billing sources. |
 | `business_partner_service` | Service layer for BusinessPartner aggregate management. |
 | `calendar_projection_service` | UIX-063 planning calendar projections. |
 | `case_management` | Case Management Service — NC-08 |
@@ -86,7 +87,10 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
+| `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
+| `document_control_projection` | Project document-control exceptions from canonical source documents. |
+| `document_control_service` | Central document-control exception worklist (Beleg-Kontrolle). |
 | `einkauf_compat_service` | Service layer for compat einkauf domain routes. |
 | `einvoice_generator` | E-Rechnung XRechnung/ZUGFeRD Generator (EN 16931). |
 | `eric_submission_service` | ELSTER ERiC Submission Service für eBilanz-Übertragung. |
@@ -98,6 +102,25 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `feed_production_chain_service` | Produktion→Charge-Durchstich Mischfutter (FEED-CHAIN-001) — durchgängig. |
 | `feed_produktion_lifecycle_service` | DOM-FEED-PROD-004.2 — Mischfutter Produktions-Lifecycle (Rezeptur→Charge→Freigabe). |
 | `feed_rezeptur_service` | DOM-FEED-PROD-004.3 — Rezeptur-Verwaltung (Freigabe + Versionierung). |
+| `feeding_actual_measure_service` | Versioned deviation policies, findings and human-created measures. |
+| `feeding_actual_service` | Append-only component actual-feeding command and variance projection. |
+| `feeding_assist_service` | Deterministische Assistenz (FEED-AI-046). |
+| `feeding_business_service` | Feeding businesses, farm sites, herds and business grants (FEED-CORE-015). |
+| `feeding_consulting_report_service` | Reproducible report-draft projection for consulting cases. |
+| `feeding_consulting_service` | Beratungsfaelle und Beobachtungen (FEED-CONS-031). |
+| `feeding_feed_analysis_service` | Application service for tenant-safe, versioned feed analyses. |
+| `feeding_feed_catalog_service` | Application service for the canonical, versioned feeding feed catalog. |
+| `feeding_herd_snapshot_service` | Gruppenhistorie aus Herd-Deltas (FEED-HERD-043). |
+| `feeding_import_monitor_service` | Integrationsmonitor: Importvorschau, Quarantaene und kontrollierte Uebernahme |
+| `feeding_measure_lifecycle_service` | Transactional lifecycle, overdue notification and history for feeding measures. |
+| `feeding_mixer_service` | Mischtechnik bidirektional (FEED-INT-035). |
+| `feeding_plan_service` | Transactional feeding-plan publication service. |
+| `feeding_ration_editor_service` | Rationseditor: Draft-Bewertung gegen Katalog und Bedarfsprofil (FEED-EDITOR-021). |
+| `feeding_ration_template_service` | Commands for immutable ration templates and read model for the feeding business file. |
+| `feeding_recipe_service` | Bidirektionaler Kundenrezeptur-Kreislauf (FEED-RECIPE-052). |
+| `feeding_reports_service` | Revisionssichere Berichte (FEED-REP-039). |
+| `feeding_requirements_service` | Bewertungssysteme, Bedarfsprofile und Solverlauf-Dokumentation (FEED-CORE-020). |
+| `feeding_supply_service` | Plan-bound supply projection and controlled procurement handoff. |
 | `finance_clearing_service` | Zahlungseingang / OP-Auszifferung (DOM-FIN-004.3). |
 | `finance_closing_service` | FIN-ABSCHLUSS-STUBS-001 — GoBD-taugliche Periodenabschluss-Fachlogik. |
 | `finance_datev_service` | DATEV-Export (DOM-FIN-004.5). |
@@ -110,6 +133,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `finance_sepa_service` | DOM-FINANCE-004.2 — SEPA-Zahlungsträger Service (Mandate + Batch-Export). |
 | `finance_transaction_service` | Service layer for finance journal entry and posting operations. |
 | `fints_connector` | FinTS/HBCI Bank-API Connector (§ 25a KWG, PSD2). |
+| `foreign_goods_worklist_service` | Governed operator projection over canonical foreign-goods storage records. |
 | `gap_analytics` | GAP-Analytik: Trend-/Wachstumsabschätzung aus mehreren Jahrgängen. |
 | `gap_pipeline` | GAP (Gemeinsame Agrarpolitik) ETL-Engine. |
 | `gap_pipeline_service` | Service layer for the GAP (Gemeinsame Agrarpolitik) ETL pipeline endpoints. |
@@ -121,10 +145,14 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `hrm_zeiterfassung_service` | DOM-HRM-004.2 — HRM Zeiterfassung Lifecycle (Einstempeln/Ausstempeln/Korrektur). |
 | `integration_bootstrap` | — |
 | `interaction_state_manager` | Interaction State Manager — NC-002 |
+| `inventory_auxiliary_service` | Controlled inventory count exports, checks, valuation and opening balances. |
+| `inventory_balance_reconciliation` | Abstimmbericht fuer das Bestandshauptbuch (DOM-INV-006). |
 | `inventory_compat_service` | Service layer for compat inventory (lager) and futter domain routes. |
 | `inventory_correction_service` | DOM-INV-004.4 — Bestandskorrektur-Storno-Service. |
 | `inventory_count_close_service` | DOM-INV-004.3 — Inventur-Differenzbeleg-Service. |
 | `inventory_lot_trace_service` | DOM-INV-004.2 — Chargen-/MHD-Traceability Service (FEFO). |
+| `inventory_movement_direction` | DOM-INV-005: kanonische Bewegungsrichtung fuer inventory_stock_movements. |
+| `inventory_stock_balance` | Bestandssaldo aus inventory_stock_movements. |
 | `ist_aggregation_service` | Echte Ist-Belegaggregation für das Bedarfsdeckungs-Cockpit. |
 | `kaeufer_klassifikator` | Austauschbare Käufergruppen-Klassifikatoren (regelbasiert / KI). |
 | `kaeufer_signal_service` | Aggregiert echte Verhaltenssignale je Betrieb (und je Produktgruppe) aus den |
@@ -140,6 +168,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kunden_backfill` | Phase 2D Schritt 3: Backfill public.kunden -> Domänensatelliten. |
 | `kunden_geocode_service` | Befüllt public.kunden_geo mit präzisen Koordinaten je Kunde. |
 | `kunden_merge` | Kunden/Business-Partner-Merge — Dry-Run / Reconciliation (Phase 2A). |
+| `l3_report_catalog_service` | Fixed L3 report catalog with shared sums, export and document drilldown. |
+| `legacy_interface_adapter_service` | Versioned, non-executing adapter framework for L3 Standard and Unimet. |
 | `lieferschein_pdf` | Lieferschein PDF Generator |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
@@ -147,6 +177,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `logistics_epod_service` | DOM-LOG-004.3 — ePOD-Lifecycle-Service (Ablieferungsbeleg → Settlement). |
 | `lohn_service` | Payroll calculation and closeout contracts. |
 | `mail_ingest_service` | Server-seitiger IMAP-Mail-Ingest (per Tenant konfiguriert). |
+| `mail_workspace_service` | Role-scoped ERP mail workspace on top of the canonical IMAP ingest. |
 | `mask_action_runtime_service` | SPEC-P1-04 — gemeinsame ActionRuntime für Mask-CommandEndpoints. |
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
@@ -189,9 +220,17 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `process_map_service` | P2.1 — Workflow-Designer / Prozesskarte fuer VALEO ERP-Prozessketten. |
 | `procurement_match_service` | Beschaffungs-Abgleich / 3-Wege-Match (DOM-PROC-004). |
 | `procurement_service` | Service layer for Einkauf/Procurement domain. |
+| `production_control_service` | Tenant-scoped production control projection over canonical ERP sources. |
 | `prompt_pack_registry` | Prompt Pack Registry -- NC-G5 |
 | `purchase_order_service` | Service layer for purchase-order compat routes. |
 | `qs_charge_service` | QS-CHARGE-001: Qualitätsprotokoll → Preisabschlag-Kalkulation. |
+| `query_center_service` | Safe query center over explicitly approved reporting read models. |
+| `rations_controlling_service` | Idempotent daily feeding-control observations and variance read model. |
+| `rations_herd_data_sync_service` | Contract-gated daily delta sync for external dairy herd-data APIs. |
+| `rations_lifecycle_service` | Transactional persistence service for feeding groups and ration versions. |
+| `rations_readiness_service` | Read model over existing feed inventory, lab and supplier-price sources. |
+| `rations_reference_data_service` | Tenant-aware read service for feeding nutrient and unit reference data. |
+| `recent_documents_service` | Tenant- and user-scoped recent document projection. |
 | `report_print_service` | Report and print contracts for traceability, weighing tickets and labels. |
 | `rfq_service` | RFQ-Service (Anfrage → Angebot → Zuschlag → Bestellung). |
 | `sales_ab_lifecycle_service` | DOM-SALES-004.2 — Auftragsbestätigung Lifecycle Service (Statusmaschine). |
@@ -215,6 +254,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `supply_chain_lot_service` | Lager-Lot-Folgeaktionen mit Abweichungsgrund (DOM-SUPPLY-004.3). |
 | `supply_chain_trace_service` | Supply-Chain-Traceability (DOM-SUPPLY-004) — durchgängige, prüfbare Kette. |
 | `sync_scheduler` | Advanced Sync Scheduler Service |
+| `tank_adapter_service` | Idempotent tank-system intake, validation and delivery-note handover. |
 | `tse_fiskaly_service` | Compatibility facade for the canonical fiscalization provider layer. |
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
