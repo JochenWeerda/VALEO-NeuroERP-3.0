@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## L3-DESKTOP-REBUILD-20260908 - reserviert
+
+**Von:** User-Auftrag alle aktuellen Fehler beheben, Docker-Rebuild und Funktionstest. **Owner:** Codex. **Stand:** reserviert 2026-09-08.
+
+**Ziel:** L3-/FiBu-Desktop-Gewohnheitsparitaet zentral pruefen und belegte Fehler beheben; Backend und Frontend neu bauen und testen.
+
+**Dateibesitz:** Meridian-Builder/Runtime, zugehoerige Tests, Docker-Build-Konfiguration soweit erforderlich, dieser Abschnitt, Slice-YAML und Abnahmebericht. Lokale L3-Bilder und unversionierte Fremddateien bleiben erhalten.
+
+**Abnahme:** Builder-/Backend-Tests, Typpruefung, Visual-Audit bei drei Desktopgroessen, Docker-Rebuild und Live-Funktionstest gruen.
+
+**Risiken:** Externe Fachfreigaben nicht simulierbar; nur Testdaten bei Schreibtests.
+
+
 ## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08
 
 **Von:** User-Auftrag Weiterarbeit und Doku-Drift. **Owner:** Codex. **Stand:** abgeschlossen.
@@ -29,9 +42,9 @@ mit drei Regressionstestfaellen abgesichert. 13 Tests bestanden; Inventar-,
 Handbuch-, Markdown-/Governance- und eigener Slice-Check gruen. Elf vorhandene
 unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
-## DOC-SLICE-HARNESS-20260908 - offen
+## DOC-SLICE-HARNESS-20260908 - reserviert
 
-**Von:** Zusatzbefund der Wiederaufnahme. **Owner:** unbesetzt. **Stand:** offen.
+**Von:** Zusatzbefund der Wiederaufnahme. **Owner:** Codex. **Stand:** reserviert 2026-09-08.
 
 **Ziel:** Bestehende Pflichtfeld-/Workboard-Luecken des globalen
 `ai-slice-readiness-check.cjs` anhand der dokumentierten Ursprungsarbeit klaeren.
