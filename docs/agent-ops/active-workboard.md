@@ -110,6 +110,18 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
+## NPM-ADVISORIES-20260909 npm-Rueckstand im Dependency Scan - reserviert
+
+**Von:** Folgebefund aus QG-GREEN-20260909, hinter `pip-audit` verdeckt. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+
+**Ziel:** `pnpm audit --prod --audit-level high` von 83 Advisories (50 high, 2 critical) auf null bringen — ueber die bestehende `pnpm.overrides`-Mechanik in `package.json`, nicht durch Absenken der Gate-Stufe.
+
+**Dateibesitz:** `package.json` (nur der `pnpm.overrides`-Block), `pnpm-lock.yaml`, bei Bedarf betroffene `packages/*/package.json`, Slice-YAML und dieser Abschnitt. Nicht: fremder unversionierter WIP, `config/architecture-index.yaml` (Codex), Gate-Stufen.
+
+**Abnahme:** `pnpm audit --prod --audit-level high` ohne Befund; `pnpm install --frozen-lockfile` reproduzierbar; Frontend-Build, Typecheck, Lint und Vitest gruen.
+
+**Risiken:** Overrides greifen tief in transitive Baeume; ein zu hoher Sprung kann Peer-Konflikte oder Laufzeitfehler ausloesen, die kein Gate zeigt. Jede Anhebung braucht daher Build- und Testnachweis, nicht nur einen sauberen Audit.
+
 ## OPENAPI-SUMMARY-20260909 Routen-Summaries nachziehen - abgeschlossen 2026-09-09
 
 **Von:** Folgebefund aus QG-GREEN-20260909, hinter dem Pagination-Blocker verdeckt. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
