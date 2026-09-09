@@ -130700,6 +130700,29 @@
             ],
             "title": "Bin Id"
           },
+          "booked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booked At"
+          },
+          "booked_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booked By"
+          },
           "booking_user": {
             "anyOf": [
               {
@@ -130853,6 +130876,18 @@
             "title": "Quantity",
             "type": "string"
           },
+          "reference_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Historische Beleg-Id; neue Buchungen nutzen source_document_id",
+            "title": "Reference Id"
+          },
           "reference_number": {
             "anyOf": [
               {
@@ -130863,6 +130898,18 @@
               }
             ],
             "title": "Reference Number"
+          },
+          "reference_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Historischer Belegtyp; neue Buchungen nutzen source_document_type",
+            "title": "Reference Type"
           },
           "source_document_id": {
             "anyOf": [
