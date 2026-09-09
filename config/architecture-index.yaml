@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-09-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-09T13:38:18Z'
+generated_at: '2026-09-09T20:22:38Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1412,6 +1412,7 @@ domains:
     - inventory_compat_service
     - inventory_correction_service
     - inventory_count_close_service
+    - inventory_document_reference
     - inventory_lot_trace_service
     - inventory_movement_direction
     - inventory_stock_balance
@@ -1982,8 +1983,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 927
   frontend_routes_mapped: 927
-  backend_services_total: 250
-  backend_services_mapped: 250
+  backend_services_total: 251
+  backend_services_mapped: 251
   backend_endpoints_total: 441
   backend_endpoints_mapped: 441
 unmapped:
