@@ -39,7 +39,10 @@ def test_business_file_is_a_native_meridian_object_page() -> None:
         "type": "native", "sourceId": "agrar/feeding-business", "temporary": False,
     }
     assert definition["layout"]["floorplan"] == "objectPage"
-    assert definition["layout"]["contextRail"] == "findings"
+    # Rail-Aliasse sind zentral normalisiert (findings -> audit), siehe
+    # L3-VISUAL-PARITY-AUDIT-031: spezialisierte Inhalte bleiben im
+    # Maskenkoerper, die Rail deklariert nur den renderbaren Vertrag.
+    assert definition["layout"]["contextRail"] == "audit"
     assert [tab["key"] for tab in definition["tabs"]] == [
         "overview", "groups", "rations", "findings", "templates",
     ]

@@ -1,6 +1,6 @@
 """FEED-CONS-032 red API/DB contract for versioned measures."""
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import FastAPI
@@ -37,7 +37,7 @@ def _measure(*, due_date: date) -> dict:
         headers=HEADERS,
         json={
             "plan_version_id": plan["id"],
-            "feeding_at": "2026-07-16T08:00:00Z",
+            "feeding_at": datetime.now(timezone.utc).isoformat(),
             "source": "manual",
             "source_ref": f"lifecycle-{uuid4()}",
             "cause_class": "dosing_error",

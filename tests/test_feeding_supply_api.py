@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 from uuid import uuid4
@@ -14,6 +15,11 @@ from app.auth.deps import get_current_user
 from app.core.database import SessionLocal, get_db
 from app.core.tenant import get_tenant_id
 from app.main import app
+
+# Siehe test_feeding_actual_api: der Versorgungsplan muss zum Testzeitpunkt
+# gueltig sein, sonst blockiert die Planversions-Sperre die Vorausrechnung.
+PLAN_VALID_FROM = (date.today() - timedelta(days=1)).isoformat()
+PLAN_VALID_UNTIL = (date.today() + timedelta(days=30)).isoformat()
 
 BASE = "/api/v1/agrar/rations-optimization"
 TENANT = "00000000-0000-0000-0000-000000000001"
@@ -63,7 +69,7 @@ def _published_plan() -> tuple[dict[str, Any], str]:
     published = client.post(f"{BASE}/feeding/plans/publish", headers=HEADERS, json={
         "source_ration_version_id": version_id, "animal_count": 10,
         "dosing_step_kg": "0.1", "rounding_mode": "nearest",
-        "valid_from": "2026-07-16", "valid_until": "2026-08-31",
+        "valid_from": PLAN_VALID_FROM, "valid_until": PLAN_VALID_UNTIL,
         "reason": "Versorgungsplan fuer API-Abnahmetest freigeben",
         "idempotency_key": f"supply-plan-{uuid4()}",
     })

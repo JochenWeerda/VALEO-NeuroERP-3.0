@@ -18,13 +18,24 @@ from app.core.database import SessionLocal, get_db
 from app.core.tenant import get_tenant_id
 from app.main import app
 
+# Ist-Fuetterungen werden mit "jetzt" gebucht. Der Plan muss zu diesem
+# Zeitpunkt gueltig sein, sonst greift die Sperre gegen veraltete
+# Planversionen — zu Recht. Feste Kalenderdaten (frueher 2026-07-16 bis
+# 2026-08-31) haben genau das ausgeloest, sobald das Fenster verstrichen war.
+# Der Konfliktfall wird bewusst an eigener Stelle geprueft, nicht hier.
+PLAN_VALID_FROM = (date.today() - timedelta(days=1)).isoformat()
+PLAN_VALID_UNTIL = (date.today() + timedelta(days=30)).isoformat()
+
 BASE = "/api/v1/agrar/rations-optimization"
 TENANT = "00000000-0000-0000-0000-000000000001"
 HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-Id": TENANT}
 client = TestClient(app, raise_server_exceptions=False)
 
 
-def _plan() -> tuple[dict[str, Any], str]:
+def _plan(
+    valid_from: str = PLAN_VALID_FROM,
+    valid_until: str | None = PLAN_VALID_UNTIL,
+) -> tuple[dict[str, Any], str]:
     suffix = uuid4().hex[:8]
     feed = client.post(
         f"{BASE}/feed-catalog/feeds",
@@ -128,8 +139,8 @@ def _plan() -> tuple[dict[str, Any], str]:
             "animal_count": 10,
             "dosing_step_kg": "0.1",
             "rounding_mode": "nearest",
-            "valid_from": "2026-07-16",
-            "valid_until": "2026-08-31",
+            "valid_from": valid_from,
+            "valid_until": valid_until,
             "reason": "Plan fuer Ist-Fuetterungs-Abnahme publizieren",
             "idempotency_key": f"actual-plan-{uuid4()}",
         },
@@ -435,3 +446,45 @@ def test_deviation_policy_finding_and_human_measure_journey() -> None:
     finally:
         db.rollback()
         db.close()
+
+
+def test_actual_feeding_is_rejected_for_a_plan_version_that_is_not_current() -> None:
+    """Die Sperre gegen veraltete Planversionen ist der eigentliche Vertrag.
+
+    Sie war bisher nur zufaellig abgedeckt: die Fixtures publizierten einen Plan
+    mit festem Kalenderfenster, das irgendwann verstrich — dann schlugen neun
+    Tests fehl, ohne dass jemand die Sperre gepruft haette. Hier wird sie
+    ausdruecklich geprueft, fuer alle drei Zweige aus ``plan_status``.
+    """
+    heute = date.today()
+
+    # 1) Fenster abgelaufen -> stale
+    abgelaufen, feed_abgelaufen = _plan(
+        valid_from=(heute - timedelta(days=30)).isoformat(),
+        valid_until=(heute - timedelta(days=1)).isoformat(),
+    )
+    # 2) Fenster liegt in der Zukunft -> scheduled
+    geplant, feed_geplant = _plan(
+        valid_from=(heute + timedelta(days=1)).isoformat(),
+        valid_until=(heute + timedelta(days=30)).isoformat(),
+    )
+
+    faelle = (
+        (abgelaufen, feed_abgelaufen, "abgelaufen"),
+        (geplant, feed_geplant, "noch nicht gueltig"),
+    )
+    for plan, feed_id, fall in faelle:
+        antwort = client.post(
+            f"{BASE}/feeding/actuals",
+            headers=HEADERS,
+            json={
+                "plan_version_id": plan["id"],
+                "feeding_at": datetime.now(timezone.utc).isoformat(),
+                "source": "manual",
+                "source_ref": f"stale-{uuid4()}",
+                "idempotency_key": f"stale-{uuid4()}",
+                "components": [{"feed_id": feed_id, "actual_kg": "100"}],
+            },
+        )
+        assert antwort.status_code == 409, f"{fall}: {antwort.text}"
+        assert "aktuelle Planversion" in antwort.json()["detail"], antwort.text

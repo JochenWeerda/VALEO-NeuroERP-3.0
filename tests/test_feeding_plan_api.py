@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date, timedelta
 from typing import Any
 from uuid import uuid4
 
@@ -49,11 +50,19 @@ def _approve(version_id: str) -> None:
         assert response.status_code == 200, response.text
 
 
+_HEUTE = date.today()
+
+
 def _publish(version_id: str, key: str, **patch: Any):
     payload = {
         "source_ration_version_id": version_id, "animal_count": 42,
         "dosing_step_kg": "0.5", "rounding_mode": "nearest",
-        "valid_from": "2026-07-16", "valid_until": "2026-07-31",
+        # Standardfall ist ein zum Testzeitpunkt gueltiger Plan; feste
+        # Kalenderdaten liessen "is_stale" verstreichen. Faelle, die einen
+        # ungueltigen Bereich oder fehlende Berechtigung pruefen, setzen ihre
+        # Daten weiterhin ausdruecklich.
+        "valid_from": _HEUTE.isoformat(),
+        "valid_until": (_HEUTE + timedelta(days=15)).isoformat(),
         "reason": "Freigabe fuer die naechste Fuetterungsperiode", "idempotency_key": key,
     }
     payload.update(patch)
@@ -105,7 +114,10 @@ def test_publish_plan_scales_instructions_and_writes_one_outbox_event() -> None:
     assert current.status_code == 200
     assert any(row["id"] == plan["id"] and row["instructions"] for row in current.json())
 
-    second = _publish(version_id, f"publish-{uuid4()}", valid_from="2026-07-16", valid_until="2026-08-31")
+    # Die Nachfolgeversion muss selbst gueltig sein, sonst ist sie nicht
+    # "current" und kann die Vorgaengerversion nicht abloesen. Der
+    # Standardfall aus _publish leistet genau das.
+    second = _publish(version_id, f"publish-{uuid4()}")
     assert second.status_code == 201
     stale = client.get(f"{BASE}/feeding/plans/{plan['id']}", headers=HEADERS)
     assert stale.status_code == 200

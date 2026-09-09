@@ -84,7 +84,10 @@ def test_reference_screen_is_native_meridian_and_generator_ready() -> None:
     assert definition["adapter"] == {
         "type": "native", "sourceId": "agrar/feeding-reference-data", "temporary": False
     }
-    assert definition["layout"]["floorplan"] == "listReport"
+    # Meridian normalisiert Floorplan-Aliasse zentral (listReport -> worklist),
+    # siehe L3-VISUAL-PARITY-AUDIT-031. Geprueft wird der wirksame Vertrag,
+    # nicht das Vokabular des Builders.
+    assert definition["layout"]["floorplan"] == "worklist"
     assert {table["key"] for table in definition["tables"]} == {"nutrients", "units"}
     assert _check_readiness(definition)["generatorReady"] is True
 

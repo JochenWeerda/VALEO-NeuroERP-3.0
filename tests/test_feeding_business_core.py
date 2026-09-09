@@ -119,16 +119,22 @@ class _Mappings:
 
 
 class _Result:
-    def __init__(self, row: dict[str, Any] | None = None, *, scalar_exists: bool = False, rowcount: int = 0):
+    def __init__(self, row: dict[str, Any] | None = None, *, scalar_exists: bool = False,
+                 rowcount: int = 0, rows: list[tuple[Any, ...]] | None = None):
         self.row = row
         self.scalar_exists = scalar_exists
         self.rowcount = rowcount
+        self.rows = rows or []
 
     def mappings(self) -> _Mappings:
         return _Mappings(self.row)
 
     def first(self) -> tuple[int] | None:
         return (1,) if self.scalar_exists else None
+
+    def fetchall(self) -> list[tuple[Any, ...]]:
+        """``revoke_access`` liest die betroffenen Ids per ``RETURNING id``."""
+        return self.rows
 
 
 class _GuardSession:
@@ -139,6 +145,7 @@ class _GuardSession:
         self.herd_belongs = herd_belongs
         self.creator_access = creator_access
         self.statements: list[str] = []
+        self.audit_events: list[dict[str, Any]] = []
 
     def execute(self, statement: Any, params: dict[str, Any] | None = None) -> _Result:
         sql = str(statement)
@@ -164,7 +171,12 @@ class _GuardSession:
         if "INSERT INTO domain_agrar.feeding_business_grants" in sql:
             return _Result({"id": "grant-1", "business_id": (params or {})["business_id"]})
         if "UPDATE domain_agrar.feeding_business_grants" in sql:
-            return _Result(rowcount=1)
+            return _Result(rowcount=1, rows=[("grant-1",)])
+        if "INSERT INTO domain_agrar.feeding_master_data_audit_events" in sql:
+            # Die Nachweispflicht gehoert zum Vertrag: das Double nimmt das
+            # Ereignis nicht nur an, es haelt es fuer die Pruefung fest.
+            self.audit_events.append(dict(params or {}))
+            return _Result()
         if "DELETE FROM domain_agrar.feeding_business_grants" in sql:
             return _Result(rowcount=1)
         raise AssertionError(f"Unerwartetes SQL: {sql}")
@@ -209,6 +221,10 @@ def test_grant_revoke_is_append_only() -> None:
     assert service.revoke_access("business-a", "advisor", "read") == 1
     assert any("UPDATE domain_agrar.feeding_business_grants" in sql for sql in db.statements)
     assert not any("DELETE FROM domain_agrar.feeding_business_grants" in sql for sql in db.statements)
+    # Ein Entzug ohne Nachweis waere kein Entzug, sondern ein stiller Eingriff.
+    assert [e["event_type"] for e in db.audit_events] == ["revoked"]
+    assert db.audit_events[0]["entity_type"] == "grant"
+    assert db.audit_events[0]["actor"] == "tester"
 
 
 def test_regrant_preserves_revoked_grant_history() -> None:
