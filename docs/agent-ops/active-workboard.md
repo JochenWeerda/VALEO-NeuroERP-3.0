@@ -110,9 +110,9 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
-## QG-GREEN-20260909 Quality Gate wieder gruen - reserviert
+## QG-GREEN-20260909 Quality Gate wieder gruen - abgeschlossen 2026-09-09
 
-**Von:** User-Auftrag Weiterarbeit nach SPEC-P1-05-S608-RESTSCHULD. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+**Von:** User-Auftrag Weiterarbeit nach SPEC-P1-05-S608-RESTSCHULD. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
 
 **Ziel:** Die drei blockierenden Jobs des seit 2026-08-21 roten Quality Gate schliessen: Pagination-Ratchet (55 > 53), Frontend-Lint (zwei wirkungslose eslint-disable-Direktiven) und Dependency Scan (aiohttp, gitpython, langgraph-checkpoint-sqlite).
 
@@ -121,6 +121,8 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 **Abnahme:** `check_pagination.py --threshold 53` gruen ohne Absenkung der Schwelle; `pnpm lint` gruen; `pip-audit` ohne High/Critical fuer die drei Pakete; Regressionstests fuer die neu paginierten Endpunkte.
 
 **Risiken:** Eine Default-Obergrenze aendert das Antwortverhalten bisher unbegrenzter Listen. Versionsspruenge koennen Folgefehler ausloesen und brauchen einen Importnachweis.
+
+**Ergebnis:** Rot war der Gate seit 2026-08-21, nicht durch den S608-Push. Bisektion ueber die Endpunkt-Historie: 54 unbegrenzte Listen-Dateien bereits am 2026-08-21, 55 ab `44dd782f4` am 2026-08-22 — Schwelle 53. Statt die Schwelle zu senken sind acht Listen tatsaechlich paginiert (kostenrechnung 3, admin_devices 5, Hausmuster `limit` Query(100, le=1000) / `skip` Query(0, ge=0)); Zaehlung 55 -> 53, Gate meldet OK. Zwei tote `eslint-disable`-Direktiven fuer `react-hooks/exhaustive-deps` durch normale Kommentare ersetzt, voller Lint fehlerfrei. Drei Pins gehoben: aiohttp 3.14.1 -> 3.14.3, GitPython 3.1.50 -> 3.1.62, langgraph-checkpoint-sqlite 3.1.0 -> 3.1.1; `pip-audit` meldet nichts mehr (vorher 21 Advisories), Resolver-Dry-Run konfliktfrei. 24 Vertragstests binden die acht Endpunkte einzeln an limit/skip, weil der Ratchet nur Dateien zaehlt.
 
 ## SPEC-P1-05-S608-RESTSCHULD SQL-f-String-Restschuld - abgeschlossen 2026-09-09
 

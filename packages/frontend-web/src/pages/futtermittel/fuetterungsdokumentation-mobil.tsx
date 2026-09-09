@@ -81,7 +81,7 @@ export default function MobileFuetterungsdokumentation() {
     const onOnline = (): void => { void replayQueue() }
     window.addEventListener('online', onOnline)
     return () => window.removeEventListener('online', onOnline)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Queue-Replay ist bewusst mount-/online-gebunden
+    // Queue-Replay ist bewusst mount-/online-gebunden: die leere Dependency-Liste ist Absicht.
   }, [])
 
   const save = useMutation({

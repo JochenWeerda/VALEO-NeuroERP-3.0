@@ -1,0 +1,104 @@
+slice_id: QG-GREEN-20260909
+id: QG-GREEN-20260909
+title: Quality Gate wieder gruen — Pagination-Ratchet, Frontend-Lint und Dependency Scan
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-09"
+started_at: "2026-09-09"
+completed_at: "2026-09-09"
+goal: >-
+  Die drei blockierenden Jobs des seit 2026-08-21 roten Quality Gate schliessen,
+  ohne einen Schwellenwert abzusenken.
+file_ownership:
+  - docs/agent-ops/slices/QG-GREEN-20260909.yaml
+  - app/api/v1/endpoints/kostenrechnung.py
+  - app/api/v1/endpoints/admin_devices.py
+  - packages/frontend-web/src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx
+  - packages/frontend-web/src/pages/portal/feldbuch.tsx
+  - requirements.txt
+  - tests/test_pagination_contract.py
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+ausloeser: >-
+  Der Push von SPEC-P1-05-S608-RESTSCHULD zeigte den Quality Gate rot. Die
+  Historie belegt: rot seit 2026-08-21, unabhaengig von diesem Push.
+befund:
+  pagination_ratchet: >-
+    55 Dateien mit unbegrenztem .all() gegen Schwelle 53. Bisektion ueber die
+    Endpunkt-Historie: 54 bereits am 2026-08-21, 55 ab 44dd782f4 am 2026-08-22.
+    Die Schwelle blieb unveraendert; stattdessen wurden acht Listen tatsaechlich
+    paginiert (kostenrechnung 3, admin_devices 5).
+  frontend_lint: >-
+    Zwei eslint-disable-Direktiven fuer react-hooks/exhaustive-deps meldeten
+    nichts mehr und fielen unter --report-unused-disable-directives. Die
+    Begruendung war erhaltenswert, die Direktive nicht: beide wurden zu
+    normalen Kommentaren.
+  dependency_scan: >-
+    pip-audit meldete 17 Advisories fuer GitPython 3.1.50, drei fuer aiohttp
+    3.14.1 und eine fuer langgraph-checkpoint-sqlite 3.1.0.
+  messung_vorher:
+    unbegrenzte_listen_dateien: 55
+    lint_fehler: 2
+    pip_audit_advisories: 21
+  messung_nachher:
+    unbegrenzte_listen_dateien: 53
+    lint_fehler: 0
+    pip_audit_advisories: 0
+result: >-
+  Acht Listenendpunkte begrenzt (limit Query(100, le=1000), skip Query(0, ge=0),
+  LIMIT/OFFSET gebunden), zwei tote Lint-Direktiven ersetzt, drei Pins auf
+  aiohttp 3.14.3, GitPython 3.1.62 und langgraph-checkpoint-sqlite 3.1.1
+  gehoben. Keine Schwelle abgesenkt.
+acceptance:
+  - "check_pagination.py --threshold 53 meldet OK, ohne dass die Schwelle sank"
+  - Voller Frontend-Lint mit --report-unused-disable-directives ist fehlerfrei
+  - pip-audit gegen requirements.txt meldet keine Verwundbarkeit
+  - Jede neu paginierte Liste ist per Test an limit/skip gebunden
+  - Der Resolver loest requirements.txt konfliktfrei auf
+tests:
+  - tests/test_pagination_contract.py
+risks:
+  - >-
+    Eine Standard-Obergrenze von 100 aendert das Antwortverhalten bisher
+    unbegrenzter Listen. Wer mehr braucht, fordert es ueber limit an; le=1000
+    verhindert, dass die Begrenzung praktisch ausgehebelt wird. Frontends, die
+    stillschweigend Vollstaendigkeit annahmen, sehen ab jetzt eine Seite.
+  - >-
+    Der Ratchet zaehlt Dateien, nicht Endpunkte: ein einziges Vorkommen von
+    skip/limit macht eine Datei sauber. Der Kontacktest bindet die acht
+    Endpunkte deshalb einzeln, damit die Begrenzung nicht still verschwindet.
+  - >-
+    Die drei Versionsspruenge sind Patch-Level, aber ungetestet in der realen
+    Laufzeit; der Resolver-Lauf zeigt nur Konfliktfreiheit, nicht Verhalten.
+ai_harness:
+  fachlicher_vertrag: >-
+    Eine Liste liefert eine Seite, keine unbegrenzte Menge. Die Seitengroesse
+    ist Teil des Vertrags und nicht dem Zufall der Datenmenge ueberlassen.
+  architektur_vertrag: >-
+    Paginierung folgt dem Hausmuster aus accounting_periods.py: limit
+    Query(100, le=1000), skip Query(0, ge=0), LIMIT :limit OFFSET :skip am Ende
+    der ORDER-BY-Klausel, Werte gebunden.
+  daten_vertrag: >-
+    Keine Schema- oder Datenaenderung. Die Sortierung bleibt unveraendert, damit
+    die Seitenbildung stabil ist.
+  test_vertrag: >-
+    tests/test_pagination_contract.py prueft Vorhandensein, Standardwert und
+    Grenzen der Parameter je Endpunkt gegen die tatsaechliche Route, nicht gegen
+    den Quelltext.
+  security_vertrag: >-
+    Unbegrenzte Listen sind auch eine Verfuegbarkeitsfrage; die Obergrenze
+    begrenzt die Antwortgroesse. pip-audit gegen requirements.txt bleibt
+    blockierend und meldet null.
+  betriebs_vertrag: >-
+    Die Ratchet-Schwelle 53 bleibt unveraendert und darf nur sinken. Fuer
+    Konsumenten der acht Listen gilt ab jetzt Seitenlogik.
+  dokumentations_vertrag: >-
+    Workboard und dieses YAML nennen Messung vorher/nachher und die Bisektion,
+    die den Ursprung der Ratchet-Verletzung belegt.
+external_gates:
+  - >-
+    Die Bestaetigung liefert erst der Quality-Gate-Lauf in der CI; lokal sind
+    alle drei Jobs nachgestellt, der Backend-pytest-Job der CI nicht.
+  - >-
+    Ob Frontends oder Integrationen die acht Listen bisher unbegrenzt gelesen
+    haben, weiss nur der Betrieb. Ein Konsument, der Vollstaendigkeit annahm,
+    braucht jetzt Seitenlogik.

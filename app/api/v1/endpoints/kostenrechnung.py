@@ -160,6 +160,8 @@ class KostenstellenReport(BaseModel):
 def list_kostenstellen(
     art: Optional[str] = Query(None),
     aktiv: Optional[bool] = Query(True),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -171,7 +173,8 @@ def list_kostenstellen(
     if aktiv is not None:
         clauses.append("aktiv = :aktiv")
         params["aktiv"] = aktiv
-    sql = f"SELECT * FROM domain_finance.kostenstellen WHERE {' AND '.join(clauses)} ORDER BY nummer"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+    params["limit"], params["skip"] = limit, skip
+    sql = f"SELECT * FROM domain_finance.kostenstellen WHERE {' AND '.join(clauses)} ORDER BY nummer LIMIT :limit OFFSET :skip"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     rows = db.execute(text(sql), params).mappings().all()
     return [dict(r) for r in rows]
 
@@ -305,6 +308,8 @@ def delete_kostenstelle(kst_id: str, db=Depends(get_db), tenant_id: str = Depend
 def list_kostenarten(
     aktiv: Optional[bool] = Query(True),
     gruppe: Optional[str] = Query(None),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -316,7 +321,8 @@ def list_kostenarten(
     if gruppe:
         clauses.append("kostenart_gruppe = :gruppe")
         params["gruppe"] = gruppe
-    sql = f"SELECT * FROM domain_finance.kostenarten WHERE {' AND '.join(clauses)} ORDER BY nummer"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+    params["limit"], params["skip"] = limit, skip
+    sql = f"SELECT * FROM domain_finance.kostenarten WHERE {' AND '.join(clauses)} ORDER BY nummer LIMIT :limit OFFSET :skip"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     return [dict(r) for r in db.execute(text(sql), params).mappings().all()]
 
 
@@ -363,6 +369,8 @@ def delete_kostenart(koa_id: str, db=Depends(get_db), tenant_id: str = Depends(g
 def list_buchungen(
     kostenstelle_id: Optional[str] = Query(None),
     periode: Optional[str] = Query(None, description="Format: YYYY-MM"),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -374,7 +382,8 @@ def list_buchungen(
     if periode:
         clauses.append("periode = :periode")
         params["periode"] = periode
-    sql = f"SELECT * FROM domain_finance.kostenstellen_buchungen WHERE {' AND '.join(clauses)} ORDER BY buchungsdatum DESC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+    params["limit"], params["skip"] = limit, skip
+    sql = f"SELECT * FROM domain_finance.kostenstellen_buchungen WHERE {' AND '.join(clauses)} ORDER BY buchungsdatum DESC LIMIT :limit OFFSET :skip"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     return [dict(r) for r in db.execute(text(sql), params).mappings().all()]
 
 

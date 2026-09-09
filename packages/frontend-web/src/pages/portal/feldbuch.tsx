@@ -295,7 +295,7 @@ function MassnahmeDialog({
     } else {
       setForm(emptyForm)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when dialog opens / target changes
+  // Reset nur beim Oeffnen des Dialogs bzw. bei Wechsel des Ziels — Dependencies bewusst eng gehalten.
   }, [open, initial?.id])
 
   const handleSubmit = async () => {

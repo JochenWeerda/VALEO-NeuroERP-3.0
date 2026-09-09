@@ -134,6 +134,8 @@ def _row_to_model(row: Any, model_cls: type[BaseModel]) -> BaseModel:
 async def list_devices(
     device_type: Optional[str] = Query(default=None),
     include_inactive: bool = Query(default=False),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -144,6 +146,7 @@ async def list_devices(
         params["device_type"] = device_type
     if not include_inactive:
         where.append("is_active = TRUE")
+    params["limit"], params["skip"] = limit, skip
     rows = db.execute(
         text(
             f"""
@@ -151,6 +154,7 @@ async def list_devices(
             FROM domain_shared.admin_devices
             WHERE {' AND '.join(where)}
             ORDER BY device_type ASC, name ASC
+            LIMIT :limit OFFSET :skip
             """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
@@ -261,6 +265,8 @@ async def delete_device(
 async def list_device_mappings(
     document_type: Optional[str] = Query(default=None),
     process_code: Optional[str] = Query(default=None),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -272,6 +278,7 @@ async def list_device_mappings(
     if process_code:
         where.append("process_code = :process_code")
         params["process_code"] = process_code
+    params["limit"], params["skip"] = limit, skip
     rows = db.execute(
         text(
             f"""
@@ -279,6 +286,7 @@ async def list_device_mappings(
             FROM domain_shared.admin_device_mappings
             WHERE {' AND '.join(where)}
             ORDER BY document_type ASC, process_code ASC, created_at DESC
+            LIMIT :limit OFFSET :skip
             """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
@@ -442,6 +450,8 @@ async def delete_device_mapping(
 @router.get("/output-templates", response_model=list[AdminOutputTemplateOut], summary="Output templates auflisten")
 async def list_output_templates(
     document_type: Optional[str] = Query(default=None),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -450,6 +460,7 @@ async def list_output_templates(
     if document_type:
         where.append("document_type = :document_type")
         params["document_type"] = document_type
+    params["limit"], params["skip"] = limit, skip
     rows = db.execute(
         text(
             f"""
@@ -457,6 +468,7 @@ async def list_output_templates(
             FROM domain_shared.admin_output_templates
             WHERE {' AND '.join(where)}
             ORDER BY document_type ASC, template_code ASC
+            LIMIT :limit OFFSET :skip
             """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
@@ -591,6 +603,8 @@ async def update_output_template(
 @router.get("/output-templates/{template_id}/versions", response_model=list[AdminOutputTemplateVersionOut], summary="Output template versions auflisten")
 async def list_output_template_versions(
     template_id: str,
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -601,9 +615,10 @@ async def list_output_template_versions(
             FROM domain_shared.admin_output_template_versions
             WHERE tenant_id = :tenant_id AND template_id = :template_id
             ORDER BY version_no DESC
+            LIMIT :limit OFFSET :skip
             """
         ),
-        {"tenant_id": tenant_id, "template_id": template_id},
+        {"tenant_id": tenant_id, "template_id": template_id, "limit": limit, "skip": skip},
     ).mappings().all()
     return [_row_to_model(row, AdminOutputTemplateVersionOut) for row in rows]
 
@@ -633,6 +648,8 @@ async def delete_output_template(
 @router.get("/output-profiles", response_model=list[AdminOutputProfileOut], summary="Output profiles auflisten")
 async def list_output_profiles(
     document_type: Optional[str] = Query(default=None),
+    limit: int = Query(100, le=1000),
+    skip: int = Query(0, ge=0),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -641,6 +658,7 @@ async def list_output_profiles(
     if document_type:
         where.append("document_type = :document_type")
         params["document_type"] = document_type
+    params["limit"], params["skip"] = limit, skip
     rows = db.execute(
         text(
             f"""
@@ -648,6 +666,7 @@ async def list_output_profiles(
             FROM domain_shared.admin_output_profiles
             WHERE {' AND '.join(where)}
             ORDER BY document_type ASC, process_code ASC, profile_code ASC
+            LIMIT :limit OFFSET :skip
             """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,

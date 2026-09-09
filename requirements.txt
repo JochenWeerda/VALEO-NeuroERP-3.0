@@ -28,7 +28,7 @@ bcrypt==4.1.2
 
 # HTTP client for external APIs
 httpx==0.28.1
-aiohttp==3.14.1
+aiohttp==3.14.3
 requests==2.33.0
 boto3>=1.34.0
 
@@ -62,7 +62,7 @@ nats-py==2.6.0
 # Code quality and utilities
 click==8.3.3
 colorama==0.4.6
-GitPython==3.1.50
+GitPython==3.1.62
 
 # Data processing
 pandas==2.3.0
@@ -78,7 +78,7 @@ pdfplumber>=0.11.0
 PyYAML==6.0.1
 langchain-core>=0.3.65,<2.0.0
 langgraph==1.2.4
-langgraph-checkpoint-sqlite==3.1.0
+langgraph-checkpoint-sqlite==3.1.1
 
 # Rate limiting
 slowapi==0.1.9
