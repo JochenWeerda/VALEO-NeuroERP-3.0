@@ -229,15 +229,19 @@ def pruefen(
         ).fetchall()
         eintraege = [_row_to_dict(r) for r in rows]
     except Exception as exc:
-        logger.warning("sanctions_list not accessible during pruefen: %s", exc)
-        return SanktionsPruefungResult(
-            geprueft_am=geprueft_am,
-            treffer=[],
-            status="KEIN_TREFFER",
-            empfehlung=f"Prüfung nicht möglich — {MIGRATION_HINT}",
-            scope=payload.scope,
-            entity_ref=payload.entity_ref,
-        )
+        # Fail-closed: Eine nicht erreichbare Sanktionsliste ist kein "kein
+        # Treffer". Der Status ist das Feld, auf das Aufrufer und Masken
+        # reagieren — er darf keine Freigabe suggerieren, die nie geprueft
+        # wurde. Frueher wurde hier KEIN_TREFFER mit erklaerendem Text
+        # zurueckgegeben; der Text half nur Menschen, nicht dem Aufrufer.
+        logger.error("sanctions_list not accessible during pruefen: %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Sanktionspruefung nicht moeglich: Sanktionsliste ist nicht "
+                f"verfuegbar. Keine Freigabe erteilt. {MIGRATION_HINT}"
+            ),
+        ) from exc
 
     treffer = _fuzzy_match(payload.name, eintraege)
     status = _status_from_treffer(treffer)

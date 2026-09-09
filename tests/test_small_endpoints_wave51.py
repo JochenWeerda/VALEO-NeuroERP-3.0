@@ -65,11 +65,15 @@ def test_list_marketing_prefs(monkeypatch: pytest.MonkeyPatch) -> None:
 
     class _FakeSvc:
         def __init__(self, db, tid): pass  # noqa: ANN001
-        def list_marketing(self, cid): return {"items": [], "contact_id": cid}  # noqa: ANN001
+        def list_marketing(self, cid):  # noqa: ANN001
+            # Vertrag ist list[MarketingPrefOut] — kein "items"-Umschlag.
+            return [{"id": "MP-1", "contact_id": cid, "category_code": "post",
+                     "preference": "erlaubt"}]
 
     monkeypatch.setattr(ep_mod, "CrmContactExtService", _FakeSvc)
     resp = _client.get("/api/v1/crm/kim/contacts/CTT-001/marketing-prefs", headers=_HEADERS)
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.text
+    assert [row["contact_id"] for row in resp.json()] == ["CTT-001"]
 
 
 @pytest.mark.unit

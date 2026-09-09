@@ -4,7 +4,7 @@ type: explanation
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-08-23
+last_reviewed: 2026-09-09
 version: 3.0.0
 description: Maschinenlesbare Bedienungsanleitung für KI-Agenten — Prozessketten, Masken-APIs, Automatisierung.
 ---

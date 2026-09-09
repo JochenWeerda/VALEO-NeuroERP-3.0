@@ -81,16 +81,27 @@ class TestSanktionsPruefung:
         assert sc._status_from_treffer(treffer) in ("VERDAECHTIG", "TREFFER")
 
     @pytest.mark.unit
-    def test_sanctions_kein_treffer_wenn_tabelle_fehlt(self):
-        """DB raises exception → graceful KEIN_TREFFER with migration_hint."""
+    def test_sanctions_faellt_geschlossen_aus_wenn_liste_fehlt(self):
+        """Nicht erreichbare Sanktionsliste darf keine Freigabe erzeugen.
+
+        Frueher lieferte der Endpunkt hier ``KEIN_TREFFER`` mit erklaerendem
+        Text. Der Text half nur Menschen; ein Aufrufer, der auf ``status``
+        reagiert, haette die Geschaeftsbeziehung freigegeben, ohne dass je eine
+        Liste geprueft wurde. Jetzt: 503 und keine Freigabe.
+        """
+        from fastapi import HTTPException
+
         db = _mock_db()
         db.execute.side_effect = Exception("relation does not exist")
 
         payload = sc.SanktionsPruefungInput(name="Irgendwas GmbH")
-        result = sc.pruefen(payload, db=db, tenant_id="test-tenant")
+        with pytest.raises(HTTPException) as fehler:
+            sc.pruefen(payload, request=MagicMock(), db=db, tenant_id="test-tenant")
 
-        assert result.status == "KEIN_TREFFER"
-        assert "migration" in result.empfehlung.lower() or "Tabelle" in result.empfehlung
+        assert fehler.value.status_code == 503
+        detail = str(fehler.value.detail)
+        assert "Keine Freigabe" in detail
+        assert "KEIN_TREFFER" not in detail
 
     @pytest.mark.unit
     def test_sanctions_alias_match(self):

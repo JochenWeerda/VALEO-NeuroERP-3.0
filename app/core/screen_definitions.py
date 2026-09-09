@@ -7,6 +7,16 @@ from typing import Any
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 
 
+def _human_input_flow(endpoint: str) -> dict[str, Any]:
+    """Existing page dialogs collect input before submitting ordinary REST APIs.
+
+    These endpoints do not implement ActionRuntime dryRun/validate modes and
+    must not be exposed as directly executable commandEndpoints.
+    """
+    return {"inputFlow": {"kind": "humanForm", "submitEndpoint": endpoint, "method": "POST"},
+            "forbiddenForAgents": True}
+
+
 def build_crm_customer_360_screen_definition() -> dict[str, Any]:
     """Canonical ScreenDefinition for crm/customer-360 (Wave 29)."""
 
@@ -2738,7 +2748,7 @@ def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
             ],
         }],
         "actions": [
-            {"key": "create_handoff", "label": "An Einkauf uebergeben", "kind": "primary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
+            {"key": "create_handoff", "label": "An Einkauf uebergeben", **_human_input_flow("/api/v1/agrar/rations-optimization/feeding/supply/procurement-handoffs"), "kind": "primary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
             {"key": "open_inventory", "label": "Bestaende pflegen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
         "noWorkflowReason": "Die Maske erzeugt ausschliesslich einen auditierbaren Bedarfsvorschlag; Bestellung und Freigabe bleiben im Einkaufsprozess.",
@@ -2836,8 +2846,8 @@ def build_agrar_feeding_actuals_screen_definition() -> dict[str, Any]:
         }],
         "actions": [
             {"key": "export_csv", "label": "CSV exportieren", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.read"},
-            {"key": "create_measure", "label": "Massnahme aus Abweichung", "kind": "secondary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
-            {"key": "configure_threshold", "label": "Schwellen konfigurieren", "kind": "secondary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
+            {"key": "create_measure", "label": "Massnahme aus Abweichung", **_human_input_flow("/api/v1/agrar/rations-optimization/feeding/actuals/measures"), "kind": "secondary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
+            {"key": "configure_threshold", "label": "Schwellen konfigurieren", **_human_input_flow("/api/v1/agrar/rations-optimization/feeding/actuals/deviation-policies"), "kind": "secondary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
             {"key": "open_mobile", "label": "Ist-Fuetterung erfassen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
         "noWorkflowReason": "Ist-Fuetterungen sind append-only Nachweise; Korrekturen erzeugen einen neuen Stand mit Vorgaengerreferenz.",
@@ -2906,11 +2916,11 @@ def build_agrar_ration_detail_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "submit_review", "label": "Zur Pruefung", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
-            {"key": "approve", "label": "Freigeben", "kind": "workflow", "dangerLevel": "moderate", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "humanApprovalRequired": True},
-            {"key": "schedule", "label": "Fuetterungsbeginn planen", "kind": "secondary", "dangerLevel": "moderate", "permission": "futtermittel.rations.update"},
-            {"key": "activate", "label": "Jetzt aktivieren", "kind": "workflow", "dangerLevel": "moderate", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "humanApprovalRequired": True},
-            {"key": "retire", "label": "Fuetterung beenden", "kind": "secondary", "dangerLevel": "high", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "auditReasonRequired": True},
-            {"key": "archive", "label": "Archivieren", "kind": "danger", "dangerLevel": "high", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "auditReasonRequired": True},
+            {"key": "approve", "label": "Freigeben", "kind": "workflow", **_human_input_flow("/api/v1/agrar/rations-optimization/lifecycle/versions/{version_id}/transitions"), "dangerLevel": "moderate", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "humanApprovalRequired": True},
+            {"key": "schedule", "label": "Fuetterungsbeginn planen", **_human_input_flow("/api/v1/agrar/rations-optimization/lifecycle/versions/{version_id}/transitions"), "kind": "secondary", "dangerLevel": "moderate", "permission": "futtermittel.rations.update"},
+            {"key": "activate", "label": "Jetzt aktivieren", **_human_input_flow("/api/v1/agrar/rations-optimization/lifecycle/versions/{version_id}/transitions"), "kind": "workflow", "dangerLevel": "moderate", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "humanApprovalRequired": True},
+            {"key": "retire", "label": "Fuetterung beenden", **_human_input_flow("/api/v1/agrar/rations-optimization/lifecycle/versions/{version_id}/transitions"), "kind": "secondary", "dangerLevel": "high", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "auditReasonRequired": True},
+            {"key": "archive", "label": "Archivieren", **_human_input_flow("/api/v1/agrar/rations-optimization/lifecycle/versions/{version_id}/transitions"), "kind": "danger", "dangerLevel": "high", "permission": "futtermittel.rations.update", "requiresConfirmation": True, "auditReasonRequired": True},
         ],
         "workflow": {"processKey": "ration-version-lifecycle", "auditRequired": True, "evidenceRequired": False},
         "layout": {
@@ -3419,7 +3429,7 @@ def build_inventory_auxiliary_screen_definition() -> dict[str, Any]:
             {"key": "create_count_sheet", "label": "Zaehlliste", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
             {"key": "create_control", "label": "Kontrolllauf", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
             {"key": "create_valuation", "label": "Vorlaeufig bewerten", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
-            {"key": "create_opening", "label": "Bestandsvortrag", "kind": "primary", "permission": "inventory.aux.write", "dangerLevel": "high", "requiresConfirmation": True},
+            {"key": "create_opening", "label": "Bestandsvortrag", **_human_input_flow("/api/v1/inventory/auxiliary/batches"), "kind": "primary", "permission": "inventory.aux.write", "dangerLevel": "high", "requiresConfirmation": True},
         ],
         "workflow": {"processKey": "inventory-auxiliary", "status": "four-eyes", "nextActionKey": "create_control", "auditRequired": True},
         "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
@@ -3604,6 +3614,7 @@ def _build_sanctions_scope_screen_definition(
         }],
         "actions": [{
             "key": "check", "label": f"{subject_label} pruefen", "kind": "primary",
+            **_human_input_flow("/api/v1/compliance/sanctions/pruefen"),
             "permission": "compliance.sanctions.check", "dangerLevel": "moderate",
         }],
         "workflow": {"processKey": f"sanctions-check-{scope}", "status": "audited", "nextActionKey": "check", "auditRequired": True},
@@ -3808,7 +3819,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
             ],
             "rowActions": [{"key": "export", "label": "CSV"}, {"key": "correct", "label": "Korrektur", "visibleWhen": {"field": "status", "values": ["calculated"]}}],
         }],
-        "actions": [{"key": "calculate", "label": "Bonuslauf berechnen", "kind": "primary", "permission": "reporting.bonus.write", "dangerLevel": "moderate"}],
+        "actions": [{"key": "calculate", "label": "Bonuslauf berechnen", **_human_input_flow("/api/v1/l3-report-catalog/bonus-runs"), "kind": "primary", "permission": "reporting.bonus.write", "dangerLevel": "moderate"}],
         "workflow": {"processKey": "bonus-calculation", "status": "immutable-runs", "nextActionKey": "calculate", "auditRequired": True},
         "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
         "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "reporting"},
@@ -3848,7 +3859,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
                 {"key": "aggregations", "label": "Summen", "width": 180},
                 {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 150}],
             "rowActions": [{"key": "preview", "label": "Vorschau"}, {"key": "print", "label": "Drucken"}, {"key": "export", "label": "Signiert exportieren"}]}],
-        "actions": [{"key": "create", "label": "Neue Abfrage", "kind": "primary", "permission": "reporting.query.write", "dangerLevel": "low"}, {"key": "import", "label": "Signiert importieren", "kind": "secondary", "permission": "reporting.query.write", "dangerLevel": "moderate"}],
+        "actions": [{"key": "create", "label": "Neue Abfrage", "kind": "primary", "permission": "reporting.query.write", "dangerLevel": "low"}, {"key": "import", "label": "Signiert importieren", **_human_input_flow("/api/v1/query-center/import"), "kind": "secondary", "permission": "reporting.query.write", "dangerLevel": "moderate"}],
         "workflow": {"processKey": "safe-query-center", "status": "governed", "nextActionKey": "create", "auditRequired": True},
         "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "reporting"},
@@ -4413,6 +4424,20 @@ for _spec in ROLLOUT_WAVES_42_51:
 # Intent-Compiler. Zentral gepflegt statt je SD, damit der Katalog
 # (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
 _AGENT_SYNONYMS: dict[str, list[str]] = {
+    # Fuetterungsberatung: die Masken kamen mit dem Programm dazu, die
+    # Suchbegriffe nicht. Ohne Synonyme findet weder Omnibox noch Agent sie
+    # unter den Woertern, die im Stall und in der Beratung benutzt werden.
+    "agrar/feed-advice": ["fuetterungsberatung", "futterberatung", "rationsplanung", "beratung fuetterung"],
+    "agrar/feed-controlling": ["fuetterungscontrolling", "futtercontrolling", "soll ist futter", "futtereffizienz"],
+    "agrar/feed-readiness": ["futterversorgung", "futterbedarf", "reichweite", "unterdeckung", "sicherheitszuschlag"],
+    "agrar/feeding-actuals": ["ist fuetterung", "istfuetterung", "mischabweichung", "futtervorlage", "nachdosierung"],
+    "agrar/feeding-business": ["fuetterungsbetrieb", "betriebsakte futter", "milchviehbetrieb"],
+    "agrar/feeding-businesses": ["fuetterungsbetriebe", "betriebe futter", "herden", "tiergruppen"],
+    "agrar/feeding-group": ["tiergruppe", "fuetterungsgruppe", "leistungsgruppe", "traechtigkeit"],
+    "agrar/feeding-plan": ["fuetterungsplan", "mischfolge", "mischanweisung", "chargenmenge"],
+    "agrar/feeding-reference-data": ["naehrstoffe", "einheiten", "bezugsbasis", "referenzwerte futter"],
+    "agrar/ration": ["rationsfreigabe", "ration freigeben", "fuetterungsbeginn"],
+    "agrar/rations-lifecycle": ["rationen", "rationsversionen", "rationsstatus", "freigaben ration"],
     "schnittstelle/legacy-adapter-monitor": ["standard schnittstelle", "unimet", "legacy adapter", "schnittstellen fehlerkorb", "reconciliation"],
     "workspace/letzte-dokumente": ["letzte dokumente", "zuletzt geoeffnet", "recent documents", "belegverlauf"],
     "agrar/duenger": ["duenger", "duengemittel", "kas", "npk"],

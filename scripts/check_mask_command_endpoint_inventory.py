@@ -15,6 +15,19 @@ sys.path.insert(0, str(REPO))
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition  # noqa: E402
 
 
+def valid_input_flow(action: dict) -> bool:
+    flow = action.get("inputFlow")
+    return bool(
+        isinstance(flow, dict)
+        and flow.get("kind") == "humanForm"
+        and isinstance(flow.get("submitEndpoint"), str)
+        and flow["submitEndpoint"].startswith("/api/v1/")
+        and flow.get("method") in {"POST", "PUT", "PATCH", "DELETE"}
+        and action.get("forbiddenForAgents") is True
+        and not action.get("commandEndpoint")
+    )
+
+
 def main() -> int:
     violations: list[str] = []
 
@@ -31,12 +44,15 @@ def main() -> int:
                 violations.append(f"{screen_id}/{key}: stubReason={action['stubReason']!r}")
 
             endpoint = action.get("commandEndpoint")
+            if action.get("inputFlow") and not valid_input_flow(action):
+                violations.append(f"{screen_id}/{key}: ungueltiger humanForm-Eingabevertrag")
             if endpoint and action.get("stubReason"):
                 violations.append(f"{screen_id}/{key}: commandEndpoint + stubReason gleichzeitig")
 
             # Mutations-Actions ohne Endpoint (edit-only ausgenommen)
             if (
                 not endpoint
+                and not valid_input_flow(action)
                 and not action.get("stubReason")
                 and action.get("key") not in ("edit",)
                 and action.get("dangerLevel") in ("moderate", "high", "critical")
