@@ -110,6 +110,18 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
+## QG-BACKEND-META-20260909 Doc-Generator-Meta-Check schliessen - reserviert
+
+**Von:** User-Auftrag, offene Punkte auch in fremdem Zustaendigkeitsbereich schliessen. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+
+**Ziel:** Den letzten roten Schritt des Backend-Jobs (`check_all_doc_generators.sh --check`) schliessen: Architektur-Index-Domain-Mapping und ADR-Navigation.
+
+**Dateibesitz:** `mkdocs.yml` (generiert), `config/architecture-index.yaml` und `config/architecture-domain-prefixes.yaml` — **fachlich von Codex im geteilten Arbeitsbaum erarbeitet, hier auf ausdrueckliche Anweisung unveraendert committet**. Slice-YAML und dieser Abschnitt. Nicht: Codex' unversionierte Migration `alembic/versions/desktop_runtime_repair_20260909.py` und uebriger WIP.
+
+**Abnahme:** `check_all_doc_generators.sh --check` Exit 0; `pnpm arch:validate` gruen; `check_no_core_contamination.py` gruen.
+
+**Risiken:** Fremde Arbeit zu committen nimmt dem Urheber die Kontrolle ueber Zeitpunkt und Zuschnitt. Der Inhalt wird deshalb nicht angefasst, die Urheberschaft in Commit und Workboard benannt.
+
 ## NPM-ADVISORIES-20260909 npm-Rueckstand im Dependency Scan - abgeschlossen 2026-09-09
 
 **Von:** Folgebefund aus QG-GREEN-20260909, hinter `pip-audit` verdeckt. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
