@@ -104,11 +104,25 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Offen/Nachbar-Slice:** `GET /lager/bestaende` zaehlt `ABGANG` ueber `ELSE quantity` positiv — Fehler im Lese-Modell, bewusst nicht in dieser Welle mitverbogen. Ebenso offen: die Vokabular-Doppelung `wareneingang/warenausgang` vs. `ZUGANG/ABGANG` in `movement_type`.
 
-## SPEC-P1-05-S608 SQL-f-String Gate Nachzug - in Arbeit 2026-08-23
+## SPEC-P1-05-S608 SQL-f-String Gate Nachzug - abgeschlossen 2026-09-09
 
-**Von:** Gap-Abwicklung. **Owner:** Cursor Agent. **Stand:** teilweise.
+**Von:** Gap-Abwicklung. **Owner:** Cursor Agent. **Stand:** abgeschlossen 2026-09-09 durch SPEC-P1-05-S608-RESTSCHULD.
 
-**Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Offen: 15 `needs_recheck` auf Core-Umbau und Hypothesis-Tests.
+**Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
+
+## SPEC-P1-05-S608-RESTSCHULD SQL-f-String-Restschuld - abgeschlossen 2026-09-09
+
+**Von:** User-Auftrag, Uebernahme der offenen S608-Restschuld. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
+
+**Ziel:** Jede offene SQL-f-String-Stelle einzeln auf ihre Datenherkunft pruefen, echte Injection-Pfade beheben und erst danach die Baseline leeren — keine pauschale Unterdrueckung.
+
+**Dateibesitz:** `app/core/sql_identifiers.py`, `tests/test_sql_identifiers.py`, `app/services/geo_pipeline.py`, `config/sql_fstring_review_baseline.json`, `docs/operations/appsec-s608-review.md`, Open-Gaps-Zeile SPEC-P1-05, Slice-YAML, dieser Abschnitt sowie in 76 weiteren `app/`-Dateien ausschliesslich nosec-Kommentare. Nicht: fremder unversionierter WIP im geteilten Working Tree.
+
+**Abnahme:** `check_sql_fstrings.py` gruen bei leerer Baseline; `bandit -r app/ -t B608` -> 0 Befunde; `generate_s608_review.py` -> suppressed 315, unsuppressed 0, unreviewed 0; 87 Tests gruen; alle 76 geaenderten Module importierbar.
+
+**Ergebnis:** Baseline 167 -> 0, Bandit-B608 139 -> 0, unreviewed 136 -> 0. Ein echter Fund: `geo_pipeline` interpolierte Tabellen-/Spaltennamen ungeprueft aus Umgebungsvariablen — jetzt gegen `app/core/sql_identifiers` validiert, mit Regressionstest fuer den praeparierten Wert. Zweiter Befund: Bandit meldet B608 am String-, nicht am Aufrufknoten; 115 Kommentare mussten auf die schliessende Quote-Zeile wandern, sonst waeren 111 Suppressions wirkungslos geblieben, waehrend das Gate gruen meldet.
+
+**Risiken:** Der Diff beruehrt 76 Dateien; ausserhalb von `geo_pipeline` besteht er nachweislich nur aus Kommentaren (Nachstellung gegen frischen HEAD-Worktree, identisches Ergebnis).
 
 ## SPEC-P1-09-LICENSE Lizenzinventar - abgeschlossen 2026-08-23
 

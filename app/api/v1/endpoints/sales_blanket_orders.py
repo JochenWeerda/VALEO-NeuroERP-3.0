@@ -152,7 +152,7 @@ async def list_blanket_orders(
         rows = db.execute(
             text(
                 f"SELECT * FROM domain_sales.blanket_orders WHERE {where_sql} "
-                "ORDER BY created_at DESC OFFSET :skip LIMIT :limit"
+                "ORDER BY created_at DESC OFFSET :skip LIMIT :limit"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()

@@ -49,7 +49,7 @@ class ForeignGoodsWorklistService:
         where_sql = " AND ".join(where)
         total = self.db.execute(
             text(
-                f"SELECT COUNT(*) FROM domain_einkauf.fremdwaren_einlagerung WHERE {where_sql}"
+                f"SELECT COUNT(*) FROM domain_einkauf.fremdwaren_einlagerung WHERE {where_sql}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).scalar_one()

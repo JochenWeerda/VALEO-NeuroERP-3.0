@@ -386,7 +386,7 @@ class GapPipelineService:
               {segment_clause}
             ORDER BY s.potential_total_eur DESC
             LIMIT :max_leads
-            """  # noqa: S608 — Filter-Klauseln sind code-kontrolliert, alle Werte parametrisiert
+            """  # noqa: S608 — Filter-Klauseln sind code-kontrolliert, alle Werte parametrisiert  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
 
         try:

@@ -349,7 +349,7 @@ class MaskRolloutSummaryService:
                 SELECT id, beleg_nr, konto_nr, konto_name, konto_typ, offener_betrag, faellig_am, status
                 FROM {schema}.offene_posten
                 WHERE tenant_id = :tenant_id AND id = :op_id
-                """
+                """  # nosec B608  # reviewed-safe: Schemaname stammt aus dem information_schema-Katalog, Werte sind gebunden
             ),
             {"tenant_id": self.tenant_id, "op_id": entity_id},
         ).mappings().first()
@@ -397,7 +397,7 @@ class MaskRolloutSummaryService:
                 FROM {schema}.op_ausgleich
                 WHERE tenant_id = :tenant_id AND op_id = :op_id
                 ORDER BY buchungs_datum DESC NULLS LAST
-                """
+                """  # nosec B608  # reviewed-safe: Schemaname stammt aus dem information_schema-Katalog, Werte sind gebunden
             ),
             {"tenant_id": self.tenant_id, "op_id": entity_id},
         ).mappings().all()

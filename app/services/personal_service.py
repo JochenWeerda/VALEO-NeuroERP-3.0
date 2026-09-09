@@ -145,7 +145,7 @@ class PersonalService:
             text(
                 f"SELECT id, username, email, first_name, last_name, roles, is_active, preferences, created_at "
                 f"FROM domain_shared.users WHERE {' AND '.join(where)} "
-                f"ORDER BY last_name ASC, first_name ASC, username ASC"
+                f"ORDER BY last_name ASC, first_name ASC, username ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -224,7 +224,7 @@ class PersonalService:
             rows = self.db.execute(
                 text(
                     f"SELECT {self._TIME_ENTRY_COLS} FROM domain_hr.time_entries "
-                    f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, employee_ref ASC"
+                    f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, employee_ref ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()
@@ -237,7 +237,7 @@ class PersonalService:
         row = self.db.execute(
             text(
                 f"SELECT {self._TIME_ENTRY_COLS} FROM domain_hr.time_entries "
-                f"WHERE id = :id AND tenant_id = :tenant_id"
+                f"WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"id": entry_id, "tenant_id": self.tenant_id},
         ).mappings().first()
@@ -255,7 +255,7 @@ class PersonalService:
                 "entry_type, source, status, cost_center, work_area, notes, created_at, updated_at) "
                 "VALUES (:id, :tenant_id, :employee_ref, :entry_date, :start_time, :end_time, :hours, "
                 ":entry_type, :source, 'Draft', :cost_center, :work_area, :notes, NOW(), NOW()) "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {
                 "id": entry_id,
@@ -282,7 +282,7 @@ class PersonalService:
                 "SET status = 'Submitted', updated_at = NOW(), version = version + 1 "
                 "WHERE id = :entry_id AND tenant_id = :tenant_id "
                 "  AND status IN ('Draft', 'Rejected', 'Corrected') "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"entry_id": entry_id, "tenant_id": self.tenant_id},
         ).mappings().first()
@@ -299,7 +299,7 @@ class PersonalService:
                 "SET status = 'Approved', approved_by = :approved_by, "
                 "    approved_at = NOW(), updated_at = NOW(), version = version + 1 "
                 "WHERE id = :entry_id AND tenant_id = :tenant_id AND status = 'Submitted' "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"entry_id": entry_id, "tenant_id": self.tenant_id, "approved_by": approved_by},
         ).mappings().first()
@@ -328,7 +328,7 @@ class PersonalService:
                 "work_area = :work_area, correction_reason = :correction_reason, "
                 "notes = :notes, updated_at = NOW(), version = version + 1 "
                 "WHERE id = :entry_id AND tenant_id = :tenant_id "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {
                 "entry_id": entry_id,
@@ -372,7 +372,7 @@ class PersonalService:
                 text(
                     f"SELECT id, employee_ref, entry_date, entry_type, source, status, notes, audit_ref "
                     f"FROM domain_hr.time_entries WHERE {' AND '.join(where)} "
-                    f"ORDER BY entry_date ASC, employee_ref ASC"
+                    f"ORDER BY entry_date ASC, employee_ref ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()
@@ -423,7 +423,7 @@ class PersonalService:
             text(
                 f"SELECT id, status FROM domain_hr.time_entries "
                 f"WHERE id = :id AND tenant_id = :tenant_id "
-                f"AND entry_type IN ({', '.join(self._ABSENCE_ENTRY_TYPES)})"
+                f"AND entry_type IN ({', '.join(self._ABSENCE_ENTRY_TYPES)})"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"id": absence_id, "tenant_id": self.tenant_id},
         ).fetchone()
@@ -461,7 +461,7 @@ class PersonalService:
                     f"cost_center, payroll_group, qualifications, can_drive, driver_card_id, "
                     f"vehicle_refs, calendar_provider, status "
                     f"FROM domain_hr.employee_time_profiles WHERE {' AND '.join(where)} "
-                    f"ORDER BY location_code ASC, department ASC, display_name ASC"
+                    f"ORDER BY location_code ASC, department ASC, display_name ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()

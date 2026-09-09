@@ -82,7 +82,7 @@ async def list_courses(
         where.append("is_active = TRUE")
     return _list(
         db,
-        f"SELECT * FROM domain_hr.training_courses WHERE {' AND '.join(where)} ORDER BY course_code ASC",
+        f"SELECT * FROM domain_hr.training_courses WHERE {' AND '.join(where)} ORDER BY course_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         {"tenant_id": tenant_id},
     )
 
@@ -205,7 +205,7 @@ async def list_assignments(
         JOIN domain_hr.training_courses c ON c.id = a.course_id AND c.tenant_id = a.tenant_id
         WHERE {' AND '.join(where)}
         ORDER BY a.assigned_at DESC
-        """,
+        """,  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params,
     )
 
@@ -320,7 +320,7 @@ async def list_certificates(
         params["status"] = status
     return _list(
         db,
-        f"SELECT * FROM domain_hr.employee_certificates WHERE {' AND '.join(where)} ORDER BY valid_until ASC NULLS LAST",
+        f"SELECT * FROM domain_hr.employee_certificates WHERE {' AND '.join(where)} ORDER BY valid_until ASC NULLS LAST",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params,
     )
 
@@ -430,7 +430,7 @@ async def list_qualifications(
         params["employee_ref"] = employee_ref
     return _list(
         db,
-        f"SELECT * FROM domain_hr.qualification_profiles WHERE {' AND '.join(where)} ORDER BY employee_ref ASC, role_code ASC",
+        f"SELECT * FROM domain_hr.qualification_profiles WHERE {' AND '.join(where)} ORDER BY employee_ref ASC, role_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params,
     )
 
@@ -532,7 +532,7 @@ async def list_checklists(
         where.append("is_active = TRUE")
     return _list(
         db,
-        f"SELECT * FROM domain_hr.onboarding_checklists WHERE {' AND '.join(where)} ORDER BY checklist_code ASC",
+        f"SELECT * FROM domain_hr.onboarding_checklists WHERE {' AND '.join(where)} ORDER BY checklist_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         {"tenant_id": tenant_id},
     )
 
@@ -646,7 +646,7 @@ async def list_runs(
         JOIN domain_hr.onboarding_checklists c ON c.id = r.checklist_id AND c.tenant_id = r.tenant_id
         WHERE {' AND '.join(where)}
         ORDER BY r.created_at DESC
-        """,
+        """,  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params,
     )
 

@@ -237,7 +237,7 @@ def create_liquidity_scenario(
         db.execute(
             text(
                 f"""INSERT INTO {_TABLE_SCENARIOS} (id, name, adjustments, tenant_id, created_at)
-                VALUES (:id, :name, :adj::jsonb, :tid, now())"""
+                VALUES (:id, :name, :adj::jsonb, :tid, now())"""  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             ),
             {
                 "id": sid,

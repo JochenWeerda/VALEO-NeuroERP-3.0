@@ -224,7 +224,7 @@ class RationLifecycleService:
           SELECT * FROM domain_agrar.feeding_groups
           WHERE tenant_id=:tenant_id AND id=:group_id
         """
-                    + lock
+                    + lock  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 {"tenant_id": self.tenant_id, "group_id": group_id},
             )

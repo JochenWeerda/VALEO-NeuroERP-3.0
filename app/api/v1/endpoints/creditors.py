@@ -232,7 +232,7 @@ async def list_creditors(
                 FROM domain_erp.creditors WHERE {where_sql}
                 ORDER BY creditor_number
                 LIMIT :limit OFFSET :skip
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).fetchall()
@@ -360,7 +360,7 @@ async def update_creditor(
             params_update["is_active"] = payload.is_active
         db.execute(
             text(
-                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params_update,
         )

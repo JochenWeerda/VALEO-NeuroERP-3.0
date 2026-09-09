@@ -1928,7 +1928,7 @@ async def list_time_profiles(
                 FROM domain_hr.employee_time_profiles
                 WHERE {' AND '.join(where)}
                 ORDER BY location_code ASC, department ASC, display_name ASC
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()

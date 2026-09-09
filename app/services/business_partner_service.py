@@ -333,7 +333,7 @@ class BusinessPartnerService:
                 text(
                     f"SELECT {addr_cols} FROM public.kunden_adressen "
                     "WHERE kunden_nr = :k AND adress_typ = :t "
-                    "ORDER BY ist_standard DESC LIMIT 1"
+                    "ORDER BY ist_standard DESC LIMIT 1"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 {"k": kunden_nr, "t": adress_typ},
             ).mappings().first()
@@ -345,7 +345,7 @@ class BusinessPartnerService:
         try:
             # reviewed-safe: pay_cols is a fixed local column list; values are bound.
             row = self.db.execute(
-                text(f"SELECT {addr_cols} FROM public.kunden WHERE kunden_nr = :k"),
+                text(f"SELECT {addr_cols} FROM public.kunden WHERE kunden_nr = :k"),  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 {"k": kunden_nr},
             ).mappings().first()
         except (OperationalError, ProgrammingError):
@@ -368,7 +368,7 @@ class BusinessPartnerService:
         try:
             # reviewed-safe: pay_cols is a fixed local column list; kunden_nr is bound.
             row = self.db.execute(
-                text(f"SELECT {pay_cols} FROM public.kunden_zahlung WHERE kunden_nr = :k"),
+                text(f"SELECT {pay_cols} FROM public.kunden_zahlung WHERE kunden_nr = :k"),  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 {"k": kunden_nr},
             ).mappings().first()
         except (OperationalError, ProgrammingError):
@@ -379,7 +379,7 @@ class BusinessPartnerService:
         try:
             # reviewed-safe: pay_cols is a fixed local column list; kunden_nr is bound.
             row = self.db.execute(
-                text(f"SELECT {pay_cols} FROM public.kunden WHERE kunden_nr = :k"),
+                text(f"SELECT {pay_cols} FROM public.kunden WHERE kunden_nr = :k"),  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 {"k": kunden_nr},
             ).mappings().first()
         except (OperationalError, ProgrammingError):

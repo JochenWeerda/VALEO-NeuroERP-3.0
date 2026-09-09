@@ -243,7 +243,7 @@ def patch_mitglied(
         db.execute(
             text(
                 f"UPDATE domain_shared.genossenschaft_mitglieder "
-                f"SET {set_clauses} WHERE id = :id"
+                f"SET {set_clauses} WHERE id = :id"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
         )

@@ -51,7 +51,7 @@ class CrmMergeService:
         try:
             # reviewed-safe: table comes exclusively from the module-owned _MOVABLE allowlist.
             return int(self.db.execute(
-                text(f"SELECT count(*) FROM public.{table} WHERE kunden_nr = :nr"), {"nr": nr}
+                text(f"SELECT count(*) FROM public.{table} WHERE kunden_nr = :nr"), {"nr": nr}  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ).scalar() or 0)
         except Exception:
             self.db.rollback()
@@ -89,7 +89,7 @@ class CrmMergeService:
             for table in _MOVABLE:
                 # reviewed-safe: table comes exclusively from the module-owned _MOVABLE allowlist.
                 res = self.db.execute(
-                    text(f"UPDATE public.{table} SET kunden_nr = :m WHERE kunden_nr = :d"),
+                    text(f"UPDATE public.{table} SET kunden_nr = :m WHERE kunden_nr = :d"),  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
                     {"m": master_nr, "d": duplicate_nr},
                 )
                 if res.rowcount:

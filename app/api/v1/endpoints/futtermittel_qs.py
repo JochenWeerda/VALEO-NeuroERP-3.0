@@ -129,7 +129,7 @@ def update_haccp_plan(
         raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
     sql = (
         "UPDATE domain_shared.futtermittel_haccp_plaene SET "
-        + ", ".join(assignments)
+        + ", ".join(assignments)  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         + " WHERE id = :id AND tenant_id = :tid"
     )
     db.execute(

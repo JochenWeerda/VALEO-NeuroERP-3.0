@@ -457,14 +457,14 @@ class L3ReportCatalogService:
         where_sql = " AND ".join(where)
         total_groups = self.db.execute(
             text(
-                f"SELECT COUNT(DISTINCT {spec.dimension_id}) FROM domain_reporting.l3_report_facts WHERE {where_sql}"
+                f"SELECT COUNT(DISTINCT {spec.dimension_id}) FROM domain_reporting.l3_report_facts WHERE {where_sql}"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
         ).scalar_one()
         sums = (
             self.db.execute(
                 text(
-                    f"SELECT COUNT(*) document_count,COALESCE(SUM(quantity),0) quantity,COALESCE(SUM(net_amount),0) net_amount,COALESCE(SUM(gross_amount),0) gross_amount FROM domain_reporting.l3_report_facts WHERE {where_sql}"
+                    f"SELECT COUNT(*) document_count,COALESCE(SUM(quantity),0) quantity,COALESCE(SUM(net_amount),0) net_amount,COALESCE(SUM(gross_amount),0) gross_amount FROM domain_reporting.l3_report_facts WHERE {where_sql}"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
                 ),
                 params,
             )

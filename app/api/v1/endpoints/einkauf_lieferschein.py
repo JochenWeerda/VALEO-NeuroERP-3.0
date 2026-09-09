@@ -248,7 +248,7 @@ async def get_last_lieferschein(
         params["lieferant_id"] = lieferant_id
     row = db.execute(
         text(
-            f"SELECT * FROM einkauf_lieferscheine WHERE {where} ORDER BY created_at DESC LIMIT 1"
+            f"SELECT * FROM einkauf_lieferscheine WHERE {where} ORDER BY created_at DESC LIMIT 1"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().first()

@@ -311,7 +311,7 @@ async def list_open_items(
             WHERE {' AND '.join(where_clauses)}
             ORDER BY {_expr(cols, "faelligkeit", "due_date")} ASC, rechnungsnr ASC
             LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
     rows = db.execute(
         text(
@@ -367,7 +367,7 @@ async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db:
                 {_expr(cols, "created_at")} AS created_at,
                 {_expr(cols, "updated_at")} AS updated_at
             FROM {table_ref} WHERE id = :id AND tenant_id = :tenant_id
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     row = db.execute(
         text(
             select_sql

@@ -164,7 +164,7 @@ class RecentDocumentsService:
         params = {"tid": self.tenant_id, "uid": self.user_id, "id": document_id}
         result = self.db.execute(
             text(
-                f"DELETE FROM domain_ops.recent_documents WHERE tenant_id=:tid AND user_id=:uid{suffix}"
+                f"DELETE FROM domain_ops.recent_documents WHERE tenant_id=:tid AND user_id=:uid{suffix}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         )

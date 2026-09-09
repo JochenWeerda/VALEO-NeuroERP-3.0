@@ -121,9 +121,9 @@ async def list_exchange_rates(
             conditions.append("active = true")
         
         if conditions:
-            query = text(str(query) + " AND " + " AND ".join(conditions))
+            query = text(str(query) + " AND " + " AND ".join(conditions))  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY rate_date DESC, from_currency, to_currency")
+        query = text(str(query) + " ORDER BY rate_date DESC, from_currency, to_currency")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         

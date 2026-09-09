@@ -35,7 +35,7 @@ class FeedingFeedCatalogService:
         row = self.db.execute(text("""
           SELECT * FROM domain_shared.futtermittel_einzelfutter
           WHERE tenant_id=:tenant_id AND id=:feed_id
-        """ + suffix), {"tenant_id": self.tenant_id, "feed_id": feed_id}).mappings().first()
+        """ + suffix), {"tenant_id": self.tenant_id, "feed_id": feed_id}).mappings().first()  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         if not row:
             raise FeedCatalogNotFound("Futtermittel nicht gefunden.")
         return dict(row)

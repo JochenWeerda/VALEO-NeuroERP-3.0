@@ -170,7 +170,7 @@ class WarehouseService:
             return existing
         sql = (
             "UPDATE domain_inventory.warehouse_bins SET "
-            + ", ".join(set_parts)
+            + ", ".join(set_parts)  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             + " WHERE id = :bid AND tenant_id = :tid"
         )
         self.db.execute(text(sql), params)

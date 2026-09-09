@@ -275,7 +275,7 @@ class ControllingService:
             where.append("kpi_id=:kpi_id")
             params["kpi_id"] = kpi_id
         return self._list(
-            f"SELECT * FROM domain_controlling.kpi_timeseries WHERE {' AND '.join(where)} ORDER BY period_start DESC",
+            f"SELECT * FROM domain_controlling.kpi_timeseries WHERE {' AND '.join(where)} ORDER BY period_start DESC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params,
         )
 
@@ -323,7 +323,7 @@ class ControllingService:
             where.append("status=:status")
             params["status"] = status
         return self._list(
-            f"SELECT * FROM domain_controlling.controlling_actions WHERE {' AND '.join(where)} ORDER BY created_at DESC",
+            f"SELECT * FROM domain_controlling.controlling_actions WHERE {' AND '.join(where)} ORDER BY created_at DESC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params,
         )
 

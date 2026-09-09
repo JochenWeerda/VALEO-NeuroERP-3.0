@@ -32,7 +32,7 @@ class CrmKontaktService:
     def list_by_kunde(self, kunden_nr: str) -> list[dict]:
         # reviewed-safe: _COLS is a module-owned constant; customer and tenant are bound.
         rows = self.db.execute(
-            text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE kunden_nr = :k AND tenant_id = :t ORDER BY created_at DESC"),
+            text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE kunden_nr = :k AND tenant_id = :t ORDER BY created_at DESC"),  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             {"k": kunden_nr, "t": self.tenant_id},
         ).mappings().all()
         return [self._row(r) for r in rows]
@@ -67,7 +67,7 @@ class CrmKontaktService:
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the contact id is bound.
         r = self.db.execute(
-            text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": new_id}
+            text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": new_id}  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         ).mappings().first()
         return self._row(r)
 
@@ -89,7 +89,7 @@ class CrmKontaktService:
             )
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the contact id is bound.
-        r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": kontakt_id}).mappings().first()
+        r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": kontakt_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         return self._row(r) if r else {}
 
     def wiedervorlagen_offen(self, tage: int = 14) -> list[dict]:
@@ -98,7 +98,7 @@ class CrmKontaktService:
                 f"SELECT {_COLS}, (SELECT name1 FROM public.kunden k WHERE k.kunden_nr = kk.kunden_nr) AS kunde "
                 "FROM public.kunden_kontakte kk WHERE tenant_id = :t AND erledigt = FALSE "
                 "AND wiedervorlage IS NOT NULL AND wiedervorlage <= (current_date + (:d || ' days')::interval) "
-                "ORDER BY wiedervorlage"
+                "ORDER BY wiedervorlage"  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             ),
             {"t": self.tenant_id, "d": tage},
         ).mappings().all()

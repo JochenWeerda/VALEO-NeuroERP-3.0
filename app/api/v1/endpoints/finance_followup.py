@@ -164,7 +164,7 @@ def _mahnwesen_csv_rows(
                 WHERE tenant_id = :tid AND status = 'open' AND type = 'debitor'
                   AND overdue_days > 0{level_clause}
                 LIMIT 10000
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             qparams,
         )
@@ -305,7 +305,7 @@ async def export_mahnwesen(
             FROM domain_shared.open_items
             WHERE tenant_id = :tid AND status = 'open' AND type = 'debitor'
               AND overdue_days > 0{level_clause}
-        """
+        """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         )

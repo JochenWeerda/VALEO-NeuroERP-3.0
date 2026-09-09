@@ -211,7 +211,7 @@ class CustomerService:
             rows = self.db.execute(
                 text(
                     f"SELECT id, chefanweisung, business_partner_id FROM domain_crm.customers "
-                    f"WHERE id IN ({placeholders})"
+                    f"WHERE id IN ({placeholders})"  # nosec B608  # reviewed-safe: interpoliert werden nur generierte Parameternamen, Werte sind gebunden
                 ),
                 params,
             ).fetchall()

@@ -232,7 +232,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
             FROM {op_table}
             WHERE tenant_id = :tenant_id AND rechnungsnr = :rechnungsnr AND konto_typ = 'debitoren'
             LIMIT 1
-            """
+            """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
         ),
         {"tenant_id": tenant_id, "rechnungsnr": invoice.number},
     ).fetchone()
@@ -252,7 +252,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
                     op_status = 'offen',
                     updated_at = NOW()
                 WHERE id = :id
-                """
+                """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
             ),
             {
                 "id": op_id,
@@ -272,7 +272,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
                  op_betrag, betrag, offen, kunde_id, kunde_name, waehrung, zahlbar, created_at, updated_at)
                 VALUES (:id, :tenant_id, 'debitoren', 'offen', :rechnungsnr, :rechnungsdatum, :datum, :faelligkeit,
                         :op_betrag, :betrag, :offen, :kunde_id, :kunde_name, :waehrung, :zahlbar, NOW(), NOW())
-                """
+                """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
             ),
             {
                 "id": op_id,
@@ -577,7 +577,7 @@ async def storno_invoice(
                     UPDATE {op_table}
                     SET op_status = 'storniert', offen = 0, updated_at = NOW()
                     WHERE tenant_id = :tid AND rechnungsnr = :nr AND konto_typ = 'debitoren'
-                    """
+                    """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
                 ),
                 {"tid": tenant_id, "nr": invoice_number},
             )

@@ -129,9 +129,9 @@ async def list_booking_templates(
             conditions.append("active = true")
         
         if conditions:
-            query = text(str(query) + " AND " + " AND ".join(conditions))
+            query = text(str(query) + " AND " + " AND ".join(conditions))  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY name")
+        query = text(str(query) + " ORDER BY name")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         

@@ -155,7 +155,7 @@ async def list_bank_accounts(
             {where}
             ORDER BY ba.account_number
             LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
         rows = db.execute(q, params).fetchall()
         return [
@@ -287,7 +287,7 @@ async def update_bank_account(
             return await get_bank_account(account_id, tenant_id, db)
         db.execute(
             text(
-                f"UPDATE domain_erp.bank_accounts SET {', '.join(updates)}, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"
+                f"UPDATE domain_erp.bank_accounts SET {', '.join(updates)}, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         )

@@ -54,13 +54,13 @@ async def list_checklist_templates(
         params = {"tenant_id": tenant_id}
 
         if closing_type:
-            query = text(str(query) + " AND closing_type = :closing_type")
+            query = text(str(query) + " AND closing_type = :closing_type")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["closing_type"] = closing_type
 
         if active_only:
-            query = text(str(query) + " AND active = true")
+            query = text(str(query) + " AND active = true")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
-        query = text(str(query) + " ORDER BY closing_type, template_name")
+        query = text(str(query) + " ORDER BY closing_type, template_name")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         rows = db.execute(query, params).fetchall()
 
@@ -795,9 +795,9 @@ async def list_closing_checklists(
             params["status"] = status
 
         if conditions:
-            query = text(str(query) + " AND " + " AND ".join(conditions))
+            query = text(str(query) + " AND " + " AND ".join(conditions))  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
-        query = text(str(query) + " ORDER BY period DESC, created_at DESC")
+        query = text(str(query) + " ORDER BY period DESC, created_at DESC")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         rows = db.execute(query, params).fetchall()
 
@@ -845,7 +845,7 @@ async def get_closing_cockpit_summary(
         )
         period_params = {"tenant_id": tenant_id}
         if period:
-            period_query = text(str(period_query) + " AND period = :period")
+            period_query = text(str(period_query) + " AND period = :period")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             period_params["period"] = period
         period_row = db.execute(period_query, period_params).first()
         if period_row:
@@ -872,7 +872,7 @@ async def get_closing_cockpit_summary(
         )
         cl_params = {"tenant_id": tenant_id}
         if period:
-            cl_query = text(str(cl_query) + " AND period = :period")
+            cl_query = text(str(cl_query) + " AND period = :period")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             cl_params["period"] = period
         cl_row = db.execute(cl_query, cl_params).first()
         if cl_row:

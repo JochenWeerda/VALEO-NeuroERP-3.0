@@ -47,7 +47,7 @@ def partner_suche(
     kunden = _safe(
         db,
         "SELECT kunden_nr, name, plz, ort, business_partner_id FROM kunden_lookup "
-        + ("WHERE name ILIKE :like OR matchcode ILIKE :like OR kunden_nr ILIKE :like " if has_q else "")
+        + ("WHERE name ILIKE :like OR matchcode ILIKE :like OR kunden_nr ILIKE :like " if has_q else "")  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         + "ORDER BY name LIMIT :lim",
         {"like": like, "lim": limit * 2},
     )
@@ -56,7 +56,7 @@ def partner_suche(
         db,
         "SELECT partner_id, firmenname AS name, plz, ort FROM domain_einkauf.lieferanten "
         "WHERE aktiv IS NOT FALSE "
-        + ("AND (firmenname ILIKE :like) " if has_q else "")
+        + ("AND (firmenname ILIKE :like) " if has_q else "")  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         + "ORDER BY firmenname LIMIT :lim",
         {"like": like, "lim": limit * 2},
     )
@@ -64,7 +64,7 @@ def partner_suche(
     leads = _safe(
         db,
         "SELECT id, company AS name, NULL AS plz, NULL AS ort, status FROM public.crm_leads "
-        + ("WHERE company ILIKE :like OR contact_person ILIKE :like " if has_q else "")
+        + ("WHERE company ILIKE :like OR contact_person ILIKE :like " if has_q else "")  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         + "ORDER BY company LIMIT :lim",
         {"like": like, "lim": limit * 2},
     )

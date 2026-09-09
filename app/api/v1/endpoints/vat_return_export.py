@@ -648,10 +648,10 @@ async def list_vat_returns(
         params = {"tenant_id": tenant_id}
         
         if period:
-            query = text(str(query) + " AND period = :period")
+            query = text(str(query) + " AND period = :period")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["period"] = period
         
-        query = text(str(query) + " ORDER BY period DESC, created_at DESC")
+        query = text(str(query) + " ORDER BY period DESC, created_at DESC")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         

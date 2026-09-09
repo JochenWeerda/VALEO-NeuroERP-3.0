@@ -171,7 +171,7 @@ def list_kostenstellen(
     if aktiv is not None:
         clauses.append("aktiv = :aktiv")
         params["aktiv"] = aktiv
-    sql = f"SELECT * FROM domain_finance.kostenstellen WHERE {' AND '.join(clauses)} ORDER BY nummer"
+    sql = f"SELECT * FROM domain_finance.kostenstellen WHERE {' AND '.join(clauses)} ORDER BY nummer"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     rows = db.execute(text(sql), params).mappings().all()
     return [dict(r) for r in rows]
 
@@ -316,7 +316,7 @@ def list_kostenarten(
     if gruppe:
         clauses.append("kostenart_gruppe = :gruppe")
         params["gruppe"] = gruppe
-    sql = f"SELECT * FROM domain_finance.kostenarten WHERE {' AND '.join(clauses)} ORDER BY nummer"
+    sql = f"SELECT * FROM domain_finance.kostenarten WHERE {' AND '.join(clauses)} ORDER BY nummer"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     return [dict(r) for r in db.execute(text(sql), params).mappings().all()]
 
 
@@ -374,7 +374,7 @@ def list_buchungen(
     if periode:
         clauses.append("periode = :periode")
         params["periode"] = periode
-    sql = f"SELECT * FROM domain_finance.kostenstellen_buchungen WHERE {' AND '.join(clauses)} ORDER BY buchungsdatum DESC"
+    sql = f"SELECT * FROM domain_finance.kostenstellen_buchungen WHERE {' AND '.join(clauses)} ORDER BY buchungsdatum DESC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     return [dict(r) for r in db.execute(text(sql), params).mappings().all()]
 
 

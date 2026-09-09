@@ -221,7 +221,7 @@ async def list_sales_orders(
             WHERE {where_sql}
             ORDER BY created_at DESC
             OFFSET :skip LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: Spalten stammen aus deklarierten Pydantic-Feldnamen, Werte sind gebunden
         ),
         params,
     ).mappings()
@@ -652,7 +652,7 @@ async def update_sales_order(
             UPDATE domain_crm.sales_orders
             SET {", ".join(set_fields)}
             WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
+            """  # nosec B608  # reviewed-safe: Spalten stammen aus deklarierten Pydantic-Feldnamen, Werte sind gebunden
         ),
         params,
     )

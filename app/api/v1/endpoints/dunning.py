@@ -153,9 +153,9 @@ async def list_dunning_rules(
         params = {"tenant_id": tenant_id}
         
         if active_only:
-            query = text(str(query) + " AND active = true")
+            query = text(str(query) + " AND active = true")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY level")
+        query = text(str(query) + " ORDER BY level")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         
@@ -705,9 +705,9 @@ async def list_dunnings(
             params["status"] = status
         
         if conditions:
-            query = text(str(query) + " AND " + " AND ".join(conditions))
+            query = text(str(query) + " AND " + " AND ".join(conditions))  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY dunning_date DESC, dunning_level DESC")
+        query = text(str(query) + " ORDER BY dunning_date DESC, dunning_level DESC")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         

@@ -355,9 +355,9 @@ async def plan_payment_run(
         """)
         params = {"tenant_id": request.tenant_id}
         if request.creditor_ids:
-            q = text(str(q) + " AND lieferant_id = ANY(:creditor_ids)")
+            q = text(str(q) + " AND lieferant_id = ANY(:creditor_ids)")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["creditor_ids"] = request.creditor_ids
-        q = text(str(q) + " ORDER BY lieferant_name, faelligkeit")
+        q = text(str(q) + " ORDER BY lieferant_name, faelligkeit")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         rows = db.execute(q, params).fetchall()
     except Exception:
         # Fallback if table/columns differ
@@ -542,10 +542,10 @@ async def list_payment_runs(
         params = {"tenant_id": tenant_id}
 
         if status:
-            query = text(str(query) + " AND status = :status")
+            query = text(str(query) + " AND status = :status")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["status"] = status
 
-        query = text(str(query) + " ORDER BY created_at DESC")
+        query = text(str(query) + " ORDER BY created_at DESC")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         rows = db.execute(query, params).fetchall()
 

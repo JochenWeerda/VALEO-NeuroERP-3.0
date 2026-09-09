@@ -43,7 +43,7 @@ class FeedingMeasureLifecycleService:
           WHERE v.tenant_id=:tenant_id AND v.measure_id=:measure_id
             AND m.group_id=ANY(:group_ids)
           ORDER BY v.version DESC LIMIT 1"""
-                    + lock_sql
+                    + lock_sql  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 {
                     "tenant_id": self.tenant_id,

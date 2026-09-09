@@ -119,7 +119,7 @@ def list_gelangensbestaetigung(
                 f"status, token, erinnerung_am, erhalten_am "
                 f"FROM domain_compliance.gelangensbestaetigung "
                 f"{where_sql} "
-                f"ORDER BY versanddatum DESC"
+                f"ORDER BY versanddatum DESC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).fetchall()

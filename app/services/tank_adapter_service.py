@@ -283,7 +283,7 @@ class TankAdapterService:
         rows = (
             self.db.execute(
                 text(
-                    f"SELECT id,adapter_key,external_id,payload_hash,status,validation_errors,rule_result,zapfung_id,delivery_handover_id,retry_count,received_at,processed_at,updated_at FROM domain_ops.tank_adapter_intake WHERE {sql} ORDER BY received_at DESC LIMIT :limit OFFSET :offset"
+                    f"SELECT id,adapter_key,external_id,payload_hash,status,validation_errors,rule_result,zapfung_id,delivery_handover_id,retry_count,received_at,processed_at,updated_at FROM domain_ops.tank_adapter_intake WHERE {sql} ORDER BY received_at DESC LIMIT :limit OFFSET :offset"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             )

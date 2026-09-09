@@ -34,7 +34,7 @@ class CrmGiftService:
         return d
 
     def list(self, kunden_nr: str, year: Optional[int] = None, contact_id: Optional[str] = None) -> list[dict]:
-        sql = f"SELECT {_COLS} FROM public.crm_gifts WHERE tenant_id = :t AND kunden_nr = :k"
+        sql = f"SELECT {_COLS} FROM public.crm_gifts WHERE tenant_id = :t AND kunden_nr = :k"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params: dict = {"t": self.tenant_id, "k": kunden_nr}
         if year is not None:
             sql += " AND year = :y"
@@ -75,7 +75,7 @@ class CrmGiftService:
         )
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the gift id is bound.
-        r = self.db.execute(text(f"SELECT {_COLS} FROM public.crm_gifts WHERE id = :id"), {"id": new_id}).mappings().first()
+        r = self.db.execute(text(f"SELECT {_COLS} FROM public.crm_gifts WHERE id = :id"), {"id": new_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         return self._row(r)
 
     def update(self, gift_id: str, data: dict) -> dict:
@@ -105,7 +105,7 @@ class CrmGiftService:
         )
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the gift id is bound.
-        r = self.db.execute(text(f"SELECT {_COLS} FROM public.crm_gifts WHERE id = :id"), {"id": gift_id}).mappings().first()
+        r = self.db.execute(text(f"SELECT {_COLS} FROM public.crm_gifts WHERE id = :id"), {"id": gift_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         return self._row(r) if r else {}
 
     def delete(self, gift_id: str) -> None:

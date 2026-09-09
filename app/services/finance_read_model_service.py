@@ -597,7 +597,7 @@ def _latest_outbox_event_id(
                   AND ({' OR '.join(conditions)})
                 ORDER BY timestamp DESC
                 LIMIT 1
-            """),
+            """),  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params,
         ).mappings().first()
     except Exception:

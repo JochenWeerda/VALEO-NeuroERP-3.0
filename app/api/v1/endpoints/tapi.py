@@ -86,7 +86,7 @@ def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = D
     )
     db.commit()
     # reviewed-safe: _COLS is a module-owned constant; all values remain bound parameters.
-    r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()
+    r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
     return _row(r)
 
 
@@ -94,7 +94,7 @@ def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = D
 def pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
     # reviewed-safe: _COLS is a module-owned constant; tenant data is bound.
     rows = db.execute(
-        text(f"SELECT {_COLS} FROM public.tapi_calls WHERE tenant_id = :t AND acked = FALSE ORDER BY created_at DESC LIMIT 20"),
+        text(f"SELECT {_COLS} FROM public.tapi_calls WHERE tenant_id = :t AND acked = FALSE ORDER BY created_at DESC LIMIT 20"),  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         {"t": tenant_id},
     ).mappings().all()
     return [_row(r) for r in rows]
@@ -146,7 +146,7 @@ def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(g
     )
     db.commit()
     # reviewed-safe: _COLS is a module-owned constant; all values remain bound parameters.
-    r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()
+    r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
     return _row(r)
 
 
@@ -156,7 +156,7 @@ def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_ten
         text(
             f"SELECT {_COLS} FROM public.tapi_calls "
             "WHERE tenant_id = :t AND richtung = 'aus' AND status = 'dial_req' "
-            "ORDER BY created_at LIMIT 20"
+            "ORDER BY created_at LIMIT 20"  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         ),
         {"t": tenant_id},
     ).mappings().all()

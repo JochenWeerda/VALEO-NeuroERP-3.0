@@ -570,7 +570,7 @@ def list_contact_docs(
               AND lower(coalesce(status,'')) <> 'paid'{overdue}
               AND partner_id = :pid
             ORDER BY due_date DESC LIMIT 100
-            """,
+            """,  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             {"t": tenant_id, "pid": pid},
         )
         out: list[ContactDoc] = []

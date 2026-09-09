@@ -466,7 +466,7 @@ class LegacyInterfaceAdapterService:
         where_sql = " AND ".join(where)
         total = self.db.execute(
             text(
-                f"SELECT COUNT(*) FROM domain_integration.legacy_adapter_batches WHERE {where_sql}"
+                f"SELECT COUNT(*) FROM domain_integration.legacy_adapter_batches WHERE {where_sql}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).scalar_one()
@@ -474,7 +474,7 @@ class LegacyInterfaceAdapterService:
         rows = (
             self.db.execute(
                 text(
-                    f"SELECT id,profile_key,external_id,payload_hash,mapping_version,status,record_count,staged_count,mismatch_count,error_code,error_message,created_at,updated_at FROM domain_integration.legacy_adapter_batches WHERE {where_sql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+                    f"SELECT id,profile_key,external_id,payload_hash,mapping_version,status,record_count,staged_count,mismatch_count,error_code,error_message,created_at,updated_at FROM domain_integration.legacy_adapter_batches WHERE {where_sql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             )

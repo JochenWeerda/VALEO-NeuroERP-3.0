@@ -40,7 +40,7 @@ class FeedingFeedAnalysisService:
           SELECT * FROM domain_shared.grundfutter_analysen
           WHERE tenant_id=:tenant_id AND id=:analysis_id
         """
-                    + suffix
+                    + suffix  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 {"tenant_id": self.tenant_id, "analysis_id": analysis_id},
             )

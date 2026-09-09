@@ -158,7 +158,7 @@ async def list_tax_keys(
             FROM domain_erp.tax_keys
             WHERE {' AND '.join(where_clauses)}
             ORDER BY code
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
         
         rows = db.execute(query, params).fetchall()

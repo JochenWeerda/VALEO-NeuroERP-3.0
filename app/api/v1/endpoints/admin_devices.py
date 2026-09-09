@@ -151,7 +151,7 @@ async def list_devices(
             FROM domain_shared.admin_devices
             WHERE {' AND '.join(where)}
             ORDER BY device_type ASC, name ASC
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -279,7 +279,7 @@ async def list_device_mappings(
             FROM domain_shared.admin_device_mappings
             WHERE {' AND '.join(where)}
             ORDER BY document_type ASC, process_code ASC, created_at DESC
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -457,7 +457,7 @@ async def list_output_templates(
             FROM domain_shared.admin_output_templates
             WHERE {' AND '.join(where)}
             ORDER BY document_type ASC, template_code ASC
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -648,7 +648,7 @@ async def list_output_profiles(
             FROM domain_shared.admin_output_profiles
             WHERE {' AND '.join(where)}
             ORDER BY document_type ASC, process_code ASC, profile_code ASC
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()

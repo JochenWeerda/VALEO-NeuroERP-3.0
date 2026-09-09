@@ -323,7 +323,7 @@ def load_kunden(db, plz_prefixes: Optional[list[str]] = None) -> list[dict]:
             FROM public.kunden
             WHERE COALESCE(geloescht, FALSE) = FALSE
             """
-            + clause
+            + clause  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -435,7 +435,7 @@ def bridge_status(db, plz_prefixes: Optional[list[str]] = None) -> dict:
     p_total: dict = {}
     c_total = _plz_clause(plz_prefixes, p_total)
     total = db.execute(
-        text("SELECT count(*) FROM public.kunden WHERE coalesce(geloescht, FALSE) = FALSE" + c_total),
+        text("SELECT count(*) FROM public.kunden WHERE coalesce(geloescht, FALSE) = FALSE" + c_total),  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         p_total,
     ).scalar() or 0
     p_linked: dict = {}
@@ -444,7 +444,7 @@ def bridge_status(db, plz_prefixes: Optional[list[str]] = None) -> dict:
         text(
             "SELECT count(*) FROM public.kunden "
             "WHERE coalesce(geloescht, FALSE) = FALSE AND business_partner_id IS NOT NULL"
-            + c_linked
+            + c_linked  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         p_linked,
     ).scalar() or 0
@@ -457,7 +457,7 @@ def bridge_status(db, plz_prefixes: Optional[list[str]] = None) -> dict:
                 "WHERE k.business_partner_id IS NOT NULL "
                 "AND NOT EXISTS (SELECT 1 FROM domain_crm.business_partners b "
                 "                WHERE b.partner_id = k.business_partner_id)"
-                + c_fk
+                + c_fk  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             p_fk,
         ).scalar() or 0

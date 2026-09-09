@@ -259,7 +259,7 @@ async def list_station_devices(
             FROM domain_shared.admin_station_devices
             WHERE {' AND '.join(where)}
             ORDER BY station_id, device_role, priority
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -710,7 +710,7 @@ async def list_connector_events(
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
             LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -737,7 +737,7 @@ async def list_connector_events_quarantine(
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
             LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()

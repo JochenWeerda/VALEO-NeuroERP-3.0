@@ -47,7 +47,7 @@ P1-Specs aus dem Audit:
 |---|---|---|
 | SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
 | SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
-| SPEC-P1-05 | teilweise 2026-08-23 | S608-Inventar `docs/operations/appsec-s608-review.md`; 23 neue Stellen annotated; `check_sql_fstrings.py` gruen; 15 `needs_recheck` fuer Core-Umbau offen |
+| SPEC-P1-05 | erledigt 2026-09-09 | S608-Restschuld einzeln reviewt (SPEC-P1-05-S608-RESTSCHULD): Baseline 167 -> 0, `bandit -t B608` -> 0, unreviewed 136 -> 0; Injection-Pfad env -> SQL-Bezeichner in `geo_pipeline` ueber `app/core/sql_identifiers` geschlossen |
 | SPEC-P1-06 | offen | Legacy-Routen mit `response_model` typisieren |
 | SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
 | SPEC-P1-08 | erledigt 2026-07-06 | Chargen-Tiefenmodell: Lot-Attribute (herkunft, sperrgrund, qs_status, received_at); FEFO-Pick sortiert `mhd ASC NULLS LAST, created_at ASC`; Migration `inv_lot_depth_spec_p1_08` |

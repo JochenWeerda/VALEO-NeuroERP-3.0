@@ -25,6 +25,7 @@ from typing import Optional
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
+from app.core.sql_identifiers import bezeichner, qualifizierter_bezeichner
 from app.services.gap_pipeline import normalize_name, tokenset as _tokenset
 
 logger = logging.getLogger("geo.pipeline")
@@ -170,10 +171,15 @@ def _partner_score(
 
 
 # Verkaufsdaten-Quelle für Share-of-Wallet (env-überschreibbar für Produktiv-DB).
-SALES_TABLE = os.getenv("SALES_TABLE", "domain_portal.customer_orders")
-SALES_KUNDE_COL = os.getenv("SALES_KUNDE_COL", "customer_number")
-SALES_AMOUNT_COL = os.getenv("SALES_AMOUNT_COL", "total_net")
-SALES_DATE_COL = os.getenv("SALES_DATE_COL", "order_date")
+# Die vier Werte landen als Bezeichner im SQL-Text (Parametrisierung deckt nur
+# Werte ab), stammen aber aus der Umgebung. Daher hier einmalig validieren —
+# ein ungueltiger Deployment-Wert faellt beim Import auf, nicht in der Query.
+SALES_TABLE = qualifizierter_bezeichner(
+    os.getenv("SALES_TABLE", "domain_portal.customer_orders"), "SALES_TABLE"
+)
+SALES_KUNDE_COL = bezeichner(os.getenv("SALES_KUNDE_COL", "customer_number"), "SALES_KUNDE_COL")
+SALES_AMOUNT_COL = bezeichner(os.getenv("SALES_AMOUNT_COL", "total_net"), "SALES_AMOUNT_COL")
+SALES_DATE_COL = bezeichner(os.getenv("SALES_DATE_COL", "order_date"), "SALES_DATE_COL")
 
 
 def build_turnover_lookup(db, year: int) -> dict[str, float]:
@@ -192,7 +198,7 @@ def build_turnover_lookup(db, year: int) -> dict[str, float]:
             WHERE {SALES_KUNDE_COL} IS NOT NULL
               AND {SALES_DATE_COL} >= :start AND {SALES_DATE_COL} < :end
             GROUP BY {SALES_KUNDE_COL}
-            """  # noqa: S608 — Bezeichner aus Config, Werte parametrisiert
+            """  # noqa: S608 — Bezeichner aus Config, Werte parametrisiert  # nosec B608  # reviewed-safe: Bezeichner sind beim Import gegen app/core/sql_identifiers geprueft
         ),
         {"start": f"{year}-01-01", "end": f"{year + 1}-01-01"},
     ).all()
@@ -279,7 +285,7 @@ def get_map_points(
             where = ""
         # reviewed-safe: where is assembled exclusively from fixed clauses below; values are bound.
         points = db.execute(
-            text(f"SELECT name, name_norm, postal_code, ort, lat, lon FROM gap_map_points {where}"),
+            text(f"SELECT name, name_norm, postal_code, ort, lat, lon FROM gap_map_points {where}"),  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             {
                 "lat_min": GEO_LAT_MIN, "lat_max": GEO_LAT_MAX,
                 "lon_min": GEO_LON_MIN, "lon_max": GEO_LON_MAX,
@@ -380,7 +386,7 @@ def geocode_pending(limit: int = 50, sleep_seconds: float = 1.1, retry_errors: b
                 WHERE lat IS NULL AND {status_filter}
                 ORDER BY id
                 LIMIT :limit
-                """  # noqa: S608 — status_filter ist code-kontrolliert (kein User-Input)
+                """  # noqa: S608 — status_filter ist code-kontrolliert (kein User-Input)  # nosec B608  # reviewed-safe: Filterfragment ist ein Code-Literal, Werte sind gebunden
             ),
             {"limit": limit},
         ).all()

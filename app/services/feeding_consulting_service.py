@@ -28,7 +28,7 @@ class FeedingConsultingService:
         if ref_id is None:
             return
         row = self.db.execute(text(
-            f"SELECT 1 FROM domain_agrar.{table} WHERE tenant_id=:tenant_id AND id=:ref_id"
+            f"SELECT 1 FROM domain_agrar.{table} WHERE tenant_id=:tenant_id AND id=:ref_id"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
         ), {"tenant_id": self.tenant_id, "ref_id": ref_id}).first()
         if not row:
             raise LookupError(message)

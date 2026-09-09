@@ -143,7 +143,7 @@ def list_meldungen(
                 f"menge, mengeneinheit, geschaeftsvorgang_code, status "
                 f"FROM domain_compliance.intrastat_meldungen "
                 f"{where_sql} "
-                f"ORDER BY meldezeitraum DESC, meldenummer"
+                f"ORDER BY meldezeitraum DESC, meldenummer"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
         ).fetchall()
@@ -231,7 +231,7 @@ def update_meldung(
         db.execute(
             text(
                 f"UPDATE domain_compliance.intrastat_meldungen "
-                f"SET {set_clauses} WHERE id = :id"
+                f"SET {set_clauses} WHERE id = :id"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
         )
