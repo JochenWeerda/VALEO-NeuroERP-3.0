@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-08
+last_reviewed: 2026-09-09
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -150,6 +150,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `inventory_compat_service` | Service layer for compat inventory (lager) and futter domain routes. |
 | `inventory_correction_service` | DOM-INV-004.4 — Bestandskorrektur-Storno-Service. |
 | `inventory_count_close_service` | DOM-INV-004.3 — Inventur-Differenzbeleg-Service. |
+| `inventory_document_reference` | Belegbezug einer Bestandsbewegung — kanonisch und historisch. |
 | `inventory_lot_trace_service` | DOM-INV-004.2 — Chargen-/MHD-Traceability Service (FEFO). |
 | `inventory_movement_direction` | DOM-INV-005: kanonische Bewegungsrichtung fuer inventory_stock_movements. |
 | `inventory_stock_balance` | Bestandssaldo aus inventory_stock_movements. |
