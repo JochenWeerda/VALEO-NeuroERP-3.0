@@ -58,7 +58,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/profiles", response_model=AdapterProfileListOut)
+@router.get("/profiles", response_model=AdapterProfileListOut, summary="Schnittstellenprofile auflisten")
 def profiles(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -66,7 +66,7 @@ def profiles(
     return {"items": items, "total": len(items), "execution_enabled": False}
 
 
-@router.put("/profiles/{profile_key}", response_model=AdapterConfigureOut)
+@router.put("/profiles/{profile_key}", response_model=AdapterConfigureOut, summary="Schnittstellenprofil konfigurieren")
 def configure(
     profile_key: str,
     body: ProfileIn,
@@ -86,7 +86,7 @@ def configure(
 
 @router.post(
     "/{profile_key}/intake", response_model=AdapterIntakeOut, status_code=status.HTTP_202_ACCEPTED
-)
+, summary="Datenlieferung entgegennehmen")
 def intake(
     profile_key: str,
     body: IntakeIn,
@@ -101,7 +101,7 @@ def intake(
     )
 
 
-@router.get("/batches", response_model=AdapterMonitorOut)
+@router.get("/batches", response_model=AdapterMonitorOut, summary="Lieferstapel ueberwachen")
 def monitor(
     batch_status: str | None = Query(default=None, alias="status"),
     page: int = Query(1, ge=1),
@@ -116,7 +116,7 @@ def monitor(
     )
 
 
-@router.post("/batches/{batch_id}/stage", response_model=AdapterBatchActionOut)
+@router.post("/batches/{batch_id}/stage", response_model=AdapterBatchActionOut, summary="Lieferstapel in die Staging-Stufe uebernehmen")
 def stage(
     batch_id: str,
     body: ReasonIn,
@@ -131,7 +131,7 @@ def stage(
     )
 
 
-@router.post("/batches/{batch_id}/reconcile", response_model=AdapterBatchActionOut)
+@router.post("/batches/{batch_id}/reconcile", response_model=AdapterBatchActionOut, summary="Lieferstapel abstimmen")
 def reconcile(
     batch_id: str,
     body: ReasonIn,
@@ -146,7 +146,7 @@ def reconcile(
     )
 
 
-@router.post("/batches/{batch_id}/approve", response_model=AdapterBatchActionOut)
+@router.post("/batches/{batch_id}/approve", response_model=AdapterBatchActionOut, summary="Lieferstapel freigeben")
 def approve(
     batch_id: str,
     body: ReasonIn,

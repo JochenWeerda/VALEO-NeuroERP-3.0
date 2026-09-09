@@ -182271,7 +182271,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Feeds",
+        "summary": "Futtermittel auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182338,7 +182338,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Feed",
+        "summary": "Futtermittel anlegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182406,7 +182406,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Feed",
+        "summary": "Futtermittel abrufen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182482,7 +182482,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Update Feed",
+        "summary": "Futtermittel aendern",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182554,7 +182554,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Feed History",
+        "summary": "Aenderungshistorie des Futtermittels",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182626,7 +182626,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Products",
+        "summary": "Handelsprodukte auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182702,7 +182702,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Add Product",
+        "summary": "Handelsprodukt hinzufuegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182774,7 +182774,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Values",
+        "summary": "Referenzwerte auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -182850,7 +182850,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Add Value",
+        "summary": "Referenzwert hinzufuegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183114,7 +183114,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Actuals",
+        "summary": "Ist-Fuetterungen auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183181,7 +183181,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Record Actual",
+        "summary": "Ist-Fuetterung erfassen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183244,7 +183244,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Actual Components",
+        "summary": "Komponenten der Ist-Fuetterung auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183307,7 +183307,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Deviation Policies",
+        "summary": "Abweichungsregeln auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183374,7 +183374,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Deviation Policy",
+        "summary": "Abweichungsregel anlegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183431,7 +183431,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Export Actuals Csv",
+        "summary": "Ist-Fuetterungen als CSV exportieren",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183494,7 +183494,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Deviation Findings",
+        "summary": "Abweichungsbefunde auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183557,7 +183557,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Actual Measures",
+        "summary": "Massnahmen aus Abweichungen auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -183624,7 +183624,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Actual Measure",
+        "summary": "Massnahme aus Abweichung anlegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -184409,7 +184409,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Business Findings",
+        "summary": "Befunde des Betriebs auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -184736,7 +184736,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Business Groups",
+        "summary": "Fuetterungsgruppen des Betriebs auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -184958,7 +184958,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Business Overview",
+        "summary": "Betriebsuebersicht abrufen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -185030,7 +185030,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Templates",
+        "summary": "Rationsvorlagen des Betriebs auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -185103,7 +185103,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Business Rations",
+        "summary": "Rationen des Betriebs auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -185550,7 +185550,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Case Measures",
+        "summary": "Massnahmen des Beratungsfalls auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -185628,7 +185628,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Link Measure",
+        "summary": "Massnahme mit Beratungsfall verknuepfen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -185779,7 +185779,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Report Drafts",
+        "summary": "Berichtsentwuerfe auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -185857,7 +185857,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Report Draft",
+        "summary": "Berichtsentwurf anlegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -186646,7 +186646,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Process Overdue",
+        "summary": "Ueberfaellige Massnahmen verarbeiten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -186719,7 +186719,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Measure History",
+        "summary": "Statushistorie der Massnahme",
         "tags": [
           "agrar",
           "futtermittel",
@@ -186799,7 +186799,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Transition Measure",
+        "summary": "Massnahme im Status weiterschalten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -186950,7 +186950,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Notifications",
+        "summary": "Benachrichtigungen zu Massnahmen auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -187412,7 +187412,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Plans",
+        "summary": "Fuetterungsplaene auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -187475,7 +187475,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Current Plans",
+        "summary": "Aktuell gueltige Fuetterungsplaene",
         "tags": [
           "agrar",
           "futtermittel",
@@ -187544,7 +187544,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Publish Plan",
+        "summary": "Fuetterungsplan veroeffentlichen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -187680,7 +187680,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Plan",
+        "summary": "Planversion abrufen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -187753,7 +187753,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Plan Instructions",
+        "summary": "Fuetterungsanweisungen der Planversion",
         "tags": [
           "agrar",
           "futtermittel",
@@ -188017,7 +188017,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Template",
+        "summary": "Rationsvorlage anlegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -188095,7 +188095,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Apply Template",
+        "summary": "Rationsvorlage anwenden",
         "tags": [
           "agrar",
           "futtermittel",
@@ -189423,7 +189423,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Project Supply",
+        "summary": "Futterbedarf vorausrechnen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -189487,7 +189487,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Procurement Handoffs",
+        "summary": "Einkaufsuebergaben auflisten",
         "tags": [
           "agrar",
           "futtermittel",
@@ -189556,7 +189556,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Procurement Handoff",
+        "summary": "Einkaufsuebergabe anlegen",
         "tags": [
           "agrar",
           "futtermittel",
@@ -207320,7 +207320,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Batches",
+        "summary": "Rechnungsstapel auflisten",
         "tags": [
           "finance",
           "billing-batches",
@@ -207384,7 +207384,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create",
+        "summary": "Rechnungsstapel anlegen",
         "tags": [
           "finance",
           "billing-batches",
@@ -207488,7 +207488,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Lines",
+        "summary": "Stapelzeilen auflisten",
         "tags": [
           "finance",
           "billing-batches",
@@ -207563,7 +207563,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Retry",
+        "summary": "Stapelzeile erneut verarbeiten",
         "tags": [
           "finance",
           "billing-batches",
@@ -207619,7 +207619,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Summary",
+        "summary": "Kennzahlen der Rechnungsstapel",
         "tags": [
           "finance",
           "billing-batches",
@@ -207694,7 +207694,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Execute",
+        "summary": "Rechnungsstapel ausfuehren",
         "tags": [
           "finance",
           "billing-batches",
@@ -207769,7 +207769,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Release",
+        "summary": "Rechnungsstapel freigeben",
         "tags": [
           "finance",
           "billing-batches",
@@ -207844,7 +207844,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Validate",
+        "summary": "Rechnungsstapel pruefen",
         "tags": [
           "finance",
           "billing-batches",
@@ -275060,7 +275060,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Items",
+        "summary": "Fremdware-Worklist auflisten",
         "tags": [
           "inventory",
           "foreign-goods"
@@ -275117,7 +275117,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Summary",
+        "summary": "Kennzahlen der Fremdware-Worklist",
         "tags": [
           "inventory",
           "foreign-goods"
@@ -275193,7 +275193,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Complete",
+        "summary": "Fremdware-Einlagerung abschliessen",
         "tags": [
           "inventory",
           "foreign-goods"
@@ -275269,7 +275269,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Transfer",
+        "summary": "Fremdware umlagern",
         "tags": [
           "inventory",
           "foreign-goods"
@@ -288072,7 +288072,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Batches",
+        "summary": "Nebenbuch-Stapel auflisten",
         "tags": [
           "inventory",
           "inventory-auxiliary"
@@ -288135,7 +288135,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Batch",
+        "summary": "Nebenbuch-Stapel anlegen",
         "tags": [
           "inventory",
           "inventory-auxiliary"
@@ -288209,7 +288209,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Transition",
+        "summary": "Nebenbuch-Stapel weiterschalten",
         "tags": [
           "inventory",
           "inventory-auxiliary"
@@ -288264,7 +288264,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Summary",
+        "summary": "Kennzahlen der Nebenbuch-Stapel",
         "tags": [
           "inventory",
           "inventory-auxiliary"
@@ -298317,7 +298317,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Catalog",
+        "summary": "Berichtskatalog abrufen",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298374,7 +298374,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Bonus Runs",
+        "summary": "Bonuslaeufe auflisten",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298439,7 +298439,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Bonus Run",
+        "summary": "Bonuslauf anlegen",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298515,7 +298515,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Correct Bonus Run",
+        "summary": "Bonuslauf korrigieren",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298583,7 +298583,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Export Bonus Run",
+        "summary": "Bonuslauf als CSV exportieren",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298650,7 +298650,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Project Fact",
+        "summary": "Berichtsfakt projizieren",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298760,7 +298760,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Drilldown",
+        "summary": "Bericht auf einen Dimensionswert aufreissen",
         "tags": [
           "reporting",
           "l3-parity"
@@ -298848,7 +298848,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Export Csv",
+        "summary": "Bericht als CSV exportieren",
         "tags": [
           "reporting",
           "l3-parity"
@@ -299085,7 +299085,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Run Report",
+        "summary": "Bericht ausfuehren",
         "tags": [
           "reporting",
           "l3-parity"
@@ -305235,7 +305235,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Monitor",
+        "summary": "Lieferstapel ueberwachen",
         "tags": [
           "integration",
           "l3-parity"
@@ -305309,7 +305309,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Approve",
+        "summary": "Lieferstapel freigeben",
         "tags": [
           "integration",
           "l3-parity"
@@ -305383,7 +305383,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Reconcile",
+        "summary": "Lieferstapel abstimmen",
         "tags": [
           "integration",
           "l3-parity"
@@ -305457,7 +305457,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Stage",
+        "summary": "Lieferstapel in die Staging-Stufe uebernehmen",
         "tags": [
           "integration",
           "l3-parity"
@@ -305512,7 +305512,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Profiles",
+        "summary": "Schnittstellenprofile auflisten",
         "tags": [
           "integration",
           "l3-parity"
@@ -305586,7 +305586,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Configure",
+        "summary": "Schnittstellenprofil konfigurieren",
         "tags": [
           "integration",
           "l3-parity"
@@ -305660,7 +305660,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Intake",
+        "summary": "Datenlieferung entgegennehmen",
         "tags": [
           "integration",
           "l3-parity"
@@ -308965,7 +308965,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Messages",
+        "summary": "Nachrichten des Mailarbeitsplatzes auflisten",
         "tags": [
           "crm",
           "mail",
@@ -309038,7 +309038,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Attachments",
+        "summary": "Anhaenge auflisten",
         "tags": [
           "crm",
           "mail",
@@ -309115,7 +309115,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Transfer Attachment",
+        "summary": "Anhang uebernehmen",
         "tags": [
           "crm",
           "mail",
@@ -309183,7 +309183,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Draft",
+        "summary": "Entwurf anlegen",
         "tags": [
           "crm",
           "mail",
@@ -309260,7 +309260,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Assign",
+        "summary": "Nachricht zuweisen",
         "tags": [
           "crm",
           "mail",
@@ -309337,7 +309337,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Queue",
+        "summary": "Nachricht zum Versand einreihen",
         "tags": [
           "crm",
           "mail",
@@ -349859,7 +349859,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Operations",
+        "summary": "Produktionsvorgaenge auflisten",
         "tags": [
           "production-control",
           "agrar",
@@ -349925,7 +349925,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Register",
+        "summary": "Produktionsvorgang registrieren",
         "tags": [
           "production-control",
           "agrar",
@@ -349995,7 +349995,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Audit",
+        "summary": "Audit-Spur des Produktionsvorgangs",
         "tags": [
           "production-control",
           "agrar",
@@ -350072,7 +350072,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Transition",
+        "summary": "Produktionsvorgang weiterschalten",
         "tags": [
           "production-control",
           "agrar",
@@ -350130,7 +350130,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Summary",
+        "summary": "Kennzahlen des Produktionsleitstands",
         "tags": [
           "production-control",
           "agrar",
@@ -350198,7 +350198,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Sync",
+        "summary": "Produktionsvorgaenge synchronisieren",
         "tags": [
           "production-control",
           "agrar",
@@ -353713,7 +353713,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Definitions",
+        "summary": "Abfragedefinitionen auflisten",
         "tags": [
           "reporting",
           "query-center"
@@ -353778,7 +353778,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Save",
+        "summary": "Abfragedefinition speichern",
         "tags": [
           "reporting",
           "query-center"
@@ -353835,7 +353835,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Catalog",
+        "summary": "Abfragekatalog abrufen",
         "tags": [
           "reporting",
           "query-center"
@@ -353902,7 +353902,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Import Definition",
+        "summary": "Signierte Abfragedefinition importieren",
         "tags": [
           "reporting",
           "query-center"
@@ -353969,7 +353969,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Preview",
+        "summary": "Abfrage als Vorschau ausfuehren",
         "tags": [
           "reporting",
           "query-center"
@@ -354045,7 +354045,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Export Definition",
+        "summary": "Abfragedefinition signiert exportieren",
         "tags": [
           "reporting",
           "query-center"
@@ -354360,7 +354360,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Clear All",
+        "summary": "Belegliste leeren",
         "tags": [
           "workspace",
           "l3-parity"
@@ -354455,7 +354455,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Recent",
+        "summary": "Zuletzt geoeffnete Belege auflisten",
         "tags": [
           "workspace",
           "l3-parity"
@@ -354522,7 +354522,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Touch",
+        "summary": "Beleg als zuletzt geoeffnet vermerken",
         "tags": [
           "workspace",
           "l3-parity"
@@ -354588,7 +354588,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Remove One",
+        "summary": "Eintrag aus der Belegliste entfernen",
         "tags": [
           "workspace",
           "l3-parity"
@@ -371654,7 +371654,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Intake",
+        "summary": "Tankdatenlieferungen auflisten",
         "tags": [
           "tankstelle",
           "integration"
@@ -371719,7 +371719,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Intake",
+        "summary": "Tankdaten entgegennehmen",
         "tags": [
           "tankstelle",
           "integration"
@@ -371795,7 +371795,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Process",
+        "summary": "Tankdatenlieferung verarbeiten",
         "tags": [
           "tankstelle",
           "integration"
@@ -371871,7 +371871,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Retry",
+        "summary": "Tankdatenlieferung erneut verarbeiten",
         "tags": [
           "tankstelle",
           "integration"
@@ -371947,7 +371947,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Validate",
+        "summary": "Tankdatenlieferung pruefen",
         "tags": [
           "tankstelle",
           "integration"
@@ -372004,7 +372004,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Summary",
+        "summary": "Kennzahlen der Tankdatenlieferungen",
         "tags": [
           "tankstelle",
           "integration"

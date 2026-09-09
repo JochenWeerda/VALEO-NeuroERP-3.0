@@ -208,7 +208,7 @@ def _translate(exc: Exception) -> HTTPException:
     return HTTPException(status_code=422, detail=str(exc))
 
 
-@router.get("/feeds", response_model=list[FeedSummaryOut])
+@router.get("/feeds", response_model=list[FeedSummaryOut], summary="Futtermittel auflisten")
 async def list_feeds(search: str | None = None, include_inactive: bool = False,
                      db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                      user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
@@ -216,7 +216,7 @@ async def list_feeds(search: str | None = None, include_inactive: bool = False,
     return _service(db, tenant_id, user).list_feeds(search=search, include_inactive=include_inactive)
 
 
-@router.post("/feeds", response_model=FeedDetailOut, status_code=201)
+@router.post("/feeds", response_model=FeedDetailOut, status_code=201, summary="Futtermittel anlegen")
 async def create_feed(body: FeedCreateIn, db: Session = Depends(get_db),
                       tenant_id: str = Depends(get_tenant_id),
                       user: User = Depends(get_current_user)) -> dict[str, Any]:
@@ -227,7 +227,7 @@ async def create_feed(body: FeedCreateIn, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.get("/feeds/{feed_id}", response_model=FeedDetailOut)
+@router.get("/feeds/{feed_id}", response_model=FeedDetailOut, summary="Futtermittel abrufen")
 async def get_feed(feed_id: str, db: Session = Depends(get_db),
                    tenant_id: str = Depends(get_tenant_id),
                    user: User = Depends(get_current_user)) -> dict[str, Any]:
@@ -238,7 +238,7 @@ async def get_feed(feed_id: str, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.patch("/feeds/{feed_id}", response_model=FeedDetailOut)
+@router.patch("/feeds/{feed_id}", response_model=FeedDetailOut, summary="Futtermittel aendern")
 async def update_feed(feed_id: str, body: FeedUpdateIn, db: Session = Depends(get_db),
                       tenant_id: str = Depends(get_tenant_id),
                       user: User = Depends(get_current_user)) -> dict[str, Any]:
@@ -249,7 +249,7 @@ async def update_feed(feed_id: str, body: FeedUpdateIn, db: Session = Depends(ge
         raise _translate(exc) from exc
 
 
-@router.get("/feeds/{feed_id}/history", response_model=list[FeedRevisionOut])
+@router.get("/feeds/{feed_id}/history", response_model=list[FeedRevisionOut], summary="Aenderungshistorie des Futtermittels")
 async def feed_history(feed_id: str, db: Session = Depends(get_db),
                        tenant_id: str = Depends(get_tenant_id),
                        user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
@@ -260,7 +260,7 @@ async def feed_history(feed_id: str, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.get("/feeds/{feed_id}/reference-values", response_model=list[FeedReferenceValueOut])
+@router.get("/feeds/{feed_id}/reference-values", response_model=list[FeedReferenceValueOut], summary="Referenzwerte auflisten")
 async def list_values(feed_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                       user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES)
@@ -270,7 +270,7 @@ async def list_values(feed_id: str, db: Session = Depends(get_db), tenant_id: st
         raise _translate(exc) from exc
 
 
-@router.post("/feeds/{feed_id}/reference-values", response_model=FeedReferenceValueOut, status_code=201)
+@router.post("/feeds/{feed_id}/reference-values", response_model=FeedReferenceValueOut, status_code=201, summary="Referenzwert hinzufuegen")
 async def add_value(feed_id: str, body: FeedReferenceValueIn, db: Session = Depends(get_db),
                     tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES)
@@ -280,7 +280,7 @@ async def add_value(feed_id: str, body: FeedReferenceValueIn, db: Session = Depe
         raise _translate(exc) from exc
 
 
-@router.get("/feeds/{feed_id}/products", response_model=list[FeedProductOut])
+@router.get("/feeds/{feed_id}/products", response_model=list[FeedProductOut], summary="Handelsprodukte auflisten")
 async def list_products(feed_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                         user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES)
@@ -290,7 +290,7 @@ async def list_products(feed_id: str, db: Session = Depends(get_db), tenant_id: 
         raise _translate(exc) from exc
 
 
-@router.post("/feeds/{feed_id}/products", response_model=FeedProductOut, status_code=201)
+@router.post("/feeds/{feed_id}/products", response_model=FeedProductOut, status_code=201, summary="Handelsprodukt hinzufuegen")
 async def add_product(feed_id: str, body: FeedProductIn, db: Session = Depends(get_db),
                       tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES)

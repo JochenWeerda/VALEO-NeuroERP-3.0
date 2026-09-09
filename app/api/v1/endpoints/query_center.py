@@ -58,7 +58,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/catalog", response_model=dict)
+@router.get("/catalog", response_model=dict, summary="Abfragekatalog abrufen")
 def catalog(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -66,7 +66,7 @@ def catalog(
     return {"items": items, "count": len(items)}
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Abfragedefinitionen auflisten")
 def list_definitions(
     request: Request,
     page: int = Query(1, ge=1),
@@ -80,7 +80,7 @@ def list_definitions(
     )
 
 
-@router.post("/preview", response_model=dict)
+@router.post("/preview", response_model=dict, summary="Abfrage als Vorschau ausfuehren")
 def preview(
     body: PreviewIn,
     db: Session = Depends(get_db),
@@ -93,7 +93,7 @@ def preview(
     )
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Abfragedefinition speichern")
 def save(
     body: SaveIn,
     request: Request,
@@ -109,7 +109,7 @@ def save(
     )
 
 
-@router.post("/{definition_id}/export", response_model=dict)
+@router.post("/{definition_id}/export", response_model=dict, summary="Abfragedefinition signiert exportieren")
 def export_definition(
     definition_id: str,
     body: ReasonIn,
@@ -124,7 +124,7 @@ def export_definition(
     )
 
 
-@router.post("/import", response_model=dict, status_code=201)
+@router.post("/import", response_model=dict, status_code=201, summary="Signierte Abfragedefinition importieren")
 def import_definition(
     body: ImportIn,
     request: Request,

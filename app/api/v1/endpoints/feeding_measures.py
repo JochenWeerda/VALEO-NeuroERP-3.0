@@ -80,7 +80,7 @@ def _service(db: Session, tenant_id: str, user: User) -> FeedingMeasureLifecycle
     )
 
 
-@router.post("/measures/{measure_id}/transitions", response_model=dict[str, Any])
+@router.post("/measures/{measure_id}/transitions", response_model=dict[str, Any], summary="Massnahme im Status weiterschalten")
 async def transition_measure(
     measure_id: str,
     body: MeasureTransitionIn,
@@ -101,7 +101,7 @@ async def transition_measure(
         raise HTTPException(409, str(exc)) from exc
 
 
-@router.get("/measures/{measure_id}/history", response_model=list[dict[str, Any]])
+@router.get("/measures/{measure_id}/history", response_model=list[dict[str, Any]], summary="Statushistorie der Massnahme")
 async def measure_history(
     measure_id: str,
     db: Session = Depends(get_db),
@@ -117,7 +117,7 @@ async def measure_history(
         raise HTTPException(404, str(exc)) from exc
 
 
-@router.post("/measures/process-overdue", response_model=dict[str, int])
+@router.post("/measures/process-overdue", response_model=dict[str, int], summary="Ueberfaellige Massnahmen verarbeiten")
 async def process_overdue(
     body: OverdueRunIn,
     db: Session = Depends(get_db),
@@ -130,7 +130,7 @@ async def process_overdue(
     )
 
 
-@router.get("/notifications", response_model=list[dict[str, Any]])
+@router.get("/notifications", response_model=list[dict[str, Any]], summary="Benachrichtigungen zu Massnahmen auflisten")
 async def notifications(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

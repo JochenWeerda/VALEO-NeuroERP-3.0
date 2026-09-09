@@ -40,7 +40,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/intake", response_model=dict, status_code=202)
+@router.post("/intake", response_model=dict, status_code=202, summary="Tankdaten entgegennehmen")
 def intake(
     body: IntakeIn,
     request: Request,
@@ -54,7 +54,7 @@ def intake(
     )
 
 
-@router.get("/intake", response_model=dict)
+@router.get("/intake", response_model=dict, summary="Tankdatenlieferungen auflisten")
 def list_intake(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -67,14 +67,14 @@ def list_intake(
     )
 
 
-@router.get("/summary", response_model=dict)
+@router.get("/summary", response_model=dict, summary="Kennzahlen der Tankdatenlieferungen")
 def summary(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, int]:
     return TankAdapterService(db, tenant_id).summary()
 
 
-@router.post("/intake/{intake_id}/validate", response_model=dict)
+@router.post("/intake/{intake_id}/validate", response_model=dict, summary="Tankdatenlieferung pruefen")
 def validate(
     intake_id: str,
     body: ReasonIn,
@@ -89,7 +89,7 @@ def validate(
     )
 
 
-@router.post("/intake/{intake_id}/process", response_model=dict)
+@router.post("/intake/{intake_id}/process", response_model=dict, summary="Tankdatenlieferung verarbeiten")
 def process(
     intake_id: str,
     body: ReasonIn,
@@ -104,7 +104,7 @@ def process(
     )
 
 
-@router.post("/intake/{intake_id}/retry", response_model=dict)
+@router.post("/intake/{intake_id}/retry", response_model=dict, summary="Tankdatenlieferung erneut verarbeiten")
 def retry(
     intake_id: str,
     body: RetryIn,

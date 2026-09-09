@@ -148,7 +148,7 @@ def _translate(exc: Exception) -> HTTPException:
     )
 
 
-@router.post("", response_model=ActualRecordOut, status_code=201)
+@router.post("", response_model=ActualRecordOut, status_code=201, summary="Ist-Fuetterung erfassen")
 async def record_actual(
     body: ActualRecordIn,
     db: Session = Depends(get_db),
@@ -172,7 +172,7 @@ async def record_actual(
         raise _translate(exc) from exc
 
 
-@router.get("", response_model=list[ActualRecordOut])
+@router.get("", response_model=list[ActualRecordOut], summary="Ist-Fuetterungen auflisten")
 async def list_actuals(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +182,7 @@ async def list_actuals(
     return _service(db, tenant_id, user).list(group_ids=_groups(db, tenant_id, user))
 
 
-@router.get("/components", response_model=list[ActualComponentRowOut])
+@router.get("/components", response_model=list[ActualComponentRowOut], summary="Komponenten der Ist-Fuetterung auflisten")
 async def list_actual_components(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -194,7 +194,7 @@ async def list_actual_components(
     )
 
 
-@router.get("/export.csv")
+@router.get("/export.csv", summary="Ist-Fuetterungen als CSV exportieren")
 async def export_actuals_csv(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -210,7 +210,7 @@ async def export_actuals_csv(
     )
 
 
-@router.post("/deviation-policies", response_model=DeviationPolicyOut, status_code=201)
+@router.post("/deviation-policies", response_model=DeviationPolicyOut, status_code=201, summary="Abweichungsregel anlegen")
 async def create_deviation_policy(
     body: DeviationPolicyIn,
     db: Session = Depends(get_db),
@@ -227,7 +227,7 @@ async def create_deviation_policy(
         raise _translate(exc) from exc
 
 
-@router.get("/deviation-policies", response_model=list[DeviationPolicyOut])
+@router.get("/deviation-policies", response_model=list[DeviationPolicyOut], summary="Abweichungsregeln auflisten")
 async def list_deviation_policies(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -237,7 +237,7 @@ async def list_deviation_policies(
     return FeedingActualMeasureService(db, tenant_id, _actor(user)).list_policies()
 
 
-@router.get("/findings", response_model=list[DeviationFindingOut])
+@router.get("/findings", response_model=list[DeviationFindingOut], summary="Abweichungsbefunde auflisten")
 async def list_deviation_findings(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -249,7 +249,7 @@ async def list_deviation_findings(
     )
 
 
-@router.post("/measures", response_model=ActualMeasureOut, status_code=201)
+@router.post("/measures", response_model=ActualMeasureOut, status_code=201, summary="Massnahme aus Abweichung anlegen")
 async def create_actual_measure(
     body: ActualMeasureIn,
     db: Session = Depends(get_db),
@@ -267,7 +267,7 @@ async def create_actual_measure(
         raise _translate(exc) from exc
 
 
-@router.get("/measures", response_model=list[ActualMeasureOut])
+@router.get("/measures", response_model=list[ActualMeasureOut], summary="Massnahmen aus Abweichungen auflisten")
 async def list_actual_measures(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

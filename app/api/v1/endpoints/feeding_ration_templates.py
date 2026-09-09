@@ -112,7 +112,7 @@ def _translate(exc: Exception) -> HTTPException:
     return HTTPException(status_code=500, detail="Rationsvorlage konnte nicht verarbeitet werden.")
 
 
-@router.post("/ration-templates", response_model=TemplateOut, status_code=201)
+@router.post("/ration-templates", response_model=TemplateOut, status_code=201, summary="Rationsvorlage anlegen")
 async def create_template(body: TemplateCreateIn, db: Session = Depends(get_db),
                           tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES)
@@ -135,7 +135,7 @@ async def create_template(body: TemplateCreateIn, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.get("/businesses/{business_id}/ration-templates", response_model=list[TemplateOut])
+@router.get("/businesses/{business_id}/ration-templates", response_model=list[TemplateOut], summary="Rationsvorlagen des Betriebs auflisten")
 async def list_templates(business_id: str, db: Session = Depends(get_db),
                          tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES)
@@ -143,7 +143,7 @@ async def list_templates(business_id: str, db: Session = Depends(get_db),
     return _template_service(db, tenant_id, user).list_for_business(business_id)
 
 
-@router.post("/ration-templates/{template_id}/apply", response_model=VersionCopyOut, status_code=201)
+@router.post("/ration-templates/{template_id}/apply", response_model=VersionCopyOut, status_code=201, summary="Rationsvorlage anwenden")
 async def apply_template(template_id: str, body: TemplateApplyIn, db: Session = Depends(get_db),
                          tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES)
@@ -162,7 +162,7 @@ async def apply_template(template_id: str, body: TemplateApplyIn, db: Session = 
         raise _translate(exc) from exc
 
 
-@router.get("/businesses/{business_id}/overview", response_model=BusinessOverviewOut)
+@router.get("/businesses/{business_id}/overview", response_model=BusinessOverviewOut, summary="Betriebsuebersicht abrufen")
 async def business_overview(business_id: str, db: Session = Depends(get_db),
                             tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, READ_ROLES)
@@ -173,21 +173,21 @@ async def business_overview(business_id: str, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.get("/businesses/{business_id}/groups")
+@router.get("/businesses/{business_id}/groups", summary="Fuetterungsgruppen des Betriebs auflisten")
 async def business_groups(business_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                           user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")
     return _template_service(db, tenant_id, user).list_business_groups(business_id)
 
 
-@router.get("/businesses/{business_id}/rations")
+@router.get("/businesses/{business_id}/rations", summary="Rationen des Betriebs auflisten")
 async def business_rations(business_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                            user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")
     return _template_service(db, tenant_id, user).list_business_rations(business_id)
 
 
-@router.get("/businesses/{business_id}/findings")
+@router.get("/businesses/{business_id}/findings", summary="Befunde des Betriebs auflisten")
 async def business_findings(business_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                             user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")

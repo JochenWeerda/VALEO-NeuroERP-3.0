@@ -110,9 +110,9 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
-## OPENAPI-SUMMARY-20260909 Routen-Summaries nachziehen - reserviert
+## OPENAPI-SUMMARY-20260909 Routen-Summaries nachziehen - abgeschlossen 2026-09-09
 
-**Von:** Folgebefund aus QG-GREEN-20260909, hinter dem Pagination-Blocker verdeckt. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+**Von:** Folgebefund aus QG-GREEN-20260909, hinter dem Pagination-Blocker verdeckt. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
 
 **Ziel:** `check_openapi_docs.py` von 101 Routen ohne `summary` auf null bringen, ohne die Schwelle zu aendern — jede Route fachlich benannt, nicht generisch aufgefuellt.
 
@@ -121,6 +121,10 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 **Abnahme:** `check_openapi_docs.py` meldet 0 fehlende Summaries bei unveraenderter Schwelle; OpenAPI-Generator laeuft; alle betroffenen Module importierbar.
 
 **Risiken:** Eine falsch benannte Route ist schlimmer als eine unbenannte, weil sie in Katalogen und Agent-Werkzeugen als Wahrheit erscheint. Jede Route wird deshalb am Handler gelesen, nicht am Pfad geraten.
+
+**Ergebnis:** Deckung 97,1 -> 100,0 Prozent (3445/3445), 101 Summaries in 17 Dateien; dreizehn Router hatten zuvor keine einzige. Schwerpunkt sind die juengeren Programme (acht Fuetterungs-Router, L3-Berichtskatalog, Rechnungsstapel, Legacy-Adapter, Mailarbeitsplatz, Produktionsleitstand, Abfrage-Center, Tankadapter, Fremdware-Worklist, Nebenbuch, zuletzt geoeffnete Belege). Jede Route wurde am Handler gelesen; drei mehrdeutige Faelle gezielt nachgeprueft (`feeding_supply` GET = Bedarfsvorausrechnung, `l3` drilldown = Detailzeilen zu einem Dimensionswert, `query_center` export = signierter Export). `docs/schnittstellen/openapi.json` neu erzeugt (2752 Pfade), weil der Drift-Check blockierend ist — erzeugt in einem sauberen HEAD-Worktree, damit kein fremder WIP in die Spec laeuft. Alle 17 Module importierbar.
+
+**Danach im selben Job noch rot:** `check_all_doc_generators.sh --check` meldet 29 Backend-Services und 28 Endpoints ohne Domain-Mapping im Architektur-Index. Das liegt in `config/architecture-index.yaml` / `config/architecture-domain-prefixes.yaml` und damit im unversionierten WIP von L3-DESKTOP-REBUILD-20260908 (Owner Codex) — bewusst nicht angefasst.
 
 ## QG-GREEN-20260909 Quality Gate wieder gruen - abgeschlossen 2026-09-09
 

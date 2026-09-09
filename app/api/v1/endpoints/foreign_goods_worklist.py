@@ -32,7 +32,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "foreign-goods-operator"
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Fremdware-Worklist auflisten")
 def list_items(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -53,7 +53,7 @@ def list_items(
     )
 
 
-@router.get("/summary", response_model=dict)
+@router.get("/summary", response_model=dict, summary="Kennzahlen der Fremdware-Worklist")
 def summary(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, int]:
@@ -69,7 +69,7 @@ def _handle(action) -> dict[str, Any]:  # noqa: ANN001
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/{foreign_goods_id}/transfer", response_model=dict)
+@router.post("/{foreign_goods_id}/transfer", response_model=dict, summary="Fremdware umlagern")
 def transfer(
     foreign_goods_id: str,
     body: TransferIn,
@@ -89,7 +89,7 @@ def transfer(
     )
 
 
-@router.post("/{foreign_goods_id}/complete", response_model=dict)
+@router.post("/{foreign_goods_id}/complete", response_model=dict, summary="Fremdware-Einlagerung abschliessen")
 def complete(
     foreign_goods_id: str,
     body: CompleteIn,

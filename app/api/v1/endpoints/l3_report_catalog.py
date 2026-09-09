@@ -69,7 +69,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "report-user"
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Berichtskatalog abrufen")
 def catalog(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -77,14 +77,14 @@ def catalog(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/bonus-runs", response_model=dict)
+@router.get("/bonus-runs", response_model=dict, summary="Bonuslaeufe auflisten")
 def list_bonus_runs(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
     return L3ReportCatalogService(db, tenant_id).list_bonus_runs()
 
 
-@router.post("/bonus-runs", response_model=dict, status_code=201)
+@router.post("/bonus-runs", response_model=dict, status_code=201, summary="Bonuslauf anlegen")
 def create_bonus_run(
     body: BonusRunIn,
     request: Request,
@@ -103,7 +103,7 @@ def create_bonus_run(
     )
 
 
-@router.post("/bonus-runs/{run_id}/corrections", response_model=dict, status_code=201)
+@router.post("/bonus-runs/{run_id}/corrections", response_model=dict, status_code=201, summary="Bonuslauf korrigieren")
 def correct_bonus_run(
     run_id: str,
     body: BonusCorrectionIn,
@@ -121,7 +121,7 @@ def correct_bonus_run(
     )
 
 
-@router.get("/bonus-runs/{run_id}/export.csv", response_class=Response)
+@router.get("/bonus-runs/{run_id}/export.csv", response_class=Response, summary="Bonuslauf als CSV exportieren")
 def export_bonus_run(
     run_id: str,
     request: Request,
@@ -143,7 +143,7 @@ def export_bonus_run(
     )
 
 
-@router.post("/facts", response_model=dict, status_code=202)
+@router.post("/facts", response_model=dict, status_code=202, summary="Berichtsfakt projizieren")
 def project_fact(
     body: FactIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -154,7 +154,7 @@ def project_fact(
     )
 
 
-@router.get("/{report_id}/run", response_model=dict)
+@router.get("/{report_id}/run", response_model=dict, summary="Bericht ausfuehren")
 def run_report(
     report_id: str,
     from_date: date = Query(default_factory=lambda: date.today() - timedelta(days=365)),
@@ -200,7 +200,7 @@ def run_report(
     )
 
 
-@router.get("/{report_id}/drilldown", response_model=list[dict])
+@router.get("/{report_id}/drilldown", response_model=list[dict], summary="Bericht auf einen Dimensionswert aufreissen")
 def drilldown(
     report_id: str,
     dimension_value: str,
@@ -221,7 +221,7 @@ def drilldown(
     )
 
 
-@router.get("/{report_id}/export.csv", response_class=Response)
+@router.get("/{report_id}/export.csv", response_class=Response, summary="Bericht als CSV exportieren")
 def export_csv(
     report_id: str,
     request: Request,

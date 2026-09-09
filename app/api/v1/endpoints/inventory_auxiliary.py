@@ -36,7 +36,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "inventory-operator"
 
 
-@router.post("/batches", response_model=AuxiliaryBatchCreatedOut, status_code=201)
+@router.post("/batches", response_model=AuxiliaryBatchCreatedOut, status_code=201, summary="Nebenbuch-Stapel anlegen")
 def create_batch(body: BatchIn, request: Request, db: Session = Depends(get_db),
                  tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     try:
@@ -49,7 +49,7 @@ def create_batch(body: BatchIn, request: Request, db: Session = Depends(get_db),
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/batches", response_model=AuxiliaryBatchPageOut)
+@router.get("/batches", response_model=AuxiliaryBatchPageOut, summary="Nebenbuch-Stapel auflisten")
 def list_batches(page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=200),
                  batch_type: str | None = None, status: str | None = None,
                  inventory_count_id: str | None = None, db: Session = Depends(get_db),
@@ -58,12 +58,12 @@ def list_batches(page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le
         batch_type=batch_type, status=status, count_id=inventory_count_id)
 
 
-@router.get("/summary", response_model=AuxiliarySummaryOut)
+@router.get("/summary", response_model=AuxiliarySummaryOut, summary="Kennzahlen der Nebenbuch-Stapel")
 def summary(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return InventoryAuxiliaryService(db, tenant_id).summary()
 
 
-@router.post("/batches/{batch_id}/transition", response_model=AuxiliaryTransitionOut)
+@router.post("/batches/{batch_id}/transition", response_model=AuxiliaryTransitionOut, summary="Nebenbuch-Stapel weiterschalten")
 def transition(batch_id: str, body: TransitionIn, request: Request, db: Session = Depends(get_db),
                tenant_id: str = Depends(get_tenant_id)) -> dict[str, str]:
     try:

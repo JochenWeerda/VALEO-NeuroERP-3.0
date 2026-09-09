@@ -55,7 +55,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "billing-operator"
 
 
-@router.post("", response_model=BatchCreatedOut, status_code=201)
+@router.post("", response_model=BatchCreatedOut, status_code=201, summary="Rechnungsstapel anlegen")
 def create(
     body: BatchIn,
     request: Request,
@@ -70,7 +70,7 @@ def create(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("", response_model=BatchPageOut)
+@router.get("", response_model=BatchPageOut, summary="Rechnungsstapel auflisten")
 def list_batches(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -84,14 +84,14 @@ def list_batches(
     )
 
 
-@router.get("/summary", response_model=BatchSummaryOut)
+@router.get("/summary", response_model=BatchSummaryOut, summary="Kennzahlen der Rechnungsstapel")
 def summary(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, int]:
     return BillingBatchService(db, tenant_id).summary()
 
 
-@router.get("/lines", response_model=list[BatchLineOut])
+@router.get("/lines", response_model=list[BatchLineOut], summary="Stapelzeilen auflisten")
 def lines(
     status: str | None = None,
     batch_id: str | None = None,
@@ -123,7 +123,7 @@ def _batch_action(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/{batch_id}/validate", response_model=BatchActionOut)
+@router.post("/{batch_id}/validate", response_model=BatchActionOut, summary="Rechnungsstapel pruefen")
 def validate(
     batch_id: str,
     body: ReasonIn,
@@ -134,7 +134,7 @@ def validate(
     return _batch_action("validate", batch_id, body, request, db, tenant_id)
 
 
-@router.post("/{batch_id}/release", response_model=BatchActionOut)
+@router.post("/{batch_id}/release", response_model=BatchActionOut, summary="Rechnungsstapel freigeben")
 def release(
     batch_id: str,
     body: ReasonIn,
@@ -145,7 +145,7 @@ def release(
     return _batch_action("release", batch_id, body, request, db, tenant_id)
 
 
-@router.post("/{batch_id}/execute", response_model=BatchActionOut)
+@router.post("/{batch_id}/execute", response_model=BatchActionOut, summary="Rechnungsstapel ausfuehren")
 def execute(
     batch_id: str,
     body: ReasonIn,
@@ -156,7 +156,7 @@ def execute(
     return _batch_action("execute", batch_id, body, request, db, tenant_id)
 
 
-@router.post("/lines/{line_id}/retry", response_model=BatchActionOut)
+@router.post("/lines/{line_id}/retry", response_model=BatchActionOut, summary="Stapelzeile erneut verarbeiten")
 def retry(
     line_id: str,
     body: ReasonIn,

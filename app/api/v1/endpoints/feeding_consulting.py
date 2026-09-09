@@ -216,7 +216,7 @@ async def close_case(
     "/consulting-cases/{case_id}/measures",
     response_model=dict[str, Any],
     status_code=201,
-)
+summary="Massnahme mit Beratungsfall verknuepfen")
 async def link_measure(
     case_id: str,
     body: CaseMeasureIn,
@@ -240,7 +240,7 @@ async def link_measure(
     "/consulting-cases/{case_id}/report-drafts",
     response_model=dict[str, Any],
     status_code=201,
-)
+summary="Berichtsentwurf anlegen")
 async def create_report_draft(
     case_id: str,
     body: ReportDraftIn,
@@ -255,7 +255,7 @@ async def create_report_draft(
         raise HTTPException(404, str(exc)) from exc
 
 
-@router.get("/consulting-cases/{case_id}/measures", response_model=list[dict[str, Any]])
+@router.get("/consulting-cases/{case_id}/measures", response_model=list[dict[str, Any]], summary="Massnahmen des Beratungsfalls auflisten")
 async def list_case_measures(
     case_id: str,
     db: Session = Depends(get_db),
@@ -273,7 +273,7 @@ async def list_case_measures(
 
 @router.get(
     "/consulting-cases/{case_id}/report-drafts", response_model=list[dict[str, Any]]
-)
+, summary="Berichtsentwuerfe auflisten")
 async def list_report_drafts(
     case_id: str,
     db: Session = Depends(get_db),

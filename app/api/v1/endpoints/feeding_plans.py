@@ -72,7 +72,7 @@ def _translate(exc: Exception) -> HTTPException:
     return HTTPException(status_code=500, detail="Fuetterungsplan konnte nicht verarbeitet werden.")
 
 
-@router.post("/publish", response_model=PlanOut, status_code=201)
+@router.post("/publish", response_model=PlanOut, status_code=201, summary="Fuetterungsplan veroeffentlichen")
 async def publish_plan(body: PlanPublishIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                        user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES)
@@ -89,7 +89,7 @@ async def publish_plan(body: PlanPublishIn, db: Session = Depends(get_db), tenan
         raise _translate(exc) from exc
 
 
-@router.get("", response_model=list[PlanOut])
+@router.get("", response_model=list[PlanOut], summary="Fuetterungsplaene auflisten")
 async def list_plans(group_id: str | None = Query(None), db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                      user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES)
@@ -101,7 +101,7 @@ async def list_plans(group_id: str | None = Query(None), db: Session = Depends(g
     return [{**row, "instructions": []} for row in rows]
 
 
-@router.get("/current", response_model=list[PlanOut])
+@router.get("/current", response_model=list[PlanOut], summary="Aktuell gueltige Fuetterungsplaene")
 async def list_current_plans(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                              user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES)
@@ -110,7 +110,7 @@ async def list_current_plans(db: Session = Depends(get_db), tenant_id: str = Dep
     )
 
 
-@router.get("/{version_id}/instructions")
+@router.get("/{version_id}/instructions", summary="Fuetterungsanweisungen der Planversion")
 async def list_plan_instructions(version_id: str, db: Session = Depends(get_db),
                                  tenant_id: str = Depends(get_tenant_id),
                                  user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
@@ -123,7 +123,7 @@ async def list_plan_instructions(version_id: str, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.get("/{version_id}", response_model=PlanOut)
+@router.get("/{version_id}", response_model=PlanOut, summary="Planversion abrufen")
 async def get_plan(version_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                    user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, READ_ROLES)
