@@ -97,6 +97,21 @@ class StornoKorrekturOut(BaseModel):
     source_document_type: Optional[str] = Field(None, description="Belegtyp, fuer Stornos 'STORNO'")
     source_document_id: Optional[str] = None
 
+    # Historisches Feldpaar aus aelteren Migrationen. Es wird nicht mehr
+    # beschrieben, bleibt aber erhalten und lesbar: der urspruengliche
+    # Belegbezug einer Buchung darf waehrend der Aufbewahrungsfrist nicht
+    # verschwinden. Aufloesung und Konflikterkennung:
+    # app/services/inventory_document_reference.py
+    reference_type: Optional[str] = Field(
+        None, description="Historischer Belegtyp; neue Buchungen nutzen source_document_type"
+    )
+    reference_id: Optional[str] = Field(
+        None, description="Historische Beleg-Id; neue Buchungen nutzen source_document_id"
+    )
+
+    booked_at: Optional[datetime] = None
+    booked_by: Optional[str] = None
+
     unit: Optional[str] = None
     unit_cost: Optional[Decimal] = None
     total_cost: Optional[Decimal] = None

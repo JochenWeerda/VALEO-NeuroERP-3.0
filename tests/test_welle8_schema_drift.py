@@ -37,6 +37,20 @@ MODELL_ZU_TABELLE = [
 ]
 
 
+# Felder, die je nach Datenbankgeneration Spalte sind oder nicht. Eine frisch
+# migrierte Datenbank fuehrt die historischen Belegfelder, eine gewachsene
+# Bestandsdatenbank kann sie ebenfalls fuehren — beide muessen mit demselben
+# Antwortmodell auskommen. Deshalb werden sie auf beiden Seiten herausgerechnet:
+# ihr Fehlen ist kein Modellfehler, ihr Vorhandensein kein Modellueberhang.
+GENERATIONSABHAENGIGE_FELDER: dict[str, set[str]] = {
+    "inventory_stock_movements": {
+        "reference_type",
+        "reference_id",
+        "booked_at",
+        "booked_by",
+    },
+}
+
 @pytest.fixture(scope="module")
 def db_session():
     from app.core.database import SessionLocal
@@ -75,6 +89,10 @@ def test_modellfelder_decken_die_ddl_vollstaendig_ab(db_session, modell, tabelle
 
     felder = set(modell.model_fields) - zusatzfelder
 
+    generationsabhaengig = GENERATIONSABHAENGIGE_FELDER.get(tabelle, set())
+    spalten = spalten - generationsabhaengig
+    felder = felder - generationsabhaengig
+
     fehlend = spalten - felder
     assert not fehlend, (
         f"{modell.__name__} verliert Spalten von {SCHEMA}.{tabelle}: {sorted(fehlend)}"
@@ -87,14 +105,14 @@ def test_modellfelder_decken_die_ddl_vollstaendig_ab(db_session, modell, tabelle
     )
 
 
-def test_bewegungstabelle_hat_kein_reference_type(db_session):
-    """Regression zum Welle-8-Befund.
+def test_bewegungstabelle_fuehrt_den_kanonischen_belegbezug(db_session):
+    """Neue Buchungen tragen den kanonischen Belegbezug.
 
-    ``storno_korrektur`` und ``differenz_buchen`` haben auf
-    ``reference_type``/``reference_id`` geschrieben und gefiltert. Diese
-    Spalten existieren nicht; kanonisch sind ``source_document_type`` und
-    ``source_document_id``. Kommen sie eines Tages doch dazu, soll dieser Test
-    auffallen, damit die Dienste bewusst nachgezogen werden.
+    Ersetzt die frueheren Abwesenheitstests fuer ``reference_type``/
+    ``reference_id``. Die Altfelder bleiben erhalten — ein Bestandshauptbuch
+    nach GoB muss den urspruenglichen Belegbezug waehrend der
+    Aufbewahrungsfrist lesbar halten, und ein Spalten-Drop gaebe genau das auf.
+    Geprueft wird deshalb der fachliche Vertrag, nicht die Spaltenmenge.
     """
     spalten = _spalten(db_session, "inventory_stock_movements")
     if not spalten:
@@ -102,5 +120,112 @@ def test_bewegungstabelle_hat_kein_reference_type(db_session):
 
     assert "source_document_type" in spalten
     assert "source_document_id" in spalten
-    assert "reference_type" not in spalten
-    assert "reference_id" not in spalten
+
+
+def test_altfelder_bleiben_lesbar_wenn_die_datenbank_sie_fuehrt(db_session):
+    """Wo Altfelder existieren, gibt das Antwortmodell sie auch heraus.
+
+    Sonst waere der historische Belegbezug zwar gespeichert, aber ueber die
+    API unsichtbar — gespeichert ist nicht dasselbe wie nachvollziehbar.
+    """
+    from app.api.v1.schemas.inventory_lot_bundle_schemas import StornoKorrekturOut
+
+    spalten = _spalten(db_session, "inventory_stock_movements")
+    if not spalten:
+        pytest.skip(f"{SCHEMA}.inventory_stock_movements nicht vorhanden")
+
+    for altfeld in ("reference_type", "reference_id"):
+        if altfeld in spalten:
+            assert altfeld in StornoKorrekturOut.model_fields, (
+                f"{altfeld} liegt in der Datenbank, fehlt aber im Antwortmodell"
+            )
+
+
+def test_belegbezug_bevorzugt_kanonisch_und_bleibt_paarweise():
+    """Der Bezug stammt immer aus genau einem Feldpaar."""
+    from app.services.inventory_document_reference import belegbezug
+
+    kanonisch = belegbezug(
+        {
+            "source_document_type": "WARENEINGANG",
+            "source_document_id": "WE-1",
+            "reference_type": None,
+            "reference_id": None,
+        }
+    )
+    assert (kanonisch.typ, kanonisch.id) == ("WARENEINGANG", "WE-1")
+    assert kanonisch.herkunft == "kanonisch"
+    assert kanonisch.konflikt is False
+
+    # Historische Zeile: nur das Altpaar ist gefuellt und bleibt aufloesbar.
+    historisch = belegbezug(
+        {
+            "source_document_type": None,
+            "source_document_id": None,
+            "reference_type": "KORREKTUR",
+            "reference_id": "KO-7",
+        }
+    )
+    assert (historisch.typ, historisch.id) == ("KORREKTUR", "KO-7")
+    assert historisch.herkunft == "historisch"
+    assert historisch.konflikt is False
+
+    # Kein gemischtes Paar: kanonischer Typ plus historische Id ergibt nicht
+    # ploetzlich eine Verknuepfung.
+    gemischt = belegbezug(
+        {
+            "source_document_type": "STORNO",
+            "source_document_id": None,
+            "reference_type": None,
+            "reference_id": "ALT-9",
+        }
+    )
+    assert gemischt.konflikt is True
+    assert gemischt.id != "ALT-9"
+
+
+def test_widersprechende_belegbezuege_werden_ausgewiesen_nicht_umgedeutet():
+    """Zwei gefuellte, widersprechende Paare sind ein Klaerfall."""
+    from app.services.inventory_document_reference import belegbezug
+
+    bezug = belegbezug(
+        {
+            "source_document_type": "WARENEINGANG",
+            "source_document_id": "WE-1",
+            "reference_type": "WARENAUSGANG",
+            "reference_id": "WA-2",
+        }
+    )
+    assert bezug.konflikt is True
+    # Beide Paare bleiben sichtbar, damit die Klaerung nichts nachschlagen muss.
+    assert bezug.kanonisch == ("WARENEINGANG", "WE-1")
+    assert bezug.historisch == ("WARENAUSGANG", "WA-2")
+
+
+def test_leere_zeile_behauptet_keinen_belegbezug():
+    from app.services.inventory_document_reference import belegbezug
+
+    bezug = belegbezug({})
+    assert bezug.herkunft == "keiner"
+    assert bezug.vorhanden is False
+
+
+def test_keine_migration_entfernt_die_altfelder():
+    """Der Bestand darf nicht durch eine spaetere Migration verschwinden.
+
+    Punkt 5 der Festlegung: Buchungsanzahl, Mengen, Werte und Belegverknuepfung
+    bleiben beim Upgrade erhalten. Fuer die Verknuepfung heisst das konkret:
+    keine Migration wirft die Altspalten weg.
+    """
+    from pathlib import Path
+
+    wurzel = Path(__file__).parents[1] / "alembic" / "versions"
+    treffer: list[str] = []
+    for datei in wurzel.glob("*.py"):
+        text_inhalt = datei.read_text(encoding="utf-8", errors="replace").lower()
+        if "inventory_stock_movements" not in text_inhalt:
+            continue
+        for altfeld in ("reference_type", "reference_id"):
+            if f"drop column {altfeld}" in text_inhalt or f'drop_column("{altfeld}"' in text_inhalt:
+                treffer.append(f"{datei.name}: {altfeld}")
+    assert treffer == [], f"Migration entfernt historische Belegfelder: {treffer}"
