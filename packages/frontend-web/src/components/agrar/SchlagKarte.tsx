@@ -45,7 +45,7 @@ export function SchlagKarte({ height = '480px', className = '' }: SchlagKartePro
 
     import('maplibre-gl')
       .then((ml) => {
-        const MapLibreGL = (ml.default ?? ml) as unknown as { Map: new (opts: unknown) => NonNullable<typeof map> }
+        const MapLibreGL = ml as unknown as { Map: new (opts: unknown) => NonNullable<typeof map> }
         if (!mapContainer.current) return
         map = new MapLibreGL.Map({
           container: mapContainer.current,

@@ -110,9 +110,9 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
-## NPM-ADVISORIES-20260909 npm-Rueckstand im Dependency Scan - reserviert
+## NPM-ADVISORIES-20260909 npm-Rueckstand im Dependency Scan - abgeschlossen 2026-09-09
 
-**Von:** Folgebefund aus QG-GREEN-20260909, hinter `pip-audit` verdeckt. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+**Von:** Folgebefund aus QG-GREEN-20260909, hinter `pip-audit` verdeckt. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
 
 **Ziel:** `pnpm audit --prod --audit-level high` von 83 Advisories (50 high, 2 critical) auf null bringen — ueber die bestehende `pnpm.overrides`-Mechanik in `package.json`, nicht durch Absenken der Gate-Stufe.
 
@@ -121,6 +121,14 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 **Abnahme:** `pnpm audit --prod --audit-level high` ohne Befund; `pnpm install --frozen-lockfile` reproduzierbar; Frontend-Build, Typecheck, Lint und Vitest gruen.
 
 **Risiken:** Overrides greifen tief in transitive Baeume; ein zu hoher Sprung kann Peer-Konflikte oder Laufzeitfehler ausloesen, die kein Gate zeigt. Jede Anhebung braucht daher Build- und Testnachweis, nicht nur einen sauberen Audit.
+
+**Ergebnis:** Die Overrides existierten laengst — ihre Untergrenzen lagen unter den inzwischen veroeffentlichten Advisories (`tar` gepinnt auf `^7.5.11`, aufgeloest 7.5.16, verwundbar bis 7.5.20). Drei Kategorien: elf bestehende Floors angehoben (multer, @xmldom/xmldom, axios, fast-uri, js-yaml, nodemailer, shell-quote, socket.io-parser, tar, brace-expansion, browserslist), neun neue Overrides (engine.io, @opentelemetry/propagator-jaeger, sharp, find-my-way, @fastify/static, postcss, deepmerge-ts sowie `nanoid@3` und `nanoid@5` **versionsbezogen**, weil beide Zweige im Baum liegen und ein pauschaler Override v5-Konsumenten auf v3 gezwungen haette), und als einzige direkte Abhaengigkeit `maplibre-gl` 5.24 -> 6 (der einzige critical-Fund). In einer zweiten Welle die elf Restbefunde unterhalb der Gate-Stufe mitgezogen (joi, qs, protobufjs, fastify, baseline-browser-mapping angehoben; body-parser, decode-uri-component, morgan neu). `pnpm audit --prod --audit-level high`: 83 Treffer/Exit 1 -> Exit 0 ohne Befund oberhalb oder unterhalb der Stufe.
+
+**Korrektur einer eigenen Fehleinschaetzung:** Ich hatte den maplibre-Major als typseitig unkritisch eingeschaetzt, weil die drei Karten strukturell gegen eigene Interfaces casten. Das gilt fuer die Methodenaufrufe, nicht fuer den Modulzugriff: maplibre-gl 6 hat den CommonJS-`default`-Export verloren, `(ml.default ?? ml)` faellt in allen drei Dateien mit TS2339. Gefunden hat das der Typecheck, nicht der Audit — der Grund, warum ein sauberer Audit als Nachweis nicht genuegt. In `SchlagKarte.tsx`, `milchvieh-karte.tsx` und `kunden-karte.tsx` auf `ml` reduziert.
+
+**Bewusst blinde Stelle:** `image-size` (GHSA-w3rx-r6r6-pgpr, GHSA-5p2g-fcmc-qvqq) hat keinen Upstream-Fix — auch das aktuelle 2.0.2 ist betroffen. Es kommt ueber metro aus dem Expo-/RN-0.71-Stack von `packages/mobile-app`, laeuft weder im Web-Frontend noch im Backend, und steht als auf zwei GHSAs begrenzte Ausnahme in `pnpm.auditConfig.ignoreGhsas`. pnpm zaehlt sie in der Summenzeile weiter mit, nimmt sie aber von Tabelle und Exit-Code aus. Sie faellt weg, sobald der Expo-Stack gehoben wird — eigenes Vorhaben mit Geraetetests.
+
+**Offen fuer den Betrieb:** Das Laufzeitverhalten der drei Karten nach dem Major sieht kein Gate und braucht eine Sichtpruefung.
 
 ## OPENAPI-SUMMARY-20260909 Routen-Summaries nachziehen - abgeschlossen 2026-09-09
 

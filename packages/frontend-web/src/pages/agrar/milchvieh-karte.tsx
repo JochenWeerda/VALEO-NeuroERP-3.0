@@ -75,7 +75,7 @@ export default function MilchviehKartePage(): JSX.Element {
     let map: MapLike | null = null
     void import('maplibre-gl')
       .then((ml) => {
-        const ML = (ml.default ?? ml) as unknown as {
+        const ML = ml as unknown as {
           Map: new (o: unknown) => MapLike
           Popup: new (o: unknown) => PopupLike
         }

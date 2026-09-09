@@ -1,0 +1,145 @@
+slice_id: NPM-ADVISORIES-20260909
+id: NPM-ADVISORIES-20260909
+title: npm-Rueckstand im Dependency Scan schliessen — 21 Pakete mit high/critical
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-09"
+started_at: "2026-09-09"
+completed_at: "2026-09-09"
+goal: >-
+  `pnpm audit --prod --audit-level high` ohne Befund, erreicht ueber angehobene
+  `pnpm.overrides` statt ueber ein Absenken der Gate-Stufe.
+file_ownership:
+  - docs/agent-ops/slices/NPM-ADVISORIES-20260909.yaml
+  - "package.json: nur pnpm.overrides und pnpm.auditConfig"
+  - "packages/frontend-web/package.json: nur maplibre-gl"
+  - pnpm-lock.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+ausloeser: >-
+  Nach dem pip-audit-Fix aus QG-GREEN-20260909 lief der Dependency-Scan-Job
+  weiter und fiel im zweiten Schritt: 83 Pfadtreffer, 48 Advisories, davon 21
+  Pakete mit high oder critical.
+befund:
+  ursache: >-
+    Die Overrides existierten bereits, ihre Untergrenzen lagen aber unter den
+    inzwischen veroeffentlichten Advisories. Beispiel tar: gepinnt auf ^7.5.11,
+    aufgeloest 7.5.16, verwundbar bis einschliesslich 7.5.20.
+  kategorien:
+    floor_anhebung: >-
+      Elf bestehende Overrides angehoben (multer, @xmldom/xmldom, axios,
+      fast-uri, js-yaml, nodemailer, shell-quote, socket.io-parser, tar,
+      brace-expansion, browserslist) — alle innerhalb des bisherigen Majors.
+    neue_overrides: >-
+      Neun ergaenzt (engine.io, @opentelemetry/propagator-jaeger, sharp,
+      find-my-way, @fastify/static, postcss, deepmerge-ts sowie nanoid
+      versionsbezogen fuer v3 und v5, weil beide Zweige im Baum liegen und ein
+      pauschaler Override v5-Konsumenten auf v3 zwingen wuerde).
+    direkte_abhaengigkeit: >-
+      maplibre-gl war als einziger Befund eine direkte Abhaengigkeit von
+      frontend-web und brauchte den Sprung 5.24 auf 6.4.1 — die einzige
+      Major-Anhebung. Die drei Kartenkomponenten importieren dynamisch und
+      typisieren strukturell gegen eigene Interfaces statt gegen maplibre-Typen;
+      benutzt werden nur Map, addSource, addLayer, on, getSource().setData,
+      fitBounds, flyTo und remove.
+  ohne_upstream_fix: >-
+    image-size 0.6.3 (GHSA-w3rx-r6r6-pgpr, GHSA-5p2g-fcmc-qvqq) hat keine
+    gepatchte Version — auch das aktuelle 2.0.2 ist betroffen. Es kommt ueber
+    metro aus dem Expo-/React-Native-Stack von packages/mobile-app und ist ein
+    Bundler-Baustein, der weder im Web-Frontend noch im Backend laeuft. Als
+    dokumentierte Ausnahme in pnpm.auditConfig.ignoreGhsas gefuehrt.
+  zweite_welle: >-
+    Nach der ersten Welle blieben elf Befunde unterhalb der Gate-Stufe (acht
+    moderate, drei low). Sie hatten samt und sonders Fixes und wurden
+    mitgezogen, statt knapp ueber der Linie stehenzubleiben: joi, qs,
+    protobufjs, fastify und baseline-browser-mapping als Floor-Anhebung,
+    body-parser, decode-uri-component und morgan neu.
+  maplibre_bruch: >-
+    Die Einschaetzung, die Karten seien typseitig entkoppelt, war falsch. Sie
+    stimmt fuer die Methodenaufrufe, nicht fuer den Modulzugriff: maplibre-gl 6
+    hat den CommonJS-default-Export verloren, und der Ausdruck
+    (ml.default ?? ml) faellt in allen drei Kartendateien mit TS2339. Der
+    Fallback war unter v6 nicht nur ueberfluessig, sondern falsch — die
+    Namensexporte liegen direkt am Modulobjekt. Gefunden hat das der Typecheck,
+    nicht der Audit; das ist der Grund, warum ein sauberer Audit als Nachweis
+    nicht genuegt.
+  messung_vorher:
+    advisories: 48
+    pfadtreffer: 83
+    high: 50
+    critical: 2
+  messung_nachher:
+    advisories_oberhalb_gate: 0
+    advisories_unterhalb_gate: 0
+    verbleibend_ignoriert: 2
+    exit_code: 0
+result: >-
+  Zwanzig Overrides angehoben oder ergaenzt und maplibre-gl von 5.24 auf 6
+  gehoben; pnpm audit --prod --audit-level high meldet keinen Befund oberhalb
+  der Gate-Stufe mehr und endet mit Exit 0. Uebrig bleiben die beiden
+  ausgenommenen image-size-Advisories ohne Upstream-Fix, die pnpm in der
+  Summenzeile weiterhin mitzaehlt, aber von Tabelle und Exit-Code ausnimmt.
+acceptance:
+  - "pnpm audit --prod --audit-level high endet mit Exit 0"
+  - Kein Befund oberhalb oder unterhalb der Gate-Stufe ausser der dokumentierten Ausnahme
+  - Typecheck, Produktionsbuild und Vitest-Suite bleiben gruen
+  - Keine Gate-Stufe und keine Schwelle wurde abgesenkt
+  - "pnpm install --frozen-lockfile laeuft ohne Abweichung durch"
+tests:
+  - "packages/frontend-web: vitest run (126 Testdateien)"
+  - "packages/frontend-web: tsc --noEmit"
+  - "packages/frontend-web: npm run build"
+  - "pnpm install --frozen-lockfile"
+risks:
+  - >-
+    Overrides greifen tief in transitive Baeume. Ein Sprung kann Peer-Konflikte
+    oder Laufzeitfehler ausloesen, die kein Audit zeigt — deshalb Build,
+    Typecheck, Lint und Unit-Tests als Nachweis, nicht nur ein sauberer Audit.
+  - >-
+    maplibre-gl 5 auf 6 ist ein Major. Kompilierung ist unkritisch, weil die
+    Karten strukturell typisiert sind; das Laufzeitverhalten der drei Karten
+    (Schlagkarte, Milchvieh-, Kundenkarte) sieht kein Gate. Das bleibt eine
+    Sichtpruefung fuer den Betrieb.
+  - >-
+    sharp ist ein Paket mit nativem Binary; 0.33 auf 0.35 zieht einen neuen
+    Prebuild. Faellt der Download in einer Umgebung aus, faellt die Installation
+    dort auf, nicht erst zur Laufzeit.
+  - >-
+    Eine Audit-Ausnahme ist eine bewusst blinde Stelle. Sie ist hier auf zwei
+    GHSAs eines Pakets ohne Upstream-Fix begrenzt und faellt weg, sobald der
+    Expo-Stack von mobile-app gehoben wird.
+ai_harness:
+  fachlicher_vertrag: >-
+    Eine Abhaengigkeit mit bekannter Schwachstelle oberhalb der Gate-Stufe ist
+    kein akzeptierter Zustand. Wo kein Fix existiert, wird die Ausnahme benannt
+    und begruendet, nicht die Stufe gesenkt.
+  architektur_vertrag: >-
+    Transitive Versionen werden zentral ueber pnpm.overrides in der
+    Wurzel-package.json gesteuert, nicht in einzelnen Paketen. Die Untergrenze
+    bleibt im bisherigen Major, ausser ein Advisory laesst keine Wahl.
+  daten_vertrag: >-
+    Keine Schema- oder Datenaenderung. Einzige Codeaenderung ist der
+    Modulzugriff auf maplibre-gl in drei Kartendateien.
+  test_vertrag: >-
+    Nachweis ist nicht der Audit allein, sondern Typecheck, Produktionsbuild und
+    die vollstaendige Vitest-Suite gegen den neu aufgeloesten Baum. Genau dieser
+    Dreiklang hat den maplibre-Bruch gefunden, den der Audit nicht sehen konnte.
+  security_vertrag: >-
+    pnpm audit --prod --audit-level high bleibt blockierend und meldet Exit 0.
+    Die einzige Ausnahme ist auf zwei GHSAs eines Pakets ohne Upstream-Fix
+    begrenzt und im Befund benannt.
+  betriebs_vertrag: >-
+    pnpm-lock.yaml ist Teil der Lieferung; CI installiert mit
+    --frozen-lockfile. Ein Aufloesen ohne Lockfile-Aktualisierung wuerde dort
+    auffallen, nicht erst zur Laufzeit.
+  dokumentations_vertrag: >-
+    Workboard und dieses YAML nennen Messung vorher/nachher, die drei
+    Aenderungskategorien, den maplibre-Bruch samt Korrektur der eigenen
+    Fehleinschaetzung und die Ausnahme mit ihrer Begruendung.
+external_gates:
+  - >-
+    Der Expo-/React-Native-Stack von packages/mobile-app steht auf RN 0.71.8 und
+    metro 0.73. Solange er nicht gehoben wird, bleibt image-size unfixierbar.
+    Diese Hebung ist ein eigenes Vorhaben mit Geraetetests.
+  - >-
+    Das Laufzeitverhalten der drei Karten nach dem maplibre-Major braucht eine
+    Sichtpruefung im Betrieb.
