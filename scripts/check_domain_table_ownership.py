@@ -52,6 +52,14 @@ TOLERATED_LEGACY_LOCATIONS: dict[tuple[str, str], str] = {
     ("domain_inventory", "agrar_settlements"): "Agrar-Abrechnungen liegen historisch im Inventory-Schema.",
     ("domain_inventory", "agrar_settlement_deductions"): "Agrar-Abzuege liegen historisch im Inventory-Schema.",
     ("domain_shared", "agrar_sorten"): "Agrar-Sorten liegen historisch im Shared-Schema.",
+    # Kein Alt-Zustand, sondern eine Namenskollision mit der document_-Regel:
+    # die Belegkontrolle fuehrt Ausnahmefaelle mit Zustaendigem, Faelligkeit und
+    # Audit — ein Prozess-Arbeitsvorrat, keine Belegartefakte. domain_docflow
+    # haelt Belege (headers/items/artifacts), domain_ops den Prozess.
+    ("domain_ops", "document_control_exceptions"):
+        "Belegkontroll-Worklist ist ein Prozessvorrat in domain_ops, kein Belegartefakt.",
+    ("domain_ops", "document_control_audit"):
+        "Audit-Spur der Belegkontroll-Worklist, liegt beim Prozess in domain_ops.",
 }
 
 

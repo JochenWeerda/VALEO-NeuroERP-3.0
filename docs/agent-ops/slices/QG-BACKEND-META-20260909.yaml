@@ -12,6 +12,7 @@ goal: >-
 file_ownership:
   - docs/agent-ops/slices/QG-BACKEND-META-20260909.yaml
   - mkdocs.yml
+  - scripts/check_domain_table_ownership.py
   - "config/architecture-index.yaml: Inhalt von Codex, hier unveraendert committet"
   - "config/architecture-domain-prefixes.yaml: Inhalt von Codex, hier unveraendert committet"
   - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
@@ -30,6 +31,17 @@ befund:
     recent_documents, tank_adapter als Service- und Endpoint-Mapping). Er war
     nur unversioniert. Nachgestellt in einem sauberen HEAD-Worktree: allein
     diese beiden Dateien bringen den Index auf 927/927 Routen.
+  nachtrag_tabellenbesitz: >-
+    Der Backend-Job lief danach bis "Check domain table ownership" und fiel dort
+    an zwei Tabellen: domain_ops.document_control_audit und
+    document_control_exceptions gegen die Praefixregel document_ ->
+    domain_docflow. Die Pruefung des Ursprungs zeigt keine Fehlplatzierung,
+    sondern eine Namenskollision: die Tabellen stammen aus dem abgeschlossenen
+    Slice L3-BELEGCHECK-WORKLIST-005 und fuehren Ausnahmefaelle mit
+    Zustaendigem, Faelligkeit und Audit — ein Prozessvorrat. domain_docflow
+    haelt Belege (headers, items, artifacts), domain_ops den Prozess. Deshalb
+    als benannte Ausnahme eingetragen statt die Tabellen zu verschieben; eine
+    Verschiebung waere eine Datenmigration ohne fachlichen Gewinn.
   naechster_blocker: >-
     Danach faellt der Meta-Check einen Schritt weiter an der ADR-Navigation:
     mkdocs.yml war fuer 75 ADRs nicht aktuell. Regeneriert mit
@@ -49,11 +61,13 @@ acceptance:
   - "check_all_doc_generators.sh --check endet mit Exit 0"
   - "pnpm arch:validate gruen (C4-Views, Index 927/927, Container-Inventar)"
   - "check_no_core_contamination.py gruen"
+  - "check_domain_table_ownership.py gruen ohne Tabellenverschiebung"
   - Fremde Dateien sind inhaltlich unveraendert und ihre Urheberschaft ist benannt
 tests:
   - "scripts/check_all_doc_generators.sh --check (Gate)"
   - "pnpm arch:validate (Gate)"
   - "scripts/check_no_core_contamination.py (Gate)"
+  - "scripts/check_domain_table_ownership.py (Gate)"
 risks:
   - >-
     Fremde Arbeit zu committen nimmt dem Urheber die Kontrolle ueber Zeitpunkt

@@ -126,7 +126,9 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Lokaler Scheinbefund:** Im Arbeitsbaum meldeten die Code-Inventare zusaetzlich Drift. Ursache ist Codex' unversionierte Migration `desktop_runtime_repair_20260909.py`; in der CI existiert sie nicht, dort ist das Inventar aktuell. Bewusst nicht mitgezogen — eine ungetestete fremde Migration gehoert nicht in einen Doku-Slice.
 
-**Danach im Backend-Job:** nur noch Datenbank- und Testschritte (init_db, Schema-Checks, pytest, Coverage), die lokal ohne Postgres nicht nachstellbar sind.
+**Nachtrag Tabellenbesitz:** Der Job lief danach bis `Check domain table ownership` und fiel an `domain_ops.document_control_audit` und `document_control_exceptions` gegen die Praefixregel `document_` -> `domain_docflow`. Die Pruefung des Ursprungs zeigt keine Fehlplatzierung, sondern eine Namenskollision: die Tabellen stammen aus dem abgeschlossenen `L3-BELEGCHECK-WORKLIST-005` und fuehren Ausnahmefaelle mit Zustaendigem, Faelligkeit und Audit — ein Prozessvorrat. `domain_docflow` haelt Belege (headers/items/artifacts), `domain_ops` den Prozess. Als benannte Ausnahme in `check_domain_table_ownership.py` eingetragen statt die Tabellen zu verschieben; eine Verschiebung waere eine Datenmigration ohne fachlichen Gewinn. Check jetzt gruen.
+
+**Danach im Backend-Job:** nur noch pytest und Coverage, lokal ohne Postgres nicht nachstellbar.
 
 ## NPM-ADVISORIES-20260909 npm-Rueckstand im Dependency Scan - abgeschlossen 2026-09-09
 
