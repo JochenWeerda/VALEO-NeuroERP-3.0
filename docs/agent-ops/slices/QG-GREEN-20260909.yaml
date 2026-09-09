@@ -15,6 +15,7 @@ file_ownership:
   - app/api/v1/endpoints/admin_devices.py
   - packages/frontend-web/src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx
   - packages/frontend-web/src/pages/portal/feldbuch.tsx
+  - packages/frontend-web/src/components/ui/native-select.tsx
   - requirements.txt
   - tests/test_pagination_contract.py
   - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
@@ -32,6 +33,17 @@ befund:
     nichts mehr und fielen unter --report-unused-disable-directives. Die
     Begruendung war erhaltenswert, die Direktive nicht: beide wurden zu
     normalen Kommentaren.
+  wcag_nachtrag: >-
+    Der CI-Lauf nach dem Pagination-Fix zeigte einen echten axe-Fehler auf
+    /portal/feldbuch: ein NativeSelect ohne zugaenglichen Namen (select-name,
+    critical). Er war vorher nur zufaellig gruen — die Seite rendert das Feld
+    abhaengig vom Ladezustand, und der Job laeuft ohne Backend. Eine Erhebung
+    ueber alle 268 NativeSelect-Aufrufe ergab 255 ohne aria-label, davon 164
+    ohne jede Namensquelle. Geschlossen wurde die Klasse, nicht die Liste: das
+    Primitive faellt jetzt auf den placeholder zurueck (deckt 91 Stellen), und
+    die acht Selects in feldbuch sind benannt — vier per Label/htmlFor, weil
+    dort ein sichtbares Label existiert, zwei per ariaLabel, zwei ueber den
+    Platzhalter.
   dependency_scan: >-
     pip-audit meldete 17 Advisories fuer GitPython 3.1.50, drei fuer aiohttp
     3.14.1 und eine fuer langgraph-checkpoint-sqlite 3.1.0.
@@ -53,9 +65,11 @@ acceptance:
   - Voller Frontend-Lint mit --report-unused-disable-directives ist fehlerfrei
   - pip-audit gegen requirements.txt meldet keine Verwundbarkeit
   - Jede neu paginierte Liste ist per Test an limit/skip gebunden
+  - Der axe-Lauf auf /portal/feldbuch ist fehlerfrei
   - Der Resolver loest requirements.txt konfliktfrei auf
 tests:
   - tests/test_pagination_contract.py
+  - packages/frontend-web/tests/e2e/accessibility.spec.ts
 risks:
   - >-
     Eine Standard-Obergrenze von 100 aendert das Antwortverhalten bisher

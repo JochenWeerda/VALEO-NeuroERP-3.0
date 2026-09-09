@@ -212,8 +212,9 @@ function SchlagFormDialog({
           </div>
           {editing && (
             <div className="space-y-1">
-              <Label>Status</Label>
+              <Label htmlFor="schlag-status">Status</Label>
               <NativeSelect
+                id="schlag-status"
                 value={form.status}
                 onValueChange={v => setForm(p => ({ ...p, status: v }))}
                 options={[
@@ -380,8 +381,8 @@ function MassnahmeDialog({
               <Input id="massnahme-menge" data-testid="massnahme-menge" type="number" step="0.1" value={form.menge} onChange={e => setForm(p => ({ ...p, menge: e.target.value }))} placeholder="3.5" />
             </div>
             <div className="space-y-1">
-              <Label>Einheit</Label>
-              <NativeSelect value={form.einheit} onValueChange={v => setForm(p => ({ ...p, einheit: v }))} options={['l/ha', 'kg/ha', 'ml/ha', 'g/ha', 't/ha', 'Stueck/ha'].map((e) => ({ value: e, label: e }))} />
+              <Label htmlFor="massnahme-einheit">Einheit</Label>
+              <NativeSelect id="massnahme-einheit" value={form.einheit} onValueChange={v => setForm(p => ({ ...p, einheit: v }))} options={['l/ha', 'kg/ha', 'ml/ha', 'g/ha', 't/ha', 'Stueck/ha'].map((e) => ({ value: e, label: e }))} />
             </div>
             <div className="space-y-1">
               <Label htmlFor="massnahme-flaeche">Fläche (ha)</Label>
@@ -492,12 +493,12 @@ function ExportDialog({
 
         <div className="grid gap-3">
           <div className="space-y-1">
-            <Label>Format</Label>
-            <NativeSelect value={format} onValueChange={v => setFormat(v as 'csv' | 'ackerschlagkartei')} options={[{ value: 'ackerschlagkartei', label: 'Ackerschlagkartei-CSV (proPlant, 365FarmNet)' }, { value: 'csv', label: 'Generisches CSV (alle Felder)' }]} />
+            <Label htmlFor="export-format">Format</Label>
+            <NativeSelect id="export-format" value={format} onValueChange={v => setFormat(v as 'csv' | 'ackerschlagkartei')} options={[{ value: 'ackerschlagkartei', label: 'Ackerschlagkartei-CSV (proPlant, 365FarmNet)' }, { value: 'csv', label: 'Generisches CSV (alle Felder)' }]} />
           </div>
           <div className="space-y-1">
-            <Label>Schlag (optional)</Label>
-            <NativeSelect value={schlagId} onValueChange={setSchlagId} placeholder="Alle Schlaege" options={[{ value: '', label: 'Alle Schlaege' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
+            <Label htmlFor="export-schlag">Schlag (optional)</Label>
+            <NativeSelect id="export-schlag" value={schlagId} onValueChange={setSchlagId} placeholder="Alle Schlaege" options={[{ value: '', label: 'Alle Schlaege' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -970,6 +971,7 @@ export default function PortalFeldbuch() {
         </div>
         <div className="flex flex-wrap gap-2">
           <NativeSelect
+            ariaLabel="Wirtschaftsjahr"
             value={String(wirtschaftsjahr)}
             onValueChange={(v) => setWirtschaftsjahr(Number(v))}
             options={[currentYear - 1, currentYear, currentYear + 1].map((y) => ({
@@ -1085,7 +1087,7 @@ export default function PortalFeldbuch() {
           />
         </div>
         {activeTab === 'massnahmen' && (
-          <NativeSelect value={selectedSchlag} onValueChange={setSelectedSchlag} placeholder="Schlag waehlen" options={[{ value: 'alle', label: 'Alle Schlaege' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
+          <NativeSelect ariaLabel="Schlag filtern" value={selectedSchlag} onValueChange={setSelectedSchlag} placeholder="Schlag waehlen" options={[{ value: 'alle', label: 'Alle Schlaege' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
         )}
       </div>
 

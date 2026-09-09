@@ -45,7 +45,10 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
       <select
         ref={ref}
         id={id}
-        aria-label={ariaLabel ?? ariaLabelAttr}
+        // Ohne Label bleibt der Platzhalter der einzige beschreibende Text am
+        // Feld — axe (select-name) wertet eine <option> nicht als Namen. Er ist
+        // deshalb der Fallback; fehlt auch er, meldet axe die Luecke weiterhin.
+        aria-label={ariaLabel ?? ariaLabelAttr ?? placeholder}
         value={value}
         onChange={(event) => {
           onChange?.(event)

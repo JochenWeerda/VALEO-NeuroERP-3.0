@@ -124,6 +124,10 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis:** Rot war der Gate seit 2026-08-21, nicht durch den S608-Push. Bisektion ueber die Endpunkt-Historie: 54 unbegrenzte Listen-Dateien bereits am 2026-08-21, 55 ab `44dd782f4` am 2026-08-22 — Schwelle 53. Statt die Schwelle zu senken sind acht Listen tatsaechlich paginiert (kostenrechnung 3, admin_devices 5, Hausmuster `limit` Query(100, le=1000) / `skip` Query(0, ge=0)); Zaehlung 55 -> 53, Gate meldet OK. Zwei tote `eslint-disable`-Direktiven fuer `react-hooks/exhaustive-deps` durch normale Kommentare ersetzt, voller Lint fehlerfrei. Drei Pins gehoben: aiohttp 3.14.1 -> 3.14.3, GitPython 3.1.50 -> 3.1.62, langgraph-checkpoint-sqlite 3.1.0 -> 3.1.1; `pip-audit` meldet nichts mehr (vorher 21 Advisories), Resolver-Dry-Run konfliktfrei. 24 Vertragstests binden die acht Endpunkte einzeln an limit/skip, weil der Ratchet nur Dateien zaehlt.
 
+**Nachtrag WCAG:** Der CI-Lauf danach legte einen echten axe-Fehler auf `/portal/feldbuch` frei (`select-name`, critical) — vorher nur zufaellig gruen, weil die Seite das Feld ladezustandsabhaengig rendert. Erhebung: 255 von 268 `NativeSelect`-Aufrufen ohne `aria-label`, davon 164 ohne jede Namensquelle. Geschlossen wurde die Klasse: das Primitive faellt auf den `placeholder` zurueck (deckt 91 Stellen), die acht Selects in feldbuch sind benannt (vier per Label/`htmlFor`, zwei per `ariaLabel`, zwei ueber den Platzhalter). Lokaler axe-Lauf gruen, tsc und Lint gruen.
+
+**Danach noch rot (nicht in diesem Slice, vorher verdeckt):** `check_openapi_docs.py` meldet 101 Routen ohne `summary` gegen Schwelle 0 (Deckung 97,1 Prozent, Schwerpunkt feeding/l3/billing); `pnpm audit --prod --audit-level high` meldet 83 npm-Advisories (50 high, 2 critical, u. a. xmldom, fast-uri, nanoid, tar, multer). Beide brauchen einen eigenen Slice.
+
 ## SPEC-P1-05-S608-RESTSCHULD SQL-f-String-Restschuld - abgeschlossen 2026-09-09
 
 **Von:** User-Auftrag, Uebernahme der offenen S608-Restschuld. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
