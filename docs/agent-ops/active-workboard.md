@@ -110,9 +110,9 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
-## QG-BACKEND-META-20260909 Doc-Generator-Meta-Check schliessen - reserviert
+## QG-BACKEND-META-20260909 Doc-Generator-Meta-Check schliessen - abgeschlossen 2026-09-09
 
-**Von:** User-Auftrag, offene Punkte auch in fremdem Zustaendigkeitsbereich schliessen. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+**Von:** User-Auftrag, offene Punkte auch in fremdem Zustaendigkeitsbereich schliessen. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
 
 **Ziel:** Den letzten roten Schritt des Backend-Jobs (`check_all_doc_generators.sh --check`) schliessen: Architektur-Index-Domain-Mapping und ADR-Navigation.
 
@@ -121,6 +121,12 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 **Abnahme:** `check_all_doc_generators.sh --check` Exit 0; `pnpm arch:validate` gruen; `check_no_core_contamination.py` gruen.
 
 **Risiken:** Fremde Arbeit zu committen nimmt dem Urheber die Kontrolle ueber Zeitpunkt und Zuschnitt. Der Inhalt wird deshalb nicht angefasst, die Urheberschaft in Commit und Workboard benannt.
+
+**Ergebnis:** Der Fix lag laengst im geteilten Arbeitsbaum — Codex hatte beide Konfigurationen bereits ergaenzt (`feeding_`-Praefix in beiden Listen, dazu billing_batch, document_control, foreign_goods_worklist, l3_report_catalog, legacy_interface_adapters, mail_workspace, production_control, recent_documents, tank_adapter als Service- und Endpoint-Mapping), nur unversioniert. Nachgestellt in einem sauberen HEAD-Worktree: allein diese beiden Dateien bringen den Index auf 927/927 Routen. Danach faellt der Meta-Check einen Schritt weiter an der **ADR-Navigation** — `mkdocs.yml` war fuer 75 ADRs nicht aktuell und wurde regeneriert. Damit laeuft `check_all_doc_generators.sh --check` mit Exit 0 durch alle acht Generatoren; `pnpm arch:validate` und `check_no_core_contamination.py` gruen.
+
+**Lokaler Scheinbefund:** Im Arbeitsbaum meldeten die Code-Inventare zusaetzlich Drift. Ursache ist Codex' unversionierte Migration `desktop_runtime_repair_20260909.py`; in der CI existiert sie nicht, dort ist das Inventar aktuell. Bewusst nicht mitgezogen — eine ungetestete fremde Migration gehoert nicht in einen Doku-Slice.
+
+**Danach im Backend-Job:** nur noch Datenbank- und Testschritte (init_db, Schema-Checks, pytest, Coverage), die lokal ohne Postgres nicht nachstellbar sind.
 
 ## NPM-ADVISORIES-20260909 npm-Rueckstand im Dependency Scan - abgeschlossen 2026-09-09
 

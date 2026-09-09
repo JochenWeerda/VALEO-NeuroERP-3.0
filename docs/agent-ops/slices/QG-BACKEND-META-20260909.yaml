@@ -1,0 +1,100 @@
+slice_id: QG-BACKEND-META-20260909
+id: QG-BACKEND-META-20260909
+title: Doc-Generator-Meta-Check schliessen — Architektur-Index und ADR-Navigation
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-09"
+started_at: "2026-09-09"
+completed_at: "2026-09-09"
+goal: >-
+  Den letzten roten Schritt des Backend-Jobs schliessen, einschliesslich der
+  Anteile, die fachlich in fremdem Zustaendigkeitsbereich liegen.
+file_ownership:
+  - docs/agent-ops/slices/QG-BACKEND-META-20260909.yaml
+  - mkdocs.yml
+  - "config/architecture-index.yaml: Inhalt von Codex, hier unveraendert committet"
+  - "config/architecture-domain-prefixes.yaml: Inhalt von Codex, hier unveraendert committet"
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+ausloeser: >-
+  Nach OPENAPI-SUMMARY-20260909 blieb der Backend-Job an
+  check_all_doc_generators.sh haengen: 29 Backend-Services und 28 Endpoints ohne
+  Domain-Mapping. Der Auftrag lautete, offene Punkte auch in fremdem
+  Zustaendigkeitsbereich zu schliessen.
+befund:
+  bereits_geloest_aber_nicht_committet: >-
+    Der Fix lag laengst im geteilten Arbeitsbaum: Codex hatte
+    architecture-index.yaml und architecture-domain-prefixes.yaml um die
+    fehlenden Zuordnungen ergaenzt (feeding_-Praefix in beiden Listen, dazu
+    billing_batch, document_control, foreign_goods_worklist, l3_report_catalog,
+    legacy_interface_adapters, mail_workspace, production_control,
+    recent_documents, tank_adapter als Service- und Endpoint-Mapping). Er war
+    nur unversioniert. Nachgestellt in einem sauberen HEAD-Worktree: allein
+    diese beiden Dateien bringen den Index auf 927/927 Routen.
+  naechster_blocker: >-
+    Danach faellt der Meta-Check einen Schritt weiter an der ADR-Navigation:
+    mkdocs.yml war fuer 75 ADRs nicht aktuell. Regeneriert mit
+    scripts/generate_adr_nav.py.
+  lokaler_scheinbefund: >-
+    Im Arbeitsbaum meldeten die Code-Inventare zusaetzlich Drift. Ursache ist
+    Codex' unversionierte Migration desktop_runtime_repair_20260909.py; in der
+    CI existiert sie nicht, dort ist das Inventar aktuell. Bewusst nicht
+    mitgezogen — eine ungetestete fremde Migration gehoert nicht in einen
+    Doku-Slice.
+result: >-
+  check_all_doc_generators.sh --check laeuft mit Exit 0 durch alle acht
+  Generatoren. Der Backend-Job hat damit keinen Doku-Blocker mehr; was danach
+  kommt, sind Datenbank- und Testschritte, die lokal ohne Postgres nicht
+  nachstellbar sind.
+acceptance:
+  - "check_all_doc_generators.sh --check endet mit Exit 0"
+  - "pnpm arch:validate gruen (C4-Views, Index 927/927, Container-Inventar)"
+  - "check_no_core_contamination.py gruen"
+  - Fremde Dateien sind inhaltlich unveraendert und ihre Urheberschaft ist benannt
+tests:
+  - "scripts/check_all_doc_generators.sh --check (Gate)"
+  - "pnpm arch:validate (Gate)"
+  - "scripts/check_no_core_contamination.py (Gate)"
+risks:
+  - >-
+    Fremde Arbeit zu committen nimmt dem Urheber die Kontrolle ueber Zeitpunkt
+    und Zuschnitt seines Commits. Der Inhalt wurde deshalb nicht angefasst und
+    die Urheberschaft in Commit, Workboard und diesem YAML benannt. Codex'
+    Arbeitsbaum bleibt unveraendert, die Dateien sind dort weiterhin identisch.
+  - >-
+    Ein regeneriertes mkdocs.yml faellt wieder auseinander, sobald ein ADR
+    hinzukommt, ohne den Generator zu laufen. Das ist die Natur des Gates und
+    kein Restrisiko dieses Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Jeder Backend-Service und jeder Endpoint gehoert genau einer fachlichen
+    Domaene. Ein fehlendes Mapping ist keine Formalie, sondern eine Luecke im
+    Domaenenschnitt, die Architektursichten und Agent-Werkzeuge falsch fuehrt.
+  architektur_vertrag: >-
+    Zuordnung erfolgt ueber Praefixregeln in architecture-domain-prefixes.yaml,
+    Ausnahmen als explizites Mapping. Der Index wird generiert, nicht gepflegt.
+  daten_vertrag: >-
+    Keine Schema- oder Datenaenderung; ausschliesslich generierte und
+    konfigurierende Dokumente.
+  test_vertrag: >-
+    Nachweis ist der Meta-Check ueber alle acht Generatoren, nicht der einzelne
+    Index-Check — sonst bleibt der naechste Blocker unsichtbar, wie hier die
+    ADR-Navigation.
+  security_vertrag: >-
+    Keine sicherheitsrelevante Aenderung; die Domain-Zuordnung enthaelt keine
+    Geheimnisse oder personenbezogenen Daten.
+  betriebs_vertrag: >-
+    Der Meta-Check bleibt blockierend. Neue Services oder Endpoints ohne
+    Domain-Mapping lassen den Backend-Job ab sofort wieder fallen.
+  dokumentations_vertrag: >-
+    Workboard und dieses YAML nennen die Herkunft der beiden Konfigurationen,
+    die Nachstellung im sauberen Worktree und den lokalen Scheinbefund der
+    Code-Inventare.
+external_gates:
+  - >-
+    Ob und wie Codex seine Migration und den uebrigen WIP committet, bleibt
+    seine Entscheidung; dieser Slice hat nur die beiden Konfigurationsdateien
+    uebernommen.
+  - >-
+    Die Datenbank- und Testschritte des Backend-Jobs (init_db, Schema-Checks,
+    pytest, Coverage) sind lokal ohne Postgres nicht nachstellbar; ihr Ergebnis
+    zeigt erst die CI.

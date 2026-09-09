@@ -209,6 +209,7 @@ domains:
       - contract_
       - settlement_
       - feed_
+      - feeding_
       - silo_rule_
       - supply_chain_
       - rations_
@@ -230,6 +231,7 @@ domains:
       - ers_settlement
       - farm_
       - feed_
+      - feeding_
       - foerderung
       - futter_
       - futtermittel_
@@ -578,6 +580,16 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  billing_batch_service: finance
+  document_control_projection: dms-compliance
+  document_control_service: dms-compliance
+  foreign_goods_worklist_service: inventory
+  l3_report_catalog_service: finance
+  legacy_interface_adapter_service: platform
+  mail_workspace_service: crm
+  production_control_service: agrar
+  recent_documents_service: platform
+  tank_adapter_service: agrar
   articles_service: inventory
   customer_service: crm
   customer_sales_eligibility: crm
@@ -597,6 +609,15 @@ exact_service_stems:
   kaeufergruppe: crm
 
 exact_endpoint_stems:
+  billing_batch: finance
+  document_control: dms-compliance
+  foreign_goods_worklist: inventory
+  l3_report_catalog: finance
+  legacy_interface_adapters: platform
+  mail_workspace: crm
+  production_control: agrar
+  recent_documents: platform
+  tank_adapter: agrar
   articles: inventory
   customers: crm
   contacts: crm

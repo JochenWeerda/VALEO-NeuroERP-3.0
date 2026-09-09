@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-08-22
+# Architecture Index — generiert 2026-09-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-08-22T07:44:44Z'
+generated_at: '2026-09-09T13:38:18Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -303,6 +303,25 @@ domains:
     - feed_production_chain_service
     - feed_produktion_lifecycle_service
     - feed_rezeptur_service
+    - feeding_actual_measure_service
+    - feeding_actual_service
+    - feeding_assist_service
+    - feeding_business_service
+    - feeding_consulting_report_service
+    - feeding_consulting_service
+    - feeding_feed_analysis_service
+    - feeding_feed_catalog_service
+    - feeding_herd_snapshot_service
+    - feeding_import_monitor_service
+    - feeding_measure_lifecycle_service
+    - feeding_mixer_service
+    - feeding_plan_service
+    - feeding_ration_editor_service
+    - feeding_ration_template_service
+    - feeding_recipe_service
+    - feeding_reports_service
+    - feeding_requirements_service
+    - feeding_supply_service
     - geo_pipeline
     - harvest_acceptance_service
     - kontrakt_fixing_service
@@ -312,7 +331,13 @@ domains:
     - kontrakt_settlement_service
     - kontrakte_adapters
     - kontrakte_service
+    - production_control_service
     - qs_charge_service
+    - rations_controlling_service
+    - rations_herd_data_sync_service
+    - rations_lifecycle_service
+    - rations_readiness_service
+    - rations_reference_data_service
     - settlement_approval_service
     - settlement_drying_service
     - settlement_pdf_service
@@ -320,6 +345,7 @@ domains:
     - supply_chain_event_service
     - supply_chain_lot_service
     - supply_chain_trace_service
+    - tank_adapter_service
     - webshop_integration_service
     backend_endpoints:
     - agrar_contracts
@@ -350,6 +376,25 @@ domains:
     - esg_footprint
     - farm_profiles
     - feed_produktion_actions
+    - feeding_actual
+    - feeding_assist
+    - feeding_consulting
+    - feeding_core
+    - feeding_feed_analyses
+    - feeding_feed_catalog
+    - feeding_governance
+    - feeding_herd_history
+    - feeding_import_monitor
+    - feeding_measures
+    - feeding_mixer
+    - feeding_performance
+    - feeding_plans
+    - feeding_ration_editor
+    - feeding_ration_templates
+    - feeding_recipes
+    - feeding_reports
+    - feeding_requirements
+    - feeding_supply
     - foerderung
     - futter_stamm
     - futtermittel_qs
@@ -366,10 +411,15 @@ domains:
     - nawaro
     - nawaro_raps
     - partiestamm
+    - production_control
     - produktion_mischfutter
     - produktion_rezepturgruppen
+    - rations_controlling
     - rations_integrations
+    - rations_lifecycle
     - rations_optimization
+    - rations_readiness
+    - rations_reference_data
     - rations_zugang
     - reklamation_api
     - rohware_sammelabrechnung
@@ -383,6 +433,7 @@ domains:
     - silo_target_cell
     - supply_chain
     - sustainability
+    - tank_adapter
     - tankstelle
     - vermehrungsvertrag
     - vertraege
@@ -671,6 +722,7 @@ domains:
     - kunden_geocode_service
     - kunden_merge
     - lieferschein_pdf
+    - mail_workspace_service
     - milchvieh_crosssell_service
     - notification_service
     - o2c_chain_service
@@ -724,6 +776,7 @@ domains:
     - dunning
     - kaeufergruppe
     - leads
+    - mail_workspace
     - marketing
     - messages
     - milchvieh_crosssell
@@ -854,7 +907,10 @@ domains:
     - docflow_evidence_service
     - docflow_followup_service
     - docflow_gobd_service
+    - docflow_return_service
     - docflow_service
+    - document_control_projection
+    - document_control_service
     - pii_detector
     backend_endpoints:
     - atlas_zollausfuhr
@@ -872,6 +928,8 @@ domains:
     - docflow_evidence
     - docflow_followup
     - docflow_gobd
+    - docflow_return
+    - document_control
     - dokumente
     - edi_api
     - gdpr
@@ -1095,6 +1153,7 @@ domains:
     backend_services:
     - accounting_export_profiles
     - ap_invoice_kernel_posting
+    - billing_batch_service
     - closing_checklists_service
     - command_handlers_finance
     - controlling_abweichung_service
@@ -1116,11 +1175,13 @@ domains:
     - finance_transaction_service
     - fints_connector
     - ist_aggregation_service
+    - l3_report_catalog_service
     - meldewesen_lifecycle_service
     - pos_accounting_service
     - pos_compat_service
     - pos_fiscal_document_service
     - pos_tagesabschluss_service
+    - query_center_service
     - tse_fiskaly_service
     - vies_service
     backend_endpoints:
@@ -1138,6 +1199,7 @@ domains:
     - bank_statement_import
     - banken
     - betriebsstaetten
+    - billing_batch
     - booking_templates
     - budget_planning
     - bulk_journal_import
@@ -1179,6 +1241,7 @@ domains:
     - kasse_tagesabschluss
     - kostenrechnung
     - kundenbanken
+    - l3_report_catalog
     - liquidity
     - liquidity_planning
     - meldewesen_lifecycle_actions
@@ -1196,6 +1259,7 @@ domains:
     - preis_rabattgruppen
     - pricing
     - pricing_governance
+    - query_center
     - report_print
     - reporting_api
     - stmd_duplikat
@@ -1342,10 +1406,15 @@ domains:
     - /stock-management
     backend_services:
     - articles_service
+    - foreign_goods_worklist_service
+    - inventory_auxiliary_service
+    - inventory_balance_reconciliation
     - inventory_compat_service
     - inventory_correction_service
     - inventory_count_close_service
     - inventory_lot_trace_service
+    - inventory_movement_direction
+    - inventory_stock_balance
     - number_range_service
     - numbering_service
     - numbering_service_pg
@@ -1366,9 +1435,11 @@ domains:
     - daily_prices
     - disposition
     - etiketten
+    - foreign_goods_worklist
     - gs1_barcode
     - gs1_parser
     - individuelle_artikelnummern
+    - inventory_auxiliary
     - inventory_counts
     - inventory_operations
     - massebilanz
@@ -1648,6 +1719,7 @@ domains:
     - integration_bootstrap
     - interaction_state_manager
     - knowledge_store
+    - legacy_interface_adapter_service
     - llm_gateway
     - mail_ingest_service
     - mask_action_runtime_service
@@ -1667,6 +1739,7 @@ domains:
     - policy_service
     - process_map_service
     - prompt_pack_registry
+    - recent_documents_service
     - scheduler_service
     - secrets_vault
     - security_observability
@@ -1723,6 +1796,7 @@ domains:
     - job_runner
     - ki_usability
     - knowledge_api
+    - legacy_interface_adapters
     - mask_actions
     - mask_registry
     - mask_rollout_summaries
@@ -1759,6 +1833,7 @@ domains:
     - projekte
     - rag
     - read_model_snapshots
+    - recent_documents
     - reports_export
     - runtime_operations
     - security_monitoring
@@ -1907,10 +1982,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 927
   frontend_routes_mapped: 927
-  backend_services_total: 210
-  backend_services_mapped: 210
-  backend_endpoints_total: 406
-  backend_endpoints_mapped: 406
+  backend_services_total: 250
+  backend_services_mapped: 250
+  backend_endpoints_total: 441
+  backend_endpoints_mapped: 441
 unmapped:
   frontend_routes: []
   backend_services: []
