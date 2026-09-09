@@ -167,10 +167,51 @@ def test_storno_neu_und_idempotent_verlieren_kein_feld():
     assert dumped["ownership_type"] == "owned"
 
 
-def test_storno_modell_kennt_keine_reference_type_spalte():
-    """Regression: die Tabelle hat source_document_type, nicht reference_type."""
-    assert "reference_type" not in lots.StornoKorrekturOut.model_fields
-    assert "source_document_type" in lots.StornoKorrekturOut.model_fields
+def test_storno_modell_fuehrt_kanonischen_und_historischen_belegbezug():
+    """Der kanonische Bezug fuehrt, der historische bleibt lesbar.
+
+    Frueher stand hier die Umkehrung: das Modell durfte ``reference_type`` nicht
+    kennen. Diese Annahme gilt nicht mehr. Die Altspalten bleiben im
+    Bestandshauptbuch erhalten — ein Spalten-Drop gaebe den urspruenglichen
+    Belegbezug auf, den GoB waehrend der Aufbewahrungsfrist verlangt. Ein Modell,
+    das sie verschweigt, macht sie ueber die API unsichtbar; gespeichert ist
+    nicht dasselbe wie nachvollziehbar.
+    """
+    felder = lots.StornoKorrekturOut.model_fields
+    assert "source_document_type" in felder
+    assert "source_document_id" in felder
+    assert "reference_type" in felder
+    assert "reference_id" in felder
+
+    # Neue Buchungen schreiben ausschliesslich den kanonischen Bezug; die
+    # Altfelder sind optional und ohne Vorgabewert.
+    for altfeld in ("reference_type", "reference_id"):
+        assert felder[altfeld].is_required() is False
+        assert felder[altfeld].default is None
+
+
+def test_storno_modell_gibt_historischen_bezug_heraus():
+    """Eine historische Zeile verliert ihren Belegbezug nicht in der Antwort."""
+    from app.services.inventory_document_reference import belegbezug
+
+    zeile = {
+        "idempotent": True,
+        "id": "mv-1",
+        "tenant_id": "system",
+        "article_id": "art-1",
+        "warehouse_id": "wh-1",
+        "movement_type": "ZUGANG",
+        "quantity": Decimal("10"),
+        "reference_type": "KORREKTUR",
+        "reference_id": "KO-7",
+    }
+    dumped = lots.StornoKorrekturOut.model_validate(zeile).model_dump()
+    assert dumped["reference_type"] == "KORREKTUR"
+    assert dumped["reference_id"] == "KO-7"
+
+    bezug = belegbezug(dumped)
+    assert (bezug.typ, bezug.id) == ("KORREKTUR", "KO-7")
+    assert bezug.herkunft == "historisch"
 
 
 # -- Silo und Materialfluss -------------------------------------------------
