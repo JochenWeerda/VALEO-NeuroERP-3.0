@@ -110,6 +110,24 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
+## CI-REGRESSION-20260909 28 Backend-Testfehler ursaechlich behoben - abgeschlossen 2026-09-09
+
+**Von:** User-Entscheidung GoBD-konform, alles umsetzen. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
+
+**Ziel:** Die 28 Testfehler des Backend-Jobs an der Ursache beheben — ohne Tests zu ueberspringen, abzuschwaechen oder Schwellen zu senken.
+
+**Dateibesitz:** `app/services/inventory_document_reference.py`, `inventory_lot_bundle_schemas.py`, `sanctions_compliance.py`, die Omnibox-Synonyme in `screen_definitions.py`, elf Testdateien, Slice-YAML und dieser Abschnitt. Nicht: fremder WIP ausser dem ausdruecklich uebernommenen humanForm-Vertrag.
+
+**Abgleich:** 28 Fehler — Fuetterung 16, CRM 4, Masken/Compliance 3, Bestandshauptbuch 5. Die fruehere Zahl 11 fuer die Fuetterung war zu niedrig.
+
+**Ergebnis:** Elf Fuetterungsfehler hatten eine gemeinsame Ursache: Fixtures publizierten Plaene mit festem Kalenderfenster und buchten Ist-Fuetterungen mit „jetzt"; seit dem 1. September griff die Sperre gegen veraltete Planversionen — zu Recht. Die Sperre bleibt, die Fixtures beziehen ihr Fenster auf den Testzeitpunkt. Dabei fiel auf, dass die Sperre **keinen eigenen Test hatte**; sie hat jetzt einen, fuer beide Nicht-aktuell-Zweige. Zwei Maskentests prueften das Vokabular vor der Normalisierung aus `L3-VISUAL-PARITY-AUDIT-031`, zwei Grant-Doubles kannten RETURNING-Lesepfad und Audit-Ereignisse nicht. Vier CRM-Doubles lieferten `{"items": …}` gegen einen `list[...]`-Vertrag — die 500er kamen von den Doubles, nicht von den Endpunkten. Elf native Fuetterungsmasken bekamen kuratierte Omnibox-Synonyme.
+
+**Sicherheitsbefund:** Die Sanktionspruefung lieferte bei nicht erreichbarer Sanktionsliste `status="KEIN_TREFFER"` mit dem Text „Pruefung nicht moeglich". Der Text half nur Menschen; ein Aufrufer, der auf `status` reagiert, haette freigegeben, ohne dass je eine Liste geprueft wurde. Der Test hielt das sogar als „graceful" fest. Jetzt 503 ohne Freigabe.
+
+**Bestandshauptbuch (GoBD-Entscheidung):** Kein Spalten-Drop. `source_document_*` bleibt kanonisch, `reference_*` bleibt als historisches Paar erhalten und lesbar; keine angewandte Migration wurde umgeschrieben. Neues Modul loest den Bezug **paarweise** auf und **weist Widersprueche aus, statt sie umzudeuten**. Die Abwesenheitstests sind durch fuenf fachliche Vertragstests ersetzt; die Deckungspruefung rechnet generationsabhaengige Spalten heraus, damit frisch migrierte und gewachsene Datenbank denselben Vertrag erfuellen.
+
+**Risiken:** Die 503-Antwort aendert das Verhalten fuer Aufrufer, die bisher stillschweigend weiterliefen — gewollt. Wer die Altfelder kuenftig beschreibt, erzeugt widersprechende Paare; die Aufloesung weist das aus, verhindert es aber nicht.
+
 ## QG-BACKEND-META-20260909 Doc-Generator-Meta-Check schliessen - abgeschlossen 2026-09-09
 
 **Von:** User-Auftrag, offene Punkte auch in fremdem Zustaendigkeitsbereich schliessen. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.

@@ -1,0 +1,144 @@
+slice_id: CI-REGRESSION-20260909
+id: CI-REGRESSION-20260909
+title: 28 Backend-Testfehler ursaechlich beheben — Fuetterung, CRM, Compliance, Bestandshauptbuch
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-09"
+started_at: "2026-09-09"
+completed_at: "2026-09-09"
+goal: >-
+  Die im Backend-Job sichtbar gewordenen 28 Testfehler an der Ursache beheben,
+  ohne Tests zu ueberspringen, abzuschwaechen oder Schwellen zu senken.
+file_ownership:
+  - docs/agent-ops/slices/CI-REGRESSION-20260909.yaml
+  - app/services/inventory_document_reference.py
+  - app/api/v1/schemas/inventory_lot_bundle_schemas.py
+  - app/api/v1/endpoints/sanctions_compliance.py
+  - "app/core/screen_definitions.py: Omnibox-Synonyme der Fuetterungsmasken"
+  - tests/test_dom_inv_004.py
+  - tests/test_welle8_schema_drift.py
+  - tests/test_feeding_actual_api.py
+  - tests/test_feeding_supply_api.py
+  - tests/test_feeding_measure_lifecycle_api.py
+  - tests/test_feeding_plan_api.py
+  - tests/test_feeding_reference_data.py
+  - tests/test_feeding_ration_templates.py
+  - tests/test_feeding_business_core.py
+  - tests/test_small_endpoints_wave51.py
+  - tests/test_small_endpoints_wave61.py
+  - tests/test_sanctions_genossenschaft_intrastat.py
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+ausloeser: >-
+  Nach dem Schliessen der Doku- und Architektur-Gates erreichte der Backend-Job
+  erstmals seit Wochen den Testlauf und meldete 28 Fehler bei 13.348 bestandenen
+  Tests.
+befund:
+  abgleich: >-
+    28 Fehler gesamt. Fuetterung 16, CRM 4, Masken/Compliance 3,
+    Bestandshauptbuch 5 (drei in test_dom_inv_004, zwei in
+    test_welle8_schema_drift). Eine fruehere Aufteilung mit 11 fuer die
+    Fuetterung war zu niedrig.
+  fuetterung_zeitbombe: >-
+    Elf der 16 Fuetterungsfehler hatten eine gemeinsame Ursache: Fixtures
+    publizierten Plaene mit festem Kalenderfenster und buchten Ist-Fuetterungen
+    mit "jetzt". Seit dem 1. September war das Fenster verstrichen und die
+    Sperre gegen veraltete Planversionen griff — zu Recht. Dabei fiel auf, dass
+    die Sperre keinen eigenen Test hatte; sie war nur zufaellig beruehrt worden.
+  fuetterung_uebrige: >-
+    Zwei Maskentests prueften das Vokabular vor der zentralen Normalisierung aus
+    L3-VISUAL-PARITY-AUDIT-031; zwei Grant-Tests liefen gegen Doubles, die den
+    RETURNING-Lesepfad und die Master-Data-Audit-Ereignisse nicht kannten; ein
+    Abloesetest gab der Nachfolgeversion ein bereits abgelaufenes Fenster.
+  crm: >-
+    Vier Doubles lieferten {"items": [...]}, wo die Response-Model-Typisierung
+    list[...] verlangt. FastAPI quittierte das mit 500 — die Endpunkte waren in
+    Ordnung.
+  sicherheitsbefund: >-
+    Die Sanktionspruefung lieferte bei nicht erreichbarer Sanktionsliste
+    status="KEIN_TREFFER" mit erklaerendem Text. Der Text half nur Menschen; ein
+    Aufrufer, der auf status reagiert, haette die Geschaeftsbeziehung
+    freigegeben, ohne dass je eine Liste geprueft wurde. Der zugehoerige Test
+    hielt dieses Verhalten sogar als "graceful" fest.
+  auffindbarkeit: >-
+    Elf native Fuetterungsmasken hatten keine kuratierten Omnibox-Synonyme; das
+    Programm brachte die Masken mit, die Suchbegriffe nicht.
+  bestandshauptbuch: >-
+    Drei Tests standen auf Spaltennamen, die Welle 8 als nicht existent
+    nachgewiesen hatte. Zwei weitere waren ein bewusster Stolperdraht gegen das
+    Wiederauftauchen der historischen Belegfelder in einer frisch migrierten
+    Datenbank.
+  messung_vorher:
+    fehler: 28
+    bestanden: 13348
+  messung_nachher:
+    lokal_gruen: "alle 28 in ihren Suiten"
+result: >-
+  Alle 28 Fehler ursaechlich behoben. Kein Test uebersprungen, keine Schwelle
+  gesenkt, keine Erwartung abgeschwaecht ohne dokumentierte fachliche Aenderung.
+  Zwei Luecken wurden dabei geschlossen, die vorher niemand geprueft hat: die
+  Planversions-Sperre hat jetzt einen eigenen Regressionstest, und die
+  Sanktionspruefung faellt geschlossen aus.
+acceptance:
+  - Die Planversions-Sperre bleibt erhalten und ist ausdruecklich getestet
+  - Kein 500er wird durch leere Listen oder pauschale Erfolgsmeldungen verdeckt
+  - Freigabe-, Rollen- und Nachweisanforderungen bleiben unveraendert bestehen
+  - Historische Belegbezuege bleiben erhalten und aufloesbar
+  - Frisch migrierte und gewachsene Datenbank erfuellen denselben Vertrag
+tests:
+  - tests/test_feeding_actual_api.py
+  - tests/test_feeding_supply_api.py
+  - tests/test_feeding_measure_lifecycle_api.py
+  - tests/test_feeding_plan_api.py
+  - tests/test_feeding_business_core.py
+  - tests/test_small_endpoints_wave51.py
+  - tests/test_small_endpoints_wave61.py
+  - tests/test_sanctions_genossenschaft_intrastat.py
+  - tests/test_welle8_schema_drift.py
+  - tests/test_dom_inv_004.py
+risks:
+  - >-
+    Die Sanktionspruefung antwortet bei fehlender Liste jetzt mit 503 statt mit
+    einer Freigabe. Aufrufer, die bisher stillschweigend weiterliefen, sehen ab
+    jetzt einen Fehler. Das ist gewollt: eine nicht geprueft Liste ist kein
+    "kein Treffer".
+  - >-
+    Relative Testdaten koennen eigene Zeitfallen tragen, etwa an Monatsgrenzen.
+    Die Fenster sind deshalb bewusst grosszuegig gewaehlt und die
+    Konfliktfaelle setzen ihre Daten weiterhin ausdruecklich.
+  - >-
+    Die Altfelder des Bestandshauptbuchs bleiben bestehen. Wer sie kuenftig
+    beschreibt, erzeugt widersprechende Paare; die Aufloesung weist das aus,
+    verhindert es aber nicht.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Test, der nur zufaellig gruen war, hat nie etwas abgesichert. Wo eine
+    Regel gilt, wird sie ausdruecklich geprueft — Planversions-Sperre und
+    geschlossener Ausfall der Sanktionspruefung.
+  architektur_vertrag: >-
+    Testdoubles folgen dem typisierten Vertrag des Endpunkts, nicht einer
+    fruehen Vorstellung davon. Die Aufloesung des Belegbezugs liegt zentral in
+    app/services/inventory_document_reference.py.
+  daten_vertrag: >-
+    Keine Spalte entfernt, keine Migration umgeschrieben, keine historische
+    Buchung umgedeutet. Widersprechende Belegpaare werden ausgewiesen.
+  test_vertrag: >-
+    Fixtures beziehen zeitabhaengige Daten auf den Testzeitpunkt; Konfliktfaelle
+    setzen ihre Daten ausdruecklich. Generationsabhaengige Spalten werden in der
+    Deckungspruefung auf beiden Seiten herausgerechnet.
+  security_vertrag: >-
+    Compliance-Kontrollen fallen geschlossen aus. Ein Status, auf den Aufrufer
+    reagieren, darf keine Freigabe suggerieren, die nie geprueft wurde.
+  betriebs_vertrag: >-
+    Der Backend-Job bleibt blockierend. Die 503-Antwort der Sanktionspruefung
+    ist ein Betriebssignal: sie zeigt eine fehlende Migration oder Datenlage an.
+  dokumentations_vertrag: >-
+    Workboard und dieses YAML nennen den Abgleich der Fehlerzahl, die vier
+    Ursachengruppen und die zwei geschlossenen Pruefluecken.
+external_gates:
+  - >-
+    Der vollstaendige Nachweis ist der Backend-Job in der CI; lokal sind die
+    betroffenen Suiten gruen, der Volllauf braucht Postgres.
+  - >-
+    Ob historische Zeilen widersprechende Belegpaare tragen, zeigt erst die
+    Bestandsdatenbank. Die Aufloesung weist solche Faelle aus; ihre Klaerung ist
+    eine fachliche Entscheidung mit Beleg.
