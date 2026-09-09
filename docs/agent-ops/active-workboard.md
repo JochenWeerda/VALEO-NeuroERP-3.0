@@ -110,6 +110,18 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
+## OPENAPI-SUMMARY-20260909 Routen-Summaries nachziehen - reserviert
+
+**Von:** Folgebefund aus QG-GREEN-20260909, hinter dem Pagination-Blocker verdeckt. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+
+**Ziel:** `check_openapi_docs.py` von 101 Routen ohne `summary` auf null bringen, ohne die Schwelle zu aendern — jede Route fachlich benannt, nicht generisch aufgefuellt.
+
+**Dateibesitz:** Die 17 betroffenen Endpunktdateien (billing_batch, feeding_actual, feeding_consulting, feeding_feed_catalog, feeding_measures, feeding_plans, feeding_ration_templates, feeding_supply, foreign_goods_worklist, inventory_auxiliary, l3_report_catalog, legacy_interface_adapters, mail_workspace, production_control, query_center, recent_documents, tank_adapter), Slice-YAML und dieser Abschnitt. Nicht: `sales_delivery_notes.py` und `system_metrics.py` (fremder WIP), Schwellenwerte der Gates.
+
+**Abnahme:** `check_openapi_docs.py` meldet 0 fehlende Summaries bei unveraenderter Schwelle; OpenAPI-Generator laeuft; alle betroffenen Module importierbar.
+
+**Risiken:** Eine falsch benannte Route ist schlimmer als eine unbenannte, weil sie in Katalogen und Agent-Werkzeugen als Wahrheit erscheint. Jede Route wird deshalb am Handler gelesen, nicht am Pfad geraten.
+
 ## QG-GREEN-20260909 Quality Gate wieder gruen - abgeschlossen 2026-09-09
 
 **Von:** User-Auftrag Weiterarbeit nach SPEC-P1-05-S608-RESTSCHULD. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
