@@ -110,6 +110,18 @@ unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
 **Ergebnis bisher:** Inventar 151 Stellen in `docs/operations/appsec-s608-review.md`; 23 ungeflaggte dynamische WHERE/ORDER-Kompositionen mit Allowlist-/Bind-Begruendung annotated; `scripts/check_sql_fstrings.py` gruen. Restschuld uebernommen und geschlossen, siehe folgenden Abschnitt. Die Zahl 15 war nicht belegt; die maschinelle Baseline fuehrte 167 Stellen.
 
+## QG-GREEN-20260909 Quality Gate wieder gruen - reserviert
+
+**Von:** User-Auftrag Weiterarbeit nach SPEC-P1-05-S608-RESTSCHULD. **Owner:** Claude Code. **Stand:** reserviert 2026-09-09.
+
+**Ziel:** Die drei blockierenden Jobs des seit 2026-08-21 roten Quality Gate schliessen: Pagination-Ratchet (55 > 53), Frontend-Lint (zwei wirkungslose eslint-disable-Direktiven) und Dependency Scan (aiohttp, gitpython, langgraph-checkpoint-sqlite).
+
+**Dateibesitz:** `app/api/v1/endpoints/kostenrechnung.py`, `app/api/v1/endpoints/admin_devices.py`, `packages/frontend-web/src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx`, `packages/frontend-web/src/pages/portal/feldbuch.tsx`, betroffene `requirements*.txt`, zugehoerige Tests, Slice-YAML und dieser Abschnitt. Nicht: Schwellenwerte der Gates, fremder unversionierter WIP, Meridian-/Sweep-Dateien aus L3-DESKTOP-REBUILD-20260908.
+
+**Abnahme:** `check_pagination.py --threshold 53` gruen ohne Absenkung der Schwelle; `pnpm lint` gruen; `pip-audit` ohne High/Critical fuer die drei Pakete; Regressionstests fuer die neu paginierten Endpunkte.
+
+**Risiken:** Eine Default-Obergrenze aendert das Antwortverhalten bisher unbegrenzter Listen. Versionsspruenge koennen Folgefehler ausloesen und brauchen einen Importnachweis.
+
 ## SPEC-P1-05-S608-RESTSCHULD SQL-f-String-Restschuld - abgeschlossen 2026-09-09
 
 **Von:** User-Auftrag, Uebernahme der offenen S608-Restschuld. **Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-09.
