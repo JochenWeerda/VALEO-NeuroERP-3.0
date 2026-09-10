@@ -59,6 +59,23 @@ WIP ist unangetastet:** 125 Dateien vor und nach allen 15 Commits, jeder Commit
 enthaelt ausschliesslich eigene Dateien (Workboard ueber HEAD-Blob und
 `update-index`, kein `git add -A`, kein Rebase).
 
+### CI-Stand am Ende der Session (Commit `5ebeb5ccf`)
+
+Sieben von neun Workflows gruen. **CI/CD Pipeline** (rot seit 05:35),
+**Quality Gate** (rot seit 05:50), **Pytest**, **Docs Build** und
+**E2E @critical** sind wieder sauber — alle drei Ursachen waren
+Doku-/Generator-Drift oder der Migrationsschritt.
+
+Zwei bleiben rot, beide vorbestehend und unabhaengig von dieser Session:
+
+- **E2E Smoke Tests** — Playwright-Assertion `Expected: 1000` in
+  `playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts:16`
+  (Inventory-Lot anlegen), zusaetzlich der finance-Shard. Sieht nach
+  Fixture-/Seed-Problem aus.
+- **Security Scan** — Trivy und Grype melden High/Critical im Container-Image,
+  dazu OWASP ZAP. Das ist der bekannte Dependency-Rueckstand
+  (Dependabot meldet 95 Verwundbarkeiten auf `main`).
+
 ### Stand jetzt
 
 Runtime-Sweep in beiden Umgebungen sauber: Container mit Sidecars **0x 5xx**,
