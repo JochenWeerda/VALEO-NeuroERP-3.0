@@ -23,6 +23,7 @@ from app.services.policy_service import (
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.auth.deps import require_roles
 
 
 router = APIRouter(tags=["policy"])
@@ -114,6 +115,7 @@ async def list_policies() -> Dict[str, Any]:
 
 
 @router.post("/policy/upsert", summary="Policies upsert",
+    dependencies=[Depends(require_roles("manager", "admin"))],
     response_model=PolicyUpsertResponse
 )
 async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
@@ -136,6 +138,7 @@ async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
 
 
 @router.post("/policy/create", summary="Policy anlegen",
+    dependencies=[Depends(require_roles("manager", "admin"))],
     response_model=StatusResponse
 )
 async def create_policy(rule: Rule) -> Dict[str, Any]:
@@ -158,6 +161,7 @@ async def create_policy(rule: Rule) -> Dict[str, Any]:
 
 
 @router.post("/policy/update", summary="Policy aktualisieren",
+    dependencies=[Depends(require_roles("manager", "admin"))],
     response_model=StatusResponse
 )
 async def update_policy(rule: Rule) -> Dict[str, Any]:
@@ -186,6 +190,7 @@ async def update_policy(rule: Rule) -> Dict[str, Any]:
 
 
 @router.post("/policy/delete", summary="Policy löschen",
+    dependencies=[Depends(require_roles("manager", "admin"))],
     response_model=StatusResponse
 )
 async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
@@ -264,6 +269,7 @@ async def test_policy(
 
 
 @router.get("/policy/export", summary="Policies exportieren",
+    dependencies=[Depends(require_roles("admin"))],
     response_model=StatusResponse
 )
 @limiter.limit("10/minute")
@@ -291,6 +297,7 @@ async def export_policies(request: Request):
 
 
 @router.post("/policy/restore", summary="Policies wiederherstellen",
+    dependencies=[Depends(require_roles("admin"))],
     response_model=StatusResponse
 )
 @limiter.limit("5/minute")

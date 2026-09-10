@@ -48,6 +48,61 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
+## POLICY-ROUTE-DEDUP-20260910 - abgeschlossen 2026-09-10
+
+**Von:** User-Auftrag im Anschluss an POS-FIBU-CLEANUP-20260910.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-10.
+
+**Ziel:** Je Pfad unter `/api/mcp/policy` genau eine Implementierung, und die
+durch die Ueberlagerung wirkungslosen Rollenpruefungen wieder wirksam machen.
+
+**Befund — sicherheitsrelevant.** `main.py` registriert
+`app/api/v1/endpoints/policies.py` in Zeile 469 und `app/policy/router.py` in
+Zeile 564. Bei gleichem Pfad gewinnt die frueher registrierte Route. Die
+gewinnende Fassung hat **keinerlei** Auth-Abhaengigkeit, die verdeckte
+deklariert `require_roles`. Damit waren die Pruefungen auf `/create`,
+`/update`, `/delete` (manager, admin) sowie `/export` und `/restore` (admin)
+wirkungslos: jeder Token, den die Bearer-Middleware akzeptiert, konnte
+Policies aendern und ueber `/restore` saemtliche Regeln ersetzen. `/upsert`
+als Massenschreibung hatte in keiner der beiden Fassungen einen Guard.
+Zusaetzlich hatten die beiden `/restore`-Fassungen unterschiedliche
+Request-Vertraege (JSON-Nutzlast gegen Dateiname).
+
+**Umsetzung.** Die sechs ueberlagerten Dubletten aus `app/policy/router.py`
+entfernt; dort verbleibt nur, was es in der wirksamen Implementierung nicht
+gibt. Der Datei-Restore liegt jetzt kollisionsfrei auf
+`/policy/backups/restore` — mit Admin-Guard, Pfadschutz und Sicherungskopie —
+und macht die geschriebenen Backups einspielbar, womit auch Restbefund R4 aus
+L3-JOURNAL-SOURCE-20260910 geschlossen ist. Die Rollenpruefungen sind auf
+`app/api/v1/endpoints/policies.py` gewandert: manager oder admin fuer
+`upsert`, `create`, `update`, `delete`; admin fuer `export` und `restore`.
+`/list` und `/test` bleiben bewusst ohne Guard, wie zuvor deklariert.
+
+**Nachweis.** Routenaufloesung ueber `app.routes`: vorher fuenf Pfade mit je
+zwei Implementierungen, die gewinnende ohne Rollenpruefung; nachher **null**
+Pfade mit mehr als einer Implementierung, alle schreibenden und exportierenden
+Routen mit Guard. 14 neue Vertragstests
+`tests/test_policy_route_uniqueness.py`, 311 Policy-Tests gruen. Live nach
+Neustart: `/policy/backups/restore` spielt ein Backup ein (Regelzahl
+unveraendert 3), `../etc/passwd` wird mit 400 abgewiesen. OpenAPI neu erzeugt,
+kein Drift. Ein Gegenbeweis mit selbst signiertem Nicht-Admin-Token war nicht
+moeglich: die Middleware prueft Nicht-Dev-Token gegen den IdP und antwortet
+mit 503.
+
+**Neuer Befund R5, nicht angefasst.** `app/main.py` mit vier Routern speist den
+OpenAPI-Generator, waehrend der Container die Wurzel-`main.py` mit 37 Routern
+faehrt. Die dokumentierte Spec beschreibt damit nur einen Ausschnitt der
+laufenden Anwendung; die zwoelf Routen unter `/api/mcp/policy` fehlen darin
+vollstaendig. Ausserdem ist `policies.router` zusaetzlich unter
+`/api/v1/mcp/policy` gemountet — die Guards greifen dort mit, die doppelte
+oeffentliche Oberflaeche bleibt aber bestehen. Beides ist eine strukturelle
+Entscheidung mit weiter Reichweite.
+
+**Risiko:** Aufrufer ohne passende Rolle erhalten kuenftig HTTP 403 statt
+Erfolg. Das ist die wiederhergestellte, urspruenglich deklarierte Absicht; ein
+Frontend-Konsument von `/api/mcp/policy` existiert nicht.
+
+
 ## POS-FIBU-CLEANUP-20260910 - abgeschlossen 2026-09-10
 
 **Von:** User-Entscheidung im Anschluss an L3-JOURNAL-SOURCE-20260910.

@@ -1,0 +1,125 @@
+slice_id: POLICY-ROUTE-DEDUP-20260910
+id: POLICY-ROUTE-DEDUP-20260910
+title: Routen-Ueberlagerung unter /api/mcp/policy entflechten und Rollenpruefungen wirksam machen
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+completed_at: "2026-09-10"
+goal: >-
+  Je Pfad unter /api/mcp/policy genau eine Implementierung herstellen und die
+  Rollenpruefungen, die durch die Ueberlagerung wirkungslos waren, auf die
+  wirksame Implementierung heben.
+coordination: >-
+  Folgeentscheidung des Users nach POS-FIBU-CLEANUP-20260910, waehrend Codex
+  ruht. Der Datei-Restore wird auf Wunsch des Users nach /policy/backups/restore
+  verschoben statt entfernt.
+file_ownership:
+  - docs/agent-ops/slices/POLICY-ROUTE-DEDUP-20260910.yaml
+  - app/policy/router.py
+  - app/api/v1/endpoints/policies.py
+  - tests/test_policy_route_uniqueness.py
+  - docs/schnittstellen/openapi.json
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt POLICY-ROUTE-DEDUP-20260910"
+ausloeser: >-
+  Beim Reparieren von /api/mcp/policy/backup fiel auf, dass /policy/list mit
+  einer fremden Antwortform reagierte. Die Routenaufloesung zeigte zwei Router
+  auf denselben Pfaden.
+befund:
+  ursache: >-
+    main.py registriert app/api/v1/endpoints/policies.py in Zeile 469 und
+    app/policy/router.py in Zeile 564. Bei gleichen Pfaden gewinnt die frueher
+    registrierte Route. app/api/v1/endpoints/policies.py hat keinerlei
+    Auth-Abhaengigkeit, app/policy/router.py deklariert require_roles.
+  sicherheitsfolge: >-
+    Die Rollenpruefungen auf /create, /update, /delete (manager, admin) sowie
+    /export und /restore (admin) waren wirkungslos. Jeder Token, den die
+    Bearer-Middleware akzeptiert, konnte Policies aendern und ueber /restore
+    saemtliche Regeln ersetzen. /upsert als Massenschreibung hatte in keiner
+    der beiden Fassungen einen Guard.
+  nachweis_vorher: >-
+    Routenaufloesung ueber app.routes mit Auswertung der dependant-Kette:
+    fuenf Pfade mit je zwei Implementierungen, die gewinnende jeweils ohne
+    Rollenpruefung. Ein selbst signierter Token liess sich nicht zum
+    Gegenbeweis nutzen, weil die Middleware Nicht-Dev-Token gegen den IdP
+    prueft (503 Identity provider unavailable).
+  vertragsunterschied: >-
+    Beide /restore-Fassungen hatten unterschiedliche Request-Vertraege: die
+    wirksame nimmt eine JSON-Nutzlast, die verdeckte einen Dateinamen.
+result: >-
+  Die sechs ueberlagerten Dubletten (/list, /create, /update, /delete, /test,
+  /export) sind aus app/policy/router.py entfernt; dort verbleibt, was es in
+  der wirksamen Implementierung nicht gibt. Der Datei-Restore liegt jetzt
+  kollisionsfrei auf /policy/backups/restore, behaelt Admin-Guard, Pfadschutz
+  und Sicherungskopie und macht die geschriebenen Backups einspielbar. Die
+  Rollenpruefungen sind auf app/api/v1/endpoints/policies.py gewandert:
+  manager oder admin fuer upsert, create, update, delete; admin fuer export
+  und restore. /list und /test bleiben bewusst ohne Guard, wie zuvor
+  deklariert.
+acceptance:
+  - Kein Pfad unter /api/mcp/policy wird von mehr als einer Implementierung bedient.
+  - Alle schreibenden und exportierenden Routen tragen eine Rollenpruefung.
+  - Der Datei-Restore ist erreichbar und weist Pfadausbruch weiterhin ab.
+  - Bestehende Policy-Tests gruen; OpenAPI neu erzeugt, kein Drift.
+tests:
+  - python -m pytest tests/test_policy_route_uniqueness.py
+  - python -m pytest tests -k "polic"
+  - python scripts/api_runtime_sweep.py
+risks:
+  - >-
+    Die Guards aendern das Verhalten fuer Aufrufer ohne passende Rolle von
+    Erfolg auf HTTP 403. Das ist die wiederhergestellte, urspruenglich
+    deklarierte Absicht; ein Frontend-Konsument von /api/mcp/policy existiert
+    nicht.
+  - >-
+    /policy/backups/restore ist ein neuer Pfad. Der alte /policy/restore mit
+    Dateinamen war nie erreichbar, daher kann kein Aufrufer darauf beruhen.
+open:
+  - >-
+    R5 neu: app/main.py mit vier Routern speist den OpenAPI-Generator,
+    waehrend der Container die Wurzel-main.py mit 37 Routern faehrt. Die
+    dokumentierte Spec beschreibt damit nur einen Ausschnitt der laufenden
+    Anwendung; die zwoelf Routen unter /api/mcp/policy fehlen darin
+    vollstaendig. Strukturelle Entscheidung, hier nicht angefasst.
+  - >-
+    policies.router ist zusaetzlich unter /api/v1/mcp/policy gemountet. Die
+    Guards greifen dort mit, die doppelte oeffentliche Oberflaeche bleibt aber
+    bestehen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Policies werden ueber genau eine Implementierung je Pfad verwaltet.
+    Aendern und Exportieren setzt eine Rolle voraus; Lesen und Simulieren
+    nicht. Gesicherte Backups sind wieder einspielbar.
+  architektur_vertrag: >-
+    Ein Pfad, eine Implementierung. app/policy/router.py fuehrt nur noch, was
+    app/api/v1/endpoints/policies.py nicht abdeckt: Backup, Backup-Liste,
+    Datei-Restore und WebSocket.
+  daten_vertrag: >-
+    Keine Migration und keine Datenmutation. Der Policy-Store ist in beiden
+    Faellen derselbe PostgreSQL-gestuetzte Dienst; ein Restore ersetzt Regeln
+    wie zuvor und legt vorher eine Sicherungskopie an.
+  test_vertrag: >-
+    tests/test_policy_route_uniqueness.py prueft ueber die Routentabelle der
+    App, dass kein Pfad doppelt bedient wird und welche Routen eine
+    Rollenpruefung tragen. Ohne Datenbank lauffaehig.
+  security_vertrag: >-
+    Wiederherstellung der deklarierten Rollenpruefungen fuer schreibende und
+    exportierende Policy-Routen. Der Pfadschutz des Datei-Restores bleibt
+    erhalten und ist mit Traversal-Faellen abgedeckt.
+  betriebs_vertrag: >-
+    Reine Codeaenderung ohne Migration, wirksam nach Neustart der Worker.
+    Aufrufer ohne passende Rolle erhalten kuenftig HTTP 403.
+  dokumentations_vertrag: >-
+    Diese Slice-YAML und der Workboard-Abschnitt POLICY-ROUTE-DEDUP-20260910
+    werden konsistent gehalten; OpenAPI wird mitgezogen.
+external_gates:
+  - >-
+    Betriebliche Bestaetigung der Rollenzuordnung fuer Policy-Aenderungen
+    (manager oder admin) und fuer Export und Restore (admin).
+  - >-
+    Entscheidung zur Konsolidierung der beiden Anwendungs-Einstiegspunkte
+    steht aus und ist Voraussetzung dafuer, dass die Spec die laufende
+    Anwendung vollstaendig beschreibt.
+verification:
+  - python -m pytest tests/test_policy_route_uniqueness.py
+  - python scripts/generate_openapi.py --check

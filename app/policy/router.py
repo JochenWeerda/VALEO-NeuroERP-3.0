@@ -5,7 +5,6 @@ FastAPI-Router mit CRUD, Test, Backup/Restore und WebSocket
 
 import os
 from pathlib import Path
-from typing import List
 from fastapi import (
     APIRouter,
     Depends,
@@ -18,13 +17,10 @@ from fastapi import (
     Request,
     status,
 )
-from fastapi.responses import JSONResponse
 import logging
 
 from app.middleware.rate_limit import limiter
-from .models import Rule, RulesEnvelope, Alert, Decision
 from .store import PolicyStore, DEFAULT_DB
-from .engine import decide
 from .ws import hub
 from app.auth.deps import get_current_user, require_roles, User
 from app.auth.jwt import decode_token
@@ -42,157 +38,14 @@ router = APIRouter(prefix="/api/mcp/policy", tags=["policy"])
 
 
 # --- CRUD ---
-
-
-@router.get("/list")
-async def list_policies(store: PolicyStore = Depends(get_store)) -> dict:
-    """Listet alle Policies auf"""
-    try:
-        rules = store.list()
-        return {"ok": True, "data": [r.model_dump() for r in rules]}
-    except Exception as e:
-        logger.error(f"Failed to list policies: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/create", dependencies=[Depends(require_roles("manager", "admin"))])
-async def create_policy(
-    payload: dict = Body(...),
-    bg: BackgroundTasks = BackgroundTasks(),
-    store: PolicyStore = Depends(get_store),
-    user: User = Depends(get_current_user),
-):
-    """
-    Erstellt Policy (einzeln oder bulk)
-
-    Payload:
-    - Einzeln: Rule-Objekt
-    - Bulk: { "rules": [Rule, ...] }
-    """
-    try:
-        # Bulk-Import?
-        if "rules" in payload:
-            env = RulesEnvelope.model_validate(payload)
-            store.bulk_upsert(env.rules)
-            logger.info(f"Created {len(env.rules)} policies (bulk) by {user['sub']}")
-            bg.add_task(
-                hub.broadcast,
-                {"service": "policy", "type": "bulk-created", "count": len(env.rules)},
-            )
-            return {"ok": True, "count": len(env.rules)}
-
-        # Einzelne Rule
-        rule = Rule.model_validate(payload)
-        store.upsert(rule)
-        logger.info(f"Created policy: {rule.id} by {user['sub']}")
-        bg.add_task(
-            hub.broadcast, {"service": "policy", "type": "created", "id": rule.id}
-        )
-        return {"ok": True}
-    except Exception as e:
-        logger.error(f"Failed to create policy: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.post("/update", dependencies=[Depends(require_roles("manager", "admin"))])
-async def update_policy(
-    rule: Rule,
-    bg: BackgroundTasks = BackgroundTasks(),
-    store: PolicyStore = Depends(get_store),
-    user: User = Depends(get_current_user),
-):
-    """Aktualisiert existierende Policy"""
-    try:
-        if not store.get(rule.id):
-            raise HTTPException(status_code=404, detail="Policy not found")
-
-        store.upsert(rule)
-        logger.info(f"Updated policy: {rule.id} by {user['sub']}")
-        bg.add_task(
-            hub.broadcast, {"service": "policy", "type": "updated", "id": rule.id}
-        )
-        return {"ok": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to update policy: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.post("/delete", dependencies=[Depends(require_roles("manager", "admin"))])
-async def delete_policy(
-    id: str = Body(..., embed=True),
-    bg: BackgroundTasks = BackgroundTasks(),
-    store: PolicyStore = Depends(get_store),
-    user: User = Depends(get_current_user),
-):
-    """Löscht Policy"""
-    try:
-        if not store.get(id):
-            raise HTTPException(status_code=404, detail="Policy not found")
-
-        store.delete(id)
-        logger.info(f"Deleted policy: {id} by {user['sub']}")
-        bg.add_task(hub.broadcast, {"service": "policy", "type": "deleted", "id": id})
-        return {"ok": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to delete policy: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# --- Test / Simulator ---
-
-
-@router.post("/test")
-async def test_decision(
-    alert: Alert,
-    roles: List[str] = Body(default=[]),
-    store: PolicyStore = Depends(get_store),
-) -> dict:
-    """
-    Test-Simulator - testet Policy-Entscheidung gegen Alert
-
-    Args:
-        alert: Alert-Objekt
-        roles: User-Rollen (z.B. ["manager"])
-
-    Returns:
-        Decision-Objekt
-    """
-    try:
-        decision: Decision = decide(roles, alert, store.list())
-        logger.info(f"Policy test: {alert.kpiId} -> {decision.type}")
-        return {"ok": True, "decision": decision.model_dump()}
-    except Exception as e:
-        logger.error(f"Failed to test policy: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-# --- Export JSON ---
-
-
-@router.get("/export", dependencies=[Depends(require_roles("admin"))])
-@limiter.limit("10/minute")
-async def export_json(
-    request: Request,
-    store: PolicyStore = Depends(get_store),
-    user: User = Depends(get_current_user),
-) -> JSONResponse:
-    """Exportiert alle Policies als JSON-Download"""
-    try:
-        rules = store.list()
-        logger.info(f"Exported {len(rules)} policies as JSON by {user['sub']}")
-        return JSONResponse(
-            content={"ok": True, "rules": [r.model_dump() for r in rules]},
-            headers={
-                "Content-Disposition": 'attachment; filename="policies-export.json"'
-            },
-        )
-    except Exception as e:
-        logger.error(f"Failed to export policies: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+#
+# Die Routen /list, /create, /update, /delete, /test und /export lagen hier
+# doppelt. Sie wurden von app/api/v1/endpoints/policies.py ueberlagert, das in
+# main.py frueher registriert wird — wodurch die hier deklarierten
+# require_roles-Pruefungen wirkungslos waren. Entfernt in
+# POLICY-ROUTE-DEDUP-20260910; die Rollenpruefungen sind auf die wirksame
+# Implementierung gewandert. Hier verbleibt nur, was es dort nicht gibt:
+# Backup, Backup-Liste, Restore aus Datei und der WebSocket.
 
 
 # --- Backup / Restore (DB-Datei) ---
@@ -259,23 +112,31 @@ async def list_backups(user: User = Depends(get_current_user)) -> dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/restore", dependencies=[Depends(require_roles("admin"))])
+@router.post("/backups/restore", dependencies=[Depends(require_roles("admin"))])
 @limiter.limit("5/minute")
-async def restore_db(
+async def restore_from_backup(
     request: Request,
     file: str = Body(..., embed=True),
     bg: BackgroundTasks = BackgroundTasks(),
     user: User = Depends(get_current_user),
     store: PolicyStore = Depends(get_store),
 ) -> dict:
-    """
-    Stellt Backup wieder her (ACHTUNG: Überschreibt aktuelle DB!)
+    """Spielt eine zuvor geschriebene Backup-Datei wieder ein.
+
+    ACHTUNG: ersetzt alle vorhandenen Regeln. Vor dem Einspielen wird der
+    aktuelle Stand als ``pre-restore-<ts>.json`` gesichert.
+
+    Der Pfad lautet ``/backups/restore`` und nicht ``/restore``: unter
+    ``/restore`` liegt die JSON-Variante in
+    ``app/api/v1/endpoints/policies.py``. Beide lagen frueher auf demselben
+    Pfad, wodurch diese Fassung samt ihrer Rollenpruefung unerreichbar war
+    (POLICY-ROUTE-DEDUP-20260910).
 
     Args:
-        file: Pfad zum Backup-File
+        file: Dateiname eines Backups aus ``GET /backups``, ohne Pfadanteile.
 
     Returns:
-        Status mit Safety-Backup-Info
+        Status mit Angabe der Quelle und der Sicherungskopie.
     """
     try:
         import datetime
