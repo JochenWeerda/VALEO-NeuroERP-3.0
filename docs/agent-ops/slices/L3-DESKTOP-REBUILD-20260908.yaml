@@ -1,0 +1,37 @@
+slice_id: L3-DESKTOP-REBUILD-20260908
+title: L3 Desktop-Paritaet und Docker-Funktionstest
+owner: Codex
+status: in arbeit
+created_at: "2026-09-08"
+coordination: Zentraler Mask-Builder; Screenshots und unversionierte Fremddateien bleiben lokal unveraendert.
+resume_20260910: "48 Backend-Tests, 66 Frontend-Runtime-Tests, TypeScript und 12 Visual-Audits bestanden; Docker-Neubau bestanden; API-Sweep 980 Routen, 5 HTTP 500 und readyz 503 offen, keine Transportfehler. Details im Abnahmebericht."
+goal: Desktopmasken gegen L3-Gewohnheiten pruefen, aktuelle Fehler beheben und Docker-Stack neu bauen und testen.
+file_ownership:
+  - docs/agent-ops/slices/L3-DESKTOP-REBUILD-20260908.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/quality-assurance/l3-desktop-docker-2026-09-08.md
+  - docs/design/valeo-meridian-experience.md
+  - packages/frontend-web/src/components/mask-builder/
+  - packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts
+acceptance:
+  - Backend- und Builder-Tests sowie TypeScript bestehen.
+  - Backend und Frontend sind in Docker Desktop neu gebaut und gesund.
+  - Desktop-Visual-Audit und reale API-/UI-Funktionstests bestanden.
+tests:
+  - Backend L3-, Safety- und Bestandssuiten
+  - Frontend Mask-Builder und RenderPlan Unit-Tests
+  - TypeScript und Meridian Visual-Audit bei drei Desktopgroessen
+  - Live-Masken und APIs im Docker-Stack
+risks:
+  - Remote Desktop kann lange laden und wird nur read-only verwendet.
+  - Reale Fachanwenderfreigabe ist nicht durch technische Tests ersetzbar.
+ai_harness:
+  fachlicher_vertrag: Minimale Umstellung fuer L3-/FiBu-Desktopnutzer durch Register, Tabellen, Aktionszonen und Tastaturwege.
+  architektur_vertrag: ScreenDefinition zu RenderPlan zu Runtime zu UniversalMaskRenderer; keine Parallelmasken.
+  daten_vertrag: Bestehende Datenvolumes erhalten; nur isolierte Testdaten fuer Schreibtests.
+  test_vertrag: Backend, Frontend, TypeScript, drei Viewports und echter Docker-Funktionstest.
+  security_vertrag: Keine L3-Echtdaten in Git oder Berichte; Rollen und Freigaben bleiben verbindlich.
+  betriebs_vertrag: Docker Compose build und up nur fuer Backend und Frontend; Abhaengigkeiten und Volumes erhalten.
+  dokumentations_vertrag: Abnahmebericht, Meridian-Doku und Workboard nachziehen.
+external_gates:
+  - Fachliche Pilotabnahme durch erfahrene L3-/FiBu-Anwender vor produktivem Cutover.

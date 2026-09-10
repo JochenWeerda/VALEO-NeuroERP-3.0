@@ -5,11 +5,12 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Optional
+from uuid import UUID
 import json
 from app.core.uuid7 import uuid7
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -137,6 +138,12 @@ class DeliveryNoteUpdate(BaseModel):
 
 
 class DeliveryNote(DeliveryNoteBase):
+    @field_validator("sales_order_id", mode="before")
+    @classmethod
+    def serialize_order_reference(cls, value):
+        # PostgreSQL UUID columns are returned as UUID objects by psycopg.
+        return str(value) if isinstance(value, UUID) else value
+
     id: str
     tenant_id: str
     delivery_note_number: str
@@ -819,4 +826,3 @@ async def create_invoice_from_delivery(
         "delivery_note_id": ls_id,
         "total": float(total),
     }
-

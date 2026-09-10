@@ -122,6 +122,8 @@ export interface ScreenActionDefinition {
   disabled?: boolean
   // Action Runtime (Phase 026)
   commandEndpoint?: string
+  /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
+  inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean

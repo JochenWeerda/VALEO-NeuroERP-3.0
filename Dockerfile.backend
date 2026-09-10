@@ -34,9 +34,10 @@ COPY --chown=appuser:appuser scripts/ ./scripts/
 COPY --chown=appuser:appuser main.py ./
 COPY --chown=appuser:appuser alembic/ ./alembic/
 COPY --chown=appuser:appuser alembic.ini ./
+COPY --chown=appuser:appuser config/ ./config/
 
-RUN mkdir -p /app/config /app/data /app/logs \
-    && chown -R appuser:appuser /app/config /app/data /app/logs
+RUN mkdir -p /app/config /app/data /app/logs /app/runtime \
+    && chown -R appuser:appuser /app/config /app/data /app/logs /app/runtime
 
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONUNBUFFERED=1 \

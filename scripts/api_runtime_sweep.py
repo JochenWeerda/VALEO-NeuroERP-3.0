@@ -67,10 +67,24 @@ def parameterless_get_paths(spec: dict) -> list[str]:
     return sorted(paths)
 
 
+def load_targets(client: httpx.Client, spec_path: str, skip_paths: set[str]) -> list[str]:
+    """A failed or empty schema must never produce a green zero-route sweep."""
+    response = client.get(spec_path)
+    response.raise_for_status()
+    spec = response.json()
+    if not isinstance(spec, dict) or not spec.get("openapi") or not isinstance(spec.get("paths"), dict):
+        raise ValueError("Ungueltige OpenAPI-Beschreibung")
+    targets = [path for path in parameterless_get_paths(spec) if path not in skip_paths]
+    if not targets:
+        raise ValueError("Keine pruefbaren GET-Routen in der OpenAPI-Beschreibung")
+    return targets
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="API runtime sweep (GET, 5xx-Gate)")
     parser.add_argument("--base-url", default=os.environ.get("SWEEP_BASE_URL", "http://127.0.0.1:8000"))
     parser.add_argument("--token", default=os.environ.get("API_DEV_TOKEN", "dev-token"))
+    parser.add_argument("--openapi-path", default="/api/v1/openapi.json")
     parser.add_argument("--tenant", default=os.environ.get("SWEEP_TENANT_ID", "00000000-0000-0000-0000-000000000001"))
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--output", default=None, help="Report-Pfad (Default: artifacts/runtime-sweep-<datum>.json)")
@@ -90,8 +104,11 @@ def main() -> int:
     }
     limits = httpx.Limits(max_connections=8, max_keepalive_connections=8)
     with httpx.Client(base_url=args.base_url, headers=headers, timeout=args.timeout, limits=limits) as client:
-        spec = client.get("/openapi.json").json()
-        targets = [p for p in parameterless_get_paths(spec) if p not in skip_paths]
+        try:
+            targets = load_targets(client, args.openapi_path, skip_paths)
+        except (httpx.HTTPError, ValueError) as exc:
+            print(f"FEHLER: OpenAPI konnte nicht fuer den Sweep geladen werden: {exc}", file=sys.stderr)
+            return 1
         print(f"Sweep: {len(targets)} parameterlose GET-Routen gegen {args.base_url} ({len(skip_paths)} geskippt)")
 
         results: dict[str, list[dict]] = {

@@ -41,14 +41,16 @@ export function useActionRuntime(
         return { actionKey: req.actionKey, mode: req.mode, success: false, error: `Unbekannte Aktion: ${req.actionKey}` }
       }
 
-      const policy = buildActionPolicy({
-        ...actionDef,
-        forbiddenForAgents: false, // AgentMaskContract override applied at page level
-      })
+      const policy = buildActionPolicy(actionDef)
 
       const blocked = checkActionPolicy(policy, opts)
       if (blocked) {
         return { actionKey: req.actionKey, mode: req.mode, success: false, error: blocked }
+      }
+
+      if (actionDef.inputFlow) {
+        return { actionKey: req.actionKey, mode: req.mode, success: false,
+          error: 'Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske.' }
       }
 
       if (!actionDef.commandEndpoint) {

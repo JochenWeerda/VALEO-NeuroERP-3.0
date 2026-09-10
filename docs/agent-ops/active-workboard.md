@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## L3-DESKTOP-REBUILD-20260908 - reserviert
+## L3-DESKTOP-REBUILD-20260908 - in arbeit
 
-**Von:** User-Auftrag alle aktuellen Fehler beheben, Docker-Rebuild und Funktionstest. **Owner:** Codex. **Stand:** reserviert 2026-09-08.
+**Von:** User-Auftrag alle aktuellen Fehler beheben, Docker-Rebuild und Funktionstest. **Owner:** Codex. **Stand:** in arbeit 2026-09-09.
 
 **Ziel:** L3-/FiBu-Desktop-Gewohnheitsparitaet zentral pruefen und belegte Fehler beheben; Backend und Frontend neu bauen und testen.
 
@@ -22,6 +22,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Abnahme:** Builder-/Backend-Tests, Typpruefung, Visual-Audit bei drei Desktopgroessen, Docker-Rebuild und Live-Funktionstest gruen.
 
 **Risiken:** Externe Fachfreigaben nicht simulierbar; nur Testdaten bei Schreibtests.
+
+**Nachweis 2026-09-09:** Backend und Frontend neu gebaut und gestartet;
+536 Backend-Tests, 490 Frontend-Tests (1 bestehender Skip), TypeScript und
+12 Meridian-Desktop-Tests bestanden. API-Sweep bisher nicht abgenommen:
+falscher OpenAPI-Pfad und falsches Gruen bei null Routen im Gate gefunden;
+Lieferschein-UUID und Kennzahlenaggregation im echten Betrieb fehlerhaft.
+Dateibesitz umfasst diese Befunde in API-Endpunkten, Sweep-Skript/Tests und
+Architektur-Prefix-Regeln/Index. Weitere Aktionsvertragsbefunde bleiben offen.
+
+**Wiederaufnahme 2026-09-10:** 48 gezielte Backend-Regressionen, 66
+Frontend-Runtime-Tests, TypeScript und 12 Visual-Audits bestanden. Backend
+und Frontend neu gebaut und gestartet; API-Sweep: 980 Routen, 5 HTTP 500,
+readyz 503, keine Transportfehler. Diese Befunde bleiben offen. Gepruefte
+Zwischenstaende werden auf User-Auftrag nach jeder Welle isoliert committet
+und nach GitHub gepusht. Grenzen und weitere Ergebnisse im
+[Abnahmebericht](../quality-assurance/l3-desktop-docker-2026-09-08.md).
 
 
 ## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08

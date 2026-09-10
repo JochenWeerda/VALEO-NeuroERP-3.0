@@ -11,6 +11,13 @@ description: Meridian als Design-, Layout- und Governance-Vertrag des Single Mas
 
 # VALEO Meridian Experience
 
+Stand 2026-09-10: Der zentrale ActionRuntime-Vertrag unterscheidet direkte
+Commands von `inputFlow.kind=humanForm`. Solche Eingabeflows werden nicht
+automatisch ueber ihren dokumentierten Submit-Endpoint ausgefuehrt;
+`forbiddenForAgents` bleibt bei der Policy-Auswertung erhalten.
+Verifikation: 66 Runtime-Tests und 12 Desktop-Visual-Audits bestanden, siehe
+[Desktop-Abnahme](../quality-assurance/l3-desktop-docker-2026-09-08.md).
+
 Meridian ist keine manuelle Seiten-Bauanleitung und kein paralleles UI-Framework.
 Meridian ist die zentrale Builder-Capability in dieser Kette:
 
