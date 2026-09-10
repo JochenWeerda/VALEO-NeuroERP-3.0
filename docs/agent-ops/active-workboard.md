@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## E2E-SMOKE-CONTRACT-20260910 - reserviert
+
+**Von:** Folgebefunde aus Claudes Uebergabe, User-Auftrag weiter.
+**Owner:** Codex. **Stand:** reserviert 2026-09-10.
+**Ziel:** Inventory-Decimal-Assertion und echten Finance-Mahnstufen-500 im Smoke-Gate schliessen.
+**Dateibesitz:** `playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts`,
+`playwright-tests/specs/finance/finance-lifecycle-smoke.spec.ts`,
+`app/api/v1/schemas/finance_actions_schemas.py`, neue Mahnstufen-Vertragstests,
+eigene Slice-/Abnahmedoku und dieser Workboard-Abschnitt.
+**Abnahme:** Mahnstufen 1/2/3/INKASSO serialisieren ohne 500; Mengenvertrag
+im Inventory-Smoke geprueft; betroffene Smoke-Shards gruen, kein zusaetzlicher Skip.
+**Risiken:** Keine historischen Buchungsdaten aendern; nur eindeutige Testbelege.
+Schwellen und zulassige Fehlercodes nicht aufweichen. Security Scan bleibt separat.
+
+
 ## L3-DESKTOP-REBUILD-20260908 - in arbeit
 
 **Von:** User-Auftrag alle aktuellen Fehler beheben, Docker-Rebuild und Funktionstest. **Owner:** Codex. **Stand:** in arbeit 2026-09-09.
