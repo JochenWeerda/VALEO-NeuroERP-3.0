@@ -72520,10 +72520,16 @@
             "title": "Reversal Of"
           },
           "source": {
-            "default": "manual",
-            "description": "Entry source (manual, system, integration)",
-            "title": "Source",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Gespeicherte Buchungsherkunft (unveraendert)",
+            "title": "Source"
           },
           "status": {
             "default": "draft",
