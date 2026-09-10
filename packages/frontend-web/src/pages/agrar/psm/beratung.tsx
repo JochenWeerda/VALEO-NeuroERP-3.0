@@ -346,7 +346,7 @@ export default function PSMBeratungPage(): JSX.Element {
                 {index === 0 && (
                   <div className="mt-3 flex items-center gap-2 p-2 bg-green-50 rounded">
                     <CheckCircle className="h-4 w-4 text-status-success" />
-                    <span className="text-sm font-medium text-green-800">Top-Empfehlung</span>
+                    <span className="text-sm font-medium text-status-success">Top-Empfehlung</span>
                   </div>
                 )}
               </div>
@@ -379,7 +379,7 @@ export default function PSMBeratungPage(): JSX.Element {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-900">
+            <CardTitle className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               Risiken beachten
             </CardTitle>

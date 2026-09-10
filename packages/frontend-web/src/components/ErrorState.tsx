@@ -38,15 +38,15 @@ export function ErrorState({
     >
       <div className={`mx-auto flex max-w-2xl ${compact ? 'gap-3' : 'gap-4'} ${compact ? 'items-start' : 'items-center'}`}>
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100">
-          <AlertTriangle className="h-5 w-5 text-red-700" />
+          <AlertTriangle className="h-5 w-5 text-status-error" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className={`${compact ? 'text-base' : 'text-lg'} font-semibold`}>{title}</h3>
-          <p className="mt-1 text-sm text-red-800">{errorMessage}</p>
+          <p className="mt-1 text-sm text-status-error">{errorMessage}</p>
           {statusText ? (
-            <p className="mt-1 text-xs uppercase tracking-wide text-red-700/80">{statusText}</p>
+            <p className="mt-1 text-xs uppercase tracking-wide text-status-error/80">{statusText}</p>
           ) : null}
-          <p className="mt-3 text-sm text-red-900/80">{recoveryHint}</p>
+          <p className="mt-3 text-sm text-status-error/80">{recoveryHint}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {onRetry ? (
               <Button type="button" variant="outline" className="border-red-300 bg-white" onClick={onRetry}>

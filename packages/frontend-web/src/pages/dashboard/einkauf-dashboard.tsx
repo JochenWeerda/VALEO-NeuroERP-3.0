@@ -136,7 +136,7 @@ export default function EinkaufDashboardPage(): JSX.Element {
       {dashboard.ueberfaellig > 0 && (
         <Card className="border-red-500 bg-red-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{dashboard.ueberfaellig} Bestellung(en) überfällig!</span>
             </div>

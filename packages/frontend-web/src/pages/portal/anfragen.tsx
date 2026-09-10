@@ -316,10 +316,10 @@ export default function PortalAnfragen() {
                 {/* Antwort */}
                 {selectedAnfrage.antwort && (
                   <div className="rounded-lg border-2 border-emerald-200 bg-emerald-50 p-4">
-                    <p className="text-sm font-medium text-emerald-800 mb-1">
+                    <p className="text-sm font-medium text-status-success mb-1">
                       Unsere Antwort ({selectedAnfrage.antwortDatum}):
                     </p>
-                    <p className="text-emerald-900">{selectedAnfrage.antwort}</p>
+                    <p className="text-status-success">{selectedAnfrage.antwort}</p>
                   </div>
                 )}
               </div>

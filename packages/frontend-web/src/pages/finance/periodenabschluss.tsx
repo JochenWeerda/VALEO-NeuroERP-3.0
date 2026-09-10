@@ -96,7 +96,7 @@ export default function PeriodenabschlussPage() {
                         <td className="px-3 py-1.5 text-right tabular-nums">{p.offen_count}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{p.storno_inkonsistent > 0 ? <span className="text-status-error">{p.storno_inkonsistent}</span> : 0}</td>
                         <td className="px-3 py-1.5">
-                          {p.abschlussreif ? <span className="text-emerald-700">reif</span> : <span className="text-amber-700 inline-flex items-center gap-1"><AlertTriangle size={12} />offen</span>}
+                          {p.abschlussreif ? <span className="text-status-success">reif</span> : <span className="text-status-warning inline-flex items-center gap-1"><AlertTriangle size={12} />offen</span>}
                         </td>
                         <td className="px-3 py-1.5 text-right">
                           {p.status === 'closed' ? (
@@ -108,7 +108,7 @@ export default function PeriodenabschlussPage() {
                               {pending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Lock size={13} className="mr-1" />}Abschließen
                             </Button>
                           ) : (
-                            <Button size="sm" variant="ghost" className="text-amber-700" onClick={() => doClose(p, true)} disabled={pending}>
+                            <Button size="sm" variant="ghost" className="text-status-warning" onClick={() => doClose(p, true)} disabled={pending}>
                               {pending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Lock size={13} className="mr-1" />}Erzwingen
                             </Button>
                           )}

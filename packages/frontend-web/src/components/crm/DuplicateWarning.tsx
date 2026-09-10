@@ -55,7 +55,7 @@ export function DuplicateWarning({
       className={cn('border-amber-300 bg-amber-50', className)}
     >
       <AlertTriangle className="h-4 w-4 text-status-warning" />
-      <AlertTitle className="text-amber-800 flex items-center gap-2">
+      <AlertTitle className="text-status-warning flex items-center gap-2">
         Mögliche Duplikate gefunden
         <Badge variant="secondary" className="text-xs">
           {candidates.length} {candidates.length === 1 ? 'Eintrag' : 'Einträge'}

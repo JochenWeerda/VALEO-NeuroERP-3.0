@@ -371,13 +371,13 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
       {statistik.ueberfaellig > 0 && (
         <Card className="border-red-500 bg-red-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">
                 {statistik.ueberfaellig} Auflage(n) sind überfällig!
               </span>
             </div>
-            <p className="mt-1 text-red-800">
+            <p className="mt-1 text-status-error">
               Überfällige Auflagen müssen dringend bearbeitet werden, um Compliance-Verstöße zu vermeiden.
             </p>
           </CardContent>

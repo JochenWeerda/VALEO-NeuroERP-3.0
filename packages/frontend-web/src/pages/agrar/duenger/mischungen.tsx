@@ -332,7 +332,7 @@ export default function DuengerMischungenPage(): JSX.Element {
                         variant="outline"
                         size="sm"
                         onClick={() => removeKomponente(index)}
-                        className="text-status-error hover:text-red-700"
+                        className="text-status-error hover:text-status-error"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -416,7 +416,7 @@ export default function DuengerMischungenPage(): JSX.Element {
               </div>
               <div className="p-4 bg-green-50 rounded-lg">
                 <div className="text-sm text-status-success">Gesamt P</div>
-                <div className="text-2xl font-bold text-green-900">{mischung.berechnete_werte.gesamt_p}%</div>
+                <div className="text-2xl font-bold text-status-success">{mischung.berechnete_werte.gesamt_p}%</div>
                 <div className="text-xs text-status-success">Ziel: {mischung.ziel_npk.p}%</div>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg">
@@ -434,7 +434,7 @@ export default function DuengerMischungenPage(): JSX.Element {
             {!validateMischung() && (
               <div className="mt-4 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
                 <AlertTriangle className="h-5 w-5 text-status-error" />
-                <span className="text-red-800 font-medium">
+                <span className="text-status-error font-medium">
                   Die Anteile summieren sich nicht auf 100%!
                   Aktuell: {mischung.komponenten.reduce((sum, k) => sum + k.anteil, 0)}%
                 </span>

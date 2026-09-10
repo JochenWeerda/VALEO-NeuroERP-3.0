@@ -134,7 +134,7 @@ export default function KreditlimitPruefungPage() {
                   <div><div className="text-xs text-muted-foreground">Exposure (andere)</div><div className="font-semibold tabular-nums">{eur(d.kredit?.exposure)}</div></div>
                   <div><div className="text-xs text-muted-foreground">Verfügbar</div><div className="font-semibold tabular-nums">{eur(d.kredit?.verfuegbar)}</div></div>
                   <div><div className="text-xs text-muted-foreground">Auftragswert</div><div className="font-semibold tabular-nums">{eur(d.auftrag_betrag)}</div></div>
-                  <div><div className="text-xs text-muted-foreground">Auslastung mit Auftrag</div><div className={`font-semibold tabular-nums ${(d.kredit?.auslastung_neu_pct ?? 0) >= 100 ? 'text-red-700' : (d.kredit?.auslastung_neu_pct ?? 0) >= 80 ? 'text-amber-700' : 'text-emerald-700'}`}>{d.kredit?.limit ? `${d.kredit?.auslastung_neu_pct}%` : '—'}</div></div>
+                  <div><div className="text-xs text-muted-foreground">Auslastung mit Auftrag</div><div className={`font-semibold tabular-nums ${(d.kredit?.auslastung_neu_pct ?? 0) >= 100 ? 'text-status-error' : (d.kredit?.auslastung_neu_pct ?? 0) >= 80 ? 'text-status-warning' : 'text-status-success'}`}>{d.kredit?.limit ? `${d.kredit?.auslastung_neu_pct}%` : '—'}</div></div>
                   <div><div className="text-xs text-muted-foreground">Offen unberechnet</div><div className="font-semibold tabular-nums">{d.summary?.offen_unberechnet} / {d.summary?.lieferscheine} LS</div></div>
                 </CardContent>
               </Card>

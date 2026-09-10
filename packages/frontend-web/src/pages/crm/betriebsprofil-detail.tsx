@@ -491,7 +491,7 @@ export default function BetriebsprofilePage(): JSX.Element {
 
                 {farmProfile.certifications && farmProfile.certifications.length > 0 && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-semibold text-green-800 mb-2">Aktive Zertifizierungen:</h4>
+                    <h4 className="font-semibold text-status-success mb-2">Aktive Zertifizierungen:</h4>
                     <div className="flex flex-wrap gap-2">
                       {farmProfile.certifications.map(cert => (
                         <Badge key={cert} variant="default" className="bg-green-600">

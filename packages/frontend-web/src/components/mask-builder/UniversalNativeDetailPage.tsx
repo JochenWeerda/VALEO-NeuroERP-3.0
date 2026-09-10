@@ -371,7 +371,7 @@ export function UniversalNativeDetailPage({
                   </p>
                 )}
                 {pendingAction?.dangerLevel === 'moderate' && (
-                  <p className="mt-2 text-sm text-amber-700">
+                  <p className="mt-2 text-sm text-status-warning">
                     Diese Aktion kann nicht ohne weiteres rückgängig gemacht werden.
                   </p>
                 )}

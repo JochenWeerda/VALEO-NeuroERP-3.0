@@ -40,7 +40,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
         {fromCoverage && (
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="pt-4 pb-4">
-              <p className="text-sm text-amber-800">
+              <p className="text-sm text-status-warning">
                 Sie wurden vom <strong>Coverage Monitor</strong> weitergeleitet ({count} Position(en) ausgewählt).
                 Starten Sie einen Workflow, um eine Aufgabe oder Freigabe für diese Positionen anzulegen.
               </p>

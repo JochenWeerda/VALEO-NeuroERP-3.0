@@ -96,7 +96,7 @@ export default function AdminSuiteKiAnbieterPage(): JSX.Element {
       <div className="flex justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
-            <BrainCircuit className="h-7 w-7 text-emerald-700" /> KI-Anbieter (NeuroAI)
+            <BrainCircuit className="h-7 w-7 text-status-success" /> KI-Anbieter (NeuroAI)
           </h1>
           <p className="mt-2 text-muted-foreground">
             Anbieterunabhängige LLM-Konfiguration für NeuroAI-Dossiers und Textassistenten.

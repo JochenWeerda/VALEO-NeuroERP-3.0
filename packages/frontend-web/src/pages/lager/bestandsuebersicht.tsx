@@ -215,7 +215,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-red-200 bg-red-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">
+            <CardTitle className="text-sm font-medium text-status-error">
               <TrendingDown className="h-4 w-4 inline mr-2" />
               Unterbestand
             </CardTitle>
@@ -236,7 +236,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
 
         <Card className="border-yellow-200 bg-yellow-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-700">
+            <CardTitle className="text-sm font-medium text-status-warning">
               ⚠️ Bald nachbestellen
             </CardTitle>
           </CardHeader>
@@ -248,7 +248,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 <span className="text-2xl font-bold text-status-warning">
                   {hasData ? Math.round(bestand.lowStockCount * 1.5) : 0}
                 </span>
-                <span className="text-sm text-yellow-800">Artikel in 7 Tagen kritisch</span>
+                <span className="text-sm text-status-warning">Artikel in 7 Tagen kritisch</span>
               </div>
             )}
           </CardContent>
@@ -256,7 +256,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
 
         <Card className="border-green-200 bg-green-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">
+            <CardTitle className="text-sm font-medium text-status-success">
               ✓ Optimal bevorratet
             </CardTitle>
           </CardHeader>
@@ -268,7 +268,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 <span className="text-2xl font-bold text-status-success">
                   {hasData ? bestand.totalArticles - bestand.lowStockCount : 0}
                 </span>
-                <span className="text-sm text-green-800">Artikel im Sollbereich</span>
+                <span className="text-sm text-status-success">Artikel im Sollbereich</span>
               </div>
             )}
           </CardContent>
@@ -328,7 +328,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         {/* PSM Abverkaufsfristen */}
         <Card className="border-red-300 bg-red-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700 flex items-center justify-between">
+            <CardTitle className="text-sm font-medium text-status-error flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <ShieldAlert className="h-4 w-4" />
                 PSM Abverkaufsfristen
@@ -379,7 +379,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         {/* Renner - Schnelldreher */}
         <Card className="border-green-300 bg-green-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700 flex items-center justify-between">
+            <CardTitle className="text-sm font-medium text-status-success flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
                 Renner (Top-Seller)

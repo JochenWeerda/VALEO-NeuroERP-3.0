@@ -343,7 +343,7 @@ export default function MonatswertePage(): JSX.Element {
           )}
           {isError && (
             <Card className="border-amber-200 bg-amber-50">
-              <CardContent className="p-4 text-amber-800 text-sm">
+              <CardContent className="p-4 text-status-warning text-sm">
                 Keine Daten für das gewählte Wirtschaftsjahr bzw. Zeitraum. Bitte Filter anpassen.
               </CardContent>
             </Card>

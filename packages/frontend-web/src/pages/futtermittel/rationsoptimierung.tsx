@@ -1304,7 +1304,7 @@ function DemoLoadingOverlay({ scenario, onDone }: { scenario: typeof DEMO_SCENAR
             >
               <div className="w-5 h-5 shrink-0 flex items-center justify-center">
                 {i < phase
-                  ? <Check size={14} className="text-green-400" />
+                  ? <Check size={14} className="text-status-success" />
                   : i === phase
                   ? <Loader2 size={14} className="text-white animate-spin" />
                   : <div className="w-2 h-2 rounded-full bg-white opacity-30" />
@@ -2428,7 +2428,7 @@ function Wizard({
                             return next
                           })
                         }}
-                        className="text-slate-300 hover:text-red-400 transition-colors"
+                        className="text-slate-300 hover:text-status-error transition-colors"
                       >
                         <XIcon size={12} />
                       </button>
@@ -2623,7 +2623,7 @@ function Wizard({
                                 setFeedMinFm((prev) => { const n = { ...prev }; delete n[f.id]; return n })
                                 setSelectedFeedIds((prev) => { const next = new Set(prev); next.delete(f.id); return next })
                               }}
-                              className="text-slate-300 hover:text-red-400 transition-colors"
+                              className="text-slate-300 hover:text-status-error transition-colors"
                             >
                               <XIcon size={12} />
                             </button>

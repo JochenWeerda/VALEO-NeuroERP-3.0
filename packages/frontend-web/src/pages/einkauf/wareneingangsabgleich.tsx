@@ -14,9 +14,9 @@ import { useMatchOrders, useMatch, useCreateFollowUp, useCreateErsCredit, type M
  */
 
 const STATUS_STYLE: Record<string, string> = {
-  vollstaendig: 'text-emerald-700',
-  teilgeliefert: 'text-amber-700',
-  ueberliefert: 'text-red-700',
+  vollstaendig: 'text-status-success',
+  teilgeliefert: 'text-status-warning',
+  ueberliefert: 'text-status-error',
   offen: 'text-muted-foreground',
 }
 

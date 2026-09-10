@@ -55,7 +55,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               }}
             />
             {import.meta.env.DEV && this.state.error ? (
-              <pre className="mt-4 max-h-32 overflow-auto rounded-md bg-muted p-3 text-left text-xs text-red-700">
+              <pre className="mt-4 max-h-32 overflow-auto rounded-md bg-muted p-3 text-left text-xs text-status-error">
                 {this.state.error.message}
               </pre>
             ) : null}

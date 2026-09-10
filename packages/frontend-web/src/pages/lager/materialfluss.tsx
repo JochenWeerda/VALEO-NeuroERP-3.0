@@ -1453,7 +1453,7 @@ export default function MaterialflussPage(): JSX.Element {
 
       <Card className="border-amber-200/80 bg-amber-50/50 dark:bg-amber-950/20">
         <CardHeader className="flex flex-row items-start gap-2 py-3">
-          <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
+          <AlertTriangle className="h-5 w-5 text-status-warning shrink-0 mt-0.5" />
           <div>
             <CardTitle className="text-base">Hinweis Prototyp</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">

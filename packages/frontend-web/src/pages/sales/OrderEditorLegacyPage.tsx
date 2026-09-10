@@ -1262,7 +1262,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       {/* Belegfolge-Hinweis */}
       {vorgaengerCount > 0 && state.customer && (
         <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
-          <span className="text-amber-800 text-sm font-medium">
+          <span className="text-status-warning text-sm font-medium">
             {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Angebote' : 's Angebot'} für{' '}
             <strong>{state.customer.name}</strong> vorhanden
           </span>
@@ -1839,7 +1839,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-status-error hover:text-red-700"
+                            className="h-7 w-7 text-status-error hover:text-status-error"
                             title="Position löschen"
                             onClick={() => handleDeletePosition(idx)}
                           >

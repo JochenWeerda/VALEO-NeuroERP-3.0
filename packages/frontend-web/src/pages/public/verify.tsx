@@ -122,7 +122,7 @@ export default function VerifyPage(): JSX.Element {
             <div className="flex items-center gap-3">
               <XCircle className="h-8 w-8 text-status-error" />
               <div>
-                <CardTitle className="text-red-900">Verification Failed</CardTitle>
+                <CardTitle className="text-status-error">Verification Failed</CardTitle>
                 <CardDescription className="text-status-error">{error}</CardDescription>
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function VerifyPage(): JSX.Element {
               <AlertCircle className="h-10 w-10 text-status-warning" />
             )}
             <div>
-              <CardTitle className={isValid ? 'text-green-900' : 'text-yellow-900'}>
+              <CardTitle className={isValid ? 'text-status-success' : 'text-status-warning'}>
                 {isValid ? 'Document Valid' : 'Document Not Verified'}
               </CardTitle>
               <CardDescription className={isValid ? 'text-status-success' : 'text-status-warning'}>

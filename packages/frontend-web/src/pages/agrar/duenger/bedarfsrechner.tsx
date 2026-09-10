@@ -362,7 +362,7 @@ export default function BedarfsrechnerPage(): JSX.Element {
             {/* Phase 2: Grünland – N-Düngebedarf + Aufteilung Tab. 3a/3b */}
             {gruenlandZeile && (
               <div className="mb-6 space-y-3 rounded-lg border border-green-200 bg-green-50/50 p-4">
-                <div className="font-semibold text-green-900">
+                <div className="font-semibold text-status-success">
                   Grünland (LWK {bedarf.vorjahresOrgDungung ? 'Tab. 3b' : 'Tab. 3a'})
                 </div>
                 <div className="flex justify-between text-sm">

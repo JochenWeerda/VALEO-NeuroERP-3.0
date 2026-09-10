@@ -200,7 +200,7 @@ export default function CustomerPortalLayout() {
             {isAnwender && (
               <Link
                 to="/"
-                className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-emerald-700"
+                className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-status-success"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Zur Startseite</span>

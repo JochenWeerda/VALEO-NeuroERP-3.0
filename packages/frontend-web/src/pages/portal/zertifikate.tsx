@@ -113,8 +113,8 @@ export default function PortalZertifikate() {
       {auslaufendeZertifikate > 0 && (
         <Alert className="border-amber-200 bg-amber-50">
           <AlertCircle className="h-4 w-4 text-status-warning" />
-          <AlertTitle className="text-amber-800">Zertifikate laufen bald aus</AlertTitle>
-          <AlertDescription className="text-amber-700">
+          <AlertTitle className="text-status-warning">Zertifikate laufen bald aus</AlertTitle>
+          <AlertDescription className="text-status-warning">
             {auslaufendeZertifikate} Zertifikat(e) laufen in den nächsten Wochen aus.
             Bitte kontaktieren Sie uns für eine Verlängerung.
           </AlertDescription>

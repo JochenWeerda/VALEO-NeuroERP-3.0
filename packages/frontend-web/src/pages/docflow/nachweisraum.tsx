@@ -104,7 +104,7 @@ export default function NachweisraumPage() {
                       <Badge variant="outline">{a.typ}</Badge>
                       <span className="truncate">{a.datei || a.storage_key || '—'}</span>
                       {a.hash
-                        ? <span className="ml-auto inline-flex items-center gap-1 text-xs text-emerald-700" title={a.hash}><Fingerprint size={12} />{a.hash.slice(0, 12)}…</span>
+                        ? <span className="ml-auto inline-flex items-center gap-1 text-xs text-status-success" title={a.hash}><Fingerprint size={12} />{a.hash.slice(0, 12)}…</span>
                         : <Badge variant="destructive" className="ml-auto">kein Hash</Badge>}
                     </div>
                   ))}

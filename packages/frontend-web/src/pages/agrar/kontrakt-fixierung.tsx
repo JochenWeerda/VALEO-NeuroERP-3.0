@@ -204,7 +204,7 @@ export default function KontraktFixierungPage() {
                   <div>
                     <div className="text-xs text-muted-foreground">Bewertung fixiert</div>
                     {ws.data.summary?.bewertbar ? (
-                      <div className={`font-semibold tabular-nums flex items-center gap-1 ${(ws.data.summary.bewertung_fixiert_eur ?? 0) >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                      <div className={`font-semibold tabular-nums flex items-center gap-1 ${(ws.data.summary.bewertung_fixiert_eur ?? 0) >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                         {(ws.data.summary.bewertung_fixiert_eur ?? 0) >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                         {fmtEur(ws.data.summary.bewertung_fixiert_eur)}
                       </div>
@@ -305,7 +305,7 @@ export default function KontraktFixierungPage() {
               )}
 
               {!ws.data.summary?.bewertbar && matifPositions.length > 0 && (
-                <div className="flex items-start gap-2 text-sm text-amber-700">
+                <div className="flex items-start gap-2 text-sm text-status-warning">
                   <AlertTriangle size={15} className="mt-0.5 shrink-0" />
                   <span>Keine Marktnotierung für das Kontrakt-Symbol hinterlegt — Mark-to-Market-Bewertung nicht möglich.</span>
                 </div>

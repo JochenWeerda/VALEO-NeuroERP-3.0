@@ -160,7 +160,7 @@ export default function KreditorenPage(): JSX.Element {
       {skontoVerfuegbar > 0 && (
         <Card className="border-green-500 bg-green-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-green-900">
+            <div className="flex items-center gap-2 text-status-success">
               <AlertCircle className="h-5 w-5" />
               <span className="font-semibold">{skontoVerfuegbar} Rechnung(en) mit Skonto-Option!</span>
             </div>

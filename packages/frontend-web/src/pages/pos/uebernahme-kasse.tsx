@@ -157,7 +157,7 @@ export default function UebernahmeKassePage(): JSX.Element {
           {/* Ergebnis */}
           {result && (
             <div className={`border rounded p-3 space-y-3 ${result.success ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-              <div className={`flex items-center gap-2 font-semibold text-sm ${result.success ? 'text-green-700' : 'text-yellow-700'}`}>
+              <div className={`flex items-center gap-2 font-semibold text-sm ${result.success ? 'text-status-success' : 'text-status-warning'}`}>
                 {result.success
                   ? <CheckCircle2 className="h-4 w-4" />
                   : <AlertCircle className="h-4 w-4" />

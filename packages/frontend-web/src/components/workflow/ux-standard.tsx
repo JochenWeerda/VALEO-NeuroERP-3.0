@@ -18,9 +18,9 @@ type Tone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'red'
 const toneClasses: Record<Tone, { border: string; bg: string; text: string; dot: string }> = {
   neutral: { border: 'border-gray-200', bg: 'bg-white', text: 'text-gray-700', dot: 'bg-gray-400' },
   blue: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-600' },
-  emerald: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' },
-  amber: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' },
-  red: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' },
+  emerald: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-status-success', dot: 'bg-emerald-600' },
+  amber: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-status-warning', dot: 'bg-amber-500' },
+  red: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-status-error', dot: 'bg-red-600' },
 }
 
 export type UxRoleOption<T extends string = string> = {
@@ -200,7 +200,7 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
     <section className="overflow-hidden rounded border border-gray-300 border-t-4 border-t-[#005ca5] bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 px-6 py-4">
         <div className="flex items-center gap-2.5">
-          {decision.allowed ? <CheckCircle2 className="h-5 w-5 text-emerald-700" /> : <ShieldAlert className="h-5 w-5 text-red-700" />}
+          {decision.allowed ? <CheckCircle2 className="h-5 w-5 text-status-success" /> : <ShieldAlert className="h-5 w-5 text-status-error" />}
           <h2 className="text-base font-bold text-gray-900">Darf der Prozess abgeschlossen werden?</h2>
         </div>
         <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Entscheidung</span>
@@ -266,8 +266,8 @@ export function CrudCapabilityChecklist({ capabilities }: { capabilities: CrudCa
           return (
             <div key={capability.key} className={`rounded border px-3 py-2 ${capability.available ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
               <div className="flex items-center gap-2">
-                {Icon ? <Icon className={`h-3.5 w-3.5 ${capability.available ? 'text-emerald-700' : 'text-amber-700'}`} /> : null}
-                <span className={`text-[12px] font-bold ${capability.available ? 'text-emerald-800' : 'text-amber-800'}`}>{capability.label}</span>
+                {Icon ? <Icon className={`h-3.5 w-3.5 ${capability.available ? 'text-status-success' : 'text-status-warning'}`} /> : null}
+                <span className={`text-[12px] font-bold ${capability.available ? 'text-status-success' : 'text-status-warning'}`}>{capability.label}</span>
               </div>
               <p className="mt-1 text-[11px] text-gray-600">{capability.hint}</p>
             </div>

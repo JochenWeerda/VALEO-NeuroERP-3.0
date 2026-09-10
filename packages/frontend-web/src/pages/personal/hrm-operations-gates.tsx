@@ -527,7 +527,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
           {gate.approvedAt ? (
             <div className="hidden text-right sm:block">
               <p className="text-[9px] font-bold uppercase text-gray-400">Freigegeben</p>
-              <p className="text-[13px] font-bold text-emerald-700">{formatDateOnly(gate.approvedAt)}</p>
+              <p className="text-[13px] font-bold text-status-success">{formatDateOnly(gate.approvedAt)}</p>
             </div>
           ) : null}
           {expanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}

@@ -87,12 +87,12 @@ function AutoLotLinkPanel({ warehouseId }: { warehouseId: string }): JSX.Element
         {result && (
           <div className={`rounded-md border px-3 py-2 text-sm ${result['ok'] ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20' : 'border-red-300 bg-red-50 dark:bg-red-900/20'}`}>
             {result['ok'] ? (
-              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-status-success">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>Gebucht in Zelle <strong>{String(result['cell_id'] ?? '—')}</strong>, {Number(result['quantity_kg'] ?? 0).toLocaleString('de-DE')} kg</span>
               </div>
             ) : (
-              <span className="text-red-700 dark:text-red-400">{String(result['reason'] ?? 'Kein Ergebnis')}</span>
+              <span className="text-status-error">{String(result['reason'] ?? 'Kein Ergebnis')}</span>
             )}
           </div>
         )}

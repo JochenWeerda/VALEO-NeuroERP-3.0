@@ -356,7 +356,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           {/* Vorschau-Ergebnis */}
           {summary && (
             <div className="bg-green-50 border border-green-200 rounded p-3 space-y-2">
-              <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+              <div className="flex items-center gap-2 text-status-success font-semibold text-sm">
                 <CheckCircle2 className="h-4 w-4" />
                 Vorschau: {summary.dateiname}
               </div>

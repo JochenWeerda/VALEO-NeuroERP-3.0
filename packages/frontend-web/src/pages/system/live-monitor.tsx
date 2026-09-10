@@ -129,22 +129,22 @@ export default function LiveMonitorPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Bestandsereignisse</CardTitle></CardHeader>
           <CardContent className="flex items-center gap-2">
-            <Boxes className="h-5 w-5 text-emerald-700" />
+            <Boxes className="h-5 w-5 text-status-success" />
             <span className="text-2xl font-bold">{inventoryEvents.length}</span>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Warnungen</CardTitle></CardHeader>
           <CardContent className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-700" />
-            <span className="text-2xl font-bold text-amber-700">{warningAlerts.length}</span>
+            <AlertTriangle className="h-5 w-5 text-status-warning" />
+            <span className="text-2xl font-bold text-status-warning">{warningAlerts.length}</span>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Kritisch</CardTitle></CardHeader>
           <CardContent className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5 text-red-700" />
-            <span className="text-2xl font-bold text-red-700">{criticalAlerts.length}</span>
+            <ShieldAlert className="h-5 w-5 text-status-error" />
+            <span className="text-2xl font-bold text-status-error">{criticalAlerts.length}</span>
           </CardContent>
         </Card>
       </div>

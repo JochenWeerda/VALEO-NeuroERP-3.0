@@ -359,7 +359,7 @@ function AnkaufsangebotDialog({
               </NativeSelect>
             </div>
             <Alert className="border-amber-200 bg-amber-50">
-              <AlertDescription className="text-amber-800 text-sm">
+              <AlertDescription className="text-status-warning text-sm">
                 Für jede Kultur wird ein Ankaufsangebot + Lohnspritz-Empfehlung generiert.
                 Bereits vorhandene Angebote werden nicht dupliziert.
               </AlertDescription>
@@ -441,7 +441,7 @@ export default function KundenSchlagkarteiPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-green-700">{schlaege?.count ?? '—'}</div>
+            <div className="text-3xl font-bold text-status-success">{schlaege?.count ?? '—'}</div>
             <div className="text-sm text-gray-500">Schläge</div>
           </CardContent>
         </Card>
@@ -453,7 +453,7 @@ export default function KundenSchlagkarteiPage() {
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-amber-700">{kulturen.length}</div>
+            <div className="text-3xl font-bold text-status-warning">{kulturen.length}</div>
             <div className="text-sm text-gray-500">Kulturen</div>
           </CardContent>
         </Card>
@@ -473,7 +473,7 @@ export default function KundenSchlagkarteiPage() {
         <CardContent className="pt-4">
           <div className="flex items-center gap-2 mb-3">
             <Users className="h-5 w-5 text-status-warning" />
-            <span className="font-medium text-amber-900">Auftrag direkt aus Schlagkartei anlegen</span>
+            <span className="font-medium text-status-warning">Auftrag direkt aus Schlagkartei anlegen</span>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button
@@ -508,7 +508,7 @@ export default function KundenSchlagkarteiPage() {
             </Button>
           </div>
           {alleSchlaege.length === 0 && !loadingS && (
-            <p className="text-xs text-amber-700 mt-2">
+            <p className="text-xs text-status-warning mt-2">
               Buttons aktiv sobald Schläge geladen sind.
             </p>
           )}

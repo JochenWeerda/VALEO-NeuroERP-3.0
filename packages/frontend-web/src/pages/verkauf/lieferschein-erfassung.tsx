@@ -1902,7 +1902,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       {/* Belegfolge-Hinweis */}
       {vorgaengerCount > 0 && state.customer && (
         <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
-          <span className="text-amber-800 text-sm font-medium">
+          <span className="text-status-warning text-sm font-medium">
             {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Vorgänger-Belege' : 'r Vorgänger-Beleg'} für{' '}
             <strong>{state.customer.name}</strong> vorhanden
           </span>
@@ -2451,7 +2451,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-status-error hover:text-red-700"
+                          className="h-7 w-7 text-status-error hover:text-status-error"
                           title="Position löschen"
                           onClick={() => handleDeletePosition(idx)}
                           disabled={state.status !== 'draft'}
@@ -2774,7 +2774,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
         {schlaege.length > 0 && (
           <Card className="mb-4 p-4 border-amber-200 bg-amber-50">
-            <h2 className="mb-2 font-semibold text-sm text-amber-800">PSM-Dienstleistung → Feldbuch</h2>
+            <h2 className="mb-2 font-semibold text-sm text-status-warning">PSM-Dienstleistung → Feldbuch</h2>
             <div className="grid grid-cols-4 gap-4">
               <div className="space-y-1 col-span-2">
                 <Label className="text-xs">Schlag (Feldbuch):</Label>
@@ -2802,7 +2802,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 />
               </div>
               <div className="flex items-end">
-                <p className="text-xs text-amber-700">
+                <p className="text-xs text-status-warning">
                   Nach dem Drucken wird automatisch ein Feldbuch-Eintrag erstellt.
                 </p>
               </div>

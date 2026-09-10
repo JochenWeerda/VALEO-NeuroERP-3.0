@@ -105,7 +105,7 @@ export default function BwaPage(): JSX.Element {
 
       {(isError || !bwa) && (
         <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="p-4 text-amber-800 text-sm">
+          <CardContent className="p-4 text-status-warning text-sm">
             Keine BWA-Daten für Periode {period} vorhanden.
           </CardContent>
         </Card>

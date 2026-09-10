@@ -143,12 +143,12 @@ export default function RationsSchnittstellenImport() {
   return (
     <main className="mx-auto w-full max-w-5xl space-y-5 p-5 text-slate-900">
       <header className="rounded-2xl bg-linear-to-r from-emerald-800 to-emerald-950 p-5 text-white shadow">
-        <div className="flex items-center gap-2 text-emerald-200">
+        <div className="flex items-center gap-2 text-status-success">
           <Upload className="h-5 w-5" />
           <span className="text-xs font-semibold uppercase tracking-wide">Rations-Schnittstellen</span>
         </div>
         <h1 className="mt-1 text-2xl font-bold">Datenimport agrirouter · ICAR-ADE · Labor</h1>
-        <p className="mt-1 text-sm text-emerald-100">
+        <p className="mt-1 text-sm text-status-success">
           Bereits dekodiertes JSON je Standard einreichen. Ergebnisse münden in die kanonischen Modelle
           (Fütterungsprotokoll, Tierprofil, Futtermittel); der Transport/Provider-Anschluss bleibt konfigurativ.
         </p>
@@ -167,7 +167,7 @@ export default function RationsSchnittstellenImport() {
               borderColor: a.id === adapterId ? '#059669' : '#E2E8F0',
             }}
           >
-            <div className="flex items-center gap-2 font-semibold text-emerald-900">{a.icon}{a.label}</div>
+            <div className="flex items-center gap-2 font-semibold text-status-success">{a.icon}{a.label}</div>
             <div className="mt-1 text-[11px] font-medium text-slate-500">→ {a.target}</div>
             <div className="mt-1 text-xs text-slate-600">{a.hint}</div>
           </button>
@@ -178,7 +178,7 @@ export default function RationsSchnittstellenImport() {
         {/* Eingabe */}
         <section className="rounded-2xl border bg-white p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-bold"><FileJson className="h-5 w-5 text-emerald-700" />Payload ({adapter.label})</h2>
+            <h2 className="flex items-center gap-2 font-bold"><FileJson className="h-5 w-5 text-status-success" />Payload ({adapter.label})</h2>
             <Button variant="outline" size="sm" onClick={loadSample}><Copy className="mr-1 h-4 w-4" />Beispiel laden</Button>
           </div>
           <textarea
@@ -220,8 +220,8 @@ export default function RationsSchnittstellenImport() {
               </dl>
               {result.feeding_control != null && (
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs">
-                  <div className="font-semibold text-emerald-900">F1-Kontrolle erzeugt</div>
-                  <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-all text-[11px] text-emerald-900">
+                  <div className="font-semibold text-status-success">F1-Kontrolle erzeugt</div>
+                  <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-all text-[11px] text-status-success">
                     {JSON.stringify(result.feeding_control, null, 2)}
                   </pre>
                 </div>

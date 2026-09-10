@@ -224,7 +224,7 @@ export default function QrScannerPage(): JSX.Element {
 
             {parsed && (
               <div className="rounded-md border bg-green-50 p-3 space-y-1">
-                <div className="flex items-center gap-2 text-green-800 font-semibold text-sm mb-2">
+                <div className="flex items-center gap-2 text-status-success font-semibold text-sm mb-2">
                   <CheckCircle className="h-4 w-4" />
                   QR-Code erkannt
                 </div>

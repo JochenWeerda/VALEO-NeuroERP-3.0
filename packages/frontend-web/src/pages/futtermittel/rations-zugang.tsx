@@ -265,7 +265,7 @@ function ShareLinkDialog({ tenantId, open, onClose }: ShareLinkDialogProps) {
           </div>
         ) : (
           <div className="space-y-3 py-2">
-            <p className="text-sm text-green-700 font-medium">Link erfolgreich erstellt.</p>
+            <p className="text-sm text-status-success font-medium">Link erfolgreich erstellt.</p>
             <div className="flex gap-2">
               <Input value={fullUrl} readOnly className="font-mono text-xs" />
               <Button variant="outline" size="icon" onClick={handleCopy} title="Kopieren">
@@ -412,7 +412,7 @@ export default function RationsZugangPage() {
                 </TableCell>
                 <TableCell>
                   {e.ist_aktiv ? (
-                    <span className="flex items-center gap-1 text-green-700 text-xs">
+                    <span className="flex items-center gap-1 text-status-success text-xs">
                       <CheckCircle className="h-3.5 w-3.5" /> Aktiv
                     </span>
                   ) : (

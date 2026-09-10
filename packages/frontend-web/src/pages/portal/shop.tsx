@@ -698,7 +698,7 @@ export default function PortalShop() {
                             {staffelInfo.naechsteStaffel && (
                               <Alert className="py-2 border-emerald-200 bg-emerald-50">
                                 <Info className="h-4 w-4 text-status-success" />
-                                <AlertDescription className="text-emerald-800 text-sm">
+                                <AlertDescription className="text-status-success text-sm">
                                   <strong>Tipp:</strong> Sie erreichen die nächst günstigere Preisstaffel ab{' '}
                                   <span className="font-bold">{staffelInfo.naechsteStaffel.abMenge} {item.einheit}</span>.
                                   <br />
@@ -713,7 +713,7 @@ export default function PortalShop() {
                             {!staffelInfo.naechsteStaffel && staffelInfo.zuschlag === 0 && (
                               <Alert className="py-2 border-emerald-200 bg-emerald-50">
                                 <Check className="h-4 w-4 text-status-success" />
-                                <AlertDescription className="text-emerald-800 text-sm">
+                                <AlertDescription className="text-status-success text-sm">
                                   <strong>Beste Staffel erreicht!</strong> Kein Mengenzuschlag.
                                 </AlertDescription>
                               </Alert>
@@ -759,7 +759,7 @@ export default function PortalShop() {
                                   {staffelInfo.zuschlag > 0 && (
                                     <>
                                       <span className="text-muted-foreground">+</span>
-                                      <span className="text-amber-700">€ {formatPrice(staffelKosten)} Staffel</span>
+                                      <span className="text-status-warning">€ {formatPrice(staffelKosten)} Staffel</span>
                                     </>
                                   )}
                                   {item.frachtkosten && item.deliveryParity !== 'ab_lager' && (
@@ -1084,7 +1084,7 @@ function ProductCard({
                   <span className="text-xs text-muted-foreground line-through">€ {formatPrice(product.preis)}</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t">
-                  <span className="text-xs font-medium text-emerald-700">Jetzt fällig</span>
+                  <span className="text-xs font-medium text-status-success">Jetzt fällig</span>
                   <span className="text-lg font-bold text-status-success">€ 0,00</span>
                 </div>
                 <p className="text-xs text-muted-foreground">(bei Abruf bis {prePurchaseRemaining} {product.einheit})</p>

@@ -165,7 +165,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
           {nonCompliant > 0 && (
             <Card className="border-red-500 bg-red-50">
               <CardContent className="pt-4">
-                <div className="flex items-center gap-2 text-red-900">
+                <div className="flex items-center gap-2 text-status-error">
                   <XCircle className="h-5 w-5" />
                   <span className="font-semibold">{nonCompliant} Nachweis(e) nicht compliant.</span>
                 </div>

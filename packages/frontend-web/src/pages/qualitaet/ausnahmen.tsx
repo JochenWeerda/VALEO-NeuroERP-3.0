@@ -224,7 +224,7 @@ export default function AusnahmenPage(): JSX.Element {
       {eskaliert > 0 && (
         <Card className="border-red-500 bg-red-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{eskaliert} Ausnahme(n) eskaliert — sofortige Bearbeitung erforderlich!</span>
             </div>
@@ -247,7 +247,7 @@ export default function AusnahmenPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Hohe Priorität</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-red-700">{hochprio}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-error">{hochprio}</span></CardContent>
         </Card>
       </div>
 

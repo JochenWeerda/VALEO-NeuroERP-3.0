@@ -229,7 +229,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
   return (
     <div className="space-y-4 p-4">
       <div className="border-b-2 border-green-600 pb-2">
-        <h1 className="text-xl font-bold text-green-700">LIEFERSCHEIN-ERFASSUNG</h1>
+        <h1 className="text-xl font-bold text-status-success">LIEFERSCHEIN-ERFASSUNG</h1>
       </div>
 
       {/* Lieferschein-Erfassung Header */}

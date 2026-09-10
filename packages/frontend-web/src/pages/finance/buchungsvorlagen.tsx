@@ -219,7 +219,7 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
             <Button
               size="sm"
               variant="ghost"
-              className="text-status-error hover:text-red-700"
+              className="text-status-error hover:text-status-error"
               onClick={() => deleteTemplate.mutate(template.id)}
               disabled={deleteTemplate.isPending}
             >

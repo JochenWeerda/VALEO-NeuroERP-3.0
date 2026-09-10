@@ -84,7 +84,7 @@ export default function BilanzPage(): JSX.Element {
         </div>
         {isError && (
           <Card className="border-amber-200 bg-amber-50">
-            <CardContent className="p-4 text-amber-800 text-sm">
+            <CardContent className="p-4 text-status-warning text-sm">
               Keine Bilanzdaten für Periode {period} vorhanden. Bitte Buchungen erfassen oder andere Periode wählen.
             </CardContent>
           </Card>

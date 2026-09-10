@@ -395,7 +395,7 @@ export default function AtlasPage(): JSX.Element {
                     {job.status}
                   </Badge>
                 </div>
-                {job.error_message ? <p className="mt-2 text-xs text-amber-700">{job.error_message}</p> : null}
+                {job.error_message ? <p className="mt-2 text-xs text-status-warning">{job.error_message}</p> : null}
               </div>
             )) : (
               <p className="text-sm text-muted-foreground">Noch keine Job-Laeufe vorhanden.</p>
@@ -421,7 +421,7 @@ export default function AtlasPage(): JSX.Element {
                   {latestJob?.status ?? 'n/a'}
                 </Badge>
               </div>
-              {latestJob?.error_message ? <p className="mt-2 text-xs text-amber-700">{latestJob.error_message}</p> : null}
+              {latestJob?.error_message ? <p className="mt-2 text-xs text-status-warning">{latestJob.error_message}</p> : null}
             </div>
             {latestArtifacts.length > 0 ? latestArtifacts.map((artifact) => (
               <div key={artifact.id} className="rounded-lg border p-3 text-sm">

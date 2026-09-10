@@ -62,7 +62,7 @@ export default function OpSkontoAuszifferungPage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <Banknote className="h-7 w-7 text-emerald-700" /> OP Skonto-Auszifferung
+          <Banknote className="h-7 w-7 text-status-success" /> OP Skonto-Auszifferung
         </h1>
         <p className="mt-2 text-muted-foreground">
           Offene Posten mit Zahlungseingang und Skontoabzug ausziffern; FIBU-Skontokonto-gerecht.
@@ -149,7 +149,7 @@ export default function OpSkontoAuszifferungPage() {
               <div className={`rounded-md border p-3 text-sm ${calcResult.skonto_gueltig ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
                 <div className="flex justify-between"><span>Skontobetrag:</span><strong className="font-mono">{eur(calcResult.skontobetrag_eur)}</strong></div>
                 <div className="flex justify-between"><span>Zahlungsbetrag:</span><strong className="font-mono">{eur(calcResult.zahlungsbetrag_eur)}</strong></div>
-                {calcResult.hinweis && <p className="mt-1 text-amber-800">{calcResult.hinweis}</p>}
+                {calcResult.hinweis && <p className="mt-1 text-status-warning">{calcResult.hinweis}</p>}
               </div>
             )}
           </CardContent>

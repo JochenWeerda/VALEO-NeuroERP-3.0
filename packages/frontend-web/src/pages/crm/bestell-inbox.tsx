@@ -132,7 +132,7 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
           </div>
         )}
         {item.status === 'bestaetigt' && (
-          <div className="flex items-center gap-2 border-t pt-3 text-sm text-green-700">
+          <div className="flex items-center gap-2 border-t pt-3 text-sm text-status-success">
             <CheckCircle2 className="h-4 w-4" />Bestätigt als {item.beleg_typ}
             {item.kunden_nr && (
               <Button size="sm" variant="outline" className="ml-auto gap-2"

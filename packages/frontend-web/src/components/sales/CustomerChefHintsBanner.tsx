@@ -55,9 +55,9 @@ export function CustomerChefHintsBanner({
   if (isLoading && !data) {
     return (
       <Alert className="mb-4 border-amber-200 bg-amber-50/90">
-        <AlertCircle className="h-4 w-4 text-amber-800" />
-        <AlertTitle className="text-amber-950">Chef-Hinweise</AlertTitle>
-        <AlertDescription className="text-amber-900 text-sm">Lade Hinweise…</AlertDescription>
+        <AlertCircle className="h-4 w-4 text-status-warning" />
+        <AlertTitle className="text-status-warning">Chef-Hinweise</AlertTitle>
+        <AlertDescription className="text-status-warning text-sm">Lade Hinweise…</AlertDescription>
       </Alert>
     )
   }
@@ -70,13 +70,13 @@ export function CustomerChefHintsBanner({
 
   return (
     <Alert className="mb-4 border-amber-300 bg-amber-50/95">
-      <AlertCircle className="h-4 w-4 text-amber-900" />
-      <AlertTitle className="text-amber-950 flex flex-wrap items-center gap-2">
+      <AlertCircle className="h-4 w-4 text-status-warning" />
+      <AlertTitle className="text-status-warning flex flex-wrap items-center gap-2">
         Chef-Hinweise
         {data.partnerId ? (
           <Link
             to={`/verkauf/kunden-stamm/${data.partnerId}`}
-            className="text-xs font-normal text-amber-900 underline-offset-2 hover:underline"
+            className="text-xs font-normal text-status-warning underline-offset-2 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -84,10 +84,10 @@ export function CustomerChefHintsBanner({
           </Link>
         ) : null}
       </AlertTitle>
-      <AlertDescription className="space-y-3 text-amber-950">
+      <AlertDescription className="space-y-3 text-status-warning">
         {hasCrm ? (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-900/90 mb-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-status-warning/90 mb-1">
               CRM-Chefanweisung
             </div>
             <p className="whitespace-pre-wrap text-sm">{data.crmChefanweisung}</p>
@@ -95,7 +95,7 @@ export function CustomerChefHintsBanner({
         ) : null}
         {hasInstr ? (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-900/90 mb-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-status-warning/90 mb-1">
               Chef-Anweisungen (Stammdaten)
             </div>
             <ul className="list-none space-y-2 pl-0">

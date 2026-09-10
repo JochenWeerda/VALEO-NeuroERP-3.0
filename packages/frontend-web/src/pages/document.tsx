@@ -419,8 +419,8 @@ export default function DocumentPanel(): JSX.Element {
       {dmsConnected && (
         <Alert className="bg-green-50 border-green-200">
           <CheckCircle2 className="h-4 w-4 text-status-success" />
-          <AlertTitle className="text-green-800">DMS verbunden</AlertTitle>
-          <AlertDescription className="text-green-700">
+          <AlertTitle className="text-status-success">DMS verbunden</AlertTitle>
+          <AlertDescription className="text-status-success">
             Paperless-ngx Dokumentenmanagement ist aktiv. Dokumente werden automatisch per OCR verarbeitet.
           </AlertDescription>
         </Alert>

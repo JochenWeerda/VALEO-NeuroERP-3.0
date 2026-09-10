@@ -37,6 +37,22 @@ border-green-200`). Nur die eindeutigen sind Gegenstand dieser Welle; die
 Tripel gehoeren ueber zentrale Badge-Varianten und sind Entwurfsarbeit, keine
 Ersetzung — eine mechanische Umstellung liesse dort die Flaechenfarbe stehen.
 
+**Welle 1 umgesetzt 2026-09-10:** 301 Ersetzungen in 127 Dateien per Codemod
+(Skript mit Selbsttest ueber sechs Musterfaelle, u. a. Badge-Tripel und
+Klassenfragmente mit trennendem Leerzeichen). Abbildung: green/emerald ->
+`status-success`, red/rose -> `status-error`, amber/yellow -> `status-warning`.
+`hover:` bleibt als Prefix erhalten; die vier `dark:`-Ueberschreibungen
+entfallen, weil die Utilities selbst theme-bewusst sind (hell 700, dunkel 500).
+
+**Nachweis:** Baseline vor der Aenderung aufgenommen — `tsc --noEmit` exit 0,
+126 Testdateien mit 495 Tests und einem bekannten Skip. Danach identisch:
+`tsc --noEmit` exit 0, 126 Dateien, 495 Tests, ein Skip. Gegenprobe mit
+demselben Skript: **0 verbleibende Welle-1-Vorkommen**. Kein Byte ausserhalb
+`packages/frontend-web/src` angefasst; Codex' `package.json`-Stand unberuehrt.
+
+**Offen (Welle 2):** 268 Badge-Tripel in 102 Dateien. Sie brauchen zentrale
+Badge-Varianten statt Einzelklassen — Entwurfsarbeit, kein Codemod.
+
 ## SECURITY-ARCHIVE-DEPS-20260910 - in arbeit
 
 **Von:** Abgrenzung aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag.

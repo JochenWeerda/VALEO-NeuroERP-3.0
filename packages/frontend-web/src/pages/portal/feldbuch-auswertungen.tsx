@@ -46,12 +46,12 @@ export default function PortalFeldbuchAuswertungen() {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-5 p-5 text-slate-900">
       <header className="rounded-2xl bg-linear-to-r from-emerald-800 to-emerald-950 p-5 text-white shadow">
-        <div className="flex items-center gap-2 text-emerald-200">
+        <div className="flex items-center gap-2 text-status-success">
           <Scale className="h-5 w-5" />
           <span className="text-xs font-semibold uppercase tracking-wide">Ackerschlagkartei</span>
         </div>
         <h1 className="mt-1 text-2xl font-bold">DüV-Auswertungen</h1>
-        <p className="mt-1 text-sm text-emerald-100">
+        <p className="mt-1 text-sm text-status-success">
           Düngebedarf, Düngebilanz (170 kg N/ha org.), Nährstoffvergleich/Stoffstrombilanz, Spritztagebuch und
           Ernte-Auswertung nach Düngeverordnung, StoffBilV und Pflanzenschutzgesetz.
         </p>
@@ -81,7 +81,7 @@ export default function PortalFeldbuchAuswertungen() {
                   <Td>{String(r.schlagName ?? '–')}</Td><Td>{String(r.kultur ?? '–')}</Td>
                   <Td>{num(r.nSollwertKgHa, 0)}</Td><Td>{num(r.nminFruehjahrKgHa, 0)}</Td>
                   <Td className="font-semibold">{num(r.nBedarfKgHa, 0)}</Td><Td>{num(r.nAusgebrachtKgHa, 0)}</Td>
-                  <Td className={Number(r.nRestbedarfKg) < 0 ? 'font-semibold text-status-error' : 'text-emerald-700'}>{num(r.nRestbedarfKg, 0)}</Td>
+                  <Td className={Number(r.nRestbedarfKg) < 0 ? 'font-semibold text-status-error' : 'text-status-success'}>{num(r.nRestbedarfKg, 0)}</Td>
                 </tr>
               ))}
               {rows(bedarf.data).length === 0 && <tr><Td className="text-slate-500">Keine Schläge mit Sollwert erfasst.</Td></tr>}
@@ -99,7 +99,7 @@ export default function PortalFeldbuchAuswertungen() {
                   <tr key={i}>
                     <Td>{String(r.schlagName ?? '–')}</Td><Td>{num(r.nKg)}</Td><Td>{num(r.nOrganischKg)}</Td>
                     <Td>{num(chk.nOrganischProHa)}</Td><Td>{num(r.p2o5Kg)}</Td><Td>{num(r.k2oKg)}</Td>
-                    <Td className={over ? 'font-semibold text-status-error' : 'text-emerald-700'}>
+                    <Td className={over ? 'font-semibold text-status-error' : 'text-status-success'}>
                       {over ? <span className="inline-flex items-center gap-1"><AlertTriangle className="h-4 w-4" />überschritten</span> : `${num(chk.auslastungPct, 0)} %`}
                     </Td>
                   </tr>
@@ -119,7 +119,7 @@ export default function PortalFeldbuchAuswertungen() {
                 return (
                   <div key={k} className="rounded-xl border p-3">
                     <div className="text-xs font-semibold uppercase text-slate-500">{k === 'n' ? 'N' : 'P₂O₅'} Betriebssaldo</div>
-                    <div className={`text-2xl font-bold ${saldo > 0 ? 'text-status-warning' : 'text-emerald-700'}`}>{num(saldo)} kg</div>
+                    <div className={`text-2xl font-bold ${saldo > 0 ? 'text-status-warning' : 'text-status-success'}`}>{num(saldo)} kg</div>
                     <div className="text-xs text-slate-500">Zufuhr {num((b as Record<string, unknown>).zufuhr_kg)} − Abfuhr {num((b as Record<string, unknown>).abfuhr_kg)}</div>
                   </div>
                 )
@@ -131,7 +131,7 @@ export default function PortalFeldbuchAuswertungen() {
                 {rows(stoffstrom.data).map((r, i) => (
                   <tr key={i}>
                     <Td>{String(r.kultur ?? '–')}</Td><Td>{num(r.nZufuhrKg)}</Td><Td>{num(r.nAbfuhrKg)}</Td>
-                    <Td className={Number(r.nSaldoKg) > 0 ? 'text-status-warning' : 'text-emerald-700'}>{num(r.nSaldoKg)}</Td>
+                    <Td className={Number(r.nSaldoKg) > 0 ? 'text-status-warning' : 'text-status-success'}>{num(r.nSaldoKg)}</Td>
                     <Td>{num(r.p2o5SaldoKg)}</Td>
                   </tr>
                 ))}
@@ -156,7 +156,7 @@ export default function PortalFeldbuchAuswertungen() {
                   <tr key={i}>
                     <Td>{String(r.datum ?? '–')}</Td><Td>{String(r.schlagName ?? '–')}</Td><Td>{String(r.mittel ?? '–')}</Td>
                     <Td>{String(r.wirkungsbereich ?? '–')}</Td><Td>{String(r.anwender ?? '–')}</Td>
-                    <Td className={r.compliant ? 'text-emerald-700' : 'font-semibold text-status-error'}>
+                    <Td className={r.compliant ? 'text-status-success' : 'font-semibold text-status-error'}>
                       {r.compliant ? 'vollständig' : `fehlt: ${(r.fehlendePflichtangaben as string[] | undefined)?.join(', ') ?? ''}`}
                     </Td>
                   </tr>

@@ -467,14 +467,14 @@ export default function BestellungAnlegenPage(): JSX.Element {
           )}
           {bestellung.contractId && (
             <div className="p-3 bg-green-50 rounded-md">
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-status-success">
                 {t('crud.fields.contract')}: {bestellung.contractId}
               </p>
             </div>
           )}
           {bestellung.rfqId && (
             <div className="p-3 bg-yellow-50 rounded-md">
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-status-warning">
                 {t('crud.fields.rfq')}: {bestellung.rfqId}
               </p>
             </div>

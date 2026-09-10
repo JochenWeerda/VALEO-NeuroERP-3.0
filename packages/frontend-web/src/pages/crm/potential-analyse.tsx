@@ -65,7 +65,7 @@ function GapKarte({ gap }: { gap: GapTyp }) {
             <div className="flex items-center justify-between">
               <div className="text-sm">
                 <span className="text-gray-500">Potential: </span>
-                <span className="font-bold text-green-700">
+                <span className="font-bold text-status-success">
                   {gesamtPotential.toLocaleString('de-DE')} €
                 </span>
                 <span className="text-gray-400 text-xs ml-1">
@@ -131,7 +131,7 @@ export default function PotentialAnalysePage() {
           </Card>
           <Card>
             <CardContent className="pt-4 text-center">
-              <div className="text-3xl font-bold text-green-700">
+              <div className="text-3xl font-bold text-status-success">
                 {(gesamtPotential / 1000).toFixed(0)} T€
               </div>
               <div className="text-sm text-gray-500">Geschätztes Gesamtpotential</div>
@@ -139,7 +139,7 @@ export default function PotentialAnalysePage() {
           </Card>
           <Card>
             <CardContent className="pt-4 text-center">
-              <div className="text-3xl font-bold text-amber-700">{data.schlag_kunden_count}</div>
+              <div className="text-3xl font-bold text-status-warning">{data.schlag_kunden_count}</div>
               <div className="text-sm text-gray-500">Kunden mit Schlagkartei</div>
             </CardContent>
           </Card>

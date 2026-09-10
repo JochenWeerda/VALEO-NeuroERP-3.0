@@ -245,10 +245,10 @@ export default function KontraktPositionsmonitor(): JSX.Element {
           <CardContent className="flex items-center gap-4 py-4">
             <AlertTriangle className="h-8 w-8 text-status-error shrink-0" />
             <div>
-              <p className="font-semibold text-red-800">
+              <p className="font-semibold text-status-error">
                 Kritische Unterdeckung: {critical.article_desc} ({critical.article_id})
               </p>
-              <p className="text-sm text-red-700">
+              <p className="text-sm text-status-error">
                 Netto-Position: {fmt(critical.net_position)} — Deckungsgrad: {critical.coverage_pct != null ? `${critical.coverage_pct.toFixed(1)}%` : 'n/a'}
                 {' | '}Verkauf offen: {fmt(critical.sell_rest_qty)} — Einkauf gedeckt: {fmt(critical.buy_rest_qty)}
               </p>
@@ -274,7 +274,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-700">{shortCount}</div>
+            <div className="text-3xl font-bold text-status-error">{shortCount}</div>
             <p className="text-xs text-muted-foreground">Artikel mit Unterdeckung</p>
           </CardContent>
         </Card>
@@ -287,7 +287,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-700">{longCount}</div>
+            <div className="text-3xl font-bold text-status-success">{longCount}</div>
             <p className="text-xs text-muted-foreground">Artikel mit Ueberdeckung</p>
           </CardContent>
         </Card>
@@ -317,7 +317,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-3xl font-bold ${(critical?.spread ?? 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+            <div className={`text-3xl font-bold ${(critical?.spread ?? 0) >= 0 ? 'text-status-success' : 'text-status-error'}`}>
               {critical?.spread != null ? fmtEur(critical.spread) : '-'}
             </div>
             <p className="text-xs text-muted-foreground">VK-Preis minus EK-Preis (kritischster Artikel)</p>
@@ -388,7 +388,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             <CardTitle className="text-base">Negative Marktwerte</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold text-red-700">{negativeValuationCount}</div>
+            <div className="text-2xl font-semibold text-status-error">{negativeValuationCount}</div>
             <p className="text-xs text-muted-foreground">Kontrakte mit negativer Marktbewertung</p>
           </CardContent>
         </Card>
@@ -434,7 +434,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
                     <TableCell className="text-right">{p.buy_contract_count}</TableCell>
                     <TableCell className="text-right font-mono">{fmt(p.buy_rest_qty)}</TableCell>
                     <TableCell className="text-right font-mono">{fmtEur(p.buy_avg_price)}</TableCell>
-                    <TableCell className={`text-right font-bold font-mono ${p.net_position < 0 ? 'text-red-700' : p.net_position > 0 ? 'text-green-700' : ''}`}>
+                    <TableCell className={`text-right font-bold font-mono ${p.net_position < 0 ? 'text-status-error' : p.net_position > 0 ? 'text-status-success' : ''}`}>
                       {fmt(p.net_position)}
                     </TableCell>
                     <TableCell className={`text-right font-mono ${(p.spread ?? 0) < 0 ? 'text-status-error' : 'text-status-success'}`}>
@@ -460,8 +460,8 @@ export default function KontraktPositionsmonitor(): JSX.Element {
           <CardTitle className="text-base">Legende</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
-          <p><strong>SHORT</strong> = Verkaufskontrakte uebersteigen Einkaufskontrakte → <span className="text-red-700 font-semibold">Unterdeckung / Boersenrisiko bei steigenden Preisen</span></p>
-          <p><strong>LONG</strong> = Einkaufskontrakte uebersteigen Verkaufskontrakte → <span className="text-green-700">Ueberdeckung / Lagerrisiko bei fallenden Preisen</span></p>
+          <p><strong>SHORT</strong> = Verkaufskontrakte uebersteigen Einkaufskontrakte → <span className="text-status-error font-semibold">Unterdeckung / Boersenrisiko bei steigenden Preisen</span></p>
+          <p><strong>LONG</strong> = Einkaufskontrakte uebersteigen Verkaufskontrakte → <span className="text-status-success">Ueberdeckung / Lagerrisiko bei fallenden Preisen</span></p>
           <p><strong>Deckungsgrad</strong> = EK-Restmenge / VK-Restmenge × 100% — unter 100% bedeutet Unterdeckung</p>
           <p><strong>Spread</strong> = Durchschnittlicher VK-Preis minus durchschnittlicher EK-Preis — positiv = Marge, negativ = Verlust</p>
           <p><strong>Netto (t)</strong> = EK-Restmenge minus VK-Restmenge — negativ = Short</p>

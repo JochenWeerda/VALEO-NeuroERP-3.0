@@ -12,8 +12,8 @@ import { useSalesMatchOrders, useSalesMatch, type SalesMatchOrderRow } from '@/l
  */
 
 const STATUS_STYLE: Record<string, string> = {
-  vollstaendig: 'text-emerald-700', teilgeliefert: 'text-amber-700',
-  ueberliefert: 'text-red-700', offen: 'text-muted-foreground',
+  vollstaendig: 'text-status-success', teilgeliefert: 'text-status-warning',
+  ueberliefert: 'text-status-error', offen: 'text-muted-foreground',
 }
 
 function Row({ o, active, onClick }: { o: SalesMatchOrderRow; active: boolean; onClick: () => void }) {

@@ -156,7 +156,7 @@ function PreisspiegalWidget() {
           </CardDescription>
         </div>
         <Link to="/portal/preisspiegel">
-          <Button variant="ghost" size="sm" className="gap-1 text-green-700">
+          <Button variant="ghost" size="sm" className="gap-1 text-status-success">
             Alle Varianten <ChevronRight className="h-4 w-4" />
           </Button>
         </Link>
@@ -246,11 +246,11 @@ function EmpfehlungsBanner() {
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div>
-            <div className="font-semibold text-amber-900 flex items-center gap-2">
+            <div className="font-semibold text-status-warning flex items-center gap-2">
               {data.ungesehen} neue Empfehlung{data.ungesehen !== 1 ? 'en' : ''} für Sie
               <Badge className="bg-amber-500 text-white text-xs">{data.ungesehen} neu</Badge>
             </div>
-            <div className="text-sm text-amber-700 flex gap-3 mt-0.5">
+            <div className="text-sm text-status-warning flex gap-3 mt-0.5">
               {ankauf > 0 && <span>{ankauf} Ankaufsangebot{ankauf !== 1 ? 'e' : ''}</span>}
               {lohn > 0 && <span>{lohn} Lohndienstleistung{lohn !== 1 ? 'en' : ''}</span>}
               {rohware > 0 && <span>{rohware} Rohwaren-Angebot{rohware !== 1 ? 'e' : ''}</span>}
@@ -287,7 +287,7 @@ export default function PortalDashboard() {
       {/* Willkommens-Header */}
       <div className="rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-800 p-6 text-white shadow-xl">
         <h1 className="text-2xl font-bold">Willkommen, {data.kunde.name}!</h1>
-        <p className="mt-1 text-emerald-100">Kundennummer: {data.kunde.kundennummer}</p>
+        <p className="mt-1 text-status-success">Kundennummer: {data.kunde.kundennummer}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link to="/portal/shop">
             <Button variant="secondary" className="h-auto gap-2 py-2">

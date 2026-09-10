@@ -486,8 +486,8 @@ function ExportDialog({
         {success && (
           <Alert className="border-emerald-200 bg-emerald-50">
             <CheckCircle2 className="h-4 w-4 text-status-success" />
-            <AlertTitle className="text-emerald-800">Export erfolgreich</AlertTitle>
-            <AlertDescription className="text-emerald-700">Die CSV-Datei wurde heruntergeladen.</AlertDescription>
+            <AlertTitle className="text-status-success">Export erfolgreich</AlertTitle>
+            <AlertDescription className="text-status-success">Die CSV-Datei wurde heruntergeladen.</AlertDescription>
           </Alert>
         )}
 
@@ -579,8 +579,8 @@ function ImportDialog({
           <div className="space-y-3">
             <Alert className="border-emerald-200 bg-emerald-50">
               <CheckCircle2 className="h-4 w-4 text-status-success" />
-              <AlertTitle className="text-emerald-800">Import abgeschlossen</AlertTitle>
-              <AlertDescription className="text-emerald-700">
+              <AlertTitle className="text-status-success">Import abgeschlossen</AlertTitle>
+              <AlertDescription className="text-status-success">
                 {result.created} Maßnahmen importiert, {result.updated} aktualisiert.
               </AlertDescription>
             </Alert>

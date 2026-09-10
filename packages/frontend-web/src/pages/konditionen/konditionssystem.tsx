@@ -535,7 +535,7 @@ function RabattsaetzeTab() {
                   <tr key={s.id} className="border-b border-border/50">
                     <td className="py-2 pr-3 font-mono">{s.rabattgruppe_nr}</td>
                     <td className="py-2 pr-3 font-mono">{s.rabattklasse_nr}</td>
-                    <td className="py-2 pr-3 tabular-nums font-medium text-green-700">{fmt(Number(s.rabatt_prozent))}%</td>
+                    <td className="py-2 pr-3 tabular-nums font-medium text-status-success">{fmt(Number(s.rabatt_prozent))}%</td>
                     <td className="py-2 pr-3 tabular-nums">{s.ab_menge != null ? fmt(Number(s.ab_menge)) : '—'}</td>
                     <td className="py-2 pr-3 text-xs">{s.gueltig_ab ? new Date(s.gueltig_ab).toLocaleDateString('de-DE') : '—'}</td>
                     <td className="py-2 pr-3 text-xs">{s.gueltig_bis ? new Date(s.gueltig_bis).toLocaleDateString('de-DE') : 'unbegrenzt'}</td>
@@ -779,7 +779,7 @@ function PreisfindungTab() {
       {result && (
         <Card className="border-green-200 bg-green-50/40 dark:bg-green-950/20">
           <CardHeader>
-            <CardTitle className="text-base text-green-800">Ergebnis Preisfindung</CardTitle>
+            <CardTitle className="text-base text-status-success">Ergebnis Preisfindung</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
@@ -789,11 +789,11 @@ function PreisfindungTab() {
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">Rabatt</p>
-                <p className="text-xl font-bold tabular-nums text-amber-700">{fmt(Number(result.discount))}%</p>
+                <p className="text-xl font-bold tabular-nums text-status-warning">{fmt(Number(result.discount))}%</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">Nettopreis</p>
-                <p className="text-2xl font-bold tabular-nums text-green-700">{fmtEur(Number(result.net_price))}</p>
+                <p className="text-2xl font-bold tabular-nums text-status-success">{fmtEur(Number(result.net_price))}</p>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t flex gap-4 text-sm">

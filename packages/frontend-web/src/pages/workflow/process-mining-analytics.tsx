@@ -148,7 +148,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
       {hochBottlenecks > 0 && (
         <Card className="border-red-500 bg-red-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{hochBottlenecks} kritische(r) Engpass/Engpässe — sofortiger Handlungsbedarf!</span>
             </div>
@@ -219,7 +219,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
                 <div key={step.step_name} className={`flex items-center justify-between rounded p-2 text-sm ${step.is_bottleneck ? 'bg-red-100 border border-red-300' : 'bg-white border'}`}>
                   <div className="flex items-center gap-2">
                     {step.is_bottleneck && <AlertTriangle className="h-4 w-4 text-status-error" />}
-                    <span className={step.is_bottleneck ? 'font-semibold text-red-800' : ''}>{step.step_name}</span>
+                    <span className={step.is_bottleneck ? 'font-semibold text-status-error' : ''}>{step.step_name}</span>
                   </div>
                   <div className="flex gap-4 text-muted-foreground font-mono text-xs">
                     <span>{step.avg_duration_sec.toFixed(1)}s</span>

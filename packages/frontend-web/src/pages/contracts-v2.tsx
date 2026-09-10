@@ -561,7 +561,7 @@ export default function ContractsPageV2(): JSX.Element {
                     {(() => {
                       const days = daysUntil(contract.deliveryWindow.to);
                       return days !== null && days >= 0 && days <= 30 ? (
-                        <p className="mt-1 text-xs text-amber-700">Ablauf in {days} Tagen</p>
+                        <p className="mt-1 text-xs text-status-warning">Ablauf in {days} Tagen</p>
                       ) : null;
                     })()}
                   </TableCell>

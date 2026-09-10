@@ -288,13 +288,13 @@ function BankImportErrorList({ errors }: { errors: string[] }) {
 
   return (
     <div className="space-y-2">
-      <div className="text-sm font-medium text-red-700">
+      <div className="text-sm font-medium text-status-error">
         {t('crud.messages.importWarnings', { defaultValue: 'Import-Warnungen' })}: {errors.length}
       </div>
       <div className="max-h-56 overflow-auto rounded border">
         <ul className="divide-y">
           {errors.map((err, idx) => (
-            <li key={`${err}-${idx}`} className="px-3 py-2 text-sm text-red-700">
+            <li key={`${err}-${idx}`} className="px-3 py-2 text-sm text-status-error">
               {err}
             </li>
           ))}

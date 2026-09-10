@@ -54,7 +54,7 @@ export default function ArtikelStoffstromPage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <Leaf className="h-7 w-7 text-emerald-700" /> Stoffstrom &amp; THG-Bilanz
+          <Leaf className="h-7 w-7 text-status-success" /> Stoffstrom &amp; THG-Bilanz
         </h1>
         <p className="mt-2 text-muted-foreground">
           Nachhaltigkeits-/THG-Daten je Artikel (Anbauland, CO₂-Äquivalent, THG-Wert, ISCC/RED-Konformität).

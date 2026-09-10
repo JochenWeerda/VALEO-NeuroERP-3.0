@@ -211,7 +211,7 @@ export default function WhatsAppSimulator() {
             <div className="border rounded-lg bg-card flex flex-col h-96">
               <div className="flex items-center gap-2 px-3 py-2 border-b bg-green-600 rounded-t-lg">
                 <span className="text-white text-sm font-medium">💬 WhatsApp Chat</span>
-                <span className="text-green-200 text-xs ml-auto font-mono">{phone}</span>
+                <span className="text-status-success text-xs ml-auto font-mono">{phone}</span>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {chatHistory.length === 0 && <p className="text-center text-xs text-muted-foreground pt-8">Wähle eine Beispiel-Nachricht oder schreibe direkt.</p>}

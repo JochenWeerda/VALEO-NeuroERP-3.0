@@ -233,12 +233,12 @@ export default function WetterPrognosePage(): JSX.Element {
                           </div>
                         )}
                         {tag.et0_fao !== undefined && tag.et0_fao !== null && (
-                          <div className="text-xs text-green-700 mt-1" title="FAO Grasreferenz-Evapotranspiration">
+                          <div className="text-xs text-status-success mt-1" title="FAO Grasreferenz-Evapotranspiration">
                             ET₀ {fmt(tag.et0_fao, ' mm')}
                           </div>
                         )}
                         {tag.wachstumsgradtage !== undefined && tag.wachstumsgradtage !== null && (
-                          <div className="text-xs text-amber-700" title="Wachstumsgradtage (base 0°C)">
+                          <div className="text-xs text-status-warning" title="Wachstumsgradtage (base 0°C)">
                             GDD {fmt(tag.wachstumsgradtage)}
                           </div>
                         )}

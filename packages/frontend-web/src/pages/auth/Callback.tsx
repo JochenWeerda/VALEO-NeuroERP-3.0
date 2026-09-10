@@ -51,7 +51,7 @@ export default function CallbackPage(): JSX.Element {
           <CardHeader>
             <div className="flex items-center gap-3">
               <XCircle className="h-8 w-8 text-status-error" />
-              <CardTitle className="text-red-900">Anmeldung fehlgeschlagen</CardTitle>
+              <CardTitle className="text-status-error">Anmeldung fehlgeschlagen</CardTitle>
             </div>
           </CardHeader>
           <CardContent>

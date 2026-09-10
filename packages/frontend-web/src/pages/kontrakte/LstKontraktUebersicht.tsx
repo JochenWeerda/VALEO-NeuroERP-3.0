@@ -160,7 +160,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">Washout / Abschreibung</div>
-                <div className="mt-2 text-2xl font-semibold text-amber-700">{steeringSummary.writeoffCandidates}</div>
+                <div className="mt-2 text-2xl font-semibold text-status-warning">{steeringSummary.writeoffCandidates}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Kontrakte mit vorgemerktem Abschreibungsbedarf</p>
               </CardContent>
             </Card>
@@ -174,7 +174,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">Mahnfaellig</div>
-                <div className="mt-2 text-2xl font-semibold text-red-700">{steeringSummary.dunningDue}</div>
+                <div className="mt-2 text-2xl font-semibold text-status-error">{steeringSummary.dunningDue}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Offene Kontrakte mit Mahnindikator</p>
               </CardContent>
             </Card>
@@ -184,21 +184,21 @@ export default function LstKontraktUebersicht(): JSX.Element {
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">VK-Exposure offen</div>
-                <div className="mt-2 text-2xl font-semibold text-red-700">{engagement.offeneVerkaufMenge.toLocaleString('de-DE')}</div>
+                <div className="mt-2 text-2xl font-semibold text-status-error">{engagement.offeneVerkaufMenge.toLocaleString('de-DE')}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Offene Verkaufsrestmenge</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">EK-/Zukauf-Exposure</div>
-                <div className="mt-2 text-2xl font-semibold text-green-700">{(engagement.offeneEinkaufMenge + engagement.offeneZukaufMenge).toLocaleString('de-DE')}</div>
+                <div className="mt-2 text-2xl font-semibold text-status-success">{(engagement.offeneEinkaufMenge + engagement.offeneZukaufMenge).toLocaleString('de-DE')}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Offene Einkaufs- und Zukaufsmengen</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">Negative Marktwerte</div>
-                <div className="mt-2 text-2xl font-semibold text-amber-700">{engagement.negativeMarktbewertung.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="mt-2 text-2xl font-semibold text-status-warning">{engagement.negativeMarktbewertung.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Aggregierte operative Marktbewertung in EUR</p>
               </CardContent>
             </Card>

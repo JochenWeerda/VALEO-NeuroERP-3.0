@@ -796,8 +796,8 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
 
           {previewData?.exception_hints && previewData.exception_hints.length > 0 ? (
             <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
-              <div className="text-sm font-semibold text-amber-900">Ausnahmehinweise</div>
-              <ul className="mt-2 space-y-2 text-sm text-amber-900">
+              <div className="text-sm font-semibold text-status-warning">Ausnahmehinweise</div>
+              <ul className="mt-2 space-y-2 text-sm text-status-warning">
                 {previewData.exception_hints.map((hint) => (
                   <li key={hint.rule_id}>
                     <div className="font-medium">{hint.description}</div>

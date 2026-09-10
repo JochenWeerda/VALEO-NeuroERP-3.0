@@ -389,7 +389,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                     Abzuege gesamt: {deductionTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                   </p>
                   {legacySettlementCount > 0 && (
-                    <p className="mt-1 text-xs text-amber-700">
+                    <p className="mt-1 text-xs text-status-warning">
                       {legacySettlementCount} Alt-Settlement(s) nutzen noch den Datumsfenster-Fallback.
                     </p>
                   )}

@@ -1577,7 +1577,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="text-slate-300">
-                      Kategorie <span className="text-rose-400">*</span>
+                      Kategorie <span className="text-status-error">*</span>
                     </Label>
                     <Select
                       value={lifecycleDialog.reasonCategory}
@@ -1599,12 +1599,12 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       </SelectContent>
                     </Select>
                     {!lifecycleDialog.reasonCategory && (
-                      <p className="text-2xs text-rose-400">Pflichtfeld</p>
+                      <p className="text-2xs text-status-error">Pflichtfeld</p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Label className="text-slate-300">
-                      Grundcode <span className="text-rose-400">*</span>
+                      Grundcode <span className="text-status-error">*</span>
                     </Label>
                     <Input
                       aria-required="true"
@@ -1617,7 +1617,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       )}
                     />
                     {!lifecycleDialog.reasonCode.trim() && (
-                      <p className="text-2xs text-rose-400">Pflichtfeld</p>
+                      <p className="text-2xs text-status-error">Pflichtfeld</p>
                     )}
                   </div>
                 </div>

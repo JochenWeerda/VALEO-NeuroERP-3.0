@@ -121,8 +121,8 @@ export default function KontraktSettlementPage() {
               <Card>
                 <CardContent className="p-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                   <div><div className="text-xs text-muted-foreground">Abgerufen</div><div className="font-semibold tabular-nums">{data.summary?.abgerufen} {einheit}</div></div>
-                  <div><div className="text-xs text-muted-foreground">Abgerechnet</div><div className="font-semibold tabular-nums text-emerald-700">{data.summary?.abgerechnet} {einheit}</div></div>
-                  <div><div className="text-xs text-muted-foreground">Offen (Abruf)</div><div className="font-semibold tabular-nums text-amber-700">{data.summary?.offen_abruf} {einheit}</div></div>
+                  <div><div className="text-xs text-muted-foreground">Abgerechnet</div><div className="font-semibold tabular-nums text-status-success">{data.summary?.abgerechnet} {einheit}</div></div>
+                  <div><div className="text-xs text-muted-foreground">Offen (Abruf)</div><div className="font-semibold tabular-nums text-status-warning">{data.summary?.offen_abruf} {einheit}</div></div>
                   <div><div className="text-xs text-muted-foreground">Fixiert aktiv</div><div className="font-semibold tabular-nums">{data.summary?.fixiert_aktiv} {einheit}</div></div>
                 </CardContent>
               </Card>

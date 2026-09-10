@@ -74,9 +74,9 @@ export default function KontraktEngagementPage() {
 
       <Card>
         <CardContent className="p-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-          <div><div className="text-xs text-muted-foreground">Einkauf offen</div><div className="font-semibold tabular-nums text-emerald-700"><Num v={s?.einkauf_offen} /></div></div>
+          <div><div className="text-xs text-muted-foreground">Einkauf offen</div><div className="font-semibold tabular-nums text-status-success"><Num v={s?.einkauf_offen} /></div></div>
           <div><div className="text-xs text-muted-foreground">Verkauf offen</div><div className="font-semibold tabular-nums text-sky-700"><Num v={s?.verkauf_offen} /></div></div>
-          <div><div className="text-xs text-muted-foreground">Netto-Engagement</div><div className={`font-semibold tabular-nums ${(s?.netto ?? 0) >= 0 ? 'text-emerald-700' : 'text-red-700'}`}><Num v={s?.netto} /></div></div>
+          <div><div className="text-xs text-muted-foreground">Netto-Engagement</div><div className={`font-semibold tabular-nums ${(s?.netto ?? 0) >= 0 ? 'text-status-success' : 'text-status-error'}`}><Num v={s?.netto} /></div></div>
           <div><div className="text-xs text-muted-foreground">Artikel / Parteien</div><div className="font-semibold tabular-nums">{s?.artikel_anzahl ?? 0} / {s?.parteien_anzahl ?? 0}</div></div>
         </CardContent>
       </Card>
@@ -105,7 +105,7 @@ export default function KontraktEngagementPage() {
                         <td className="px-3 py-1.5">{a.artikel}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{a.einkauf_offen}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{a.verkauf_offen}</td>
-                        <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${a.netto >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>{a.netto}</td>
+                        <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${a.netto >= 0 ? 'text-status-success' : 'text-status-error'}`}>{a.netto}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{a.kontrakte}</td>
                       </tr>
                     ))}

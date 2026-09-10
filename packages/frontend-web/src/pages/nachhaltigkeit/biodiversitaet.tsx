@@ -203,7 +203,7 @@ export default function BiodiversitaetPage(): JSX.Element {
                     <div className="text-sm text-muted-foreground">{cat.position_count} Positionen</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-green-700">
+                    <div className="font-bold text-status-success">
                       {cat.co2e_kg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg CO₂e
                     </div>
                     <Badge variant="outline">Aktiv</Badge>

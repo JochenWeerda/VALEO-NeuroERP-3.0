@@ -58,7 +58,7 @@ export default function GobdExportPage() {
         <CardContent className="p-3 flex items-center gap-2 text-sm">
           <span className="text-muted-foreground">DMS / Paperless:</span>
           {probe.isLoading ? <Loader2 size={14} className="animate-spin" /> : !probe.data?.konfiguriert ? (
-            <Badge variant="outline" className="text-amber-700">nicht konfiguriert</Badge>
+            <Badge variant="outline" className="text-status-warning">nicht konfiguriert</Badge>
           ) : probe.data?.erreichbar ? (
             <Badge className="bg-emerald-100 text-emerald-800"><CheckCircle2 size={12} className="mr-1" />erreichbar</Badge>
           ) : (

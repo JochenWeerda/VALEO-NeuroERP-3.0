@@ -337,8 +337,8 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
 
             {pruefErgebnis.risiken.length > 0 && (
               <div>
-                <h4 className="font-medium text-red-900 mb-2">Risiken:</h4>
-                <ul className="list-disc list-inside space-y-1 text-red-800">
+                <h4 className="font-medium text-status-error mb-2">Risiken:</h4>
+                <ul className="list-disc list-inside space-y-1 text-status-error">
                   {pruefErgebnis.risiken.map((risiko, i) => (
                     <li key={i}>{risiko}</li>
                   ))}

@@ -146,11 +146,11 @@ function LotActionRow({
             ) : suggest.data ? (
               <div className="mt-2 text-xs space-y-1">
                 {suggest.data.production_release_allowed ? (
-                  <p className="text-emerald-700 flex items-center gap-1">
+                  <p className="text-status-success flex items-center gap-1">
                     <CheckCircle2 size={12} /> Produktionsfreigabe laut Regelwerk möglich
                   </p>
                 ) : (
-                  <p className="text-amber-700 flex items-center gap-1">
+                  <p className="text-status-warning flex items-center gap-1">
                     <AlertTriangle size={12} />
                     {(suggest.data.blockers ?? []).join(' · ') || 'Manuelle Freigabe erforderlich'}
                   </p>

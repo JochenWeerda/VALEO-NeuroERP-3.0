@@ -457,7 +457,7 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
         )}
         {isError && (
           <Card className="border-amber-200 bg-amber-50">
-            <CardContent className="p-4 text-amber-800 text-sm">
+            <CardContent className="p-4 text-status-warning text-sm">
               Keine Bilanzdaten für die gewählte Periode. Bitte Buchungen erfassen oder andere Parameter wählen.
             </CardContent>
           </Card>

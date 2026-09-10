@@ -66,7 +66,7 @@ export default function PermanenteInventurPage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <ClipboardCheck className="h-7 w-7 text-emerald-700" /> Permanente Inventur (PIV)
+          <ClipboardCheck className="h-7 w-7 text-status-success" /> Permanente Inventur (PIV)
         </h1>
         <p className="mt-2 text-muted-foreground">
           Stichtagsunabhängige Bestandszählung je Inventurgruppe/Lager mit Differenzbewertung.
@@ -135,7 +135,7 @@ export default function PermanenteInventurPage() {
                       <TableCell>{p.lagerplatz ?? '—'}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.buchbestand)}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.zaehlmenge)}</TableCell>
-                      <TableCell className={`text-right font-mono ${(p.differenz ?? 0) < 0 ? 'text-status-error' : (p.differenz ?? 0) > 0 ? 'text-emerald-700' : ''}`}>{num(p.differenz)}</TableCell>
+                      <TableCell className={`text-right font-mono ${(p.differenz ?? 0) < 0 ? 'text-status-error' : (p.differenz ?? 0) > 0 ? 'text-status-success' : ''}`}>{num(p.differenz)}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.differenzwert_eur)}</TableCell>
                       {offen && (
                         <TableCell>

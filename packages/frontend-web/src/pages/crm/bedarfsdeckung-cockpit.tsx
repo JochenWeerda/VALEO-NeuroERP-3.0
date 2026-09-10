@@ -262,10 +262,10 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                           )}
                         </td>
                         <td className="px-4 py-2.5 text-right tabular-nums">{EUR(g.bedarf_jahr_eur)}</td>
-                        <td className="px-4 py-2.5 text-right tabular-nums text-emerald-700">{EUR(g.ist_12m_eur)}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-status-success">{EUR(g.ist_12m_eur)}</td>
                         <td className="px-4 py-2.5"><DeckungBar pct={g.deckung_pct} /></td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">{Math.round(g.ziel_anteil * 100)} %</td>
-                        <td className="px-4 py-2.5 text-right font-medium tabular-nums text-amber-700">
+                        <td className="px-4 py-2.5 text-right font-medium tabular-nums text-status-warning">
                           {EUR(g.realistische_luecke_eur)}
                           {g.luecke_eur > g.realistische_luecke_eur && (
                             <span className="block text-[10px] font-normal text-slate-400 line-through">{EUR(g.luecke_eur)}</span>

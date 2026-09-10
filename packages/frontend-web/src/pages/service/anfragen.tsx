@@ -214,7 +214,7 @@ export default function ServiceAnfragenPage(): JSX.Element {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Anfragen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><HeadphonesIcon className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{anfragen.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Neu</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-error">{neu}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{inBearbeitung}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abschlussfaehig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-700">{erledigt}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abschlussfaehig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{erledigt}</span></CardContent></Card>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">

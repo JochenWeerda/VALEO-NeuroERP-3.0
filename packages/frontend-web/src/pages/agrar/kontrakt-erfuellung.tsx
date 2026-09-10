@@ -13,7 +13,7 @@ import { useContracts, useContractDetail, type ContractRow } from '@/lib/api/con
  */
 
 const STATUS_STYLE: Record<string, string> = {
-  erfuellt: 'text-emerald-700', teilerfuellt: 'text-amber-700', uebererfuellt: 'text-red-700', offen: 'text-muted-foreground',
+  erfuellt: 'text-status-success', teilerfuellt: 'text-status-warning', uebererfuellt: 'text-status-error', offen: 'text-muted-foreground',
 }
 
 function Bar({ pct, over }: { pct: number; over: boolean }) {

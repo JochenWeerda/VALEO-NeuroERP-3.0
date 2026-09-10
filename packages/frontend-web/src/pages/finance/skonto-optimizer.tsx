@@ -139,7 +139,7 @@ export default function SkontoOptimizerPage(): JSX.Element {
       render: (i: OpenItem) => {
         const s = skontoBetrag(i)
         return s > 0 ? (
-          <span className="font-mono font-semibold text-green-700">
+          <span className="font-mono font-semibold text-status-success">
             {s.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
           </span>
         ) : (
@@ -228,7 +228,7 @@ export default function SkontoOptimizerPage(): JSX.Element {
                 <p>Valutatag: <span className="font-semibold">{new Date(suggestion.valutatag).toLocaleDateString('de-DE')}</span></p>
               )}
               {suggestion.skonto_betrag != null && (
-                <p className="text-green-700">Skonto-Ersparnis: <span className="font-mono font-semibold">{suggestion.skonto_betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></p>
+                <p className="text-status-success">Skonto-Ersparnis: <span className="font-mono font-semibold">{suggestion.skonto_betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></p>
               )}
             </div>
           )}
@@ -238,8 +238,8 @@ export default function SkontoOptimizerPage(): JSX.Element {
           <Card className="border-green-400 bg-green-50 mt-4">
             <CardContent className="pt-4">
               <div className="flex items-start gap-2">
-                <Zap className="h-5 w-5 text-green-700 mt-0.5" />
-                <div className="space-y-1 text-sm text-green-900">
+                <Zap className="h-5 w-5 text-status-success mt-0.5" />
+                <div className="space-y-1 text-sm text-status-success">
                   <p className="font-semibold">Empfehlung übernommen</p>
                   {agentSuggestion.empfehlung && <p>{agentSuggestion.empfehlung}</p>}
                   {agentSuggestion.zahlungsbetrag != null && (

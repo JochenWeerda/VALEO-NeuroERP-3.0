@@ -294,7 +294,7 @@ export default function BuchungsimportPage(): JSX.Element {
                         <tr key={i} className="border-b last:border-0 bg-red-50">
                           <td className="py-1 px-2 font-mono">{err.row_number}</td>
                           <td className="py-1 px-2 font-mono text-muted-foreground">{err.field ?? '–'}</td>
-                          <td className="py-1 px-2 text-red-700">{err.error_message}</td>
+                          <td className="py-1 px-2 text-status-error">{err.error_message}</td>
                         </tr>
                       ))}
                     </tbody>

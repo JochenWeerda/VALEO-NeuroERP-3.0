@@ -649,7 +649,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className={cockpit.payrollReadiness.status === 'ready' ? 'h-5 w-5 text-emerald-700' : 'h-5 w-5 text-amber-700'} />
+              <CheckCircle2 className={cockpit.payrollReadiness.status === 'ready' ? 'h-5 w-5 text-status-success' : 'h-5 w-5 text-status-warning'} />
               <span className="text-2xl font-bold">{cockpit.payrollReadiness.status === 'ready' ? 'bereit' : 'blockiert'}</span>
             </div>
           </CardContent>
@@ -681,7 +681,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-emerald-700" />
+              <Truck className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{fahrzeitStunden.toFixed(2)} h</span>
             </div>
           </CardContent>
@@ -705,7 +705,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-amber-700" />
+              <CalendarCheck className="h-5 w-5 text-status-warning" />
               <span className="text-2xl font-bold">
                 {(driverTime?.findings ?? []).filter((finding) => finding.code === 'ABSENCE_COLLISION').length}
               </span>
@@ -1549,9 +1549,9 @@ export default function ZeiterfassungPage(): JSX.Element {
               </div>
             ) : (
               <div className="flex items-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-700" />
+                <CheckCircle2 className="h-5 w-5 text-status-success" />
                 <div className="flex-1">
-                  <p className="font-semibold text-emerald-800">Export freigegeben</p>
+                  <p className="font-semibold text-status-success">Export freigegeben</p>
                   <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
                 </div>
                 <Button size="sm" className="gap-2" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
@@ -1573,7 +1573,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
                     <p className="text-sm text-muted-foreground">Bereite Eintraege</p>
-                    <p className="text-xl font-semibold text-emerald-700">{cockpit.payrollReadiness.readyEntries}</p>
+                    <p className="text-xl font-semibold text-status-success">{cockpit.payrollReadiness.readyEntries}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Blockierte Eintraege</p>

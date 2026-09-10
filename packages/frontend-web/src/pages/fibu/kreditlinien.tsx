@@ -185,7 +185,7 @@ export default function KreditlinienPage(): JSX.Element {
       {ueberzogen > 0 && (
         <Card className="border-red-500 bg-red-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <TrendingDown className="h-5 w-5" />
               <span className="font-semibold">{ueberzogen} Kreditlinie(n) überzogen!</span>
             </div>

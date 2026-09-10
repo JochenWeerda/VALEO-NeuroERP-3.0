@@ -575,7 +575,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                     ].map(({ label, val }) => (
                       <div key={label} className={`rounded border p-3 text-center ${val != null && val <= 30 ? 'border-amber-300 bg-amber-50' : ''}`}>
                         <p className="text-xs text-muted-foreground">{label}</p>
-                        <p className={`text-lg font-bold tabular-nums ${val != null && val <= 30 ? 'text-amber-700' : ''}`}>
+                        <p className={`text-lg font-bold tabular-nums ${val != null && val <= 30 ? 'text-status-warning' : ''}`}>
                           {val != null ? val : '—'}
                         </p>
                       </div>
@@ -660,7 +660,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
 
               {lrErgebnis && (
                 <div className="rounded border border-green-200 bg-green-50 p-4 space-y-1 dark:bg-green-950/20">
-                  <p className="text-sm font-semibold text-green-700">Rückgabe protokolliert</p>
+                  <p className="text-sm font-semibold text-status-success">Rückgabe protokolliert</p>
                   <pre className="text-xs text-status-success whitespace-pre-wrap">
                     {JSON.stringify(lrErgebnis, null, 2)}
                   </pre>

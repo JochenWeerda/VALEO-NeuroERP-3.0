@@ -165,7 +165,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
             <p className="font-semibold">Daten aus dem signierten Fiskaljournal</p>
             <p className="mt-1">Datum: {new Date(abschluss.datum).toLocaleDateString('de-DE')}</p>
             {fiscalSummaryQuery.data && fiscalSummaryQuery.data.incomplete_count > 0 && (
-              <p className="mt-2 font-semibold text-red-700">
+              <p className="mt-2 font-semibold text-status-error">
                 Abschluss blockiert: {fiscalSummaryQuery.data.incomplete_count} unvollständige TSE-Transaktion(en).
               </p>
             )}

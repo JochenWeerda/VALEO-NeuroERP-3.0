@@ -262,7 +262,7 @@ export default function StartDashboardPage(): JSX.Element {
           {flowCatalogError ? (
             <div className="sm:col-span-2 xl:col-span-3 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200">
               Flow-Spine-Katalog konnte nicht geladen werden: {getFlowSpineFetchErrorMessage(flowCatalogErr)}. Lokal FastAPI starten und Vite{' '}
-              <code className="rounded bg-white/80 px-1 text-xs text-red-900 dark:bg-black/20 dark:text-red-100">/api/v1</code> auf Port 8000 proxien.
+              <code className="rounded bg-white/80 px-1 text-xs text-status-error dark:bg-black/20">/api/v1</code> auf Port 8000 proxien.
             </div>
           ) : null}
           {!flowCatalogPending &&
@@ -356,7 +356,7 @@ export default function StartDashboardPage(): JSX.Element {
       {pinnedTiles.length > 0 ? (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
-            <Pin className="h-4 w-4 text-amber-700" aria-hidden="true" />
+            <Pin className="h-4 w-4 text-status-warning" aria-hidden="true" />
             <h2 className="text-lg font-semibold">Favoriten</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

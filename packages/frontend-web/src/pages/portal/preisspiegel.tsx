@@ -105,7 +105,7 @@ function PreisKarte({ variante, preis }: { variante: string; preis: PreisVariant
       )}
       <div className="text-xs text-gray-500 mt-1">{preis.basis_qualitaet}</div>
       {preis.hinweis && (
-        <div className="text-xs text-amber-700 mt-2 flex items-start gap-1">
+        <div className="text-xs text-status-warning mt-2 flex items-start gap-1">
           <Info className="h-3 w-3 mt-0.5 shrink-0" />
           {preis.hinweis}
         </div>

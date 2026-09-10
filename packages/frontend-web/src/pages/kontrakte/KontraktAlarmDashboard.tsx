@@ -171,8 +171,8 @@ export default function KontraktAlarmDashboard(): JSX.Element {
       case 'matif_open': return <TrendingUp className="h-4 w-4 text-blue-600" />
       case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-fuchsia-600" />
       case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-status-error" />
-      case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-rose-700" />
-      case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-amber-700" />
+      case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-status-error" />
+      case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-status-warning" />
       case 'print_missing': return <Package className="h-4 w-4 text-slate-700" />
     }
   }
@@ -225,7 +225,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-700">{expiringCount}</div>
+            <div className="text-3xl font-bold text-status-warning">{expiringCount}</div>
             <p className="text-xs text-muted-foreground">Innerhalb 30 Tagen</p>
           </CardContent>
         </Card>
@@ -277,7 +277,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-700">{dunningCount}</div>
+            <div className="text-3xl font-bold text-status-error">{dunningCount}</div>
             <p className="text-xs text-muted-foreground">Kontrakte mit Mahnbedarf</p>
           </CardContent>
         </Card>
@@ -285,12 +285,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <AlertTriangle className="h-4 w-4 text-amber-700" />
+              <AlertTriangle className="h-4 w-4 text-status-warning" />
               Washout
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-700">{washoutCount}</div>
+            <div className="text-3xl font-bold text-status-warning">{washoutCount}</div>
             <p className="text-xs text-muted-foreground">Vorgemerkte Abschreibung / Washout</p>
           </CardContent>
         </Card>

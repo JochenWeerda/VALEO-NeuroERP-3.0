@@ -707,7 +707,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                           onClick={() => handleMovePositionDown(idx)} disabled={idx >= state.positionen.length - 1}>
                           <ChevronDown className="h-4 w-4" />
                         </Button>
-                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-status-error hover:text-red-700" title="Position löschen"
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-status-error hover:text-status-error" title="Position löschen"
                           onClick={() => handleDeletePosition(idx)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>

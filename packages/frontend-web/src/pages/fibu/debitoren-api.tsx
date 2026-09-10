@@ -111,7 +111,7 @@ export default function DebitorenAPIPage(): JSX.Element {
       <div className="p-6">
         <Card className="border-red-500">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">Fehler beim Laden der Daten</span>
             </div>

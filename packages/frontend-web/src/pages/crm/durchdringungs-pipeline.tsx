@@ -141,7 +141,7 @@ export default function DurchdringungsPipelinePage(): JSX.Element {
                           <span className="text-xs tabular-nums">{p.deckung_pct_gesamt}%</span>
                         </div>
                       </td>
-                      <td className="px-3 py-2 text-right font-medium tabular-nums text-amber-700">{EUR(p.realistische_luecke_eur_gesamt)}</td>
+                      <td className="px-3 py-2 text-right font-medium tabular-nums text-status-warning">{EUR(p.realistische_luecke_eur_gesamt)}</td>
                       <td className="px-3 py-2">
                         <span className="font-medium">{p.top_produktgruppe}</span>
                         <span className="ml-1 text-xs text-muted-foreground">· {EUR(p.top_luecke_eur)}</span>

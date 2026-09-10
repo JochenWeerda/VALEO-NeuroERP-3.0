@@ -147,10 +147,10 @@ export function FormBuilder<T extends Record<string, unknown>>({
 
       {validationSummary.length > 0 ? (
         <Card className="border border-red-300 bg-red-50 p-3">
-          <div className="text-sm font-medium text-red-800">
+          <div className="text-sm font-medium text-status-error">
             Validierung noch nicht abgeschlossen
           </div>
-          <ul className="mt-2 list-disc pl-5 text-sm text-red-700">
+          <ul className="mt-2 list-disc pl-5 text-sm text-status-error">
             {validationSummary.slice(0, 4).map((entry) => (
               <li key={entry}>{entry}</li>
             ))}

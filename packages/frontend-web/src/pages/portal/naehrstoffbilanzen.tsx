@@ -253,8 +253,8 @@ export default function PortalNaehrstoffbilanzen() {
       ) : (
         <Alert className="border-emerald-200 bg-emerald-50">
           <CheckCircle2 className="h-4 w-4 text-status-success" />
-          <AlertTitle className="text-emerald-800">Grenzwerte eingehalten</AlertTitle>
-          <AlertDescription className="text-emerald-700">
+          <AlertTitle className="text-status-success">Grenzwerte eingehalten</AlertTitle>
+          <AlertDescription className="text-status-success">
             Der 3-Jahres-Durchschnitt liegt innerhalb der gesetzlichen Grenzwerte.
           </AlertDescription>
         </Alert>

@@ -125,8 +125,8 @@ function AuswertungTab() {
           <div className="grid gap-4 sm:grid-cols-4">
             {[
               { label: 'Budget gesamt', value: fmtEur(Number(r.gesamt_budget)), icon: Euro, color: 'text-blue-700' },
-              { label: 'Verbraucht (Ist)', value: fmtEur(Number(r.gesamt_verbraucht)), icon: TrendingDown, color: 'text-amber-700' },
-              { label: 'Verfügbar', value: fmtEur(Number(r.gesamt_offen)), icon: TrendingUp, color: Number(r.gesamt_offen) >= 0 ? 'text-green-700' : 'text-red-700' },
+              { label: 'Verbraucht (Ist)', value: fmtEur(Number(r.gesamt_verbraucht)), icon: TrendingDown, color: 'text-status-warning' },
+              { label: 'Verfügbar', value: fmtEur(Number(r.gesamt_offen)), icon: TrendingUp, color: Number(r.gesamt_offen) >= 0 ? 'text-status-success' : 'text-status-error' },
               {
                 label: 'Auslastung',
                 value: Number(r.gesamt_budget) > 0 ? `${((Number(r.gesamt_verbraucht) / Number(r.gesamt_budget)) * 100).toFixed(1)}%` : '—',
@@ -674,7 +674,7 @@ function BuchungenTab() {
                     <td className="py-2 pr-3 text-muted-foreground text-xs">{b.kostenart_id ? (koaMap[b.kostenart_id]?.nummer ?? '?') : '—'}</td>
                     <td className="py-2 pr-3 max-w-[200px] truncate">{b.buchungstext ?? '—'}</td>
                     <td className="py-2 pr-3 font-mono text-xs text-muted-foreground">{b.belegnummer ?? '—'}</td>
-                    <td className={`py-2 pr-3 text-right tabular-nums font-medium ${Number(b.betrag_eur) < 0 ? 'text-green-700' : ''}`}>
+                    <td className={`py-2 pr-3 text-right tabular-nums font-medium ${Number(b.betrag_eur) < 0 ? 'text-status-success' : ''}`}>
                       {fmtEurFull(Number(b.betrag_eur))}
                     </td>
                     <td className="py-2">
@@ -789,7 +789,7 @@ function BABTab(): JSX.Element {
                         <td className="p-2 font-mono text-xs">{z.nummer}</td>
                         <td className="p-2">{z.bezeichnung}</td>
                         <td className="p-2 text-right">{z.primaerkosten_eur.toFixed(2)}</td>
-                        <td className="p-2 text-right text-green-700">{z.umlage_eingang_eur > 0 ? `+${z.umlage_eingang_eur.toFixed(2)}` : '—'}</td>
+                        <td className="p-2 text-right text-status-success">{z.umlage_eingang_eur > 0 ? `+${z.umlage_eingang_eur.toFixed(2)}` : '—'}</td>
                         <td className="p-2 text-right text-status-error">{z.umlage_ausgang_eur > 0 ? `-${z.umlage_ausgang_eur.toFixed(2)}` : '—'}</td>
                         <td className="p-2 text-right font-semibold">{z.gesamtkosten_eur.toFixed(2)}</td>
                         <td className="p-2 text-right">{z.budget_eur.toFixed(2)}</td>

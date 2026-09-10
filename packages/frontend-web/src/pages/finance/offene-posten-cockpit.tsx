@@ -56,7 +56,7 @@ export default function OffenePostenCockpitPage() {
         ))}
       </div>
       {!!s?.summe_ueberfaellig && (
-        <div className="text-sm text-red-700 inline-flex items-center gap-1">
+        <div className="text-sm text-status-error inline-flex items-center gap-1">
           <AlertTriangle size={14} /> Überfällig gesamt: {eur(s.summe_ueberfaellig)}
         </div>
       )}
@@ -92,7 +92,7 @@ export default function OffenePostenCockpitPage() {
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(i.offen)}</td>
                       <td className="px-3 py-1.5">
                         {i.ueberfaellig
-                          ? <span className="text-red-700">{i.tage_ueberfaellig} T überfällig</span>
+                          ? <span className="text-status-error">{i.tage_ueberfaellig} T überfällig</span>
                           : <span className="text-muted-foreground">nicht fällig</span>}
                       </td>
                       <td className="px-3 py-1.5">

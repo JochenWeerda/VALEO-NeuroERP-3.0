@@ -91,7 +91,7 @@ export default function KontraktMengenzeitraeumePage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <CalendarRange className="h-7 w-7 text-emerald-700" /> Kontrakt-Mengenzeiträume &amp; Zu-/Abschläge
+          <CalendarRange className="h-7 w-7 text-status-success" /> Kontrakt-Mengenzeiträume &amp; Zu-/Abschläge
         </h1>
         <p className="mt-2 text-muted-foreground">
           Abnahme-Staffeln (Mengenzeiträume) je Kontrakt und kontraktbezogene Zu-/Abschläge.

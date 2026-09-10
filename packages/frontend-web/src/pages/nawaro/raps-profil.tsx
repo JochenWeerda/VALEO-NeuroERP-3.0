@@ -247,7 +247,7 @@ export default function NawaroRapsProfilPage(): JSX.Element {
         <CardContent className="grid gap-4 md:grid-cols-3">
           <div><Label>THG (gCO2eq/MJ)</Label><Input value={thgValue} onChange={(e) => setThgValue(e.target.value)} /></div>
           <div><Label>Ertrag (dt/ha)</Label><Input value={yieldPerHa} onChange={(e) => setYieldPerHa(e.target.value)} /></div>
-          <div className="rounded border p-3 text-sm">Verwendungssumme: <span className={usageTotal === 100 ? 'font-semibold text-green-700' : 'font-semibold text-red-700'}>{usageTotal.toFixed(2)}%</span></div>
+          <div className="rounded border p-3 text-sm">Verwendungssumme: <span className={usageTotal === 100 ? 'font-semibold text-status-success' : 'font-semibold text-status-error'}>{usageTotal.toFixed(2)}%</span></div>
           <div className="md:col-span-3"><Label>Notiz</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
         </CardContent>
       </Card>

@@ -286,8 +286,8 @@ export function FeldblockfinderIntegration({
             {selectedBundesland === 'niedersachsen' && (
               <Alert className="bg-green-50 border-green-200">
                 <MapPin className="h-4 w-4 text-status-success" />
-                <AlertTitle className="text-green-800">Niedersachsen Schlaginfo</AlertTitle>
-                <AlertDescription className="text-green-700">
+                <AlertTitle className="text-status-success">Niedersachsen Schlaginfo</AlertTitle>
+                <AlertDescription className="text-status-success">
                   <p>Öffnen Sie das Portal im neuen Tab und nutzen Sie folgende Funktionen:</p>
                   <ul className="list-disc list-inside mt-2 text-sm">
                     <li><strong>Suche Agrarförderung</strong>: Feldblock nach FLIK oder LE nach FLEK suchen</li>

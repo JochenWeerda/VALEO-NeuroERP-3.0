@@ -12,7 +12,7 @@ export const colors = {
   success: {
     bg: 'bg-green-50',
     border: 'border-green-500',
-    text: 'text-green-700',
+    text: 'text-status-success',
     badge: 'bg-green-100 text-green-800 border-green-200',
   },
   warning: {
@@ -24,7 +24,7 @@ export const colors = {
   error: {
     bg: 'bg-red-50',
     border: 'border-red-500',
-    text: 'text-red-700',
+    text: 'text-status-error',
     badge: 'bg-red-100 text-red-800 border-red-200',
   },
   info: {

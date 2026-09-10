@@ -435,7 +435,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 Verknüpfungen laden…
               </p>
             ) : unmappedLinks.length === 0 ? (
-              <p className="text-green-700">Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft.</p>
+              <p className="text-status-success">Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft.</p>
             ) : (
               <ul className="space-y-2">
                 {unmappedLinks.map((row) => (

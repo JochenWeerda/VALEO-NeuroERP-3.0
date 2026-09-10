@@ -296,7 +296,7 @@ export default function RueckverfolgbarkeitPage() {
                   <Badge variant="outline">{trace.data.summary.offene_luecken} Lücke(n)</Badge>
                 )}
                 {trace.data.kanon_status?.status !== 'storniert' && (
-                  <Button size="sm" variant="outline" className="ml-auto text-red-700 hover:text-red-800"
+                  <Button size="sm" variant="outline" className="ml-auto text-status-error hover:text-status-error"
                     onClick={() => setStornoOpen((v) => !v)}>
                     <Ban size={14} className="mr-1" />Kette stornieren
                   </Button>
