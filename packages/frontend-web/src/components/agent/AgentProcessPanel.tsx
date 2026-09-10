@@ -90,10 +90,7 @@ export function AgentProcessPanel({
           />
           <span className="text-xs font-medium text-violet-800">Agent-Aktivität</span>
           {activeCount > 0 && (
-            <Badge
-              variant="outline"
-              className="text-xs text-violet-700 border-violet-300 h-5 px-1.5"
-            >
+            <Badge variant="info" className="text-xs h-5 px-1.5">
               {activeCount} aktiv
             </Badge>
           )}

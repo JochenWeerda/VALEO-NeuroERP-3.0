@@ -94,7 +94,7 @@ export default function AuftragskettePage() {
                 {chain.data.kunde && <span className="text-sm text-muted-foreground">· {chain.data.kunde}</span>}
                 <Badge variant="outline" className="capitalize">Status: {STATUS_LABEL[chain.data.summary?.status ?? ''] ?? chain.data.summary?.status}</Badge>
                 {chain.data.summary?.vollstaendig
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig</Badge>
                   : <Badge variant="secondary">offen</Badge>}
               </div>
 

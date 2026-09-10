@@ -342,7 +342,7 @@ function AnkaufsangebotDialog({
               <p className="text-sm font-medium text-gray-700">Angebaute Kulturen ({kulturen.length}):</p>
               <div className="flex flex-wrap gap-1">
                 {kulturen.map((k) => (
-                  <Badge key={k} variant="outline" className="bg-green-50 text-green-800">{k}</Badge>
+                  <Badge variant="success" key={k}>{k}</Badge>
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -463,7 +463,7 @@ export default function KundenSchlagkarteiPage() {
         <div className="flex gap-2 flex-wrap">
           <span className="text-sm text-gray-500 self-center">Angebaute Kulturen:</span>
           {kulturen.map((k) => (
-            <Badge key={k} variant="outline" className="bg-green-50">{k}</Badge>
+            <Badge variant="success" key={k}>{k}</Badge>
           ))}
         </div>
       )}

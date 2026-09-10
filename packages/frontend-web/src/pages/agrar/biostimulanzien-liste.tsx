@@ -70,7 +70,7 @@ const buildColumns = (
       const item = row.original;
       if (item.eu_zulassung) {
         return (
-          <Badge variant="secondary" className="bg-green-100 text-green-800">
+          <Badge variant="success">
             <CheckCircle className="w-3 h-3 mr-1" />
             {item.eu_zulassung}
           </Badge>
@@ -109,9 +109,9 @@ const buildColumns = (
       } else if (available <= 0) {
         return <Badge variant="destructive">Nicht verfügbar</Badge>;
       } else if (available < 50) {
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Niedrig</Badge>;
+        return <Badge variant="warning">Niedrig</Badge>;
       } else {
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Verfügbar</Badge>;
+        return <Badge variant="success">Verfügbar</Badge>;
       }
     },
   },

@@ -114,7 +114,7 @@ export default function AdminSuiteConnectorenPage(): JSX.Element {
   }
 
   const StatusBadge = ({ ok }: { ok: boolean }) => ok
-    ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />Einsatzbereit</Badge>
+    ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />Einsatzbereit</Badge>
     : <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" />Nicht konfiguriert</Badge>
 
   return (

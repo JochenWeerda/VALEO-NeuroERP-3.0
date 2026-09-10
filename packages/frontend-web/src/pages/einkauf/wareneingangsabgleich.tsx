@@ -152,12 +152,12 @@ export default function WareneingangsabgleichPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{match.data.bestellnummer}</span>
                 {match.data.summary?.vollstaendig_geliefert
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig geliefert</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig geliefert</Badge>
                   : <Badge variant="secondary">offen/teilweise</Badge>}
                 {match.data.summary?.hat_abweichung && <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />Mengenabweichung</Badge>}
                 {!!match.data.summary?.offene_luecken && <Badge variant="outline">{match.data.summary.offene_luecken} Hinweis(e)</Badge>}
                 {match.data.summary?.drei_wege_abgeglichen
-                  ? <Badge className="bg-emerald-700">3-Wege abgeglichen</Badge>
+                  ? <Badge variant="success">3-Wege abgeglichen</Badge>
                   : match.data.three_way && <Badge variant="destructive">Rechnungsstufe offen</Badge>}
               </div>
 

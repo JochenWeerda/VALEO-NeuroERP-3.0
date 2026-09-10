@@ -68,7 +68,7 @@ function dnStatusBadge(status: string) {
 function plStatusBadge(status: string) {
   if (status === 'OPEN') return <Badge variant="secondary">Offen</Badge>
   if (status === 'IN_PROGRESS') return <Badge variant="outline">In Bearbeitung</Badge>
-  if (status === 'COMPLETED') return <Badge className="bg-green-600 text-white">Abgeschlossen</Badge>
+  if (status === 'COMPLETED') return <Badge variant="success" className="text-white">Abgeschlossen</Badge>
   if (status === 'CANCELLED') return <Badge variant="destructive">Storniert</Badge>
   return <Badge variant="secondary">{status}</Badge>
 }
@@ -76,7 +76,7 @@ function plStatusBadge(status: string) {
 function lineStatusBadge(status: string) {
   if (status === 'OPEN') return <Badge variant="secondary">Offen</Badge>
   if (status === 'PARTIAL') return <Badge variant="outline">Teilweise</Badge>
-  if (status === 'DONE') return <Badge className="bg-green-600 text-white">Fertig</Badge>
+  if (status === 'DONE') return <Badge variant="success" className="text-white">Fertig</Badge>
   if (status === 'SKIPPED') return <Badge variant="destructive">Übersprungen</Badge>
   return <Badge variant="secondary">{status}</Badge>
 }

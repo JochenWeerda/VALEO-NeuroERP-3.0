@@ -248,7 +248,7 @@ function EmpfehlungsBanner() {
           <div>
             <div className="font-semibold text-status-warning flex items-center gap-2">
               {data.ungesehen} neue Empfehlung{data.ungesehen !== 1 ? 'en' : ''} für Sie
-              <Badge className="bg-amber-500 text-white text-xs">{data.ungesehen} neu</Badge>
+              <Badge variant="warning" className="text-white text-xs">{data.ungesehen} neu</Badge>
             </div>
             <div className="text-sm text-status-warning flex gap-3 mt-0.5">
               {ankauf > 0 && <span>{ankauf} Ankaufsangebot{ankauf !== 1 ? 'e' : ''}</span>}

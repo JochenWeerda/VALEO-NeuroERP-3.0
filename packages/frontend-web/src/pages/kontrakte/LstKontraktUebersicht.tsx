@@ -353,8 +353,8 @@ export default function LstKontraktUebersicht(): JSX.Element {
                       <div className="flex flex-wrap gap-1">
                         {row.steering?.parity_code ? <Badge variant="outline">{row.steering.parity_code}</Badge> : null}
                         {row.steering?.disposition_flag ? <Badge variant="outline">{row.steering.disposition_flag}</Badge> : null}
-                        {row.steering?.writeoff_candidate ? <Badge className="bg-amber-100 text-amber-800">Washout</Badge> : null}
-                        {row.steering?.print_ready ? <Badge className="bg-blue-100 text-blue-800">Druck</Badge> : null}
+                        {row.steering?.writeoff_candidate ? <Badge variant="warning">Washout</Badge> : null}
+                        {row.steering?.print_ready ? <Badge variant="info">Druck</Badge> : null}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">{row.total_quantity.toLocaleString('de-DE')}</TableCell>
@@ -404,8 +404,8 @@ export default function LstKontraktUebersicht(): JSX.Element {
                     <TableCell className="text-right">{row.steering?.hedge_gap_pct?.toFixed(1) ?? '-'}%</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {row.steering?.dunning_candidate ? <Badge className="bg-red-100 text-red-800">Mahnung</Badge> : null}
-                        {row.steering?.writeoff_candidate ? <Badge className="bg-amber-100 text-amber-800">Washout</Badge> : null}
+                        {row.steering?.dunning_candidate ? <Badge variant="error">Mahnung</Badge> : null}
+                        {row.steering?.writeoff_candidate ? <Badge variant="warning">Washout</Badge> : null}
                         {!row.steering?.print_ready ? <Badge variant="outline">Druck offen</Badge> : null}
                       </div>
                     </TableCell>

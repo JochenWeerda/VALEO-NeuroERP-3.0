@@ -1020,7 +1020,7 @@ function ProductCard({
 
               {/* Erneut bestellen Badge */}
               {recentlyOrdered && (
-                <Badge className="bg-blue-600 text-xs hover:bg-blue-700 gap-1">
+                <Badge variant="info" className="text-xs gap-1">
                   <RotateCcw className="h-3 w-3" />
                   Erneut bestellen
                 </Badge>

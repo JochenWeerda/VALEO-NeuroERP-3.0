@@ -410,7 +410,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     </TableCell>
                     <TableCell>
                       {entry.is_balanced ? (
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge variant="success">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           {t('crud.fields.balanced')}
                         </Badge>

@@ -143,7 +143,7 @@ function LanguagePackageCard({
       </div>
       <div className="flex items-center gap-3">
         {status === 'active' && (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <Badge variant="success">
             <Check className="mr-1 h-3 w-3" />
             {t('admin.languagePackage.active')}
           </Badge>

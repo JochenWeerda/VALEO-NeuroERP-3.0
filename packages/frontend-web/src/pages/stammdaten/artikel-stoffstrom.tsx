@@ -80,7 +80,7 @@ export default function ArtikelStoffstromPage() {
                     <TableCell className="text-right font-mono">{num(s.co2_aequivalent_kg_per_t)}</TableCell>
                     <TableCell className="text-right font-mono">{num(s.thg_wert)}</TableCell>
                     <TableCell className="space-x-1">
-                      {s.nachhaltig && <Badge className="bg-emerald-600">nachhaltig</Badge>}
+                      {s.nachhaltig && <Badge variant="success">nachhaltig</Badge>}
                       {s.iscc_zertifiziert && <Badge variant="outline">ISCC</Badge>}
                       {s.red_konform && <Badge variant="outline">RED</Badge>}
                     </TableCell>

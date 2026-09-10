@@ -141,7 +141,7 @@ export default function DuengerListePage(): JSX.Element {
 
     if (item.wassergefaehrdend) {
       badges.push(
-        <Badge key="water" variant="secondary" className="flex items-center gap-1 bg-blue-100 text-blue-800">
+        <Badge variant="info" key="water" className="flex items-center gap-1">
           <Droplets className="h-3 w-3" />
           WG
         </Badge>,
@@ -159,7 +159,7 @@ export default function DuengerListePage(): JSX.Element {
 
     if (badges.length === 0) {
       badges.push(
-        <Badge key="safe" variant="secondary" className="bg-green-100 text-green-800">
+        <Badge variant="success" key="safe">
           Sicher
         </Badge>,
       )
@@ -185,7 +185,7 @@ export default function DuengerListePage(): JSX.Element {
 
     if (hasDmv || hasEu) {
       return (
-        <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800">
+        <Badge variant="success" className="flex items-center gap-1">
           <CheckCircle className="h-3 w-3" />
           {hasDmv && hasEu ? 'DuMV + EU' : hasDmv ? 'DuMV' : 'EU'}
         </Badge>

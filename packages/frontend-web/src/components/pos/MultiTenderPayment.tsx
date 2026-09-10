@@ -81,7 +81,7 @@ export function MultiTenderPayment({ total, onPaymentsChange }: MultiTenderPayme
               Offen: {remaining.toFixed(2)} €
             </Badge>
           ) : (
-            <Badge variant="default" className="text-lg bg-green-600">
+            <Badge variant="success" className="text-lg">
               ✅ Vollständig bezahlt
             </Badge>
           )}

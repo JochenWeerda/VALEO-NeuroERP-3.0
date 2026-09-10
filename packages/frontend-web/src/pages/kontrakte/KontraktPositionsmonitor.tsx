@@ -74,7 +74,7 @@ function signalBadge(signal: string, coveragePct: number | null): JSX.Element {
   }
   if (signal === 'LONG') {
     return (
-      <Badge className="bg-green-100 text-green-800">
+      <Badge variant="success">
         <ArrowUpRight className="mr-1 h-3 w-3" />
         LONG
       </Badge>

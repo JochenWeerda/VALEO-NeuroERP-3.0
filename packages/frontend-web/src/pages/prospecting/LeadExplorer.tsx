@@ -775,7 +775,7 @@ export default function LeadExplorer(): JSX.Element {
                     <td className="py-2 pl-4">
                       <div className="flex items-center gap-2">
                         {(candidate.is_core_customer || candidate.is_locked_by_sales) && (
-                          <Badge variant="outline" className="border-red-400 text-xs text-status-error">
+                          <Badge variant="error" className="text-xs text-status-error">
                             Geschützt
                           </Badge>
                         )}

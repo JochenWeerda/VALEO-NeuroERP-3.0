@@ -120,7 +120,7 @@ export default function OnboardingPage() {
         <p className="text-gray-600">
           Ihre Anfrage ist bei uns eingegangen. Unser Innendienst meldet sich in Kürze bei Ihnen.
         </p>
-        <Badge className="bg-green-100 text-green-800 text-sm px-4 py-2">Registrierung erfolgreich</Badge>
+        <Badge variant="success" className="text-sm px-4 py-2">Registrierung erfolgreich</Badge>
       </div>
     )
   }

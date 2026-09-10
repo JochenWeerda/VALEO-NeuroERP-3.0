@@ -57,7 +57,7 @@ function GapKarte({ gap }: { gap: GapTyp }) {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
               <span className="font-semibold text-gray-900">{gap.titel}</span>
-              <Badge className="bg-red-100 text-red-700">
+              <Badge variant="error">
                 {gap.kunden.length} Kunden
               </Badge>
             </div>

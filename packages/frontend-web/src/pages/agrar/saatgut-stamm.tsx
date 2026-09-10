@@ -453,13 +453,13 @@ const SaatgutStammPage: React.FC = () => {
               {/* Zulassungs-Status */}
               <div className="flex gap-2">
                 {formData.bsa_zulassung && (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge variant="success">
                     <CheckCircle className="w-3 h-3 mr-1" />
                     BSA-zugelassen
                   </Badge>
                 )}
                 {formData.eu_zulassung && (
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <Badge variant="info">
                     <CheckCircle className="w-3 h-3 mr-1" />
                     EU-zugelassen
                   </Badge>

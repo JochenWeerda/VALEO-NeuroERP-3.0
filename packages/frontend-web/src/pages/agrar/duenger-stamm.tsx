@@ -622,7 +622,7 @@ const DuengerStammPage: React.FC = () => {
                  </Badge>
                )}
                {formData.wassergefaehrdend && (
-                 <Badge variant="secondary" className="bg-blue-100 text-blue-800 flex items-center gap-1">
+                 <Badge variant="info" className="flex items-center gap-1">
                    <Droplets className="w-3 h-3" />
                    Wassergefährdend
                  </Badge>

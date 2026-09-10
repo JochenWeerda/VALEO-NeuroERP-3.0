@@ -20,6 +20,12 @@ const badgeVariants = cva(
           'border-[hsl(var(--color-semantic-warning-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-warning-50-hsl))] text-[hsl(var(--color-semantic-warning-700-hsl))] dark:border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)] dark:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.15)] dark:text-[hsl(var(--color-semantic-warning-50-hsl))]',
         info:
           'border-[hsl(var(--color-semantic-info-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-info-50-hsl))] text-[hsl(var(--color-semantic-info-700-hsl))] dark:border-[hsl(var(--color-semantic-info-500-hsl)/0.35)] dark:bg-[hsl(var(--color-semantic-info-500-hsl)/0.15)] dark:text-[hsl(var(--color-semantic-info-50-hsl))]',
+        // Weiches Gegenstueck zu success/warning/info fuer Fehlerzustaende.
+        // `destructive` bleibt die deckende Variante fuer zerstoerende Aktionen;
+        // `error` kennzeichnet einen Status und folgt derselben Toenung wie die
+        // uebrigen drei (DESIGN-STATUS-COLORS-016).
+        error:
+          'border-[hsl(var(--color-semantic-error-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-error-50-hsl))] text-[hsl(var(--color-semantic-error-700-hsl))] dark:border-[hsl(var(--color-semantic-error-500-hsl)/0.35)] dark:bg-[hsl(var(--color-semantic-error-500-hsl)/0.15)] dark:text-[hsl(var(--color-semantic-error-50-hsl))]',
         muted:
           'border-transparent bg-muted text-muted-foreground',
       },

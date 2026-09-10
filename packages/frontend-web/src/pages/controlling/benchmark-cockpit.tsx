@@ -208,7 +208,7 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                 if (pct != null) {
                   if (pct > 0) {
                     statusIcon = <TrendingUp className="h-4 w-4 text-status-success" />
-                    statusBadge = <Badge variant="default" className="bg-green-600">+{pct} %</Badge>
+                    statusBadge = <Badge variant="success">+{pct} %</Badge>
                   } else if (pct < 0) {
                     statusIcon = <TrendingDown className="h-4 w-4 text-status-warning" />
                     statusBadge = <Badge variant="secondary">{pct} %</Badge>
@@ -257,7 +257,7 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                     <div key={key} className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium">{KPI_LABELS[key] ?? key}</span>
-                        <Badge variant="default" className="bg-emerald-600">+{comp.deviation_pct ?? 0} %</Badge>
+                        <Badge variant="success">+{comp.deviation_pct ?? 0} %</Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Eigener Wert {formatValue(key, comp.own)} gegenüber Branche {comp.branch != null ? formatValue(key, comp.branch) : 'n/a'}.

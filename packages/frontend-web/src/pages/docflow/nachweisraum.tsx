@@ -89,7 +89,7 @@ export default function NachweisraumPage() {
                 <Badge variant="outline">{detail.data.doc_type}</Badge>
                 <Badge variant="outline">{detail.data.status}</Badge>
                 {detail.data.summary?.revisionssicher
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />revisionssicher</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />revisionssicher</Badge>
                   : <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />nicht revisionssicher</Badge>}
                 {detail.data.summary?.gebucht && <Badge variant="secondary">gebucht</Badge>}
               </div>

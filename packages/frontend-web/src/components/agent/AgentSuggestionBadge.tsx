@@ -72,7 +72,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
           <span className="font-medium text-violet-900 truncate">{displayLabel}</span>
           {agent.isLoading && <Loader2 className="h-3 w-3 animate-spin text-violet-500 shrink-0" />}
           {agent.status === 'ready' && (
-            <Badge variant="outline" className="text-xs text-violet-700 border-violet-300 shrink-0">
+            <Badge variant="info" className="text-xs shrink-0">
               Vorschlag bereit
             </Badge>
           )}

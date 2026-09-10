@@ -315,7 +315,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                     <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.quantity} Stk</span>
-                      <Badge variant="outline" className="text-orange-700 border-orange-400">
+                      <Badge variant="warning">
                         {new Date(item.expiryDate).toLocaleDateString('de-DE')}
                       </Badge>
                     </div>
@@ -407,12 +407,12 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 {(rennerItems ?? []).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-green-200 p-2 bg-white/50 text-sm">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-400">#{i + 1}</Badge>
+                      <Badge variant="success">#{i + 1}</Badge>
                       <span className="font-medium truncate max-w-[180px]">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.absatz} Stk</span>
-                      <Badge className="bg-green-600">{item.trend}</Badge>
+                      <Badge variant="success">{item.trend}</Badge>
                     </div>
                   </div>
                 ))}              </div>

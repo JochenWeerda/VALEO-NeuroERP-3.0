@@ -41,8 +41,8 @@ const buildColumns = (
     cell: ({ row }): JSX.Element => {
       const item = row.original
       const badges = []
-      if (item.bsa_zulassung) badges.push(<Badge key="bsa" variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="mr-1 w-3 h-3" />BSA</Badge>)
-      if (item.eu_zulassung) badges.push(<Badge key="eu" variant="secondary" className="bg-blue-100 text-blue-800"><CheckCircle className="mr-1 w-3 h-3" />EU</Badge>)
+      if (item.bsa_zulassung) badges.push(<Badge variant="success" key="bsa"><CheckCircle className="mr-1 w-3 h-3" />BSA</Badge>)
+      if (item.eu_zulassung) badges.push(<Badge variant="info" key="eu"><CheckCircle className="mr-1 w-3 h-3" />EU</Badge>)
       if (!item.bsa_zulassung && !item.eu_zulassung) badges.push(<Badge key="none" variant="secondary" className="bg-gray-100 text-gray-600"><XCircle className="mr-1 w-3 h-3" />Keine Zulassung</Badge>)
       return <div className="flex flex-wrap gap-1">{badges}</div>
     },
@@ -53,8 +53,8 @@ const buildColumns = (
     cell: ({ row }): JSX.Element => {
       const available = row.original.verfuegbar || 0
       if (available <= 0) return <Badge variant="destructive">Nicht verfuegbar</Badge>
-      if (available < 100) return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Niedrig</Badge>
-      return <Badge variant="secondary" className="bg-green-100 text-green-800">Verfuegbar</Badge>
+      if (available < 100) return <Badge variant="warning">Niedrig</Badge>
+      return <Badge variant="success">Verfuegbar</Badge>
     },
   },
   { accessorKey: 'vk_preis', header: 'VK-Preis', cell: ({ row }): string => (row.original.vk_preis ? `EUR ${row.original.vk_preis.toFixed(2)}` : '-') },

@@ -1,0 +1,86 @@
+slice_id: DESIGN-STATUS-COLORS-016
+id: DESIGN-STATUS-COLORS-016
+title: Palette-Tripel an Badge durch zentrale Varianten ersetzen (Welle 2)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+completed_at: "2026-09-10"
+vorgaenger: DESIGN-STATUS-COLORS-015
+goal: >-
+  Die in Welle 1 bewusst ausgelassenen Palette-Tripel dort schliessen, wo
+  CLAUDE.md eine zentrale Variante vorschreibt: an der Badge-Komponente.
+befund: >-
+  Welle 1 hinterliess Tripel der Form "bg-green-100 text-green-800". Die
+  Kontextanalyse zeigte sehr unterschiedliche Verankerung: 166 in
+  Status-zu-Klassen-Tabellen, 84 an div-Panels, 47 direkt als className an
+  Badge, dazu span, Button und Icons. Ein einheitlicher Codemod waere falsch -
+  nur die Badge-Faelle haben eine zentrale Variante als Ziel.
+luecke_im_designsystem:
+  befund: >-
+    Badge fuehrte success, warning und info als weich getoente Statusvarianten,
+    aber kein Gegenstueck fuer Fehler. destructive ist deckend und meint
+    zerstoerende Aktionen, nicht einen Fehlerzustand. Die roten Tripel hatten
+    damit kein Ziel.
+  entscheidung: >-
+    Variante error ergaenzt, exakt nach dem Muster der drei vorhandenen und auf
+    denselben Tokens (semantic-error 50/500/700). destructive bleibt
+    unveraendert fuer Aktionen. Die Benennung folgt den Status-Utilities.
+umsetzung:
+  konvertiert: 63
+  dateien: 39
+  verteilung: "success 39, info 9, error 8, warning 7"
+  abbildung: >-
+    green/emerald/lime/teal -> success, red/rose -> error,
+    amber/yellow/orange -> warning, blue/sky/indigo/cyan/violet -> info.
+  werkzeug: >-
+    Codemod mit Selbsttest ueber sieben Musterfaelle. Er ersetzt die
+    Palette-Klassen im className durch das variant-Attribut, behaelt
+    Layout-Klassen und weitere Attribute wie key, entfernt ein vorhandenes
+    variant und laesst das className-Attribut weg, wenn nichts uebrig bleibt.
+  bewusst_uebersprungen:
+    - "className als Ausdruck: das Ziel steht in einer Tabelle, nicht am Element."
+    - "widerspruechliche Farbfamilien in einem String: keine eindeutige Variante."
+sichtbare_aenderung: >-
+  Einige Badges trugen deckende Flaechen wie bg-emerald-600 und werden nun
+  weich getoent dargestellt. Das ist beabsichtigt: die Statusvarianten sind
+  einheitlich getoent, und genau diese Vereinheitlichung ist der Zweck.
+acceptance:
+  - Badge-Faelle mit literalem className und eindeutiger Familie auf 0.
+  - TypeScript und Vitest gruen, unveraendert zur Baseline.
+  - Keine Datei ausserhalb packages/frontend-web/src angefasst.
+tests:
+  - "npx tsc --noEmit: exit 0"
+  - "vitest: 126 Dateien, 495 Tests, 1 bekannter Skip - identisch zur Baseline"
+offen_welle_3:
+  verbleibend: 343
+  dateien: 122
+  aufschluesselung:
+    - "166 in Status-zu-Klassen-Tabellen (Map-Konstanten)"
+    - "84 an div-Panels und Hinweisboxen"
+    - "19 an span, 12 an Badge (Ausdruck oder widerspruechliche Familie)"
+    - "9 an Button, Rest an Icons"
+  naechster_schritt: >-
+    Die Map-Konstanten sind der groesste und lohnendste Block: sie bilden
+    Status auf Klassen ab und muessten stattdessen auf Variantennamen abbilden,
+    typisiert ueber die Badge-Variantenliste. Das ist je Datei eine kleine
+    Umstellung von Tabelle und Verwendungsstelle, kein Codemod. Danach bleiben
+    die div-Panels, fuer die zuerst zu klaeren ist, ob eine zentrale
+    Hinweisbox-Komponente entsteht oder die Alert-Varianten erweitert werden.
+ai_harness:
+  fachlicher_vertrag: >-
+    Statusfarben an Badges kommen aus dem Designsystem, nicht aus Einzelklassen
+    an der Verwendungsstelle.
+  architektur_vertrag: >-
+    Farbwerte ausschliesslich ueber zentrale Varianten und Tokens. Die neue
+    Badge-Variante ist additiv; bestehende Varianten bleiben unveraendert.
+  daten_vertrag: "Keine Migration, keine Datenmutation."
+  test_vertrag: "Typpruefung und Vitest vor und nach der Aenderung."
+  security_vertrag: "Ohne Bezug zu Auth, Rechten oder Daten."
+  betriebs_vertrag: "Kein Deployment, kein Container-Neustart."
+  dokumentations_vertrag: >-
+    Restbestand mit Zahl, Aufschluesselung und naechstem Schritt benannt statt
+    als erledigt dargestellt.
+verification:
+  - npx tsc --noEmit
+  - npm run test

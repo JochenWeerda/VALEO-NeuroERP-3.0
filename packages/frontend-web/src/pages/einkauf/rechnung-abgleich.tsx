@@ -373,9 +373,9 @@ export default function RechnungAbgleichPage(): JSX.Element {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'matched':
-        return <Badge variant="outline" className="bg-green-50 text-green-700"><CheckCircle className="h-3 w-3 mr-1" />{t('status.approved')}</Badge>
+        return <Badge variant="success"><CheckCircle className="h-3 w-3 mr-1" />{t('status.approved')}</Badge>
       case 'partial_match':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700"><AlertTriangle className="h-3 w-3 mr-1" />{t('status.partial')}</Badge>
+        return <Badge variant="warning"><AlertTriangle className="h-3 w-3 mr-1" />{t('status.partial')}</Badge>
       case 'exceptions':
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />{t('status.rejected')}</Badge>
       default:
@@ -640,7 +640,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
                       <TableCell>
                         <div className="flex flex-col gap-1">
                           {item.quantityMatch ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 w-fit">
+                            <Badge variant="success" className="w-fit">
                               <CheckCircle className="h-3 w-3 mr-1" />{t('crud.fields.quantity')}
                             </Badge>
                           ) : (
@@ -649,7 +649,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
                             </Badge>
                           )}
                           {item.priceMatch ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 w-fit">
+                            <Badge variant="success" className="w-fit">
                               <CheckCircle className="h-3 w-3 mr-1" />{t('crud.fields.price')}
                             </Badge>
                           ) : (
@@ -658,7 +658,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
                             </Badge>
                           )}
                           {item.qualityMatch ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 w-fit">
+                            <Badge variant="success" className="w-fit">
                               <CheckCircle className="h-3 w-3 mr-1" />{t('crud.fields.quality')}
                             </Badge>
                           ) : (

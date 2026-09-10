@@ -102,7 +102,7 @@ export default function KontraktErfuellungPage() {
                 <Badge variant="outline">{detail.data.contract_type}</Badge>
                 <Badge variant="outline" className="capitalize">{detail.data.summary?.status}</Badge>
                 {detail.data.summary?.status === 'erfuellt'
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />erfüllt</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />erfüllt</Badge>
                   : <Badge variant="secondary">{detail.data.summary?.erfuellung_pct}% erfüllt</Badge>}
                 {detail.data.ueberfaellig && <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />überfällig</Badge>}
               </div>

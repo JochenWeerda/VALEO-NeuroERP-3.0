@@ -494,7 +494,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                     <h4 className="font-semibold text-status-success mb-2">Aktive Zertifizierungen:</h4>
                     <div className="flex flex-wrap gap-2">
                       {farmProfile.certifications.map(cert => (
-                        <Badge key={cert} variant="default" className="bg-green-600">
+                        <Badge variant="success" key={cert}>
                           {cert}
                         </Badge>
                       ))}

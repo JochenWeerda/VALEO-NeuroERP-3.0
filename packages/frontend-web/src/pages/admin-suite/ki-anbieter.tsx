@@ -113,7 +113,7 @@ export default function AdminSuiteKiAnbieterPage(): JSX.Element {
           <CardTitle className="flex items-center gap-2">
             Aktueller Status
             {query.data.available
-              ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />Einsatzbereit</Badge>
+              ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />Einsatzbereit</Badge>
               : <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" />Nicht konfiguriert</Badge>}
           </CardTitle>
           <CardDescription>

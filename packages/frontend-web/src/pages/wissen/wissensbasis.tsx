@@ -348,7 +348,7 @@ function VersionenTab({ item }: { item: KnowledgeItem }) {
         >
           <span className="font-semibold text-gray-600 w-14">v{row.version}</span>
           {row.isCurrent && (
-            <Badge className="text-xs bg-blue-600 text-white">Aktuell</Badge>
+            <Badge variant="info" className="text-xs text-white">Aktuell</Badge>
           )}
         </div>
       ))}

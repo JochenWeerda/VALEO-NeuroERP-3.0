@@ -154,7 +154,7 @@ export default function EmpfehlungenPage() {
           </p>
         </div>
         {ungesehen > 0 && (
-          <Badge className="bg-red-500 text-white text-base px-3 py-1">
+          <Badge variant="error" className="text-white text-base px-3 py-1">
             {ungesehen} neu
           </Badge>
         )}

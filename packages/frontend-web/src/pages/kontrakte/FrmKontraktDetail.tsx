@@ -658,7 +658,7 @@ export default function FrmKontraktDetail(): JSX.Element {
               <ShieldAlert className="h-4 w-4" />
               <AlertTitle className="flex items-center gap-2">
                 Unterdeckung (Short-Position)
-                <Badge className="bg-red-600 text-white">{shortArticles.length} Artikel</Badge>
+                <Badge variant="error" className="text-white">{shortArticles.length} Artikel</Badge>
               </AlertTitle>
               <AlertDescription className="mt-1 space-y-1">
                 {shortArticles.map((a) => (

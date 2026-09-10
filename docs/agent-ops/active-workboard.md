@@ -11,6 +11,39 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DESIGN-STATUS-COLORS-016 - abgeschlossen
+
+**Von:** Welle 2 aus DESIGN-STATUS-COLORS-015. **Owner:** Claude Code.
+**Stand:** abgeschlossen 2026-09-10.
+**Dateibesitz:** `components/ui/badge.tsx`, 39 Dateien unter
+`packages/frontend-web/src` mit Badge-Palette-Tripeln, Slice-YAML, dieser Abschnitt.
+
+**Luecke im Designsystem geschlossen:** Badge fuehrte `success`, `warning` und
+`info` als weich getoente Statusvarianten, aber kein Gegenstueck fuer Fehler —
+`destructive` ist deckend und meint zerstoerende Aktionen, nicht einen Zustand.
+Die roten Tripel hatten damit kein Ziel. Variante **`error`** ergaenzt, exakt
+nach dem Muster der drei vorhandenen und auf denselben Tokens. `destructive`
+bleibt unveraendert.
+
+**Umsetzung:** 63 Badges in 39 Dateien auf Varianten umgestellt
+(success 39, info 9, error 8, warning 7). Der Codemod behaelt Layout-Klassen
+und Attribute wie `key`, entfernt ein vorhandenes `variant` und laesst
+`className` weg, wenn nichts uebrig bleibt. Uebersprungen: `className` als
+Ausdruck und widerspruechliche Farbfamilien in einem String.
+
+**Sichtbare Aenderung:** Einige Badges trugen deckende Flaechen wie
+`bg-emerald-600` und erscheinen nun weich getoent. Beabsichtigt — genau diese
+Vereinheitlichung ist der Zweck.
+
+**Nachweis:** `tsc --noEmit` exit 0; 126 Testdateien, 495 Tests, ein bekannter
+Skip — identisch zur Baseline.
+
+**Offen (Welle 3):** 343 Tripel in 122 Dateien. Groesster Block sind 166
+Status-zu-Klassen-Tabellen, die auf Variantennamen statt Klassen abbilden
+muessten — je Datei eine kleine Umstellung, kein Codemod. Danach 84 div-Panels,
+fuer die zuerst zu klaeren ist, ob eine zentrale Hinweisbox entsteht oder die
+Alert-Varianten wachsen.
+
 ## DESIGN-STATUS-COLORS-015 - in arbeit
 
 **Von:** Aufgeschobener Sweep aus dem Frontend-Design-Audit, aufgenommen waehrend

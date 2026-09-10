@@ -83,7 +83,7 @@ export default function AuftragLieferscheinAbgleichPage() {
                 <span className="font-medium">{d.order_number}</span>
                 <span className="text-sm text-muted-foreground">{d.kunde}</span>
                 {d.summary?.vollstaendig_geliefert
-                  ? <Badge className="bg-emerald-600">vollständig geliefert</Badge>
+                  ? <Badge variant="success">vollständig geliefert</Badge>
                   : <Badge variant="secondary">{d.summary?.offen_positionen} Position(en) offen</Badge>}
                 {d.summary?.hat_abweichung && <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />Abweichung</Badge>}
               </div>

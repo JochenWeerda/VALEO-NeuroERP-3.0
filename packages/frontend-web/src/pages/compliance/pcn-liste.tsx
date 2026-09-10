@@ -20,7 +20,7 @@ type PCNMeldung = {
 
 const statusBadge = (s: string) => {
   switch (s) {
-    case 'uebermittelt': return <Badge className="bg-green-100 text-green-800">Uebermittelt</Badge>
+    case 'uebermittelt': return <Badge variant="success">Uebermittelt</Badge>
     case 'entwurf': return <Badge variant="secondary">Entwurf</Badge>
     default: return <Badge variant="outline">{s}</Badge>
   }

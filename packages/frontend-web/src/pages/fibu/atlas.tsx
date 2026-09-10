@@ -192,7 +192,7 @@ export default function AtlasPage(): JSX.Element {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold">ATLAS (Zoll)</h1>
-            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+            <Badge variant="success">
               Operations Console
             </Badge>
           </div>

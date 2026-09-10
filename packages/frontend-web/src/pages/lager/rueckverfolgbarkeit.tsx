@@ -287,7 +287,7 @@ export default function RueckverfolgbarkeitPage() {
                   Status: {STATUS_LABEL[trace.data.kanon_status?.status ?? 'offen'] ?? trace.data.kanon_status?.status}
                 </Badge>
                 {trace.data.summary?.vollstaendig
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />Kette vollständig</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />Kette vollständig</Badge>
                   : <Badge variant="secondary">Kette unvollständig</Badge>}
                 {trace.data.summary?.hat_mengen_abweichung && (
                   <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />Mengen-Abweichung</Badge>

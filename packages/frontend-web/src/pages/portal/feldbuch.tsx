@@ -1262,7 +1262,7 @@ export default function PortalFeldbuch() {
                           || !m.sachkundeNummer
                           || !m.sachkundeGueltigBis
                         ) && (
-                          <Badge className="bg-red-100 text-red-800 gap-1" data-testid={`psm-pruefen-${m.id}`}>
+                          <Badge variant="error" className="gap-1" data-testid={`psm-pruefen-${m.id}`}>
                             <AlertTriangle className="h-3 w-3" />
                             Prüfen
                           </Badge>
