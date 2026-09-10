@@ -11,6 +11,43 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SECURITY-ARCHIVE-DEPS-20260910 - in arbeit
+
+**Von:** Abgrenzung aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag.
+**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
+**Ziel:** Die 44 offenen Dependabot-Meldungen auf toten Archiv-Manifesten an der
+Ursache beseitigen, ohne einen realen Befund zu unterdruecken.
+**Dateibesitz:** ausschliesslich die 11 getrackten Manifeste unter
+`docs/_internal/archive/` (`domains-ts-backend/finance`, `domains-ts-backend/inventory`,
+`guacamole-l3-migration/playwright-snap`, `l3-migration-toolkit`,
+`l3-migration-toolkit/playwright-snap`, `mains/crm`, `swarm`), ein erklaerender
+README-Hinweis im Archiv, eigene Slice-YAML und dieser Abschnitt.
+**Abgrenzung:** Codex behaelt `Dockerfile.backend`, `.grype.yaml`,
+`config/security/cpython-3.13.15/`, `scripts/verify_cpython_security.py` und die
+komplette Dependency-Welle (`package.json`-Manifeste unter `packages/`,
+`pnpm-lock.yaml`, `services/*/requirements.txt`, `requirements-docs.txt`).
+Ich fasse kein einziges lebendes Manifest an.
+**Abnahme:** Alertzahl fuer Archivpfade nachweislich auf 0; Alerts auf gelieferten
+Pfaden unveraendert; keine Dismissals, keine gelockerten Gates.
+**Risiken:** Archivinhalt ist historischer Nachweis — kein Informationsverlust.
+
+**Befund:** Von 95 offenen Meldungen zeigen 44 (24 high, 18 medium, 2 low) auf
+11 getrackte Manifeste unter `docs/_internal/archive/`. Laut ADR-039 sind diese
+Projekte bewusst archiviert, nie produktiv verdrahtet; ihre CI-Workflows wurden
+entfernt. Kein Workflow, kein Compose-File und kein pnpm-Workspace referenziert
+sie — sie werden nie installiert, gebaut oder ausgeliefert. Versionsspruenge in
+diesen Lockfiles wuerden kein reales Risiko senken, aber "behoben" signalisieren.
+
+**Mechanik geprueft:** Die Meldungen stammen aus dem Dependency Graph, nicht aus
+`dependabot.yml` — das steuert ausschliesslich Update-PRs. Eine Pfad-Ausnahme
+fuer Alerts gibt es nicht (GitHub-Doku geprueft). Es bleiben nur Dismissal oder
+das Entfernen der toten Manifeste aus dem Graph.
+
+**Entscheidung (User, 2026-09-10):** Umbenennen auf `*.archived`. Der Graph
+erkennt die Dateien nicht mehr, der Inhalt bleibt vollstaendig als historischer
+Nachweis erhalten, und kuenftige Archiv-Meldungen entstehen gar nicht erst.
+Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
+
 ## SECURITY-REMAINDER-20260910 - in arbeit
 
 **Von:** User-Auftrag Binaerbefunde und andere Befunde beheben.
