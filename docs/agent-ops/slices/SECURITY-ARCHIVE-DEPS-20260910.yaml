@@ -1,0 +1,108 @@
+slice_id: SECURITY-ARCHIVE-DEPS-20260910
+id: SECURITY-ARCHIVE-DEPS-20260910
+title: Dependabot-Meldungen auf toten Archiv-Manifesten ursachenbezogen beseitigen
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+goal: >-
+  Die 44 offenen Dependabot-Meldungen, die auf nie ausgelieferte Manifeste unter
+  docs/_internal/archive/ zeigen, an der Ursache beseitigen — ohne einen realen
+  Befund auf geliefertem Code stumm zu schalten.
+coordination: >-
+  Aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag abgegrenzt, damit
+  nicht dieselben Dateien bearbeitet werden. Codex behaelt Dockerfile.backend,
+  .grype.yaml, config/security/cpython-3.13.15/,
+  scripts/verify_cpython_security.py und die gesamte Dependency-Welle auf
+  lebenden Manifesten. Dieser Slice fasst kein lebendes Manifest an.
+file_ownership:
+  - docs/agent-ops/slices/SECURITY-ARCHIVE-DEPS-20260910.yaml
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt SECURITY-ARCHIVE-DEPS-20260910"
+  - docs/_internal/archive/README.md
+  - "10 Manifeste unter docs/_internal/archive/ (package.json und package-lock.json)"
+befund:
+  gesamt_offen: 95
+  auf_archivpfaden: 44
+  severity: "24 high, 18 medium, 2 low"
+  betroffene_manifeste:
+    - "domains-ts-backend/finance/package-lock.json: 26"
+    - "domains-ts-backend/inventory/package-lock.json: 12"
+    - "l3-migration-toolkit/playwright-snap/package-lock.json: 3"
+    - "guacamole-l3-migration/playwright-snap/package.json: 2"
+    - "l3-migration-toolkit/package-lock.json: 1"
+  pakete:
+    - "@opentelemetry/propagator-jaeger, axios, baseline-browser-mapping"
+    - "body-parser, brace-expansion, browserslist, csv-parse"
+    - "js-yaml, protobufjs, qs, sharp"
+  totlage_belegt: >-
+    ADR-039 stellt diese Projekte bewusst still: nie produktiv verdrahtet, die
+    CI-Workflows inventory-domain-ci.yml und finance-domain-ci.yml wurden
+    entfernt. Ausserhalb des Archivs referenziert sie nur Doku und .gitignore —
+    kein Workflow, kein Compose-File, kein pnpm-Workspace. Sie werden nie
+    installiert, gebaut oder ausgeliefert.
+  mechanik: >-
+    Die Meldungen stammen aus dem Dependency Graph, der Manifeste am Dateinamen
+    erkennt. dependabot.yml steuert ausschliesslich Update-Pull-Requests und
+    kennt keine Pfad-Ausnahme fuer Alerts (GitHub-Doku geprueft, 2026-09-10);
+    ein dependabot.yml haette hier also nichts bewirkt. Es blieben nur
+    Einzel-Dismissal oder das Entfernen der toten Manifeste aus dem Graph.
+entscheidung:
+  wer: "User, 2026-09-10"
+  was: >-
+    Umbenennen auf *.archived statt Versionsspruenge, Loeschen oder Dismissal.
+  begruendung: >-
+    Versionsspruenge in Lockfiles, die nie installiert werden, senken kein
+    reales Risiko, wuerden aber "behoben" signalisieren. Loeschen wuerde den
+    Versionsstand aus dem Archiv nehmen. Dismissal muesste 44-mal einzeln
+    erfolgen und liesse kuenftige Meldungen auf denselben Dateien wiederkehren.
+    Das Umbenennen ist ein reines git mv: der Graph erkennt die Dateien nicht
+    mehr, der Inhalt bleibt vollstaendig als historischer Nachweis erhalten.
+ausnahme:
+  datei: docs/_internal/archive/swarm/requirements.ui-explorer.txt
+  entscheidung: nicht umbenannt
+  grund: >-
+    Pinnt keine Versionen, erzeugt entsprechend keine Meldung, wird aber von
+    swarm/Dockerfile.ui-explorer per Pfad referenziert. Ein Umbenennen braeche
+    die Referenz ohne Sicherheitsgewinn.
+acceptance:
+  - Alertzahl auf Archivpfaden nachweislich 0.
+  - Alerts auf gelieferten Pfaden unveraendert (51 verbleibend).
+  - Kein Dismissal, keine gelockerte Schwelle, kein continue-on-error.
+  - Kein Informationsverlust im Archiv; Umbenennung als reines Rename erkennbar.
+  - Keine Referenz im Repository gebrochen.
+tests:
+  - "git grep auf die alten Pfade: keine Referenz ausserhalb des Archiv-README"
+  - "git status: 10 Eintraege als R (Rename), keine Inhaltsaenderung"
+  - "gh api dependabot/alerts nach Graph-Refresh: 0 Treffer auf docs/_internal/archive"
+risks:
+  - >-
+    Wird eines der Projekte wiederbelebt, muessen die Dateien zurueckbenannt und
+    die Abhaengigkeiten dabei aktualisiert werden; im Archiv-README vermerkt.
+  - >-
+    Der Dependency Graph aktualisiert sich verzoegert; die Abnahme erfolgt erst
+    nach dem Refresh gegen die Live-API, nicht gegen eine Annahme.
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Schwachstellenliste des Repositories beschreibt nur noch Code, der
+    tatsaechlich ausgeliefert wird. Archivmaterial erzeugt kein Rauschen mehr,
+    das echte Befunde verdeckt.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf docs/_internal/archive/ beschraenkt. Kein lebendes
+    Manifest, kein Lockfile, kein Dockerfile und keine Gate-Konfiguration.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation. Reine Dateiumbenennung.
+  test_vertrag: >-
+    Nachweis ueber die Live-Alert-API vor und nach dem Push sowie ueber
+    git grep gegen gebrochene Referenzen.
+  security_vertrag: >-
+    Kein Dismissal, keine Ausnahme, keine abgesenkte Schwelle. Die Meldungen
+    verschwinden, weil die Dateien nicht mehr im Dependency Graph liegen, nicht
+    weil ein Befund unterdrueckt wurde. Auf geliefertem Code wird nichts
+    stummgeschaltet.
+  betriebs_vertrag: >-
+    Keine Deployments, keine Container-Neustarts, keine Beruehrung fremden WIP.
+  dokumentations_vertrag: >-
+    Archiv-README erklaert die Endung und den Rueckweg; Slice-YAML und
+    Workboard-Abschnitt werden konsistent gehalten.
+verification:
+  - "gh api repos/.../dependabot/alerts?state=open | grep docs/_internal/archive"
