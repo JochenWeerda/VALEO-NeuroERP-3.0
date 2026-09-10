@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SECURITY-REMAINDER-20260910 - reserviert
+
+**Von:** User-Auftrag Binaerbefunde und andere Befunde beheben.
+**Owner:** Codex. **Stand:** reserviert 2026-09-10.
+**Ziel:** Verbleibende CPython-Binaerbefunde und offene Dependency-Befunde
+anhand aktueller Herstellerfixes und reproduzierbarer Scans beheben.
+**Dateibesitz:** Dockerfile.backend, .grype.yaml; konkret betroffene
+Dependency-Manifeste/Lockfiles nach Befunderhebung hier ergaenzen;
+eigene Regressionstests, Slice-YAML, Abnahmebericht und dieser Abschnitt.
+**Abnahme:** Herstellerbezug pro Fix, Build und funktionale Regressionen,
+Scanner-Nachmessung ohne neue Ausnahmen oder gelockerte Gates.
+**Risiken:** Kein Wechsel auf Vorabversionen ohne belegte Notwendigkeit;
+keine Scanner-Versionsfaelschung. Fremden WIP isolieren, keine Datenmigration.
+
 ## SECURITY-SCAN-20260910 - abgeschlossen
 
 **Von:** User-Auftrag Parallelaufgabe fuer Claude Code. **Owner:** Claude Code.
