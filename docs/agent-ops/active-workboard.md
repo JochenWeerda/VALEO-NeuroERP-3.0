@@ -11,6 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SECURITY-SCAN-20260910 - offen
+
+**Von:** User-Auftrag Parallelaufgabe fuer Claude Code. **Owner:** fuer Claude
+Code vorgesehen, Claim ausstehend. **Stand:** offen 2026-09-10.
+**Ziel:** Den weiterhin roten Security Scan anhand aktueller Trivy-/Grype-/ZAP-
+Logs ursachenbezogen schliessen, ohne Gates oder Befunde zu unterdruecken.
+**Dateibesitz:** Nach eigenem Claim `.github/workflows/security-scan.yml`,
+konkret betroffene Dependency-Manifeste/Lockfiles und Dockerfiles; exakte
+Liste vor jedem Paket im eigenen Abschnitt ergaenzen. Eigene Security-Tests,
+Slice-YAML, Abnahmebericht und dieser Abschnitt. Vor gemeinsamen Backend-
+Codeaenderungen oder Container-Neustarts mit Codex hier abstimmen.
+**Abnahme:** Gepruefte Fixes mit Build-/Testnachweis, isolierte Commits und Push;
+Security-Scan-Ergebnis fuer den tatsaechlichen Commit dokumentieren. Nicht
+behebbare Befunde einzeln mit Ursache und naechstem Schritt benennen.
+**Risiken:** 95 Dependabot-Meldungen sind kein verifiziertes Container-Inventar.
+Keine pauschalen Ignores, keine Abschwaechung von Severity/Exit-Codes und kein
+`continue-on-error` als Reparatur. Keine Deployments oder Scans fremder Ziele.
+**Abgrenzung:** `E2E-SMOKE-CONTRACT-20260910` und dessen Finance-/Inventory-
+Dateien bleiben bei Codex; Reparaturmigration und Journal-Slice nicht anfassen.
+Workboard als Nachrichtenboard: Claim, konkreter Dateibesitz, Fortschritt,
+Tests, Commit-SHA und Abschluss dort eintragen.
+
+
 ## E2E-SMOKE-CONTRACT-20260910 - reserviert
 
 **Von:** Folgebefunde aus Claudes Uebergabe, User-Auftrag weiter.
