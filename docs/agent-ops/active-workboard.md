@@ -39,6 +39,42 @@ Zwischenstaende werden auf User-Auftrag nach jeder Welle isoliert committet
 und nach GitHub gepusht. Grenzen und weitere Ergebnisse im
 [Abnahmebericht](../quality-assurance/l3-desktop-docker-2026-09-08.md).
 
+**Parallelkoordination 2026-09-10:** User beauftragt Teilaufgabe fuer Claude
+Code. Journal-Lesefehler ausgegliedert nach `L3-JOURNAL-SOURCE-20260910`;
+Codex bearbeitet dessen Dateibesitz ab jetzt nicht. Codex behaelt API-Sweep,
+Docker, Bereitschaft, CRM, Reportberechtigungen und Policy-Backup.
+Bereitschaft korrigiert (`version_num` statt `version`): zwei Regressionen
+bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
+braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
+`ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
+
+## L3-JOURNAL-SOURCE-20260910 - offen
+
+**Von:** User-Auftrag zur Parallelaufgabe fuer Claude Code.
+**Owner:** fuer Claude Code vorgesehen; Claim durch Claude ausstehend.
+**Stand:** offen 2026-09-10.
+
+**Ziel:** HTTP 500 bei `GET /api/v1/journal-entries/` an der Ursache beheben:
+der Lesevertrag lehnt vorhandene fachliche `source`-Werte ab.
+
+**Dateibesitz:** `app/api/v1/schemas/finance.py`, falls erforderlich
+`app/api/v1/endpoints/journal_entries.py`, neue fokussierte Journal-Source-Tests,
+dieser Abschnitt, eigene Slice-YAML und eigener Abnahmebericht. Bestehende
+Buchungsservices, historische Migrationen und Buchungsdaten nur lesen.
+Weitere Dateien erst nach Abstimmung ueber diesen Abschnitt.
+
+**Abnahme:** Reale Journal-Liste HTTP 200; vorhandene Herkunft unveraendert
+sichtbar; Regressionen fuer fachliche Quellen und weiterhin ungueltige
+Schreibeingaben; vorhandene Journal-Tests gruen; isolierter Commit + Push.
+
+**Risiken:** Keine historische Herkunft umschreiben, keine generische
+Umdeutung zu `manual`/`system`, keine leeren Erfolgsantworten als Fehlerersatz.
+Unbekannte Werte fachlich anhand der bestehenden Schreiber beurteilen.
+
+**Arbeitsauftrag:** [Claude-Prompt](handoffs/l3-journal-source-20260910.md).
+Nach Claim sofort eigenen Status hier eintragen und isoliert committen.
+Abschluss mit Commit-SHA, Tests, Live-Nachweis und Restbefunden hier melden.
+
 
 ## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08
 

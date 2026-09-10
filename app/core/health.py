@@ -24,7 +24,7 @@ def _check_postgresql_sync() -> tuple[bool, str]:
                 return False, "No alembic migrations applied (empty alembic_version table)"
             
             # Get current migration version
-            result = conn.execute(text("SELECT version FROM alembic_version LIMIT 1"))
+            result = conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))
             current_version = result.scalar()
             
         return True, f"ok (migration: {current_version})"

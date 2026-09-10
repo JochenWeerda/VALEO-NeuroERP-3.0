@@ -54,6 +54,17 @@ bleiben extern. Der Slice bleibt bis zur vollstaendigen Abnahme in Arbeit.
 
 ## Zwischenstand in Git
 
+`ccef6c96e` wurde nach `origin/main` gepusht. Der Visual-Audit nach dem
+Neubau bestand ebenfalls mit 12/12. Die Readiness-Ursache ist korrigiert:
+Alembic fuehrt `version_num`, nicht `version`. Zwei Regressionen pruefen
+eine echte Versionstabelle und den unmigrierten Zustand. Direkter Aufruf
+gegen die lokale PostgreSQL-DB ist erfolgreich; die laufenden HTTP-Worker
+muessen die Aenderung noch durch einen Neustart laden.
+
+Die Journal-Source-Regressionsarbeit ist auf User-Auftrag als offener
+Claude-Code-Slice `L3-JOURNAL-SOURCE-20260910` ausgegliedert. Claim und
+Liefermeldung erfolgen ueber das Workboard; bisher keine Uebernahme bestaetigt.
+
 User-Auftrag vom 2026-09-10: gepruefte Zwischenstaende nach jeder Welle
 committen und nach GitHub pushen; Workboard fortlaufend nachziehen.
 Der erste Commit umfasst API-/ActionRuntime-Korrekturen, ihre Tests und
