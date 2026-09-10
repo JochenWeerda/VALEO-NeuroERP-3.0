@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-10
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -127,12 +127,6 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `lkw.registered` | outbox | `app/services/annahme_service.py` |
-
-### POS / Kasse
-
-| Event-ID | Kanal | Quelle |
-|---|---|---|
-| `pos.tagesabschluss.created` | outbox | `app/services/pos_compat_service.py` |
 
 ### Portal
 

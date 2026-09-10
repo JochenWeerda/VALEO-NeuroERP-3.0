@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09",
+  "generatedAt": "2026-09-10",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -3186,5 +3186,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 76
+  "event_count": 75
 }
