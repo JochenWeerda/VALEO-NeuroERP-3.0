@@ -1,0 +1,119 @@
+slice_id: POS-FIBU-CLEANUP-20260910
+id: POS-FIBU-CLEANUP-20260910
+title: Toten POS-Buchungspfad entfernen und stille FiBu-Buchungsverluste sichtbar machen
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+goal: >-
+  Den nie verdrahteten zweiten POS-Buchungspfad aus PosCompatService entfernen
+  und die vier FiBu-Schreibpfade, die eine fehlgeschlagene Buchung still
+  verschlucken, auf das bestehende Projektmuster aus logger.error und
+  critical_data_path_errors_total heben — ohne den fachlichen Ablauf, Betraege,
+  Konten oder Buchungssaetze zu aendern.
+coordination: >-
+  Folgeentscheidung des Users zu L3-JOURNAL-SOURCE-20260910, waehrend Codex
+  ruht. Kanonische POS-Buchungslogik in app/services/pos_accounting_service.py
+  und der Pfad compat.py POST /pos/tagesabschluss bleiben unveraendert.
+file_ownership:
+  - docs/agent-ops/slices/POS-FIBU-CLEANUP-20260910.yaml
+  - app/services/pos_compat_service.py
+  - tests/test_pos_booking_single_source.py
+  - "app/api/v1/endpoints/produktion_mischfutter.py: nur der Fehlerbehandlungsblock"
+  - "app/api/v1/endpoints/logistics_freight.py: nur der Fehlerbehandlungsblock"
+  - "app/api/v1/endpoints/inventory_operations.py: nur der Fehlerbehandlungsblock"
+  - "app/api/v1/endpoints/sales_credit_notes.py: nur der Fehlerbehandlungsblock"
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt POS-FIBU-CLEANUP-20260910"
+ausloeser: >-
+  Beim Abschluss von L3-JOURNAL-SOURCE-20260910 fiel auf, dass
+  PosCompatService._write_fibu_entries an nicht existierenden Spalten
+  scheitert. Die Untersuchung ergab, dass der Pfad nie verdrahtet war und der
+  produktive POS-Abschluss korrekt bucht.
+befund:
+  tote_implementierung: >-
+    PosCompatService.create_tagesabschluss und _write_fibu_entries stammen aus
+    dem Service-Layer-Refactor 2803a3433 und werden nirgends aufgerufen. Aus
+    PosCompatService werden nur list_suspended_sales und delete_suspended_sale
+    genutzt.
+  defekte_im_toten_code:
+    - "Kopf-INSERT nennt source_doc_id und source_doc_type — Spalten existieren nicht"
+    - "Zeilen-INSERT nennt account_code — Spalte existiert nicht"
+    - "NOT-NULL-Felder entry_number, posting_date, account_id, line_number fehlen"
+    - "tenant_id wird auf den Buchungszeilen nicht gesetzt"
+    - "Alle drei Zeilen stehen im Soll und wuerden nicht ausgeglichen buchen"
+    - "Breites except Exception macht den Absturz zur Logzeile"
+  kanonischer_pfad: >-
+    compat.py POST /pos/tagesabschluss bucht ueber build_pos_closing_lines
+    (SKR03, Bar, EC, PayPal, B2B, Gutscheine, Barentnahme, Kassendifferenz),
+    prueft TSE und DSFinV-K, loest Konten ueber _ensure_chart_account auf und
+    setzt tenant_id sowie line_number. build_pos_closing_lines wirft bei
+    Unausgeglichenheit.
+  korrektur_frueherer_meldung: >-
+    POS-Tagesabschluesse gehen nicht verloren. Die zwei abschluss_checklisten
+    ohne Journalbuchung sind vom 2026-03-01, die FiBu-Verdrahtung kam am
+    2026-03-06 und ist damit juenger.
+  stille_buchungsverluste:
+    - "app/api/v1/endpoints/produktion_mischfutter.py: pass verschluckt die gesamte Journalbuchung"
+    - "app/api/v1/endpoints/logistics_freight.py: pass verschluckt die FiBu-Buchung der Frachtrechnung"
+    - "app/api/v1/endpoints/inventory_operations.py: pass verschluckt die GL-Buchung der Korrektur"
+    - "app/api/v1/endpoints/sales_credit_notes.py: pass verschluckt die GL-Zeilen, der Buchungskopf bleibt zeilenlos stehen"
+  bewusst_best_effort:
+    - "app/services/ap_invoice_kernel_posting.py: Outbox-Event, keine Buchung"
+    - "app/services/agrar_settlement_service.py: OP-Anlage, keine Buchung"
+    - "app/finance/router.py: reine Zaehlabfrage, Wert bleibt 0"
+acceptance:
+  - Genau eine Stelle im Code schreibt POS-Tagesabschluesse nach domain_erp.journal_entries.
+  - app/services/pos_accounting_service.py bleibt unveraendert und weiterhin ausgeglichen.
+  - Die vier Buchungsverluste melden logger.error und zaehlen critical_data_path_errors_total.
+  - Fachlicher Ablauf, Betraege, Konten und Buchungssaetze unveraendert.
+  - Bestehende POS-, Produktions- und Gutschrift-Tests gruen; Sweep weiterhin ohne 5xx.
+tests:
+  - python -m pytest tests/test_pos_booking_single_source.py
+  - python -m pytest tests -k "pos or produktion or credit_note or inventory or freight"
+  - python scripts/api_runtime_sweep.py
+risks:
+  - >-
+    Kein Eingriff in Buchungslogik. Das Entfernen toten Codes kann eine
+    geplante, aber unfertige Verdrahtung streichen; git log -S belegt, dass es
+    nie einen Aufruf gab, und die Historie bleibt im Repository erhalten.
+  - >-
+    Die Haertung aendert das Fehlerverhalten nicht, nur dessen Sichtbarkeit.
+    Wer bisher stille Fehlschlaege als Normalzustand gewohnt war, sieht nun
+    Alarme; die Zaehler sind pro Endpunkt gelabelt.
+ai_harness:
+  fachlicher_vertrag: >-
+    POS-Tagesabschluesse werden ausschliesslich ueber den fiskalisch
+    abgesicherten Pfad gebucht. Eine fehlgeschlagene FiBu-Buchung bleibt fuer
+    den Aufrufer nicht blockierend, ist aber im Log und in der Metrik sichtbar.
+  architektur_vertrag: >-
+    Eine Buchungsstelle je Geschaeftsereignis. Buchungssaetze entstehen in
+    app/services/pos_accounting_service.py, nicht in Compat-Services.
+    Fehlerbehandlung folgt dem in journal_entries.py etablierten Muster.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation, keine Aenderung an Betraegen, Konten
+    oder Buchungssaetzen. Nur Codeentfernung und Fehlerbehandlung.
+  test_vertrag: >-
+    tests/test_pos_booking_single_source.py sichert, dass genau eine Stelle POS
+    nach journal_entries schreibt, und prueft build_pos_closing_lines auf
+    Ausgeglichenheit ueber die Zahlarten hinweg. Ohne Datenbank lauffaehig.
+  security_vertrag: >-
+    Keine Aenderung an Authentifizierung, Rollen oder Tenant-Grenzen. Das
+    Entfernen des toten Pfades beseitigt eine Stelle, die Buchungszeilen ohne
+    tenant_id geschrieben haette.
+  betriebs_vertrag: >-
+    Reine Codeaenderung ohne Migration. Wirksam nach Neustart der Worker.
+    Neue Alarme laufen ueber die bestehende Metrik
+    critical_data_path_errors_total.
+  dokumentations_vertrag: >-
+    Diese Slice-YAML und der Workboard-Abschnitt POS-FIBU-CLEANUP-20260910
+    werden konsistent gehalten; die Korrektur der frueheren Fehlmeldung ist
+    dort ausdruecklich vermerkt.
+external_gates:
+  - >-
+    Fachliche Bestaetigung der Finanzbuchhaltung, dass der fiskalisch
+    abgesicherte Pfad der einzige gewuenschte POS-Buchungsweg ist.
+  - >-
+    Betriebliche Entscheidung, ob die neuen Zaehler alarmiert werden sollen.
+verification:
+  - python -m pytest tests/test_pos_booking_single_source.py
+  - python scripts/api_runtime_sweep.py

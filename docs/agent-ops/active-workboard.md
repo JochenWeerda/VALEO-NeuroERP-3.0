@@ -48,6 +48,51 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
+## POS-FIBU-CLEANUP-20260910 - in arbeit
+
+**Von:** User-Entscheidung im Anschluss an L3-JOURNAL-SOURCE-20260910.
+**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10.
+
+**Ziel:** Den nie verdrahteten zweiten POS-Buchungspfad entfernen und die
+FiBu-Schreibpfade, die eine fehlgeschlagene Buchung still verschlucken,
+sichtbar machen — ohne den fachlichen Ablauf zu aendern.
+
+**Befund:** `PosCompatService.create_tagesabschluss` und `_write_fibu_entries`
+stammen aus dem Service-Layer-Refactor `2803a3433` und wurden nie aufgerufen
+(`git log -S` findet keinen Aufruf; aus `PosCompatService` werden nur
+`list_suspended_sales` und `delete_suspended_sale` genutzt). Der Code ist
+zugleich kaputt: `source_doc_id`/`source_doc_type` und `account_code`
+existieren nicht, die NOT-NULL-Felder `entry_number`, `posting_date`,
+`account_id`, `line_number` fehlen, `tenant_id` wird auf den Zeilen nicht
+gesetzt, und die drei Zeilen stehen alle im Soll. Ein breites
+`except Exception` wuerde den Absturz zur Logzeile machen.
+
+**Korrektur einer frueheren Meldung:** POS-Tagesabschluesse gehen *nicht*
+verloren. Der kanonische Pfad `compat.py POST /pos/tagesabschluss` bucht
+korrekt ueber `build_pos_closing_lines` (SKR03, ausgeglichen, wirft bei
+Unausgeglichenheit), mit TSE-/DSFinV-K-Gate und `_ensure_chart_account`. Die
+zwei `abschluss_checklisten` ohne Journalbuchung sind vom 2026-03-01, die
+FiBu-Verdrahtung kam am 2026-03-06 — sie sind aelter als die Verdrahtung.
+
+**Dateibesitz:** `app/services/pos_compat_service.py`,
+`app/api/v1/endpoints/produktion_mischfutter.py`,
+`app/api/v1/endpoints/logistics_freight.py`,
+`app/api/v1/endpoints/inventory_operations.py`,
+`app/api/v1/endpoints/sales_credit_notes.py` (jeweils nur der
+Fehlerbehandlungsblock), neue Tests, dieser Abschnitt und die Slice-YAML.
+Buchungslogik, Kontenrahmen und `pos_accounting_service.py` bleiben
+unveraendert.
+
+**Abnahme:** Genau eine POS-FiBu-Buchungsstelle im Code; `pos_accounting_service`
+unangetastet und weiterhin ausgeglichen; die vier Buchungsverluste melden
+`logger.error` plus `critical_data_path_errors_total`; fachlicher Ablauf
+unveraendert; Tests gruen; Sweep weiterhin 0x 5xx.
+
+**Risiken:** Keine Aenderung an Betraegen, Konten oder Buchungssaetzen. Drei
+weitere breite Handler bleiben bewusst Best-Effort, weil sie Folgeschritte
+und keine Buchung schlucken: Outbox (`ap_invoice_kernel_posting.py`),
+OP-Anlage (`agrar_settlement_service.py`), Zaehlabfrage (`finance/router.py`).
+
 ## L3-JOURNAL-SOURCE-20260910 - in arbeit
 
 **Von:** User-Auftrag zur Parallelaufgabe fuer Claude Code.
