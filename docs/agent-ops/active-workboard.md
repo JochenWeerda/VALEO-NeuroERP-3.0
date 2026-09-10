@@ -150,17 +150,34 @@ tote Pfad ist entfernt (`2175c4394`).
 
 ### Offen — vier Punkte fuer dich
 
-1. **Code-Inventare driften.** `scripts/check_all_doc_generators.sh --check`
-   bricht bei `generate_code_inventories.py` mit
-   `docs/entwickler/service-inventory.md` und
-   `docs/admin/migration-inventory.md`. Der Drift ist **nicht** von mir: ich
-   habe meine Migration testweise entfernt, er blieb bestehen. Beide Dateien
-   sind dein WIP; ich habe sie nach einem Testlauf bitgleich wiederhergestellt
-   und nicht committet. Dein naechster Generatorlauf nimmt meine Migration
-   automatisch mit.
-2. **Architektur-Index.** Bleibt wie gehabt bei dir; ich habe
-   `config/architecture-index.yaml` nicht angefasst, obwohl meine neuen
-   Routen und die Migration dort vermutlich Eintraege brauchen.
+1. **Code-Inventare und Architektur-Index sind gruen — meine erste Meldung
+   dazu war falsch.** Ich hatte beide als Drift gemeldet. Nachgemessen in der
+   *echten* Repository-Sicht, also mit den committeten Fassungen der
+   Inventardateien **und ohne deine unversionierte Migration auf der Platte**:
+   `generate_code_inventories.py --check` meldet `3 Inventar-Dateien aktuell`,
+   `generate_architecture_index.py --check --require-complete` meldet
+   `routes 927/927`. Beides ohne Zutun.
+
+   Der Drift, den ich zuerst sah, war ein Artefakt deines Arbeitsbaums: deine
+   Arbeitskopie von `docs/entwickler/service-inventory.md` ist **aelter** als
+   die committete (ihr fehlt `inventory_document_reference`), und
+   `generate_architecture_index.py` liest genau diese Datei — der Index erbt
+   den Rueckstand also. Dazu zaehlt der Inventar-Generator deine untracked
+   Migration mit, die es im Repository nicht gibt. Auch
+   `config/architecture-index.yaml` ist in deinem Baum aelter als in HEAD
+   (`generated_at` 13:38 gegen 20:22).
+
+   **Fuer dich heisst das:** vor dem naechsten Generatorlauf die drei Dateien
+   auf HEAD bringen, sonst schreibst du einen Rueckstand fest. Ich habe alle
+   Testlaeufe mit Sicherungskopie gefahren und deinen Stand bitgleich
+   wiederhergestellt; `git status` steht unveraendert bei 125 Dateien.
+
+2. **Agent-Handbuch nachgezogen** (`2634b0292`). Der Workflow *Docs Build* war
+   seit 05:35 rot, also vor dieser Session, und zwar am Handbuch-Drift.
+   Erzeugt in der Repository-Sicht. Inhaltlich entfaellt dabei der
+   Domain-Event `pos.tagesabschluss.created`: er wurde nur von dem nie
+   verdrahteten `PosCompatService.create_tagesabschluss` deklariert, nie
+   ausgeloest und hat keinen Konsumenten im Code.
 3. **`/api/v1/health/ready` kann flackern.** Im ersten Simulationslauf gab die
    Route einmalig 503 zurueck, direkt nach dem Start; zehn Folgeabfragen und
    der zweite vollstaendige Sweep lieferten 200. Die Route existiert in beiden
