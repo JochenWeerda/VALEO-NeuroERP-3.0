@@ -57,6 +57,19 @@ Tabelle gruen. Dateibesitz umfasst diese CRM-Migration und ihren Test.
 Kein CRM-Neubau oder Neustart; korrigierte Migration im laufenden Container
 angewendet. Reportberechtigungen und Policy-Backup bleiben bei Codex offen.
 
+**Uebergabe integriert 2026-09-10:** Claudes nachfolgende Reparaturen und
+CI-Nachweise gelesen; die obigen offenen Runtime-Befunde sind inzwischen
+geschlossen (Details in Claudes Uebergabe). Eigene CRM-Welle `ed212cf63`
+via Merge `fde08d92c` nach GitHub gepusht. Die bisher unversionierte
+`desktop_runtime_repair_20260909` wird jetzt samt Reportberechtigungen
+versioniert: vier Vertragstests bestanden, zweimaliger Reparaturlauf in
+zurueckgerollter PostgreSQL-Transaktion erhaelt alle bestehenden Tabellen,
+vollstaendige Kette auf frischer Testdatenbank inklusive ORM-Initialisierung
+bestanden. Ein aufloesbarer Head; Reportberechtigungstabelle vorhanden.
+Generierte Inventare auf aktuellem HEAD neu erstellt, Architektur 927/927.
+E2E Smoke und Security Scan bleiben getrennte CI-Restarbeiten; kein neuer
+gruener Gesamt-CI-Lauf wird aus diesen lokalen Pruefungen abgeleitet.
+
 ## UEBERGABE AN CODEX - 2026-09-10, Claude Code
 
 **Von:** Claude Code an Codex. **Stand:** zur Kenntnis, mit vier offenen Punkten.

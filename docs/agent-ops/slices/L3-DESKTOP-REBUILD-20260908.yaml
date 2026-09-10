@@ -4,9 +4,12 @@ owner: Codex
 status: in arbeit
 created_at: "2026-09-08"
 coordination: Zentraler Mask-Builder; Screenshots und unversionierte Fremddateien bleiben lokal unveraendert.
-resume_20260910: "48 Backend-Tests, 66 Frontend-Runtime-Tests, TypeScript und 12 Visual-Audits bestanden; Docker-Neubau bestanden; API-Sweep 980 Routen, 5 HTTP 500 und readyz 503 offen, keine Transportfehler. Details im Abnahmebericht."
+resume_20260910: "Runtime-Befunde durch Codex und Claude geschlossen, Uebergabe im Workboard. Reparaturmigration samt Reportberechtigungen: 4 Vertragstests, doppelte Ausfuehrung in zurueckgerollter PostgreSQL-Transaktion und vollstaendige Kette auf frischer Testdatenbank bestanden. E2E Smoke und Security Scan bleiben eigene CI-Restarbeiten."
 goal: Desktopmasken gegen L3-Gewohnheiten pruefen, aktuelle Fehler beheben und Docker-Stack neu bauen und testen.
 file_ownership:
+  - alembic/versions/desktop_runtime_repair_20260909.py
+  - tests/test_desktop_runtime_repair_migration.py
+  - docs/admin/migration-inventory.md
   - services/crm-sales/alembic/versions/002_extend_opportunities.py
   - services/crm-sales/tests/test_migration_numbering.py
   - docs/agent-ops/slices/L3-DESKTOP-REBUILD-20260908.yaml

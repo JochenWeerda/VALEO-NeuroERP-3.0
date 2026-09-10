@@ -11,6 +11,35 @@ description: Aktuelle Verifikation und offene Abnahme des Desktop-Rebuild-Slices
 
 # L3 Desktop und Docker
 
+## Aktueller Stand nach Claudes Uebergabe
+
+Die unten dokumentierten fuenf HTTP-500 und die Readiness-503 sind inzwischen
+geschlossen. Claudes Uebergabe im Workboard belegt den Runtime-Sweep mit
+Sidecars sowie 979 Ziele unter nachgestellten CI-Bedingungen ohne 5xx oder
+unerwartete 503. Laut uebergebenem CI-Nachweis sind sieben von neun Workflows
+gruen; E2E Smoke und Security Scan bleiben offen. Das ist ein uebernommener
+CI-Nachweis, kein neuer Vollsuite-Lauf dieses Zwischenstands.
+
+Codex-Nachzug: Die lokal bereits angewandte Reparaturmigration wird mit ihrer
+unveraenderten Revision `desktop_runtime_repair_20260909` in Git aufgenommen.
+Zusaetzlich repariert sie fehlende `domain_shared.admin_report_permissions`
+mit der unveraenderten Tabellendefinition aus der historischen Migration.
+Der idempotente Zusatz ist auf der vorhandenen DB ein No-op; dort hat Claude
+die Tabelle bereits angelegt. Es wird keine zweite Alembic-Kette eingefuehrt.
+
+| Nachweis 2026-09-10 | Ergebnis |
+|---|---|
+| Vier Migrations-Vertragstests | bestanden |
+| Vollstaendige Reparatur zweimal in zurueckgerollter PostgreSQL-Transaktion | bestanden; vorhandene Tabellenidentitaeten erhalten |
+| Frische isolierte DB: gesamte Alembic-Kette und ORM-Initialisierung | bestanden; ein erwarteter Head, Reportberechtigungen vorhanden |
+| Testdatenbank nach Test | ausschliesslich neu angelegte Testdatenbank entfernt |
+| Code-Inventare und Architektur-Index | aktuell, 927/927 Routen |
+
+Die veralteten generierten Arbeitskopien wurden nach Diff-Pruefung auf HEAD
+gebracht; ihre vorherigen Bytes liegen unter
+`artifacts/pre-inventory-reconcile-20260910/`. Das Migrationsinventar wird
+danach aus dem aktuellen Code inklusive der Reparatur neu erzeugt.
+
 ## Wiederaufnahme 2026-09-10
 
 Fortsetzung des bestehenden Codex-Slices `L3-DESKTOP-REBUILD-20260908`.
