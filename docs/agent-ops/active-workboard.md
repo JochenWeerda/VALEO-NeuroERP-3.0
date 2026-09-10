@@ -11,10 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SECURITY-SCAN-20260910 - in arbeit
+## SECURITY-SCAN-20260910 - abgeschlossen
 
 **Von:** User-Auftrag Parallelaufgabe fuer Claude Code. **Owner:** Claude Code.
-**Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
+**Stand:** abgeschlossen 2026-09-10 durch Claude Code; GitHub-Abnahme nach Push offen.
 **Ziel:** Den weiterhin roten Security Scan anhand aktueller Trivy-/Grype-/ZAP-
 Logs ursachenbezogen schliessen, ohne Gates oder Befunde zu unterdruecken.
 **Dateibesitz:** Nach eigenem Claim `.github/workflows/security-scan.yml`,
@@ -87,9 +87,47 @@ geaendert wird.
   belegten Befund zeigt.
 - `docs/agent-ops/slices/SECURITY-SCAN-20260910.yaml`, dieser Abschnitt.
 
-`.github/workflows/security-scan.yml` bleibt vorerst **unveraendert** — die
-Ursachen liegen in den Images, nicht im Gate. Keine Absenkung von Schwellen,
-keine Ignores, kein `continue-on-error`.
+`.github/workflows/security-scan.yml` bleibt **unveraendert** — die Ursachen
+lagen in den Images, nicht im Gate. Keine Absenkung von Schwellen, keine
+Ignores, kein `continue-on-error`.
+
+### Abschluss 2026-09-10 — beide Gates lokal gruen
+
+**Geaendert:** `Dockerfile.backend` (Basis-Image auf
+`python:3.13.15-slim-bookworm`; pip nach der Installation aus dem venv und aus
+dem Runtime-Stage entfernt) und `.grype.yaml` (vier veraltete CPython-Ausnahmen
+entfernt). `Dockerfile.frontend` blieb unberuehrt.
+
+**Frontend-Messung nachgetragen:** Build mit `--no-cache --pull`, danach Trivy
+und Grype je **0 Befunde** (alpine 3.23.4). Der frueher vermutete Befund war ein
+Layer-Cache-Artefakt; `apk upgrade --no-cache` genuegt.
+
+**Gate-Ergebnisse mit den exakten Workflow-Befehlen:**
+
+| Lauf | Ergebnis |
+|---|---|
+| `trivy --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1` Backend | exit 0 |
+| `trivy --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1` Frontend | exit 0 |
+| `grype --only-fixed --fail-on high` Backend | exit 0 |
+| `grype --only-fixed --fail-on high` Frontend | exit 0, keine Befunde |
+
+**Funktionsnachweis nach der pip-Entfernung:** im gebauten Image importiert
+`/opt/venv/bin/python` fastapi, uvicorn, sqlalchemy, alembic, pydantic und
+`app.main` fehlerfrei; pip ist weder im venv noch im System vorhanden.
+
+**Grype-Ignores bereinigt statt erweitert:** `CVE-2025-15366`,
+`CVE-2026-12003`, `CVE-2026-7210` und `CVE-2026-15308` reproduziert der Scanner
+nach dem Image-Bump nicht mehr und sind entfernt — das verschaerft den Gate.
+`CVE-2025-15367` bleibt paket-/binaer-scoped stehen, liegt aber nur noch als
+Medium unterhalb des Cutoffs.
+
+**Nicht behebbar, benannt statt unterdrueckt:** die CPython-Binaerbefunde
+`CVE-2026-17084`, `CVE-2026-15806`, `CVE-2025-15367`, `CVE-2026-15310` — alle
+Medium/Low und nur in 3.15.0a6/3.15.0rc2 gefixt, also ohne Fix in der
+unterstuetzten 3.13-Linie. Naechster Schritt: beim naechsten CPython-Image-
+Refresh erneut messen, kein Wechsel auf eine Vorabversion.
+
+**Offen:** GitHub-Gesamtabnahme des Workflows fuer den Push-Commit.
 
 ## E2E-SMOKE-CONTRACT-20260910 - in arbeit
 

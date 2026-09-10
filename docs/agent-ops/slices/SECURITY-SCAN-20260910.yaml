@@ -2,9 +2,10 @@ slice_id: SECURITY-SCAN-20260910
 id: SECURITY-SCAN-20260910
 title: Security Scan ursachenbezogen schliessen (Trivy, Grype, OWASP ZAP)
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-09-10"
 started_at: "2026-09-10"
+completed_at: "2026-09-10"
 goal: >-
   Den weiterhin roten Security-Scan-Workflow anhand der aktuellen Trivy-,
   Grype- und ZAP-Logs an den belegten Ursachen schliessen. Keine abgesenkten
@@ -19,6 +20,8 @@ coordination: >-
   ueber das Workboard abstimmen.
 file_ownership:
   - docs/agent-ops/slices/SECURITY-SCAN-20260910.yaml
+  - Dockerfile.backend
+  - .grype.yaml
   - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt SECURITY-SCAN-20260910"
   - ".github/workflows/security-scan.yml: nur falls eine belegte Ursache dort liegt"
   - "Dependency-Manifeste, Lockfiles und Dockerfiles: exakte Liste wird vor jedem Codepaket im Workboard-Abschnitt ergaenzt"
@@ -102,3 +105,49 @@ external_gates:
     vorweggenommen.
 verification:
   - python -m pytest tests -k "security"
+
+behebung:
+  dockerfile_backend:
+    - >-
+      Basis-Image auf python:3.13.15-slim-bookworm gehoben (Builder und
+      Runtime ueber ARG PYTHON_IMAGE).
+    - >-
+      pip nach der Installation aus dem venv entfernt und im Runtime-Stage
+      deinstalliert. Ursache belegt: msgpack 1.1.2 und setuptools 70.3.0 sind
+      keine Anwendungsabhaengigkeiten, sondern Kopien in
+      pip/_vendor/vendor.txt, das Trivy als Manifest liest. Auch das neueste
+      pip vendort weiterhin dieselben Versionen, ein pip-Upgrade behebt es
+      also nicht. Kein Laufzeitpfad ruft pip auf; CMD ist init_db.py plus
+      uvicorn.
+  dockerfile_frontend: >-
+    Unveraendert. Neu gemessen mit --no-cache --pull, damit kein Layer-Cache
+    das Ergebnis verfaelscht: 0 Befunde in Trivy und Grype. Das bestehende
+    `apk upgrade --no-cache` genuegt.
+  grype_config: >-
+    Vier CPython-Ausnahmen entfernt, weil der Image-Bump sie nicht mehr
+    reproduziert: CVE-2025-15366, CVE-2026-12003, CVE-2026-7210,
+    CVE-2026-15308. Das verschaerft den Gate, es schwaecht ihn nicht.
+    CVE-2025-15367 bleibt paket-/binaer-scoped stehen, existiert aber nur noch
+    als Medium und damit unterhalb des Cutoffs `high`.
+messung_2026_09_10:
+  images: "lokal gebaut aus dem Arbeitsstand, Frontend mit --no-cache --pull"
+  ergebnisse:
+    - "trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend: exit 0"
+    - "trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 frontend: exit 0 (alpine 3.23.4, 0 Befunde)"
+    - "grype --only-fixed --fail-on high backend (mit bereinigter .grype.yaml): exit 0"
+    - "grype --only-fixed --fail-on high frontend: exit 0, keine Befunde"
+  funktionsnachweis: >-
+    Im gebauten Backend-Image importiert /opt/venv/bin/python fastapi,
+    uvicorn, sqlalchemy, alembic, pydantic und app.main fehlerfrei; weder im
+    venv noch im System ist pip noch vorhanden.
+  verbleibend_ohne_fix:
+    - >-
+      CPython-Binaerbefunde CVE-2026-17084, CVE-2026-15806, CVE-2025-15367 und
+      CVE-2026-15310. Alle Medium oder Low, also unterhalb des Gate-Cutoffs,
+      und ausschliesslich in 3.15.0a6/3.15.0rc2 behoben — kein Fix in der
+      unterstuetzten 3.13-Linie. Naechster Schritt: mit dem naechsten CPython-
+      Image-Refresh erneut pruefen, nicht vorzeitig auf eine Vorabversion
+      wechseln.
+  offen: >-
+    GitHub-Gesamtabnahme des Workflows fuer den tatsaechlichen Commit steht
+    nach dem Push aus; die lokale Messung nutzt exakt die Gate-Befehle.

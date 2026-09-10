@@ -1,44 +1,18 @@
 ignore:
-  # CPython IMAP/POP command-injection hardening is not available as a
-  # supported 3.13 Docker patch tag yet (3.13.15 is unavailable as of
-  # 2026-07-10). App-side IMAP config now rejects control characters before
-  # calling imaplib, poplib is not used, and a 3.12.12 trial image produced
-  # more fixable Python-binary findings. Keep this exception binary/package
-  # scoped and remove it once a patched 3.13/3.14 slim-bookworm tag exists.
-  - vulnerability: CVE-2025-15366
-    package:
-      name: python
-      type: binary
-
+  # Gemessen am gepinnten Backend-Image (python:3.13.15-slim-bookworm,
+  # SECURITY-SCAN-20260910): von den frueher hier gefuehrten CPython-Befunden
+  # reproduziert Grype nur noch CVE-2025-15367, und zwar als Medium — also
+  # unterhalb des Gate-Cutoffs `high`. Die Ausnahme bleibt binaer-/paket-
+  # scoped als Netz gegen ein Re-Scoring und faellt weg, sobald CPython einen
+  # Fix in der unterstuetzten 3.13-Linie ausliefert (aktuell nur 3.15.0a6).
+  # App-seitig lehnt die IMAP-Konfiguration Steuerzeichen vor dem
+  # imaplib-Aufruf ab, poplib wird nicht verwendet.
   - vulnerability: CVE-2025-15367
     package:
       name: python
       type: binary
 
-  # Windows legacy installer / in-tree-layout Python finding. The backend
-  # image is a Linux slim-bookworm container running Python from /usr/local.
-  # A fixed 3.13/3.14 Docker tag is not available yet; revisit with the next
-  # upstream CPython image refresh.
-  - vulnerability: CVE-2026-12003
-    package:
-      name: python
-      type: binary
-
-  # Grype treats Python 3.15.0b2 as the only fixed release for this binary
-  # finding. That is not an actionable upgrade for the supported 3.13 line.
-  # Trivy does not reproduce the finding. Keep the exception package-scoped
-  # and remove it as soon as CPython publishes a supported-branch fix.
-  - vulnerability: CVE-2026-7210
-    package:
-      name: python
-      type: binary
-
-  # CPython binary finding whose only "fixed in" release is 3.15.0, i.e. a
-  # future minor branch with no supported 3.13/3.14 slim-bookworm Docker tag
-  # available (checked 2026-07-12). Not an actionable upgrade for the pinned
-  # 3.13 line. Keep package/binary scoped and drop once a patched supported
-  # CPython image ships.
-  - vulnerability: CVE-2026-15308
-    package:
-      name: python
-      type: binary
+  # Entfernt am 2026-09-10, weil der Bump auf python:3.13.15-slim-bookworm sie
+  # nicht mehr reproduziert (Grype `--only-fixed`, alle Severities geprueft):
+  # CVE-2025-15366, CVE-2026-12003, CVE-2026-7210, CVE-2026-15308.
+  # Wieder aufnehmen nur mit erneutem Messnachweis, nicht auf Verdacht.
