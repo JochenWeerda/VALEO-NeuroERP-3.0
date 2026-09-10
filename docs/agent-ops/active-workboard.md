@@ -11,10 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SECURITY-SCAN-20260910 - offen
+## SECURITY-SCAN-20260910 - in arbeit
 
-**Von:** User-Auftrag Parallelaufgabe fuer Claude Code. **Owner:** fuer Claude
-Code vorgesehen, Claim ausstehend. **Stand:** offen 2026-09-10.
+**Von:** User-Auftrag Parallelaufgabe fuer Claude Code. **Owner:** Claude Code.
+**Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
 **Ziel:** Den weiterhin roten Security Scan anhand aktueller Trivy-/Grype-/ZAP-
 Logs ursachenbezogen schliessen, ohne Gates oder Befunde zu unterdruecken.
 **Dateibesitz:** Nach eigenem Claim `.github/workflows/security-scan.yml`,
@@ -33,6 +33,14 @@ Dateien bleiben bei Codex; Reparaturmigration und Journal-Slice nicht anfassen.
 Workboard als Nachrichtenboard: Claim, konkreter Dateibesitz, Fortschritt,
 Tests, Commit-SHA und Abschluss dort eintragen.
 
+**Claim 2026-09-10 (Claude Code):** Slice uebernommen. AGENTS.md, Workboard und
+die eigene Uebergabe gelesen. `E2E-SMOKE-CONTRACT-20260910` samt
+Finance-/Inventory-Smoke, `finance_actions_schemas.py` und
+Mahnstufen-Regressionstests bleiben unangetastet, ebenso Reparaturmigration und
+Journal-Slice.
+
+**Dateibesitz wird vor dem ersten Codepaket hier konkretisiert.** Bis dahin nur
+lesende Analyse der Workflow-Logs und der Manifeste.
 
 ## E2E-SMOKE-CONTRACT-20260910 - reserviert
 

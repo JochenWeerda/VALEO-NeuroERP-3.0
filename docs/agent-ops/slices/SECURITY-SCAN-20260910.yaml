@@ -1,0 +1,104 @@
+slice_id: SECURITY-SCAN-20260910
+id: SECURITY-SCAN-20260910
+title: Security Scan ursachenbezogen schliessen (Trivy, Grype, OWASP ZAP)
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+goal: >-
+  Den weiterhin roten Security-Scan-Workflow anhand der aktuellen Trivy-,
+  Grype- und ZAP-Logs an den belegten Ursachen schliessen. Keine abgesenkten
+  Severity-Schwellen, keine pauschalen Ausnahmen, kein continue-on-error als
+  Reparatur.
+coordination: >-
+  Parallel zu Codex, das E2E-SMOKE-CONTRACT-20260910 bearbeitet. Deren
+  Finance-/Inventory-Smoke-Tests, app/api/v1/schemas/finance_actions_schemas.py
+  und die Mahnstufen-Regressionstests bleiben unangetastet, ebenso die
+  Reparaturmigration desktop_runtime_repair_20260909 und der abgeschlossene
+  Journal-Slice. Gemeinsame Backend-Aenderungen und Container-Neustarts vorher
+  ueber das Workboard abstimmen.
+file_ownership:
+  - docs/agent-ops/slices/SECURITY-SCAN-20260910.yaml
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt SECURITY-SCAN-20260910"
+  - ".github/workflows/security-scan.yml: nur falls eine belegte Ursache dort liegt"
+  - "Dependency-Manifeste, Lockfiles und Dockerfiles: exakte Liste wird vor jedem Codepaket im Workboard-Abschnitt ergaenzt"
+ausloeser: >-
+  Nach Abschluss von SPEC-SOURCE-REALAPP-20260910 blieben zwei Workflows rot.
+  E2E Smoke liegt bei Codex; der Security Scan ist dieser Slice.
+befund_erhebung:
+  lauf: 34470954356
+  commit: ef7e7707e
+  jobs:
+    - "Python and Node Dependency Audit: success"
+    - "Bandit Python Security Scan: success"
+    - "OWASP ZAP Full Scan: success"
+    - "Grype Vulnerability Scan: failure"
+    - "Trivy Container Scan: failure"
+    - "Security Scan Summary: failure (Folge der beiden)"
+  gate_semantik: >-
+    Beide Gates werten ausschliesslich behebbare Befunde: Trivy laeuft mit
+    --ignore-unfixed, Grype mit --only-fixed und --fail-on high. Gemeldet wird
+    also nur, wofuer ein Herstellerfix existiert.
+  trivy_backend_high:
+    - "msgpack 1.1.2 -> 1.2.1 (GHSA-6v7p-g79w-8964, HIGH)"
+    - "setuptools 70.3.0 -> 78.1.1 (CVE-2025-47273, Path Traversal, HIGH)"
+  offen_bei_erhebung:
+    - >-
+      Der Trivy-Schritt laeuft unter bash -e und bricht nach dem Backend-Image
+      ab; ob valeo-frontend eigene behebbare Befunde hat, ist noch nicht
+      belegt.
+    - >-
+      Grype schreibt nur SARIF, die konkrete Paketliste ist aus dem Konsolenlog
+      nicht ableitbar und muss ueber die Code-Scanning-Alerts oder einen
+      lokalen Lauf ermittelt werden.
+    - >-
+      Code-Scanning fuehrt 25 Grype- und 75 Trivy-Alerts, darunter unbehebbare.
+      Diese Zahl ist kein Mass fuer den Gate-Umfang.
+acceptance:
+  - Jeder Fix ist auf einen belegten Scanner-Befund zurueckgefuehrt.
+  - Severity-Schwellen, Exit-Codes und Gate-Umfang bleiben unveraendert.
+  - Kein continue-on-error und keine pauschalen Ignores.
+  - Nicht behebbare Befunde einzeln mit Ursache und naechstem Schritt benannt.
+  - Security-Scan-Ergebnis fuer den tatsaechlichen Commit dokumentiert.
+tests:
+  - docker build -f Dockerfile.backend .
+  - trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 <image>
+  - python -m pytest tests -k "security or bandit"
+risks:
+  - >-
+    Anhebung transitiver Abhaengigkeiten kann Laufzeitverhalten aendern; jeder
+    Sprung wird durch Build und Tests belegt, nicht nur durch den Scanner.
+  - >-
+    msgpack und setuptools sind nicht direkt gepinnt, sondern transitiv. Ein
+    Pin im Manifest ist ein neuer Vertrag und wird begruendet.
+ai_harness:
+  fachlicher_vertrag: >-
+    Der Security-Scan meldet nur noch Befunde ohne verfuegbaren Herstellerfix.
+    Behebbare Schwachstellen in den ausgelieferten Images sind geschlossen.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf Dependency-Manifeste, Lockfiles, Dockerfiles und
+    den Security-Workflow begrenzt. Keine Anpassung von Anwendungscode ohne
+    belegten Scanner-Bezug und ohne Abstimmung im Workboard.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation. Reine Build- und
+    Abhaengigkeitsaenderungen.
+  test_vertrag: >-
+    Jeder Fix wird durch einen Image-Build und einen erneuten Scanner-Lauf
+    belegt, ergaenzt um die bestehenden Backend-Tests der betroffenen Pfade.
+  security_vertrag: >-
+    Keine Absenkung von Severity-Schwellen, kein pauschales Ignorieren, kein
+    continue-on-error. Ausnahmen nur einzeln, mit Kennung und Begruendung, und
+    nur wenn kein Herstellerfix existiert. Keine Scans fremder Systeme.
+  betriebs_vertrag: >-
+    Keine Deployments. Container-Neustarts nur nach Abstimmung mit Codex ueber
+    das Workboard.
+  dokumentations_vertrag: >-
+    Diese Slice-YAML und der Workboard-Abschnitt SECURITY-SCAN-20260910 werden
+    konsistent gehalten; Dateibesitz wird vor jedem Codepaket konkretisiert.
+external_gates:
+  - >-
+    Fuer Befunde ohne Herstellerfix ist eine Betriebsentscheidung noetig
+    (Basis-Image-Wechsel oder dokumentierte Risikoannahme); hier nicht
+    vorweggenommen.
+verification:
+  - python -m pytest tests -k "security"
