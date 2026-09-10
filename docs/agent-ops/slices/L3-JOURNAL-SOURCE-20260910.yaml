@@ -2,9 +2,10 @@ slice_id: L3-JOURNAL-SOURCE-20260910
 id: L3-JOURNAL-SOURCE-20260910
 title: Journal-Liste liest gespeicherte Buchungsherkunft unveraendert
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-09-10"
 started_at: "2026-09-10"
+completed_at: "2026-09-10"
 goal: >-
   Den HTTP-500-Fehler von GET /api/v1/journal-entries/ an der Ursache beheben:
   der Lesevertrag lehnte vorhandene fachliche source-Werte ab. Schreibvertrag
@@ -98,17 +99,60 @@ risks:
     Die Werte system, integration und import bleiben als Bestandsvertrag
     zulaessig, obwohl kein Schreiber im Code sie setzt. Entfernen waere eine
     Verschaerfung des Schreibvertrags und gehoert in eine eigene Entscheidung.
+besitzerweiterung_2026_09_10: >-
+  Der User hat Claude Code Neustart und die verbliebenen Laufzeitfehler
+  uebertragen, weil Codex ruht. Zusaetzlich im Besitz: Backend-Neustart,
+  alembic/versions/admin_report_permissions_repair_20260910.py,
+  app/policy/router.py, app/api/v1/endpoints/policies.py,
+  tests/test_policy_response_contract.py.
+folgearbeiten:
+  neustart: >-
+    docker compose restart backend; Code ist ueber ./app:/app/app gemountet,
+    kein Rebuild noetig. Codex' untracked Migration
+    desktop_runtime_repair_20260909 war bereits DB-Head, der Startlauf von
+    alembic upgrade head daher ein No-op.
+  report_permissions: >-
+    domain_shared.admin_report_permissions fehlte in einer auf head
+    gestempelten DB. Neue additive Migration
+    admin_report_permissions_repair_20260910; angewandte Migrationen
+    unveraendert, ein Head.
+  policy_backup: >-
+    /api/mcp/policy/backup kopierte eine SQLite-Datei ueber DEFAULT_DB, das
+    seit der Umstellung auf PostgreSQL None ist. Gesichert wird jetzt der
+    JSON-Export; Backup-Namen auf .json begrenzt.
+  policy_response_models: >-
+    policies.py deklarierte response_model=StatusResponse (Feld success),
+    die Handler gaben {"ok": True} zurueck. FastAPI validiert nach der
+    Ausfuehrung: /policy/restore ersetzte alle Regeln und meldete danach
+    HTTP 500; /policy/list verlor still sein data. Antwortmodelle bilden
+    jetzt die Nutzlast ab.
+  gesamtnachweis: >-
+    scripts/api_runtime_sweep.py gegen das neu gestartete Backend: 980
+    Routen, 0x 5xx, 0 unerwartete 503, ok_2xx 913 (vorher 907).
 open:
   - >-
-    Mandant system liefert weiterhin HTTP 500, aus anderer Ursache: zwei
-    Zeilen in domain_erp.journal_entry_lines haben tenant_id NULL
-    (Buchung IMP-AUDIT-001). Das Lesemodell JournalEntryLine fuehrt tenant_id
-    als Pflichtfeld. Nicht im eigenen Dateibesitz und ausdruecklich keine
-    Datenkorrektur; an Codex gemeldet.
+    R1 Korrektur einer frueheren Meldung: app/services/pos_compat_service.py
+    erzeugt keine mandantenlosen Zeilen, sondern schreibt gar nichts. Der
+    Kopf-INSERT nennt source_doc_id/source_doc_type, die Zeilen account_code
+    — keine dieser Spalten existiert; NOT-NULL-Felder entry_number,
+    posting_date, account_id, line_number fehlen. Der erste INSERT wirft
+    UndefinedColumn, das breite except macht daraus eine Warnung.
+    POS-Tagesabschluesse sind nie in der FiBu gelandet. Nicht repariert:
+    die Buchungslogik braucht eine fachliche Entscheidung, da alle drei
+    Zeilen im Soll stehen und nicht ausgeglichen buchen wuerden.
   - >-
-    Aktiver Schreiber ohne tenant_id: app/services/pos_compat_service.py
-    schreibt journal_entry_lines ohne tenant_id und ohne account_id. Erzeugt
-    denselben Defekt neu. Mandantenisolation betroffen; gehoert Codex.
+    R2 aufgeklaert: die Zeilen ohne tenant_id gehoeren zu IMP-AUDIT-001,
+    Mandant system, Status draft, "Integrationstest Buchung" vom 2026-03-03.
+    Testrueckstand im Dev-Bestand, kein Produktivmandant betroffen. Keine
+    Datenkorrektur vorgenommen.
+  - >-
+    R3 neu: Routen-Ueberlagerung unter /api/mcp/policy —
+    app.api.v1.endpoints.policies gewinnt gegen app.policy.router fuer list,
+    create, update, delete, test, export, restore. Zwei divergierende
+    Restore-Implementierungen mit unterschiedlichem Request-Vertrag.
+  - >-
+    R4 neu: gesicherte Policy-Backups sind ueber die API nicht abrufbar; ein
+    Restore aus einer Sicherung setzt Server-Dateizugriff voraus.
 ai_harness:
   fachlicher_vertrag: >-
     Die Journal-Liste zeigt jede gespeicherte Buchung mit ihrer
@@ -156,3 +200,5 @@ external_gates:
 verification:
   - python -m pytest tests/test_journal_source_contract.py
   - python -m pytest tests/test_journal_entries.py tests/test_journal_entries_api.py
+  - python -m pytest tests/test_policy_response_contract.py
+  - python scripts/api_runtime_sweep.py

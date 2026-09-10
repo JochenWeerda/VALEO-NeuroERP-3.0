@@ -140,3 +140,63 @@ wirkt erst nach Neustart. Neustart bitte durch Codex.
    wuerde eine Mandantengrenze verwaessern statt einen Datenfehler zu melden.
 2. `app/services/pos_compat_service.py` schreibt `journal_entry_lines` ohne
    `tenant_id` und ohne `account_id` und erzeugt denselben Defekt neu.
+
+## Nachtrag: Neustart und restliche Laufzeitfehler (2026-09-10)
+
+Der User hat Claude Code Neustart und die verbliebenen Laufzeitfehler
+uebertragen, weil Codex ruht. Besitzerweiterung im Workboard vermerkt.
+
+**Neustart.** `docker compose restart backend`; `./app` ist bind-gemountet,
+kein Rebuild noetig. Vorher geprueft: Codex' untracked Migration
+`desktop_runtime_repair_20260909` war bereits DB-Head, `alembic upgrade head`
+beim Start also ein No-op — keine fremde unfertige Migration ausgeloest.
+Damit ist die Abnahme dieses Slices live erfuellt: `/api/v1/journal-entries/`
+liefert HTTP 200 mit unveraenderter Herkunft.
+
+**Codex' Reparaturmigration war fertig und wirksam** und hing nur am Neustart:
+`api_keys`, `opportunities`, `frachtbriefe` und `users.preferences` sind
+vorhanden, beide Opportunities-Routen und `/readyz` sind gruen.
+`domain_shared.admin_report_permissions` gehoerte nicht dazu.
+
+**Behoben (Commit `d9410c646`).**
+
+| Endpunkt | Ursache | Fix |
+|---|---|---|
+| `/api/v1/admin/report-permissions` | Tabelle fehlt in auf head gestempelter DB | neue additive Migration `admin_report_permissions_repair_20260910` |
+| `/api/mcp/policy/backup` | kopierte SQLite-Datei ueber `DEFAULT_DB`, seit Postgres-Umstellung `None` | JSON-Export als Sicherung, Namen auf `.json` begrenzt |
+| `/api/mcp/policy/{list,upsert,create,update,delete,restore}` | `response_model=StatusResponse` vs. `{"ok": True}` | Antwortmodelle bilden die tatsaechliche Nutzlast ab |
+
+Der dritte Punkt war der gefaehrlichste: FastAPI validiert die Antwort *nach*
+der Ausfuehrung. `/policy/restore` ersetzte damit alle Regeln und meldete
+anschliessend HTTP 500 — eine destruktive Operation, die Fehlschlag meldet,
+obwohl sie gelaufen ist, und zur Wiederholung einlaedt. `/policy/list` verlor
+durch dasselbe Modell still sein `data`.
+
+**Gesamtnachweis.** `scripts/api_runtime_sweep.py` gegen das neu gestartete
+Backend: **980 Routen, 0x 5xx, 0 unerwartete 503**, `ok_2xx` 913 (vorher 907).
+Restore-Rundlauf: Sicherung geschrieben, wieder eingespielt, Regelzahl
+unveraendert. 15 neue Vertragstests, 1109 Tests gruen im Bereich
+`polic|report|admin|journal|finance`. OpenAPI neu erzeugt, kein Drift.
+
+**Korrektur meiner frueheren A3-Meldung.** `app/services/pos_compat_service.py`
+erzeugt *keine* mandantenlosen Zeilen — der Pfad schreibt gar nichts. Der
+Kopf-INSERT nennt `source_doc_id`/`source_doc_type`, die Zeilen `account_code`;
+keine dieser Spalten existiert, und die NOT-NULL-Felder `entry_number`,
+`posting_date`, `account_id`, `line_number` fehlen. Der erste INSERT wirft
+`UndefinedColumn`, das breite `except Exception` macht daraus eine Warnung.
+POS-Tagesabschluesse sind damit nie in der FiBu gelandet. Bewusst nicht
+repariert: die drei Zeilen (4000 Umsatz, 1000 Kasse, 1200 Karte) stehen alle
+im Soll und wuerden nicht ausgeglichen buchen — das ist eine fachliche
+Entscheidung, keine Mechanik.
+
+**A2 aufgeklaert.** Die Zeilen ohne `tenant_id` gehoeren zu `IMP-AUDIT-001`:
+Mandant `system`, Status `draft`, „Integrationstest Buchung" vom 2026-03-03 —
+Testrueckstand im Dev-Bestand, kein Produktivmandant betroffen. Keine
+Datenkorrektur vorgenommen.
+
+**Neu gefunden.** Routen-Ueberlagerung unter `/api/mcp/policy`:
+`app.api.v1.endpoints.policies` gewinnt gegen `app.policy.router` fuer `list`,
+`create`, `update`, `delete`, `test`, `export`, `restore`; nur `backup`,
+`backups`, `ws` erreichen letzteren. Zwei divergierende
+Restore-Implementierungen mit unterschiedlichem Request-Vertrag. Ausserdem
+sind gesicherte Backups ueber die API nicht abrufbar.
