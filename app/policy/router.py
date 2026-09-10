@@ -70,12 +70,16 @@ def _resolve_backup_file(file_name: str) -> Path:
     return candidate
 
 
-@router.get("/backup", dependencies=[Depends(require_roles("admin"))])
+@router.post("/backup", dependencies=[Depends(require_roles("admin"))])
 async def backup_db(
     user: User = Depends(get_current_user),
     store: PolicyStore = Depends(get_store),
 ) -> dict:
     """Sichert alle Policies als JSON-Datei.
+
+    Bewusst ``POST``: der Aufruf legt eine Datei an. Als ``GET`` traf ihn der
+    naechtliche Runtime-Sweep, der nur parameterlose GET-Routen abfragt, und
+    erzeugte bei jedem Lauf eine Sicherung (SPEC-SOURCE-REALAPP-20260910).
 
     Der Policy-Store liegt seit der Umstellung auf ``PolicyService`` in
     PostgreSQL; die frueheren Sicherungen kopierten eine SQLite-Datei, die es

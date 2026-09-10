@@ -66,9 +66,13 @@ jobs:
 
       - name: Start backend
         run: |
-          nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning > uvicorn.log 2>&1 &
+          # Bewusst die Wurzel-``main``: app.main ist die auth-freie
+          # Test-Schicht, der 251 Produktionsrouten fehlen. Die Bereitschafts-
+          # probe muss deshalb /api/v1/openapi.json abfragen — die Produktions-
+          # App liefert auf /openapi.json 404 (SPEC-SOURCE-REALAPP-20260910).
+          nohup python -m uvicorn main:app --host 127.0.0.1 --port 8000 --log-level warning > uvicorn.log 2>&1 &
           for i in $(seq 1 120); do
-            if curl -sf -o /dev/null http://127.0.0.1:8000/openapi.json; then
+            if curl -sf -o /dev/null http://127.0.0.1:8000/api/v1/openapi.json; then
               echo "Backend bereit nach ${i}x5s"; exit 0
             fi
             sleep 5

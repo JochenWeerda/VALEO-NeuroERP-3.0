@@ -97,8 +97,27 @@ class CustomerUpdate(BaseSchema):
 
 
 class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
-    """Full customer schema"""
-    id: UUID = Field(..., description="Customer ID")
+    """Full customer schema.
+
+    Nur Antwortmodell: die Schreibwege laufen ueber ``CustomerCreate`` und
+    ``CustomerUpdate``, die keine ``id`` entgegennehmen.
+    """
+
+    # Leseweg: die Spalte ``domain_crm.customers.id`` ist ``character varying``
+    # und traegt neben UUIDs auch fachliche Schluessel aus Demo- und
+    # UAT-Bestaenden (z. B. ``DEMO-CUST-001``). Ein ``UUID``-Typ hier hat die
+    # gesamte Kundenliste mit HTTP 500 abgebrochen, sobald der CRM-Sidecar
+    # nicht erreichbar war und der Degrade-Pfad lokale Daten gelesen hat —
+    # sichtbar nur in Umgebungen ohne Sidecar, etwa im CI-Runtime-Sweep
+    # (SPEC-SOURCE-REALAPP-20260910). Gespeicherte Ids werden unveraendert
+    # durchgereicht, statt vorhandene Kunden aus der Liste zu entfernen.
+    id: str = Field(..., description="Customer ID (gespeicherter Schluessel, unveraendert)")
+    # Gleiche Begruendung fuer die Adresse: gespeicherte Werte werden gelesen,
+    # nicht erneut auf Zustellbarkeit geprueft. ``EmailStr`` lehnt unter anderem
+    # die per RFC 2606 fuer Testdaten reservierte Domain ``.invalid`` ab und
+    # brach damit dieselbe Liste ab. Der Schreibweg (``CustomerCreate`` und
+    # ``CustomerUpdate``) validiert weiterhin als ``EmailStr``.
+    email: Optional[str] = Field(None, description="Contact email (gespeichert, unveraendert)")
     business_partner_id: Optional[str] = Field(
         None,
         max_length=36,

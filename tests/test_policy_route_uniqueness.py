@@ -86,7 +86,7 @@ class TestRollenpruefung:
             ("/delete", "POST"),
             ("/export", "GET"),
             ("/restore", "POST"),
-            ("/backup", "GET"),
+            ("/backup", "POST"),
             ("/backups", "GET"),
             ("/backups/restore", "POST"),
         ],
@@ -96,6 +96,13 @@ class TestRollenpruefung:
     ):
         route = policy_routes[(PRAEFIX + pfad, (methode,))][0]
         assert _hat_rollenpruefung(route), f"{methode} {pfad} ohne Rollenpruefung"
+
+    def test_backup_ist_kein_get(self, policy_routes):
+        """Der Aufruf legt eine Datei an. Als GET traf ihn der naechtliche
+        Runtime-Sweep und erzeugte bei jedem Lauf eine Sicherung."""
+        vorhanden = {(p, m) for (p, ms) in policy_routes for m in ms}
+        assert (PRAEFIX + "/backup", "POST") in vorhanden
+        assert (PRAEFIX + "/backup", "GET") not in vorhanden
 
     @pytest.mark.parametrize("pfad,methode", [("/list", "GET"), ("/test", "POST")])
     def test_lesende_routen_bleiben_ohne_rollenpruefung(

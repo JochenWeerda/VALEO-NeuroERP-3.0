@@ -159112,7 +159112,7 @@
         "type": "object"
       },
       "app__api__v1__schemas__crm__Customer": {
-        "description": "Full customer schema",
+        "description": "Full customer schema.\n\nNur Antwortmodell: die Schreibwege laufen ueber ``CustomerCreate`` und\n``CustomerUpdate``, die keine ``id`` entgegennehmen.",
         "properties": {
           "address": {
             "anyOf": [
@@ -159246,19 +159246,17 @@
           "email": {
             "anyOf": [
               {
-                "format": "email",
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Contact email",
+            "description": "Contact email (gespeichert, unveraendert)",
             "title": "Email"
           },
           "id": {
-            "description": "Customer ID",
-            "format": "uuid",
+            "description": "Customer ID (gespeicherter Schluessel, unveraendert)",
             "title": "Id",
             "type": "string"
           },
@@ -166756,16 +166754,16 @@
       }
     },
     "/api/mcp/policy/backup": {
-      "get": {
-        "description": "Sichert alle Policies als JSON-Datei.\n\nDer Policy-Store liegt seit der Umstellung auf ``PolicyService`` in\nPostgreSQL; die frueheren Sicherungen kopierten eine SQLite-Datei, die es\nnicht mehr gibt (``DEFAULT_DB`` ist None). Gesichert wird deshalb der\nfachliche Inhalt ueber den JSON-Export, den ``/restore`` wieder einspielt.",
-        "operationId": "backup_db_api_mcp_policy_backup_get",
+      "post": {
+        "description": "Sichert alle Policies als JSON-Datei.\n\nBewusst ``POST``: der Aufruf legt eine Datei an. Als ``GET`` traf ihn der\nnaechtliche Runtime-Sweep, der nur parameterlose GET-Routen abfragt, und\nerzeugte bei jedem Lauf eine Sicherung (SPEC-SOURCE-REALAPP-20260910).\n\nDer Policy-Store liegt seit der Umstellung auf ``PolicyService`` in\nPostgreSQL; die frueheren Sicherungen kopierten eine SQLite-Datei, die es\nnicht mehr gibt (``DEFAULT_DB`` ist None). Gesichert wird deshalb der\nfachliche Inhalt ueber den JSON-Export, den ``/restore`` wieder einspielt.",
+        "operationId": "backup_db_api_mcp_policy_backup_post",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Backup Db Api Mcp Policy Backup Get",
+                  "title": "Response Backup Db Api Mcp Policy Backup Post",
                   "type": "object"
                 }
               }
