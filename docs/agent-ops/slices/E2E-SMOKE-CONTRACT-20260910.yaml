@@ -1,0 +1,36 @@
+slice_id: E2E-SMOKE-CONTRACT-20260910
+title: Inventory- und Finance-Smoke-Vertraege
+owner: Codex
+status: in arbeit
+created_at: "2026-09-10"
+goal: Decimal-Assertion und Mahnstufen-Response-500 in beiden roten Smoke-Shards beheben.
+coordination: Eigener Claim 44481ee09; Claude-Journal-Dateien bleiben ausserhalb des Besitzes.
+file_ownership:
+  - playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts
+  - playwright-tests/specs/finance/finance-lifecycle-smoke.spec.ts
+  - app/api/v1/schemas/finance_actions_schemas.py
+  - tests/test_mahnstufe_response_contract.py
+  - docs/agent-ops/slices/E2E-SMOKE-CONTRACT-20260910.yaml
+  - docs/quality-assurance/e2e-smoke-contract-2026-09-10.md
+acceptance:
+  - Beide betroffenen Smoke-Shards bestehen ohne zusaetzliche Skips.
+  - Mahnstufen 1, 2, 3 und INKASSO sind erreichbar und als Text serialisiert.
+  - Eskalation ueber INKASSO hinaus bleibt 422 ohne neue Buchung.
+tests:
+  - tests/test_mahnstufe_response_contract.py
+  - tests/test_dom_finance_004.py
+  - tests/test_welle5_response_models.py
+  - Playwright smoke fuer finance und inventory
+risks:
+  - Der Test erzeugt eindeutig benannte append-only Mahnstufen-Testbelege.
+  - Geteilter Arbeitsbaum; eigene Aenderungen isoliert committen.
+ai_harness:
+  fachlicher_vertrag: Vollstaendige Eskalationsfolge und Mengenwert 1000 pruefen.
+  architektur_vertrag: Bestehender String-Response-Vertrag; interne Service-Zahlen bleiben unveraendert.
+  daten_vertrag: Keine historischen Buchungen veraendern; neue eindeutige Testbelege.
+  test_vertrag: Echte Service-Rueckgaben durch HTTP-Response-Validierung und Live-Smoke abnehmen.
+  security_vertrag: Berechtigungen und Tenant-Header erhalten; 500 nicht als erlaubt behandeln.
+  betriebs_vertrag: Nur lokales Backend fuer Code-Aktivierung neu starten.
+  dokumentations_vertrag: Workboard, Slice, Abnahmebericht mit Tests und Commit-SHA.
+external_gates:
+  - Vollstaendiger gruener GitHub-Smoke-Lauf nach Push.

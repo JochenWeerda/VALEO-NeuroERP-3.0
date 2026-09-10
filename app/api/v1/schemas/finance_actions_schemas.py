@@ -15,7 +15,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -106,6 +106,13 @@ class MahnstufeOut(BaseSchema):
     bearbeitungsgebuehr_eur: Optional[float] = None
     operator: Optional[str] = None
     created_at: Optional[datetime] = None
+
+    @field_validator("stufe", "vorherige_stufe", mode="before")
+    @classmethod
+    def serialize_service_stage(cls, value):
+        # The service calculates numeric stages; persisted audit stages are text.
+        # Preserve the public string contract for both response paths.
+        return str(value) if type(value) is int else value
 
 
 class MahnstufenTrailOut(BaseSchema):

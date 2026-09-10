@@ -42,10 +42,10 @@ Journal-Slice.
 **Dateibesitz wird vor dem ersten Codepaket hier konkretisiert.** Bis dahin nur
 lesende Analyse der Workflow-Logs und der Manifeste.
 
-## E2E-SMOKE-CONTRACT-20260910 - reserviert
+## E2E-SMOKE-CONTRACT-20260910 - in arbeit
 
 **Von:** Folgebefunde aus Claudes Uebergabe, User-Auftrag weiter.
-**Owner:** Codex. **Stand:** reserviert 2026-09-10.
+**Owner:** Codex. **Stand:** in arbeit 2026-09-10; Claim `44481ee09`.
 **Ziel:** Inventory-Decimal-Assertion und echten Finance-Mahnstufen-500 im Smoke-Gate schliessen.
 **Dateibesitz:** `playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts`,
 `playwright-tests/specs/finance/finance-lifecycle-smoke.spec.ts`,
@@ -56,6 +56,17 @@ im Inventory-Smoke geprueft; betroffene Smoke-Shards gruen, kein zusaetzlicher S
 **Risiken:** Keine historischen Buchungsdaten aendern; nur eindeutige Testbelege.
 Schwellen und zulassige Fehlercodes nicht aufweichen. Security Scan bleibt separat.
 
+**Befund:** Lauf 34470538019: Inventory erhaelt Decimal-String statt Zahl;
+Finance scheitert an Integer-Stufe gegen String-Response. Gezielte
+Normalisierung und exakte Decimal-Assertion vorbereitet; Mahnstufen-Smoke
+prueft nun alle vier Stufen, Endstufensperre und Audit-Trail mit eindeutiger
+Testreferenz. [Abnahmebericht](../quality-assurance/e2e-smoke-contract-2026-09-10.md).
+
+**Validierung 2026-09-10:** 35 Backend-Tests gruen, Slice-Readiness und
+Handbuch-Driftcheck gruen. Lokal 19 Smoke-Tests bestanden, ein bestehender
+UI-Skip; drei Finance-Verbindungsabbrueche beim Neustart. Nach gesundem
+Backend alle drei Finance-Lifecycle-Tests gruen. Inventory-Lifecycle gruen.
+GitHub-Gesamtabnahme nach Push ausstehend.
 
 ## L3-DESKTOP-REBUILD-20260908 - in arbeit
 
