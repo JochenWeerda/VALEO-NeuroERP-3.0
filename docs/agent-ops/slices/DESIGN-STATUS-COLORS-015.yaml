@@ -2,9 +2,10 @@ slice_id: DESIGN-STATUS-COLORS-015
 id: DESIGN-STATUS-COLORS-015
 title: Rohe Palette-Statusfarben auf theme-bewusste Utilities umstellen (Welle 1)
 owner: Claude Code
-status: in_arbeit
+status: welle_1_abgeschlossen
 created_at: "2026-09-10"
 started_at: "2026-09-10"
+completed_at: "2026-09-10"
 goal: >-
   Die im Design-Audit gemessenen Kontrastverstoesse beheben: rohe
   Palette-Textklassen wie text-green-700 durch die theme-bewussten Utilities
@@ -95,3 +96,37 @@ ai_harness:
 verification:
   - npx tsc --noEmit
   - npm run test
+
+ergebnis_welle_1:
+  commit: c76893e00
+  ersetzungen: 301
+  dateien: 127
+  werkzeug: >-
+    Codemod mit Selbsttest ueber sechs Musterfaelle (reiner Statustext,
+    Badge-Tripel, Klassenfragment mit trennendem Leerzeichen, dark-Paar,
+    hover-Prefix, ring-Begleiter). Der Schutz gegen Verschmelzen benachbarter
+    Klassen war noetig: ein erster Entwurf htte bei Fragmenten wie
+    "text-red-700 " das trennende Leerzeichen entfernt und die Folgeklasse
+    angeklebt.
+  baseline_vorher:
+    - "npx tsc --noEmit: exit 0"
+    - "vitest: 126 Dateien, 495 Tests bestanden, 1 bekannter Skip"
+  messung_nachher:
+    - "npx tsc --noEmit: exit 0"
+    - "vitest: 126 Dateien, 495 Tests bestanden, 1 bekannter Skip"
+    - "Gegenprobe mit demselben Skript: 0 verbleibende Welle-1-Vorkommen"
+  abgrenzung_eingehalten: >-
+    Keine Datei ausserhalb packages/frontend-web/src angefasst; Codex' Stand an
+    packages/frontend-web/package.json blieb unberuehrt.
+offen_welle_2:
+  vorkommen: 268
+  dateien: 102
+  beschreibung: >-
+    Badge-Tripel der Form "bg-green-50 text-green-700 border-green-200". Sie
+    gehoeren laut CLAUDE.md ueber zentrale Badge-Varianten. Das ist
+    Entwurfsarbeit und kein Codemod: eine mechanische Ersetzung liesse die
+    Flaechenfarbe stehen und erzeugte ein inkonsistentes Zwischenbild.
+  naechster_schritt: >-
+    Badge-Varianten fuer die vier Statusrollen pruefen und die Tripel
+    maskenweise darauf umstellen, beginnend bei den Kernrouten des Audits
+    (/agrar, /finance, /lager).
