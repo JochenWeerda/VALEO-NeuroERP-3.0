@@ -97,9 +97,45 @@ kam ueber eine eigene additive Migration.
 3. **Drei Backend-Neustarts** (`docker compose restart backend`). Vorher
    geprueft: deine untracked Migration `desktop_runtime_repair_20260909` war
    bereits DB-Head, `alembic upgrade head` beim Start also ein No-op.
-4. **Neue Migration angewandt:** `admin_report_permissions_repair_20260910`,
-   additiv nach dem Muster deiner Reparaturmigration. DB-Head steht jetzt
-   darauf.
+4. **Neue Migration angewandt und wieder zurueckgezogen** — siehe naechster
+   Abschnitt. Der DB-Head steht wieder auf `desktop_runtime_repair_20260909`.
+
+### Fehler von mir, korrigiert: gebrochene Alembic-Kette
+
+`admin_report_permissions_repair_20260910` hatte
+`down_revision = "desktop_runtime_repair_20260909"` — **deine unversionierte
+Migration.** Lokal existiert sie, im Repository nicht. Damit brach jeder
+`alembic upgrade head` aus einem sauberen Checkout mit
+`KeyError: 'desktop_runtime_repair_20260909'`.
+
+Betroffen: der naechtliche **Runtime API Sweep** (34450092672, die vier Naechte
+davor gruen) und der **Pytest-Workflow**, der dadurch schon im
+Migrationsschritt scheiterte statt in den Tests. Ich hatte die Kopplung in der
+Slice-YAML notiert und trotzdem nicht gehandelt — der Fehler lag darin, aus
+"die DB ist dort gestempelt" auf "das Repository kennt die Revision" zu
+schliessen.
+
+Umhaengen auf die letzte committete Revision waere kein Fix gewesen, sondern
+ein Tausch: lokal entstuenden zwei Heads (nachgemessen), und der
+Container-Start ueber `init_db.py` liefe in eine Crash-Schleife. Die Migration
+ist deshalb zurueckgezogen (`5f4b8d929`), die lokale `alembic_version` steht
+wieder auf deinem Head, `alembic upgrade head` laeuft lokal und im
+Repository-Stand jeweils einkoepfig durch. Die Tabelle
+`domain_shared.admin_report_permissions` bleibt bestehen, der Endpunkt
+antwortet weiter mit 200.
+
+**Bitte an dich:** Auf einer frischen Datenbank legt
+`admin_report_permissions_20260215` die Tabelle ohnehin an. Gebraucht wird die
+Reparatur nur von Datenbanken, die auf head gestempelt sind und die Tabelle
+nicht haben — genau der Fall, den `desktop_runtime_repair_20260909` abdeckt.
+Nimm `domain_shared.admin_report_permissions` dort mit auf, sobald du deine
+Migration committest; die Tabellendefinition steht in
+`alembic/versions/admin_report_permissions_20260215.py`.
+
+**Und die eigentliche Ursache:** eine angewandte Migration, die nicht im
+Repository liegt, macht jede Folgemigration unmoeglich. Solange
+`desktop_runtime_repair_20260909` unversioniert bleibt, kann niemand darauf
+aufbauen.
 
 ### Korrektur einer frueheren Meldung an dich
 
