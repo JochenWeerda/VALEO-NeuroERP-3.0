@@ -54,6 +54,24 @@ bleiben extern. Der Slice bleibt bis zur vollstaendigen Abnahme in Arbeit.
 
 ## Zwischenstand in Git
 
+### CRM-Folgewelle
+
+Beide Opportunities-HTTP-500 stammen aus demselben CRM-Sales-Dienst.
+`crm_sales_alembic_version` hatte keine Revision: Migration 002 verwendet
+eine in PostgreSQL unzulaessige Fensterfunktion direkt im UPDATE. Danach
+blockierte ein Text-Fremdschluessel auf eine UUID-ID die gesamte Kette.
+Die bisher nicht ausfuehrbare Migration wurde ohne Aenderung ihrer
+Revision oder ihres Zielmodells repariert: Nummerierung per CTE, Historien-
+Fremdschluessel als UUID entsprechend dem bestehenden ORM-Modell.
+
+`alembic upgrade head` im lokalen CRM-Sales-Container: 001 und 002 bestanden.
+`python -m unittest discover -s tests -p test_migration_numbering.py -v`:
+ein PostgreSQL-Test bestanden (temporaere Tabelle, stabile Reihenfolge,
+Erhalt bestehender Referenz und Wiederholung). Beide Backend-Aliasse
+`/api/crm-sales/opportunities/` und `/api/v1/crm/opportunities/`: HTTP 200.
+Die Schemaanlage verwendet die vorhandenen Migrationen; kein CRM-Container
+wurde neu gebaut oder neu gestartet.
+
 `ccef6c96e` wurde nach `origin/main` gepusht. Der Visual-Audit nach dem
 Neubau bestand ebenfalls mit 12/12. Die Readiness-Ursache ist korrigiert:
 Alembic fuehrt `version_num`, nicht `version`. Zwei Regressionen pruefen

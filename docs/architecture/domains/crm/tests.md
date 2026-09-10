@@ -12,6 +12,14 @@ version: 1.0.0
 
 ## Backend (pytest)
 
+CRM-Sales-Migrationen: Im Service-Container
+`python -m unittest discover -s tests -p test_migration_numbering.py -v`.
+Der Test fuehrt das Nummerierungs-SQL aus Migration 002 auf einer temporaeren
+PostgreSQL-Tabelle aus und prueft stabile Vergabe, Referenzerhalt und
+Wiederholung. Lokaler Nachweis 2026-09-10: Test und Migrationskette gruen,
+beide Opportunities-Aliasse HTTP 200; Details im
+[Desktop-Abnahmebericht](../../../quality-assurance/l3-desktop-docker-2026-09-08.md).
+
 | Muster | Beispiel |
 |---|---|
 | Business Partner | `tests/test_business_partner*.py` |

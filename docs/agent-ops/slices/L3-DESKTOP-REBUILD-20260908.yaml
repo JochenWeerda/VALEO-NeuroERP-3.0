@@ -7,6 +7,8 @@ coordination: Zentraler Mask-Builder; Screenshots und unversionierte Fremddateie
 resume_20260910: "48 Backend-Tests, 66 Frontend-Runtime-Tests, TypeScript und 12 Visual-Audits bestanden; Docker-Neubau bestanden; API-Sweep 980 Routen, 5 HTTP 500 und readyz 503 offen, keine Transportfehler. Details im Abnahmebericht."
 goal: Desktopmasken gegen L3-Gewohnheiten pruefen, aktuelle Fehler beheben und Docker-Stack neu bauen und testen.
 file_ownership:
+  - services/crm-sales/alembic/versions/002_extend_opportunities.py
+  - services/crm-sales/tests/test_migration_numbering.py
   - docs/agent-ops/slices/L3-DESKTOP-REBUILD-20260908.yaml
   - docs/agent-ops/active-workboard.md
   - docs/quality-assurance/l3-desktop-docker-2026-09-08.md
@@ -18,6 +20,7 @@ acceptance:
   - Backend und Frontend sind in Docker Desktop neu gebaut und gesund.
   - Desktop-Visual-Audit und reale API-/UI-Funktionstests bestanden.
 tests:
+  - CRM-Sales Migrationskette 001 bis 002 und PostgreSQL-Nummerierungsregression
   - Backend L3-, Safety- und Bestandssuiten
   - Frontend Mask-Builder und RenderPlan Unit-Tests
   - TypeScript und Meridian Visual-Audit bei drei Desktopgroessen

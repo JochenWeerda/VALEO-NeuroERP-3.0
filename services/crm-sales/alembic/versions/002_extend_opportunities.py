@@ -46,9 +46,15 @@ def upgrade() -> None:
     # Make number NOT NULL after populating with default values
     # Generate default numbers for existing records
     op.execute("""
-        UPDATE crm_sales_opportunities 
-        SET number = 'OPP-' || LPAD(ROW_NUMBER() OVER (ORDER BY created_at)::text, 6, '0')
-        WHERE number IS NULL;
+        WITH numbered AS (
+            SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS sequence
+            FROM crm_sales_opportunities
+            WHERE number IS NULL
+        )
+        UPDATE crm_sales_opportunities AS opportunity
+        SET number = 'OPP-' || LPAD(numbered.sequence::text, 6, '0')
+        FROM numbered
+        WHERE opportunity.id = numbered.id;
     """)
     
     op.alter_column("crm_sales_opportunities", "number", nullable=False)
@@ -80,7 +86,7 @@ def upgrade() -> None:
     op.create_table(
         "crm_sales_opportunity_history",
         sa.Column("id", sa.String(), primary_key=True, default=uuid4),
-        sa.Column("opportunity_id", sa.String(), sa.ForeignKey("crm_sales_opportunities.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("opportunity_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_sales_opportunities.id", ondelete="CASCADE"), nullable=False),
         sa.Column("field_name", sa.String(128), nullable=False),
         sa.Column("old_value", sa.Text, nullable=True),
         sa.Column("new_value", sa.Text, nullable=True),

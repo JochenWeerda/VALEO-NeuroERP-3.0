@@ -48,6 +48,15 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
+**CRM-Folgewelle 2026-09-10:** Beide Opportunities-Routen liefern jetzt
+HTTP 200. Ursache war die vollstaendig zurueckgerollte CRM-Sales-Migration:
+ungueltige Fensterfunktion im UPDATE, danach Text/UUID-Fremdschluesselkonflikt.
+Migration 002 minimal repariert (CTE und UUID-Verweis), Revisionen unveraendert.
+Kette 001 bis 002 lokal angewendet; PostgreSQL-Regression mit temporaerer
+Tabelle gruen. Dateibesitz umfasst diese CRM-Migration und ihren Test.
+Kein CRM-Neubau oder Neustart; korrigierte Migration im laufenden Container
+angewendet. Reportberechtigungen und Policy-Backup bleiben bei Codex offen.
+
 ## UEBERGABE AN CODEX - 2026-09-10, Claude Code
 
 **Von:** Claude Code an Codex. **Stand:** zur Kenntnis, mit vier offenen Punkten.
