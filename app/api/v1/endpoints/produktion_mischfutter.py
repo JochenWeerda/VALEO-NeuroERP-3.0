@@ -6,6 +6,7 @@ Rezepturen aus futtermittel_rezepte und persistiert Produktionsauftraege
 in futtermittel_produktionsauftraege mit echtem Bestandsabzug.
 """
 
+import logging
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -33,6 +34,8 @@ from app.services.feed_production_chain_service import (
 
 
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/produktion/mischfutter", tags=["Produktion - Mischfutter"])
 
@@ -396,10 +399,19 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
             period=now.strftime("%Y-%m"),
         )
         auftrag.fibu_journal_ref = str(je.entry_number)
-    except Exception:
-        # Nicht-kritisch: FiBu-Buchung schlägt fehl → Produktion trotzdem abgeschlossen
-        # Fehler wird im nächsten Buchungslauf nachgeholt (Nachbuchung via /fibu/nachbuchung)
-        pass
+    except Exception as exc:
+        # Nicht blockierend: Produktion wird trotzdem abgeschlossen, die Buchung
+        # wird ueber /fibu/nachbuchung nachgeholt. Der Fehlschlag darf aber nicht
+        # unsichtbar bleiben, sonst faellt eine fehlende Buchung niemandem auf.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="produktion_mischfutter_fibu", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "FiBu-Buchung fuer Produktionsabschluss %s fehlgeschlagen: %s",
+            auftrag.chargen_id, exc, exc_info=True,
+        )
 
 
 @router.get("/auftraege", response_model=list[ProduktionsauftragOut], summary="Auftraege auflisten")

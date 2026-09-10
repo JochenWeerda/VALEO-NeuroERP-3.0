@@ -17,6 +17,7 @@ Alembic: ``log_freight_tariff_storno_20260613``.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Any, Dict
@@ -31,6 +32,8 @@ from app.core.database import get_db
 from app.api.v1.schemas.base import IDResponse
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/logistik", tags=["logistik", "frachtkosten"])
 
@@ -428,9 +431,19 @@ def create_carrier_invoice(
              WHERE id = :id AND tenant_id = :tenant_id
         """), {"ref": journal_ref, "id": invoice_id, "tenant_id": x_tenant_id})
 
-    except Exception:
-        # FiBu-Fehler → Invoice gespeichert, Status bleibt 'offen', manuell nachbuchen
-        pass
+    except Exception as exc:
+        # Nicht blockierend: Rechnung ist gespeichert, Status bleibt 'offen' und
+        # wird manuell nachgebucht. Der Fehlschlag wird gemeldet, damit die
+        # fehlende Buchung nicht unbemerkt bleibt.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="logistics_freight_fibu", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "FiBu-Buchung fuer Frachtrechnung %s fehlgeschlagen: %s",
+            invoice_id, exc, exc_info=True,
+        )
 
     db.commit()
 

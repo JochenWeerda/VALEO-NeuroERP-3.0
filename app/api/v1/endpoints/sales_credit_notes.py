@@ -296,8 +296,19 @@ async def post_credit_note(
               AND op_status NOT IN ('geschlossen', 'ausgeziffert')
         """), {"tid": row[1], "betrag": float(total), "ref": cn_number, "cid": str(row[3])})
         db.commit()
-    except Exception:  # noqa: BLE001 — GL-Zeilen/OP-Reduktion nicht kritisch für Gutschrift-Buchung
-        pass
+    except Exception as exc:  # noqa: BLE001
+        # Nicht blockierend fuer die Gutschrift selbst. Faellt dieser Block aus,
+        # steht der Buchungskopf allerdings ohne GL-Zeilen da — das muss
+        # sichtbar sein und darf nicht still passieren.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="sales_credit_note_gl", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "GL-Zeilen/OP-Reduktion fuer Gutschrift %s fehlgeschlagen: %s",
+            cn_id, exc, exc_info=True,
+        )
 
     log_fibu_audit(db, row[1], "post", "sales_credit_note", cn_id, {"total": float(total)}, request=request)
     return {"ok": True, "journal_entry_id": je_id}

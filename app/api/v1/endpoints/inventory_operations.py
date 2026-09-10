@@ -356,9 +356,18 @@ async def create_bestandskorrektur(
                 amount=amount,
                 reference=ref_number,
             )
-    except Exception:
-        # GL posting is best-effort; don't block the correction
-        pass
+    except Exception as exc:
+        # Nicht blockierend: die Bestandskorrektur bleibt bestehen. Die
+        # ausgefallene GL-Buchung wird gemeldet statt verschluckt.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="inventory_operations_gl", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "GL-Buchung fuer Bestandskorrektur %s fehlgeschlagen: %s",
+            ref_number, exc, exc_info=True,
+        )
 
     db.commit()
 

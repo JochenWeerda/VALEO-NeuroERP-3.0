@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.uuid7 import uuid7
-from app.services.compat_helpers import enqueue_event, list_docs, now_iso, doc_repo, safe_float
+from app.services.compat_helpers import list_docs, now_iso, doc_repo
 
 logger = logging.getLogger(__name__)
 
@@ -57,72 +57,17 @@ class PosCompatService:
         repo.delete("pos_suspended_sale", sale_id)
         return {"deleted": True, "id": sale_id}
 
-    # ── Tagesabschluss (with FiBu integration) ───────────────────────────────
-
-    async def create_tagesabschluss(self, payload: dict) -> dict:
-        """Create daily closing entry and write FiBu journal entries."""
-        abschluss_id = uuid7()
-        total_sales = safe_float(payload.get("total_sales", 0))
-        total_cash = safe_float(payload.get("total_cash", 0))
-        total_card = safe_float(payload.get("total_card", 0))
-        closing_date = payload.get("closing_date", now_iso()[:10])
-
-        # Write FiBu journal entries
-        await self._write_fibu_entries(abschluss_id, closing_date, total_sales,
-                                       total_cash, total_card)
-
-        repo = doc_repo(self.db)
-        doc = {
-            "id": abschluss_id,
-            "tenantId": self.tenant_id,
-            "status": "ABGESCHLOSSEN",
-            "total_sales": total_sales,
-            "total_cash": total_cash,
-            "total_card": total_card,
-            "closing_date": closing_date,
-            "created_at": now_iso(),
-            **{k: v for k, v in payload.items()
-               if k not in ("total_sales", "total_cash", "total_card", "closing_date")},
-        }
-        repo.save("pos_tagesabschluss", abschluss_id, doc)
-        await enqueue_event(self.db, event_type="pos.tagesabschluss.created",
-                            aggregate_id=abschluss_id, payload=doc, tenant_id=self.tenant_id)
-        return doc
-
-    async def _write_fibu_entries(
-        self,
-        abschluss_id: str,
-        closing_date: str,
-        total_sales: float,
-        total_cash: float,
-        total_card: float,
-    ) -> None:
-        from sqlalchemy import text
-        journal_id = uuid7()
-        try:
-            self.db.execute(
-                text("""INSERT INTO domain_erp.journal_entries
-                        (id, tenant_id, entry_date, description, status, source_doc_id, source_doc_type)
-                        VALUES (:id, :tid, :dt, :desc, 'POSTED', :src_id, 'pos_tagesabschluss')"""),
-                {"id": journal_id, "tid": self.tenant_id, "dt": closing_date,
-                 "desc": f"POS Tagesabschluss {closing_date}", "src_id": abschluss_id},
-            )
-            lines = [
-                (uuid7(), journal_id, "4000", "Umsatz POS", total_sales, 0.0),
-                (uuid7(), journal_id, "1000", "Kasse", total_cash, 0.0),
-                (uuid7(), journal_id, "1200", "Kartenzahlung", total_card, 0.0),
-            ]
-            for line_id, jid, account, desc, debit, credit in lines:
-                self.db.execute(
-                    text("""INSERT INTO domain_erp.journal_entry_lines
-                            (id, journal_entry_id, account_code, description, debit, credit)
-                            VALUES (:id, :jid, :acc, :desc, :deb, :cred)"""),
-                    {"id": line_id, "jid": jid, "acc": account, "desc": desc,
-                     "deb": debit, "cred": credit},
-                )
-            self.db.flush()
-        except Exception as exc:
-            logger.warning("FiBu journal write failed for Tagesabschluss %s: %s", abschluss_id, exc)
+    # ── Tagesabschluss ──────────────────────────────────────────────────────
+    #
+    # Hier lagen bis 2026-09-10 ein zweites ``create_tagesabschluss`` und ein
+    # ``_write_fibu_entries``. Beide stammten aus dem Service-Layer-Refactor
+    # 2803a3433 und wurden nie verdrahtet; ausserdem waren sie defekt
+    # (nicht existierende Spalten, fehlende NOT-NULL-Felder, keine tenant_id,
+    # drei Zeilen samtlich im Soll). Entfernt in POS-FIBU-CLEANUP-20260910.
+    #
+    # Gebucht wird ausschliesslich ueber ``POST /pos/tagesabschluss`` in
+    # ``app/api/v1/endpoints/compat.py`` mit den Buchungssaetzen aus
+    # ``app/services/pos_accounting_service.build_pos_closing_lines``.
 
     def list_tagesabschluesse(self) -> list:
         return list_docs(self.db, "pos_tagesabschluss", tenant_id=self.tenant_id)
