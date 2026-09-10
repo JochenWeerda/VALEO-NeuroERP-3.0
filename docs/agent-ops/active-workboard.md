@@ -39,8 +39,57 @@ Finance-/Inventory-Smoke, `finance_actions_schemas.py` und
 Mahnstufen-Regressionstests bleiben unangetastet, ebenso Reparaturmigration und
 Journal-Slice.
 
-**Dateibesitz wird vor dem ersten Codepaket hier konkretisiert.** Bis dahin nur
-lesende Analyse der Workflow-Logs und der Manifeste.
+### Befunderhebung abgeschlossen (Lauf 34470954356, Commit `ef7e7707e`)
+
+**Jobs:** ZAP, Bandit und der Python-/Node-Dependency-Audit sind **gruen**. Rot
+sind nur `Grype Vulnerability Scan` und `Trivy Container Scan`; die
+`Security Scan Summary` ist deren Folge.
+
+**Gate-Semantik geprueft:** Trivy laeuft mit `--ignore-unfixed`, Grype mit
+`--only-fixed --fail-on high`. Gemeldet wird also ausschliesslich, wofuer ein
+Herstellerfix existiert. Die SARIF-Schritte laufen mit `exit-code: 0`, der
+Gate ist der separate Schritt `Enforce Trivy High/Critical gate`.
+
+**Die 95 Dependabot-Meldungen und die Code-Scanning-Alerts sind kein Mass fuer
+den Gate-Umfang** — bestaetigt: von 100 offenen Trivy-Alerts zeigen die meisten
+auf `services/*/requirements.txt`, `pnpm-lock.yaml` und sogar
+`docs/_internal/archive/...`, stammen also aus Dateisystem-Scans anderer
+Workflows. Container-Alerts unter `home/appuser/.local/...` gehoeren zu einem
+anderen Image; unser Backend-venv liegt unter `/opt/venv`.
+
+**Lokal reproduziert** mit dem exakten Gate-Befehl gegen selbst gebaute Images:
+
+*Backend (`Dockerfile.backend`, python:3.13.14-slim-bookworm) — 2 HIGH:*
+
+| Paket | Befund | installiert | Fix |
+|---|---|---|---|
+| `msgpack` | GHSA-6v7p-g79w-8964 | 1.1.2 | 1.2.1 |
+| `setuptools` | CVE-2025-47273 | 70.3.0 | 78.1.1 |
+
+**Ursache belegt:** beide sind *keine* Anwendungsabhaengigkeiten. Sie stehen in
+`pip/_vendor/vendor.txt` — pip liefert sie gebuendelt mit, Trivy liest dieses
+Manifest. Betroffen sind beide pips im Image: venv `26.2.1` und System
+`26.1.2`. Im venv existiert kein `msgpack-*.dist-info` und kein
+`setuptools-*.dist-info`; `importlib.metadata` findet beide nicht.
+
+*Frontend (`Dockerfile.frontend`, nginx-unprivileged auf alpine 3.23.4):*
+Messung laeuft mit `--no-cache --pull`, weil der erste Lauf einen
+Docker-Layer-Cache getroffen haben koennte — die Datei fuehrt bereits
+`apk upgrade --no-cache`. Ergebnis wird hier nachgetragen, bevor dort etwas
+geaendert wird.
+
+### Dateibesitz (konkret, vor dem ersten Codepaket)
+
+- `Dockerfile.backend` — pip aus dem Laufzeit-Image entfernen. Geprueft: kein
+  Laufzeitaufruf von pip (die Treffer in `app/` sind reine Fehlermeldungstexte),
+  kein `pkg_resources`-Import, CMD ist `init_db.py` plus uvicorn.
+- `Dockerfile.frontend` — **nur falls** die Messung ohne Cache dort einen
+  belegten Befund zeigt.
+- `docs/agent-ops/slices/SECURITY-SCAN-20260910.yaml`, dieser Abschnitt.
+
+`.github/workflows/security-scan.yml` bleibt vorerst **unveraendert** — die
+Ursachen liegen in den Images, nicht im Gate. Keine Absenkung von Schwellen,
+keine Ignores, kein `continue-on-error`.
 
 ## E2E-SMOKE-CONTRACT-20260910 - in arbeit
 
