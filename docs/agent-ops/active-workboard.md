@@ -75,11 +75,51 @@ Unbekannte Werte fachlich anhand der bestehenden Schreiber beurteilen.
 Nach Claim sofort eigenen Status hier eintragen und isoliert committen.
 Abschluss mit Commit-SHA, Tests, Live-Nachweis und Restbefunden hier melden.
 
-**Claim 2026-09-10 (Claude Code):** Slice uebernommen, Arbeit beginnt.
-Auftrag `handoffs/l3-journal-source-20260910.md` und AGENTS.md gelesen.
-Dateibesitz wie oben, keine Erweiterung bisher. Keine Container-Neustarts;
-Bedarf fuer den Live-Nachweis wird hier gemeldet. Naechster Schritt:
-vollstaendige Erhebung der realen `source`-Schreiber als Lese-/Schreibvertrag.
+**Stand 2026-09-10 (Claude Code), Fix gepusht `b7316ba6d`:** Ursache war, dass
+der Whitelist-Validator `validate_source` auf `JournalEntryBase` sass und
+dadurch von `JournalEntry` geerbt wurde — dem Response-Model der Liste. Eine
+Schreibregel galt damit auf dem Leseweg; eine einzige Buchung mit nicht
+gelisteter Herkunft liess die ganze Liste mit HTTP 500 kippen. Abgelehnter
+Wert war `produktion_mischfutter` (5 Buchungen, Schreiber
+`endpoints/produktion_mischfutter.py`).
+
+Umsetzung: `JOURNAL_ENTRY_WRITE_SOURCES` fuehrt die 17 im Code belegten
+Herkuenfte je mit Fundstelle. `JournalEntryCreate` validiert weiter dagegen
+und weist unbelegte Eingaben ab; `JournalEntry` reicht gespeicherte Herkunft
+unveraendert durch und toleriert die nullable Spalte. Keine Datenkorrektur,
+keine Umdeutung auf `manual`, keine leere Liste als Fehlerersatz. Die alte
+Whitelist deckte 12 der real geschriebenen Herkuenfte nicht ab.
+
+**Nachweis:** In-Process-Lauf der echten Route gegen die echte DB — Mandant des
+Sweeps `00000000-0000-0000-0000-000000000001` HTTP 200 mit 7 Buchungen und
+unveraenderter Herkunft (`produktion_mischfutter` 5, `sales_invoice` 1,
+`reversal` 1); `test-tenant` HTTP 200 mit 363. Alle 370 gespeicherten
+Buchungen einzeln durch das Lesemodell validiert. Tests: 37 neue
+Vertragstests, 34 Bestandstests (`test_journal_entries*.py`), 621 im Bereich
+`finance|journal|booking|accrual|open_item` — alle gruen. Slice-YAML
+`slices/L3-JOURNAL-SOURCE-20260910.yaml`, Readiness-Check fuer 189 Slices
+bestanden. Gegenprobe: ausser `source` hat kein weiteres Pflichtfeld des
+Lesemodells NULL- oder Laengenverletzungen in den Daten.
+
+**An Codex — Neustart erforderlich:** Der laufende Worker antwortet weiterhin
+mit der alten Whitelist-Meldung, die Aenderung ist reiner Code ohne Migration.
+Fuer den Live-Nachweis im Sweep bitte Backend neu starten; ich fasse keine
+Container an.
+
+**An Codex — zwei Restbefunde ausserhalb meines Dateibesitzes:**
+
+1. Mandant `system` liefert weiterhin HTTP 500, aus anderer Ursache: zwei
+   Zeilen in `domain_erp.journal_entry_lines` haben `tenant_id NULL`
+   (Buchung `IMP-AUDIT-001`), waehrend `JournalEntryLine` `tenant_id` als
+   Pflichtfeld fuehrt. Das ist ein Mandantenisolations-/Datenbefund, kein
+   Lesevertragsproblem — ich habe das Modell bewusst *nicht* aufgeweicht und
+   keine Daten korrigiert.
+2. Aktiver Schreiber ohne Mandant: `app/services/pos_compat_service.py`
+   schreibt `journal_entry_lines` ohne `tenant_id` und ohne `account_id` und
+   erzeugt denselben Defekt neu.
+
+Beides beruehrt Buchungsservices und Buchungsdaten und liegt damit bei dir.
+Wenn ich einen davon uebernehmen soll, bitte hier den Dateibesitz erweitern.
 
 
 ## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08
