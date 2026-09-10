@@ -48,10 +48,10 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
-## POS-FIBU-CLEANUP-20260910 - in arbeit
+## POS-FIBU-CLEANUP-20260910 - abgeschlossen 2026-09-10
 
 **Von:** User-Entscheidung im Anschluss an L3-JOURNAL-SOURCE-20260910.
-**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-10.
 
 **Ziel:** Den nie verdrahteten zweiten POS-Buchungspfad entfernen und die
 FiBu-Schreibpfade, die eine fehlgeschlagene Buchung still verschlucken,
@@ -92,6 +92,33 @@ unveraendert; Tests gruen; Sweep weiterhin 0x 5xx.
 weitere breite Handler bleiben bewusst Best-Effort, weil sie Folgeschritte
 und keine Buchung schlucken: Outbox (`ap_invoice_kernel_posting.py`),
 OP-Anlage (`agrar_settlement_service.py`), Zaehlabfrage (`finance/router.py`).
+
+**Ergebnis 2026-09-10, Commit `2175c4394`:** 67 Zeilen toter Buchungscode aus
+`PosCompatService` entfernt, die sechs tatsaechlich genutzten Methoden bleiben.
+Die zwei durch die Entfernung verwaisten Importe (`enqueue_event`,
+`safe_float`) mitbereinigt; das vorbestehend ungenutzte `Optional` bewusst
+nicht angefasst. Vier Buchungsverluste melden jetzt `logger.error` mit
+`exc_info` und zaehlen `critical_data_path_errors_total` mit eigenem
+Endpunkt-Label; `produktion_mischfutter.py` und `logistics_freight.py` hatten
+noch gar keinen Logger und haben jetzt einen. Fachlicher Ablauf, Betraege,
+Konten und Buchungssaetze unveraendert; `pos_accounting_service.py` nicht
+angefasst.
+
+**Nachweis:** 17 neue Vertragstests `tests/test_pos_booking_single_source.py` —
+darunter der repo-weite Beleg, dass nur `compat.py` POS nach
+`domain_erp.journal_entries` schreibt, der Beleg, dass die nicht existierenden
+Spalten `source_doc_id`/`source_doc_type`/`account_code` nirgends mehr
+vorkommen, und zehn Ausgeglichenheitsfaelle ueber alle Zahlarten,
+Gutscheine, Barentnahme und Kassendifferenz in beide Richtungen. 784 Tests
+gruen im Bereich `pos|produktion|credit_note|inventory|freight|logistic`.
+Vollstaendiger Sweep nach Neustart erneut **980 Routen, 0x 5xx, 0 unerwartete
+503**.
+
+**Vorbestehender Rotstand, nicht von diesem Slice:**
+`tests/test_feed_chain_004.py::TestFeedChain004::test_list_inventory_links`
+scheitert mit `mapped_count == 0`. Gegen die unveraenderte HEAD-Fassung von
+`produktion_mischfutter.py` faellt der Test genauso — er haengt an
+Seed-Daten, die in dieser Dev-DB fehlen. Nicht angefasst.
 
 ## L3-JOURNAL-SOURCE-20260910 - in arbeit
 

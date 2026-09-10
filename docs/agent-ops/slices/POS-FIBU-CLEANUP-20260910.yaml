@@ -2,9 +2,10 @@ slice_id: POS-FIBU-CLEANUP-20260910
 id: POS-FIBU-CLEANUP-20260910
 title: Toten POS-Buchungspfad entfernen und stille FiBu-Buchungsverluste sichtbar machen
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-09-10"
 started_at: "2026-09-10"
+completed_at: "2026-09-10"
 goal: >-
   Den nie verdrahteten zweiten POS-Buchungspfad aus PosCompatService entfernen
   und die vier FiBu-Schreibpfade, die eine fehlgeschlagene Buchung still
@@ -114,6 +115,22 @@ external_gates:
     abgesicherte Pfad der einzige gewuenschte POS-Buchungsweg ist.
   - >-
     Betriebliche Entscheidung, ob die neuen Zaehler alarmiert werden sollen.
+result: >-
+  67 Zeilen toter Buchungscode aus PosCompatService entfernt; die sechs
+  genutzten Methoden bleiben. Zwei durch die Entfernung verwaiste Importe
+  mitbereinigt. Vier Buchungsverluste melden logger.error mit exc_info und
+  zaehlen critical_data_path_errors_total je Endpunkt; zwei der Dateien hatten
+  zuvor gar keinen Logger. Buchungslogik, Betraege und Konten unveraendert.
+verifikation_2026_09_10: >-
+  17 neue Vertragstests, darunter der repo-weite Beleg, dass nur compat.py POS
+  nach domain_erp.journal_entries schreibt, und zehn Ausgeglichenheitsfaelle
+  ueber alle Zahlarten. 784 Tests gruen im betroffenen Bereich. Vollstaendiger
+  api_runtime_sweep nach Neustart: 980 Routen, 0x 5xx, 0 unerwartete 503.
+vorbestehender_rotstand: >-
+  tests/test_feed_chain_004.py::TestFeedChain004::test_list_inventory_links
+  scheitert mit mapped_count == 0, auch gegen die unveraenderte HEAD-Fassung
+  von produktion_mischfutter.py. Seed-Daten fehlen in der Dev-DB; nicht Teil
+  dieses Slices.
 verification:
   - python -m pytest tests/test_pos_booking_single_source.py
   - python scripts/api_runtime_sweep.py
