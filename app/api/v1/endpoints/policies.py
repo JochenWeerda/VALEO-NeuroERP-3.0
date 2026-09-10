@@ -32,6 +32,20 @@ policy_store = PolicyStore()
 
 
 # Request/Response Models
+class PolicyListResponse(BaseSchema):
+    """Antwort von /policy/list — StatusResponse verliert die Nutzlast."""
+
+    success: bool = Field(default=True, description="Ob die Operation erfolgreich war")
+    data: List[Dict[str, Any]] = Field(default_factory=list, description="Policy-Regeln")
+
+
+class PolicyUpsertResponse(BaseSchema):
+    """Antwort von /policy/upsert — meldet die Anzahl geschriebener Regeln."""
+
+    success: bool = Field(default=True, description="Ob die Operation erfolgreich war")
+    count: int = Field(description="Anzahl geschriebener Regeln")
+
+
 class UpsertRequest(BaseModel):
     """Upsert-Request (einzeln oder bulk)"""
     rules: List[Rule]
@@ -82,7 +96,7 @@ def resolve_tenant_policy_override(
 # Endpoints
 
 @router.get("/policy/list", summary="Policies auflisten",
-    response_model=StatusResponse
+    response_model=PolicyListResponse
 )
 async def list_policies() -> Dict[str, Any]:
     """
@@ -100,7 +114,7 @@ async def list_policies() -> Dict[str, Any]:
 
 
 @router.post("/policy/upsert", summary="Policies upsert",
-    response_model=StatusResponse
+    response_model=PolicyUpsertResponse
 )
 async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
     """
@@ -115,7 +129,7 @@ async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
     try:
         policy_store.bulk_upsert(request.rules)
         logger.info(f"Upserted {len(request.rules)} policies")
-        return {"ok": True, "count": len(request.rules)}
+        return {"success": True, "count": len(request.rules)}
     except Exception as e:
         logger.error(f"Failed to upsert policies: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -137,7 +151,7 @@ async def create_policy(rule: Rule) -> Dict[str, Any]:
     try:
         policy_store.upsert(rule)
         logger.info(f"Created/updated policy: {rule.id}")
-        return {"ok": True}
+        return {"success": True, "message": f"Policy {rule.id} angelegt"}
     except Exception as e:
         logger.error(f"Failed to create policy: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -163,7 +177,7 @@ async def update_policy(rule: Rule) -> Dict[str, Any]:
 
         policy_store.upsert(rule)
         logger.info(f"Updated policy: {rule.id}")
-        return {"ok": True}
+        return {"success": True, "message": f"Policy {rule.id} aktualisiert"}
     except HTTPException:
         raise
     except Exception as e:
@@ -191,7 +205,7 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
 
         policy_store.delete(request.id)
         logger.info(f"Deleted policy: {request.id}")
-        return {"ok": True}
+        return {"success": True, "message": f"Policy {request.id} geloescht"}
     except HTTPException:
         raise
     except Exception as e:
@@ -293,7 +307,7 @@ async def restore_policies(request: Request, request_body: RestoreRequest) -> Di
     try:
         policy_store.restore_json(request_body.json_payload)
         logger.warning("Policies restored from JSON - all previous policies replaced")
-        return {"ok": True}
+        return {"success": True, "message": "Alle Policies ersetzt"}
     except Exception as e:
         logger.error(f"Failed to restore policies: {e}")
         raise HTTPException(status_code=400, detail=str(e))

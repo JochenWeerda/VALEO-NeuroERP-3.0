@@ -102754,6 +102754,28 @@
         "title": "PodIn",
         "type": "object"
       },
+      "PolicyListResponse": {
+        "description": "Antwort von /policy/list — StatusResponse verliert die Nutzlast.",
+        "properties": {
+          "data": {
+            "description": "Policy-Regeln",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "success": {
+            "default": true,
+            "description": "Ob die Operation erfolgreich war",
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "title": "PolicyListResponse",
+        "type": "object"
+      },
       "PolicyOverrideLayer": {
         "properties": {
           "enabled": {
@@ -102926,6 +102948,27 @@
           }
         },
         "title": "PolicyOverridesOut",
+        "type": "object"
+      },
+      "PolicyUpsertResponse": {
+        "description": "Antwort von /policy/upsert — meldet die Anzahl geschriebener Regeln.",
+        "properties": {
+          "count": {
+            "description": "Anzahl geschriebener Regeln",
+            "title": "Count",
+            "type": "integer"
+          },
+          "success": {
+            "default": true,
+            "description": "Ob die Operation erfolgreich war",
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PolicyUpsertResponse",
         "type": "object"
       },
       "PortalFeldbuchOut": {
@@ -311807,7 +311850,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
+                  "$ref": "#/components/schemas/PolicyListResponse"
                 }
               }
             },
@@ -312007,7 +312050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
+                  "$ref": "#/components/schemas/PolicyUpsertResponse"
                 }
               }
             },

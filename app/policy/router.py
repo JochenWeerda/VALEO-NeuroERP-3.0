@@ -4,7 +4,6 @@ FastAPI-Router mit CRUD, Test, Backup/Restore und WebSocket
 """
 
 import os
-import shutil
 from pathlib import Path
 from typing import List
 from fastapi import (
@@ -202,10 +201,15 @@ BACKUP_DIR = os.environ.get("POLICY_BACKUP_DIR", "data/backups")
 Path(BACKUP_DIR).mkdir(parents=True, exist_ok=True)
 
 
+BACKUP_SUFFIX = ".json"
+
+
 def _resolve_backup_file(file_name: str) -> Path:
     backup_root = Path(BACKUP_DIR).resolve()
     submitted = Path(file_name)
     if submitted.name != file_name or submitted.is_absolute():
+        raise HTTPException(status_code=400, detail="Backup path is invalid")
+    if submitted.suffix != BACKUP_SUFFIX:
         raise HTTPException(status_code=400, detail="Backup path is invalid")
     candidate = (backup_root / submitted.name).resolve()
     if candidate.parent != backup_root:
@@ -214,14 +218,24 @@ def _resolve_backup_file(file_name: str) -> Path:
 
 
 @router.get("/backup", dependencies=[Depends(require_roles("admin"))])
-async def backup_db(user: User = Depends(get_current_user)) -> dict:
-    """Erstellt Backup der SQLite-Datenbank"""
+async def backup_db(
+    user: User = Depends(get_current_user),
+    store: PolicyStore = Depends(get_store),
+) -> dict:
+    """Sichert alle Policies als JSON-Datei.
+
+    Der Policy-Store liegt seit der Umstellung auf ``PolicyService`` in
+    PostgreSQL; die frueheren Sicherungen kopierten eine SQLite-Datei, die es
+    nicht mehr gibt (``DEFAULT_DB`` ist None). Gesichert wird deshalb der
+    fachliche Inhalt ueber den JSON-Export, den ``/restore`` wieder einspielt.
+    """
     try:
         import datetime
 
         ts = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
-        dest = Path(BACKUP_DIR) / f"policies-{ts}.db"
-        shutil.copyfile(DEFAULT_DB, dest)
+        dest = Path(BACKUP_DIR) / f"policies-{ts}{BACKUP_SUFFIX}"
+        rules = store.export_json()
+        dest.write_text(rules, encoding="utf-8")
         logger.info(f"Created backup: {dest} by {user['sub']}")
         return {"ok": True, "file": str(dest)}
     except Exception as e:
@@ -236,7 +250,7 @@ async def list_backups(user: User = Depends(get_current_user)) -> dict:
         files = [
             str(Path(BACKUP_DIR) / f)
             for f in os.listdir(BACKUP_DIR)
-            if f.endswith(".db")
+            if f.endswith(BACKUP_SUFFIX)
         ]
         files.sort(reverse=True)
         return {"ok": True, "files": files}
@@ -252,6 +266,7 @@ async def restore_db(
     file: str = Body(..., embed=True),
     bg: BackgroundTasks = BackgroundTasks(),
     user: User = Depends(get_current_user),
+    store: PolicyStore = Depends(get_store),
 ) -> dict:
     """
     Stellt Backup wieder her (ACHTUNG: Überschreibt aktuelle DB!)
@@ -269,14 +284,13 @@ async def restore_db(
         if not src.exists():
             raise HTTPException(status_code=400, detail="Backup not found")
 
-        # Safety-Backup vor Restore
+        # Safety-Backup vor Restore: aktueller Stand als JSON-Export
         ts = datetime.datetime.now().isoformat().replace(":", "-").replace(".", "-")
-        safety = Path(BACKUP_DIR) / f"pre-restore-{ts}.db"
-        if Path(DEFAULT_DB).exists():
-            shutil.copyfile(DEFAULT_DB, safety)
+        safety = Path(BACKUP_DIR) / f"pre-restore-{ts}{BACKUP_SUFFIX}"
+        safety.write_text(store.export_json(), encoding="utf-8")
 
-        # Restore
-        shutil.copyfile(src, DEFAULT_DB)
+        # Restore: ersetzt alle vorhandenen Regeln
+        store.restore_json(src.read_text(encoding="utf-8"))
         logger.warning(
             f"Restored policies from {src} by {user['sub']} (safety backup: {safety})"
         )
