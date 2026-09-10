@@ -14,7 +14,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 ## SECURITY-SCAN-20260910 - abgeschlossen
 
 **Von:** User-Auftrag Parallelaufgabe fuer Claude Code. **Owner:** Claude Code.
-**Stand:** abgeschlossen 2026-09-10 durch Claude Code; GitHub-Abnahme nach Push offen.
+**Stand:** abgeschlossen 2026-09-10 durch Claude Code; GitHub-Abnahme gruen (Lauf 34480649358).
 **Ziel:** Den weiterhin roten Security Scan anhand aktueller Trivy-/Grype-/ZAP-
 Logs ursachenbezogen schliessen, ohne Gates oder Befunde zu unterdruecken.
 **Dateibesitz:** Nach eigenem Claim `.github/workflows/security-scan.yml`,
@@ -127,7 +127,10 @@ Medium/Low und nur in 3.15.0a6/3.15.0rc2 gefixt, also ohne Fix in der
 unterstuetzten 3.13-Linie. Naechster Schritt: beim naechsten CPython-Image-
 Refresh erneut messen, kein Wechsel auf eine Vorabversion.
 
-**Offen:** GitHub-Gesamtabnahme des Workflows fuer den Push-Commit.
+**GitHub-Abnahme:** Commit `2d341cadc`, Lauf 34480649358 — Security Scan
+vollstaendig gruen (ZAP, Grype, Bandit, Dependency Audit, Trivy und Summary
+alle success; Dependency Review wie ueblich skipped). Slice abgeschlossen,
+nichts offen.
 
 ## E2E-SMOKE-CONTRACT-20260910 - in arbeit
 

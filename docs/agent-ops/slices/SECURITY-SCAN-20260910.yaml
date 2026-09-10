@@ -148,6 +148,10 @@ messung_2026_09_10:
       unterstuetzten 3.13-Linie. Naechster Schritt: mit dem naechsten CPython-
       Image-Refresh erneut pruefen, nicht vorzeitig auf eine Vorabversion
       wechseln.
-  offen: >-
-    GitHub-Gesamtabnahme des Workflows fuer den tatsaechlichen Commit steht
-    nach dem Push aus; die lokale Messung nutzt exakt die Gate-Befehle.
+  github_abnahme:
+    commit: 2d341cadc
+    lauf: 34480649358
+    ergebnis: >-
+      Security Scan vollstaendig gruen: OWASP ZAP, Grype, Bandit,
+      Dependency Audit, Trivy und Security Scan Summary alle success
+      (Dependency Review wie ueblich skipped).
