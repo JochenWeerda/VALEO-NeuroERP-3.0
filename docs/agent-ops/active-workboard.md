@@ -152,9 +152,16 @@ neu. Sollte das Nightly flackern, gehoert `/api/v1/health/ready` in
 `config/runtime_sweep_allowlist.yaml` — die Datei liegt im Codex-Besitz, ich
 habe sie nicht angefasst.
 
-**Weiterhin offen:** `docs/api/openapi.json` ist ein verwaistes Artefakt vom
-2026-02-13 mit 590 Pfaden, erzeugt von `scripts/export_openapi.py` aus der
-Produktions-App. Entweder in die Generator-Kette aufnehmen oder entfernen.
+**Nachtrag 2026-09-10, entfernt.** `docs/api/openapi.json` (verwaistes
+Artefakt vom 2026-02-13, 590 Pfade, 1,9 MB) und sein einziger Erzeuger
+`scripts/export_openapi.py` sind geloescht. Beide waren durch
+`generate_openapi.py` aus derselben Produktions-App vollstaendig abgeloest;
+das Skript stehen zu lassen haette die Datei beim naechsten Lauf neu angelegt.
+Kein Code, keine CI, kein mkdocs-Nav verwies darauf; die zwei Fundstellen in
+`scripts/apm_manager.py` und `scripts/docs-legacy-migrate.py` meinen das
+Verzeichnis, das mit vier AI-CRM-Toolschemata bestehen bleibt. `RESTARBEITEN.md`
+und die `_internal/archive`-Dokumente nennen die Datei weiterhin — sie halten
+historische Staende fest und werden bewusst nicht umgeschrieben.
 
 
 ## POLICY-ROUTE-DEDUP-20260910 - abgeschlossen 2026-09-10

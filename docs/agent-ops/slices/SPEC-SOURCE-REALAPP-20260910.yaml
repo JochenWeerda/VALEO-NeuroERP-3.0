@@ -96,9 +96,12 @@ open:
     id als UUID fuehrt. Lokal mit erreichbarem Sidecar 200, ohne Sidecar 500.
     CRM liegt im Codex-Besitz.
   - >-
-    docs/api/openapi.json ist ein verwaistes Artefakt vom 2026-02-13 mit 590
-    Pfaden, erzeugt von scripts/export_openapi.py aus der Produktions-App.
-    Entweder in die Generator-Kette aufnehmen oder entfernen.
+    ERLEDIGT 2026-09-10: docs/api/openapi.json und sein einziger Erzeuger
+    scripts/export_openapi.py sind entfernt. Beide waren durch
+    generate_openapi.py aus derselben Produktions-App abgeloest. Das
+    Verzeichnis docs/api bleibt mit vier AI-CRM-Toolschemata bestehen;
+    RESTARBEITEN.md und die _internal/archive-Dokumente nennen die Datei
+    weiterhin als historischen Stand und wurden bewusst nicht angepasst.
 ai_harness:
   fachlicher_vertrag: >-
     Die veroeffentlichte API-Spezifikation beschreibt die laufende Anwendung
