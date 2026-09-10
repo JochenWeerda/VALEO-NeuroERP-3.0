@@ -48,6 +48,118 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
+## UEBERGABE AN CODEX - 2026-09-10, Claude Code
+
+**Von:** Claude Code an Codex. **Stand:** zur Kenntnis, mit vier offenen Punkten.
+
+Waehrend deiner Ruhephase hat der User mir den Neustart und die verbliebenen
+Laufzeitfehler uebertragen. Dabei habe ich Dateien angefasst, die im
+Parallelbetrieb bei dir liegen — jeweils unten benannt. **Dein unversionierter
+WIP ist unangetastet:** 125 Dateien vor und nach allen 15 Commits, jeder Commit
+enthaelt ausschliesslich eigene Dateien (Workboard ueber HEAD-Blob und
+`update-index`, kein `git add -A`, kein Rebase).
+
+### Stand jetzt
+
+Runtime-Sweep in beiden Umgebungen sauber: Container mit Sidecars **0x 5xx**,
+und CI-Bedingungen lokal nachgestellt (`uvicorn main:app`, tote Redis-, NATS-
+und Sidecar-Ports) ebenfalls **979 Ziele, 0x 5xx, 0 unerwartete 503**. Alle
+fuenf 500er und das 503 aus `artifacts/runtime-sweep-2026-09-10.json` sind zu.
+
+| Sweep-Befund | Ursache | erledigt in |
+|---|---|---|
+| `/api/v1/journal-entries/` | Whitelist-Validator auf der geteilten Basisklasse traf das Response-Model | `b7316ba6d` |
+| `/api/v1/admin/report-permissions` | Tabelle fehlte in auf head gestempelter DB | `d9410c646` |
+| `/api/mcp/policy/backup` | kopierte SQLite-Datei ueber `DEFAULT_DB` (seit Postgres-Umstellung `None`) | `d9410c646` |
+| `/api/v1/crm/opportunities/`, `/api/crm-sales/opportunities/`, `/readyz` | **deine** Arbeit — hing nur am Neustart | — |
+
+**Deine Reparaturmigration war fertig und wirksam**, sie brauchte nur den
+Neustart: `api_keys`, `opportunities`, `frachtbriefe`, `users.preferences` sind
+vorhanden. `domain_shared.admin_report_permissions` gehoerte nicht dazu und
+kam ueber eine eigene additive Migration.
+
+### Eingriffe in deinem Besitz
+
+1. **`.github/workflows/runtime-sweep.yml`** — startet jetzt `uvicorn main:app`
+   statt `app.main:app`, Bereitschaftsprobe von `/openapi.json` auf
+   `/api/v1/openapi.json`. Grund: `app/main.py` ist die auth-freie
+   Test-Schicht, ihr fehlen **251 Produktionsrouten**; die Probe haette auf
+   der Produktions-App 404 bekommen und den Job nach zehn Minuten rot laufen
+   lassen. Vorher lokal unter CI-Bedingungen zweimal durchgemessen.
+2. **`app/api/v1/schemas/crm.py`** — Blocker fuer Punkt 1. `Customer.id` war
+   `UUID`, `Customer.email` war `EmailStr`; `domain_crm.customers` ist in
+   beiden Spalten `character varying` und enthaelt `DEMO-CUST-001` sowie
+   `uat360-...@example.invalid`. Ohne CRM-Sidecar liest der Degrade-Pfad
+   lokale Daten — genau die CI-Lage. Beide Felder reichen jetzt auf dem
+   **Leseweg** den gespeicherten Wert durch; `CustomerCreate` und
+   `CustomerUpdate` validieren unveraendert streng. **`tenant_id` habe ich
+   bewusst als `UUID` gelassen.**
+3. **Drei Backend-Neustarts** (`docker compose restart backend`). Vorher
+   geprueft: deine untracked Migration `desktop_runtime_repair_20260909` war
+   bereits DB-Head, `alembic upgrade head` beim Start also ein No-op.
+4. **Neue Migration angewandt:** `admin_report_permissions_repair_20260910`,
+   additiv nach dem Muster deiner Reparaturmigration. DB-Head steht jetzt
+   darauf.
+
+### Korrektur einer frueheren Meldung an dich
+
+Ich hatte gemeldet, `app/services/pos_compat_service.py` erzeuge laufend
+Buchungszeilen ohne `tenant_id`, und daraus geschlossen, POS-Tagesabschluesse
+gingen verloren. **Beides war falsch.** Der Pfad wurde nie verdrahtet und
+schreibt gar nichts; der produktive Abschluss `compat.py POST
+/pos/tagesabschluss` bucht korrekt ueber `build_pos_closing_lines`. Die zwei
+`abschluss_checklisten` ohne Journalbuchung sind vom 2026-03-01, die
+FiBu-Verdrahtung kam am 2026-03-06 — sie sind aelter als die Verdrahtung. Der
+tote Pfad ist entfernt (`2175c4394`).
+
+### Offen — vier Punkte fuer dich
+
+1. **Code-Inventare driften.** `scripts/check_all_doc_generators.sh --check`
+   bricht bei `generate_code_inventories.py` mit
+   `docs/entwickler/service-inventory.md` und
+   `docs/admin/migration-inventory.md`. Der Drift ist **nicht** von mir: ich
+   habe meine Migration testweise entfernt, er blieb bestehen. Beide Dateien
+   sind dein WIP; ich habe sie nach einem Testlauf bitgleich wiederhergestellt
+   und nicht committet. Dein naechster Generatorlauf nimmt meine Migration
+   automatisch mit.
+2. **Architektur-Index.** Bleibt wie gehabt bei dir; ich habe
+   `config/architecture-index.yaml` nicht angefasst, obwohl meine neuen
+   Routen und die Migration dort vermutlich Eintraege brauchen.
+3. **`/api/v1/health/ready` kann flackern.** Im ersten Simulationslauf gab die
+   Route einmalig 503 zurueck, direkt nach dem Start; zehn Folgeabfragen und
+   der zweite vollstaendige Sweep lieferten 200. Die Route existiert in beiden
+   Apps, der Effekt ist also nicht neu — aber der Workflow pollt
+   `/api/v1/openapi.json` und sagt nichts ueber die Aufwaermphase. Wenn das
+   Nightly flackert, gehoert sie in `config/runtime_sweep_allowlist.yaml`.
+   Deine Datei, ich habe sie nicht angefasst.
+4. **POS-Buchungslogik.** Der entfernte Pfad ist weg, aber falls je ein
+   zweiter Einstieg gebraucht wird (Offline-Queue, Mobile-POS), muss fachlich
+   geklaert werden, ob er das TSE-/DSFinV-K-Gate aus `compat.py` umgehen darf.
+   Aktuell bewusst nur ein Buchungsweg, per Test abgesichert.
+
+### Was ich bewusst nicht angefasst habe
+
+`tests/conftest.py` bleibt auf `app.main` — die Produktions-App traegt
+`BearerAuthMiddleware`, ein Umstellen wuerde hunderte Tests auth-pflichtig
+machen. Keine Datenkorrektur an Buchungs- oder Kundendaten. `RESTARBEITEN.md`
+und die `_internal/archive`-Dokumente nennen die geloeschte
+`docs/api/openapi.json` weiterhin; sie halten historische Staende fest.
+`tests/test_feed_chain_004.py::test_list_inventory_links` ist vorbestehend rot
+(`mapped_count == 0`, fehlende Seed-Daten) — gegen die unveraenderte
+HEAD-Fassung genauso.
+
+### Neue Tests
+
+`test_journal_source_contract.py` (37), `test_policy_response_contract.py` (15),
+`test_pos_booking_single_source.py` (17), `test_policy_route_uniqueness.py` (14),
+`test_crm_customer_id_contract.py` (8). Alle ohne Datenbank und ohne Netzwerk
+lauffaehig.
+
+**Details je Slice:** `L3-JOURNAL-SOURCE-20260910`, `POS-FIBU-CLEANUP-20260910`,
+`POLICY-ROUTE-DEDUP-20260910`, `SPEC-SOURCE-REALAPP-20260910` — jeweils unten
+mit Befund, Nachweis und Restbefunden.
+
+
 ## SPEC-SOURCE-REALAPP-20260910 - abgeschlossen 2026-09-10
 
 **Von:** User-Auftrag zu Restbefund R5 aus POLICY-ROUTE-DEDUP-20260910.
