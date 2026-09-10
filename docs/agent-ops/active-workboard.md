@@ -132,10 +132,10 @@ vollstaendig gruen (ZAP, Grype, Bandit, Dependency Audit, Trivy und Summary
 alle success; Dependency Review wie ueblich skipped). Slice abgeschlossen,
 nichts offen.
 
-## E2E-SMOKE-CONTRACT-20260910 - in arbeit
+## E2E-SMOKE-CONTRACT-20260910 - abgeschlossen
 
 **Von:** Folgebefunde aus Claudes Uebergabe, User-Auftrag weiter.
-**Owner:** Codex. **Stand:** in arbeit 2026-09-10; Claim `44481ee09`.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-09-10; Claim `44481ee09`.
 **Ziel:** Inventory-Decimal-Assertion und echten Finance-Mahnstufen-500 im Smoke-Gate schliessen.
 **Dateibesitz:** `playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts`,
 `playwright-tests/specs/finance/finance-lifecycle-smoke.spec.ts`,
@@ -156,7 +156,10 @@ Testreferenz. [Abnahmebericht](../quality-assurance/e2e-smoke-contract-2026-09-1
 Handbuch-Driftcheck gruen. Lokal 19 Smoke-Tests bestanden, ein bestehender
 UI-Skip; drei Finance-Verbindungsabbrueche beim Neustart. Nach gesundem
 Backend alle drei Finance-Lifecycle-Tests gruen. Inventory-Lifecycle gruen.
-GitHub-Gesamtabnahme nach Push ausstehend.
+GitHub-Abnahme bestaetigt: Lauf `34472358711` auf `4c6009cb3` vollstaendig
+gruen (agrar, inventory, finance, sales, crm und Summary). Auch der neueste
+Lauf `34481347177` auf `11d01db79` ist gruen. Security separat durch Claude
+abgeschlossen; dessen gruener Nachweis steht im eigenen Abschnitt.
 
 ## L3-DESKTOP-REBUILD-20260908 - in arbeit
 

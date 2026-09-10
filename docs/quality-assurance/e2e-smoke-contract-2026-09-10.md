@@ -41,4 +41,8 @@ und Agent-Handbuch-Driftcheck bestanden. Lokaler kombinierter Smoke-Lauf:
 waehrend des Backend-Neustarts. Nach bestaetigtem HTTP 200 auf `/readyz`
 bestanden alle drei Finance-Lifecycle-Tests im gezielten Wiederholungslauf.
 Inventory-Lifecycle einschliesslich Decimal-Assertion bestand bereits im
-kombinierten Lauf. Keine neuen Skips. GitHub-Gesamtlauf nach Push noch offen.
+kombinierten Lauf. Keine neuen Skips. GitHub-Abnahme abgeschlossen: [Lauf 34472358711](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34472358711)
+auf `4c6009cb3`: alle fuenf Shards und Summary success. Auch
+[Lauf 34481347177](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34481347177)
+auf `11d01db79` success. Die 35 Backend-Tests bestanden zusaetzlich im
+isolierten HEAD-Arbeitsverzeichnis. Slice abgeschlossen.

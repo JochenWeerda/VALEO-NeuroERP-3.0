@@ -1,7 +1,7 @@
 slice_id: E2E-SMOKE-CONTRACT-20260910
 title: Inventory- und Finance-Smoke-Vertraege
 owner: Codex
-status: in arbeit
+status: abgeschlossen
 created_at: "2026-09-10"
 goal: Decimal-Assertion und Mahnstufen-Response-500 in beiden roten Smoke-Shards beheben.
 coordination: Eigener Claim 44481ee09; Claude-Journal-Dateien bleiben ausserhalb des Besitzes.
@@ -34,3 +34,5 @@ ai_harness:
   dokumentations_vertrag: Workboard, Slice, Abnahmebericht mit Tests und Commit-SHA.
 external_gates:
   - Vollstaendiger gruener GitHub-Smoke-Lauf nach Push.
+
+completion_evidence: "Commit 4c6009cb3; GitHub 34472358711 alle fuenf Shards und Summary success. Folgeabnahme 34481347177 auf 11d01db79 success. 35 Backend-Tests auch isoliert bestanden."
