@@ -101,25 +101,45 @@ Vertragstests, 34 Bestandstests (`test_journal_entries*.py`), 621 im Bereich
 bestanden. Gegenprobe: ausser `source` hat kein weiteres Pflichtfeld des
 Lesemodells NULL- oder Laengenverletzungen in den Daten.
 
-**An Codex — Neustart erforderlich:** Der laufende Worker antwortet weiterhin
-mit der alten Whitelist-Meldung, die Aenderung ist reiner Code ohne Migration.
-Fuer den Live-Nachweis im Sweep bitte Backend neu starten; ich fasse keine
-Container an.
+### An Codex — offene Uebergabe (Stand 2026-09-10)
 
-**An Codex — zwei Restbefunde ausserhalb meines Dateibesitzes:**
+**A1 — Neustart erforderlich, damit der Sweep gruen wird.** Der laufende
+Worker antwortet weiterhin mit der alten Whitelist-Meldung; der Fix ist reiner
+Code ohne Migration und wirkt erst nach Neustart. Ich fasse keine Container an.
+Enthalten ab Commit `b7316ba6d` (auf `origin/main`). Pruefbefehl nach dem
+Neustart — muss `200` liefern:
 
-1. Mandant `system` liefert weiterhin HTTP 500, aus anderer Ursache: zwei
-   Zeilen in `domain_erp.journal_entry_lines` haben `tenant_id NULL`
-   (Buchung `IMP-AUDIT-001`), waehrend `JournalEntryLine` `tenant_id` als
-   Pflichtfeld fuehrt. Das ist ein Mandantenisolations-/Datenbefund, kein
-   Lesevertragsproblem — ich habe das Modell bewusst *nicht* aufgeweicht und
-   keine Daten korrigiert.
-2. Aktiver Schreiber ohne Mandant: `app/services/pos_compat_service.py`
-   schreibt `journal_entry_lines` ohne `tenant_id` und ohne `account_id` und
-   erzeugt denselben Defekt neu.
+```bash
+curl -s -o /dev/null -w "%{http_code}
+"   "http://127.0.0.1:8000/api/v1/journal-entries/"   -H "Authorization: Bearer dev-token"   -H "X-Tenant-Id: 00000000-0000-0000-0000-000000000001"
+```
 
-Beides beruehrt Buchungsservices und Buchungsdaten und liegt damit bei dir.
-Wenn ich einen davon uebernehmen soll, bitte hier den Dateibesitz erweitern.
+Solange `500` kommt und die Fehlermeldung die alte Fuenfer-Whitelist
+(`['manual', 'system', 'integration', 'import', 'cash_close']`) nennt, laeuft
+noch der alte Code — kein neuer Fachbefund.
+
+**A2 — Restbefund Mandantenisolation (Daten).** Mandant `system` liefert auch
+nach dem Fix HTTP 500, aus anderer Ursache: zwei Zeilen in
+`domain_erp.journal_entry_lines` haben `tenant_id NULL`, waehrend
+`JournalEntryLine` das Feld als Pflicht fuehrt.
+
+- Buchung `IMP-AUDIT-001`, `journal_entry_id`
+  `019cb55c-bb42-786f-84b2-b6154952279b`, Zeilen `…-L1` und `…-L2`.
+- Nachweis:
+  `SELECT id, journal_entry_id FROM domain_erp.journal_entry_lines WHERE tenant_id IS NULL;`
+- Ich habe das Lesemodell hier bewusst **nicht** aufgeweicht: eine tolerante
+  `tenant_id` wuerde eine Mandantengrenze verwaessern, statt einen Datenfehler
+  zu melden. Datenkorrektur ist mir im Auftrag ausdruecklich untersagt.
+
+**A3 — Restbefund aktiver Schreiber (Code).** `app/services/pos_compat_service.py:117`
+schreibt `domain_erp.journal_entry_lines` ohne `tenant_id` und ohne
+`account_id` (nur `account_code`) und erzeugt A2 fortlaufend neu. Die
+zugehoerige Kopfbuchung entsteht in derselben Datei in Zeile 104. Zum
+Vergleich: alle 15 uebrigen Schreiber der Tabelle setzen `tenant_id`.
+
+A2 und A3 beruehren Buchungsservices und Buchungsdaten und liegen damit bei
+dir. Wenn ich einen davon uebernehmen soll, bitte hier den Dateibesitz
+erweitern — ich fasse sie bis dahin nicht an.
 
 
 ## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08
