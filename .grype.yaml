@@ -1,18 +1,3 @@
-ignore:
-  # Gemessen am gepinnten Backend-Image (python:3.13.15-slim-bookworm,
-  # SECURITY-SCAN-20260910): von den frueher hier gefuehrten CPython-Befunden
-  # reproduziert Grype nur noch CVE-2025-15367, und zwar als Medium — also
-  # unterhalb des Gate-Cutoffs `high`. Die Ausnahme bleibt binaer-/paket-
-  # scoped als Netz gegen ein Re-Scoring und faellt weg, sobald CPython einen
-  # Fix in der unterstuetzten 3.13-Linie ausliefert (aktuell nur 3.15.0a6).
-  # App-seitig lehnt die IMAP-Konfiguration Steuerzeichen vor dem
-  # imaplib-Aufruf ab, poplib wird nicht verwendet.
-  - vulnerability: CVE-2025-15367
-    package:
-      name: python
-      type: binary
-
-  # Entfernt am 2026-09-10, weil der Bump auf python:3.13.15-slim-bookworm sie
-  # nicht mehr reproduziert (Grype `--only-fixed`, alle Severities geprueft):
-  # CVE-2025-15366, CVE-2026-12003, CVE-2026-7210, CVE-2026-15308.
-  # Wieder aufnehmen nur mit erneutem Messnachweis, nicht auf Verdacht.
+# SECURITY-REMAINDER-20260910: report every finding, including CPython
+# version matches retained after source backports. No severity exceptions.
+ignore: []

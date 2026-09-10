@@ -11,19 +11,30 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SECURITY-REMAINDER-20260910 - reserviert
+## SECURITY-REMAINDER-20260910 - in arbeit
 
 **Von:** User-Auftrag Binaerbefunde und andere Befunde beheben.
-**Owner:** Codex. **Stand:** reserviert 2026-09-10.
+**Owner:** Codex. **Stand:** in arbeit 2026-09-10; Claim `6ff8338ce`.
 **Ziel:** Verbleibende CPython-Binaerbefunde und offene Dependency-Befunde
 anhand aktueller Herstellerfixes und reproduzierbarer Scans beheben.
-**Dateibesitz:** Dockerfile.backend, .grype.yaml; konkret betroffene
+**Dateibesitz:** Dockerfile.backend, .grype.yaml, config/security/cpython-3.13.15/,
+scripts/verify_cpython_security.py; konkret betroffene
 Dependency-Manifeste/Lockfiles nach Befunderhebung hier ergaenzen;
 eigene Regressionstests, Slice-YAML, Abnahmebericht und dieser Abschnitt.
 **Abnahme:** Herstellerbezug pro Fix, Build und funktionale Regressionen,
 Scanner-Nachmessung ohne neue Ausnahmen oder gelockerte Gates.
 **Risiken:** Kein Wechsel auf Vorabversionen ohne belegte Notwendigkeit;
 keine Scanner-Versionsfaelschung. Fremden WIP isolieren, keine Datenmigration.
+
+**Dependency-Welle Dateibesitz:** `package.json`, `packages/agribusiness-domain/package.json`, `packages/analytics-domain/package.json`, `packages/audit-domain/package.json`, `packages/contracts-domain/package.json`, `packages/crm-domain/package.json`, `packages/delivery-domain/package.json`, `packages/document-domain/package.json`, `packages/frontend-web/package.json`, `packages/hr-domain/package.json`, `packages/notifications-domain/package.json`, `packages/pricing-domain/package.json`, `packages/procurement-domain/package.json`, `packages/production-domain/package.json`, `packages/quality-domain/package.json`, `packages/regulatory-domain/package.json`, `packages/sales-domain/package.json`, `packages/scheduler-domain/package.json`, `packages/weighing-domain/package.json`, `pnpm-lock.yaml`, `requirements-docs.txt`, `services/ai/requirements.txt`, `services/crm-ai/requirements.txt`, `services/crm-communication/requirements.txt`, `services/crm-gdpr/requirements.txt`, `services/crm-marketing/requirements.txt`, `services/crm-security/requirements.txt`, `services/finance/fibu-core/requirements.txt`.
+Zusaetzlich alle vorhandenen `@vitest/coverage-v8`-/`@vitest/ui`-Manifeste
+unter packages/ fuer konsistente Vitest-Versionen. Archiv-Lockfiles folgen separat.
+
+**Binaer-Welle:** Vier CPython-CVEs im Basisimage reproduziert (17 rote
+Teilpruefungen), Upstream-Backports angewandt, Builder und Runtime jeweils
+4/4 gruen. Backend-Imports gruen. Keine Grype-Ausnahme mehr. Trivy ungefiltert
+244 Meldungen, davon keine High/Critical mit Herstellerfix; Debian-Restbefunde
+und Dependency-Welle noch offen. Bericht: `security-remainder-2026-09-10.md`.
 
 ## SECURITY-SCAN-20260910 - abgeschlossen
 
