@@ -1,0 +1,133 @@
+slice_id: SPEC-SOURCE-REALAPP-20260910
+id: SPEC-SOURCE-REALAPP-20260910
+title: OpenAPI-Spec aus der Produktions-App statt aus der Test-App erzeugen
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+goal: >-
+  Die committete Vertrags-Spec soll die Anwendung beschreiben, die tatsaechlich
+  laeuft. Heute erzeugt der Generator sie aus app/main.py, einer auth-freien
+  Test-Kompatibilitaetsschicht; 251 Produktionsrouten fehlen dadurch im
+  Vertrag.
+coordination: >-
+  Folgeauftrag des Users zu Restbefund R5 aus POLICY-ROUTE-DEDUP-20260910,
+  waehrend Codex ruht. Stufe 2 (CI-Sweep) beruehrt Codex-Besitz und wird nicht
+  ohne Freigabe ausgefuehrt.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-SOURCE-REALAPP-20260910.yaml
+  - scripts/generate_openapi.py
+  - docs/schnittstellen/openapi.json
+  - app/main.py
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt SPEC-SOURCE-REALAPP-20260910"
+ausloeser: >-
+  Beim OpenAPI-Nachziehen in POLICY-ROUTE-DEDUP-20260910 fiel auf, dass die
+  neuen Routen unter /api/mcp/policy nicht in der Spec erscheinen.
+befund:
+  historie: >-
+    main.py in der Wurzel existiert seit 2025-10-02 und ist die
+    Produktionsanwendung; der Container faehrt uvicorn main:app.
+    app/main.py entstand am 2026-03-14 in Prozesskern-Welle 9 Paket A und ist
+    dort als auth-freie Test-Kompatibilitaetsschicht fuer api_router
+    dokumentiert; der App-Titel lautet woertlich VALEO-NeuroERP Test App.
+    Am 2026-06-25 waehlte DOC-INTERFACES-001 diese Test-App als Quelle des
+    OpenAPI-Generators, am 2026-07-03 uebernahm das Runtime-Sweep-Gate
+    (A3/SPEC-P0-02) sie ebenfalls. Kein Hinweis auf eine geplante
+    Versionierung; die Test-App wurde uebernommen, weil sie ohne Auth
+    auskommt und schlank importiert.
+  belege:
+    - "app/main.py Titel: VALEO-NeuroERP Test App"
+    - "docs/architecture/process-kernel/wave-9/package-a/STATUS.md: auth-freie Test-Kompatibilitaetsschicht fuer api_router"
+    - "scripts/export_openapi.py importiert bereits from main import app und schreibt docs/api/openapi.json — dort 590 Pfade, Stand 2026-02-13, seither nicht gepflegt"
+  messung:
+    routen_test_app: 3553
+    routen_produktions_app: 3803
+    nur_in_produktion: 251
+    nur_in_test_app: 1
+    spec_pfade_vorher: 2752
+    spec_pfade_nachher: 2945
+    spec_pfade_entfallen: 0
+    sweep_ziele_test_app: 895
+    sweep_ziele_produktions_app: 971
+  fehlende_domaenen_im_vertrag:
+    - "/api/v1/finance: 29 Pfade"
+    - "/api/mcp/documents: 23 Pfade"
+    - "/api/v1/crm: 20 Pfade"
+    - "/api/v1/fibu: 15 Pfade"
+    - "/api/mcp/policy: 11 Pfade"
+    - "/api/v1/einkauf: 9 Pfade"
+    - "/api/v1/agrar: 8 Pfade"
+  reichweite: >-
+    Kein nachgelagerter Doku-Generator liest die Spec: Architektur-Index,
+    Agent-Handbuch, MCP-Tool-Referenz, Action-Matrix und Code-Inventare
+    arbeiten alle aus dem Quellcode. Die Spec wird nur vom Drift-Gate, vom
+    openapi-drift-Workflow, von docs-code-sync als generiertes Artefakt, vom
+    Release-Evidence-Report und von der Swagger-Einbettung genutzt. Alle
+    vertragen eine rein additive Aenderung.
+acceptance:
+  - Die committete Spec traegt den Titel der Produktions-App, nicht Test App.
+  - Kein zuvor dokumentierter Pfad entfaellt.
+  - generate_openapi.py --check ist gruen, kein Drift.
+  - Die Doku-Generator-Kette bleibt gruen.
+tests:
+  - python scripts/generate_openapi.py --check
+  - python -m pytest tests/test_api_runtime_sweep.py
+risks:
+  - >-
+    Die Spec waechst um 193 Pfade und rund 0,2 MB. Rein additiv, kein Pfad
+    entfaellt; Konsumenten verlieren nichts.
+  - >-
+    tests/conftest.py bleibt bewusst auf app.main. Die Produktions-App traegt
+    BearerAuthMiddleware; ein Umstellen wuerde hunderte Tests auth-pflichtig
+    machen und ist nicht Teil dieses Slices.
+open:
+  - >-
+    Stufe 2, nicht ausgefuehrt: .github/workflows/runtime-sweep.yml startet
+    uvicorn app.main:app und pollt /openapi.json. Die Produktions-App liefert
+    dort 404 und serviert unter /api/v1/openapi.json; ohne Anpassung der
+    Bereitschaftsprobe wuerde der Workflow zehn Minuten pollen und rot laufen.
+    Datei liegt im Codex-Besitz (API-Sweep).
+  - >-
+    Blocker fuer Stufe 2: unter CI-Bedingungen ohne CRM-Sidecar antwortet
+    GET /api/v1/crm/customers/ mit HTTP 500. domain_crm.customers enthaelt
+    Demo- und UAT-Zeilen mit Nicht-UUID-Ids (DEMO-CUST-001,
+    crm360-uat-customer-20260609042028), waehrend das Customer-Lesemodell
+    id als UUID fuehrt. Lokal mit erreichbarem Sidecar 200, ohne Sidecar 500.
+    CRM liegt im Codex-Besitz.
+  - >-
+    docs/api/openapi.json ist ein verwaistes Artefakt vom 2026-02-13 mit 590
+    Pfaden, erzeugt von scripts/export_openapi.py aus der Produktions-App.
+    Entweder in die Generator-Kette aufnehmen oder entfernen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Die veroeffentlichte API-Spezifikation beschreibt die laufende Anwendung
+    vollstaendig. Wer den Vertrag liest, sieht dieselben Routen, die der
+    Container bedient.
+  architektur_vertrag: >-
+    Quelle der Spec ist die Produktionsanwendung main:app. app/main.py bleibt
+    ausschliesslich Test-Kompatibilitaetsschicht und wird als solche im Code
+    kenntlich gemacht.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation. Reine Erzeugung eines
+    Dokumentationsartefakts.
+  test_vertrag: >-
+    generate_openapi.py --check als Drift-Gate; bestehende Sweep-Tests
+    unveraendert. Keine Aenderung an tests/conftest.py.
+  security_vertrag: >-
+    Die Spec dokumentiert kuenftig auch Routen hinter BearerAuthMiddleware.
+    Es werden keine Secrets oder Beispieldaten aufgenommen; die Spec enthaelt
+    nur Schemata und Pfade.
+  betriebs_vertrag: >-
+    Keine Laufzeitaenderung an der Anwendung. Der Generator ist bewusst vom
+    Docs-Build entkoppelt und laeuft rund zwei Minuten.
+  dokumentations_vertrag: >-
+    Diese Slice-YAML und der Workboard-Abschnitt SPEC-SOURCE-REALAPP-20260910
+    werden konsistent gehalten; die offenen Stufen sind dort benannt.
+external_gates:
+  - >-
+    Freigabe von Codex oder dem User fuer Stufe 2, da .github/workflows und
+    der API-Sweep im Codex-Besitz liegen.
+  - >-
+    Behebung des CRM-Degrade-Pfads als Vorbedingung fuer Stufe 2.
+verification:
+  - python scripts/generate_openapi.py --check

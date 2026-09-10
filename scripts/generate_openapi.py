@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 """Erzeugt die OpenAPI-Spezifikation aus der FastAPI-App.
 
-Single Source of Truth ist der Code: Dieses Skript importiert ``app.main:app``
-und schreibt die Spezifikation nach ``docs/schnittstellen/openapi.json``.
+Single Source of Truth ist der Code: Dieses Skript importiert ``main:app`` —
+die Anwendung, die der Container faehrt — und schreibt die Spezifikation nach
+``docs/schnittstellen/openapi.json``.
+
+Bis 2026-09-10 wurde hier ``app.main:app`` importiert. Das ist die auth-freie
+Test-Kompatibilitaetsschicht (App-Titel ``VALEO-NeuroERP Test App``), der 251
+Produktionsrouten fehlen — unter anderem Finance, FiBu, CRM und die
+MCP-Routen. Die veroeffentlichte Spec beschrieb damit nicht die laufende
+Anwendung (SPEC-SOURCE-REALAPP-20260910).
 
 Bewusst vom Docs-Build entkoppelt: Der Import der vollstaendigen App ist
 schwergewichtig (~2 min) und benoetigt die Backend-Abhaengigkeiten. Daher wird
@@ -32,7 +39,9 @@ def build_spec() -> dict:
     sys.path.insert(0, str(REPO_ROOT))
     import importlib
 
-    main = importlib.import_module("app.main")
+    # Bewusst die Wurzel-``main``: app.main ist die Test-Schicht ohne Auth
+    # und ohne die zusaetzlich in main.py registrierten Router.
+    main = importlib.import_module("main")
     app = getattr(main, "app")
     spec = app.openapi()
 

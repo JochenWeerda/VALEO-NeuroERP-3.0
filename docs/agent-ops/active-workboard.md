@@ -48,6 +48,72 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
+## SPEC-SOURCE-REALAPP-20260910 - in arbeit
+
+**Von:** User-Auftrag zu Restbefund R5 aus POLICY-ROUTE-DEDUP-20260910.
+**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10.
+
+**Ziel:** Die committete Vertrags-Spec soll die Anwendung beschreiben, die
+tatsaechlich laeuft.
+
+**Wie es dazu kam.** Die Wurzel-`main.py` ist seit 2025-10-02 die
+Produktionsanwendung; der Container faehrt `uvicorn main:app`. `app/main.py`
+entstand am 2026-03-14 in Prozesskern-Welle 9 Paket A und ist dort als
+*auth-freie Test-Kompatibilitaetsschicht fuer `api_router`* dokumentiert; der
+App-Titel lautet woertlich `VALEO-NeuroERP Test App`. Am 2026-06-25 waehlte
+DOC-INTERFACES-001 diese Test-App als Quelle des OpenAPI-Generators, am
+2026-07-03 uebernahm sie auch das Runtime-Sweep-Gate (A3/SPEC-P0-02). **Keine
+geplante Versionierung** — die Test-App wurde uebernommen, weil sie ohne Auth
+auskommt und schlank importiert. Bestaetigend: `scripts/export_openapi.py`
+importiert bereits `from main import app`, sein Artefakt `docs/api/openapi.json`
+steht aber unveraendert seit 2026-02-13 mit 590 Pfaden.
+
+**Messung.** Test-App 3553 Routen, Produktions-App 3803 — **251 Routen nur in
+Produktion**, umgekehrt nur die FastAPI-Default-Route `/openapi.json`. In der
+Spec: 2752 gegen 2945 Pfade, **+193, −0 entfallen**. Fehlend waren u. a. 29
+`/api/v1/finance`, 23 `/api/mcp/documents`, 20 `/api/v1/crm`, 15 `/api/v1/fibu`,
+11 `/api/mcp/policy`.
+
+**Reichweite geprueft.** Kein nachgelagerter Doku-Generator liest die Spec —
+Architektur-Index, Agent-Handbuch, MCP-Tool-Referenz, Action-Matrix und
+Code-Inventare arbeiten alle aus dem Quellcode. Die Spec nutzen nur
+Drift-Gate, `openapi-drift.yml`, `docs-code-sync` (als generiertes Artefakt),
+Release-Evidence und die Swagger-Einbettung. Alle vertragen eine rein additive
+Aenderung.
+
+**Dateibesitz:** `scripts/generate_openapi.py`, `docs/schnittstellen/openapi.json`,
+`app/main.py` (nur Kenntlichmachung), eigene Slice-YAML, dieser Abschnitt.
+
+**Abnahme:** Spec traegt den Titel der Produktions-App; kein zuvor
+dokumentierter Pfad entfaellt; `generate_openapi.py --check` gruen;
+Doku-Generator-Kette gruen.
+
+**Nicht angefasst — `tests/conftest.py` bleibt auf `app.main`.** Die
+Produktions-App traegt `BearerAuthMiddleware`; genau deshalb existiert die
+auth-freie Test-App. Ein Umstellen wuerde hunderte Tests auth-pflichtig machen.
+
+### Stufe 2 — nicht ausgefuehrt, braucht Freigabe und hat einen Blocker
+
+`.github/workflows/runtime-sweep.yml` startet `uvicorn app.main:app` und pollt
+`/openapi.json`. Zwei Punkte stehen dem entgegen:
+
+1. **Bereitschaftsprobe.** Die Produktions-App liefert auf `/openapi.json`
+   **404** und serviert unter `/api/v1/openapi.json` (empirisch geprueft).
+   Ohne Anpassung wuerde der Workflow zehn Minuten pollen und rot laufen.
+2. **Blocker CRM.** Unter CI-Bedingungen ohne CRM-Sidecar antwortet
+   `GET /api/v1/crm/customers/` mit **HTTP 500**: `domain_crm.customers`
+   enthaelt Demo-/UAT-Zeilen mit Nicht-UUID-Ids (`DEMO-CUST-001`,
+   `crm360-uat-customer-20260609042028`), waehrend das `Customer`-Lesemodell
+   `id` als UUID fuehrt — derselbe Fehlertyp wie beim Journal. Lokal mit
+   erreichbarem Sidecar 200, ohne Sidecar 500. Nachgestellt mit
+   `uvicorn main:app` und toten Sidecar-Ports: 980 Ziele, 914 ok, **1x 5xx**.
+
+Beide Dateien liegen im Codex-Besitz (API-Sweep, CRM). Stufe 2 erst nach
+Behebung von Punkt 2 und mit Freigabe.
+
+**Risiken:** Spec waechst um 193 Pfade und rund 0,2 MB, rein additiv.
+
+
 ## POLICY-ROUTE-DEDUP-20260910 - abgeschlossen 2026-09-10
 
 **Von:** User-Auftrag im Anschluss an POS-FIBU-CLEANUP-20260910.
