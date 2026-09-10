@@ -1,0 +1,97 @@
+slice_id: DESIGN-STATUS-COLORS-015
+id: DESIGN-STATUS-COLORS-015
+title: Rohe Palette-Statusfarben auf theme-bewusste Utilities umstellen (Welle 1)
+owner: Claude Code
+status: in_arbeit
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+goal: >-
+  Die im Design-Audit gemessenen Kontrastverstoesse beheben: rohe
+  Palette-Textklassen wie text-green-700 durch die theme-bewussten Utilities
+  text-status-success|warning|error|info ersetzen. Welle 1 umfasst die
+  eindeutigen Faelle ohne begleitende Flaechen- oder Rahmenfarbe.
+ausloeser: >-
+  docs/design/frontend-design-skill-audit.md weist fuer /agrar, /finance und
+  /lager durchgaengige color-contrast-Verstoesse aus: Roh-Palette text-green-600
+  ergibt #00a63e auf #f5f7f8 und damit 2,99:1 statt der geforderten 4,5:1.
+  Der Sweep wurde dort bewusst als eigener Slice zurueckgestellt.
+  CLAUDE.md fuehrt die Regel als verbindlich: semantische Farben nur ueber
+  zentrale Varianten oder die Status-Utilities, nie ueber rohe Palette-Klassen.
+coordination: >-
+  Parallel arbeiten Codex an SECURITY-REMAINDER-20260910 (Dependency-Welle) und
+  L3-DESKTOP-REBUILD-20260908. Deren Arbeitsstand umfasst ausschliesslich
+  package.json-Manifeste, docker-compose, Inventardokumente und
+  Meridian-Builder/Runtime — keine einzige Datei unter
+  packages/frontend-web/src. Vor dem Commit erneut geprueft.
+file_ownership:
+  - docs/agent-ops/slices/DESIGN-STATUS-COLORS-015.yaml
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt DESIGN-STATUS-COLORS-015"
+  - "packages/frontend-web/src: ausschliesslich Dateien mit rohen Status-Textklassen ohne bg-/border-Begleiter"
+befund:
+  gemessen_am: "2026-09-10"
+  gesamt_vorkommen: 571
+  welle_1_eindeutig:
+    vorkommen: 303
+    dateien: 129
+    definition: >-
+      Klassenstrings mit text-<hue>-<shade>, in denen keine bg- oder
+      border-Palette-Klasse derselben Familie steht. Diese Faelle sind reine
+      Statustexte und eins zu eins auf die Utilities abbildbar.
+  welle_2_badge_tripel:
+    vorkommen: 268
+    dateien: 102
+    definition: >-
+      Klassenstrings der Form "bg-green-50 text-green-700 border-green-200".
+      Diese gehoeren laut CLAUDE.md ueber zentrale Badge-/Button-Varianten und
+      nicht ueber Einzelklassen; das ist Entwurfsarbeit, keine Ersetzung.
+    entscheidung: >-
+      Bewusst nicht in dieser Welle. Eine mechanische Ersetzung wuerde die
+      Flaechenfarbe stehen lassen und ein inkonsistentes Zwischenbild erzeugen.
+  varianten:
+    - "hover: kommt vor und bleibt als Prefix erhalten"
+    - >-
+      dark: kommt vier Mal vor; da die Utilities selbst theme-bewusst sind
+      (hell 700, dunkel 500), entfaellt die dark:-Ueberschreibung.
+abbildung:
+  green: status-success
+  emerald: status-success
+  red: status-error
+  rose: status-error
+  amber: status-warning
+  yellow: status-warning
+acceptance:
+  - Welle-1-Vorkommen in packages/frontend-web/src auf 0.
+  - Badge-Tripel unveraendert und als Welle 2 dokumentiert.
+  - TypeScript-Pruefung und Vitest-Suite gruen.
+  - Keine Datei ausserhalb packages/frontend-web/src angefasst.
+tests:
+  - npx tsc --noEmit
+  - npm run test
+  - "grep-Gegenprobe auf verbleibende Welle-1-Vorkommen"
+risks:
+  - >-
+    Rein visuelle Aenderung ohne Testabdeckung je Einzelfall; abgesichert wird
+    ueber Typpruefung, Vitest und die Gegenprobe, nicht ueber Sichtpruefung
+    jeder Maske.
+  - >-
+    Der Farbton verschiebt sich leicht, weil die Utilities auf semantische
+    Tokens zeigen. Das ist beabsichtigt und der Zweck des Slices.
+ai_harness:
+  fachlicher_vertrag: >-
+    Statusfarben in der Oberflaeche erfuellen den WCAG-AA-Kontrast und folgen in
+    hellem wie dunklem Theme derselben semantischen Quelle.
+  architektur_vertrag: >-
+    Farbwerte kommen ausschliesslich aus den zentralen Tokens. Keine neuen
+    Roh-Palette-Klassen, keine Farbdefinition ausserhalb des Designsystems.
+  daten_vertrag: "Keine Migration, keine Datenmutation, keine API-Aenderung."
+  test_vertrag: >-
+    Typpruefung und Vitest-Suite vor und nach der Aenderung, ergaenzt um eine
+    Gegenprobe auf verbleibende Vorkommen.
+  security_vertrag: "Keine Auswirkung auf Authentifizierung, Rechte oder Daten."
+  betriebs_vertrag: "Kein Deployment, kein Container-Neustart."
+  dokumentations_vertrag: >-
+    Slice-YAML und Workboard-Abschnitt bleiben konsistent; Welle 2 wird mit
+    Zahl und Begruendung als offene Schuld benannt.
+verification:
+  - npx tsc --noEmit
+  - npm run test

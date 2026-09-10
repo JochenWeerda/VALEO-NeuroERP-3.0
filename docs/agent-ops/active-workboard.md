@@ -11,6 +11,32 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DESIGN-STATUS-COLORS-015 - in arbeit
+
+**Von:** Aufgeschobener Sweep aus dem Frontend-Design-Audit, aufgenommen waehrend
+der Wartezeit auf den Dependency-Graph-Refresh in SECURITY-ARCHIVE-DEPS-20260910.
+**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10.
+**Ziel:** Rohe Palette-Statusfarben durch die theme-bewussten Utilities
+`text-status-success|warning|error|info` ersetzen (Welle 1: eindeutige Faelle).
+**Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-015.yaml`, dieser
+Abschnitt und ausschliesslich Dateien unter `packages/frontend-web/src` mit
+rohen Status-Textklassen ohne `bg-`/`border-`-Begleiter.
+**Abgrenzung:** Codex' Arbeitsstand umfasst `package.json`-Manifeste,
+`docker-compose.yml`, Inventardokumente und Meridian-Builder/Runtime — **keine
+einzige Datei unter `packages/frontend-web/src`**. Vor dem Commit erneut geprueft.
+**Abnahme:** Welle-1-Vorkommen auf 0, TypeScript und Vitest gruen,
+Badge-Tripel unveraendert und als Welle 2 dokumentiert.
+
+**Befund:** Der Design-Audit misst fuer `/agrar`, `/finance` und `/lager`
+durchgaengige `color-contrast`-Verstoesse: Roh-Palette `text-green-600` ergibt
+#00a63e auf #f5f7f8 und damit **2,99:1** statt der geforderten 4,5:1. CLAUDE.md
+fuehrt die Regel als verbindlich. Gemessen 2026-09-10: 571 Vorkommen gesamt,
+davon **303 in 129 Dateien eindeutig** (kein `bg-`/`border-` derselben Familie)
+und **268 in 102 Dateien als Badge-Tripel** (`bg-green-50 text-green-700
+border-green-200`). Nur die eindeutigen sind Gegenstand dieser Welle; die
+Tripel gehoeren ueber zentrale Badge-Varianten und sind Entwurfsarbeit, keine
+Ersetzung — eine mechanische Umstellung liesse dort die Flaechenfarbe stehen.
+
 ## SECURITY-ARCHIVE-DEPS-20260910 - in arbeit
 
 **Von:** Abgrenzung aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag.
