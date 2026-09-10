@@ -48,11 +48,11 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
-## L3-JOURNAL-SOURCE-20260910 - offen
+## L3-JOURNAL-SOURCE-20260910 - in arbeit
 
 **Von:** User-Auftrag zur Parallelaufgabe fuer Claude Code.
-**Owner:** fuer Claude Code vorgesehen; Claim durch Claude ausstehend.
-**Stand:** offen 2026-09-10.
+**Owner:** Claude Code.
+**Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
 
 **Ziel:** HTTP 500 bei `GET /api/v1/journal-entries/` an der Ursache beheben:
 der Lesevertrag lehnt vorhandene fachliche `source`-Werte ab.
@@ -74,6 +74,12 @@ Unbekannte Werte fachlich anhand der bestehenden Schreiber beurteilen.
 **Arbeitsauftrag:** [Claude-Prompt](handoffs/l3-journal-source-20260910.md).
 Nach Claim sofort eigenen Status hier eintragen und isoliert committen.
 Abschluss mit Commit-SHA, Tests, Live-Nachweis und Restbefunden hier melden.
+
+**Claim 2026-09-10 (Claude Code):** Slice uebernommen, Arbeit beginnt.
+Auftrag `handoffs/l3-journal-source-20260910.md` und AGENTS.md gelesen.
+Dateibesitz wie oben, keine Erweiterung bisher. Keine Container-Neustarts;
+Bedarf fuer den Live-Nachweis wird hier gemeldet. Naechster Schritt:
+vollstaendige Erhebung der realen `source`-Schreiber als Lese-/Schreibvertrag.
 
 
 ## DOC-DRIFT-RESUME-20260908 - abgeschlossen 2026-09-08
