@@ -2,9 +2,10 @@ slice_id: SPEC-SOURCE-REALAPP-20260910
 id: SPEC-SOURCE-REALAPP-20260910
 title: OpenAPI-Spec aus der Produktions-App statt aus der Test-App erzeugen
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-09-10"
 started_at: "2026-09-10"
+completed_at: "2026-09-10"
 goal: >-
   Die committete Vertrags-Spec soll die Anwendung beschreiben, die tatsaechlich
   laeuft. Heute erzeugt der Generator sie aus app/main.py, einer auth-freien
@@ -129,5 +130,21 @@ external_gates:
     der API-Sweep im Codex-Besitz liegen.
   - >-
     Behebung des CRM-Degrade-Pfads als Vorbedingung fuer Stufe 2.
+stufe_2_2026_09_10: >-
+  Auf User-Anweisung ausgefuehrt, Commit 289363e6f. CRM-Blocker war eine
+  Kaskade: nach dem id-Fix lehnte email als EmailStr die per RFC 2606 fuer
+  Testdaten reservierte Domain .invalid ab. Beide Felder reichen auf dem
+  Leseweg den gespeicherten Wert durch, die Schreibwege validieren
+  unveraendert; tenant_id bleibt bewusst UUID. Workflow auf uvicorn main:app
+  und Bereitschaftsprobe /api/v1/openapi.json umgestellt.
+  /api/mcp/policy/backup von GET auf POST, weil der Aufruf eine Datei anlegt
+  und vom Sweep getroffen wurde. Nachweis: CI-Bedingungen lokal nachgestellt,
+  zweiter Lauf 979 Ziele, 0x 5xx, 0 unerwartete 503; Container ebenfalls
+  0x 5xx; 547 Tests gruen.
+restrisiko: >-
+  /api/v1/health/ready gab im ersten Simulationslauf einmalig 503 zurueck
+  (Aufwaermphase), danach durchgaengig 200. Die Route existiert in beiden
+  Apps, der Effekt ist nicht neu. Bei Flackern des Nightly gehoert sie in
+  config/runtime_sweep_allowlist.yaml (Codex-Besitz, nicht angefasst).
 verification:
   - python scripts/generate_openapi.py --check

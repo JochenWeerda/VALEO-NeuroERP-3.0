@@ -48,10 +48,10 @@ bestanden, direkter Check gegen lokale PostgreSQL-DB erfolgreich. HTTP-Probe
 braucht noch den Neustart der laufenden Worker. Erster Zwischenstand
 `ccef6c96e` nach `origin/main` gepusht; Visual-Audit nach Neubau erneut 12/12.
 
-## SPEC-SOURCE-REALAPP-20260910 - in arbeit
+## SPEC-SOURCE-REALAPP-20260910 - abgeschlossen 2026-09-10
 
 **Von:** User-Auftrag zu Restbefund R5 aus POLICY-ROUTE-DEDUP-20260910.
-**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-10.
 
 **Ziel:** Die committete Vertrags-Spec soll die Anwendung beschreiben, die
 tatsaechlich laeuft.
@@ -112,6 +112,49 @@ Beide Dateien liegen im Codex-Besitz (API-Sweep, CRM). Stufe 2 erst nach
 Behebung von Punkt 2 und mit Freigabe.
 
 **Risiken:** Spec waechst um 193 Pfade und rund 0,2 MB, rein additiv.
+
+### Stufe 2 ausgefuehrt 2026-09-10, Commit `289363e6f`
+
+Auf User-Anweisung uebernommen (Besitzerweiterung auf
+`.github/workflows/runtime-sweep.yml` und `app/api/v1/schemas/crm.py`).
+
+**CRM-Blocker behoben — und er war eine Kaskade.** Das Antwortmodell
+`Customer` fuehrte `id` als `UUID`; nach dem Fix trat sofort der naechste
+Abbruch zutage: `email` als `EmailStr` lehnte
+`uat360-...@example.invalid` ab — ausgerechnet die per RFC 2606 fuer
+Testdaten reservierte Domain. `domain_crm.customers` ist in beiden Spalten
+`character varying`. Beide Felder reichen auf dem Leseweg jetzt den
+gespeicherten Wert durch; `CustomerCreate` und `CustomerUpdate` validieren
+unveraendert streng. **`tenant_id` bleibt bewusst `UUID`** — eine nicht
+auswertbare Mandanten-Id soll auffallen, nicht durchgereicht werden.
+
+**Workflow umgestellt.** `uvicorn app.main:app` → `uvicorn main:app`, und die
+Bereitschaftsprobe von `/openapi.json` auf `/api/v1/openapi.json`, weil die
+Produktions-App auf dem alten Pfad 404 liefert.
+
+**`/api/mcp/policy/backup` von GET auf POST.** Der Aufruf legt eine Datei an
+und wurde vom Sweep bei jedem Lauf getroffen — eine Nebenwirkung, die erst
+durch die Reparatur des Endpunkts in POLICY-ROUTE-DEDUP-20260910 wirksam
+wurde. Sweep-Ziele damit 980 → 979.
+
+**Nachweis.** CI-Bedingungen lokal nachgestellt (`uvicorn main:app`, tote
+Redis-, NATS- und Sidecar-Ports): erster Lauf 0x 5xx, zweiter Lauf **0x 5xx
+und 0 unerwartete 503**. Container mit Sidecars ebenfalls 0x 5xx. 547 Tests
+gruen im Bereich `polic|crm|customer`, 8 neue CRM-Vertragstests. Drift-Gate
+gruen.
+
+**Restrisiko, dokumentiert statt versteckt.** Im ersten Simulationslauf gab
+`/api/v1/health/ready` einmalig 503 zurueck, unmittelbar nach dem Start; zehn
+Folgeabfragen und der zweite Sweep lieferten 200. Die Bereitschaftsprobe des
+Workflows pollt `/api/v1/openapi.json` und sagt damit nichts ueber die
+Aufwaermphase. Die Route existiert in beiden Apps, der Effekt ist also nicht
+neu. Sollte das Nightly flackern, gehoert `/api/v1/health/ready` in
+`config/runtime_sweep_allowlist.yaml` — die Datei liegt im Codex-Besitz, ich
+habe sie nicht angefasst.
+
+**Weiterhin offen:** `docs/api/openapi.json` ist ein verwaistes Artefakt vom
+2026-02-13 mit 590 Pfaden, erzeugt von `scripts/export_openapi.py` aus der
+Produktions-App. Entweder in die Generator-Kette aufnehmen oder entfernen.
 
 
 ## POLICY-ROUTE-DEDUP-20260910 - abgeschlossen 2026-09-10
