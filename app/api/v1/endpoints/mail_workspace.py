@@ -6,6 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.crm_channel_bundle_schemas import (
+    MailAssignOut,
+    MailAttachmentOut,
+    MailDraftCreatedOut,
+    MailMessagePageOut,
+    MailQueueOut,
+    MailTransferOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.mail_workspace_service import MailWorkspaceError, MailWorkspaceService
@@ -62,7 +70,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.get("", response_model=dict, summary="Nachrichten des Mailarbeitsplatzes auflisten")
+@router.get("", response_model=MailMessagePageOut, summary="Nachrichten des Mailarbeitsplatzes auflisten")
 def list_messages(
     request: Request,
     page: int = Query(1, ge=1),
@@ -78,7 +86,7 @@ def list_messages(
     )
 
 
-@router.get("/attachments", response_model=list[dict], summary="Anhaenge auflisten")
+@router.get("/attachments", response_model=list[MailAttachmentOut], summary="Anhaenge auflisten")
 def list_attachments(
     request: Request,
     limit: int = Query(200, ge=1, le=500),
@@ -92,7 +100,7 @@ def list_attachments(
     )
 
 
-@router.post("/drafts", response_model=dict, status_code=201, summary="Entwurf anlegen")
+@router.post("/drafts", response_model=MailDraftCreatedOut, status_code=201, summary="Entwurf anlegen")
 def create_draft(
     body: DraftIn,
     request: Request,
@@ -110,7 +118,7 @@ def create_draft(
     )
 
 
-@router.post("/{message_id}/assign", response_model=dict, summary="Nachricht zuweisen")
+@router.post("/{message_id}/assign", response_model=MailAssignOut, summary="Nachricht zuweisen")
 def assign(
     message_id: str,
     body: AssignmentIn,
@@ -129,7 +137,7 @@ def assign(
     )
 
 
-@router.post("/{message_id}/queue", response_model=dict, summary="Nachricht zum Versand einreihen")
+@router.post("/{message_id}/queue", response_model=MailQueueOut, summary="Nachricht zum Versand einreihen")
 def queue(
     message_id: str,
     body: ReasonIn,
@@ -147,7 +155,7 @@ def queue(
     )
 
 
-@router.post("/attachments/{attachment_id}/transfer", response_model=dict, summary="Anhang uebernehmen")
+@router.post("/attachments/{attachment_id}/transfer", response_model=MailTransferOut, summary="Anhang uebernehmen")
 def transfer_attachment(
     attachment_id: str,
     body: ReasonIn,

@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-06-W11-CRM-CHANNELS - abgeschlossen 2026-09-11
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 10. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** `mail_workspace`, `tapi` und `whatsapp_intake` (17 schwache
+`response_model`) typisieren; Gate 217 → 200.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `crm_channel_bundle_schemas.py`,
+drei Endpoint-Dateien, `tests/test_welle11_response_models.py`.
+**Abnahme:** Welle-11- und Bestands-API-Tests gruen;
+`check_weak_response_models.py --threshold 200` gruen (200/76 Dateien).
+
 ## SPEC-P1-06-W10-REPORTING - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung SPEC-P1-06 nach Welle 9. **Owner:** Cursor Auto.
