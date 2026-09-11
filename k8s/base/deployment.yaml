@@ -26,6 +26,14 @@ spec:
         prometheus.io/port: "8000"
         prometheus.io/path: "/metrics"
     spec:
+      # KSV-0118: Der Container war bereits gehaertet, die Pod-Ebene fehlte.
+      # Ohne sie gilt fuer alles, was spaeter hinzukommt, wieder der Standard.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: valeo-app
         image: ghcr.io/jochenweerda/valeo-neuroerp-3.0:latest

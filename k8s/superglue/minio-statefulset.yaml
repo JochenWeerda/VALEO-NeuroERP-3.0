@@ -19,9 +19,25 @@ spec:
         app.kubernetes.io/part-of: valeo-neuroerp
     spec:
       serviceAccountName: superglue
+      # KSV-0118: MinIO laeuft im offiziellen Image als uid/gid 1000.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: minio
           image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+          # KSV-0014: MinIO startet mit schreibgeschuetzter Wurzel ohne
+          # zusaetzliche Pfade — lokal mit docker --read-only bestaetigt.
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           args:
             - server
             - /data

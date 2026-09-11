@@ -101,3 +101,36 @@ ai_harness:
     mitbehoben.
 verification:
   - "trivy config --severity HIGH,CRITICAL services/"
+
+nachtrag_kubernetes:
+  slice_erweiterung: "KSV-0118 (4x) und KSV-0014 (4x) in fuenf Manifesten unter k8s/"
+  relevanz: >-
+    Die Manifeste werden von deploy-staging.yml und superglue-deploy.yml
+    ausgerollt, sind also echte Infrastruktur und keine Ablage.
+  empirische_grundlage: >-
+    readOnlyRootFilesystem wurde nicht auf Verdacht gesetzt, sondern je Image
+    mit 'docker run --read-only' nachgestellt. Postgres 15 scheitert dabei ohne
+    Zusatzpfade mit 'could not create lock file
+    /var/run/postgresql/.s.PGSQL.5432.lock: Read-only file system' und startet
+    erst mit beschreibbarem /var/run/postgresql und /tmp. MinIO dagegen startet
+    schreibgeschuetzt ohne jeden Zusatzpfad. Ein pauschales Setzen haette die
+    Datenbank lahmgelegt.
+  aenderungen:
+    - "postgres-statefulset: Pod-Kontext uid/gid 999, readOnlyRootFilesystem, emptyDir fuer /var/run/postgresql und /tmp"
+    - "minio-statefulset: Pod-Kontext uid/gid 1000, readOnlyRootFilesystem ohne Zusatzpfade"
+    - "superglue-deployment: Container-Kontext plus emptyDir /tmp; Zustand bleibt im PVC"
+    - "base/deployment: Pod-Ebene ergaenzt, der Container war bereits gehaertet"
+    - "valeo-neuroerp-deployment: Pod-Ebene, Container-Kontext fuer valeo-domains"
+  nebenbefund_behoben:
+    datei: k8s/valeo-neuroerp-deployment.yaml
+    befund: >-
+      Dem Manifest fehlte die volumes-Sektion vollstaendig, obwohl die Container
+      shared-config und logs-volume einhaengen. In dieser Form haette der Pod
+      nicht starten koennen ('volume not found').
+    annahme: >-
+      shared-config verweist jetzt auf valeo-neuroerp-config, die einzige
+      ConfigMap dieses Manifests. Falls eine andere gemeint war, bitte
+      korrigieren - die Annahme ist im Manifest als Kommentar vermerkt.
+  nachweis_k8s:
+    - "alle fuenf Manifeste als YAML gueltig geparst"
+    - "trivy config --severity HIGH,CRITICAL ueber k8s/: 0 Befunde, KSV-0118 und KSV-0014 je 0"
