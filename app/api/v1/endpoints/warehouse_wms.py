@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.warehouse_service import WarehouseService
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -444,7 +444,7 @@ class PutawayRequest(BaseModel):
     strategy: str = "CAPACITY"
 
 
-@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=dict, summary="Einlagerungsvorschlag (Putaway)")
+@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=TypedObjectOut, summary="Einlagerungsvorschlag (Putaway)")
 def suggest_putaway(
     warehouse_id: str,
     payload: PutawayRequest,

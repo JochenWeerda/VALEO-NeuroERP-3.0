@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.sales_match_service import SalesMatchService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/sales", tags=["sales", "o2c"])
 
 
-@router.get("/match/orders", response_model=dict, summary="Aufträge mit Positions-Match-Übersicht (Picker)")
+@router.get("/match/orders", response_model=TypedObjectOut, summary="Aufträge mit Positions-Match-Übersicht (Picker)")
 def list_orders(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -23,7 +24,7 @@ def list_orders(
     return {"items": SalesMatchService(db, tenant_id).list_orders(limit=limit)}
 
 
-@router.get("/match", response_model=dict, summary="Positions-Match Auftrag ↔ Lieferschein (Teil-/Überlieferung)")
+@router.get("/match", response_model=TypedObjectOut, summary="Positions-Match Auftrag ↔ Lieferschein (Teil-/Überlieferung)")
 def match(
     auftrag: str = Query(..., description="Auftragsnummer oder -ID"),
     db: Session = Depends(get_db),

@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
 from app.core.database import get_db
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/meldewesen/lifecycle", tags=["meldewesen-lifecycle"])
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ class MeldungTransitionRequest(BaseModel):
     externe_referenz: str = ""
 
 
-@router.post("", response_model=Dict[str, Any], summary="Meldewesen-Meldung anlegen")
+@router.post("", response_model=TypedObjectOut, summary="Meldewesen-Meldung anlegen")
 def create_meldung(
     req: MeldungCreateRequest,
     x_tenant_id: str = Header(...),
@@ -53,7 +54,7 @@ def create_meldung(
 
 @router.post(
     "/{meldung_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Meldewesen-Meldungsstatus wechseln",
 )
 def transition_meldung(
@@ -82,7 +83,7 @@ def transition_meldung(
 
 @router.post(
     "/simulate-uebermittlung",
-    response_model=Dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Meldewesen-Uebermittlung simulieren",
 )
 def simulate_uebermittlung(

@@ -21,7 +21,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -373,7 +373,7 @@ async def get_wetter_boden(
     return result
 
 
-@router.get("/kulturen", response_model=list[dict], summary="Agrar-Kulturen-Stammdaten auflisten")
+@router.get("/kulturen", response_model=list[TypedObjectOut], summary="Agrar-Kulturen-Stammdaten auflisten")
 async def list_kulturen(
     search: Optional[str] = Query(None),
 ):

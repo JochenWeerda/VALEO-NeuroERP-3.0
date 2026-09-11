@@ -21,6 +21,7 @@ from app.services.feeding_feed_analysis_service import (
     FeedAnalysisNotFound,
     FeedingFeedAnalysisService,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/feed-analyses", tags=["feeding-feed-analyses"])
 
@@ -368,7 +369,7 @@ def _run_action(*, analysis_id: str, target: AnalysisStatus, body: AnalysisActio
             "status": changed["status"], "revision": changed["revision"]}
 
 
-@router.post("/{analysis_id}/actions/release", response_model=dict[str, Any], summary="Analyse via ActionRuntime freigeben")
+@router.post("/{analysis_id}/actions/release", response_model=TypedObjectOut, summary="Analyse via ActionRuntime freigeben")
 def release_action(analysis_id: str, body: AnalysisActionIn, db: Session = Depends(get_db),
                    tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, APPROVE_ROLES)
@@ -379,7 +380,7 @@ def release_action(analysis_id: str, body: AnalysisActionIn, db: Session = Depen
         raise _translate(exc) from exc
 
 
-@router.post("/{analysis_id}/actions/reject", response_model=dict[str, Any], summary="Analyse via ActionRuntime zurueckweisen")
+@router.post("/{analysis_id}/actions/reject", response_model=TypedObjectOut, summary="Analyse via ActionRuntime zurueckweisen")
 def reject_action(analysis_id: str, body: AnalysisActionIn, db: Session = Depends(get_db),
                   tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
     require_roles(user, WRITE_ROLES)

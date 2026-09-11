@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
 from app.core.database import get_db
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/futtermittel/produktion", tags=["feed-produktion"])
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class RezepturTransitionRequest(BaseModel):
     operator: str = "system"
 
 
-@router.post("/auftraege", response_model=Dict[str, Any], summary="Futtermittel-Produktionsauftrag anlegen")
+@router.post("/auftraege", response_model=TypedObjectOut, summary="Futtermittel-Produktionsauftrag anlegen")
 def create_produktionsauftrag(
     req: ProduktionsauftragCreateRequest,
     x_tenant_id: str = Header(...),
@@ -72,7 +73,7 @@ def create_produktionsauftrag(
 
 @router.post(
     "/auftraege/{auftrag_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Futtermittel-Produktionsauftragstatus wechseln",
 )
 def transition_auftrag(
@@ -99,7 +100,7 @@ def transition_auftrag(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/rezepturen", response_model=Dict[str, Any], summary="Futtermittel-Rezeptur anlegen")
+@router.post("/rezepturen", response_model=TypedObjectOut, summary="Futtermittel-Rezeptur anlegen")
 def create_rezeptur(
     req: RezepturCreateRequest,
     x_tenant_id: str = Header(...),
@@ -122,7 +123,7 @@ def create_rezeptur(
 
 @router.post(
     "/rezepturen/{rezeptur_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Futtermittel-Rezepturstatus wechseln",
 )
 def transition_rezeptur(

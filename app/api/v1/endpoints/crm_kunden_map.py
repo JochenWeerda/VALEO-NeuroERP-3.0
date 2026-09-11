@@ -9,11 +9,12 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.services.crm_kunden_map_service import CrmKundenMapService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kunden-karte", tags=["crm", "map"])
 
 
-@router.get("/map", response_model=dict, summary="Alle Kunden als GeoJSON (CRM-Kundenkarte)")
+@router.get("/map", response_model=TypedObjectOut, summary="Alle Kunden als GeoJSON (CRM-Kundenkarte)")
 def kunden_map(
     typ: Optional[str] = Query(None, description="gap | milchvieh | lead | stamm"),
     db: Session = Depends(get_db),

@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.mobile_sync_service import MobileSyncService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/mobile", tags=["mobile", "sync"])
 
@@ -39,7 +40,7 @@ class ProcessQueueIn(BaseModel):
     reason: str = Field(default="Manuelle MDE-Verarbeitung", min_length=5, max_length=500)
 
 
-@router.post("/sync-events", response_model=dict, summary="MOB-SYNC-001: Offline-Events in Queue hochladen", status_code=202)
+@router.post("/sync-events", response_model=TypedObjectOut, summary="MOB-SYNC-001: Offline-Events in Queue hochladen", status_code=202)
 def sync_events(
     body: SyncBatchIn,
     db: Session = Depends(get_db),
@@ -63,7 +64,7 @@ def sync_events(
     }
 
 
-@router.post("/sync-process", response_model=dict, summary="Pending Events verarbeiten")
+@router.post("/sync-process", response_model=TypedObjectOut, summary="Pending Events verarbeiten")
 def process_queue(
     request: Request,
     body: ProcessQueueIn | None = None,
@@ -79,7 +80,7 @@ def process_queue(
     return svc.process_pending(limit=limit, actor=actor, reason=(body.reason if body else "Manuelle MDE-Verarbeitung"))
 
 
-@router.get("/sync-queue", response_model=dict, summary="Queue-Status abrufen")
+@router.get("/sync-queue", response_model=TypedObjectOut, summary="Queue-Status abrufen")
 def get_queue(
     status: Optional[str] = Query(None, description="pending | processing | done | failed | quarantined"),
     device_id: Optional[str] = Query(None, max_length=120),
@@ -108,7 +109,7 @@ def get_queue(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/sync-summary", response_model=dict, summary="MDE Queue-Zusammenfassung abrufen")
+@router.get("/sync-summary", response_model=TypedObjectOut, summary="MDE Queue-Zusammenfassung abrufen")
 def get_queue_summary(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -116,7 +117,7 @@ def get_queue_summary(
     return MobileSyncService(db, tenant_id).queue_summary()
 
 
-@router.post("/sync-queue/{event_id}/retry", response_model=dict, summary="Fehlgeschlagenes MDE-Ereignis wiederholen")
+@router.post("/sync-queue/{event_id}/retry", response_model=TypedObjectOut, summary="Fehlgeschlagenes MDE-Ereignis wiederholen")
 def retry_event(
     event_id: str,
     body: RetryEventIn,
@@ -133,7 +134,7 @@ def retry_event(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.get("/sync-queue/{event_id}/audit", response_model=list[dict], summary="MDE-Ereignis-Audit abrufen")
+@router.get("/sync-queue/{event_id}/audit", response_model=list[TypedObjectOut], summary="MDE-Ereignis-Audit abrufen")
 def get_event_audit(
     event_id: str,
     db: Session = Depends(get_db),

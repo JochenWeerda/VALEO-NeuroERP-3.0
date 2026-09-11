@@ -29,6 +29,7 @@ from app.api.v1.schemas.procurement_match_schemas import (
     WareneingangOut,
 )
 from app.services.procurement_match_service import ProcurementMatchService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/procurement", tags=["procurement", "einkauf"])
 
@@ -345,7 +346,7 @@ class RechnungsFreigabeIn(_BM):
 # je Installation abweicht (die Migration legt sie nur additiv mit id/tenant_id/
 # status an). Ein striktes response_model wuerde dort Felder still verwerfen.
 # Erst typisieren, wenn die Tabelle ein verbindliches Schema hat.
-@router.post("/bestellungen/{bestellung_id}/transition", response_model=dict[str, Any], summary="Bestellungs-Status wechseln")
+@router.post("/bestellungen/{bestellung_id}/transition", response_model=TypedObjectOut, summary="Bestellungs-Status wechseln")
 def bestellung_transition_endpoint(
     bestellung_id: str,
     body: BestellungTransitionIn,

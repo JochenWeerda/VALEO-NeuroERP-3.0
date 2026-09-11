@@ -6,21 +6,22 @@ from fastapi import APIRouter, HTTPException
 from typing import Any
 
 from app.services.process_map_service import ProcessDomain, process_map_service
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/process-map", tags=["process-map", "workflow"])
 
 
-@router.get("/", summary="Alle Prozesskarten auflisten", response_model=list[dict[str, Any]])
+@router.get("/", summary="Alle Prozesskarten auflisten", response_model=list[TypedObjectOut])
 async def list_domains() -> list[dict[str, Any]]:
     return process_map_service.list_domains()
 
 
-@router.get("/summary", summary="Prozesskarten-Zusammenfassung", response_model=dict[str, Any])
+@router.get("/summary", summary="Prozesskarten-Zusammenfassung", response_model=TypedObjectOut)
 async def get_summary() -> dict[str, Any]:
     return process_map_service.summary()
 
 
-@router.get("/external-gates", summary="Externe Gates aller Prozessketten", response_model=list[dict[str, Any]])
+@router.get("/external-gates", summary="Externe Gates aller Prozessketten", response_model=list[TypedObjectOut])
 async def list_external_gates(domain: str | None = None) -> list[dict[str, Any]]:
     parsed: ProcessDomain | None = None
     if domain:
@@ -31,12 +32,12 @@ async def list_external_gates(domain: str | None = None) -> list[dict[str, Any]]
     return process_map_service.list_external_gates(domain=parsed)
 
 
-@router.get("/external-gates/open", summary="Offene externe Gates", response_model=list[dict[str, Any]])
+@router.get("/external-gates/open", summary="Offene externe Gates", response_model=list[TypedObjectOut])
 async def get_open_gates() -> list[dict[str, Any]]:
     return process_map_service.get_open_gates()
 
 
-@router.get("/{domain}", summary="Prozesskarte fuer Domain", response_model=dict[str, Any])
+@router.get("/{domain}", summary="Prozesskarte fuer Domain", response_model=TypedObjectOut)
 async def get_process_map(domain: str) -> dict[str, Any]:
     try:
         d = ProcessDomain(domain)

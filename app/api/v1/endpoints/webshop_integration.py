@@ -13,7 +13,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.webshop_integration_service import WebshopIntegrationService
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
 
 
@@ -102,7 +102,7 @@ def list_connectors(
     ]
 
 
-@router.post("/orders/import", response_model=dict, summary="Orders importieren (Frontend-Alias)")
+@router.post("/orders/import", response_model=TypedObjectOut, summary="Orders importieren (Frontend-Alias)")
 def import_orders_alias(
     body: dict = None,  # type: ignore[assignment]
     db: Session = Depends(get_db),
@@ -198,7 +198,7 @@ def sync_status(
 
 
 @router.get("/orders", summary="Orders auflisten",
-    response_model=list[dict]
+    response_model=list[TypedObjectOut]
 )
 def list_orders(
     db: Session = Depends(get_db),
@@ -245,7 +245,7 @@ def convert_order(
 
 
 @router.get("/sync-log", summary="Log synchronisieren",
-    response_model=list[dict]
+    response_model=list[TypedObjectOut]
 )
 def sync_log(
     db: Session = Depends(get_db),

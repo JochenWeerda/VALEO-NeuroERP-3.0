@@ -28,7 +28,7 @@ from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
 
 logger = logging.getLogger(__name__)
-from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.base import BaseSchema, StatusResponse, TypedObjectOut
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
 
 
@@ -494,7 +494,7 @@ async def post_ap_invoice(
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
 
-@router.post("/{entity_id}/actions/freigeben", response_model=dict, summary="Eingangsrechnung freigeben (SPEC-P1-04)")
+@router.post("/{entity_id}/actions/freigeben", response_model=TypedObjectOut, summary="Eingangsrechnung freigeben (SPEC-P1-04)")
 async def action_freigeben(
     entity_id: str,
     body: dict = Body(default_factory=dict),

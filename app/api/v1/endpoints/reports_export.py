@@ -10,11 +10,12 @@ from fastapi import APIRouter, Depends, Path, Query
 from fastapi.responses import JSONResponse
 
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/reports", tags=["reports", "export"])
 
 
-@router.get("/export/{report_type}", response_model=dict, summary="Bericht exportieren")
+@router.get("/export/{report_type}", response_model=TypedObjectOut, summary="Bericht exportieren")
 async def export_report(
     report_type: str = Path(..., description="Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag"),
     format: str = Query("xlsx", description="Ausgabeformat: xlsx, csv, pdf"),

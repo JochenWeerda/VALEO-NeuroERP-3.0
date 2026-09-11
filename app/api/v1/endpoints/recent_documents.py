@@ -13,6 +13,7 @@ from app.services.recent_documents_service import (
     RecentDocumentError,
     RecentDocumentsService,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/recent-documents", tags=["workspace", "l3-parity"])
 
@@ -41,7 +42,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
-@router.post("/touch", response_model=dict, status_code=status.HTTP_202_ACCEPTED, summary="Beleg als zuletzt geoeffnet vermerken")
+@router.post("/touch", response_model=TypedObjectOut, status_code=status.HTTP_202_ACCEPTED, summary="Beleg als zuletzt geoeffnet vermerken")
 def touch(
     body: RecentDocumentTouch,
     db: Session = Depends(get_db),
@@ -51,7 +52,7 @@ def touch(
     return guarded(lambda: service(db, tenant_id, user).touch(body.model_dump()))
 
 
-@router.get("", response_model=dict, summary="Zuletzt geoeffnete Belege auflisten")
+@router.get("", response_model=TypedObjectOut, summary="Zuletzt geoeffnete Belege auflisten")
 def list_recent(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -67,7 +68,7 @@ def list_recent(
     )
 
 
-@router.delete("/{recent_id}", response_model=dict, summary="Eintrag aus der Belegliste entfernen")
+@router.delete("/{recent_id}", response_model=TypedObjectOut, summary="Eintrag aus der Belegliste entfernen")
 def remove_one(
     recent_id: str,
     db: Session = Depends(get_db),
@@ -77,7 +78,7 @@ def remove_one(
     return {"deleted": service(db, tenant_id, user).remove(recent_id)}
 
 
-@router.delete("", response_model=dict, summary="Belegliste leeren")
+@router.delete("", response_model=TypedObjectOut, summary="Belegliste leeren")
 def clear_all(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

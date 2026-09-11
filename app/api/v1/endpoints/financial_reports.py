@@ -20,7 +20,7 @@ from ....core.database import get_db
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.financial_reports_schemas import FinancialReportsOut
 
 
@@ -668,7 +668,7 @@ async def export_report(
 
 @router.get(
     "/periodenvergleich",
-    response_model=dict,
+    response_model=TypedObjectOut,
     summary="Konten-Saldenliste mit Periodenvergleich (BI-DRILL-001)",
 )
 async def get_periodenvergleich(
@@ -757,7 +757,7 @@ async def get_periodenvergleich(
 
 
 @router.get(
-    "/beleg-drilldown/{journal_entry_id}", response_model=dict,
+    "/beleg-drilldown/{journal_entry_id}", response_model=TypedObjectOut,
     summary="Beleg-Drilldown: JournalEntry → Quelldokument + Zeilen",
 )
 async def get_beleg_drilldown(

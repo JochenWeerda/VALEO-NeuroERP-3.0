@@ -45,7 +45,7 @@ from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -8484,7 +8484,7 @@ async def evaluate_feeding_control(payload: _FeedingControlIn):
 
 @router.post(
     "/feeding-control/logs",
-    response_model=dict,
+    response_model=TypedObjectOut,
     summary="Fuetterungsprotokoll speichern",
 )
 async def save_feeding_control_log(
@@ -8529,7 +8529,7 @@ async def save_feeding_control_log(
 
 @router.get(
     "/feeding-control/logs",
-    response_model=list[dict],
+    response_model=list[TypedObjectOut],
     summary="Fuetterungscontrolling-Zeitreihe",
 )
 async def list_feeding_control_logs(

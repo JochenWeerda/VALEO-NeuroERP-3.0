@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
-from app.api.v1.schemas.base import IDResponse
+from app.api.v1.schemas.base import IDResponse, TypedObjectOut
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
 
 
@@ -344,7 +344,7 @@ class CarrierInvoiceIn(BaseModel):
 
 
 @router.post(
-    "/freight-cost/carrier-invoice", response_model=dict,
+    "/freight-cost/carrier-invoice", response_model=TypedObjectOut,
     status_code=201,
     summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)",
 )
@@ -463,7 +463,7 @@ def create_carrier_invoice(
 
 
 @router.get(
-    "/freight-cost/carrier-invoices", response_model=dict,
+    "/freight-cost/carrier-invoices", response_model=TypedObjectOut,
     summary="Spediteur-Rechnungen auflisten",
 )
 def list_carrier_invoices(

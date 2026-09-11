@@ -21,6 +21,7 @@ from app.services.feeding_consulting_report_service import (
     ConsultingReportConflict,
     FeedingConsultingReportService,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/feeding", tags=["feeding-consulting"])
 
@@ -214,7 +215,7 @@ async def close_case(
 
 @router.post(
     "/consulting-cases/{case_id}/measures",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     status_code=201,
 summary="Massnahme mit Beratungsfall verknuepfen")
 async def link_measure(
@@ -238,7 +239,7 @@ async def link_measure(
 
 @router.post(
     "/consulting-cases/{case_id}/report-drafts",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     status_code=201,
 summary="Berichtsentwurf anlegen")
 async def create_report_draft(
@@ -255,7 +256,7 @@ async def create_report_draft(
         raise HTTPException(404, str(exc)) from exc
 
 
-@router.get("/consulting-cases/{case_id}/measures", response_model=list[dict[str, Any]], summary="Massnahmen des Beratungsfalls auflisten")
+@router.get("/consulting-cases/{case_id}/measures", response_model=list[TypedObjectOut], summary="Massnahmen des Beratungsfalls auflisten")
 async def list_case_measures(
     case_id: str,
     db: Session = Depends(get_db),
@@ -272,7 +273,7 @@ async def list_case_measures(
 
 
 @router.get(
-    "/consulting-cases/{case_id}/report-drafts", response_model=list[dict[str, Any]]
+    "/consulting-cases/{case_id}/report-drafts", response_model=list[TypedObjectOut]
 , summary="Berichtsentwuerfe auflisten")
 async def list_report_drafts(
     case_id: str,

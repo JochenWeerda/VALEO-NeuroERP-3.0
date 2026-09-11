@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.einkauf_kpis_schemas import EinkaufKpisOut
 
 
@@ -207,7 +207,7 @@ def get_kpis(
     }
 
 
-@router.get("/audit-trail/{doc_type}/{doc_id}", response_model=dict, summary="Einkauf Audit-Trail abrufen")
+@router.get("/audit-trail/{doc_type}/{doc_id}", response_model=TypedObjectOut, summary="Einkauf Audit-Trail abrufen")
 async def get_einkauf_audit_trail(
     doc_type: str,
     doc_id: str,
@@ -222,7 +222,7 @@ async def get_einkauf_audit_trail(
     }
 
 
-@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=dict, summary="Bestellung anlegen (SPEC-P1-04)")
+@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=TypedObjectOut, summary="Bestellung anlegen (SPEC-P1-04)")
 async def action_neue_bestellung(
     entity_id: str,
     body: dict = Body(default_factory=dict),

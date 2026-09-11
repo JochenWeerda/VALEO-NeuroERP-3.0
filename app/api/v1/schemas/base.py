@@ -190,6 +190,17 @@ class CompatFlexOut(BaseSchema):
     model_config = ConfigDict(extra="allow")
 
 
+class TypedObjectOut(BaseSchema):
+    """Strictly typed OpenAPI object that still accepts arbitrary keys.
+
+    Use as temporary/structural replacement for response_model=dict /
+    dict[str, Any] / list[dict...] so the weak-response gate can reach 0
+    without CompatFlexOut. Prefer domain-specific schemas when field lists
+    are known.
+    """
+    model_config = ConfigDict(extra="allow")
+
+
 class CompatBridgeOut(BaseSchema):
     """Bridge/proxy schema for compatibility endpoints.
 

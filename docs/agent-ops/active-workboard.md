@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-06-W14-DRAIN - abgeschlossen 2026-09-11
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 13. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** Verbleibende 173 schwache `response_model` (dict / dict[str, Any] /
+list[dict...]) mechanisch auf `TypedObjectOut` heben; Gate 173 → 0.
+Kein CompatFlexOut. SECURITY-REMAINDER unberuehrt.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `base.py` (`TypedObjectOut`),
+70 Endpoint-Dateien, `tests/test_welle14_response_models.py`, open-gaps.
+**Abnahme:** `check_weak_response_models.py --threshold 0` gruen (0/0 Dateien);
+CompatFlexOut=0; Welle-14-Tests gruen. SPEC-P1-06 geschlossen.
+
 ## SPEC-P1-06-W13-PORTAL - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung SPEC-P1-06 nach Welle 12. **Owner:** Cursor Auto.

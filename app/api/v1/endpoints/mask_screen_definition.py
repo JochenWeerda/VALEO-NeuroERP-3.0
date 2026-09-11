@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ....core.screen_definitions import get_screen_definition
 from ....core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 
 router = APIRouter(prefix="/masks", tags=["ui", "masks", "screen-definition"])
@@ -91,7 +92,7 @@ def _generate_agent_contract(definition: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/{mask_id:path}/screen-definition", response_model=dict[str, Any], summary="Native ScreenDefinition abrufen")
+@router.get("/{mask_id:path}/screen-definition", response_model=TypedObjectOut, summary="Native ScreenDefinition abrufen")
 async def get_mask_screen_definition(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -106,7 +107,7 @@ async def get_mask_screen_definition(
     return definition
 
 
-@router.get("/{mask_id:path}/agent-contract", response_model=dict[str, Any], summary="AgentMaskContract abrufen")
+@router.get("/{mask_id:path}/agent-contract", response_model=TypedObjectOut, summary="AgentMaskContract abrufen")
 async def get_agent_mask_contract(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -305,7 +306,7 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/{mask_id:path}/readiness", response_model=dict[str, Any], summary="Generator-Readiness pruefen")
+@router.get("/{mask_id:path}/readiness", response_model=TypedObjectOut, summary="Generator-Readiness pruefen")
 async def get_mask_readiness(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -330,7 +331,7 @@ async def get_mask_readiness(
 
 @router.get(
     "/{mask_id:path}/entity/{entity_id}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Generischer Entity-Stub fuer native SDs ohne dedizierten Backend-Endpunkt",
 )
 async def get_mask_entity_stub(
@@ -362,7 +363,7 @@ async def get_mask_entity_stub(
 
 @router.get(
     "/{mask_id:path}/entity/{entity_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Generischer Tab-Stub fuer native SDs ohne dedizierten Tab-Endpunkt",
 )
 async def get_mask_tab_stub(

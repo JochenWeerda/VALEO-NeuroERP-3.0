@@ -18,6 +18,7 @@ from app.api.v1.schemas.crm_bundle_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_contact_ext_service import CrmContactExtService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -55,7 +56,7 @@ def set_marketing(
     )
 
 
-@router.post("/contacts/{contact_id}/pseudonymize", response_model=dict[str, Any], summary="Ansprechpartner DSGVO-pseudonymisieren")
+@router.post("/contacts/{contact_id}/pseudonymize", response_model=TypedObjectOut, summary="Ansprechpartner DSGVO-pseudonymisieren")
 def pseudonymize(
     contact_id: str,
     db: Session = Depends(get_db),

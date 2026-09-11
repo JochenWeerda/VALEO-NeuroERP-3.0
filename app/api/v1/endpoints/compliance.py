@@ -33,7 +33,7 @@ from app.services.compliance_service import (
     build_compliance_pdf_bytes as _build_compliance_pdf_bytes,
 )
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -775,7 +775,7 @@ _VALID_SPERRGRUENDE = {
 }
 
 
-@router.post("/artikel-sperre", response_model=dict, status_code=201, summary="Artikel sperren (COMP-SPERR-001)")
+@router.post("/artikel-sperre", response_model=TypedObjectOut, status_code=201, summary="Artikel sperren (COMP-SPERR-001)")
 async def sperre_artikel(
     body: ArtikelSperreIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -833,7 +833,7 @@ async def sperre_artikel(
     }
 
 
-@router.get("/artikel-sperre/{artikel_id}", response_model=dict, summary="Artikel-Sperrstatus prüfen")
+@router.get("/artikel-sperre/{artikel_id}", response_model=TypedObjectOut, summary="Artikel-Sperrstatus prüfen")
 async def get_artikel_sperre(
     artikel_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -866,7 +866,7 @@ async def get_artikel_sperre(
     }
 
 
-@router.delete("/artikel-sperre/{artikel_id}", response_model=dict, summary="Artikel freigeben")
+@router.delete("/artikel-sperre/{artikel_id}", response_model=TypedObjectOut, summary="Artikel freigeben")
 async def freigabe_artikel(
     artikel_id: str,
     body: ArtikelFreigabeIn,
@@ -895,7 +895,7 @@ async def freigabe_artikel(
     return {"artikel_id": artikel_id, "status": "AUFGEHOBEN"}
 
 
-@router.get("/artikel-sperren", response_model=dict, summary="Alle aktiven Artikel-Sperren auflisten")
+@router.get("/artikel-sperren", response_model=TypedObjectOut, summary="Alle aktiven Artikel-Sperren auflisten")
 async def list_artikel_sperren(
     sperrgrund: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),

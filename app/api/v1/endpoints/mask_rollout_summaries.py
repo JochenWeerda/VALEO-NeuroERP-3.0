@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.core.mask_rollout_catalog import get_rollout_spec
 from app.core.tenant import get_tenant_id
 from app.services.mask_rollout_summary_service import MaskRolloutSummaryService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/mask-rollouts", tags=["ui", "mask-rollout", "screen-summary"])
 
@@ -21,7 +22,7 @@ def _normalize_screen_id(screen_id: str) -> str:
 
 @router.get(
     "/{screen_id:path}/{entity_id}/screen-summary",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Rollout screen summary abrufen",
 )
 async def get_mask_rollout_screen_summary(
@@ -38,7 +39,7 @@ async def get_mask_rollout_screen_summary(
 
 @router.get(
     "/{screen_id:path}/{entity_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Rollout tab data abrufen",
 )
 async def get_mask_rollout_tab_data(

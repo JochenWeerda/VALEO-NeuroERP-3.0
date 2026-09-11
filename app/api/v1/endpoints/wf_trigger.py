@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.wf_trigger_service import WfTriggerService, TRIGGER_MAP
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/wf-trigger", tags=["workflow", "automation"])
 
@@ -21,7 +22,7 @@ class TriggerIn(BaseModel):
     context: dict[str, Any] = {}
 
 
-@router.post("", response_model=dict, status_code=200, summary="Status-Trigger manuell feuern (WF-TRIGGER-001)")
+@router.post("", response_model=TypedObjectOut, status_code=200, summary="Status-Trigger manuell feuern (WF-TRIGGER-001)")
 def fire_trigger(
     body: TriggerIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -38,13 +39,13 @@ def fire_trigger(
             "new_status": body.new_status, "actions": results}
 
 
-@router.get("/map", response_model=dict, summary="Trigger-Map: alle registrierten Automationen")
+@router.get("/map", response_model=TypedObjectOut, summary="Trigger-Map: alle registrierten Automationen")
 def get_trigger_map() -> dict:
     """Gibt die vollständige Trigger-Konfiguration zurück."""
     return {"trigger_map": TRIGGER_MAP}
 
 
-@router.get("/log", response_model=dict, summary="Trigger-Ausführungslog")
+@router.get("/log", response_model=TypedObjectOut, summary="Trigger-Ausführungslog")
 def get_trigger_log(
     entity_type: str | None = Query(None),
     entity_id: str | None = Query(None),

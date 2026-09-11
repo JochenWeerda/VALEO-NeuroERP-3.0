@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/stammdaten/duplikate", tags=["stammdaten", "qualitaet"])
 
@@ -30,7 +31,7 @@ class DuplikatTreffer(BaseModel):
 
 
 @router.get(
-    "/business-partner", response_model=dict,
+    "/business-partner", response_model=TypedObjectOut,
     summary="Dubletten-Check Business Partner (UST-ID, Name, Adresse) — STMD-DUP-001",
 )
 def check_bp_dubletten(
@@ -127,7 +128,7 @@ def check_bp_dubletten(
 
 
 @router.get(
-    "/artikel", response_model=dict,
+    "/artikel", response_model=TypedObjectOut,
     summary="Dubletten-Check Artikel (EAN, Name+Einheit) — STMD-DUP-001",
 )
 def check_artikel_dubletten(
@@ -185,7 +186,7 @@ def check_artikel_dubletten(
 
 
 @router.post(
-    "/zusammenfuehren", response_model=dict,
+    "/zusammenfuehren", response_model=TypedObjectOut,
     summary="Dubletten zusammenführen (Master bleibt, Duplikat wird deaktiviert)",
     status_code=200,
 )

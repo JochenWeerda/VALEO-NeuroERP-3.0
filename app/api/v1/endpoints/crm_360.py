@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.crm_360_schemas import Crm360Out
 
 
@@ -115,7 +115,7 @@ def build_customer_screen_summary(
 
 @router.get(
     "/{customer_id}/screen-summary",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["crm", "customers", "screen-summary"],
     summary="Customer screen summary abrufen",
 )
@@ -320,7 +320,7 @@ def _paginate_items(
 
 @router.get(
     "/{customer_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["crm", "customers", "screen-summary"],
     summary="Customer tab list data abrufen",
 )

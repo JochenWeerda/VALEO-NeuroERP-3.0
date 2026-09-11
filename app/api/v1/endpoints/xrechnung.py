@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/xrechnung", tags=["schnittstellen", "e-rechnung"])
 
@@ -202,7 +203,7 @@ def export_xrechnung(
     )
 
 
-@router.get("/{invoice_id}/validate", response_model=dict, summary="XRechnung Pflichtfelder prüfen")
+@router.get("/{invoice_id}/validate", response_model=TypedObjectOut, summary="XRechnung Pflichtfelder prüfen")
 def validate_xrechnung(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -38,6 +38,7 @@ from app.services.kontrakte_service import (
     _text,
     _contract_reference_price,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 # Backwards-compatible alias for tests
 _line_to_out = line_to_dict
@@ -235,7 +236,7 @@ def build_kontrakt_screen_summary(
 
 @router.get(
     "/{contract_id}/screen-summary",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["kontrakte", "screen-summary"],
     summary="Kontrakt screen summary abrufen",
 )
@@ -267,7 +268,7 @@ async def get_kontrakt_screen_summary(
 
 @router.get(
     "/{contract_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["kontrakte", "screen-summary"],
     summary="Kontrakt tab list data abrufen",
 )

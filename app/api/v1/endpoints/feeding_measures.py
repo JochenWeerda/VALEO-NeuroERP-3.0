@@ -22,6 +22,7 @@ from app.services.feeding_measure_lifecycle_service import (
     FeedingMeasureLifecycleService,
     FeedingMeasureNotFound,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/feeding", tags=["feeding-measures"])
 
@@ -80,7 +81,7 @@ def _service(db: Session, tenant_id: str, user: User) -> FeedingMeasureLifecycle
     )
 
 
-@router.post("/measures/{measure_id}/transitions", response_model=dict[str, Any], summary="Massnahme im Status weiterschalten")
+@router.post("/measures/{measure_id}/transitions", response_model=TypedObjectOut, summary="Massnahme im Status weiterschalten")
 async def transition_measure(
     measure_id: str,
     body: MeasureTransitionIn,
@@ -101,7 +102,7 @@ async def transition_measure(
         raise HTTPException(409, str(exc)) from exc
 
 
-@router.get("/measures/{measure_id}/history", response_model=list[dict[str, Any]], summary="Statushistorie der Massnahme")
+@router.get("/measures/{measure_id}/history", response_model=list[TypedObjectOut], summary="Statushistorie der Massnahme")
 async def measure_history(
     measure_id: str,
     db: Session = Depends(get_db),
@@ -130,7 +131,7 @@ async def process_overdue(
     )
 
 
-@router.get("/notifications", response_model=list[dict[str, Any]], summary="Benachrichtigungen zu Massnahmen auflisten")
+@router.get("/notifications", response_model=list[TypedObjectOut], summary="Benachrichtigungen zu Massnahmen auflisten")
 async def notifications(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

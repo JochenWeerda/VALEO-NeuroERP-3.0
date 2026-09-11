@@ -19,7 +19,7 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from sqlalchemy import text
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -337,7 +337,7 @@ async def freigabe_charge(
 
 @router.post(
     "/operator/bulk-release",
-    response_model=dict,
+    response_model=TypedObjectOut,
     summary="Chargen geprueft massenfreigeben",
 )
 async def bulk_release_charges(

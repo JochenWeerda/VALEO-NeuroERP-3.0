@@ -7,6 +7,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 
 from app.services.mcp_tool_registry_service import mcp_tool_registry_service
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/mcp/tools", tags=["mcp", "tools"])
 
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/mcp/tools", tags=["mcp", "tools"])
 @router.get(
     "",
     summary="ERP-MCP-Toolkatalog listen",
-    response_model=list[dict[str, Any]],
+    response_model=list[TypedObjectOut],
 )
 async def list_tools(
     domain: str | None = Query(default=None),
@@ -31,7 +32,7 @@ async def list_tools(
 @router.get(
     "/summary",
     summary="Tool-Katalog Zusammenfassung",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
 )
 async def get_summary() -> dict[str, Any]:
     return mcp_tool_registry_service.summary()
@@ -40,7 +41,7 @@ async def get_summary() -> dict[str, Any]:
 @router.get(
     "/{tool_id}",
     summary="Einzelnes MCP-Tool abrufen",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
 )
 async def get_tool(tool_id: str) -> dict[str, Any]:
     try:

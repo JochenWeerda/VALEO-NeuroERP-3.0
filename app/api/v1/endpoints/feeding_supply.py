@@ -18,6 +18,7 @@ from app.services.feeding_supply_service import (
     FeedingSupplyService,
 )
 from app.services.rations_lifecycle_service import RationLifecycleService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/feeding/supply", tags=["feeding-supply"])
 
@@ -51,7 +52,7 @@ def _translate(exc: Exception) -> HTTPException:
     return HTTPException(status_code=500, detail="Versorgungsbedarf konnte nicht verarbeitet werden.")
 
 
-@router.get("", response_model=list[dict[str, Any]], summary="Futterbedarf vorausrechnen")
+@router.get("", response_model=list[TypedObjectOut], summary="Futterbedarf vorausrechnen")
 async def project_supply(
     horizon_days: int = Query(default=30, ge=1, le=365),
     safety_pct: float = Query(default=10, ge=0, le=100),
@@ -71,7 +72,7 @@ async def project_supply(
         raise _translate(exc) from exc
 
 
-@router.get("/procurement-handoffs", response_model=list[dict[str, Any]], summary="Einkaufsuebergaben auflisten")
+@router.get("/procurement-handoffs", response_model=list[TypedObjectOut], summary="Einkaufsuebergaben auflisten")
 async def list_procurement_handoffs(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -83,7 +84,7 @@ async def list_procurement_handoffs(
     )
 
 
-@router.post("/procurement-handoffs", response_model=dict[str, Any], status_code=201, summary="Einkaufsuebergabe anlegen")
+@router.post("/procurement-handoffs", response_model=TypedObjectOut, status_code=201, summary="Einkaufsuebergabe anlegen")
 async def create_procurement_handoff(
     body: ProcurementHandoffIn,
     db: Session = Depends(get_db),

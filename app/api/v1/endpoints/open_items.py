@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.open_items_schemas import OpenItemsOut
 
 
@@ -958,7 +958,7 @@ async def reverse_settlement(
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
 
 
-@router.post("/{entity_id}/actions/mahnen", response_model=dict, summary="Mahnung erstellen (SPEC-P1-04)")
+@router.post("/{entity_id}/actions/mahnen", response_model=TypedObjectOut, summary="Mahnung erstellen (SPEC-P1-04)")
 async def action_mahnen(
     entity_id: str,
     body: dict = Body(default_factory=dict),

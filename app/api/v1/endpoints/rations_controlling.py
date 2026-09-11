@@ -10,6 +10,7 @@ from app.auth.deps import User, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.rations_controlling_service import RationsControllingService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/controlling", tags=["rations-controlling"])
 
@@ -37,7 +38,7 @@ class DailyObservationIn(BaseModel):
 
 @router.post(
     "/observations",
-    response_model=dict,
+    response_model=TypedObjectOut,
     status_code=201,
     summary="Taegliche Soll-Ist-Beobachtung erfassen",
 )
@@ -62,7 +63,7 @@ async def record_observation(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/series", response_model=list[dict], summary="Soll-Ist-Zeitreihe lesen")
+@router.get("/series", response_model=list[TypedObjectOut], summary="Soll-Ist-Zeitreihe lesen")
 async def get_series(
     group_id: str | None = None,
     date_from: date | None = Query(default=None),
