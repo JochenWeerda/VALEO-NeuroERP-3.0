@@ -341,11 +341,14 @@ class RechnungsFreigabeIn(_BM):
     grund: _Opt[str] = None
 
 
-# SPEC-P1-06: bewusst noch untypisiert. Der Service liefert `SELECT *` ueber
-# die Legacy-Tabelle domain_procurement.proc_purchase_orders, deren Spaltenbreite
-# je Installation abweicht (die Migration legt sie nur additiv mit id/tenant_id/
-# status an). Ein striktes response_model wuerde dort Felder still verwerfen.
-# Erst typisieren, wenn die Tabelle ein verbindliches Schema hat.
+# SPEC-P1-06: Der Service liefert `SELECT *` ueber die Legacy-Tabelle
+# domain_procurement.proc_purchase_orders, deren Spaltenbreite je Installation
+# abweicht (die Migration legt sie nur additiv mit id/tenant_id/status an). Ein
+# striktes response_model wuerde dort Felder still verwerfen, deshalb
+# TypedObjectOut: es ist in OpenAPI ein getyptes Objekt, laesst dank
+# extra="allow" aber jedes zusaetzliche Feld unveraendert durch. Ein
+# domaenenspezifisches Schema kann folgen, sobald die Tabelle ein verbindliches
+# Schema hat.
 @router.post("/bestellungen/{bestellung_id}/transition", response_model=TypedObjectOut, summary="Bestellungs-Status wechseln")
 def bestellung_transition_endpoint(
     bestellung_id: str,

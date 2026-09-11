@@ -43,6 +43,10 @@ TYPED_ROUTES = {
     ("/procurement/wareneingaenge/{we_id}/qs", "POST"): "WareneingangOut",
     ("/procurement/bestellungen/{bestellung_id}/rechnungspruefung", "POST"): "RechnungspruefungOut",
     ("/procurement/rechnungspruefungen/{pruefung_id}/freigabe", "POST"): "RechnungspruefungOut",
+    # Frueher bewusst untypisiert (SPEC-P1-06): der Service liefert SELECT * ueber
+    # eine Legacy-Tabelle mit installationsabhaengiger Spaltenbreite. Geloest ueber
+    # TypedObjectOut, das dank extra="allow" keine Felder verwirft.
+    ("/procurement/bestellungen/{bestellung_id}/transition", "POST"): "TypedObjectOut",
 }
 
 
@@ -61,14 +65,20 @@ def test_endpoint_hat_getyptes_response_model(key, expected):
     assert getattr(model, "__name__", None) == expected
 
 
-def test_nur_der_legacy_transition_endpunkt_bleibt_untypisiert():
-    """Regressionsklammer: die Welle darf sich nicht rueckwaerts bewegen."""
+def test_kein_endpunkt_bleibt_untypisiert():
+    """Regressionsklammer: die Welle darf sich nicht rueckwaerts bewegen.
+
+    Bis 2026-09-11 hielt dieser Test genau einen verbliebenen Rueckstand fest,
+    den Transition-Endpunkt. Der ist inzwischen ueber TypedObjectOut typisiert,
+    womit die Klammer vom Rueckstand auf das Ziel umgestellt ist: kein Endpunkt
+    dieses Routers darf ohne Response-Model auskommen.
+    """
     untyped = [
         path
         for (path, _method), model in _routes().items()
         if getattr(model, "__name__", None) in (None, "dict")
     ]
-    assert untyped == ["/procurement/bestellungen/{bestellung_id}/transition"]
+    assert untyped == []
 
 
 def _assert_kein_feldverlust(model, data):
