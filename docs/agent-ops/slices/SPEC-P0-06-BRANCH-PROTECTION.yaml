@@ -27,6 +27,17 @@ acceptance:
   - Unit-Tests gruen
 tests:
   - tests/test_spec_p0_06_codeowners.py
+risks:
+  - >-
+    Solo-Maintainer: enforce_admins=false erlaubt Admin-Bypass; ohne Zweit-Reviewer
+    ist Vier-Augen nur fuer Nicht-Admin-Pushes wirksam.
+  - >-
+    Required Checks (Path Guard / gitleaks / Security Scan Summary) blockieren Merges
+    auch dann, wenn andere Gates (pytest Backend) separat rot sind.
+external_gates:
+  - >-
+    GitHub Branch-Protection und CODEOWNERS-Reviewer sind Plattform-Einstellungen;
+    ein zweites Reviewer-Konto (enforce_admins=true) bleibt Betriebsentscheidung.
 ai_harness:
   fachlicher_vertrag: Aenderungen an GoBD-/CI-kritischen Pfaden brauchen Review.
   architektur_vertrag: GitHub Branch-Protection + CODEOWNERS; kein App-Code.

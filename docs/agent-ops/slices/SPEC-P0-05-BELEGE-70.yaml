@@ -23,6 +23,14 @@ acceptance:
   - Unit-Tests gruen
 tests:
   - tests/test_spec_p0_05_belege_coverage.py
+risks:
+  - >-
+    Isolierte Modul-Coverage kann hoeher liegen als in der CI-Vollsuite, wenn
+    andere Tests die Pfade anders belasten; only-up-Ratchet schuetzt vor Absenkung.
+  - >-
+    MagicMock-DB-Tests decken keine echten SQL-/Schema-Fehler ab.
+external_gates:
+  - not_applicable — rein repo-seitige Coverage-/Ratchet-Arbeit ohne Fremdsystem.
 ai_harness:
   fachlicher_vertrag: Finanzreports, Sammelabrechnung und E-Rechnung sind testbar abgesichert.
   architektur_vertrag: Nur Tests + Ratchet; keine API-Vertragsaenderung.

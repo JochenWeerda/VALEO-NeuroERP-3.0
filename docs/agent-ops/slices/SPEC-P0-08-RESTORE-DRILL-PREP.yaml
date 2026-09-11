@@ -24,6 +24,17 @@ acceptance:
   - open-gaps: repo-seitig erledigt, Drill selbst external_gate
 tests:
   - tests/test_spec_p0_08_restore_drill_evidence.py
+risks:
+  - >-
+    Ohne committetes Drill-Protokoll bleibt check_restore_drill_evidence.py auf
+    Exit 2 (EXTERNAL_GATE); Release mit --strict blockiert dann bewusst.
+  - >-
+    Das Runner-Skript misst gegen die lokale/ops-Umgebung; RTO-Nachweis gilt nur
+    fuer den dokumentierten Lauf, nicht fuer ungetestete Cluster.
+external_gates:
+  - >-
+    Realer Backup-/Restore-Drill gegen Staging inkl. Protokoll-Commit bleibt
+    Betriebsverantwortung (15-min-RTO-Nachweis).
 ai_harness:
   fachlicher_vertrag: 15-min-RTO-Drill ist fuer Ops reproduzierbar dokumentiert.
   architektur_vertrag: bestehende scripts/run_restore_drill.sh + Evidence-Check.
