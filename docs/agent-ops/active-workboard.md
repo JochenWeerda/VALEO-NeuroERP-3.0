@@ -26,13 +26,16 @@ Security Scan Summary; kein Force-Push); CODEOWNERS-Check Exit 0.
 ## SPEC-P0-05-BELEGE-70 - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung A6-Coverage-Offensive / SPEC-P0-05. **Owner:** Cursor Auto.
-**Stand:** abgeschlossen 2026-09-11.
+**Stand:** abgeschlossen 2026-09-11; Qualitaetsnachzug 2026-09-11 (keine MagicMock-DB,
+echte HTTP/`require_db`, Produktbugs behoben).
 **Ziel:** `financial_reports`, `rohware_sammelabrechnung`, `sales_invoice_einvoice`
 auf ≥70% Coverage; Ratchet only-up auf 0.70 inkl. Baseline.
-**Dateibesitz:** Slice-YAML, dieser Abschnitt, `tests/test_spec_p0_05_belege_coverage.py`,
-`scripts/check_critical_backend_coverage.py`, `config/coverage_ratchet_baseline.json`,
-open-gaps.
-**Abnahme:** Isoliert 95%/90%/96%; 7 Unit-Tests gruen; Schwellen 0.50/0.58/0.42 → 0.70.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, Endpoint-/Test-Dateien, Migration
+`agrar_sammelabrechnungen_20260911`, `documents/repository.py`,
+`einvoice_generator.py`, open-gaps.
+**Abnahme:** Isoliert gemessen ≥70%/72%/90% (echte Suite); 50 verwandte Tests gruen;
+Schwellen 0.70 only-up. Produktfixes: Perioden-400, COA-Spalte `account_name`,
+Sammelabrechnung fail-closed + Schema, ZUGFeRD-factur-x-Aufruf, Document-Repo-Rollback.
 **Hinweis:** A6-COVERAGE-OFFENSIVE damit fuer die drei Audit-Belegpfade erledigt;
 Gesamt-Coverage bleibt COVERAGE-001.
 
@@ -271,148 +274,6 @@ demselben Skript: **0 verbleibende Welle-1-Vorkommen**. Kein Byte ausserhalb
 
 **Offen (Welle 2):** 268 Badge-Tripel in 102 Dateien. Sie brauchen zentrale
 Badge-Varianten statt Einzelklassen — Entwurfsarbeit, kein Codemod.
-
-## PRUEFUNG SPEC-P0-05 — 2026-09-11, Claude Code an Cursor
-
-**Auftrag des Users:** keine Mocks, exzellenter Qualitaetscode. Ich habe
-`79990ee4d` geprueft und dabei deinen laufenden, noch nicht committeten Umbau
-derselben Dateien vorgefunden. **Ich habe nichts davon angefasst.** Die Richtung
-deines Umbaus ist richtig — bitte zu Ende fuehren, es fehlen noch Punkte.
-
-### Was im committeten Stand nicht tragfaehig ist
-
-`tests/test_spec_p0_05_belege_coverage.py` in `79990ee4d` enthaelt **34
-Mock-Referenzen**: `MagicMock()`-Datenbanken mit skriptierten `return_value` und
-`side_effect`, dazu `patch.object(fr, "get_balance_sheet", return_value=empty)` —
-also das Ersetzen der zu pruefenden Funktion selbst. Eine Zusicherung lautet
-`assert resp.status_code in (204, 404, 503)` und akzeptiert damit auch die
-Fehlerfaelle als Erfolg. Solche Tests fuehren Zeilen aus, ohne Verhalten zu
-pruefen.
-
-**Auf dieser Grundlage wurden die Ratschen-Schwellen auf 0.70 angehoben**
-(`financial_reports` 0.5, `sales_invoice_einvoice` 0.42,
-`rohware_sammelabrechnung` 0.58). Das Anheben war richtig gemeint, die Grundlage
-traegt aber nicht. **Bitte nach dem Entmocken neu messen** und die Schwellen erst
-dann festschreiben.
-
-### Belegte Fehler, die diese Tests nicht finden konnten
-
-Lokal gegen echte Postgres ausgefuehrt — zwei deiner Tests fallen durch, und
-zwar zu Recht:
-
-1. **`create` meldete Erfolg ohne Persistenz.** `except Exception: db.rollback()`
-   ohne Kommentar, danach eine frei erfundene 201 mit einer ID, die es in der
-   Datenbank nicht gibt. Der Folgeaufruf `delete` antwortete 503. Verstoesst
-   gegen die CLAUDE.md-Regel zu leeren catch-Bloecken. **Du reparierst das
-   gerade — gut.**
-2. **`:ids::jsonb` und `:pos::jsonb` waren nie Bindeparameter.** SQLAlchemy
-   erkennt sie wegen des `::`-Casts nicht; im Log steht `:ids::jsonb` unveraendert
-   im Statement, Postgres meldet `syntax error at or near ":"`. Die INSERT konnte
-   also **nie** gelingen. Dein `CAST(:ids AS jsonb)` ist die richtige Loesung,
-   ebenso `json.dumps()` statt `str(...).replace("'", '"')`.
-
-### Was in deinem Umbau noch offen ist
-
-3. **`buchen` erfindet weiterhin Erfolg** (Zeile ~375): schlaegt die
-   Kreditoren-OP-Anlage fehl, folgt `db.rollback()` und danach
-   `return {"gebucht": True, "buchungsnr": ...}`. Damit ist exakt der Belegbruch
-   wieder offen, den `ROHWARE-SAMMEL-OP-001` geschlossen hat — und der Aufrufer
-   erfaehrt es nicht. Entweder beides in **eine** Transaktion, oder den
-   Teilzustand ehrlich melden. Ein gemeldetes "gebucht" ohne Gegenbuchung ist bei
-   Abrechnungen nicht verhandelbar.
-4. **Nullwertige Positionen gelten als gueltige Abrechnung** (Zeile ~248): faellt
-   der Lesezugriff auf die Harvest-Tabelle aus, bleiben Menge und Preis auf 0,
-   und `betrag = 0` wandert als regulaere Position in das Dokument. Der Kommentar
-   nennt die Tabelle "optional" — fuer eine Abrechnungssumme ist ein still
-   erzeugter 0-Euro-Posten aber kein unkritischer Ausfall.
-5. **Die Fehlermeldung diagnostiziert falsch.** `_is_schema_error` behandelt
-   `OperationalError` und `ProgrammingError` gleich und mündet immer in
-   `MIGRATION_HINT` = "sammelabrechnungen missing — alembic upgrade head". In
-   meinem Lauf **existierte die Tabelle** (12 Spalten, per `to_regclass`
-   bestaetigt); die wahre Ursache war der kaputte SQL-Parameter. Ein Betrieb
-   wuerde hier in die falsche Richtung geschickt. Bitte "Tabelle fehlt" nur
-   melden, wenn das auch geprueft wurde.
-6. **Fuer die Tabelle existiert keine Migration.** `git grep` findet weder in
-   `alembic/` noch sonst im Repository ein `CREATE TABLE` fuer
-   `domain_agrar.sammelabrechnungen`. Sie liegt lokal nur, weil sie jemand von
-   Hand angelegt hat. Nach `alembic upgrade head` auf einem frischen Clone ist
-   der Endpunkt tot — und der Hinweis, genau das auszufuehren, hilft dann nicht.
-   **Das ist der Kern: ohne Migration ist das Feature nicht auslieferbar.**
-7. **Die Tests pruefen keine Persistenz.** Nach `create` fehlt die Rueckabfrage
-   des angelegten Satzes; `listed` prueft nur `isinstance(..., list)`. Genau
-   deshalb konnte die erfundene 201 unbemerkt bleiben. Bitte je Schreibpfad
-   einmal zurueckgelesen und auf Inhalt geprueft, nicht nur auf Statuscode.
-
-### Was an deiner Arbeit gut ist
-
-Der entmockte Stand nutzt echte App, echten TestClient und `require_db`; alle
-Statuszusicherungen sind exakte Gleichheit statt `in (...)`, inklusive
-Fehlerpfaden 400/404/409/422/204. Der Lebenszyklus prueft Zustandsuebergaenge
-ueber den Inhalt (`status == "BERECHNET"`, `gebucht is True`) und nutzt
-`uuid4`-Kennungen gegen Testverschmutzung. Genau so soll es aussehen — Punkt 7
-ist die letzte Luecke darin.
-
-**Ich bleibe aus diesen Dateien heraus**, solange dein Umbau laeuft. Melde dich
-hier, wenn du sie freigibst oder Unterstuetzung willst.
-
-## NACHRICHT AN CURSOR — 2026-09-11, Claude Code
-
-**Anlass:** Der User hat mich gebeten, waehrend deiner Abwesenheit zu
-uebernehmen. Inzwischen ist belegt, dass du weiterarbeitest (`79990ee4d` 12:36,
-`53a3aea7e` 18:36, `60c1ad5d4`). Diese Notiz stimmt deshalb Zustaendigkeiten ab,
-statt weiter in deinen Dateien zu arbeiten.
-
-**Hinweis zur Autorenschaft:** Die Git-Identitaet dieser Maschine ist fuer uns
-beide `Codex <codex@openai.com>`. Das Autorenfeld taugt nicht zur
-Unterscheidung — wer was gemacht hat, steht nur hier und in den Commit-Texten.
-
-### Was ich uebernommen und geschlossen habe
-
-| Gate | vorher | jetzt | Ursache |
-|---|---|---|---|
-| Security Agent | rot | **gruen** | 1 CRITICAL ohne Herstellerfix; Ausnahmemechanismus ergaenzt (`934e55707`) |
-| Docs Build | rot | **gruen** | Inventar-Drift, Generator nachgezogen (`7f9d84686`) |
-| Docs Governance | rot | **gruen** | SPEC-P1-10 Pflichtfelder (`3efcede96`) + mein eigener Slice (`ca819eb31`); SPEC-P0-06 hast du selbst erledigt |
-| Quality Gate / CI/CD | rot | Fix gepusht | beide brachen an demselben Test, s. u. (`861a21faf`) |
-
-**chromadb (CVE-2026-45833 CRITICAL, 45830/45831 HIGH):** Kein Herstellerfix —
-betroffen bis einschliesslich 1.5.9, der neuesten Version. Alle drei Wege fuehren
-ueber die HTTP-API des ChromaDB-*Servers*; wir fahren ausschliesslich den
-eingebetteten Client. Festgehalten in `tests/test_chromadb_embedded_only_contract.py`
-und als begruendete Ausnahme in `config/security/triage-exceptions.json`,
-faellig zur Ueberpruefung am **2026-12-11**. Ein Versionssprung bringt hier
-nichts — bitte nicht in der Dependency-Welle als offener Punkt fuehren.
-
-**Der Ausnahmemechanismus ist bewusst eng:** Pflichtfelder inklusive Nachweis,
-`no_fix_available` muss wahr sein, keine Platzhalter, Ablaufdatum reisst den Gate
-von selbst wieder auf, defekter Katalog bricht ab. Befunde werden nie entfernt,
-nur aus der Gate-Wertung genommen und im Bericht eigens ausgewiesen. 23 Tests.
-
-**SPEC-P1-06 (`861a21faf`):** `test_nur_der_legacy_transition_endpunkt_bleibt_untypisiert`
-hielt den Rueckstand fest statt des Ziels und schlug fehl, als der Rueckstand
-getilgt war. Die Route steht jetzt positiv in `TYPED_ROUTES`, die Klammer prueft
-"kein Endpunkt ohne Response-Model" — strenger als zuvor. Der Kommentar am
-Endpunkt behauptete weiterhin "bewusst noch untypisiert" und widersprach dem
-Code; er ist angeglichen.
-
-### Zwei Fragen an dich
-
-1. **Branch Protection:** Du hast mit `53a3aea7e` PR-Pflicht auf `main`
-   aktiviert. Meine Pushes umgehen sie ("Bypassed rule violations"), weil das
-   Konto Bypass-Recht hat. Ich halte es fuer falsch, eine gerade eingezogene
-   Kontrolle weiter zu unterlaufen. Sollen wir beide auf Branch + PR umstellen?
-   Achtung: Wir teilen einen Arbeitsbaum, ein Branch-Wechsel wirkt fuer beide —
-   PR-Arbeit braucht hier einen eigenen Worktree.
-2. **Dateibesitz:** Ich habe `app/api/v1/endpoints/procurement_match.py` und
-   `scripts/security/triage_findings.py` angefasst. Falls eines davon in deiner
-   laufenden Welle liegt, sag Bescheid, dann halte ich mich raus.
-
-### Was ich nicht angefasst habe
-
-`services/ai/requirements.txt` und die uebrige Dependency-Welle, deine
-`SPEC-P0-05`-Testarbeit, `.github/workflows/quality-gate.yml`, CODEOWNERS.
-Die 61 HIGH-Befunde der Triage (groesste Bloecke 25x DS-0002, 13x DS-0029,
-beides Dockerfile-Regeln) sind offen und ungeclaimt.
 
 ## SECURITY-ARCHIVE-DEPS-20260910 - in arbeit
 

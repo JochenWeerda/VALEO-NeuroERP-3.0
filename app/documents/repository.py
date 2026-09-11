@@ -92,6 +92,7 @@ class DocumentRepository:
                 return json.loads(result.data) if isinstance(result.data, str) else result.data
             return None
         except Exception as e:
+            self.db.rollback()
             logger.error(f"Failed to get document: {e}")
             raise
     
@@ -137,6 +138,7 @@ class DocumentRepository:
                 for row in results
             ]
         except Exception:
+            self.db.rollback()
             raise
     
     def delete_document(self, doc_type: str, doc_number: str) -> bool:
@@ -175,5 +177,6 @@ class DocumentRepository:
             result = self.db.execute(text(query), params).scalar()
             return result or 0
         except Exception:
+            self.db.rollback()
             raise
 

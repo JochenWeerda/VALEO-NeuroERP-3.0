@@ -3,9 +3,11 @@ Financial Reports API
 FIBU-REP-01: Standardreports (Bilanz/GuV/BWA) Backend-Integration
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 import io
 import logging
+import re
+from calendar import monthrange
 from decimal import Decimal
 from datetime import date, datetime
 
@@ -25,6 +27,24 @@ from app.api.v1.schemas.financial_reports_schemas import FinancialReportsOut
 
 
 router = APIRouter(prefix="/financial-reports", tags=["finance", "reports"])
+
+_PERIOD_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
+
+
+def _parse_period_yyyy_mm(period: str) -> Tuple[int, int]:
+    """Require YYYY-MM; raise 400 on invalid input (fail-closed)."""
+    if not period or not _PERIOD_RE.fullmatch(period):
+        raise HTTPException(
+            status_code=400,
+            detail="period must be YYYY-MM (e.g. 2026-03)",
+        )
+    year_s, month_s = period.split("-", 1)
+    return int(year_s), int(month_s)
+
+
+def _period_end_date(period: str) -> date:
+    year, month = _parse_period_yyyy_mm(period)
+    return date(year, month, monthrange(year, month)[1])
 
 
 def _empty_balance_sheet(period: str, as_of_date: date) -> "BalanceSheet":
@@ -134,19 +154,17 @@ async def get_balance_sheet(
     """
     Get balance sheet for a period.
     """
+    if not as_of_date:
+        as_of_date = _period_end_date(period)
+    else:
+        _parse_period_yyyy_mm(period)
+
     try:
-        if not as_of_date:
-            # Default to end of period
-            year, month = period.split('-')
-            from calendar import monthrange
-            last_day = monthrange(int(year), int(month))[1]
-            as_of_date = date(int(year), int(month), last_day)
-        
         # Get all accounts with balances
         accounts_query = text("""
             SELECT 
                 coa.account_number,
-                coa.name,
+                coa.account_name,
                 coa.account_type,
                 coa.parent_account_id,
                 COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit,
@@ -158,7 +176,7 @@ async def get_balance_sheet(
             AND (je.tenant_id = :tenant_id OR je.tenant_id IS NULL)
             AND (je.status = 'posted' OR je.status IS NULL)
             AND (TO_CHAR(je.entry_date, 'YYYY-MM') <= :period OR je.entry_date IS NULL)
-            GROUP BY coa.id, coa.account_number, coa.name, coa.account_type, coa.parent_account_id
+            GROUP BY coa.id, coa.account_number, coa.account_name, coa.account_type, coa.parent_account_id
             ORDER BY coa.account_number
         """)
         
@@ -224,22 +242,14 @@ async def get_balance_sheet(
             is_balanced=is_balanced
         )
         
+    except HTTPException:
+        raise
     except (OperationalError, ProgrammingError) as e:
         db.rollback()
         logger.warning("Balance sheet fallback to empty due to DB availability issue: %s", e)
-        if not as_of_date:
-            year, month = period.split('-')
-            from calendar import monthrange
-            last_day = monthrange(int(year), int(month))[1]
-            as_of_date = date(int(year), int(month), last_day)
         return _empty_balance_sheet(period, as_of_date)
     except Exception as e:
         logger.exception("Unexpected balance sheet error, returning empty report: %s", e)
-        if not as_of_date:
-            year, month = period.split('-')
-            from calendar import monthrange
-            last_day = monthrange(int(year), int(month))[1]
-            as_of_date = date(int(year), int(month), last_day)
         return _empty_balance_sheet(period, as_of_date)
 
 
@@ -252,12 +262,13 @@ async def get_profit_loss(
     """
     Get profit & loss statement for a period.
     """
+    _parse_period_yyyy_mm(period)
     try:
         # Get revenue accounts (typically 4xxx, 5xxx, 6xxx, 7xxx, 8xxx)
         revenue_query = text("""
             SELECT 
                 coa.account_number,
-                coa.name,
+                coa.account_name,
                 'REVENUE' as account_type,
                 COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit,
                 COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit
@@ -269,7 +280,7 @@ async def get_profit_loss(
             AND (je.tenant_id = :tenant_id OR je.tenant_id IS NULL)
             AND (je.status = 'posted' OR je.status IS NULL)
             AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
-            GROUP BY coa.id, coa.account_number, coa.name
+            GROUP BY coa.id, coa.account_number, coa.account_name
             HAVING ABS(COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) - 
                        COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0)) >= 0.01
             ORDER BY coa.account_number
@@ -299,7 +310,7 @@ async def get_profit_loss(
         expense_query = text("""
             SELECT 
                 coa.account_number,
-                coa.name,
+                coa.account_name,
                 'EXPENSE' as account_type,
                 COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit,
                 COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit
@@ -312,7 +323,7 @@ async def get_profit_loss(
             AND (je.tenant_id = :tenant_id OR je.tenant_id IS NULL)
             AND (je.status = 'posted' OR je.status IS NULL)
             AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
-            GROUP BY coa.id, coa.account_number, coa.name
+            GROUP BY coa.id, coa.account_number, coa.account_name
             HAVING ABS(COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) - 
                        COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0)) >= 0.01
             ORDER BY coa.account_number
@@ -351,6 +362,8 @@ async def get_profit_loss(
             net_income=net_income
         )
         
+    except HTTPException:
+        raise
     except (OperationalError, ProgrammingError) as e:
         db.rollback()
         logger.warning("Profit/Loss fallback to empty due to DB availability issue: %s", e)
@@ -369,10 +382,8 @@ async def get_bwa(
     """
     Get BWA (Betriebswirtschaftliche Auswertung) for a period.
     """
+    year_int, month_int = _parse_period_yyyy_mm(period)
     try:
-        year, month = period.split('-')
-        year_int = int(year)
-        month_int = int(month)
         
         # Get current period data
         current_period_data = await get_profit_loss(period, tenant_id, db)
@@ -470,6 +481,8 @@ async def get_bwa(
             net_result=net_result
         )
         
+    except HTTPException:
+        raise
     except (OperationalError, ProgrammingError) as e:
         db.rollback()
         logger.warning("BWA fallback to empty due to DB availability issue: %s", e)
@@ -490,6 +503,7 @@ async def get_report_drilldown(
     """
     FIBU-REP-02: Drilldown â€” list journal entry lines for an account in a period.
     """
+    _parse_period_yyyy_mm(period)
     try:
         rows = db.execute(
             text("""
@@ -583,6 +597,7 @@ async def export_report(
     """
     Export financial report as PDF or Excel. Falls back to JSON if format is 'json'.
     """
+    _parse_period_yyyy_mm(period)
     try:
         if report_type == "balance-sheet":
             data = await get_balance_sheet(period, None, tenant_id, db)
@@ -684,6 +699,8 @@ async def get_periodenvergleich(
     Ergebnis pro Konto: Saldo aktuell, Saldo Vergleich, Δ EUR, Δ %.
     Ermöglicht Monats- und Jahresvergleich (Plan/Ist wenn Vergleichsperiode = Planperiode).
     """
+    _parse_period_yyyy_mm(periode_aktuell)
+    _parse_period_yyyy_mm(periode_vergleich)
     try:
         where_kl = "AND coa.account_number LIKE :konto_klasse" if konto_klasse else ""
         params: dict = {

@@ -18,9 +18,10 @@ file_ownership:
   - scripts/check_critical_backend_coverage.py
   - config/coverage_ratchet_baseline.json
 acceptance:
-  - Isolierte Modul-Coverage ≥70% fuer die drei Zielpfade
+  - Isolierte/CI Modul-Coverage ≥70% fuer die drei Zielpfade (echte Suite)
   - CRITICAL_THRESHOLDS und Baseline auf 0.70 (only-up)
-  - Unit-Tests gruen
+  - Unit-/Integrationstests ohne MagicMock-DB; require_db fuer HTTP-Vertraege
+  - Konkrete Statuscodes (kein status in (200,503)-Soft-Assert)
 tests:
   - tests/test_spec_p0_05_belege_coverage.py
 risks:
@@ -33,11 +34,11 @@ external_gates:
   - not_applicable — rein repo-seitige Coverage-/Ratchet-Arbeit ohne Fremdsystem.
 ai_harness:
   fachlicher_vertrag: Finanzreports, Sammelabrechnung und E-Rechnung sind testbar abgesichert.
-  architektur_vertrag: Nur Tests + Ratchet; keine API-Vertragsaenderung.
-  daten_vertrag: Keine Migration.
-  test_vertrag: MagicMock-DB Unit-Tests ohne Vollsuite.
+  architektur_vertrag: Fail-closed Perioden-/Schema-Fehler; keine Schein-201/200 bei DB-Fehlern.
+  daten_vertrag: domain_agrar.sammelabrechnungen via alembic agrar_sammelabrechnungen_20260911.
+  test_vertrag: require_db HTTP-Vertraege + pure Helper; keine MagicMock-DB fuer Coverage.
   security_vertrag: SECURITY-REMAINDER unberuehrt.
-  betriebs_vertrag: Keine Deployments.
+  betriebs_vertrag: alembic upgrade head fuer Sammelabrechnung-Schema.
   dokumentations_vertrag: Slice, Workboard, open-gaps.
 verification:
   - "pytest tests/test_spec_p0_05_belege_coverage.py -o addopts= --cov=app.api.v1.endpoints.financial_reports --cov=app.api.v1.endpoints.rohware_sammelabrechnung --cov=app.api.v1.endpoints.sales_invoice_einvoice"

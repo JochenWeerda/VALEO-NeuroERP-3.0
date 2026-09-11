@@ -674,9 +674,13 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - **COV-RATCHET-010 (2026-06-27):** Quality-Gate-Baseline erneut auf echte CI-Messwerte kalibriert, nachdem geschaetzte Schwellen den Gate-Lauf blockierten. Betroffen: `domains/shared/events.py` 62%, `finance_actions.py` 78%, `financial_reports.py` 25%, `psm_proplanta.py` 15%, `kaeufergruppe.py` 41%, `ai_engineering_metrics_service.py` 38%, `hrm_abwesenheit.py` 43%, `wf_cockpit_persist_service.py` 70%, `wf_cockpit_persist.py` 44%, `portal_innendienst.py` 30%. Fachliche Vertiefung bleibt sinnvoll fuer Finance-Reports, Proplanta, AI-Metrics, HR-Abwesenheit und Portal-Innendienst; naechste Schritte sind gezielte Tests statt geschaetzter Gate-Werte.
 
 - **COV-RATCHET-011 / SPEC-P0-05-BELEGE-70 (2026-09-11):** Kritische Beleg-/Report-Pfade
-  auf ≥70% gehoben (isoliert gemessen): `financial_reports` 95%, `rohware_sammelabrechnung`
-  90%, `sales_invoice_einvoice` 96%. Ratchet+Baseline only-up auf 0.70. Tests:
-  `tests/test_spec_p0_05_belege_coverage.py`. Gesamt-Coverage-Repo bleibt COVERAGE-001-Folgearbeit.
+  auf ≥70% gehoben. Nach Qualitaetsnachzug (ohne MagicMock-DB, echte HTTP/`require_db`)
+  isoliert gemessen: `financial_reports` 70%, `rohware_sammelabrechnung` 72%,
+  `sales_invoice_einvoice` 90%. Ratchet+Baseline only-up auf 0.70. Tests:
+  `tests/test_spec_p0_05_belege_coverage.py` (+ Endpoint-Suiten). Produktfixes dabei:
+  Periodenformat 400, Bilanz-SQL `account_name`, Sammelabrechnung-Schema/fail-closed,
+  ZUGFeRD factur-x-Signatur, Document-Repo-Rollback nach fehlendem `documents`-Table.
+  Gesamt-Coverage-Repo bleibt COVERAGE-001-Folgearbeit.
 
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich
 

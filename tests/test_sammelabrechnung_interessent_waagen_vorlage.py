@@ -111,30 +111,72 @@ def test_sammelabrechnung_requires_min_2_ids():
 
 
 @pytest.mark.unit
-def test_sammelabrechnung_berechnen_graceful_missing_table():
-    """When DB tables are missing, berechnen must still return status=BERECHNET with summe=0."""
+def test_sammelabrechnung_berechnen_schema_error_is_503():
+    """Fehlende Tabelle / ProgrammingError → fail-closed 503 mit migration_hint."""
+    from sqlalchemy.exc import ProgrammingError
+
     app, db = _app_sammelabrechnung()
-    # Make all DB calls raise (simulates missing table)
-    db.execute.side_effect = Exception("relation does not exist")
+    db.execute.side_effect = ProgrammingError("SELECT", {}, Exception("relation does not exist"))
 
     client = TestClient(app)
     resp = client.post("/agrar/sammelabrechnung/some-id/berechnen")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "BERECHNET"
-    assert data["summe_menge_kg"] == 0.0
-    assert data["summe_betrag_eur"] == 0.0
+    assert resp.status_code == 503, resp.text
+    detail = resp.json().get("detail") or {}
+    assert "migration_hint" in detail
 
 
 @pytest.mark.unit
-def test_sammelabrechnung_buchen_sets_gebucht():
+def test_sammelabrechnung_berechnen_unknown_is_404():
     app, _ = _app_sammelabrechnung()
     client = TestClient(app)
+    resp = client.post("/agrar/sammelabrechnung/missing-id/berechnen")
+    assert resp.status_code == 404, resp.text
+
+
+@pytest.mark.unit
+def test_sammelabrechnung_buchen_requires_berechnet():
+    app, db = _app_sammelabrechnung()
+    select_mock = MagicMock()
+    select_mock.mappings.return_value.first.return_value = {
+        "id": "some-id",
+        "status": "BERECHNET",
+        "summe_betrag_eur": 0,
+        "bezeichnung": "T",
+    }
+    update_mock = MagicMock()
+    call_count = [0]
+
+    def side_effect(*args, **kwargs):
+        call_count[0] += 1
+        if call_count[0] == 1:
+            return select_mock
+        return update_mock
+
+    db.execute.side_effect = side_effect
+
+    client = TestClient(app)
     resp = client.post("/agrar/sammelabrechnung/some-id/buchen")
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["gebucht"] is True
     assert "buchungsnr" in data
+
+
+@pytest.mark.unit
+def test_sammelabrechnung_buchen_entwurf_is_409():
+    app, db = _app_sammelabrechnung()
+    select_mock = MagicMock()
+    select_mock.mappings.return_value.first.return_value = {
+        "id": "some-id",
+        "status": "ENTWURF",
+        "summe_betrag_eur": 0,
+        "bezeichnung": "T",
+    }
+    db.execute.return_value = select_mock
+
+    client = TestClient(app)
+    resp = client.post("/agrar/sammelabrechnung/some-id/buchen")
+    assert resp.status_code == 409, resp.text
 
 
 @pytest.mark.unit

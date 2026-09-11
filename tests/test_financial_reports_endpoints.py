@@ -1,10 +1,6 @@
-"""Coverage-Offensive financial_reports.py (A6 / SPEC-P0-05).
+"""Financial Reports API — echte HTTP-Vertraege (SPEC-P0-05).
 
-Deckt Balance-Sheet, GuV, BWA, Drilldown, Export, Periodenvergleich und
-Beleg-Drilldown auf Happy-Path (Query + Transformation, auch bei leerer
-Datenlage) und Fehlerpfaden (ungueltige Periode, unbekannter Report-Typ,
-fehlender Beleg) ab. Finanz-Report-Pfade waren laut Audit bei ~25% nicht
-go-live-fähig — dieser Test hebt die Abdeckung.
+Erfordert PostgreSQL (`require_db`). Keine Mock-DB, keine weichen Status-Mengen.
 """
 from __future__ import annotations
 
@@ -23,64 +19,84 @@ HEADERS = {
 BASE = "/api/v1/finance/financial-reports"
 PERIOD = "2026-03"
 
-
-@pytest.mark.parametrize("path", ["/balance-sheet", "/profit-loss", "/bwa"])
-def test_reports_happy_path_structure(path):
-    resp = client.get(f"{BASE}{path}", params={"period": PERIOD}, headers=HEADERS)
-    assert resp.status_code in (200, 503), resp.text
-    if resp.status_code == 200:
-        assert isinstance(resp.json(), dict)
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize("path", ["/balance-sheet", "/profit-loss", "/bwa"])
-def test_reports_invalid_period_is_handled(path):
-    # Periode ohne Monat -> split('-') schlaegt fehl -> vom Handler gefangen
-    resp = client.get(f"{BASE}{path}", params={"period": "2026"}, headers=HEADERS)
-    assert resp.status_code in (200, 400, 422, 500, 503), resp.text
-
-
-def test_drilldown_happy_and_empty():
+def test_reports_return_200_with_period(require_db, path):
     resp = client.get(
-        f"{BASE}/drilldown",
-        params={"account_number": "1200", "period": PERIOD, "limit": 50},
+        f"{BASE}{path}",
+        params={"period": PERIOD, "tenant_id": "system"},
         headers=HEADERS,
     )
-    assert resp.status_code in (200, 503), resp.text
-    if resp.status_code == 200:
-        assert isinstance(resp.json(), list)
+    assert resp.status_code == 200, resp.text
+    assert isinstance(resp.json(), dict)
 
 
-def test_export_json_for_each_report_type():
+def test_balance_sheet_with_explicit_as_of_date(require_db):
+    resp = client.get(
+        f"{BASE}/balance-sheet",
+        params={"period": PERIOD, "as_of_date": "2026-03-31", "tenant_id": "system"},
+        headers=HEADERS,
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["period"] == PERIOD
+    assert "assets" in body
+    assert "is_balanced" in body
+
+
+@pytest.mark.parametrize("path", ["/balance-sheet", "/profit-loss", "/bwa"])
+def test_reports_invalid_period_returns_400(require_db, path):
+    resp = client.get(f"{BASE}{path}", params={"period": "2026"}, headers=HEADERS)
+    assert resp.status_code == 400, resp.text
+    assert "YYYY-MM" in resp.text
+
+
+def test_drilldown_returns_list(require_db):
+    resp = client.get(
+        f"{BASE}/drilldown",
+        params={"account_number": "1200", "period": PERIOD, "limit": 50, "tenant_id": "system"},
+        headers=HEADERS,
+    )
+    assert resp.status_code == 200, resp.text
+    assert isinstance(resp.json(), list)
+
+
+def test_export_json_known_and_unknown(require_db):
     for rt in ("balance-sheet", "profit-loss", "bwa"):
         resp = client.get(
             f"{BASE}/export/{rt}",
-            params={"period": PERIOD, "format": "json"},
+            params={"period": PERIOD, "format": "json", "tenant_id": "system"},
             headers=HEADERS,
         )
-        assert resp.status_code in (200, 503), (rt, resp.text)
+        assert resp.status_code == 200, (rt, resp.text)
+        assert resp.json()["report_type"] == rt
 
-
-def test_export_unknown_report_type_returns_400():
-    resp = client.get(
+    bad = client.get(
         f"{BASE}/export/nonexistent-report",
         params={"period": PERIOD, "format": "json"},
         headers=HEADERS,
     )
-    assert resp.status_code in (400, 503), resp.text
+    assert bad.status_code == 400, bad.text
 
 
-def test_periodenvergleich_happy_path():
+def test_periodenvergleich_structure(require_db):
     resp = client.get(
         f"{BASE}/periodenvergleich",
-        params={"periode_aktuell": PERIOD, "periode_vergleich": "2026-02", "konto_klasse": "4"},
+        params={
+            "periode_aktuell": PERIOD,
+            "periode_vergleich": "2026-02",
+            "konto_klasse": "4",
+            "tenant_id": "system",
+        },
         headers=HEADERS,
     )
-    assert resp.status_code in (200, 503), resp.text
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert "zeilen" in body and "count" in body
 
 
-def test_beleg_drilldown_missing_returns_404():
-    resp = client.get(
-        f"{BASE}/beleg-drilldown/{uuid.uuid4()}",
-        headers=HEADERS,
-    )
-    assert resp.status_code in (404, 503), resp.text
+def test_beleg_drilldown_unknown_is_404(require_db):
+    resp = client.get(f"{BASE}/beleg-drilldown/{uuid.uuid4()}", headers=HEADERS)
+    assert resp.status_code == 404, resp.text
