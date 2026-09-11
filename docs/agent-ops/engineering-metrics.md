@@ -4,24 +4,24 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 version: 3.0.0
-generated: 2026-09-10
+generated: 2026-09-11
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-06-12` · Stand: `2026-09-10`
+> **Automatisch generiert** · Daten seit: `2026-06-13` · Stand: `2026-09-11`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **170** |
-| Slices abgeschlossen | **148** (87 %) |
-| Mit externen Gates | 97 |
-| Ohne Doku-Dateien | 46 |
-| Slices ohne Cycle-Time (kein Claim-Commit) | 123 |
+| Slices gesamt | **177** |
+| Slices abgeschlossen | **153** (86 %) |
+| Mit externen Gates | 100 |
+| Ohne Doku-Dateien | 48 |
+| Slices ohne Cycle-Time (kein Claim-Commit) | 130 |
 
 ## Cycle Time
 
@@ -36,13 +36,16 @@ generated: 2026-09-10
 
 ## Rework-Rate
 
-**66.9 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**72.9 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
 | Slice | fix-Commits | Owner |
 |---|---|---|
 | `DESIGN-GAPS-SWEEP-002` | 1 | Claude |
+| `DESIGN-STATUS-COLORS-015` | 1 | Claude Code |
+| `DESIGN-STATUS-COLORS-016` | 1 | Claude Code |
+| `DESIGN-STATUS-COLORS-017` | 1 | Claude Code |
 
 ## Langläufer (≥ P90)
 
@@ -58,9 +61,9 @@ generated: 2026-09-10
 
 | Owner | Slices | Anteil |
 |---|---|---|
-| Codex | 76 | `████████████████████` |
+| Codex | 78 | `████████████████████` |
 | Claude | 42 | `███████████░░░░░░░░░` |
-| Claude Code | 21 | `██████░░░░░░░░░░░░░░` |
+| Claude Code | 26 | `███████░░░░░░░░░░░░░` |
 | Cursor | 15 | `████░░░░░░░░░░░░░░░░` |
 | Cursor Agent | 6 | `██░░░░░░░░░░░░░░░░░░` |
 | offen | 6 | `██░░░░░░░░░░░░░░░░░░` |
