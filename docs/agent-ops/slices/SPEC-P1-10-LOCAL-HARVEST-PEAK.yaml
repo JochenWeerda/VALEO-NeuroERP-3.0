@@ -27,6 +27,20 @@ acceptance:
   - Doku in tests/load/README.md und skalierung-performance.md
 tests:
   - tests/test_spec_p1_10_local_harvest_peak.py
+risks:
+  - >-
+    Das lokale Profil misst gegen docker-compose auf einem Entwicklungsrechner
+    und ist deshalb kein Ersatz fuer eine Staging-Messung: absolute Zahlen sind
+    nicht vergleichbar, nur Regressionen innerhalb derselben Umgebung.
+  - >-
+    Der Unit-Test prueft die Profil-Deklaration und die Praesenz der Runner,
+    nicht deren Ausfuehrung. Ein Runner kann also deklarativ gruen sein und
+    trotzdem an fehlendem k6 oder unerreichbarem Backend scheitern.
+external_gates:
+  - >-
+    Die Vollmessung mit PROFILE=full gegen Staging bleibt Betriebsverantwortung
+    und ist hier nicht vorweggenommen; sie braucht Staging-DNS und eine
+    Freigabe des Betriebs.
 ai_harness:
   fachlicher_vertrag: Lokales Peak-Profil ist ohne Staging-DNS ausfuehrbar.
   architektur_vertrag: k6-Script + scripts/loadtest Runner; kein neues Backend.
