@@ -7,6 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.ops_worklist_bundle_schemas import (
+    ProductionAuditOut,
+    ProductionOperationPageOut,
+    ProductionRegisterOut,
+    ProductionSummaryOut,
+    ProductionSyncOut,
+    ProductionTransitionOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.production_control_service import ProductionControlError, ProductionControlService
@@ -44,7 +52,7 @@ def _actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "production-operator"
 
 
-@router.post("/operations", response_model=dict, status_code=201, summary="Produktionsvorgang registrieren")
+@router.post("/operations", response_model=ProductionRegisterOut, status_code=201, summary="Produktionsvorgang registrieren")
 def register(body: OperationIn, request: Request, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     try:
         return ProductionControlService(db, tenant_id).register(body.model_dump(), actor=_actor(request))
@@ -52,7 +60,7 @@ def register(body: OperationIn, request: Request, db: Session = Depends(get_db),
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/operations", response_model=dict, summary="Produktionsvorgaenge auflisten")
+@router.get("/operations", response_model=ProductionOperationPageOut, summary="Produktionsvorgaenge auflisten")
 def list_operations(page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=200),
                     operation_type: str | None = None, status: str | None = None,
                     work_center: str | None = None, assigned_user: str | None = None,
@@ -63,17 +71,17 @@ def list_operations(page: int = Query(1, ge=1), page_size: int = Query(50, ge=1,
         q=q, sort=sort, sort_dir=sort_dir)
 
 
-@router.get("/summary", response_model=dict, summary="Kennzahlen des Produktionsleitstands")
+@router.get("/summary", response_model=ProductionSummaryOut, summary="Kennzahlen des Produktionsleitstands")
 def summary(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return ProductionControlService(db, tenant_id).summary()
 
 
-@router.post("/sync", response_model=dict, summary="Produktionsvorgaenge synchronisieren")
+@router.post("/sync", response_model=ProductionSyncOut, summary="Produktionsvorgaenge synchronisieren")
 def sync(body: ReasonIn, request: Request, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return ProductionControlService(db, tenant_id).sync_production_orders(actor=_actor(request), reason=body.reason)
 
 
-@router.post("/operations/{operation_id}/transition", response_model=dict, summary="Produktionsvorgang weiterschalten")
+@router.post("/operations/{operation_id}/transition", response_model=ProductionTransitionOut, summary="Produktionsvorgang weiterschalten")
 def transition(operation_id: str, body: TransitionIn, request: Request,
                db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, str]:
     try:
@@ -85,6 +93,6 @@ def transition(operation_id: str, body: TransitionIn, request: Request,
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.get("/operations/{operation_id}/audit", response_model=list[dict], summary="Audit-Spur des Produktionsvorgangs")
+@router.get("/operations/{operation_id}/audit", response_model=list[ProductionAuditOut], summary="Audit-Spur des Produktionsvorgangs")
 def audit(operation_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
     return ProductionControlService(db, tenant_id).audit(operation_id)

@@ -6,6 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.ops_worklist_bundle_schemas import (
+    TankIngestOut,
+    TankIntakePageOut,
+    TankProcessOut,
+    TankRetryOut,
+    TankSummaryOut,
+    TankValidateOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.tank_adapter_service import TankAdapterError, TankAdapterService
@@ -40,7 +48,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/intake", response_model=dict, status_code=202, summary="Tankdaten entgegennehmen")
+@router.post("/intake", response_model=TankIngestOut, status_code=202, summary="Tankdaten entgegennehmen")
 def intake(
     body: IntakeIn,
     request: Request,
@@ -54,7 +62,7 @@ def intake(
     )
 
 
-@router.get("/intake", response_model=dict, summary="Tankdatenlieferungen auflisten")
+@router.get("/intake", response_model=TankIntakePageOut, summary="Tankdatenlieferungen auflisten")
 def list_intake(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -67,14 +75,14 @@ def list_intake(
     )
 
 
-@router.get("/summary", response_model=dict, summary="Kennzahlen der Tankdatenlieferungen")
+@router.get("/summary", response_model=TankSummaryOut, summary="Kennzahlen der Tankdatenlieferungen")
 def summary(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, int]:
     return TankAdapterService(db, tenant_id).summary()
 
 
-@router.post("/intake/{intake_id}/validate", response_model=dict, summary="Tankdatenlieferung pruefen")
+@router.post("/intake/{intake_id}/validate", response_model=TankValidateOut, summary="Tankdatenlieferung pruefen")
 def validate(
     intake_id: str,
     body: ReasonIn,
@@ -89,7 +97,7 @@ def validate(
     )
 
 
-@router.post("/intake/{intake_id}/process", response_model=dict, summary="Tankdatenlieferung verarbeiten")
+@router.post("/intake/{intake_id}/process", response_model=TankProcessOut, summary="Tankdatenlieferung verarbeiten")
 def process(
     intake_id: str,
     body: ReasonIn,
@@ -104,7 +112,7 @@ def process(
     )
 
 
-@router.post("/intake/{intake_id}/retry", response_model=dict, summary="Tankdatenlieferung erneut verarbeiten")
+@router.post("/intake/{intake_id}/retry", response_model=TankRetryOut, summary="Tankdatenlieferung erneut verarbeiten")
 def retry(
     intake_id: str,
     body: RetryIn,

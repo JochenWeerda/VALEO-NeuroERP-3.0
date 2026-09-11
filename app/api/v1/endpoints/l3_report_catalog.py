@@ -8,6 +8,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.reporting_bundle_schemas import (
+    L3BonusCorrectionOut,
+    L3BonusRunCreatedOut,
+    L3BonusRunListOut,
+    L3DrilldownRowOut,
+    L3FactProjectedOut,
+    L3ReportCatalogOut,
+    L3ReportRunOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.l3_report_catalog_service import (
@@ -69,7 +78,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "report-user"
 
 
-@router.get("", response_model=dict, summary="Berichtskatalog abrufen")
+@router.get("", response_model=L3ReportCatalogOut, summary="Berichtskatalog abrufen")
 def catalog(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -77,14 +86,14 @@ def catalog(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/bonus-runs", response_model=dict, summary="Bonuslaeufe auflisten")
+@router.get("/bonus-runs", response_model=L3BonusRunListOut, summary="Bonuslaeufe auflisten")
 def list_bonus_runs(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
     return L3ReportCatalogService(db, tenant_id).list_bonus_runs()
 
 
-@router.post("/bonus-runs", response_model=dict, status_code=201, summary="Bonuslauf anlegen")
+@router.post("/bonus-runs", response_model=L3BonusRunCreatedOut, status_code=201, summary="Bonuslauf anlegen")
 def create_bonus_run(
     body: BonusRunIn,
     request: Request,
@@ -103,7 +112,7 @@ def create_bonus_run(
     )
 
 
-@router.post("/bonus-runs/{run_id}/corrections", response_model=dict, status_code=201, summary="Bonuslauf korrigieren")
+@router.post("/bonus-runs/{run_id}/corrections", response_model=L3BonusCorrectionOut, status_code=201, summary="Bonuslauf korrigieren")
 def correct_bonus_run(
     run_id: str,
     body: BonusCorrectionIn,
@@ -143,7 +152,7 @@ def export_bonus_run(
     )
 
 
-@router.post("/facts", response_model=dict, status_code=202, summary="Berichtsfakt projizieren")
+@router.post("/facts", response_model=L3FactProjectedOut, status_code=202, summary="Berichtsfakt projizieren")
 def project_fact(
     body: FactIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -154,7 +163,7 @@ def project_fact(
     )
 
 
-@router.get("/{report_id}/run", response_model=dict, summary="Bericht ausfuehren")
+@router.get("/{report_id}/run", response_model=L3ReportRunOut, summary="Bericht ausfuehren")
 def run_report(
     report_id: str,
     from_date: date = Query(default_factory=lambda: date.today() - timedelta(days=365)),
@@ -200,7 +209,7 @@ def run_report(
     )
 
 
-@router.get("/{report_id}/drilldown", response_model=list[dict], summary="Bericht auf einen Dimensionswert aufreissen")
+@router.get("/{report_id}/drilldown", response_model=list[L3DrilldownRowOut], summary="Bericht auf einen Dimensionswert aufreissen")
 def drilldown(
     report_id: str,
     dimension_value: str,

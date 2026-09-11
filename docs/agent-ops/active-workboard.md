@@ -11,6 +11,36 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-06-W10-REPORTING - abgeschlossen 2026-09-11
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 9. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** `l3_report_catalog` und `query_center` (13 schwache `response_model`)
+auf echte Pydantic-Schemas heben; Gate von 230 → 217.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `reporting_bundle_schemas.py`,
+beide Endpoint-Dateien, `tests/test_welle10_response_models.py`.
+**Abgrenzung:** CSV-Exports bleiben `response_class=Response`; fremde Security-
+und Design-Slices unberuehrt.
+**Abnahme:** `pytest tests/test_welle10_response_models.py` + Bestandstests →
+gruen; `check_weak_response_models.py --threshold 217` gruen (217/79 Dateien).
+
+## SPEC-P1-06-W9-OPS-WORKLISTS - abgeschlossen 2026-09-11
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 8. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** `production_control`, `tank_adapter` und `foreign_goods_worklist`
+(16 schwache `response_model`) auf echte Pydantic-Schemas heben; Gate von
+246 → 230.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `ops_worklist_bundle_schemas.py`,
+die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
+**Abgrenzung:** `recent_documents` (L3-Nachbar), `l3_report_catalog` /
+`query_center` (Folge-Welle), SECURITY-REMAINDER / SECURITY-ARCHIVE-DEPS
+(fremde Claims).
+**Abnahme:** `pytest tests/test_welle9_response_models.py` → 6 passed;
+`tests/test_production_control.py` + `test_tank_adapter.py` +
+`test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
+--threshold 230` gruen (230/81 Dateien).
+
 ## DESIGN-STATUS-COLORS-017 - abgeschlossen
 
 **Von:** Welle 3 aus DESIGN-STATUS-COLORS-016. **Owner:** Claude Code.
@@ -100,7 +130,7 @@ Badge-Tripel unveraendert und als Welle 2 dokumentiert.
 
 **Befund:** Der Design-Audit misst fuer `/agrar`, `/finance` und `/lager`
 durchgaengige `color-contrast`-Verstoesse: Roh-Palette `text-green-600` ergibt
-#00a63e auf #f5f7f8 und damit **2,99:1** statt der geforderten 4,5:1. CLAUDE.md
+`#00a63e` auf `#f5f7f8` und damit **2,99:1** statt der geforderten 4,5:1. CLAUDE.md
 fuehrt die Regel als verbindlich. Gemessen 2026-09-10: 571 Vorkommen gesamt,
 davon **303 in 129 Dateien eindeutig** (kein `bg-`/`border-` derselben Familie)
 und **268 in 102 Dateien als Badge-Tripel** (`bg-green-50 text-green-700
@@ -128,6 +158,10 @@ Badge-Varianten statt Einzelklassen — Entwurfsarbeit, kein Codemod.
 
 **Von:** Abgrenzung aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag.
 **Owner:** Claude Code. **Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
+**Nachweis 2026-09-11 (Cursor, kein Claim-Uebernahme):** Rename auf `*.archived`
+ist auf `main` (`8c39a5220`). Live-API zeigt weiterhin **44** offene Alerts auf
+den alten Pfaden (Graph-Lag). Abnahme erfordert UI „Refresh Dependabot alerts“
+oder Support-Redetect — kein Dismissal. Parallel weiter: SPEC-P1-06-W9.
 **Ziel:** Die 44 offenen Dependabot-Meldungen auf toten Archiv-Manifesten an der
 Ursache beseitigen, ohne einen realen Befund zu unterdruecken.
 **Dateibesitz:** ausschliesslich die 11 getrackten Manifeste unter

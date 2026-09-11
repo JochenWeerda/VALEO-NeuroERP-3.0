@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.reporting_bundle_schemas import (
+    QueryCatalogOut,
+    QueryDefinitionPageOut,
+    QueryDefinitionSavedOut,
+    QueryExportBundleOut,
+    QueryPreviewOut,
+)
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -58,7 +65,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/catalog", response_model=dict, summary="Abfragekatalog abrufen")
+@router.get("/catalog", response_model=QueryCatalogOut, summary="Abfragekatalog abrufen")
 def catalog(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:
@@ -66,7 +73,7 @@ def catalog(
     return {"items": items, "count": len(items)}
 
 
-@router.get("", response_model=dict, summary="Abfragedefinitionen auflisten")
+@router.get("", response_model=QueryDefinitionPageOut, summary="Abfragedefinitionen auflisten")
 def list_definitions(
     request: Request,
     page: int = Query(1, ge=1),
@@ -80,7 +87,7 @@ def list_definitions(
     )
 
 
-@router.post("/preview", response_model=dict, summary="Abfrage als Vorschau ausfuehren")
+@router.post("/preview", response_model=QueryPreviewOut, summary="Abfrage als Vorschau ausfuehren")
 def preview(
     body: PreviewIn,
     db: Session = Depends(get_db),
@@ -93,7 +100,7 @@ def preview(
     )
 
 
-@router.post("", response_model=dict, status_code=201, summary="Abfragedefinition speichern")
+@router.post("", response_model=QueryDefinitionSavedOut, status_code=201, summary="Abfragedefinition speichern")
 def save(
     body: SaveIn,
     request: Request,
@@ -109,7 +116,7 @@ def save(
     )
 
 
-@router.post("/{definition_id}/export", response_model=dict, summary="Abfragedefinition signiert exportieren")
+@router.post("/{definition_id}/export", response_model=QueryExportBundleOut, summary="Abfragedefinition signiert exportieren")
 def export_definition(
     definition_id: str,
     body: ReasonIn,
@@ -124,7 +131,7 @@ def export_definition(
     )
 
 
-@router.post("/import", response_model=dict, status_code=201, summary="Signierte Abfragedefinition importieren")
+@router.post("/import", response_model=QueryDefinitionSavedOut, status_code=201, summary="Signierte Abfragedefinition importieren")
 def import_definition(
     body: ImportIn,
     request: Request,

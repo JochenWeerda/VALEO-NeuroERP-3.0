@@ -7,6 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.ops_worklist_bundle_schemas import (
+    ForeignGoodsCompleteOut,
+    ForeignGoodsPageOut,
+    ForeignGoodsSummaryOut,
+    ForeignGoodsTransferOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.foreign_goods_worklist_service import (
@@ -32,7 +38,7 @@ def actor(request: Request) -> str:
     return request.headers.get("X-User-ID") or "foreign-goods-operator"
 
 
-@router.get("", response_model=dict, summary="Fremdware-Worklist auflisten")
+@router.get("", response_model=ForeignGoodsPageOut, summary="Fremdware-Worklist auflisten")
 def list_items(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
@@ -53,7 +59,7 @@ def list_items(
     )
 
 
-@router.get("/summary", response_model=dict, summary="Kennzahlen der Fremdware-Worklist")
+@router.get("/summary", response_model=ForeignGoodsSummaryOut, summary="Kennzahlen der Fremdware-Worklist")
 def summary(
     db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, int]:
@@ -69,7 +75,7 @@ def _handle(action) -> dict[str, Any]:  # noqa: ANN001
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/{foreign_goods_id}/transfer", response_model=dict, summary="Fremdware umlagern")
+@router.post("/{foreign_goods_id}/transfer", response_model=ForeignGoodsTransferOut, summary="Fremdware umlagern")
 def transfer(
     foreign_goods_id: str,
     body: TransferIn,
@@ -89,7 +95,7 @@ def transfer(
     )
 
 
-@router.post("/{foreign_goods_id}/complete", response_model=dict, summary="Fremdware-Einlagerung abschliessen")
+@router.post("/{foreign_goods_id}/complete", response_model=ForeignGoodsCompleteOut, summary="Fremdware-Einlagerung abschliessen")
 def complete(
     foreign_goods_id: str,
     body: CompleteIn,

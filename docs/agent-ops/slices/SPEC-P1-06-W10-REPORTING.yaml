@@ -1,0 +1,49 @@
+slice_id: SPEC-P1-06-W10-REPORTING
+id: SPEC-P1-06-W10-REPORTING
+title: Legacy-Routen response_model typisieren — Welle 10 (L3-Berichtskatalog + Query-Center)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  Zehnte Welle von SPEC-P1-06: l3_report_catalog und query_center (13 schwache
+  response_model) auf echte Pydantic-Schemas heben. Feldlisten aus den
+  Service-Return-Dicts; CSV-Exports bleiben response_class=Response.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W10-REPORTING.yaml
+  - docs/agent-ops/active-workboard.md
+  - app/api/v1/schemas/reporting_bundle_schemas.py
+  - app/api/v1/endpoints/l3_report_catalog.py
+  - app/api/v1/endpoints/query_center.py
+  - tests/test_welle10_response_models.py
+ausgeschlossen:
+  - CSV-Export-Endpunkte (response_class=Response, kein Body-Schema)
+  - SECURITY-REMAINDER / SECURITY-ARCHIVE-DEPS / DESIGN-STATUS-COLORS
+acceptance:
+  - 13 Endpunkte tragen ein echtes response_model
+  - Kein Feldverlust gegen die Service-Return-Dicts (Unit-Test)
+  - Bestandstests l3_report_catalog und query_center gruen
+  - Schwache response_model-Typen sinken von 230 auf 217
+tests:
+  - tests/test_welle10_response_models.py
+  - tests/test_l3_report_catalog.py
+  - tests/test_query_center.py
+risks:
+  - >-
+    Query-Center-Preview-Zeilen sind datenproduktabhaengig und bleiben als
+    list[dict[str, Any]] im Schema; das aeussere Envelope ist typisiert.
+ai_harness:
+  fachlicher_vertrag: >-
+    Berichtskatalog- und Query-Center-Antworten sind OpenAPI-faehig typisiert.
+  architektur_vertrag: >-
+    Antwortschemata in app/api/v1/schemas; Endpoints importieren nur.
+  daten_vertrag: Keine Migration.
+  test_vertrag: >-
+    Gate check_weak_response_models --threshold 217; fokussierte Tests.
+  security_vertrag: Keine Gate-Lockerung ausser Absenkung der Weak-Schwelle.
+  betriebs_vertrag: Keine Deployments.
+  dokumentations_vertrag: Slice-YAML, Workboard, open-gaps SPEC-P1-06-Zeile.
+verification:
+  - "python scripts/check_weak_response_models.py --threshold 217"
+  - "pytest tests/test_welle10_response_models.py tests/test_l3_report_catalog.py tests/test_query_center.py -o addopts="
