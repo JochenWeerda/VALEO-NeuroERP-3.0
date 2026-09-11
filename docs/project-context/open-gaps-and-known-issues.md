@@ -49,10 +49,10 @@ P1-Specs aus dem Audit:
 | SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
 | SPEC-P1-05 | erledigt 2026-09-09 | S608-Restschuld einzeln reviewt (SPEC-P1-05-S608-RESTSCHULD): Baseline 167 -> 0, `bandit -t B608` -> 0, unreviewed 136 -> 0; Injection-Pfad env -> SQL-Bezeichner in `geo_pipeline` ueber `app/core/sql_identifiers` geschlossen |
 | SPEC-P1-06 | erledigt (geschlossen, Restschwelle 0) | Legacy-Routen mit `response_model` typisieren; W1–W14 erledigt, Gate `--threshold 0` (TypedObjectOut-Drain, kein CompatFlexOut) |
-| SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
+| SPEC-P1-07 | erledigt 2026-07-06 (Nachzug dokumentiert 2026-09-11) | `domains/` (paralleles TS-Backend inkl. inventory) per ADR-039 nach `docs/_internal/archive/domains-ts-backend/` archiviert; Root-`domains/` und Workflows `inventory-domain-ci`/`finance-domain-ci` entfernt; kanonisch: `app/domains/inventory` + Domain Pack |
 | SPEC-P1-08 | erledigt 2026-07-06 | Chargen-Tiefenmodell: Lot-Attribute (herkunft, sperrgrund, qs_status, received_at); FEFO-Pick sortiert `mhd ASC NULLS LAST, created_at ASC`; Migration `inv_lot_depth_spec_p1_08` |
 | SPEC-P1-09 | erledigt 2026-08-23 | Lizenzinventar (`docs/operations/license-inventory.md`) + erweiterte `THIRD_PARTY_NOTICES.md`; SBOM weiter via CI CycloneDX |
-| SPEC-P1-10 | offen | Erntepeak-Lasttest lokal reproduzierbar |
+| SPEC-P1-10 | erledigt 2026-09-11 | Erntepeak-k6 lokal: `PROFILE=local|smoke` + `scripts/loadtest/run_harvest_peak_local.{ps1,sh}`; Staging bleibt `PROFILE=full` / externes Gate |
 
 Priorisierte Sequenz: A0 Verifikation und A2 PII parallel/sofort, danach
 A1 CI-Gruen, SPEC-P0-06 Governance, A3 Runtime-Sweep und A5 Modulaktivierung.
@@ -725,6 +725,7 @@ Repo-seitige Vorbereitungen (Scripts, Templates, Gates) sind vollstaendig:
 - `scripts/check_integration_bootstrap.py --strict-live` blockiert bei nicht-bereiten Probes
 - `config/fibu_cutover_mapping.template.yaml` + `scripts/check_fibu_cutover_mapping.py --strict`
 - `.github/workflows/load-test.yml` fuehrt den Erntepeak-Lasttest nur aus, wenn `STAGING_URL`, `API_DEV_TOKEN` und DNS-Aufloesung im Runner vorhanden sind; andernfalls wird das externe Gate neutral dokumentiert statt als Produktfehler gemeldet.
+- SPEC-P1-10 (lokal): `PROFILE=local|smoke` + `scripts/loadtest/run_harvest_peak_local.{ps1,sh}` gegen docker-compose/localhost; Staging bleibt externes Ops-Gate.
 
 ---
 

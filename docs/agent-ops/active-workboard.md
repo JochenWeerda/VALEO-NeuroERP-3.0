@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-10-LOCAL-HARVEST-PEAK - abgeschlossen 2026-09-11
+
+**Von:** Production-Readiness SPEC-P1-10 nach SPEC-P1-06-Abschluss.
+**Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** Erntepeak-Lasttest lokal gegen docker-compose/localhost reproduzierbar
+(`PROFILE=local`/`smoke`); Staging-Vollprofil unverändert `full`.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `tests/load/harvest-peak.js`,
+`scripts/loadtest/run_harvest_peak_local.{ps1,sh}`, Load-README,
+`docs/admin/skalierung-performance.md`, Unit-Test, open-gaps.
+**Abnahme:** Unit-Test gruen; Runner warten auf Health und schreiben
+`reports/performance/harvest-peak-*-summary.json`. Staging bleibt Ops-Gate.
+
+## SPEC-P1-07-DOMAINS-ARCHIVE - Nachzug dokumentiert 2026-09-11
+
+**Von:** Open-Gaps-Drift (SPEC-P1-07). **Owner:** Cursor Auto.
+**Stand:** erledigt seit ADR-039 / A9 (2026-07-06); open-gaps 2026-09-11
+nachgezogen. Root-`domains/` entfernt, Archiv unter
+`docs/_internal/archive/domains-ts-backend/`, kanonisch `app/domains/inventory`.
+
 ## SPEC-P1-06-W14-DRAIN - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung SPEC-P1-06 nach Welle 13. **Owner:** Cursor Auto.

@@ -1,0 +1,40 @@
+slice_id: SPEC-P1-10-LOCAL-HARVEST-PEAK
+id: SPEC-P1-10-LOCAL-HARVEST-PEAK
+title: Erntepeak-Lasttest lokal reproduzierbar (k6 PROFILE=local/smoke)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  SPEC-P1-10: Erntepeak-k6 gegen docker-compose/localhost reproduzierbar machen.
+  Profile local/smoke + Runner-Scripts; Staging-Vollprofil bleibt PROFILE=full.
+  Externes Staging-Gate bleibt Betriebsverantwortung.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-10-LOCAL-HARVEST-PEAK.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/admin/skalierung-performance.md
+  - tests/load/harvest-peak.js
+  - tests/load/README.md
+  - scripts/loadtest/run_harvest_peak_local.ps1
+  - scripts/loadtest/run_harvest_peak_local.sh
+  - tests/test_spec_p1_10_local_harvest_peak.py
+acceptance:
+  - harvest-peak.js kennt PROFILE=full|local|smoke
+  - Runner warten auf Backend-Health und exportieren Summary unter reports/performance/
+  - Unit-Test prueft Profil-Deklaration und Runner-Präsenz
+  - Doku in tests/load/README.md und skalierung-performance.md
+tests:
+  - tests/test_spec_p1_10_local_harvest_peak.py
+ai_harness:
+  fachlicher_vertrag: Lokales Peak-Profil ist ohne Staging-DNS ausfuehrbar.
+  architektur_vertrag: k6-Script + scripts/loadtest Runner; kein neues Backend.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Deklarativer Unit-Test ohne live k6.
+  security_vertrag: SECURITY-REMAINDER unberuehrt; Token nur via ENV.
+  betriebs_vertrag: Staging-Gate bleibt externes Ops-Gate.
+  dokumentations_vertrag: Slice-YAML, Workboard, open-gaps, Load-README, skalierung-performance.
+verification:
+  - "pytest tests/test_spec_p1_10_local_harvest_peak.py -o addopts="
+  - "pwsh scripts/loadtest/run_harvest_peak_local.ps1 -Profile smoke  # optional, Backend+k6 noetig"
