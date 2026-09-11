@@ -84,17 +84,36 @@ def _app_waagen():
 
 @pytest.mark.unit
 def test_sammelabrechnung_create_returns_id():
-    app, _ = _app_sammelabrechnung()
+    app, db = _app_sammelabrechnung()
+    call_count = [0]
+
+    def side_effect(*args, **kwargs):
+        call_count[0] += 1
+        m = MagicMock()
+        if call_count[0] == 1:
+            return m  # INSERT
+        m.mappings.return_value.first.return_value = {
+            "id": "created-1",
+            "bezeichnung": "Abrechnung Aug 2026",
+            "abrechnungsperiode": "2026-08",
+            "status": "ENTWURF",
+            "positionen": [],
+            "summe_menge_kg": 0,
+            "summe_betrag_eur": 0,
+            "erstellt_am": "2026-08-01",
+        }
+        return m
+
+    db.execute.side_effect = side_effect
     client = TestClient(app)
     resp = client.post("/agrar/sammelabrechnung", json={
         "bezeichnung": "Abrechnung Aug 2026",
         "abrechnungsperiode": "2026-08",
         "harvest_acceptance_ids": ["id-001", "id-002"],
     })
-    assert resp.status_code == 201
+    assert resp.status_code == 201, resp.text
     data = resp.json()
-    assert "id" in data
-    assert len(data["id"]) > 0
+    assert data["id"] == "created-1"
     assert data["status"] == "ENTWURF"
 
 
@@ -112,16 +131,19 @@ def test_sammelabrechnung_requires_min_2_ids():
 
 @pytest.mark.unit
 def test_sammelabrechnung_berechnen_schema_error_is_503():
-    """Fehlende Tabelle / ProgrammingError → fail-closed 503 mit migration_hint."""
+    """Fehlende Tabelle / ProgrammingError → fail-closed 503 mit cause/migration_hint."""
     from sqlalchemy.exc import ProgrammingError
 
     app, db = _app_sammelabrechnung()
-    db.execute.side_effect = ProgrammingError("SELECT", {}, Exception("relation does not exist"))
+    db.execute.side_effect = ProgrammingError(
+        "SELECT", {}, Exception('relation "domain_agrar.sammelabrechnungen" does not exist')
+    )
 
     client = TestClient(app)
     resp = client.post("/agrar/sammelabrechnung/some-id/berechnen")
     assert resp.status_code == 503, resp.text
     detail = resp.json().get("detail") or {}
+    assert "cause" in detail
     assert "migration_hint" in detail
 
 
@@ -159,7 +181,45 @@ def test_sammelabrechnung_buchen_requires_berechnet():
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["gebucht"] is True
+    assert data.get("op_angelegt") is False
     assert "buchungsnr" in data
+
+
+@pytest.mark.unit
+def test_sammelabrechnung_buchen_op_failure_is_not_gebucht():
+    """Betrag > 0 und OP-INSERT scheitert → kein gebucht:true (Belegbruch)."""
+    from sqlalchemy.exc import ProgrammingError
+
+    app, db = _app_sammelabrechnung()
+    select_mock = MagicMock()
+    select_mock.mappings.return_value.first.return_value = {
+        "id": "some-id",
+        "status": "BERECHNET",
+        "summe_betrag_eur": 100.0,
+        "bezeichnung": "T",
+    }
+    call_count = [0]
+
+    def side_effect(*args, **kwargs):
+        call_count[0] += 1
+        if call_count[0] == 1:
+            return select_mock  # load header
+        if call_count[0] == 2:
+            return MagicMock()  # UPDATE status
+        raise ProgrammingError(
+            "INSERT", {}, Exception('relation "domain_erp.offene_posten" does not exist')
+        )
+
+    db.execute.side_effect = side_effect
+
+    client = TestClient(app)
+    resp = client.post("/agrar/sammelabrechnung/some-id/buchen")
+    assert resp.status_code == 503, resp.text
+    body = resp.json()
+    assert body.get("gebucht") is not True
+    detail = body.get("detail") or {}
+    assert "cause" in detail
+    db.rollback.assert_called()
 
 
 @pytest.mark.unit

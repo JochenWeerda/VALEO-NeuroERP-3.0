@@ -142,6 +142,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_phase4_opportunity_links_20260305` | CRM Phase 4: Opportunity links to offer/order, loss_reason |
 | `desktop_runtime_repair_20260909` | Repair missing historical tables in a database already stamped at head. |
 | `agrar_sammelabrechnungen_20260911` | Create domain_agrar.sammelabrechnungen for Rohware-Sammelabrechnung. |
+| `agrar_harvest_acceptances_sammel_20260911` | Add domain_agrar.harvest_acceptances columns used by Sammelabrechnung. |
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |
 | `doc_nachweisraum_lifecycle_20260623` | DOM-DOC-004 — Nachweisraum Dokument-Lifecycle + GoBD-Export Tabellen |

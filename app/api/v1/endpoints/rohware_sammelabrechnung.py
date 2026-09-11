@@ -24,7 +24,11 @@ class RohwareSammelabrechnungOut(BaseSchema):
 
 router = APIRouter(prefix="/agrar/sammelabrechnung", tags=["agrar", "sammelabrechnung"])
 
-MIGRATION_HINT = "domain_agrar.sammelabrechnungen missing — alembic upgrade head"
+SAMMEL_RELATION = "domain_agrar.sammelabrechnungen"
+HARVEST_RELATION = "domain_agrar.harvest_acceptances"
+OP_RELATION = "domain_erp.offene_posten"
+SAMMEL_MIGRATION = "alembic upgrade head (agrar_sammelabrechnungen_20260911)"
+HARVEST_MIGRATION = "alembic upgrade head (agrar_harvest_acceptances_sammel_20260911)"
 
 
 # ---------------------------------------------------------------------------
@@ -65,11 +69,38 @@ class SammelabrechnungOut(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _raise_db_unavailable() -> None:
-    raise HTTPException(
-        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        detail={"message": "DB unavailable", "migration_hint": MIGRATION_HINT},
-    )
+def _exc_message(exc: BaseException) -> str:
+    orig = getattr(exc, "orig", None)
+    return str(orig or exc)
+
+
+def _looks_like_missing_relation(exc: BaseException, relation: str) -> bool:
+    msg = _exc_message(exc).lower()
+    short = relation.split(".")[-1].lower()
+    return (
+        "does not exist" in msg
+        or "undefinedtable" in msg
+        or "undefined column" in msg
+    ) and (relation.lower() in msg or short in msg or "relation" in msg)
+
+
+def _raise_db_error(
+    exc: BaseException,
+    *,
+    relation: str,
+    migration: str,
+    fallback_message: str,
+    status_code: int = status.HTTP_503_SERVICE_UNAVAILABLE,
+) -> None:
+    cause = _exc_message(exc)
+    detail: dict = {
+        "message": fallback_message,
+        "cause": cause,
+    }
+    if _looks_like_missing_relation(exc, relation):
+        detail["migration_hint"] = f"{relation} missing — {migration}"
+        detail["message"] = f"{relation} nicht verfügbar"
+    raise HTTPException(status_code=status_code, detail=detail) from exc
 
 
 def _is_schema_error(exc: BaseException) -> bool:
@@ -86,13 +117,20 @@ def _load_header(db: Session, sammelabrechnung_id: str, tenant_id: str) -> dict:
             {"id": sammelabrechnung_id, "tenant_id": tenant_id},
         ).mappings().first()
     except Exception as exc:
-        if _is_schema_error(exc):
-            db.rollback()
-            _raise_db_unavailable()
         db.rollback()
+        if _is_schema_error(exc):
+            _raise_db_error(
+                exc,
+                relation=SAMMEL_RELATION,
+                migration=SAMMEL_MIGRATION,
+                fallback_message="Sammelabrechnung konnte nicht geladen werden",
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Sammelabrechnung konnte nicht geladen werden",
+            detail={
+                "message": "Sammelabrechnung konnte nicht geladen werden",
+                "cause": _exc_message(exc),
+            },
         ) from exc
 
     if not row:
@@ -128,6 +166,46 @@ def _to_out(row: dict) -> dict:
     }
 
 
+def _load_harvest_row(db: Session, ha_id: str) -> dict:
+    """Lädt eine Harvest-Annahme; Schemafehler und fehlende Zeilen fail-closed."""
+    try:
+        ha_row = db.execute(
+            text(
+                "SELECT lieferant_id, artikel_nr, menge_netto_kg, "
+                "qualitaet_feuchte, qualitaet_besatz, preis_eur_t "
+                "FROM domain_agrar.harvest_acceptances WHERE id = :id"
+            ),
+            {"id": ha_id},
+        ).mappings().first()
+    except Exception as exc:
+        db.rollback()
+        if _is_schema_error(exc):
+            _raise_db_error(
+                exc,
+                relation=HARVEST_RELATION,
+                migration=HARVEST_MIGRATION,
+                fallback_message="Harvest-Annahmen können nicht gelesen werden",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "message": "Harvest-Annahme konnte nicht geladen werden",
+                "cause": _exc_message(exc),
+                "harvest_acceptance_id": ha_id,
+            },
+        ) from exc
+
+    if not ha_row:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "Harvest-Annahme nicht gefunden",
+                "harvest_acceptance_id": ha_id,
+            },
+        )
+    return dict(ha_row)
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -149,13 +227,20 @@ def list_sammelabrechnungen(
         ).mappings().all()
         return [_to_out(dict(r)) for r in rows]
     except Exception as exc:
-        if _is_schema_error(exc):
-            db.rollback()
-            _raise_db_unavailable()
         db.rollback()
+        if _is_schema_error(exc):
+            _raise_db_error(
+                exc,
+                relation=SAMMEL_RELATION,
+                migration=SAMMEL_MIGRATION,
+                fallback_message="Sammelabrechnungen konnten nicht geladen werden",
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Sammelabrechnungen konnten nicht geladen werden",
+            detail={
+                "message": "Sammelabrechnungen konnten nicht geladen werden",
+                "cause": _exc_message(exc),
+            },
         ) from exc
 
 
@@ -197,22 +282,22 @@ def create_sammelabrechnung(
     except Exception as exc:
         db.rollback()
         if _is_schema_error(exc):
-            _raise_db_unavailable()
+            _raise_db_error(
+                exc,
+                relation=SAMMEL_RELATION,
+                migration=SAMMEL_MIGRATION,
+                fallback_message="Sammelabrechnung konnte nicht angelegt werden",
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Sammelabrechnung konnte nicht angelegt werden",
+            detail={
+                "message": "Sammelabrechnung konnte nicht angelegt werden",
+                "cause": _exc_message(exc),
+            },
         ) from exc
 
-    return {
-        "id": new_id,
-        "bezeichnung": payload.bezeichnung,
-        "abrechnungsperiode": payload.abrechnungsperiode,
-        "status": "ENTWURF",
-        "positionen": [],
-        "summe_menge_kg": 0.0,
-        "summe_betrag_eur": 0.0,
-        "erstellt_am": sammeldatum,
-    }
+    # Persistenz nachweisbar zurückgeben (keine erfundene 201 ohne DB-Zeile).
+    return _to_out(_load_header(db, new_id, tenant_id))
 
 
 @router.post("/{sammelabrechnung_id}/berechnen", response_model=SammelabrechnungOut, summary="Berechnen")
@@ -235,53 +320,29 @@ def berechnen(
         except json.JSONDecodeError:
             raw_ids = []
     ids = list(raw_ids) if isinstance(raw_ids, (list, tuple)) else []
+    if len(ids) < 2:
+        raise HTTPException(
+            status_code=422,
+            detail="Mindestens zwei Harvest-Annahmen erforderlich",
+        )
 
     positionen: list[dict] = []
     summe_menge: float = 0.0
     summe_betrag: float = 0.0
-    harvest_lookup_enabled = True
 
     for ha_id in ids:
-        menge: float = 0.0
-        preis: float = 0.0
-        lieferant_id: Optional[str] = None
-        artikel_nr: Optional[str] = None
-        feuchte: Optional[float] = None
-        besatz: Optional[float] = None
-        if harvest_lookup_enabled:
-            try:
-                ha_row = db.execute(
-                    text(
-                        "SELECT lieferant_id, artikel_nr, menge_netto_kg, "
-                        "qualitaet_feuchte, qualitaet_besatz, preis_eur_t "
-                        "FROM domain_agrar.harvest_acceptances WHERE id = :id"
-                    ),
-                    {"id": ha_id},
-                ).mappings().first()
-                if ha_row:
-                    ha = dict(ha_row)
-                    menge = float(ha.get("menge_netto_kg") or 0)
-                    preis = float(ha.get("preis_eur_t") or 0)
-                    lieferant_id = ha.get("lieferant_id")
-                    artikel_nr = ha.get("artikel_nr")
-                    feuchte = ha.get("qualitaet_feuchte")
-                    besatz = ha.get("qualitaet_besatz")
-            except Exception as exc:
-                # Harvest-Tabelle optional. Postgres bricht die Tx nach Fehler ab —
-                # Rollback, sonst schlaegt der nachfolgende UPDATE fehl.
-                db.rollback()
-                if _is_schema_error(exc):
-                    harvest_lookup_enabled = False
-
+        ha = _load_harvest_row(db, str(ha_id))
+        menge = float(ha.get("menge_netto_kg") or 0)
+        preis = float(ha.get("preis_eur_t") or 0)
         betrag = (menge / 1000.0) * preis
         positionen.append(
             {
-                "harvest_acceptance_id": ha_id,
-                "lieferant_id": lieferant_id,
-                "artikel_nr": artikel_nr,
+                "harvest_acceptance_id": str(ha_id),
+                "lieferant_id": ha.get("lieferant_id"),
+                "artikel_nr": ha.get("artikel_nr"),
                 "menge_kg": menge,
-                "qualitaet_feuchte": feuchte,
-                "qualitaet_besatz": besatz,
+                "qualitaet_feuchte": ha.get("qualitaet_feuchte"),
+                "qualitaet_besatz": ha.get("qualitaet_besatz"),
                 "abrechnungspreis_eur_t": preis,
                 "abrechnungsbetrag_eur": betrag,
             }
@@ -309,22 +370,21 @@ def berechnen(
     except Exception as exc:
         db.rollback()
         if _is_schema_error(exc):
-            _raise_db_unavailable()
+            _raise_db_error(
+                exc,
+                relation=SAMMEL_RELATION,
+                migration=SAMMEL_MIGRATION,
+                fallback_message="Berechnung konnte nicht gespeichert werden",
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Berechnung konnte nicht gespeichert werden",
+            detail={
+                "message": "Berechnung konnte nicht gespeichert werden",
+                "cause": _exc_message(exc),
+            },
         ) from exc
 
-    return {
-        "id": sammelabrechnung_id,
-        "bezeichnung": header.get("bezeichnung", ""),
-        "abrechnungsperiode": header.get("abrechnungsperiode", ""),
-        "status": "BERECHNET",
-        "positionen": positionen,
-        "summe_menge_kg": summe_menge,
-        "summe_betrag_eur": summe_betrag,
-        "erstellt_am": _erstellt_am_iso(header),
-    }
+    return _to_out(_load_header(db, sammelabrechnung_id, tenant_id))
 
 
 @router.post(
@@ -337,6 +397,10 @@ def buchen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
+    """Bucht atomar: Status GEBUCHT und Kreditoren-OP in einer Transaktion.
+
+    Bei Betrag > 0 ohne erfolgreiche OP-Anlage kein ``gebucht: true`` (Belegbruch).
+    """
     header = _load_header(db, sammelabrechnung_id, tenant_id)
     current_status = header.get("status")
     if current_status != "BERECHNET":
@@ -348,7 +412,10 @@ def buchen(
             ),
         )
 
+    betrag = float(header.get("summe_betrag_eur") or 0)
     buchungsnr = uuid.uuid4().hex[:8].upper()
+    op_angelegt = False
+
     try:
         db.execute(
             text(
@@ -357,20 +424,8 @@ def buchen(
             ),
             {"id": sammelabrechnung_id, "tenant_id": tenant_id},
         )
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        if _is_schema_error(exc):
-            _raise_db_unavailable()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Buchung konnte nicht gespeichert werden",
-        ) from exc
 
-    # Kreditoren-OP (Belegbruch) — best-effort; Buchung selbst ist bereits persisted.
-    betrag = header.get("summe_betrag_eur")
-    if betrag and float(betrag) > 0:
-        try:
+        if betrag > 0:
             today = date.today().isoformat()
             due = date.today().replace(day=min(date.today().day + 30, 28)).isoformat()
             db.execute(
@@ -391,15 +446,42 @@ def buchen(
                     "rdat": today,
                     "dat": today,
                     "faell": due,
-                    "betrag": float(betrag),
+                    "betrag": betrag,
                     "lname": str(header.get("bezeichnung") or "Sammelabrechnung"),
                 },
             )
-            db.commit()
-        except Exception:
-            db.rollback()
+            op_angelegt = True
 
-    return {"gebucht": True, "buchungsnr": buchungsnr}
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        if _is_schema_error(exc):
+            relation = OP_RELATION if betrag > 0 else SAMMEL_RELATION
+            migration = (
+                "alembic upgrade head"
+                if relation == OP_RELATION
+                else SAMMEL_MIGRATION
+            )
+            _raise_db_error(
+                exc,
+                relation=relation,
+                migration=migration,
+                fallback_message="Buchung abgebrochen — Belegbruch (Status+OP) nicht geschlossen",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "message": "Buchung abgebrochen — Belegbruch (Status+OP) nicht geschlossen",
+                "cause": _exc_message(exc),
+            },
+        ) from exc
+
+    return {
+        "gebucht": True,
+        "buchungsnr": buchungsnr,
+        "op_angelegt": op_angelegt,
+        "betrag_eur": betrag,
+    }
 
 
 @router.delete(
@@ -436,10 +518,18 @@ def delete_sammelabrechnung(
     except Exception as exc:
         db.rollback()
         if _is_schema_error(exc):
-            _raise_db_unavailable()
+            _raise_db_error(
+                exc,
+                relation=SAMMEL_RELATION,
+                migration=SAMMEL_MIGRATION,
+                fallback_message="Löschen fehlgeschlagen",
+            )
         raise HTTPException(
             status_code=500,
-            detail="Löschen fehlgeschlagen",
+            detail={
+                "message": "Löschen fehlgeschlagen",
+                "cause": _exc_message(exc),
+            },
         ) from exc
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

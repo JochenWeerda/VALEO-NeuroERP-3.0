@@ -190,6 +190,9 @@ def test_financial_report_periodenvergleich_and_missing_beleg(require_db):
 
 
 def test_sammelabrechnung_validation_and_lifecycle(require_db):
+    from sqlalchemy import text
+    from app.core.database import SessionLocal
+
     invalid = client.post(
         SA_BASE,
         json={
@@ -201,12 +204,30 @@ def test_sammelabrechnung_validation_and_lifecycle(require_db):
     )
     assert invalid.status_code == 422, invalid.text
 
+    ha_ids = []
+    db = SessionLocal()
+    try:
+        for _ in range(2):
+            ha_id = str(uuid.uuid4())
+            db.execute(
+                text(
+                    "INSERT INTO domain_agrar.harvest_acceptances "
+                    "(id, tenant_id, lieferant_id, artikel_nr, menge_netto_kg, preis_eur_t) "
+                    "VALUES (:id, :tid, 'L1', 'WEIZEN', 1000, 200)"
+                ),
+                {"id": ha_id, "tid": TENANT},
+            )
+            ha_ids.append(ha_id)
+        db.commit()
+    finally:
+        db.close()
+
     create = client.post(
         SA_BASE,
         json={
             "bezeichnung": f"IT-{uuid.uuid4().hex[:6]}",
             "abrechnungsperiode": "2026-08",
-            "harvest_acceptance_ids": [str(uuid.uuid4()), str(uuid.uuid4())],
+            "harvest_acceptance_ids": ha_ids,
         },
         headers=HEADERS,
     )
@@ -217,15 +238,17 @@ def test_sammelabrechnung_validation_and_lifecycle(require_db):
 
     listed = client.get(SA_BASE, headers=HEADERS)
     assert listed.status_code == 200, listed.text
-    assert isinstance(listed.json(), list)
+    assert any(r.get("id") == sid for r in listed.json()), "create ohne Persistenz"
 
     calc = client.post(f"{SA_BASE}/{sid}/berechnen", headers=HEADERS)
     assert calc.status_code == 200, calc.text
     assert calc.json()["status"] == "BERECHNET"
+    assert calc.json()["summe_betrag_eur"] == pytest.approx(400.0)
 
     book = client.post(f"{SA_BASE}/{sid}/buchen", headers=HEADERS)
     assert book.status_code == 200, book.text
     assert book.json().get("gebucht") is True
+    assert book.json().get("op_angelegt") is True
 
     # Nach Buchung kein Loeschen mehr
     deleted = client.delete(f"{SA_BASE}/{sid}", headers=HEADERS)

@@ -36,6 +36,10 @@ auf ≥70% Coverage; Ratchet only-up auf 0.70 inkl. Baseline.
 **Abnahme:** Isoliert gemessen ≥70%/72%/90% (echte Suite); 50 verwandte Tests gruen;
 Schwellen 0.70 only-up. Produktfixes: Perioden-400, COA-Spalte `account_name`,
 Sammelabrechnung fail-closed + Schema, ZUGFeRD-factur-x-Aufruf, Document-Repo-Rollback.
+**Nachzug Claude-Review:** Status+OP atomar (kein `gebucht:true` bei OP-Fail);
+Harvest fail-closed (keine 0-EUR-Scheinposten); `cause`+gezielter `migration_hint`;
+Persistenz-Rueckabfrage nach create; Migrationen
+`agrar_sammelabrechnungen_20260911` + `agrar_harvest_acceptances_sammel_20260911`.
 **Hinweis:** A6-COVERAGE-OFFENSIVE damit fuer die drei Audit-Belegpfade erledigt;
 Gesamt-Coverage bleibt COVERAGE-001.
 
