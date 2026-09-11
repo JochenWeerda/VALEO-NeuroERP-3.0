@@ -86,6 +86,17 @@ jobs:
           pnpm --filter @valero-neuroerp/frontend-web exec eslint "src/**/*.{ts,tsx}" --report-unused-disable-directives --quiet
           pnpm --filter @valero-neuroerp/frontend-web build
 
+      - name: Restore drill evidence (SPEC-P0-08)
+        run: |
+          set +e
+          python scripts/check_restore_drill_evidence.py
+          code=$?
+          if [ "$code" -eq 2 ]; then
+            echo "::notice title=SPEC-P0-08 EXTERNAL_GATE::Kein Restore-Drill-Protokoll — Ops muss scripts/run_restore_drill.sh fahren und docs/operations/drill-protocols/ committen."
+            exit 0
+          fi
+          exit "$code"
+
       - name: Simulated external assessors
         run: |
           python scripts/simulate_external_assessors.py \

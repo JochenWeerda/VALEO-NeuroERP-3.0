@@ -1,0 +1,37 @@
+slice_id: SPEC-P0-08-RESTORE-DRILL-PREP
+id: SPEC-P0-08-RESTORE-DRILL-PREP
+title: Restore-/Backup-Drill repo-seitig reproduzierbar (Evidence-Gate)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  SPEC-P0-08: Repo-Vorbereitung abschliessen — Runner, Evidence-Check,
+  Doku, CI-Notice und Unit-Tests. Der reale Staging-Drill bleibt Ops/external_gate.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P0-08-RESTORE-DRILL-PREP.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/admin/backup-restore.md
+  - docs/operations/drill-protocols/README.md
+  - .github/workflows/release-gates.yml
+  - tests/test_spec_p0_08_restore_drill_evidence.py
+acceptance:
+  - check_restore_drill_evidence.py: Exit 2 ohne Protokoll, Exit 0 bei frischem passed+rto_met
+  - release-gates fuehren den Check aus und behandeln Exit 2 als EXTERNAL_GATE-Notice
+  - Unit-Tests gruen
+  - open-gaps: repo-seitig erledigt, Drill selbst external_gate
+tests:
+  - tests/test_spec_p0_08_restore_drill_evidence.py
+ai_harness:
+  fachlicher_vertrag: 15-min-RTO-Drill ist fuer Ops reproduzierbar dokumentiert.
+  architektur_vertrag: bestehende scripts/run_restore_drill.sh + Evidence-Check.
+  daten_vertrag: Keine Migration; Protokolle ohne Secrets.
+  test_vertrag: Unit-Tests mit tmp PROTO_DIR.
+  security_vertrag: SECURITY-REMAINDER unberuehrt.
+  betriebs_vertrag: Echtes Drill-Protokoll bleibt Ops-Aufgabe.
+  dokumentations_vertrag: Slice, Workboard, open-gaps, backup-restore.md.
+verification:
+  - "pytest tests/test_spec_p0_08_restore_drill_evidence.py -o addopts="
+  - "python scripts/check_restore_drill_evidence.py  # erwartet Exit 2 ohne Protokoll"

@@ -39,13 +39,13 @@ P0-Specs aus dem Audit:
 | SPEC-P0-05 | teilweise | only-up-Ratchet aktiv (`coverage_ratchet_baseline.json`); Zielwerte ≥70% fuer kritische Pfade bleiben COVERAGE-001-Folgearbeit |
 | SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
 | SPEC-P0-07 | erledigt 2026-08-23 | SOC-2-Profil in `simulate_external_assessors.py` + `config/audit/soc2-tsc-matrix.yaml`; Type-II-/AVV-Gates bleiben extern |
-| SPEC-P0-08 | offen/external_gate | Restore-/Backup-Drill reproduzierbar vorbereiten |
+| SPEC-P0-08 | repo-seitig erledigt 2026-09-11 (Drill selbst external_gate) | `run_restore_drill.sh` + `check_restore_drill_evidence.py` + CI-Notice in release-gates; Ops muss Protokoll committen |
 
 P1-Specs aus dem Audit:
 
 | Spec | Status | Kurzinhalt |
 |---|---|---|
-| SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
+| SPEC-P1-01..03 | erledigt 2026-07-01 (Nachzug dokumentiert 2026-09-11) | UIX-054 Inventory, UIX-055 CI, UIX-056 Playwright, UIX-057 Rollback laut Workboard abgeschlossen |
 | SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
 | SPEC-P1-05 | erledigt 2026-09-09 | S608-Restschuld einzeln reviewt (SPEC-P1-05-S608-RESTSCHULD): Baseline 167 -> 0, `bandit -t B608` -> 0, unreviewed 136 -> 0; Injection-Pfad env -> SQL-Bezeichner in `geo_pipeline` ueber `app/core/sql_identifiers` geschlossen |
 | SPEC-P1-06 | erledigt (geschlossen, Restschwelle 0) | Legacy-Routen mit `response_model` typisieren; W1–W14 erledigt, Gate `--threshold 0` (TypedObjectOut-Drain, kein CompatFlexOut) |

@@ -4,8 +4,8 @@ type: reference
 audience: [betrieb, lead]
 owner: Claude
 status: aktiv
-last_reviewed: 2026-07-03
-version: 1.0.0
+last_reviewed: 2026-09-11
+version: 1.1.0
 description: Ablage fuer committete Backup-/Restore-Drill-Protokolle als Release-Evidenz (SPEC-P0-08, 15-min-RTO).
 ---
 

@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P0-08-RESTORE-DRILL-PREP - abgeschlossen 2026-09-11
+
+**Von:** Production-Readiness nach SPEC-P1-10. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11 (repo-seitig); realer Staging-Drill bleibt
+Ops/`external_gate`.
+**Ziel:** Evidence-Check + CI-Notice + Unit-Tests + Doku; Runner
+`scripts/run_restore_drill.sh` war bereits vorhanden.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `release-gates.yml`,
+`backup-restore.md`, `tests/test_spec_p0_08_restore_drill_evidence.py`, open-gaps.
+**Abnahme:** Unit-Tests gruen; `check_restore_drill_evidence.py` Exit 2 ohne
+Protokoll; release-gates behandeln Exit 2 als Notice.
+
+## SPEC-P1-01..03-VERIFY - Nachzug dokumentiert 2026-09-11
+
+**Von:** Open-Gaps „teils erledigt, verifizieren“. **Owner:** Cursor Auto.
+**Stand:** erledigt seit UIX-054…057 (2026-07-01); open-gaps 2026-09-11
+nachgezogen. Evidenz: Workboard-Abschnitt UIX-054…057.
+
 ## SPEC-P1-10-LOCAL-HARVEST-PEAK - abgeschlossen 2026-09-11
 
 **Von:** Production-Readiness SPEC-P1-10 nach SPEC-P1-06-Abschluss.

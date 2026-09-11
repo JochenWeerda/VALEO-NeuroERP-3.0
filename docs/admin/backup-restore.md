@@ -4,8 +4,8 @@ type: how-to
 audience: [betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-09-11
+version: 3.1.0
 ---
 
 # Backup & Restore
@@ -13,6 +13,23 @@ version: 3.0.0
 Datensicherung umfasst PostgreSQL (führend), den DMS-Dokumentenbestand und
 relevante Konfiguration. GoBD verlangt Nachvollziehbarkeit und
 Unveränderbarkeit der aufbewahrten Daten.
+
+## 15-min-RTO-Drill (SPEC-P0-08)
+
+Repo-seitig vorbereitet; der reale Lauf gegen Staging bleibt Betriebsverantwortung.
+
+```bash
+# Ops: gegen produktionsnahe Umgebung (Backup-Pfad/DB-Env setzen)
+DRILL_OPERATOR="<name>" bash scripts/run_restore_drill.sh
+
+# Evidence prüfen (Exit 2 = noch kein Protokoll / EXTERNAL_GATE)
+python scripts/check_restore_drill_evidence.py
+# Release-Gate mit Fail-closed: python scripts/check_restore_drill_evidence.py --strict
+```
+
+Protokoll landet unter `docs/operations/drill-protocols/restore-drill-<datum>.json`
+(siehe [drill-protocols/README.md](../operations/drill-protocols/README.md)).
+Keine Secrets/PII ins Protokoll schreiben.
 
 ## Was sichern?
 
