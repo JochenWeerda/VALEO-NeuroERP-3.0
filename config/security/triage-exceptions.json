@@ -1,0 +1,43 @@
+{
+  "$comment": [
+    "Begruendete Ausnahmen fuer scripts/security/triage_findings.py.",
+    "Eine Ausnahme unterdrueckt keinen Befund: er bleibt im Bericht sichtbar und",
+    "wird dort eigens ausgewiesen. Sie nimmt ihn nur aus der Gate-Wertung heraus",
+    "und faellt nach 'review_by' von selbst weg, worauf das Gate wieder rot wird.",
+    "Zulaessig ausschliesslich, wenn kein Herstellerfix existiert. Gibt es einen",
+    "Fix, ist der Befund zu beheben und nicht auszunehmen.",
+    "Platzhalter sind nicht erlaubt; 'rule_id' und 'scope' muessen exakt sein."
+  ],
+  "exceptions": [
+    {
+      "id": "SECURITY-AGENT-CHROMADB-20260911",
+      "rule_id": "CVE-2026-45833",
+      "scope": { "package": "chromadb", "file": "services/ai/requirements.txt" },
+      "reason": "Code Injection ueber die HTTP-API des ChromaDB-Servers: ein authentifizierter Angreifer setzt beim Aktualisieren einer Collection ein fremdes Model-Repository mit trust_remote_code. Wir betreiben keinen ChromaDB-Server, sondern ausschliesslich den eingebetteten Client, womit dieser Weg nicht existiert. Betroffen ist >= 0.4.17 bis einschliesslich 1.5.9 - das ist die neueste Version, ein Herstellerfix existiert nicht.",
+      "evidence": "app/infrastructure/rag/vector_store.py nutzt chromadb.Client(Settings(persist_directory=...)), services/ai/app/services/vector_store.py nutzt PersistentClient. Keine Compose-Datei startet einen Chroma-Server. Erzwungen durch tests/test_chromadb_embedded_only_contract.py, der bei Wechsel auf HttpClient oder chroma_server_* fehlschlaegt.",
+      "no_fix_available": true,
+      "review_by": "2026-12-11",
+      "owner": "Claude Code"
+    },
+    {
+      "id": "SECURITY-AGENT-CHROMADB-20260911",
+      "rule_id": "CVE-2026-45830",
+      "scope": { "package": "chromadb", "file": "services/ai/requirements.txt" },
+      "reason": "Jeder authentifizierte Nutzer kann Collections fremder Mandanten lesen und schreiben. Die Schwachstelle liegt in der Authentifizierungsschicht des ChromaDB-Servers, den wir nicht betreiben; im eingebetteten Betrieb gibt es keine ChromaDB-Nutzer, und die Mandantentrennung leistet unsere Anwendungsschicht. Betroffen bis einschliesslich 1.5.9, kein Herstellerfix.",
+      "evidence": "Wie CVE-2026-45833: ausschliesslich eingebetteter Client, kein Server in Compose, abgesichert durch tests/test_chromadb_embedded_only_contract.py.",
+      "no_fix_available": true,
+      "review_by": "2026-12-11",
+      "owner": "Claude Code"
+    },
+    {
+      "id": "SECURITY-AGENT-CHROMADB-20260911",
+      "rule_id": "CVE-2026-45831",
+      "scope": { "package": "chromadb", "file": "services/ai/requirements.txt" },
+      "reason": "Der SimpleRBACAuthorizationProvider von ChromaDB prueft nicht, fuer welchen Mandanten und welche Collection ein Recht gilt. Dieser Provider ist Teil des Serverbetriebs und bei uns nicht im Einsatz; wir verwenden keine ChromaDB-Rechteverwaltung. Betroffen >= 0.5.0 bis einschliesslich 1.5.9, kein Herstellerfix.",
+      "evidence": "Wie CVE-2026-45833: ausschliesslich eingebetteter Client, keine ChromaDB-Auth-Konfiguration im Repository, abgesichert durch tests/test_chromadb_embedded_only_contract.py.",
+      "no_fix_available": true,
+      "review_by": "2026-12-11",
+      "owner": "Claude Code"
+    }
+  ]
+}
