@@ -82,6 +82,11 @@ risks:
   - >-
     Der Dependency Graph aktualisiert sich verzoegert; die Abnahme erfolgt erst
     nach dem Refresh gegen die Live-API, nicht gegen eine Annahme.
+external_gates:
+  - >-
+    Die Neuanalyse durch GitHubs Dependency Graph laesst sich von aussen nicht
+    ausloesen. Zwischen Push und Wirkung lagen rund 16 Stunden; bis dahin blieb
+    die Abnahme offen. Das ist ein Fremdsystem-Gate und kein Arbeitsschritt.
 ai_harness:
   fachlicher_vertrag: >-
     Die Schwachstellenliste des Repositories beschreibt nur noch Code, der
