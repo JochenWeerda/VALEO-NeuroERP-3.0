@@ -145269,6 +145269,13 @@
         "title": "TwinShapeOut",
         "type": "object"
       },
+      "TypedObjectOut": {
+        "additionalProperties": true,
+        "description": "Strictly typed OpenAPI object that still accepts arbitrary keys.\n\nUse as temporary/structural replacement for response_model=dict /\ndict[str, Any] / list[dict...] so the weak-response gate can reach 0\nwithout CompatFlexOut. Prefer domain-specific schemas when field lists\nare known.",
+        "properties": {},
+        "title": "TypedObjectOut",
+        "type": "object"
+      },
       "UATSchritt": {
         "properties": {
           "dauer_ms": {
@@ -182781,9 +182788,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Drift Status Api V1 Admin Quality Evidence Drift Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -193287,9 +193292,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Qs Abschlag Api V1 Agrar Harvest Acceptance  Acceptance Id  Qs Abschlag Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -193365,9 +193368,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Link Qs Protokoll Api V1 Agrar Harvest Acceptance  Acceptance Id  Qs Protokoll Link Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -193826,8 +193827,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Kulturen Api V1 Agrar Kulturen Get",
                   "type": "array"
@@ -194522,9 +194522,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Crosssell Map Api V1 Agrar Milchvieh Crosssell Map Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -194563,9 +194561,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Crosssell Summary Api V1 Agrar Milchvieh Crosssell Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -199686,9 +199682,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Record Observation Api V1 Agrar Rations Optimization Controlling Observations Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -199798,8 +199792,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Get Series Api V1 Agrar Rations Optimization Controlling Series Get",
                   "type": "array"
@@ -200271,9 +200264,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Reject Action Api V1 Agrar Rations Optimization Feed Analyses  Analysis Id  Actions Reject Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -200351,9 +200342,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Release Action Api V1 Agrar Rations Optimization Feed Analyses  Analysis Id  Actions Release Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -201677,8 +201666,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Feeding Control Logs Api V1 Agrar Rations Optimization Feeding Control Logs Get",
                   "type": "array"
@@ -201747,9 +201735,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Save Feeding Control Log Api V1 Agrar Rations Optimization Feeding Control Logs Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -204243,8 +204229,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Case Measures Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Measures Get",
                   "type": "array"
@@ -204323,9 +204308,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Link Measure Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Measures Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -204472,8 +204455,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Report Drafts Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Report Drafts Get",
                   "type": "array"
@@ -204552,9 +204534,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Report Draft Api V1 Agrar Rations Optimization Feeding Consulting Cases  Case Id  Report Drafts Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -205412,8 +205392,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Measure History Api V1 Agrar Rations Optimization Feeding Measures  Measure Id  History Get",
                   "type": "array"
@@ -205494,9 +205473,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Measure Api V1 Agrar Rations Optimization Feeding Measures  Measure Id  Transitions Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -205643,8 +205620,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Notifications Api V1 Agrar Rations Optimization Feeding Notifications Get",
                   "type": "array"
@@ -208116,8 +208092,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Project Supply Api V1 Agrar Rations Optimization Feeding Supply Get",
                   "type": "array"
@@ -208180,8 +208155,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Procurement Handoffs Api V1 Agrar Rations Optimization Feeding Supply Procurement Handoffs Get",
                   "type": "array"
@@ -208251,9 +208225,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Procurement Handoff Api V1 Agrar Rations Optimization Feeding Supply Procurement Handoffs Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -210307,9 +210279,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Evaluate Readiness Api V1 Agrar Rations Optimization Readiness Evaluate Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -210369,8 +210339,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Active Material Readiness Api V1 Agrar Rations Optimization Readiness Materials Get",
                   "type": "array"
@@ -217029,8 +216998,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Categories Api V1 Ai Data Classes  Get",
                   "type": "array"
@@ -217082,9 +217050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Check Model Api V1 Ai Data Classes Check Model Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -217123,9 +217089,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Summary Api V1 Ai Data Classes Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -217165,9 +217129,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Category Api V1 Ai Data Classes  Category Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -217881,8 +217843,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Warteschlange Api V1 Annahme Warteschlange Get",
                   "type": "array"
@@ -217953,9 +217914,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Warteschlange Entry Api V1 Annahme Warteschlange Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -218034,9 +217993,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Repair Article Api V1 Annahme Warteschlange  Entry Id  Repair Article Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -228699,9 +228656,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Release Charges Api V1 Chargen Operator Bulk Release Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -229742,9 +229697,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Sperre Artikel Api V1 Compliance Artikel Sperre Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -229818,9 +229771,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Freigabe Artikel Api V1 Compliance Artikel Sperre  Artikel Id  Delete",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -229882,9 +229833,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Artikel Sperre Api V1 Compliance Artikel Sperre  Artikel Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -229955,9 +229904,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Artikel Sperren Api V1 Compliance Artikel Sperren Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -234571,9 +234518,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Fulfillment Api V1 Contracts Fulfillment Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -234656,9 +234601,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Contracts Api V1 Contracts Fulfillment List Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -238534,8 +238477,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Pipeline Api V1 Crm Bedarfsdeckung Pipeline Get",
                   "type": "array"
@@ -238604,9 +238546,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Cockpit Api V1 Crm Bedarfsdeckung  Kunden Nr  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -249451,9 +249391,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Customer Screen Summary Api V1 Crm Customers  Customer Id  Screen Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -249621,9 +249559,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Customer Tab Data Api V1 Crm Customers  Customer Id  Tabs  Tab Key  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -249720,9 +249656,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Duplicates Api V1 Crm Duplicates Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -249789,9 +249723,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Merge Api V1 Crm Duplicates Merge Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -249858,9 +249790,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Merge Preview Api V1 Crm Duplicates Merge Preview Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251054,8 +250984,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Katalog Api V1 Crm Kaeufergruppe Katalog Get",
                   "type": "array"
@@ -251114,9 +251043,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Profil Api V1 Crm Kaeufergruppe  Kunden Nr  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251182,9 +251109,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Ki Klassifizieren Api V1 Crm Kaeufergruppe  Kunden Nr  Ki Klassifizieren Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251250,9 +251175,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Neu Klassifizieren Api V1 Crm Kaeufergruppe  Kunden Nr  Neu Klassifizieren Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251319,9 +251242,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Produktgruppen Klassifizieren Api V1 Crm Kaeufergruppe  Kunden Nr  Produktgruppen Klassifizieren Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251397,9 +251318,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Setzen Api V1 Crm Kaeufergruppe  Kunden Nr  Setzen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251466,9 +251385,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Auto Capture Api V1 Crm Kim Auto Capture Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251537,9 +251454,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Call Transcript Api V1 Crm Kim Call Transcript Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251622,9 +251537,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Inbox Api V1 Crm Kim Capture Inbox Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251702,9 +251615,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Assign Inbox Api V1 Crm Kim Capture Inbox  Inbox Id  Assign Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -251782,9 +251693,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dismiss Inbox Api V1 Crm Kim Capture Inbox  Inbox Id  Dismiss Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -252068,9 +251977,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Pseudonymize Api V1 Crm Kim Contacts  Contact Id  Pseudonymize Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -253375,9 +253282,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Mail Capture Api V1 Crm Kim Mail Capture Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -253525,8 +253430,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Notifications Api V1 Crm Kim Notifications Get",
                   "type": "array"
@@ -253596,9 +253500,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Notification Api V1 Crm Kim Notifications Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -253666,9 +253568,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Read Notification Api V1 Crm Kim Notifications  Notification Id  Read Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -253776,9 +253676,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Kunden Map Api V1 Crm Kunden Karte Map Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -256753,8 +256651,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Partner Suche Api V1 Crm Partner Suche Get",
                   "type": "array"
@@ -261013,9 +260910,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Artifacts Api V1 Docflow Evidence Artifacts Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -261082,9 +260977,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Upload Artifact Api V1 Docflow Evidence Artifacts Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -261162,9 +261055,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Set Freigabe Api V1 Docflow Evidence Artifacts  Artifact Id  Freigabe Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -261234,9 +261125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Evidence Api V1 Docflow Evidence Detail Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -261307,9 +261196,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Documents Api V1 Docflow Evidence Documents Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -261593,9 +261480,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Gobd Export Api V1 Docflow Evidence Gobd Export Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -261654,9 +261539,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Paperless Probe Api V1 Docflow Evidence Paperless Probe Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -266095,9 +265978,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Einkauf Audit Trail Api V1 Einkauf Audit Trail  Doc Type   Doc Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -270811,9 +270692,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Action Neue Bestellung Api V1 Einkauf Lieferanten  Entity Id  Actions Neue Bestellung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -275332,9 +275211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get All Gates Api V1 External Gates  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -275398,9 +275275,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Gate Api V1 External Gates  System Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -280694,9 +280569,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Action Freigeben Api V1 Finance Ap Invoices  Entity Id  Actions Freigeben Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -288372,9 +288245,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Datev Export Api V1 Finance Datev Export Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -288462,9 +288333,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Datev Journal Export Api V1 Finance Datev Journal Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -290414,9 +290283,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Beleg Drilldown Api V1 Finance Financial Reports Beleg Drilldown  Journal Entry Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -290758,9 +290625,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Periodenvergleich Api V1 Finance Financial Reports Periodenvergleich Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -294347,9 +294212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Candidates Api V1 Finance Mahnlauf Candidates Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -294420,9 +294283,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Notices Api V1 Finance Mahnlauf Notices Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -294491,9 +294352,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Run Api V1 Finance Mahnlauf Run Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -294718,9 +294577,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Offene Posten Api V1 Finance Offene Posten Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -295065,9 +294922,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Action Mahnen Api V1 Finance Open Items  Entity Id  Actions Mahnen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -301311,9 +301166,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Record Payment Api V1 Finance Zahlungseingang Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -301383,9 +301236,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Clearings Api V1 Finance Zahlungseingang Clearings Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -305366,9 +305217,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Produktionsauftrag Api V1 Futtermittel Produktion Auftraege Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -305435,9 +305284,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Auftrag Api V1 Futtermittel Produktion Auftraege  Auftrag Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -305495,9 +305342,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Rezeptur Api V1 Futtermittel Produktion Rezepturen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -305564,9 +305409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Rezeptur Api V1 Futtermittel Produktion Rezepturen  Rezeptur Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -312267,9 +312110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Abwesenheit Api V1 Hrm Lifecycle Abwesenheiten Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -312336,9 +312177,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Abwesenheit Api V1 Hrm Lifecycle Abwesenheiten  Abwesenheit Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -312404,9 +312243,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Arbeitszeitkonto Api V1 Hrm Lifecycle Arbeitszeitkonto  Mitarbeiter Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -312464,9 +312301,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Zeitbuchung Api V1 Hrm Lifecycle Zeitbuchungen Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -312533,9 +312368,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Zeitbuchung Api V1 Hrm Lifecycle Zeitbuchungen  Buchung Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -312946,9 +312779,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Kunden Massnahmen Api V1 Innendienst Kunden  Kunden Nr  Massnahmen Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -313015,9 +312846,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Kunden Schlaege Api V1 Innendienst Kunden  Kunden Nr  Schlaege Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -313075,9 +312904,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Potential Analyse Api V1 Innendienst Potential Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -322795,9 +322622,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Kontrakt Screen Summary Api V1 Kontrakte  Contract Id  Screen Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -322910,9 +322735,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Kontrakt Tab Data Api V1 Kontrakte  Contract Id  Tabs  Tab Key  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -331582,9 +331405,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Suggest Putaway Api V1 Lager Wms Warehouses  Warehouse Id  Suggest Putaway Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -333294,9 +333115,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Carrier Invoice Api V1 Logistik Freight Cost Carrier Invoice Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -333398,9 +333217,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Carrier Invoices Api V1 Logistik Freight Cost Carrier Invoices Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336309,9 +336126,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mask Rollout Screen Summary Api V1 Mask Rollouts  Screen Id   Entity Id  Screen Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336488,9 +336303,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mask Rollout Tab Data Api V1 Mask Rollouts  Screen Id   Entity Id  Tabs  Tab Key  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336556,9 +336369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Agent Mask Contract Api V1 Masks  Mask Id  Agent Contract Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336633,9 +336444,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mask Entity Stub Api V1 Masks  Mask Id  Entity  Entity Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336739,9 +336548,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mask Tab Stub Api V1 Masks  Mask Id  Entity  Entity Id  Tabs  Tab Key  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336807,9 +336614,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mask Readiness Api V1 Masks  Mask Id  Readiness Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -336875,9 +336680,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Mask Screen Definition Api V1 Masks  Mask Id  Screen Definition Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -338636,8 +338439,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Tools Api V1 Mcp Tools Get",
                   "type": "array"
@@ -338679,9 +338481,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Summary Api V1 Mcp Tools Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -338721,9 +338521,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Tool Api V1 Mcp Tools  Tool Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -338783,9 +338581,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Meldung Api V1 Meldewesen Lifecycle Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -338861,9 +338657,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Simulate Uebermittlung Api V1 Meldewesen Lifecycle Simulate Uebermittlung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -338930,9 +338724,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Meldung Api V1 Meldewesen Lifecycle  Meldung Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -339503,9 +339295,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Sync Events Api V1 Mobile Sync Events Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -339590,9 +339380,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Process Queue Api V1 Mobile Sync Process Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -339760,9 +339548,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Queue Api V1 Mobile Sync Queue Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -339827,8 +339613,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Get Event Audit Api V1 Mobile Sync Queue  Event Id  Audit Get",
                   "type": "array"
@@ -339905,9 +339690,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Retry Event Api V1 Mobile Sync Queue  Event Id  Retry Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -339962,9 +339745,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Queue Summary Api V1 Mobile Sync Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -355913,9 +355694,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Preise Alle Api V1 Portal Preisspiegel Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -355980,9 +355759,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Preis Setzen Api V1 Portal Preisspiegel Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -356050,9 +355827,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Preisspiegel Kunde Api V1 Portal Preisspiegel Kunde Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -356704,9 +356479,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Dsfinvk Status Api V1 Pos Dsfinvk Status Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -357813,9 +357586,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Tagesabschluss Api V1 Pos Tagesabschluss Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -357891,9 +357662,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Simulate Tse Api V1 Pos Tagesabschluss Tse Simulate Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -357960,9 +357729,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Transition Tagesabschluss Api V1 Pos Tagesabschluss  Abschluss Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -362674,8 +362441,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Domains Api V1 Process Map  Get",
                   "type": "array"
@@ -362726,8 +362492,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List External Gates Api V1 Process Map External Gates Get",
                   "type": "array"
@@ -362770,8 +362535,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Get Open Gates Api V1 Process Map External Gates Open Get",
                   "type": "array"
@@ -362803,9 +362567,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Summary Api V1 Process Map Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -362845,9 +362607,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Process Map Api V1 Process Map  Domain  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -375445,9 +375205,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bestellung Transition Endpoint Api V1 Procurement Bestellungen  Bestellung Id  Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -377038,9 +376796,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Trace Auftrag Api V1 Produktion Mischfutter Auftraege  Ref  Trace Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -377245,9 +377001,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Inventory Links Api V1 Produktion Mischfutter Inventory Links Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -377310,9 +377064,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Ensure Inventory Link Api V1 Produktion Mischfutter Inventory Links  Einzelfutter Id  Ensure Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -381045,9 +380797,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Clear All Api V1 Recent Documents Delete",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -381140,9 +380890,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Recent Api V1 Recent Documents Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -381207,9 +380955,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Touch Api V1 Recent Documents Touch Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -381273,9 +381019,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Remove One Api V1 Recent Documents  Recent Id  Delete",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -382934,9 +382678,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Export Report Api V1 Reports Export  Report Type  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -386840,9 +386582,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Credit Check Api V1 Sales Credit Check Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -386913,9 +386653,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Customers Api V1 Sales Credit Check Customers Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -387558,9 +387296,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Storno Delivery Api V1 Sales Deliveries  Delivery No  Storno Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -388735,9 +388471,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Match Api V1 Sales Match Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -388806,9 +388540,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Orders Api V1 Sales Match Orders Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -388876,9 +388608,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response O2C Api V1 Sales O2C Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -388947,9 +388677,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Orders Api V1 Sales O2C Orders Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -389663,9 +389391,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Ls Advance Endpoint Api V1 Sales Orders Delivery Notes  Ls Id  Advance Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -389739,9 +389465,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Ab Transition Endpoint Api V1 Sales Orders Orders  Auftrag Id  Ab Transition Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -389815,9 +389539,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Pruefe Preisabweichung Endpoint Api V1 Sales Orders Orders  Auftrag Id  Preisabweichung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -389891,9 +389613,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Freigabe Preisabweichung Endpoint Api V1 Sales Orders Preisabweichungen  Abweichung Id  Freigabe Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -390408,9 +390128,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Sales Order Screen Summary Api V1 Sales Orders  Order Id  Screen Summary Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -390525,9 +390243,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Sales Order Tab Data Api V1 Sales Orders  Order Id  Tabs  Tab Key  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -391304,9 +391020,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Storno Status Api V1 Sales Storno Status Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -393682,9 +393396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Zielzellen Vorschlag Api V1 Silo Zielzellen Vorschlag Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -393795,9 +393507,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Zielzellen Vorschlag Lot Api V1 Silo Zielzellen Vorschlag Lot  Lot Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -394165,9 +393875,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Check Artikel Dubletten Api V1 Stammdaten Duplikate Artikel Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -394251,9 +393959,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Check Bp Dubletten Api V1 Stammdaten Duplikate Business Partner Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -394345,9 +394051,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Zusammenfuehren Api V1 Stammdaten Duplikate Zusammenfuehren Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -406021,9 +405725,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Pending Api V1 Waage Mobile Pending Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -406093,9 +405795,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Quittung Api V1 Waage Mobile Quittung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -406165,9 +405865,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Batch Sync Api V1 Waage Mobile Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -406235,9 +405933,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Ticket With Quittung Api V1 Waage Mobile Tickets  Ticket Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -410342,8 +410038,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Orders Api V1 Webshop Orders Get",
                   "type": "array"
@@ -410415,9 +410110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Import Orders Alias Api V1 Webshop Orders Import Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -410543,8 +410236,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Sync Log Api V1 Webshop Sync Log Get",
                   "type": "array"
@@ -410993,9 +410685,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Fire Trigger Api V1 Wf Trigger Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -411097,9 +410787,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Trigger Log Api V1 Wf Trigger Log Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -411139,9 +410827,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Trigger Map Api V1 Wf Trigger Map Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -413918,9 +413604,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Validate Xrechnung Api V1 Xrechnung  Invoice Id  Validate Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
