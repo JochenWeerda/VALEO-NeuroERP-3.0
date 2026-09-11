@@ -107382,11 +107382,865 @@
         "title": "PolicyUpsertResponse",
         "type": "object"
       },
+      "PortalEmpfehlungAckOut": {
+        "properties": {
+          "ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ok"
+          }
+        },
+        "title": "PortalEmpfehlungAckOut",
+        "type": "object"
+      },
+      "PortalEmpfehlungGeneratedOut": {
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "neue_empfehlungen": {
+            "items": {
+              "$ref": "#/components/schemas/PortalEmpfehlungOut"
+            },
+            "title": "Neue Empfehlungen",
+            "type": "array"
+          }
+        },
+        "title": "PortalEmpfehlungGeneratedOut",
+        "type": "object"
+      },
+      "PortalEmpfehlungListOut": {
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PortalEmpfehlungOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "PortalEmpfehlungListOut",
+        "type": "object"
+      },
+      "PortalEmpfehlungOut": {
+        "properties": {
+          "artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Id"
+          },
+          "beschreibung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschreibung"
+          },
+          "betrag_indikativ": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag Indikativ"
+          },
+          "cta_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cta Label"
+          },
+          "cta_ziel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cta Ziel"
+          },
+          "empfehlung_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empfehlung Id"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "gesehen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesehen"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "kontext_schluessel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontext Schluessel"
+          },
+          "kontext_wert": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontext Wert"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "prioritaet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prioritaet"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "titel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titel"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          }
+        },
+        "title": "PortalEmpfehlungOut",
+        "type": "object"
+      },
+      "PortalEmpfehlungSummaryOut": {
+        "properties": {
+          "gesamt": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamt"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "nach_typ": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Nach Typ",
+            "type": "object"
+          },
+          "ungesehen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ungesehen"
+          }
+        },
+        "title": "PortalEmpfehlungSummaryOut",
+        "type": "object"
+      },
       "PortalFeldbuchOut": {
         "additionalProperties": true,
         "description": "Typed response schema for PortalFeldbuchOut endpoints (extra fields forwarded).",
         "properties": {},
         "title": "PortalFeldbuchOut",
+        "type": "object"
+      },
+      "PortalInteressentListOut": {
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PortalInteressentOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "PortalInteressentListOut",
+        "type": "object"
+      },
+      "PortalInteressentOut": {
+        "properties": {
+          "aktualisiert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aktualisiert Am"
+          },
+          "anmerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anmerkung"
+          },
+          "betrieb_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrieb Name"
+          },
+          "betrieb_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrieb Typ"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "flaeche_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche Ha"
+          },
+          "hauptkulturen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Hauptkulturen",
+            "type": "array"
+          },
+          "interesse_themen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interesse Themen",
+            "type": "array"
+          },
+          "interessent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interessent Id"
+          },
+          "konvertiert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Konvertiert Am"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "nachname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachname"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          },
+          "qualifiziert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualifiziert Am"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "telefon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefon"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "tierart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tierart"
+          },
+          "tiere_anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiere Anzahl"
+          },
+          "vollname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vollname"
+          },
+          "vorname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vorname"
+          },
+          "zugewiesen_an": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zugewiesen An"
+          }
+        },
+        "title": "PortalInteressentOut",
+        "type": "object"
+      },
+      "PortalLohndienstAuftragOut": {
+        "properties": {
+          "abgeschlossen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abgeschlossen"
+          },
+          "aktualisiert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aktualisiert Am"
+          },
+          "anmerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anmerkung"
+          },
+          "auftrag_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auftrag Id"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "flaeche_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche Ha"
+          },
+          "geplant_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplant Datum"
+          },
+          "getreide_art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Getreide Art"
+          },
+          "innendienst_notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Innendienst Notiz"
+          },
+          "kultur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kultur"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "menge_dt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Dt"
+          },
+          "preis_indikativ_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Indikativ Eur"
+          },
+          "psm_mittel": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Psm Mittel",
+            "type": "array"
+          },
+          "schlag_beschreibung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schlag Beschreibung"
+          },
+          "schlag_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Schlag Ids",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "tierart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tierart"
+          },
+          "tiere_anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiere Anzahl"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "typ_bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ Bezeichnung"
+          },
+          "wunsch_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wunsch Datum"
+          }
+        },
+        "title": "PortalLohndienstAuftragOut",
+        "type": "object"
+      },
+      "PortalLohndienstListOut": {
+        "properties": {
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PortalLohndienstAuftragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "title": "PortalLohndienstListOut",
         "type": "object"
       },
       "PortalMassnahmeCreate": {
@@ -350766,9 +351620,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Generiere Aus Ration Api V1 Portal Empfehlungen Generieren Ration Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalEmpfehlungGeneratedOut"
                 }
               }
             },
@@ -350835,9 +351687,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Generiere Aus Schlagkartei Api V1 Portal Empfehlungen Generieren Schlagkartei Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalEmpfehlungGeneratedOut"
                 }
               }
             },
@@ -350913,9 +351763,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Empfehlungen Fuer Kunden Api V1 Portal Empfehlungen  Kunden Nr  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalEmpfehlungListOut"
                 }
               }
             },
@@ -350990,9 +351838,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Als Gesehen Api V1 Portal Empfehlungen  Kunden Nr  Gesehen  Empfehlung Id  Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalEmpfehlungAckOut"
                 }
               }
             },
@@ -351058,9 +351904,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Zusammenfassung Api V1 Portal Empfehlungen  Kunden Nr  Zusammenfassung Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalEmpfehlungSummaryOut"
                 }
               }
             },
@@ -353903,9 +354747,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Interessenten Api V1 Portal Interessenten Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalInteressentListOut"
                 }
               }
             },
@@ -353970,9 +354812,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Registrieren Api V1 Portal Interessenten Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalInteressentOut"
                 }
               }
             },
@@ -354038,9 +354878,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Interessent Api V1 Portal Interessenten  Interessent Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalInteressentOut"
                 }
               }
             },
@@ -354116,9 +354954,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Status Wechsel Api V1 Portal Interessenten  Interessent Id  Status Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalInteressentOut"
                 }
               }
             },
@@ -354223,9 +355059,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Auftraege Api V1 Portal Lohndienste Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalLohndienstListOut"
                 }
               }
             },
@@ -354290,9 +355124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Auftrag Anlegen Api V1 Portal Lohndienste Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalLohndienstAuftragOut"
                 }
               }
             },
@@ -354358,9 +355190,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Auftrag Api V1 Portal Lohndienste  Auftrag Id  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalLohndienstAuftragOut"
                 }
               }
             },
@@ -354436,9 +355266,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Status Wechsel Api V1 Portal Lohndienste  Auftrag Id  Status Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/PortalLohndienstAuftragOut"
                 }
               }
             },
