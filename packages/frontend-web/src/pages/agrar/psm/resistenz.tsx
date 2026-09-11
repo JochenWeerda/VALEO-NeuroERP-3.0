@@ -81,10 +81,10 @@ export default function PSMResistenzManagementPage(): JSX.Element {
 
   const getRisikoColor = (risiko: string) => {
     switch (risiko) {
-      case 'hoch': return 'text-status-error bg-red-50'
-      case 'mittel': return 'text-status-warning bg-orange-50'
-      case 'niedrig': return 'text-status-success bg-green-50'
-      default: return 'text-gray-600 bg-gray-50'
+      case 'hoch': return 'error'
+      case 'mittel': return 'warning'
+      case 'niedrig': return 'success'
+      default: return 'muted'
     }
   }
 
@@ -176,7 +176,7 @@ export default function PSMResistenzManagementPage(): JSX.Element {
                       {gruppe.wirkstoffe.join(', ')}
                     </p>
                   </div>
-                  <Badge className={getRisikoColor(gruppe.resistenzRisiko)}>
+                  <Badge variant={getRisikoColor(gruppe.resistenzRisiko)}>
                     {gruppe.resistenzRisiko}
                   </Badge>
                 </div>
@@ -185,16 +185,16 @@ export default function PSMResistenzManagementPage(): JSX.Element {
                     <span>Resistenz-Risiko</span>
                     <span>{getRisikoProgress(gruppe.resistenzRisiko)}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className='muted'>
                     <div
-                      className="bg-red-600 h-2 rounded-full"
+                      className='error'
                       style={{ width: `${getRisikoProgress(gruppe.resistenzRisiko)}%` }}
                     ></div>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Letzte Anwendung: {new Date(gruppe.letzteAnwendung).toLocaleDateString('de-DE')}
                   </div>
-                  <div className="text-xs text-blue-600">
+                  <div className='info'>
                     {gruppe.rotationsEmpfehlung}
                   </div>
                 </div>
@@ -225,9 +225,9 @@ export default function PSMResistenzManagementPage(): JSX.Element {
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium">Resistenz: {historie.resistenzEntwicklung}%</div>
-                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div className='muted'>
                       <div
-                        className="bg-orange-600 h-2 rounded-full"
+                        className='warning'
                         style={{ width: `${historie.resistenzEntwicklung}%` }}
                       ></div>
                     </div>
@@ -256,8 +256,8 @@ export default function PSMResistenzManagementPage(): JSX.Element {
             </h4>
             <div className="space-y-2">
               {strategie.empfohleneRotation.map((empfehlung, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 bg-blue-50 rounded">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <div key={index} className='info'>
+                  <div className='info'></div>
                   <span className="text-sm">{empfehlung}</span>
                 </div>
               ))}
@@ -284,8 +284,8 @@ export default function PSMResistenzManagementPage(): JSX.Element {
             <h4 className="font-medium mb-3">Monitoring-Empfehlungen</h4>
             <div className="space-y-2">
               {strategie.monitoringEmpfehlungen.map((empfehlung, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 bg-green-50 rounded">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                <div key={index} className='success'>
+                  <div className='success'></div>
                   <span className="text-sm">{empfehlung}</span>
                 </div>
               ))}
@@ -295,15 +295,15 @@ export default function PSMResistenzManagementPage(): JSX.Element {
       </Card>
 
       {/* Handlungsempfehlungen */}
-      <Card className="border-orange-500 bg-orange-50">
+      <Card className='warning'>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-orange-900">
+          <CardTitle className='warning'>
             <AlertTriangle className="h-5 w-5" />
             Handlungsempfehlungen
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 text-orange-800">
+          <div className='warning'>
             <p>
               <strong>Dringend:</strong> Bei Azolen besteht hohes Resistenzrisiko.
               Planen Sie eine 3-jährige Pause für diese Wirkstoffgruppe.

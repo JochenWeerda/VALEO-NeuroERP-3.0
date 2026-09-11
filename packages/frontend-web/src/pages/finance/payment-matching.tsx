@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { NativeSelect } from '@/components/ui/native-select'
@@ -208,17 +208,17 @@ export default function PaymentMatchingPage(): JSX.Element {
     }
   }
 
-  const getMatchStatusColor = (status: string): string => {
+  const getMatchStatusColor = (status: string): BadgeVariant => {
     switch (status) {
       case 'MATCHED':
-        return 'bg-green-100 text-green-800'
+        return 'success'
       case 'PARTIAL':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'warning'
       case 'MANUAL':
-        return 'bg-blue-100 text-blue-800'
+        return 'info'
       case 'UNMATCHED':
       default:
-        return 'bg-red-100 text-red-800'
+        return 'error'
     }
   }
 
@@ -276,7 +276,7 @@ export default function PaymentMatchingPage(): JSX.Element {
       accessorKey: 'match_status',
       header: t('crud.fields.status'),
       cell: ({ row }: { row: { original: PaymentEntry } }) => (
-        <Badge className={getMatchStatusColor(row.original.match_status)}>
+        <Badge variant={getMatchStatusColor(row.original.match_status)}>
           {getMatchStatusLabel(row.original.match_status)}
         </Badge>
       ),

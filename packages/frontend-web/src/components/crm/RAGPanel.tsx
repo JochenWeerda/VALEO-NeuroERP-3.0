@@ -135,10 +135,10 @@ export function RAGPanel({ customerId, customerName, className }: RAGPanelProps)
   }
 
   const priorityColors = {
-    high: 'bg-red-100 text-red-800',
-    medium: 'bg-amber-100 text-amber-800',
-    low: 'bg-gray-100 text-gray-800',
-  }
+    high: 'error',
+    medium: 'warning',
+    low: 'muted',
+  } as const
 
   return (
     <Card className={cn('border-primary/20', className)}>
@@ -274,7 +274,7 @@ export function RAGPanel({ customerId, customerName, className }: RAGPanelProps)
                             {action.reason}
                           </div>
                         </div>
-                        <Badge className={priorityColors[action.priority]}>
+                        <Badge variant={priorityColors[action.priority]}>
                           {action.priority === 'high'
                             ? 'Hoch'
                             : action.priority === 'medium'

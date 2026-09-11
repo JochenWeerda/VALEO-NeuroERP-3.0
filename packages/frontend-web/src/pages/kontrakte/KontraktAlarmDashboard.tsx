@@ -3,7 +3,7 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -178,18 +178,18 @@ export default function KontraktAlarmDashboard(): JSX.Element {
   }
 
   const alarmBadge = (type: AlarmItem['alarmType']): JSX.Element => {
-    const styles = {
-      expiring: 'bg-amber-100 text-amber-800',
-      low_rest: 'bg-orange-100 text-orange-800',
-      matif_open: 'bg-blue-100 text-blue-800',
-      hedge_gap: 'bg-fuchsia-100 text-fuchsia-800',
-      dunning_due: 'bg-red-100 text-red-800',
-      market_valuation: 'bg-rose-100 text-rose-800',
-      washout_candidate: 'bg-amber-100 text-amber-800',
-      print_missing: 'bg-slate-100 text-slate-800',
+    const styles: Record<string, BadgeVariant> = {
+      expiring: 'warning',
+      low_rest: 'warning',
+      matif_open: 'info',
+      hedge_gap: 'secondary',
+      dunning_due: 'error',
+      market_valuation: 'error',
+      washout_candidate: 'warning',
+      print_missing: 'muted',
     }
     const labels = { expiring: 'Ablauf', low_rest: 'Restmenge', matif_open: 'MATIF', hedge_gap: 'Hedge', dunning_due: 'Mahnung', market_valuation: 'Marktwert', washout_candidate: 'Washout', print_missing: 'Druck' }
-    return <Badge className={styles[type]}>{labels[type]}</Badge>
+    return <Badge variant={styles[type]}>{labels[type]}</Badge>
   }
 
   return (
@@ -238,7 +238,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-700">{lowRestCount}</div>
+            <div className='warning'>{lowRestCount}</div>
             <p className="text-xs text-muted-foreground">Unter 10% Restmenge</p>
           </CardContent>
         </Card>
@@ -246,12 +246,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <TrendingUp className='info' />
               MATIF offen
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-700">{matifCount}</div>
+            <div className='info'>{matifCount}</div>
             <p className="text-xs text-muted-foreground">Preisfixierung ausstehend</p>
           </CardContent>
         </Card>
@@ -298,12 +298,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Package className="h-4 w-4 text-slate-700" />
+              <Package className='muted' />
               Druck fehlt
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-700">{printCount}</div>
+            <div className='muted'>{printCount}</div>
             <p className="text-xs text-muted-foreground">Formular- oder Kanalsteuerung offen</p>
           </CardContent>
         </Card>

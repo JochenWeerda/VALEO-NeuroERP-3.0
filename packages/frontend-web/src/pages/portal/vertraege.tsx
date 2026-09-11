@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { usePortalVertraege } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Progress } from '@/components/ui/progress'
@@ -48,10 +48,10 @@ interface Vertrag {
 }
 
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  'aktiv': { label: 'Aktiv', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
-  'auslaufend': { label: 'Läuft bald aus', color: 'bg-amber-100 text-amber-800', icon: <AlertCircle className="h-4 w-4" /> },
-  'abgelaufen': { label: 'Abgelaufen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
+const statusConfig: Record<string, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  'aktiv': { label: 'Aktiv', color: 'success', icon: <CheckCircle2 className="h-4 w-4" /> },
+  'auslaufend': { label: 'Läuft bald aus', color: 'warning', icon: <AlertCircle className="h-4 w-4" /> },
+  'abgelaufen': { label: 'Abgelaufen', color: 'muted', icon: <Clock className="h-4 w-4" /> },
 }
 
 const typConfig: Record<string, { label: string; color: string }> = {
@@ -265,7 +265,7 @@ export default function PortalVertraege() {
               <div className="space-y-4">
                 {/* Status Badges */}
                 <div className="flex gap-2">
-                  <Badge className={`${statusConfig[selectedVertrag.status].color} gap-1`}>
+                  <Badge variant={statusConfig[selectedVertrag.status].color} className="gap-1">
                     {statusConfig[selectedVertrag.status].icon}
                     {statusConfig[selectedVertrag.status].label}
                   </Badge>

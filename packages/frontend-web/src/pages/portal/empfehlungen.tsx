@@ -12,7 +12,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -56,10 +56,10 @@ const TYP_CONFIG: Record<string, { icon: React.ReactNode; farbe: string; badge: 
   vertrag_erinnerung: { icon: <Bell className="h-5 w-5" />, farbe: 'border-red-300 bg-red-50', badge: 'Erinnerung' },
 }
 
-const PRIORITAET_FARBE: Record<string, string> = {
-  hoch: 'bg-red-100 text-red-800',
-  mittel: 'bg-amber-100 text-amber-800',
-  niedrig: 'bg-gray-100 text-gray-600',
+const PRIORITAET_FARBE: Record<string, BadgeVariant> = {
+  hoch: 'error',
+  mittel: 'warning',
+  niedrig: 'muted',
 }
 
 function EmpfehlungCard({ e, onGesehen }: { e: Empfehlung; onGesehen: (id: string) => void }) {
@@ -74,7 +74,7 @@ function EmpfehlungCard({ e, onGesehen }: { e: Empfehlung; onGesehen: (id: strin
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className="font-semibold text-gray-900">{e.titel}</span>
-                <Badge className={PRIORITAET_FARBE[e.prioritaet]}>{e.prioritaet}</Badge>
+                <Badge variant={PRIORITAET_FARBE[e.prioritaet]}>{e.prioritaet}</Badge>
                 <Badge variant="outline">{cfg.badge}</Badge>
                 {e.gesehen && <CheckCircle2 className="h-4 w-4 text-status-success" />}
               </div>

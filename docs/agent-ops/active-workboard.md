@@ -11,6 +11,44 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DESIGN-STATUS-COLORS-017 - abgeschlossen
+
+**Von:** Welle 3 aus DESIGN-STATUS-COLORS-016. **Owner:** Claude Code.
+**Stand:** abgeschlossen 2026-09-11.
+**Dateibesitz:** `components/ui/badge.tsx` (Typ-Export), 23 Dateien unter
+`packages/frontend-web/src` mit Status-Tabellen, Slice-YAML, dieser Abschnitt.
+
+**Umsetzung:** 23 Helfer mit 117 Tabelleneintraegen bilden jetzt auf
+Badge-Varianten statt auf Palette-Klassen ab; 25 Badge-Verbraucher von
+`className={...}` auf `variant={...}` gedreht. `badge.tsx` exportiert dafuer
+**`BadgeVariant`** — damit prueft TypeScript jede Umstellung, statt sie zu
+glauben.
+
+**Bewusst ausgenommen:** Fuenf Helfer (`typConfig`, `DOMAIN_COLORS`,
+`typColors`) faerben **Kategorien, keine Statuswerte** — erkennbar an
+`purple`/`violet` ausserhalb der Statusskala. Sie auf Statusvarianten zu
+zwingen waere semantisch falsch; sie gehoeren auf die Kategorienpalette.
+
+**Die Typpruefung hat sich bezahlt gemacht:** Der erste Durchlauf ergab zwoelf
+Fehler — genau die Faelle, die der Transform nicht entscheiden konnte. Darunter
+ein **echter Fehler meines Transforms**: in `shop.tsx` steckte die Klasse in
+einem `cn()`-Aufruf, der faelschlich als Variante uebernommen wurde. Ebenso
+gefunden: `line-through` in LstKontraktUebersicht ist eine Textauszeichnung,
+keine Farbe — sie bleibt jetzt als bedingtes `className` erhalten, statt mit
+der Farbe wegzufallen.
+
+**Nachweis:** `tsc --noEmit` exit 0; 126 Testdateien, 495 Tests, ein bekannter
+Skip — identisch zur Baseline.
+
+**Verlauf:** 571 vor Welle 1 → 343 nach Welle 1 → nach Welle 2 63 Badges
+umgestellt → **276 in 106 Dateien** offen.
+
+**Offen (Welle 4):** 82 div-Panels sind der naechste Block, brauchen aber
+zuerst eine Entscheidung — eigene Hinweisbox-Komponente oder Erweiterung der
+Alert-Varianten. Das ist Entwurfsarbeit und sollte nicht nebenbei entschieden
+werden. Dazu 119 Tabellen ohne Badge-Bezug oder mit kategorialer Faerbung,
+16 span, 12 Badge mit uneindeutiger Familie, 9 Button.
+
 ## DESIGN-STATUS-COLORS-016 - abgeschlossen
 
 **Von:** Welle 2 aus DESIGN-STATUS-COLORS-015. **Owner:** Claude Code.

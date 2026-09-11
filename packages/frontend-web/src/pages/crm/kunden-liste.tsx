@@ -5,7 +5,7 @@ import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { resolveBusinessPartnerIdForCrmCustomer } from '@/lib/crm/fetch-customer-chef-hints'
@@ -91,14 +91,14 @@ const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConf
       sortable: true,
       filterable: true,
       render: (value) => {
-        const colors = {
-          'ausgezeichnet': 'bg-green-100 text-green-800',
-          'gut': 'bg-blue-100 text-blue-800',
-          'mittel': 'bg-yellow-100 text-yellow-800',
-          'schlecht': 'bg-red-100 text-red-800',
-          'unklar': 'bg-gray-100 text-gray-800'
+        const colors: Record<string, BadgeVariant> = {
+          'ausgezeichnet': 'success',
+          'gut': 'info',
+          'mittel': 'warning',
+          'schlecht': 'error',
+          'unklar': 'muted'
         }
-        return <Badge className={colors[value as keyof typeof colors] || colors.unklar}>{value}</Badge>
+        return <Badge variant={colors[value as keyof typeof colors] || colors.unklar}>{value}</Badge>
       }
     },
     {

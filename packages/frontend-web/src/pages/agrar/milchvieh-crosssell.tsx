@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Droplets, Wheat, Users, Euro } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -27,10 +27,10 @@ const eur = (n: number | null | undefined): string =>
 const eurMio = (n: number | null | undefined): string =>
   n === null || n === undefined ? '–' : `${(n / 1_000_000).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} Mio €`
 
-const BEDARF_BADGE: Record<string, string> = {
-  hoch: 'bg-red-100 text-red-800',
-  mittel: 'bg-yellow-100 text-yellow-800',
-  niedrig: 'bg-green-100 text-green-800',
+const BEDARF_BADGE: Record<string, BadgeVariant> = {
+  hoch: 'error',
+  mittel: 'warning',
+  niedrig: 'success',
 }
 
 function Kpi({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub?: string }): JSX.Element {
@@ -175,7 +175,7 @@ export default function MilchviehCrossSellPage(): JSX.Element {
                       {nf(i.zellzahl_tsd_ml)}
                       {i.zellzahl_quelle === 'dev_synthetik' && <span title="synthetischer Schätzwert" className="ml-1 text-xs text-muted-foreground">~</span>}
                     </td>
-                    <td className="py-2 pr-3"><Badge className={BEDARF_BADGE[i.hygiene_bedarf] ?? ''}>{i.hygiene_bedarf}</Badge></td>
+                    <td className="py-2 pr-3"><Badge variant={BEDARF_BADGE[i.hygiene_bedarf] ?? 'muted'}>{i.hygiene_bedarf}</Badge></td>
                     <td className="py-2 pr-3 text-right">{nf(i.kraftfutter_t_jahr_min, 1)}–{nf(i.kraftfutter_t_jahr_max, 1)}</td>
                     <td className="py-2 pr-3 text-right font-medium">{eur(i.crosssell_ziel_eur)}</td>
                     <td className="py-2 pr-3 text-right text-muted-foreground">{eur(i.crosssell_gewinnbar_eur_min)}–{eur(i.crosssell_gewinnbar_eur_max)}</td>

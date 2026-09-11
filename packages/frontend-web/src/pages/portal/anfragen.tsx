@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { usePortalAnfragen } from '@/lib/api/portal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
@@ -58,12 +58,12 @@ interface Anfrage {
   antwortDatum?: string
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  'offen': { label: 'Offen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
-  'in_bearbeitung': { label: 'In Bearbeitung', color: 'bg-amber-100 text-amber-800', icon: <Clock className="h-4 w-4" /> },
-  'beantwortet': { label: 'Beantwortet', color: 'bg-blue-100 text-blue-800', icon: <MessageSquare className="h-4 w-4" /> },
-  'abgeschlossen': { label: 'Abgeschlossen', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
-  'abgelehnt': { label: 'Abgelehnt', color: 'bg-red-100 text-red-800', icon: <XCircle className="h-4 w-4" /> },
+const statusConfig: Record<string, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  'offen': { label: 'Offen', color: 'muted', icon: <Clock className="h-4 w-4" /> },
+  'in_bearbeitung': { label: 'In Bearbeitung', color: 'warning', icon: <Clock className="h-4 w-4" /> },
+  'beantwortet': { label: 'Beantwortet', color: 'info', icon: <MessageSquare className="h-4 w-4" /> },
+  'abgeschlossen': { label: 'Abgeschlossen', color: 'success', icon: <CheckCircle2 className="h-4 w-4" /> },
+  'abgelehnt': { label: 'Abgelehnt', color: 'error', icon: <XCircle className="h-4 w-4" /> },
 }
 
 const typConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
@@ -298,7 +298,7 @@ export default function PortalAnfragen() {
               <div className="space-y-4">
                 {/* Status & Typ */}
                 <div className="flex gap-2">
-                  <Badge className={`${statusConfig[selectedAnfrage.status].color} gap-1`}>
+                  <Badge variant={statusConfig[selectedAnfrage.status].color} className="gap-1">
                     {statusConfig[selectedAnfrage.status].icon}
                     {statusConfig[selectedAnfrage.status].label}
                   </Badge>

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { NativeSelect } from '@/components/ui/native-select'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listKontrakte } from '@/lib/api/kontrakte'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
@@ -16,13 +16,20 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 const PAGE_SIZE = 50
 
 function statusBadge(status: string): JSX.Element {
-  const variants: Record<string, string> = {
-    OFFEN: 'bg-green-100 text-green-800',
-    ERLEDIGT: 'bg-slate-100 text-slate-600',
-    STORNIERT: 'bg-red-100 text-red-700',
-    GELOESCHT: 'bg-muted text-muted-foreground line-through',
+  const variants: Record<string, BadgeVariant> = {
+    OFFEN: 'success',
+    ERLEDIGT: 'muted',
+    STORNIERT: 'error',
+    GELOESCHT: 'muted',
   }
-  return <Badge className={variants[status] ?? 'bg-slate-50'}>{status}</Badge>
+  return (
+    <Badge
+      variant={variants[status] ?? 'muted'}
+      className={status === 'GELOESCHT' ? 'line-through' : undefined}
+    >
+      {status}
+    </Badge>
+  )
 }
 
 export default function LstKontraktUebersicht(): JSX.Element {

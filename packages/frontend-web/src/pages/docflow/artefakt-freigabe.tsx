@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FileCheck2, Loader2, RefreshCw, Search, Upload, CheckCircle2, Archive } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
@@ -14,9 +14,9 @@ import { useArtifacts, useUploadArtifact, useSetFreigabe, type ArtifactItem } fr
  * (entwurf→freigegeben→archiviert).
  */
 
-const STATUS_BADGE: Record<string, string> = {
-  entwurf: 'bg-amber-100 text-amber-800', freigegeben: 'bg-emerald-100 text-emerald-800',
-  archiviert: 'bg-muted text-muted-foreground',
+const STATUS_BADGE: Record<string, BadgeVariant> = {
+  entwurf: 'warning', freigegeben: 'success',
+  archiviert: 'muted',
 }
 
 function errDetail(err: unknown) {
@@ -166,7 +166,7 @@ export default function ArtefaktFreigabePage() {
                               <td className="px-3 py-1.5 text-right tabular-nums">v{a.version}{a.aktuell && <Badge variant="outline" className="ml-1 text-[10px]">aktuell</Badge>}</td>
                               <td className="px-3 py-1.5">{a.file_name ?? '—'}</td>
                               <td className="px-3 py-1.5 font-mono text-[11px] text-muted-foreground">{a.sha256 ? `${a.sha256.slice(0, 12)}…` : '—'}</td>
-                              <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[a.freigabe_status] ?? ''}`}>{a.freigabe_status}</Badge></td>
+                              <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[a.freigabe_status] ?? 'muted'} className="text-[10px]">{a.freigabe_status}</Badge></td>
                               <td className="px-3 py-1.5 text-right"><ArtifactActions doc={selected} a={a} /></td>
                             </tr>
                           ))}

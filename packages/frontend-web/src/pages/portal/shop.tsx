@@ -9,7 +9,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Label } from '@/components/ui/label'
@@ -921,11 +921,11 @@ function formatPrice(price: number): string {
 
 
 // Kontrakt-Status Badge Konfiguration
-const contractStatusConfig: Record<ContractStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  NONE: { label: '', color: '', icon: null },
-  ACTIVE: { label: 'Kontrakt aktiv', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', icon: <FileText className="h-3 w-3" /> },
-  LOW: { label: 'Kontrakt fast ausgeschöpft', color: 'bg-orange-100 text-orange-800 border-orange-200', icon: <AlertTriangle className="h-3 w-3" /> },
-  EXHAUSTED: { label: 'Kontrakt ausgeschöpft', color: 'bg-gray-100 text-gray-600 border-gray-200', icon: <FileText className="h-3 w-3" /> },
+const contractStatusConfig: Record<ContractStatus, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  NONE: { label: '', color: 'muted', icon: null },
+  ACTIVE: { label: 'Kontrakt aktiv', color: 'success', icon: <FileText className="h-3 w-3" /> },
+  LOW: { label: 'Kontrakt fast ausgeschöpft', color: 'warning', icon: <AlertTriangle className="h-3 w-3" /> },
+  EXHAUSTED: { label: 'Kontrakt ausgeschöpft', color: 'muted', icon: <FileText className="h-3 w-3" /> },
 }
 
 function ProductCard({
@@ -1006,7 +1006,7 @@ function ProductCard({
               {!hasPrePurchase && hasContract && (
                 <Tooltip>
                   <TooltipTrigger>
-                    <Badge className={cn('text-xs gap-1 border', contractStatusConfig[contractStatusKey].color)}>
+                    <Badge variant={contractStatusConfig[contractStatusKey].color} className="text-xs gap-1 border">
                       {contractStatusConfig[contractStatusKey].icon}
                       {contractStatusConfig[contractStatusKey].label}
                     </Badge>

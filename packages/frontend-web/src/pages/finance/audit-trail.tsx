@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -128,18 +128,18 @@ export default function AuditTrailPage(): JSX.Element {
     return true
   })
 
-  const getActionColor = (action: string): string => {
+  const getActionColor = (action: string): BadgeVariant => {
     switch (action.toLowerCase()) {
       case 'create':
-        return 'bg-green-100 text-green-800'
+        return 'success'
       case 'update':
-        return 'bg-blue-100 text-blue-800'
+        return 'info'
       case 'delete':
-        return 'bg-red-100 text-red-800'
+        return 'error'
       case 'view':
-        return 'bg-gray-100 text-gray-800'
+        return 'muted'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'muted'
     }
   }
 
@@ -167,7 +167,7 @@ export default function AuditTrailPage(): JSX.Element {
       accessorKey: 'action',
       header: t('crud.fields.action'),
       cell: ({ row }: { row: { original: AuditLogEntry } }) => (
-        <Badge className={getActionColor(row.original.action)}>{row.original.action}</Badge>
+        <Badge variant={getActionColor(row.original.action)}>{row.original.action}</Badge>
       ),
     },
     {

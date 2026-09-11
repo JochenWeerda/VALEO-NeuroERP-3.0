@@ -36,6 +36,9 @@ const badgeVariants = cva(
   }
 )
 
+/** Variantennamen der Badge - Zielwerte fuer Status-zu-Variante-Tabellen. */
+export type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>['variant']>
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}

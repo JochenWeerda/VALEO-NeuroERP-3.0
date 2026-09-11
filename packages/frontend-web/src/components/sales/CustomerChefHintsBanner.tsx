@@ -1,7 +1,7 @@
 import { Link } from '@/app/routing/typed-router'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { useCustomerChefHints } from '@/hooks/useCustomerChefHints'
 import type { Instruction } from '@/lib/services/business-partner-service'
 
@@ -18,16 +18,16 @@ function priorityLabel(p: Instruction['instruction_priority']): string {
   }
 }
 
-function priorityBadgeClass(p: Instruction['instruction_priority']): string {
+function priorityBadgeClass(p: Instruction['instruction_priority']): BadgeVariant {
   switch (p) {
     case 'critical':
-      return 'bg-red-700 text-white border-transparent'
+      return 'error'
     case 'high':
-      return 'bg-amber-600 text-white border-transparent'
+      return 'warning'
     case 'low':
-      return 'bg-slate-500 text-white border-transparent'
+      return 'muted'
     default:
-      return 'bg-slate-600 text-white border-transparent'
+      return 'muted'
   }
 }
 
@@ -102,7 +102,7 @@ export function CustomerChefHintsBanner({
               {data.instructions.map((row) => (
                 <li key={row.id} className="rounded-md border border-amber-200/80 bg-white/60 px-3 py-2 text-sm">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <Badge className={priorityBadgeClass(row.instruction_priority)} variant="secondary">
+                    <Badge variant={priorityBadgeClass(row.instruction_priority)}>
                       {priorityLabel(row.instruction_priority)}
                     </Badge>
                   </div>

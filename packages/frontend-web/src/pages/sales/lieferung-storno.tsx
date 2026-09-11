@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Undo2, Loader2, RefreshCw, Search, Ban, ReceiptText } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,8 +18,8 @@ import { useStornoStatus, useStornoDelivery } from '@/lib/api/sales-storno'
  * Lieferungen sind storno-gesperrt (zuerst Gutschrift). Gutschrift-Übersicht.
  */
 
-const STATUS_BADGE: Record<string, string> = {
-  storniert: 'bg-red-100 text-red-800', geliefert: 'bg-emerald-100 text-emerald-800',
+const STATUS_BADGE: Record<string, BadgeVariant> = {
+  storniert: 'error', geliefert: 'success',
 }
 
 export default function LieferungStornoPage() {
@@ -121,7 +121,7 @@ export default function LieferungStornoPage() {
                         {(d.lieferscheine ?? []).map((ls) => (
                           <tr key={ls.lieferschein} className="border-b last:border-0">
                             <td className="px-3 py-1.5">{ls.lieferschein}</td>
-                            <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[(ls.status ?? '').toLowerCase()] ?? ''}`}>{ls.status}</Badge></td>
+                            <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[(ls.status ?? 'muted').toLowerCase()] ?? 'muted'} className="text-[10px]">{ls.status}</Badge></td>
                             <td className="px-3 py-1.5 text-muted-foreground">{ls.rechnung ?? '—'}</td>
                             <td className="px-3 py-1.5 text-muted-foreground">{ls.storno_grund ?? '—'}</td>
                             <td className="px-3 py-1.5 text-right">

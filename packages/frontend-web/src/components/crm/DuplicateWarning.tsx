@@ -38,9 +38,9 @@ export function DuplicateWarning({
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 0.9) return 'bg-red-100 text-red-800 border-red-200'
-    if (score >= 0.8) return 'bg-amber-100 text-amber-800 border-amber-200'
-    return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    if (score >= 0.9) return 'error'
+    if (score >= 0.8) return 'warning'
+    return 'warning'
   }
 
   const getScoreLabel = (score: number) => {
@@ -52,7 +52,7 @@ export function DuplicateWarning({
   return (
     <Alert
       variant="destructive"
-      className={cn('border-amber-300 bg-amber-50', className)}
+      className={cn('warning', className)}
     >
       <AlertTriangle className="h-4 w-4 text-status-warning" />
       <AlertTitle className="text-status-warning flex items-center gap-2">
@@ -66,13 +66,13 @@ export function DuplicateWarning({
           {candidates.map((candidate) => (
             <div
               key={candidate.id}
-              className="flex items-center justify-between p-3 bg-white rounded-lg border border-amber-200"
+              className='warning'
             >
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-status-warning" />
                 <div>
-                  <div className="font-medium text-gray-900">{candidate.name}</div>
-                  <div className="text-xs text-gray-500 flex gap-2">
+                  <div className='muted'>{candidate.name}</div>
+                  <div className='muted'>
                     {candidate.email && <span>{candidate.email}</span>}
                     {candidate.phone && <span>{candidate.phone}</span>}
                   </div>
@@ -86,7 +86,7 @@ export function DuplicateWarning({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className={getScoreColor(candidate.matchScore)}>
+                <Badge variant={getScoreColor(candidate.matchScore)}>
                   {getScoreLabel(candidate.matchScore)} (
                   {Math.round(candidate.matchScore * 100)}%)
                 </Badge>

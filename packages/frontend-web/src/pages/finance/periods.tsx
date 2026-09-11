@@ -11,7 +11,7 @@ import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -150,16 +150,16 @@ export default function PeriodsPage(): JSX.Element {
     }
   }
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = (status: string): BadgeVariant => {
     switch (status) {
       case 'OPEN':
-        return 'bg-green-100 text-green-800'
+        return 'success'
       case 'CLOSED':
-        return 'bg-red-100 text-red-800'
+        return 'error'
       case 'ADJUSTING':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'warning'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'muted'
     }
   }
 
@@ -206,7 +206,7 @@ export default function PeriodsPage(): JSX.Element {
       accessorKey: 'status',
       header: t('crud.fields.status'),
       cell: ({ row }: { row: { original: AccountingPeriod } }) => (
-        <Badge className={getStatusColor(row.original.status)}>
+        <Badge variant={getStatusColor(row.original.status)}>
           {getStatusLabel(row.original.status)}
         </Badge>
       ),
@@ -261,7 +261,7 @@ export default function PeriodsPage(): JSX.Element {
   return (
     <div className="space-y-6 p-6">
       {workflowInstanceId && (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+        <div className='info'>
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
         </div>
       )}
@@ -320,7 +320,7 @@ export default function PeriodsPage(): JSX.Element {
       </div>
 
       {/* Info Card */}
-      <Card className="border-yellow-200 bg-yellow-50">
+      <Card className='warning'>
         <CardContent className="pt-6">
           <div className="flex items-start space-x-3">
             <AlertCircle className="h-5 w-5 text-status-warning mt-0.5" />

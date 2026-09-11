@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -97,13 +97,13 @@ export default function PSMListePage(): JSX.Element {
       label: 'Erklärung Landwirt',
       render: (psm: PSM) => {
         if (!psm.erklaerungLandwirtStatus) return <span className="text-muted-foreground">-</span>
-        const statusColors = {
-          'eingegangen': 'bg-yellow-100 text-yellow-800',
-          'geprueft': 'bg-green-100 text-green-800',
-          'abgelehnt': 'bg-red-100 text-red-800',
+        const statusColors: Record<string, BadgeVariant> = {
+          'eingegangen': 'warning',
+          'geprueft': 'success',
+          'abgelehnt': 'error',
         }
         return (
-          <Badge className={statusColors[psm.erklaerungLandwirtStatus as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
+          <Badge variant={statusColors[psm.erklaerungLandwirtStatus as keyof typeof statusColors] || 'muted'}>
             {psm.erklaerungLandwirtStatus === 'eingegangen' ? 'Eingegangen' :
              psm.erklaerungLandwirtStatus === 'geprueft' ? 'Geprüft' : 'Abgelehnt'}
           </Badge>

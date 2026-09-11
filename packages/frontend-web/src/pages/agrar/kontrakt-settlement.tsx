@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Receipt, Loader2, RefreshCw, Search, Ban, FileCheck2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,9 +20,9 @@ import {
  * abgerechnete Bewegungen sind storno-gesperrt.
  */
 
-const STATUS_BADGE: Record<string, string> = {
-  offen: 'bg-amber-100 text-amber-800', abgerechnet: 'bg-emerald-100 text-emerald-800',
-  storniert: 'bg-red-100 text-red-800', aktiv: 'bg-sky-100 text-sky-800',
+const STATUS_BADGE: Record<string, BadgeVariant> = {
+  offen: 'warning', abgerechnet: 'success',
+  storniert: 'error', aktiv: 'info',
 }
 
 type StornoTarget = { kind: 'movement' | 'fixing'; id: string; label: string } | null
@@ -154,7 +154,7 @@ export default function KontraktSettlementPage() {
                           <tr key={m.movement_id} className="border-b last:border-0">
                             <td className="px-3 py-1.5 text-right tabular-nums">{m.menge}</td>
                             <td className="px-3 py-1.5">{m.datum ? new Date(m.datum).toLocaleDateString('de-DE') : '—'}</td>
-                            <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[m.status] ?? ''}`}>{m.status}</Badge></td>
+                            <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[m.status] ?? 'muted'} className="text-[10px]">{m.status}</Badge></td>
                             <td className="px-3 py-1.5 text-muted-foreground">{m.invoice_no ?? m.storno_grund ?? '—'}</td>
                             <td className="px-3 py-1.5 text-right">
                               {m.status === 'offen' && (
@@ -196,7 +196,7 @@ export default function KontraktSettlementPage() {
                               <td className="px-3 py-1.5">{f.fixing_no}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{f.menge}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{f.effektiv_preis}</td>
-                              <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[f.status] ?? ''}`}>{f.status}</Badge></td>
+                              <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[f.status] ?? 'muted'} className="text-[10px]">{f.status}</Badge></td>
                               <td className="px-3 py-1.5 text-right">
                                 {f.status === 'aktiv' && (
                                   <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'fixing', id: f.fixing_id, label: `Fixierung #${f.fixing_no} (${f.menge} ${einheit})` }); setGrund('') }}><Ban size={13} className="text-status-error" /></Button>
