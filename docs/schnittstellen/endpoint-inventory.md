@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-11
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -317,11 +317,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `planung_kalender` | UIX-063 planning calendar API. |
 | `policies` | Policy Manager API Endpoints |
 | `portal_feldbuch` | Portal Feldbuch — Endpoints für den Landwirt im Kundenportal |
-| `portal_innendienst` | — |
+| `portal_innendienst` | PORTAL-INNENDIENST-001 — Innendienst-Sicht auf Kundenschlaege und Potentialanalyse. |
 | `portal_intelligence` | — |
 | `portal_interessent` | — |
 | `portal_lohndienst` | — |
-| `portal_preisspiegel` | — |
+| `portal_preisspiegel` | PORTAL-PREISSPIEGEL-001 — Getreidekurs-API fuer Kundenportal und Innendienst. |
 | `portal_shop` | Kundenportal Shop API Endpunkte |
 | `pos_dsfinvk` | Compatibility endpoints for provider-backed DSFinV-K exports. |
 | `pos_fiscalization` | — |
