@@ -36,7 +36,7 @@ P0-Specs aus dem Audit:
 | SPEC-P0-02 | erledigt 2026-07-05 | Runtime-Sweep Nightly-Gate 0×5xx (`scripts/api_runtime_sweep.py`, Repair-Migration `runtime_sweep_repair_20260702`) |
 | SPEC-P0-03 | erledigt 2026-08-23 | Kat.-B/D-Matrix + `/ready`/`/readyz`; Finance-/Bestands-Listen liefern bei DB-Fehler 503+Metrik (Nachzug OP/Matching/Bank) |
 | SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
-| SPEC-P0-05 | teilweise | only-up-Ratchet aktiv (`coverage_ratchet_baseline.json`); Zielwerte ≥70% fuer kritische Pfade bleiben COVERAGE-001-Folgearbeit |
+| SPEC-P0-05 | erledigt 2026-09-11 (Belege ≥70%; Gesamt-Coverage weiter COVERAGE-001) | only-up-Ratchet aktiv; `financial_reports`/`rohware_sammelabrechnung`/`sales_invoice_einvoice` Ratchet 0.70 (SPEC-P0-05-BELEGE-70) |
 | SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
 | SPEC-P0-07 | erledigt 2026-08-23 | SOC-2-Profil in `simulate_external_assessors.py` + `config/audit/soc2-tsc-matrix.yaml`; Type-II-/AVV-Gates bleiben extern |
 | SPEC-P0-08 | repo-seitig erledigt 2026-09-11 (Drill selbst external_gate) | `run_restore_drill.sh` + `check_restore_drill_evidence.py` + CI-Notice in release-gates; Ops muss Protokoll committen |
@@ -672,6 +672,11 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - **COV-RATCHET-006 (2026-06-25):** Quality-Gate-Baseline auf tatsaechliche CI-Messwerte korrigiert, nachdem neue P2/WMS/WF-Slices teilweise geschaetzte Schwellen eingetragen hatten. Betroffen: `finance_actions.py` 79%, `inventory_operations.py` 52%, `agrar_p0.py` 57%, `operator_agent.py` 43%, `process_map.py` 45%, `wf_cockpit_persist.py` 48%.
 - **COV-RATCHET-007 (2026-06-27):** `wf_cockpit_nats_projector.py` jetzt mit echtem Unit-Test abgesichert (`tests/test_wf_cockpit_nats_projector.py` — 14 Tests, NATS-unabhaengig via MagicMock); zum Ratchet hinzugefuegt. HR-TIME UX-M1 (Suche/Filter/Sort in `zeiterfassung.tsx`) als umgesetzt dokumentiert.
 - **COV-RATCHET-010 (2026-06-27):** Quality-Gate-Baseline erneut auf echte CI-Messwerte kalibriert, nachdem geschaetzte Schwellen den Gate-Lauf blockierten. Betroffen: `domains/shared/events.py` 62%, `finance_actions.py` 78%, `financial_reports.py` 25%, `psm_proplanta.py` 15%, `kaeufergruppe.py` 41%, `ai_engineering_metrics_service.py` 38%, `hrm_abwesenheit.py` 43%, `wf_cockpit_persist_service.py` 70%, `wf_cockpit_persist.py` 44%, `portal_innendienst.py` 30%. Fachliche Vertiefung bleibt sinnvoll fuer Finance-Reports, Proplanta, AI-Metrics, HR-Abwesenheit und Portal-Innendienst; naechste Schritte sind gezielte Tests statt geschaetzter Gate-Werte.
+
+- **COV-RATCHET-011 / SPEC-P0-05-BELEGE-70 (2026-09-11):** Kritische Beleg-/Report-Pfade
+  auf ≥70% gehoben (isoliert gemessen): `financial_reports` 95%, `rohware_sammelabrechnung`
+  90%, `sales_invoice_einvoice` 96%. Ratchet+Baseline only-up auf 0.70. Tests:
+  `tests/test_spec_p0_05_belege_coverage.py`. Gesamt-Coverage-Repo bleibt COVERAGE-001-Folgearbeit.
 
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich
 

@@ -1,0 +1,35 @@
+slice_id: SPEC-P0-05-BELEGE-70
+id: SPEC-P0-05-BELEGE-70
+title: Kritische Beleg-/Report-Pfade auf ≥70% Coverage (SPEC-P0-05)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  SPEC-P0-05: financial_reports, rohware_sammelabrechnung und
+  sales_invoice_einvoice auf ≥70% heben (only-up Ratchet + Baseline).
+  Fortsetzung der A6-Coverage-Offensive.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P0-05-BELEGE-70.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - tests/test_spec_p0_05_belege_coverage.py
+  - scripts/check_critical_backend_coverage.py
+  - config/coverage_ratchet_baseline.json
+acceptance:
+  - Isolierte Modul-Coverage ≥70% fuer die drei Zielpfade
+  - CRITICAL_THRESHOLDS und Baseline auf 0.70 (only-up)
+  - Unit-Tests gruen
+tests:
+  - tests/test_spec_p0_05_belege_coverage.py
+ai_harness:
+  fachlicher_vertrag: Finanzreports, Sammelabrechnung und E-Rechnung sind testbar abgesichert.
+  architektur_vertrag: Nur Tests + Ratchet; keine API-Vertragsaenderung.
+  daten_vertrag: Keine Migration.
+  test_vertrag: MagicMock-DB Unit-Tests ohne Vollsuite.
+  security_vertrag: SECURITY-REMAINDER unberuehrt.
+  betriebs_vertrag: Keine Deployments.
+  dokumentations_vertrag: Slice, Workboard, open-gaps.
+verification:
+  - "pytest tests/test_spec_p0_05_belege_coverage.py -o addopts= --cov=app.api.v1.endpoints.financial_reports --cov=app.api.v1.endpoints.rohware_sammelabrechnung --cov=app.api.v1.endpoints.sales_invoice_einvoice"
