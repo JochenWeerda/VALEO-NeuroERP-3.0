@@ -238,7 +238,7 @@ demselben Skript: **0 verbleibende Welle-1-Vorkommen**. Kein Byte ausserhalb
 **Offen (Welle 2):** 268 Badge-Tripel in 102 Dateien. Sie brauchen zentrale
 Badge-Varianten statt Einzelklassen — Entwurfsarbeit, kein Codemod.
 
-## SECURITY-ARCHIVE-DEPS-20260910 - in arbeit
+## SECURITY-ARCHIVE-DEPS-20260910 - abgeschlossen
 
 **Von:** Abgrenzung aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag.
 **Owner:** Claude Code. **Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
@@ -278,6 +278,15 @@ das Entfernen der toten Manifeste aus dem Graph.
 erkennt die Dateien nicht mehr, der Inhalt bleibt vollstaendig als historischer
 Nachweis erhalten, und kuenftige Archiv-Meldungen entstehen gar nicht erst.
 Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
+
+
+**Abnahme 2026-09-11:** Bestaetigt ueber die Live-Alert-API — **51 offene
+Meldungen, davon 0 auf Archivpfaden** (vorher 95 mit 44 im Archiv). Der
+Dependency Graph brauchte rund **16 Stunden** bis zur Neuanalyse; ein Ausloesen
+von aussen gibt es dafuer nicht. Kein einziger Alert wurde stummgeschaltet —
+die Meldungen sind geschlossen, weil die Dateien nicht mehr im Graph liegen.
+Die verbleibenden 51 liegen auf geliefertem Code (pnpm-lock.yaml 14,
+services/ai/requirements.txt 7) und gehoeren in die Dependency-Welle.
 
 ## SECURITY-REMAINDER-20260910 - in arbeit
 

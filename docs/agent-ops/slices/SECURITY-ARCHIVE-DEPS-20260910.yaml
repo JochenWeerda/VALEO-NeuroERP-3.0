@@ -2,9 +2,10 @@ slice_id: SECURITY-ARCHIVE-DEPS-20260910
 id: SECURITY-ARCHIVE-DEPS-20260910
 title: Dependabot-Meldungen auf toten Archiv-Manifesten ursachenbezogen beseitigen
 owner: Claude Code
-status: in_arbeit
+status: abgeschlossen
 created_at: "2026-09-10"
 started_at: "2026-09-10"
+completed_at: "2026-09-11"
 goal: >-
   Die 44 offenen Dependabot-Meldungen, die auf nie ausgelieferte Manifeste unter
   docs/_internal/archive/ zeigen, an der Ursache beseitigen — ohne einen realen
@@ -106,3 +107,20 @@ ai_harness:
     Workboard-Abschnitt werden konsistent gehalten.
 verification:
   - "gh api repos/.../dependabot/alerts?state=open | grep docs/_internal/archive"
+
+abnahme_2026_09_11:
+  ergebnis: >-
+    Bestaetigt ueber die Live-Alert-API: 51 offene Meldungen, davon 0 auf
+    Archivpfaden. Vor dem Slice waren es 95 mit 44 auf Archivpfaden - die
+    Differenz entspricht exakt den entfernten Manifesten.
+  dauer_bis_wirkung: >-
+    Rund 16 Stunden zwischen Push und Neuanalyse durch den Dependency Graph.
+    Ein Ausloesen von aussen gibt es dafuer nicht; die Verzoegerung war die
+    einzige Unbekannte und ist damit beziffert.
+  keine_dismissals: >-
+    Kein einziger Alert wurde stummgeschaltet. Die Meldungen sind geschlossen,
+    weil die Dateien nicht mehr im Dependency Graph liegen.
+  verbleibend_auf_geliefertem_code: >-
+    51 Meldungen, groesste Bloecke pnpm-lock.yaml (14) und
+    services/ai/requirements.txt (7). Das ist echtes Signal und gehoert in die
+    Dependency-Welle.
