@@ -7,6 +7,10 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.v1.schemas.portal_bundle_schemas import (
+    PortalLohndienstAuftragOut,
+    PortalLohndienstListOut,
+)
 from app.services.portal_lohndienst_service import (
     AuftragNichtGefundenFehler,
     LohndienstStatus,
@@ -47,7 +51,7 @@ class StatusWechselBody(BaseModel):
     preis_indikativ_eur: float | None = None
 
 
-@router.post("", response_model=dict[str, Any], status_code=201, summary="Lohndienst-Auftrag anlegen")
+@router.post("", response_model=PortalLohndienstAuftragOut, status_code=201, summary="Lohndienst-Auftrag anlegen")
 def auftrag_anlegen(body: AuftragCreateBody, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     tid = _tid(x_tenant_id)
     svc = get_lohndienst_service(tid)
@@ -72,7 +76,7 @@ def auftrag_anlegen(body: AuftragCreateBody, x_tenant_id: Annotated[str | None, 
     return a.to_dict()
 
 
-@router.get("", response_model=dict[str, Any], summary="Lohndienst-Auftraege auflisten")
+@router.get("", response_model=PortalLohndienstListOut, summary="Lohndienst-Auftraege auflisten")
 def list_auftraege(
     kunden_nr: str | None = Query(None),
     typ: str | None = Query(None),
@@ -89,7 +93,7 @@ def list_auftraege(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/{auftrag_id}", response_model=dict[str, Any], summary="Lohndienst-Auftrag abrufen")
+@router.get("/{auftrag_id}", response_model=PortalLohndienstAuftragOut, summary="Lohndienst-Auftrag abrufen")
 def get_auftrag(auftrag_id: str, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     try:
         return get_lohndienst_service(_tid(x_tenant_id)).get_auftrag(auftrag_id)
@@ -97,7 +101,7 @@ def get_auftrag(auftrag_id: str, x_tenant_id: Annotated[str | None, Header()] = 
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.post("/{auftrag_id}/status", response_model=dict[str, Any], summary="Lohndienst-Auftragsstatus wechseln")
+@router.post("/{auftrag_id}/status", response_model=PortalLohndienstAuftragOut, summary="Lohndienst-Auftragsstatus wechseln")
 def status_wechsel(
     auftrag_id: str,
     body: StatusWechselBody,

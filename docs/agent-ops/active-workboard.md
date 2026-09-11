@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-06-W13-PORTAL - abgeschlossen 2026-09-11
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 12. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** `portal_intelligence`, `portal_interessent`, `portal_lohndienst`
+(13 schwache `response_model`) typisieren; Gate 186 → 173.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `portal_bundle_schemas.py`,
+drei Endpoint-Dateien, `tests/test_welle13_response_models.py`.
+**Abnahme:** Welle-13- und Portal-Bestandstests gruen;
+`check_weak_response_models.py --threshold 173` gruen (173/70 Dateien).
+
 ## SPEC-P1-06-W12-FINANCE-CONTROLLING - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung SPEC-P1-06 nach Welle 11. **Owner:** Cursor Auto.

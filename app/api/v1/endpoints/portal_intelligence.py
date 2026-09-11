@@ -6,6 +6,12 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.v1.schemas.portal_bundle_schemas import (
+    PortalEmpfehlungAckOut,
+    PortalEmpfehlungGeneratedOut,
+    PortalEmpfehlungListOut,
+    PortalEmpfehlungSummaryOut,
+)
 from app.services.portal_intelligence_service import get_intelligence_service
 
 router = APIRouter(prefix="/portal/empfehlungen", tags=["portal", "intelligence"])
@@ -17,7 +23,7 @@ def _tid(x_tenant_id: Annotated[str | None, Header()] = None) -> str:
     return x_tenant_id
 
 
-@router.get("/{kunden_nr}", response_model=dict[str, Any], summary="Cross-Sell-Empfehlungen fuer Kunden abrufen")
+@router.get("/{kunden_nr}", response_model=PortalEmpfehlungListOut, summary="Cross-Sell-Empfehlungen fuer Kunden abrufen")
 def empfehlungen_fuer_kunden(
     kunden_nr: str,
     nur_ungesehen: bool = Query(False),
@@ -29,12 +35,12 @@ def empfehlungen_fuer_kunden(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/{kunden_nr}/zusammenfassung", response_model=dict[str, Any], summary="Empfehlungs-Zusammenfassung fuer Kunden abrufen")
+@router.get("/{kunden_nr}/zusammenfassung", response_model=PortalEmpfehlungSummaryOut, summary="Empfehlungs-Zusammenfassung fuer Kunden abrufen")
 def zusammenfassung(kunden_nr: str, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     return get_intelligence_service(_tid(x_tenant_id)).zusammenfassung(kunden_nr)
 
 
-@router.post("/{kunden_nr}/gesehen/{empfehlung_id}", response_model=dict[str, Any], summary="Empfehlung als gesehen markieren")
+@router.post("/{kunden_nr}/gesehen/{empfehlung_id}", response_model=PortalEmpfehlungAckOut, summary="Empfehlung als gesehen markieren")
 def als_gesehen(
     kunden_nr: str,
     empfehlung_id: str,
@@ -54,7 +60,7 @@ class RationContext(BaseModel):
     benoetigt_rohwaren: list[str] = []
 
 
-@router.post("/generieren/ration", response_model=dict[str, Any], status_code=201, summary="Empfehlungen aus Rationskontext generieren")
+@router.post("/generieren/ration", response_model=PortalEmpfehlungGeneratedOut, status_code=201, summary="Empfehlungen aus Rationskontext generieren")
 def generiere_aus_ration(body: RationContext, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     svc = get_intelligence_service(_tid(x_tenant_id))
     neue = svc.generiere_aus_ration(
@@ -73,7 +79,7 @@ class SchlagContext(BaseModel):
     ernte_jahr: int
 
 
-@router.post("/generieren/schlagkartei", response_model=dict[str, Any], status_code=201, summary="Empfehlungen aus Schlagkartei-Kontext generieren")
+@router.post("/generieren/schlagkartei", response_model=PortalEmpfehlungGeneratedOut, status_code=201, summary="Empfehlungen aus Schlagkartei-Kontext generieren")
 def generiere_aus_schlagkartei(body: SchlagContext, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     svc = get_intelligence_service(_tid(x_tenant_id))
     neue = svc.generiere_aus_schlagkartei(
