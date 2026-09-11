@@ -7,6 +7,13 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
+from app.api.v1.schemas.finance_controlling_bundle_schemas import (
+    ControllingAbweichungOut,
+    ControllingBudgetCreatedOut,
+    ControllingBudgetTransitionOut,
+    ControllingIstWertOut,
+    ControllingKstAbschlussOut,
+)
 from app.core.database import get_db
 
 router = APIRouter(prefix="/controlling", tags=["controlling"])
@@ -48,7 +55,7 @@ class KSTAbschlussRequest(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/budgets", response_model=dict[str, Any], status_code=201, summary="Controlling-Budget anlegen")
+@router.post("/budgets", response_model=ControllingBudgetCreatedOut, status_code=201, summary="Controlling-Budget anlegen")
 def create_budget(
     body: BudgetCreateRequest,
     x_tenant_id: Optional[str] = Header(None),
@@ -64,7 +71,7 @@ def create_budget(
 
 @router.post(
     "/budgets/{budget_id}/transition",
-    response_model=dict[str, Any],
+    response_model=ControllingBudgetTransitionOut,
     summary="Controlling-Budgetstatus wechseln",
 )
 def transition_budget(
@@ -81,7 +88,7 @@ def transition_budget(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.get("/abweichung", response_model=dict[str, Any], summary="Plan-Ist-Abweichung abrufen")
+@router.get("/abweichung", response_model=ControllingAbweichungOut, summary="Plan-Ist-Abweichung abrufen")
 def get_abweichung(
     kostenstelle_id: str,
     periode: str,
@@ -93,7 +100,7 @@ def get_abweichung(
     return svc(db, tenant_id, kostenstelle_id, periode)
 
 
-@router.post("/ist-werte", response_model=dict[str, Any], status_code=201, summary="Ist-Wert buchen")
+@router.post("/ist-werte", response_model=ControllingIstWertOut, status_code=201, summary="Ist-Wert buchen")
 def buche_ist_wert(
     body: IstWertRequest,
     x_tenant_id: Optional[str] = Header(None),
@@ -109,7 +116,7 @@ def buche_ist_wert(
 
 @router.get(
     "/abweichung/drill-down",
-    response_model=dict[str, Any],
+    response_model=list[ControllingAbweichungOut],
     summary="Plan-Ist-Abweichungs-Drilldown abrufen",
 )
 def drill_down(
@@ -124,7 +131,7 @@ def drill_down(
 
 @router.post(
     "/kostenstellen/{kostenstelle_id}/abschluss",
-    response_model=dict[str, Any],
+    response_model=ControllingKstAbschlussOut,
     summary="Kostenstellenabschluss fortschreiben",
 )
 def advance_abschluss(

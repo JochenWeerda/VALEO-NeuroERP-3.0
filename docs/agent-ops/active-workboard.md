@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P1-06-W12-FINANCE-CONTROLLING - abgeschlossen 2026-09-11
+
+**Von:** Fortsetzung SPEC-P1-06 nach Welle 11. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** `controlling_actions`, `finance_period`, `bank_import` (14 schwache
+`response_model`) typisieren; Gate 200 → 186. Drill-Down als Liste korrigiert.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt,
+`finance_controlling_bundle_schemas.py`, drei Endpoint-Dateien,
+`tests/test_welle12_response_models.py`.
+**Abnahme:** Welle-12- und Bestands-API-Tests gruen;
+`check_weak_response_models.py --threshold 186` gruen (186/73 Dateien).
+
 ## SPEC-P1-06-W11-CRM-CHANNELS - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung SPEC-P1-06 nach Welle 10. **Owner:** Cursor Auto.

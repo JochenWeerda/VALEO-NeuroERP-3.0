@@ -48,7 +48,7 @@ P1-Specs aus dem Audit:
 | SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
 | SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
 | SPEC-P1-05 | erledigt 2026-09-09 | S608-Restschuld einzeln reviewt (SPEC-P1-05-S608-RESTSCHULD): Baseline 167 -> 0, `bandit -t B608` -> 0, unreviewed 136 -> 0; Injection-Pfad env -> SQL-Bezeichner in `geo_pipeline` ueber `app/core/sql_identifiers` geschlossen |
-| SPEC-P1-06 | offen (W11 erledigt, Rest 200) | Legacy-Routen mit `response_model` typisieren; W1–W11 erledigt, Restschwelle 200 |
+| SPEC-P1-06 | offen (W12 erledigt, Rest 186) | Legacy-Routen mit `response_model` typisieren; W1–W12 erledigt, Restschwelle 186 |
 | SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
 | SPEC-P1-08 | erledigt 2026-07-06 | Chargen-Tiefenmodell: Lot-Attribute (herkunft, sperrgrund, qs_status, received_at); FEFO-Pick sortiert `mhd ASC NULLS LAST, created_at ASC`; Migration `inv_lot_depth_spec_p1_08` |
 | SPEC-P1-09 | erledigt 2026-08-23 | Lizenzinventar (`docs/operations/license-inventory.md`) + erweiterte `THIRD_PARTY_NOTICES.md`; SBOM weiter via CI CycloneDX |

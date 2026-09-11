@@ -20,6 +20,11 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.finance_controlling_bundle_schemas import (
+    BankMatchOut,
+    BankStatementImportOut,
+    BankStatementListOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -184,7 +189,7 @@ def _match_transactions(db: Session, tenant_id: str,
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.post("/import/mt940", response_model=dict[str, Any], status_code=201, summary="MT940-Kontoauszug importieren (INT-BANK-001)")
+@router.post("/import/mt940", response_model=BankStatementImportOut, status_code=201, summary="MT940-Kontoauszug importieren (INT-BANK-001)")
 async def import_mt940(
     file: UploadFile = File(..., description="MT940-Datei (.sta / .txt)"),
     iban: str = Query(..., description="IBAN des Kontos"),
@@ -200,7 +205,7 @@ async def import_mt940(
     return _persist_statement(db, tenant_id, iban, transactions, "MT940", file.filename or "")
 
 
-@router.post("/import/camt053", response_model=dict[str, Any], status_code=201, summary="CAMT.053 XML importieren (INT-BANK-001)")
+@router.post("/import/camt053", response_model=BankStatementImportOut, status_code=201, summary="CAMT.053 XML importieren (INT-BANK-001)")
 async def import_camt053(
     file: UploadFile = File(..., description="CAMT.053 XML-Datei"),
     iban: str = Query(..., description="IBAN des Kontos"),
@@ -250,7 +255,7 @@ def _persist_statement(db: Session, tenant_id: str, iban: str,
             "iban": iban, "format": format_}
 
 
-@router.post("/match/{statement_id}", response_model=dict[str, Any], summary="OP-Matching für importierten Auszug ausführen")
+@router.post("/match/{statement_id}", response_model=BankMatchOut, summary="OP-Matching für importierten Auszug ausführen")
 def run_matching(
     statement_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -277,7 +282,7 @@ def run_matching(
     return {"statement_id": statement_id, **result}
 
 
-@router.get("/statements", response_model=dict[str, Any], summary="Importierte Kontoauszüge auflisten")
+@router.get("/statements", response_model=BankStatementListOut, summary="Importierte Kontoauszüge auflisten")
 def list_statements(
     iban: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
