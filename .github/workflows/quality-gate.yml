@@ -175,6 +175,9 @@ jobs:
       - name: Check toolchain pins
         run: python scripts/check_toolchain_pins.py
 
+      - name: CODEOWNERS SPEC-P0-06
+        run: python scripts/check_codeowners_spec_p0_06.py
+
       - name: Check migrations (single head)
         run: python scripts/check_alembic_single_head.py
 

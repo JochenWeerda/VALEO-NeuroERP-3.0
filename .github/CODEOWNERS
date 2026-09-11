@@ -40,10 +40,14 @@
 /app/api/v1/endpoints/payment*          @JochenWeerda
 /app/api/v1/endpoints/pos*              @JochenWeerda
 /app/services/pos*                      @JochenWeerda
+/packages/frontend-web/src/pages/pos/   @JochenWeerda
+/packages/frontend-web/src/components/pos/ @JochenWeerda
 /alembic/                               @JochenWeerda
 /.github/                               @JochenWeerda
 /app/core/security*                     @JochenWeerda
 /app/core/tenant*                       @JochenWeerda
 /app/middleware/                        @JochenWeerda
 /scripts/check_production_readiness.py  @JochenWeerda
+/scripts/check_codeowners_spec_p0_06.py @JochenWeerda
 /scripts/purge_pii_history.sh           @JochenWeerda
+/docs/operations/governance/            @JochenWeerda

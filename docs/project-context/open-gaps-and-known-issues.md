@@ -37,7 +37,7 @@ P0-Specs aus dem Audit:
 | SPEC-P0-03 | erledigt 2026-08-23 | Kat.-B/D-Matrix + `/ready`/`/readyz`; Finance-/Bestands-Listen liefern bei DB-Fehler 503+Metrik (Nachzug OP/Matching/Bank) |
 | SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
 | SPEC-P0-05 | erledigt 2026-09-11 (Belege ≥70%; Gesamt-Coverage weiter COVERAGE-001) | only-up-Ratchet aktiv; `financial_reports`/`rohware_sammelabrechnung`/`sales_invoice_einvoice` Ratchet 0.70 (SPEC-P0-05-BELEGE-70) |
-| SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
+| SPEC-P0-06 | erledigt 2026-09-11 (enforce_admins=false bis Zweit-Reviewer) | CODEOWNERS inkl. finance/pos/alembic/.github; Branch-Protection main (1 Review + CODEOWNERS + Pflicht-Checks); Gate `check_codeowners_spec_p0_06.py` |
 | SPEC-P0-07 | erledigt 2026-08-23 | SOC-2-Profil in `simulate_external_assessors.py` + `config/audit/soc2-tsc-matrix.yaml`; Type-II-/AVV-Gates bleiben extern |
 | SPEC-P0-08 | repo-seitig erledigt 2026-09-11 (Drill selbst external_gate) | `run_restore_drill.sh` + `check_restore_drill_evidence.py` + CI-Notice in release-gates; Ops muss Protokoll committen |
 

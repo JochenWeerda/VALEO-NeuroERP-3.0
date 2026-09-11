@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SPEC-P0-06-BRANCH-PROTECTION - abgeschlossen 2026-09-11
+
+**Von:** Production-Readiness nach SPEC-P0-05. **Owner:** Cursor Auto.
+**Stand:** abgeschlossen 2026-09-11.
+**Ziel:** Branch-Protection auf `main` + CODEOWNERS-Pflichtpfade + CI-Gate.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt, `.github/CODEOWNERS`,
+`quality-gate.yml`, `scripts/check_codeowners_spec_p0_06.py`, Unit-Test,
+`docs/operations/governance/branch-protection-main.*`, Runbook, open-gaps.
+**Abnahme:** Protection aktiv (1 Review, CODEOWNERS, Path Guard / gitleaks /
+Security Scan Summary; kein Force-Push); CODEOWNERS-Check Exit 0.
+**Hinweis:** `enforce_admins=false` bis Zweit-Reviewer vorhanden.
+
 ## SPEC-P0-05-BELEGE-70 - abgeschlossen 2026-09-11
 
 **Von:** Fortsetzung A6-Coverage-Offensive / SPEC-P0-05. **Owner:** Cursor Auto.
