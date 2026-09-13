@@ -362,14 +362,24 @@ demselben Skript: **0 verbleibende Welle-1-Vorkommen**. Kein Byte ausserhalb
 **Offen (Welle 2):** 268 Badge-Tripel in 102 Dateien. Sie brauchen zentrale
 Badge-Varianten statt Einzelklassen — Entwurfsarbeit, kein Codemod.
 
-## SECURITY-ARCHIVE-DEPS-20260910 - in arbeit
+## SECURITY-ARCHIVE-DEPS-20260910 - abgeschlossen
 
 **Von:** Abgrenzung aus SECURITY-REMAINDER-20260910 (Codex) per User-Auftrag.
-**Owner:** Claude Code. **Stand:** in arbeit 2026-09-10, geclaimt durch Claude Code.
-**Nachweis 2026-09-11 (Cursor, kein Claim-Uebernahme):** Rename auf `*.archived`
-ist auf `main` (`8c39a5220`). Live-API zeigt weiterhin **44** offene Alerts auf
-den alten Pfaden (Graph-Lag). Abnahme erfordert UI „Refresh Dependabot alerts“
-oder Support-Redetect — kein Dismissal. Parallel weiter: SPEC-P1-06-W9.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-13.
+**Zwischenstand 2026-09-11 (Cursor, kein Claim-Uebernahme):** Rename auf
+`*.archived` ist auf `main` (`8c39a5220`), die Live-API zeigte aber noch **44**
+offene Alerts auf den alten Pfaden — Graph-Lag, kein Arbeitsschritt.
+**Abnahme 2026-09-13 (Claude Code, nachgemessen statt geglaubt):** `gh api
+dependabot/alerts?state=open` liefert **51** offene Meldungen, davon **0 auf
+Archivpfaden**. Vorher 95 mit 44 auf Archivpfaden — die Differenz entspricht
+exakt den entfernten Manifesten. **Kein einziger Dismissal**; die Meldungen sind
+weg, weil die Dateien nicht mehr im Dependency Graph liegen. Der Refresh kam von
+selbst; ein Ausloesen von aussen gibt es nicht.
+**Verbleibend — echtes Signal, gehoert in die Dependency-Welle (Cursor/Codex):**
+51 Meldungen auf gelieferten Pfaden, 1 critical / 17 high / 32 medium / 1 low.
+Groesste Bloecke `pnpm-lock.yaml` (14), `services/ai/requirements.txt` (7),
+`packages/procurement-domain/package.json` (3), `services/crm-ai/requirements.txt`
+(3), dazu je 1 in 21 weiteren Manifesten.
 **Ziel:** Die 44 offenen Dependabot-Meldungen auf toten Archiv-Manifesten an der
 Ursache beseitigen, ohne einen realen Befund zu unterdruecken.
 **Dateibesitz:** ausschliesslich die 11 getrackten Manifeste unter
