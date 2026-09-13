@@ -249,6 +249,46 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
+## DESIGN-STATUS-COLORS-018 - in arbeit
+
+**Von:** Welle 4 aus DESIGN-STATUS-COLORS-017. **Owner:** Claude Code.
+**Stand:** in arbeit 2026-09-13, geclaimt durch Claude Code.
+**Ziel:** Den Restbestand roher Palette-Statusfarben schliessen — Hinweisboxen,
+sonstige getoente Flaechen, Ikonflaechen und die zurueckgestellten Tabellen.
+**Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-018.yaml`, dieser
+Abschnitt, `components/ui/callout.tsx` (neu), `components/ui/alert.tsx` und
+Dateien unter `packages/frontend-web/src` mit rohen Status-Flaechenklassen.
+**Abgrenzung:** RESTFEHLER-20260911 (Cursor) haelt `lib/api/produktion.ts` und
+`pages/produktion/mischfutter-produktion.tsx` im geteilten Arbeitsbaum — beide
+fasse ich nicht an, solange der Slice laeuft.
+**Abnahme:** Callout vorhanden und variantengleich mit Alert, Bloecke auf 0 bzw.
+begruendet ausgenommen, `tsc --noEmit` exit 0, Vitest identisch zur Baseline.
+
+**Messung 2026-09-13** (Zeilen mit `bg-<familie>-50|100` aus den Statusfamilien,
+klassifiziert nach der Form des Traegerelements):
+
+| Block | Treffer | Dateien | Ziel |
+|---|---|---|---|
+| Hinweisbox (border + Flaeche + Text) | 69 | 45 | `Callout` |
+| sonstige Flaeche (Chip, Kopfzeile, Zeile) | 82 | 50 | Einzelfall |
+| Status-Tabellen (Rest aus Welle 3) | 137 | — | Variantennamen |
+| Ikonflaeche (rund, ohne Text) | 5 | 4 | dekorative Token |
+| Overlay | 1 | 1 | dekorative Token |
+
+**Entscheidung (User, 2026-09-13):** Die Hinweisboxen gehen auf eine neue
+schlanke Komponente **`Callout`**, die `alertVariants` wiederverwendet, aber
+**ohne `role="alert"`** rendert. Grund: die 69 Boxen stehen dauerhaft in der
+Maske — `role="alert"` liesse sie bei jedem Render assertiv vorlesen, das waere
+eine A11y-Verschlechterung. `Alert` bleibt fuer echte, erscheinende Meldungen.
+Geteilte Varianten verhindern eine zweite Farbdefinition. Umfang: **alle vier
+Bloecke**, nicht nur die Hinweisboxen.
+
+**Luecke im Designsystem, gleiche Klasse wie Welle 2:** `alertVariants` kennt
+`success`, `warning`, `info` und `destructive`, aber **kein `error`**.
+`destructive` ist deckend und meint zerstoerende Aktionen, nicht einen Zustand —
+die roten Boxen haetten also kein Ziel. Variante `error` wird ergaenzt, exakt
+nach dem Muster der drei vorhandenen und auf denselben Tokens.
+
 ## DESIGN-STATUS-COLORS-017 - abgeschlossen
 
 **Von:** Welle 3 aus DESIGN-STATUS-COLORS-016. **Owner:** Claude Code.

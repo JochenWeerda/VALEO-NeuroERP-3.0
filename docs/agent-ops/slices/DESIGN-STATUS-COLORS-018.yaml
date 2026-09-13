@@ -1,0 +1,68 @@
+slice_id: DESIGN-STATUS-COLORS-018
+id: DESIGN-STATUS-COLORS-018
+title: Getoente Flaechen und Resttabellen auf Designsystem-Komponenten (Welle 4)
+owner: Claude Code
+status: in arbeit
+created_at: "2026-09-13"
+started_at: "2026-09-13"
+vorgaenger: DESIGN-STATUS-COLORS-017
+goal: >-
+  Den Restbestand roher Palette-Statusfarben unter packages/frontend-web/src
+  schliessen: Hinweisboxen, sonstige getoente Flaechen, Ikonflaechen und die
+  aus Welle 3 zurueckgestellten Status-Tabellen.
+entscheidung:
+  wer: "User, 2026-09-13"
+  frage: >-
+    Die 69 Hinweisboxen brauchen ein Ziel im Designsystem. Alert fuehrt die
+    Varianten bereits auf semantischen Tokens, rendert aber hart role="alert".
+  was: >-
+    Neue schlanke Komponente Callout, die alertVariants wiederverwendet und
+    ohne role="alert" rendert. Alert bleibt fuer echte, erscheinende Meldungen.
+  begruendung: >-
+    Die Boxen stehen dauerhaft in der Maske. role="alert" liesse sie bei jedem
+    Render assertiv vorlesen - das waere eine A11y-Verschlechterung, keine
+    Verbesserung. Geteilte Varianten verhindern eine zweite Farbdefinition.
+  umfang: >-
+    Alle vier Bloecke, nicht nur die Hinweisboxen (User-Entscheidung).
+befund:
+  gemessen_am: "2026-09-13"
+  methode: >-
+    Zeilen unter packages/frontend-web/src mit bg-<familie>-50|100 aus den
+    Statusfamilien, klassifiziert nach der Form des Traegerelements.
+  bloecke:
+    hinweisbox: "69 Treffer in 45 Dateien - border + getoente Flaeche + Text"
+    sonstige_flaeche: "82 Treffer in 50 Dateien - Chips, Panel-Kopfzeilen, Zeilen-Hervorhebung"
+    ikonflaeche: "5 Treffer in 4 Dateien - runde Icon-Container ohne Text"
+    overlay: "1 Treffer - Karten-Overlay in SchlagKarte"
+    status_tabellen: "137 Treffer - Rest ohne Badge-Bezug oder kategorial"
+  luecke_im_designsystem: >-
+    alertVariants kennt success, warning, info und destructive, aber kein
+    error. destructive ist deckend und meint zerstoerende Aktionen, nicht
+    einen Zustand - dieselbe Luecke, die Welle 2 bei Badge geschlossen hat.
+file_ownership:
+  - docs/agent-ops/slices/DESIGN-STATUS-COLORS-018.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - packages/frontend-web/src/components/ui/callout.tsx
+  - packages/frontend-web/src/components/ui/alert.tsx
+  - "Dateien unter packages/frontend-web/src mit rohen Status-Flaechenklassen"
+abgrenzung: >-
+  RESTFEHLER-20260911 (Cursor) haelt produktion.ts und
+  mischfutter-produktion.tsx im geteilten Arbeitsbaum - beide werden nicht
+  angefasst, solange der Slice laeuft. Backend, k8s und Dependency-Welle
+  bleiben unberuehrt.
+acceptance:
+  - Callout existiert, teilt die Varianten mit Alert, rendert ohne role="alert".
+  - Rohe Status-Flaechenklassen in den vier Bloecken auf 0 bzw. begruendet ausgenommen.
+  - "tsc --noEmit exit 0; Vitest identisch zur Baseline (126 Dateien, 495 Tests, 1 Skip)."
+  - Kategoriale Faerbung wird nicht auf Statusvarianten gezwungen.
+risks:
+  - >-
+    Deckende Flaechen (bg-*-100) erscheinen nach der Umstellung weich getoent.
+    Beabsichtigt, wie in Welle 2 - die Vereinheitlichung ist der Zweck.
+  - >-
+    Ikonflaechen tragen keinen Text und verletzen die Kontrastregel nicht.
+    Sie brauchen dekorative Token-Flaechen, keine Statuskomponente.
+verification:
+  - "npx tsc --noEmit"
+  - "npm run test"
+  - "Gegenprobe mit dem Messskript: 0 verbleibende Treffer je Block"
