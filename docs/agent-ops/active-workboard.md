@@ -417,6 +417,42 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
+## DESIGN-STATUS-COLORS-020 - in arbeit
+
+**Von:** Welle 6 aus DESIGN-STATUS-COLORS-019, User-Auftrag „Rest nach Best
+Practice abschliessen, weniger ist mehr". **Owner:** Claude Code.
+**Stand:** in arbeit 2026-09-14, geclaimt durch Claude Code.
+**Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-020.yaml`, dieser
+Abschnitt, Dateien unter `packages/frontend-web/src` mit rohen Palettenklassen.
+
+**Leitbild (SAP Fiori, Semantic Colors):** Die semantischen Farben sind fuer
+**Zustand und Kritikalitaet** reserviert. Ikonen im Inhaltsbereich **erben die
+Textfarbe**; farbig werden sie nur als Statusanzeige. Farbe darf nie der
+einzige Traeger einer Information sein.
+
+**Der Befund widerspricht dem an der breitesten Stelle:** **135 von 176 farbigen
+Ikonen sind blau** — und es sind **Sachikonen**: `FileText`, `Euro`, `Users`,
+`Truck`, `Package`, `Calendar`, `MapPin`. Das Blau bedeutet nichts, es
+dekoriert. Es auf ein Info-Token zu ziehen haette die Ueberfrachtung
+**zementiert** statt sie aufzuloesen. Deshalb ist diese Welle ein **Rueckbau**,
+kein Umfaerben.
+
+**Regel dieser Welle:**
+
+1. Farbe, die einen **Zustand** benennt, bleibt semantisch — ueber Badge,
+   Callout, Alert oder die Statusutilities.
+2. Farbe an **Sachikonen und Schmuckelementen** wird neutral
+   (`text-muted-foreground`). Weniger Farbe heisst mehr Signalwert fuer den Rest.
+3. **Auswahl ist kein Erfolg**: die ausgewaehlte Zeile gehoert auf `bg-accent`,
+   nicht auf Gruen.
+4. **Verweise** gehoeren auf die Primaerfarbe bzw. Button-Varianten, nicht auf
+   blaue Einzelklassen.
+5. **Kategoriale** Faerbung bleibt ausgenommen wie in Welle 4/5.
+
+**Ausgangsmessung:** 1570 Palettenklassen — 169 Ikonfarben, 189 Textfarben,
+54 Button-Uebersteuerungen, 36 Auswahlhervorhebungen, 152 Tabellen/Helfer,
+484 deckende Flaechen.
+
 ## DESIGN-STATUS-COLORS-019 - abgeschlossen
 
 **Von:** Welle 5 aus DESIGN-STATUS-COLORS-018. **Owner:** Claude Code.

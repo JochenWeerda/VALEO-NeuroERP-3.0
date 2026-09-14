@@ -1,0 +1,74 @@
+slice_id: DESIGN-STATUS-COLORS-020
+id: DESIGN-STATUS-COLORS-020
+title: Farbe zurueckbauen - Semantik sparsam, Dekoration neutral (Welle 6, Abschluss)
+owner: Claude Code
+status: in arbeit
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+vorgaenger: DESIGN-STATUS-COLORS-019
+goal: >-
+  Den Rest der rohen Palettenfarben schliessen - aber nicht durch Umfaerben,
+  sondern durch Zurueckbauen. Leitbild ist die Praxis fuehrender
+  Unternehmensanwendungen (SAP Fiori): semantische Farbe ist ein knappes
+  Signal, kein Gestaltungsmittel. Wo Farbe nichts bedeutet, wird sie neutral.
+leitbild:
+  quelle: >-
+    SAP Fiori Design Guidelines, Semantic Colors: die semantischen Farben
+    (Negative, Critical, Positive, Informative, Neutral) sind fuer Zustand und
+    Kritikalitaet reserviert. Ikonen im Inhaltsbereich erben die Textfarbe;
+    farbig werden sie nur als Statusanzeige. Farbe darf nie der einzige
+    Traeger einer Information sein.
+  konsequenz_hier: >-
+    Der bisherige Bestand widerspricht dem an der breitesten Stelle: 135 von
+    176 farbigen Ikonen sind blau, und es sind Sachikonen - FileText, Euro,
+    Users, Truck, Package, Calendar, MapPin. Das Blau bedeutet nichts, es
+    dekoriert. Es zu einem Info-Token zu machen haette die Ueberfrachtung
+    zementiert statt sie aufzuloesen.
+regel:
+  - >-
+    Farbe, die einen Zustand benennt, bleibt semantisch - und zwar ueber die
+    Komponenten Badge, Callout, Alert oder die Statusutilities.
+  - >-
+    Farbe an Sachikonen, Sparte- und Schmuckelementen wird neutral
+    (text-muted-foreground). Weniger Farbe, mehr Signalwert fuer den Rest.
+  - >-
+    Auswahl und Zeilenhervorhebung sind kein Erfolg. Sie gehoeren auf die
+    neutrale Auswahlfarbe (bg-accent), nicht auf Gruen.
+  - >-
+    Verweise und Aktionen gehoeren auf die Primaerfarbe bzw. die
+    Button-Varianten, nicht auf blaue Einzelklassen.
+  - >-
+    Kategoriale Faerbung bleibt ausgenommen (siehe Welle 4/5) und wird nicht
+    in die Statusskala gezwungen.
+befund:
+  gemessen_am: "2026-09-14"
+  palettenklassen_gesamt: 1570
+  bloecke:
+    ikonfarben: "169 an echten lucide-Ikonen, davon 135 blau"
+    textfarben: "189, ueberwiegend blaue Kennzahlen und Beschriftungen"
+    button_uebersteuerungen: "54, ueberwiegend das Muster text-blue-600 hover:underline als Verweis"
+    auswahlhervorhebung: "36, darunter bg-green-100 fuer die ausgewaehlte Zeile"
+    tabellen_helfer: "152"
+    flaechen_ab_500: "484 deckende Flaechen, Punkte, Verlaeufe"
+file_ownership:
+  - docs/agent-ops/slices/DESIGN-STATUS-COLORS-020.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - "Dateien unter packages/frontend-web/src mit rohen Palettenklassen"
+acceptance:
+  - Sachikonen tragen keine Palettenfarbe mehr.
+  - Auswahl und Zeilenhervorhebung neutral.
+  - Verweise ueber Primaerfarbe bzw. Button-Varianten.
+  - Verbleibende Farbe benennt einen Zustand, eine Kategorie oder eine Marke - begruendet.
+  - "tsc --noEmit exit 0; vitest identisch zur Baseline (126 Dateien, 495 Tests, 1 Skip)."
+risks:
+  - >-
+    Die Oberflaeche wird sichtbar ruhiger. Das ist der Zweck und keine
+    Regression - aber es ist eine sichtbare Aenderung an vielen Masken.
+  - >-
+    Einzelne Ikonen tragen doch Bedeutung (Trend, Warnung, Erfolg). Sie
+    werden an ihrer Farbfamilie erkannt und bleiben unangetastet, wenn die
+    Familie zur Bedeutung passt.
+verification:
+  - "npx tsc --noEmit"
+  - "npx vitest run --testTimeout=30000 --maxWorkers=2"
+  - "Gegenprobe je Block mit dem Messskript"
