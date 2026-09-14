@@ -417,6 +417,37 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
+## DESIGN-STATUS-COLORS-019 - in arbeit
+
+**Von:** Welle 5 aus DESIGN-STATUS-COLORS-018. **Owner:** Claude Code.
+**Stand:** in arbeit 2026-09-14, geclaimt durch Claude Code.
+**Ziel:** Den Restbestand roher Palette-Statusfarben schliessen.
+**Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-019.yaml`, dieser
+Abschnitt, Dateien unter `packages/frontend-web/src` mit rohen
+Status-Flaechenklassen.
+**Abnahme:** Bloecke auf 0 bzw. begruendet ausgenommen, `tsc --noEmit` exit 0,
+Vitest identisch zur Baseline.
+
+**Leitsatz dieser Welle:** Farbe, die einen **Zustand** benennt, gehoert in eine
+Komponente (Badge, Callout, Alert). Farbe, die nur eine **Flaeche toent**,
+gehoert auf ein semantisches Token. Farbe, die eine **Kategorie** unterscheidet,
+bleibt ausgenommen.
+
+**Messung 2026-09-14:**
+
+| Block | Treffer | Dateien | Ziel |
+|---|---|---|---|
+| bedingte Hinweiskaesten | 13 | 13 | `Callout` mit berechneter Variante |
+| Warnkarten-Idiom `Card border-orange-500 bg-orange-50` | 5 | 5 | `Callout` |
+| Flaeche **mit** farbigem Text | 54 | 43 | Komponente / Statusutility |
+| Flaeche **ohne** farbigen Text | 42 | 22 | semantische Tokens |
+| Ikonflaeche + Overlay | 6 | 5 | semantische Tokens |
+| Tabelleneintraege | 109 | 21 | je Schluessel pruefen |
+
+Die Trennung „mit/ohne farbigen Text" ist neu und folgt dem Befund aus Welle 4:
+nur die erste Gruppe ist ein Kontrastfall nach der CLAUDE.md-Regel. Die zweite
+in `Badge` oder `Callout` zu zwingen waere semantisch falsch.
+
 ## DESIGN-STATUS-COLORS-018 - in arbeit
 
 **Von:** Welle 4 aus DESIGN-STATUS-COLORS-017. **Owner:** Claude Code.

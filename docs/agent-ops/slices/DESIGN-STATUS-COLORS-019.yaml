@@ -1,0 +1,71 @@
+slice_id: DESIGN-STATUS-COLORS-019
+id: DESIGN-STATUS-COLORS-019
+title: Restbestand Statusfarben schliessen - bedingte Kaesten, Flaechen, Ikonflaechen (Welle 5)
+owner: Claude Code
+status: in arbeit
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+vorgaenger: DESIGN-STATUS-COLORS-018
+goal: >-
+  Den nach Welle 4 verbliebenen Restbestand roher Palette-Statusfarben unter
+  packages/frontend-web/src schliessen und dabei zwei Faelle sauber trennen:
+  getoente Flaechen mit farbigem Text sind Kontrastfaelle und gehoeren auf
+  Komponenten; getoente Flaechen ohne farbigen Text sind Dekoration und
+  gehoeren auf semantische Tokens.
+befund:
+  gemessen_am: "2026-09-14"
+  methode: >-
+    Zeilen unter packages/frontend-web/src mit bg-<statusfamilie>-50|100 am
+    div, klassifiziert nach Traegerform und danach, ob dieselbe Zeile eine
+    farbige Textklasse traegt.
+  bloecke:
+    hinweisbox_bedingt: >-
+      13 Treffer in 13 Dateien. Farbe haengt an einer Bedingung
+      (condition ? 'border-emerald-200 bg-emerald-50' : '...'), deshalb in
+      Welle 4 bewusst vom Codemod ausgenommen. Ziel: Callout mit berechneter
+      Variante.
+    warnkarte_idiom: >-
+      5 Treffer. Wiederkehrendes Muster Card className="border-orange-500
+      bg-orange-50" in zulassungen-register, fahrzeuge, versicherungen/liste,
+      vertrag/rahmenvertraege, wartung/anlagen-liste.
+    flaeche_mit_text: >-
+      54 Treffer in 43 Dateien. Getoente Flaeche plus farbiger Text - echter
+      Kontrastfall nach der CLAUDE.md-Regel.
+    flaeche_ohne_text: >-
+      42 Treffer in 22 Dateien. Getoente Flaeche ohne farbigen Text - kein
+      Kontrastfall, sondern Dekoration.
+    ikonflaeche_overlay: >-
+      5 runde Ikoncontainer und 1 Karten-Overlay. Tragen keinen Text.
+    tabelleneintraege: >-
+      109 in 21 Dateien. Nach Welle 4 ueberwiegend kategorial; jeder Eintrag
+      wird an der Bedeutung des Schluessels geprueft, nicht an der Farbfamilie.
+leitsatz: >-
+  Farbe, die einen Zustand benennt, gehoert in eine Komponente (Badge,
+  Callout, Alert). Farbe, die nur eine Flaeche toent, gehoert auf ein
+  semantisches Token. Farbe, die eine Kategorie unterscheidet, bleibt
+  ausgenommen und gehoert auf die Kategorienpalette.
+file_ownership:
+  - docs/agent-ops/slices/DESIGN-STATUS-COLORS-019.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - "Dateien unter packages/frontend-web/src mit rohen Status-Flaechenklassen"
+abgrenzung: >-
+  Backend, k8s und die Dependency-Welle bleiben unberuehrt. Dateien mit
+  fremdem, nicht committetem Arbeitsstand werden vor jedem Commit geprueft
+  und ausgelassen.
+acceptance:
+  - Bedingte Hinweiskaesten und das Warnkarten-Idiom auf Callout.
+  - Flaechen mit farbigem Text auf Komponenten oder Statusutilities.
+  - Flaechen ohne farbigen Text auf semantische Tokens statt Palette.
+  - Kategoriale Faerbung bleibt ausgenommen und wird begruendet benannt.
+  - "tsc --noEmit exit 0; vitest identisch zur Baseline (126 Dateien, 495 Tests, 1 Skip)."
+risks:
+  - >-
+    Deckende Flaechen (bg-*-100) erscheinen nach der Umstellung weich getoent.
+    Beabsichtigt seit Welle 2.
+  - >-
+    Bedingte Kaesten brauchen je Datei eine Entscheidung, welcher Zweig welche
+    Variante meint. Kein Codemod, sondern Einzelfallarbeit.
+verification:
+  - "npx tsc --noEmit"
+  - "npx vitest run --testTimeout=30000 --maxWorkers=2"
+  - "Gegenprobe mit dem Messskript je Block"
