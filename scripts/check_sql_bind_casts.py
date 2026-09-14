@@ -41,6 +41,12 @@ PATTERN = re.compile(r'(?<![\w:]):([a-zA-Z_]\w*)::([a-zA-Z_]\w*(?:\s*\[\s*\])?)'
 
 DEFAULT_ROOTS = ("app", "modules", "services", "tools", "scripts")
 
+# Dieses Gate selbst zeigt das Anti-Muster im Docstring und in den Meldungen -
+# sonst waere nicht erklaerbar, wogegen es schuetzt. Es darf sich deshalb nicht
+# selbst melden. Die Ausnahme gilt genau fuer diese eine Datei, nicht fuer ein
+# Verzeichnis, damit sie nicht unbemerkt waechst.
+SELBSTAUSNAHME = "scripts/check_sql_bind_casts.py"
+
 
 def read_text(path: str) -> str:
     raw = io.open(path, "rb").read()
@@ -55,7 +61,7 @@ def find_hits(roots):
     files = subprocess.check_output(["git", "ls-files", *roots], text=True).split()
     hits = []
     for path in files:
-        if not path.endswith(".py"):
+        if not path.endswith(".py") or path.replace("\\", "/") == SELBSTAUSNAHME:
             continue
         for number, line in enumerate(read_text(path).split("\n"), 1):
             for match in PATTERN.finditer(line):

@@ -74,3 +74,17 @@ def test_repository_enthaelt_keine_fehlerhafte_schreibweise_mehr() -> None:
 
     treffer = [h for h in find_hits(("app",)) if h[0].endswith("documents/repository.py")]
     assert treffer == []
+
+
+def test_gate_laeuft_ueber_das_repository_sauber_durch() -> None:
+    """Das Gate darf sich nicht selbst melden.
+
+    Die erste Fassung tat genau das: ihr Docstring zeigt das Anti-Muster als
+    Beispiel, und lokal fiel es nicht auf, weil die Datei zu dem Zeitpunkt noch
+    nicht in ``git ls-files`` stand. Dieser Test laeuft ueber den getrackten
+    Stand und faengt den Fall.
+    """
+    from scripts.check_sql_bind_casts import find_hits
+
+    treffer = find_hits(("app", "modules", "services", "tools", "scripts"))
+    assert treffer == [], [f"{h[0]}:{h[1]}" for h in treffer]

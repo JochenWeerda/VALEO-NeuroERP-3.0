@@ -475,6 +475,14 @@ SQLAlchemy-Version sie korrekt, schlaegt er an und das Gate darf weg.
 Postgres (vorher 3 failed in CI) · `test_sql_bind_casts.py` 16 passed · Gate
 Exit 0.
 
+**Nachtrag 2026-09-14: das Gate hat sich selbst gemeldet.** Sein Docstring
+zeigt `:name::typ` als Beispiel — anders waere nicht erklaerbar, wogegen es
+schuetzt. Lokal fiel das nicht auf, weil die Datei beim Probelauf noch nicht in
+`git ls-files` stand; in CI war sie getrackt und das Gate schlug auf sich selbst
+an. Ausnahme jetzt genau fuer diese eine Datei (kein Verzeichnis, damit sie
+nicht unbemerkt waechst), dazu ein Test, der das Gate ueber den getrackten Stand
+laufen laesst und den Fall kuenftig faengt.
+
 **Offen, bewusst nicht hier entschieden:** Der In-Memory-Fallback in
 `app/documents/router_helpers.py` meldet einen fehlgeschlagenen Schreibvorgang
 weiterhin als Erfolg. Er hat diesen Fehler verdeckt. Ob er abgeschafft wird oder
