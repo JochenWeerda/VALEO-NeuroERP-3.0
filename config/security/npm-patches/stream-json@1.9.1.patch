@@ -1,0 +1,10 @@
+--- a/filters/FilterBase.js
++++ b/filters/FilterBase.js
+@@ -57,2 +57,7 @@
+   _check(chunk, _, callback) {
++    // CVE-2026-71429: bound path-filter work before joining the nesting stack.
++    // Same default depth ceiling as upstream 3.5.0, preserving the 1.x API.
++    if (this._stack.length > 1024) {
++      return callback(new RangeError('JSON filter nesting depth exceeds 1024'));
++    }
+     // update the last stack key

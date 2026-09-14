@@ -1,0 +1,14 @@
+{
+  "patches": [
+    {
+      "patch": "artillery@2.0.33.patch",
+      "sha256": "0e5c69117b8cb9ae3405907de4724df05d7aa7a789741c53c5b212cb08919ae2"
+    },
+    {
+      "patch": "stream-json@1.9.1.patch",
+      "sha256": "23ac8cba3cd9d7ec6572fc07c538c9726b43f457033247283426c5efc5019a23"
+    }
+  ],
+  "advisory": "https://github.com/uhop/stream-json/security/advisories/GHSA-528h-pc64-c93x",
+  "backport": "Locally adapted depth guard; not an upstream 1.x release"
+}

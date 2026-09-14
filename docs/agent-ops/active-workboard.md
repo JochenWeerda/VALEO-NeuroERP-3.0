@@ -1036,6 +1036,8 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
 ## SECURITY-REMAINDER-20260910 - in arbeit
 
+**Node-Paketwelle 2026-09-14 (Codex):** 19 Manifeste und Lockfile aktualisiert; acht Paketvertraege bestanden, 495 Frontend-Tests gruen plus ein bestehender Skip. stream-json 1.9.1 erhaelt eine lokal angepasste Tiefenbegrenzung; Artillery-Patches erhalten CSV-/YAML-Kompatibilitaet. Audit: 0 Critical, 2 High (bestehende image-size-Ausnahmen ohne Fix), 1 Moderate (versionsbasierter stream-json-Treffer trotz Quellkorrektur). Keine neuen Ausnahmen. Service-Gates, Auth-Fail-open und unvollstaendiges crm-ai bleiben offen. Details im QA-Bericht und Slice.
+
 **Python-Service-Pins 2026-09-14 (Cursor, SERVICE-CVE-PINS-20260914):** Die
 Gegenstueck-Haelfte zum Node-Abschluss ist erledigt: `cryptography` 48.0.1 ->
 50.0.1 in `crm-gdpr`, `crm-marketing`, `crm-security` und `finance/fibu-core`,

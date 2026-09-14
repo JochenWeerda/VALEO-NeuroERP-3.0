@@ -1,0 +1,15 @@
+--- a/lib/cmds/run.js
++++ b/lib/cmds/run.js
+@@ -5 +5 @@
+-const _csv = require('csv-parse');
++const { parse: _csv } = require('csv-parse');
+--- a/lib/util/prepare-test-execution-plan.js
++++ b/lib/util/prepare-test-execution-plan.js
+@@ -1 +1 @@
+-const csv = require('csv-parse');
++const { parse: csv } = require('csv-parse');
+--- a/lib/util.js
++++ b/lib/util.js
+@@ -41 +41 @@
+-  return YAML.safeLoad(data);
++  return YAML.load(data);

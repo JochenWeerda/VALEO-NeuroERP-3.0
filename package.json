@@ -41,9 +41,9 @@
       "tmp": "^0.2.6",
       "validator": "^13.15.22",
       "yaml": "^2.8.2",
-      "undici": "^7.28.0",
+      "undici": "^7.29.0",
       "@grpc/grpc-js": "^1.14.4",
-      "linkify-it": "^5.0.1",
+      "linkify-it": "^5.0.2",
       "markdown-it": "^14.2.0",
       "js-yaml": "^4.3.2",
       "ajv": "^8.18.0",
@@ -74,13 +74,22 @@
       "nanoid@5": "^5.1.16",
       "body-parser": "^1.20.6",
       "decode-uri-component": "^0.5.0",
-      "morgan": "^1.12.0"
+      "morgan": "^1.12.0",
+      "fflate": "^0.8.3",
+      "stream-json": "1.9.1",
+      "csv-parse": "^7.0.2",
+      "@faker-js/faker": "^10.5.0",
+      "diff@4": "^4.0.4"
     },
     "auditConfig": {
       "ignoreGhsas": [
         "GHSA-w3rx-r6r6-pgpr",
         "GHSA-5p2g-fcmc-qvqq"
       ]
+    },
+    "patchedDependencies": {
+      "stream-json@1.9.1": "config/security/npm-patches/stream-json@1.9.1.patch",
+      "artillery@2.0.33": "config/security/npm-patches/artillery@2.0.33.patch"
     }
   },
   "scripts": {
@@ -129,7 +138,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "commander": "^14.0.2",
-    "csv-parse": "^6.1.0",
+    "csv-parse": "^7.0.2",
     "eslint": "^8.57.0",
     "eslint-plugin-perfectionist": "^2.11.0",
     "eslint-plugin-sonarjs": "^1.0.3",

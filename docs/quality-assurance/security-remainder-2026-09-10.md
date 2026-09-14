@@ -156,3 +156,56 @@ bleiben unveraendert sichtbar. Kein Browser-Exploit-Test; Hersteller-Fix
 plus Integrations-Build, kein Nachweis fuer einen bereits veroeffentlichten
 Docs-Stand. Logs: `artifacts/docs-security-install.log` und
 `artifacts/docs-security-build.log`.
+
+
+### Node-Restwelle vorbereitet, Abnahme blockiert (2026-09-14)
+
+19 Root-/Package-Manifeste und pnpm-lock.yaml auf die dokumentierten
+Advisory-Fixversionen aktualisiert. `pnpm install --lockfile-only
+--ignore-scripts` Exit 0; keine neuen Ignore-Eintraege. Lokale CSV-Probe
+mit der bereits vorhandenen Version 7.0.2: BOM, Semikolon, zitiertes Feld
+mit Semikolon und Dezimaltext bestanden.
+
+Die vollstaendige Installation nach Lockfile wurde durch die automatische
+Freigabepruefung wegen Nutzungslimit bis 13:19 abgelehnt. Kein Umgehungsversuch.
+Frontend-Vitest scheiterte im eingeschraenkten lokalen Kontext vor Teststart
+an Zugriff auf die Elternverzeichnisse beim Laden von vite.config.ts.
+Damit fehlen aktuelle Installation, Funktionsabnahme aller Versionsspruenge,
+Node-Audit und Push. Insbesondere stream-json 1 -> 3 muss an den indirekten
+Verbrauchern dockerode/bunyamin vor Freigabe geprueft werden. Die vorbereiteten
+Node-Aenderungen sind ausdruecklich **nicht abgenommen**.
+
+Cursor-Uebergabe gelesen: Service-Pins als `24ac535ae` eingecheckt;
+crm-ai bleibt wegen fehlendem app/schemas/base.py unvollstaendig. Service-
+Audit-Gate, AuthMiddleware-Fail-open und FastAPI-/Starlette-Altbestand sind
+zusaetzliche Arbeitsumfaenge; die Paketwelle schliesst diese nicht implizit.
+
+
+### Node-Paketwelle abgenommen (2026-09-14, ersetzt den blockierten Zwischenstand)
+
+Installation nach Lockfile inklusive Paketpatches bestanden. Frontend:
+126 Testdateien, 495 bestanden und ein bestehender Skip (Vitest 4.1.11).
+Acht gezielte Tests in `scripts/verify_node_dependency_security.cjs` bestanden:
+vier Tiefenfehler-Vertraege, zwei positive JSON-Kontrollen, PNG-Verarbeitung
+und reproduzierbare Faker-Daten sowie echte Artillery-CSV-Testvorbereitung.
+Ungepatchte JSON-Negativkontrolle: vier erwartete Fehler, zwei Pass.
+
+Weitere indirekte Befunde korrigiert: Faker aus Artillery, CSV aus Artillery
+und diff 4.0.2. Der globale stream-json-3.x-Sprung war inkompatibel mit den
+bestehenden StreamArray-Verbrauchern und wurde durch einen engen 1.9.1-
+Backport ersetzt. Artillery benoetigte zwei CSV-Importanpassungen sowie
+YAML.load statt des unter YAML 4 entfernten safeLoad. Die echten
+Verbrauchertests decken diese Pfade ab. Provenienz und Patchumfang unter
+`config/security/npm-patches/README.md`.
+
+Audit `artifacts/security-node-audit-final.json`: 0 critical, 2 high,
+1 moderate, 0 low. Die zwei high sind die bereits ausgenommenen image-size-
+GHSAs ohne Fix; moderate ist die echte Version 1.9.1 des lokal gepatchten
+stream-json. Keine neuen Ignore-Eintraege, keine verfaelschten Versionen.
+Der Scan endet deshalb weiterhin mit Exit 1. Vorhandene Peer-Warnungen
+(unter anderem Storybook/React) sind keine neuen Abnahmefehler dieser Welle.
+
+Logs: `security-node-frozen-final.log`, `security-node-vitest.log`,
+`security-node-contracts.log`, `security-node-contracts-baseline.log`
+unter artifacts/. Service-Gates, Auth-Fail-open, FastAPI-Altbestand und
+fehlendes crm-ai-Schema bleiben eigenstaendige offene Betriebs-/Produktarbeit.

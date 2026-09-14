@@ -13,6 +13,11 @@ file_ownership:
   - scripts/verify_aiosmtplib_security.py
   - services/crm-communication/requirements.txt
   - requirements-docs.txt
+  - package.json
+  - pnpm-lock.yaml
+  - packages/*/package.json
+  - config/security/npm-patches/
+  - scripts/verify_node_dependency_security.cjs
   - docs/agent-ops/slices/SECURITY-REMAINDER-20260910.yaml
   - docs/quality-assurance/security-remainder-2026-09-10.md
 acceptance:
@@ -57,3 +62,12 @@ resume_20260914:
 
   docs_patch: "mkdocs-material 9.5.49 -> 9.7.7; GHSA-xvg9-69gf-fjrf; Suchvorschlaege bleiben aktiv."
   docs_validation: "Python 3.11; komplette Toolchain installiert; pip check und mkdocs build Exit 0. Linkwarnungen unveraendert sichtbar."
+
+node_remainder_20260914:
+  state: "Node-Paketwelle lokal abgenommen"
+  lockfile: "19 Manifeste aktualisiert; pnpm lockfile-only Exit 0."
+  validation: "Urspruengliche Zugriffssperre behoben; abschliessend 495 Frontend-Tests und acht Paketvertraege bestanden."
+  blocker: "Fruehere Freigabesperre abgelaufen; Installation und Tests bestanden."
+  remaining: "Versionsbasierte stream-json-Meldung nach Backport; image-size ohne Fix; separate Service-Arbeit offen."
+  completion_validation: "Frozen install; 495 Frontend-Tests plus ein bestehender Skip; acht Paketvertraege gruen, vier negative Altfassungstests rot."
+  patches: "stream-json 1.9.1 Tiefenbegrenzung; Artillery 2.0.33 CSV-/YAML-Kompatibilitaet."
