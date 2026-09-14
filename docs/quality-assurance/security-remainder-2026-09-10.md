@@ -139,3 +139,20 @@ keine auf Archivpfaden (`artifacts/security-dependabot-20260914.jsonl`).
 Der lokale SMTP-Patch ist noch kein geschlossener GitHub-Alert. Andere
 Dependency-Fixes bleiben offen; services/ai, cryptography und image-size
 bleiben bei Cursor. Keine neuen Ausnahmen oder abgeschwaechten Gates.
+
+
+### Dokumentations-Toolchain: Suchvorschlaege (2026-09-14)
+
+`requirements-docs.txt`: mkdocs-material 9.5.49 -> **9.7.7**.
+[Hersteller-Advisory GHSA-xvg9-69gf-fjrf](https://github.com/squidfunk/mkdocs-material/security/advisories/GHSA-xvg9-69gf-fjrf)
+nennt 9.7.7 als Fix fuer DOM-XSS in Suchvorschlaegen; `search.suggest` ist
+in unserer `mkdocs.yml` aktiviert. Die Funktion bleibt erhalten.
+
+Abnahme unter Python 3.11 in isolierter Umgebung: Installation der gesamten
+`requirements-docs.txt` bestanden, `pip check` ohne Konflikte und
+`python -m mkdocs build --site-dir artifacts/docs-security-site` Exit 0
+(57,89 Sekunden). Vorhandene Linkwarnungen und Validierungskonfiguration
+bleiben unveraendert sichtbar. Kein Browser-Exploit-Test; Hersteller-Fix
+plus Integrations-Build, kein Nachweis fuer einen bereits veroeffentlichten
+Docs-Stand. Logs: `artifacts/docs-security-install.log` und
+`artifacts/docs-security-build.log`.

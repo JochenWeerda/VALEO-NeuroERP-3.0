@@ -4,6 +4,6 @@
 # Lokal:        python -m mkdocs serve
 # Versionierung (Releases): mike deploy --update-aliases <version> latest
 
-mkdocs-material==9.5.49
+mkdocs-material==9.7.7
 mike==2.1.3
 mkdocs-swagger-ui-tag==0.8.0

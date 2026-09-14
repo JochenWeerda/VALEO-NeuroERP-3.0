@@ -12,6 +12,7 @@ file_ownership:
   - scripts/verify_cpython_security.py
   - scripts/verify_aiosmtplib_security.py
   - services/crm-communication/requirements.txt
+  - requirements-docs.txt
   - docs/agent-ops/slices/SECURITY-REMAINDER-20260910.yaml
   - docs/quality-assurance/security-remainder-2026-09-10.md
 acceptance:
@@ -53,3 +54,6 @@ resume_20260914:
   smtp_regression: "Echtes Loopback-TLS: 5.1.1 ein Pass/ein Fail; 5.1.2 zwei Pass. Kein Mailversand."
   github: "51 offene Dependabot-Meldungen, keine Archivpfade; lokaler Patch noch nicht remote geschlossen."
   dependency_resolution: "Python 3.11: 50 Pakete aufgeloest, aiosmtplib 5.1.2, Exit 0; kein Dienst-Build."
+
+  docs_patch: "mkdocs-material 9.5.49 -> 9.7.7; GHSA-xvg9-69gf-fjrf; Suchvorschlaege bleiben aktiv."
+  docs_validation: "Python 3.11; komplette Toolchain installiert; pip check und mkdocs build Exit 0. Linkwarnungen unveraendert sichtbar."

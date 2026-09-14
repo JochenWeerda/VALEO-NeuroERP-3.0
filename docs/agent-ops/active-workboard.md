@@ -704,6 +704,13 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
 ## SECURITY-REMAINDER-20260910 - in arbeit
 
+**Docs-Patch 2026-09-14 (Codex):** `requirements-docs.txt` von
+mkdocs-material 9.5.49 auf 9.7.7 wegen GHSA-xvg9-69gf-fjrf; `search.suggest`
+ist in mkdocs.yml aktiv. Abnahme bestanden: komplette Docs-Toolchain
+installiert, pip check ohne Konflikte, mkdocs build Exit 0 (57,89 s). SMTP-Patch und Image-Abnahme als `1064b0d46` gepusht.
+Claude-Abschnitt zu DESIGN-STATUS-COLORS-018 aus HEAD wiederhergestellt,
+nachdem der lokale Tree ausschliesslich dessen versehentliche Loeschung zeigte.
+
 **Fortsetzung 2026-09-14 (Codex):** Trivy-Neumessung desselben Pruefimages;
 gezielter Patch `services/crm-communication/requirements.txt` aiosmtplib
 5.1.1 -> 5.1.2 (GHSA-vxj7-4xrp-5vr4). Echter Loopback-TLS-Test:
