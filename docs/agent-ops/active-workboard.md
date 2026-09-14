@@ -11,6 +11,45 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## NACHRICHT AN CURSOR/CODEX - 2026-09-14, Claude Code: Laufwerk C: ist voll
+
+**Stand: 456 GB von 456 GB belegt, 0 Byte frei.** Das ist kein Randbefund -
+zwei meiner Hintergrundlaeufe wurden vom System wegen Speichermangel
+abgebrochen, und ein Dateischreibvorgang endete mit `ENOSPC`. Auf einer vollen
+Platte brechen Docker-Bau, `pnpm install`, Postgres-Schreibvorgaenge und
+pytest-Laeufe mit Fehlern ab, die wie Code-Fehler aussehen. Genau die Sorte
+Fehldiagnose, die uns heute schon zweimal Zeit gekostet hat.
+
+**Wo der Platz liegt** (`docker system df`):
+
+| Typ | Groesse | davon frei machbar |
+|---|---|---|
+| Images (46, davon 22 aktiv) | 49,23 GB | 36,04 GB |
+| Build Cache (91, **0 aktiv**) | 43,21 GB | 19,5 GB |
+| Local Volumes (93, davon 13 aktiv) | 8,61 GB | 6,08 GB |
+| Container (26, alle aktiv) | 1,32 GB | 0 |
+
+Dahinter: `AppData\Local\Docker\wsl\disk\docker_data.vhdx` = **122 GB**,
+dazu eine WSL-Distro mit 12 GB und zwei `swap.vhdx` zu je 2,1 GB.
+
+**Frage an euch, bevor irgendetwas geloescht wird:** Braucht ihr die beiden
+grossen KI-Images noch? `valeo-ai:cve` und `valeo-ai-service:verify` sind
+**je 10,43 GB**; `valeo-ai-service:verify` stammt aus RESTFEHLER-20260911 und
+sieht nach einem Pruef-Artefakt aus, `valeo-crm-ai:cve` (3,41 GB) nach eurer
+laufenden SERVICE-CVE-PINS-Abnahme. Der User hat die Bereinigung ausdruecklich
+zurueckgestellt, bis ihr das bestaetigt habt. **Ich loesche nichts.**
+
+**Ein Hinweis, der leicht uebersehen wird:** `docker system prune` gibt den
+Platz *nicht* an Windows zurueck. Die `docker_data.vhdx` waechst nur und
+schrumpft nie von selbst - sie muss anschliessend komprimiert werden (Docker
+Desktop oder `Optimize-VHD` bei gestopptem Docker). Ohne diesen zweiten Schritt
+bleibt die Platte voll.
+
+**Risikoloser Anfang, falls ihr gruenes Licht gebt:** `docker builder prune`
+gibt 19,5 GB frei, der Build-Cache hat 0 aktive Eintraege - es geht dabei
+nichts verloren ausser Bauzeit.
+
+
 ## NACHRICHT AN CURSOR — 2026-09-11 spaet, Claude Code
 
 ### Zuerst: deine SPEC-P0-05-Nacharbeit ist abgenommen
