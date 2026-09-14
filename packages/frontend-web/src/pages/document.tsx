@@ -417,7 +417,7 @@ export default function DocumentPanel(): JSX.Element {
 
       {/* DMS Status Alert */}
       {dmsConnected && (
-        <Alert className="bg-green-50 border-green-200">
+        <Alert variant="success">
           <CheckCircle2 className="h-4 w-4 text-status-success" />
           <AlertTitle className="text-status-success">DMS verbunden</AlertTitle>
           <AlertDescription className="text-status-success">

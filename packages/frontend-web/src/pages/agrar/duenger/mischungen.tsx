@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -432,13 +433,13 @@ export default function DuengerMischungenPage(): JSX.Element {
             </div>
 
             {!validateMischung() && (
-              <div className="mt-4 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
+              <Callout variant="error" className="mt-4 flex items-center gap-2 p-3 border rounded">
                 <AlertTriangle className="h-5 w-5 text-status-error" />
                 <span className="text-status-error font-medium">
                   Die Anteile summieren sich nicht auf 100%!
                   Aktuell: {mischung.komponenten.reduce((sum, k) => sum + k.anteil, 0)}%
                 </span>
-              </div>
+              </Callout>
             )}
           </CardContent>
         </Card>

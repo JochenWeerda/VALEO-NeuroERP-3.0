@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -659,12 +660,12 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
               </Button>
 
               {lrErgebnis && (
-                <div className="rounded border border-green-200 bg-green-50 p-4 space-y-1 dark:bg-green-950/20">
+                <Callout variant="success" className="rounded border p-4 space-y-1">
                   <p className="text-sm font-semibold text-status-success">Rückgabe protokolliert</p>
                   <pre className="text-xs text-status-success whitespace-pre-wrap">
                     {JSON.stringify(lrErgebnis, null, 2)}
                   </pre>
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>

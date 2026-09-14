@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -490,7 +491,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                 </div>
 
                 {farmProfile.certifications && farmProfile.certifications.length > 0 && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <Callout variant="success" className="p-4 border rounded-lg">
                     <h4 className="font-semibold text-status-success mb-2">Aktive Zertifizierungen:</h4>
                     <div className="flex flex-wrap gap-2">
                       {farmProfile.certifications.map(cert => (
@@ -499,7 +500,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                         </Badge>
                       ))}
                     </div>
-                  </div>
+                  </Callout>
                 )}
               </div>
             </CardContent>

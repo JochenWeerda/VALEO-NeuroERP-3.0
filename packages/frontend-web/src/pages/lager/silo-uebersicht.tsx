@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 
 import { useNavigate } from '@/app/routing/typed-router'
 import { PageToolbar } from '@/components/navigation/PageToolbar'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -185,10 +186,10 @@ function SummaryBar({ cells }: SummaryBarProps): JSX.Element {
         </span>
       </div>
       {locked > 0 && (
-        <div className="flex flex-col rounded-md border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 px-4 py-2 min-w-[120px]">
+        <Callout variant="error" className="flex flex-col rounded-md border px-4 py-2 min-w-[120px]">
           <span className="text-2xs tracking-wide text-status-error">QS-gesperrt</span>
           <span className="text-xl font-semibold text-status-error tabular-nums">{locked}</span>
-        </div>
+        </Callout>
       )}
     </div>
   )

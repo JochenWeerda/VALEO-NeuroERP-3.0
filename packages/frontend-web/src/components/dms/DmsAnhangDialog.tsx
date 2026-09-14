@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Callout } from '@/components/ui/callout'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import {
@@ -291,10 +292,10 @@ export function DmsAnhangDialog({
           {/* ── Tab: Anhänge ─────────────────────────────────────────────── */}
           <TabsContent value="anhaenge" className="flex-1 overflow-auto space-y-3 pt-2">
             {!businessObjectId ? (
-              <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-800">
+              <Callout variant="warning" className="flex items-center gap-2 rounded-md border p-4">
                 <AlertCircle className="h-5 w-5 shrink-0" />
                 <span>Bitte zuerst speichern, um Anhänge hinzuzufügen.</span>
-              </div>
+              </Callout>
             ) : (
               <>
                 <DropUpload onFiles={(files) => void handleFiles(files)} />
@@ -350,10 +351,10 @@ export function DmsAnhangDialog({
             </div>
 
             {!businessObjectId && (
-              <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+              <Callout variant="warning" className="flex items-center gap-2 rounded-md border p-3 text-sm">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>Bitte zuerst speichern, um Dokumente zuordnen zu können.</span>
-              </div>
+              </Callout>
             )}
 
             {loadingInbox ? (

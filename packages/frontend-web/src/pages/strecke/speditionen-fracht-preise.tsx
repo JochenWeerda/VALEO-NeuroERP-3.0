@@ -15,6 +15,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { Callout } from '@/components/ui/callout'
 
 type EditRow = SpeditionFrachttarifPayload & { id?: string }
 type FreightTariffRole = 'disposition' | 'einkauf' | 'finance' | 'leitung'
@@ -179,7 +180,7 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
       <div className="mb-2 text-[12px] font-semibold uppercase">Speditionen / Fracht-Preise (nach PLZ)</div>
 
       {error && (
-        <div className="mb-2 border border-red-400 bg-red-50 px-2 py-1 text-red-700">{error}</div>
+        <Callout variant="error" className="mb-2 border px-2 py-1">{error}</Callout>
       )}
 
       {/* Toolbar */}

@@ -242,7 +242,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
 
           {step === 'download' && statusData && (
             <div className="space-y-4">
-              <Alert className="border-green-500 bg-green-50">
+              <Alert variant="success">
                 <CheckCircle2 className="h-5 w-5 text-status-success" />
                 <AlertDescription>
                   <div className="font-medium mb-2">{t('crud.messages.exportReady')}</div>

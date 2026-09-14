@@ -15,6 +15,8 @@ const alertVariants = cva(
           'border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-warning-50-hsl))] text-[hsl(var(--color-semantic-warning-700-hsl))] dark:border-[hsl(var(--color-semantic-warning-500-hsl)/0.4)] dark:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.12)] dark:text-[hsl(var(--color-semantic-warning-50-hsl))] [&>svg]:text-[hsl(var(--color-semantic-warning-500-hsl))]',
         info:
           'border-[hsl(var(--color-semantic-info-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-info-50-hsl))] text-[hsl(var(--color-semantic-info-700-hsl))] dark:border-[hsl(var(--color-semantic-info-500-hsl)/0.4)] dark:bg-[hsl(var(--color-semantic-info-500-hsl)/0.12)] dark:text-[hsl(var(--color-semantic-info-50-hsl))] [&>svg]:text-[hsl(var(--color-semantic-info-500-hsl))]',
+        error:
+          'border-[hsl(var(--color-semantic-error-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-error-50-hsl))] text-[hsl(var(--color-semantic-error-700-hsl))] dark:border-[hsl(var(--color-semantic-error-500-hsl)/0.4)] dark:bg-[hsl(var(--color-semantic-error-500-hsl)/0.12)] dark:text-[hsl(var(--color-semantic-error-50-hsl))] [&>svg]:text-[hsl(var(--color-semantic-error-500-hsl))]',
         success:
           'border-[hsl(var(--color-semantic-success-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-success-50-hsl))] text-[hsl(var(--color-semantic-success-700-hsl))] dark:border-[hsl(var(--color-semantic-success-500-hsl)/0.4)] dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)] dark:text-[hsl(var(--color-semantic-success-50-hsl))] [&>svg]:text-[hsl(var(--color-semantic-success-500-hsl))]',
       },
@@ -62,4 +64,5 @@ const AlertDescription = React.forwardRef<
 ))
 AlertDescription.displayName = 'AlertDescription'
 
-export { Alert, AlertTitle, AlertDescription }
+export { Alert, AlertTitle, AlertDescription, alertVariants }
+export type AlertVariant = NonNullable<VariantProps<typeof alertVariants>['variant']>

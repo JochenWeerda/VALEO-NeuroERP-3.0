@@ -358,7 +358,7 @@ function AnkaufsangebotDialog({
                 })}
               </NativeSelect>
             </div>
-            <Alert className="border-amber-200 bg-amber-50">
+            <Alert variant="warning">
               <AlertDescription className="text-status-warning text-sm">
                 Für jede Kultur wird ein Ankaufsangebot + Lohnspritz-Empfehlung generiert.
                 Bereits vorhandene Angebote werden nicht dupliziert.

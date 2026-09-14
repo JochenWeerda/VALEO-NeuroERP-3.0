@@ -3,6 +3,7 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useKulturen, useSorten, useKunden, useSchlaege } from '@/lib/api/agrar'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -397,10 +398,10 @@ export default function SaatgutBestellungPage(): JSX.Element {
                 </div>
               </div>
               {bestellung.menge > (saatgutOptionen.find(s => s.id === bestellung.saatgutId)?.verfuegbar || 0) && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
+                <Callout variant="error" className="flex items-center gap-2 p-3 border rounded">
                   <AlertTriangle className="h-5 w-5 text-status-error" />
                   <span className="text-status-error font-medium">Bestellmenge überschreitet verfügbaren Bestand!</span>
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>

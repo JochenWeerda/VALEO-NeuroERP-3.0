@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -331,14 +332,14 @@ export default function SystemEinstellungenPage(): JSX.Element {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-6 dark:border-amber-800 dark:bg-amber-950">
+                <Callout variant="warning" className="rounded-lg border p-4 mb-6">
                   <div className="flex gap-3">
                     <AlertTriangle className="h-5 w-5 text-status-warning shrink-0 mt-0.5" />
                     <div className="text-sm text-status-warning">
                       <p className="font-medium">{t('admin.languagePackage.switchWarning')}</p>
                     </div>
                   </div>
-                </div>
+                </Callout>
 
                 <div className="mb-4">
                   <Label className="text-sm text-muted-foreground">{t('admin.languagePackage.currentLanguage')}</Label>

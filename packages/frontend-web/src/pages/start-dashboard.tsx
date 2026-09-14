@@ -18,6 +18,7 @@ import { getDomainPresentation, getSectionPresentation } from '@/app/navigation/
 import { useNavSections } from '@/app/navigation/nav-runtime'
 import { useWorkspaceRedirect } from '@/hooks/useWorkspaceRedirect'
 import type { NavItem } from '@/app/navigation/types'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -260,10 +261,10 @@ export default function StartDashboardPage(): JSX.Element {
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
             : null}
           {flowCatalogError ? (
-            <div className="sm:col-span-2 xl:col-span-3 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200">
+            <Callout variant="error" className="sm:col-span-2 xl:col-span-3 rounded-2xl border px-4 py-3 text-sm">
               Flow-Spine-Katalog konnte nicht geladen werden: {getFlowSpineFetchErrorMessage(flowCatalogErr)}. Lokal FastAPI starten und Vite{' '}
               <code className="rounded bg-white/80 px-1 text-xs text-status-error dark:bg-black/20">/api/v1</code> auf Port 8000 proxien.
-            </div>
+            </Callout>
           ) : null}
           {!flowCatalogPending &&
           !flowCatalogError &&

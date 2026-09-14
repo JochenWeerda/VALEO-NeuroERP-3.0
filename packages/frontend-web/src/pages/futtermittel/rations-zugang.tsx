@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Shield, Plus, Link2, Trash2, Ban, CheckCircle, Copy, AlertCircle } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -457,7 +458,7 @@ export default function RationsZugangPage() {
       </div>
 
       {/* Info-Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800 space-y-1">
+      <Callout variant="info" className="border rounded-lg p-4 text-sm space-y-1">
         <p className="font-medium">Datenschutzhinweis (DSGVO Art. 5)</p>
         <p>
           Betriebseigene Grundfutteranalysen und daraus berechnete Rationen sind
@@ -468,7 +469,7 @@ export default function RationsZugangPage() {
           Share-Links verfallen automatisch zum angegebenen Datum und berechtigen nur
           zum Lesen.
         </p>
-      </div>
+      </Callout>
 
       <AddZugangDialog tenantId={tenantId} open={showAdd} onClose={() => setShowAdd(false)} />
       <ShareLinkDialog tenantId={tenantId} open={showShare} onClose={() => setShowShare(false)} />

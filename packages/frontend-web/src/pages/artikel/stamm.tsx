@@ -37,6 +37,7 @@ import {
   Download,
   Edit,
 } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { useToast } from '@/components/ui/toast-provider'
 import { ErrorState } from '@/components/ErrorState'
 import { Badge } from '@/components/ui/badge'
@@ -938,7 +939,7 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
               </div>
               {artikel.gefahrgutklasse && (
-                <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                <Callout variant="warning" className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 text-orange-700">
                     <AlertTriangle className="h-5 w-5" />
                     <span className="font-medium">
@@ -948,7 +949,7 @@ export default function ArtikelStammPage(): JSX.Element {
                   <p className="mt-2 text-sm text-status-warning">
                     Bitte beachten Sie die gesetzlichen Vorschriften fuer Lagerung und Transport.
                   </p>
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>

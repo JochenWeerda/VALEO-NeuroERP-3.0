@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -795,7 +796,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           ) : null}
 
           {previewData?.exception_hints && previewData.exception_hints.length > 0 ? (
-            <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
+            <Callout variant="warning" className="rounded-md border p-3">
               <div className="text-sm font-semibold text-status-warning">Ausnahmehinweise</div>
               <ul className="mt-2 space-y-2 text-sm text-status-warning">
                 {previewData.exception_hints.map((hint) => (
@@ -808,7 +809,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Callout>
           ) : null}
 
           {previewData?.reference_context ? (

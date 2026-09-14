@@ -5,6 +5,7 @@
 
 import { lazy, Suspense, useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -1901,7 +1902,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       <ModuleToolbar backTarget="/verkauf" closeTarget="/verkauf" title="Lieferschein-Erfassung" />
       {/* Belegfolge-Hinweis */}
       {vorgaengerCount > 0 && state.customer && (
-        <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
+        <Callout variant="warning" className="border-b px-4 py-1.5 flex items-center gap-3">
           <span className="text-status-warning text-sm font-medium">
             {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Vorgänger-Belege' : 'r Vorgänger-Beleg'} für{' '}
             <strong>{state.customer.name}</strong> vorhanden
@@ -1922,7 +1923,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           >
             <X className="h-3 w-3" />
           </Button>
-        </div>
+        </Callout>
       )}
 
       <div className="flex-1 overflow-auto p-4">
@@ -2259,9 +2260,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                       {(state.customer.chefanweisung || state.customer.executiveNote) ? (
                         <div>
                           <div className="font-semibold mb-1">Chefanweisung</div>
-                          <div className="p-2 bg-amber-50 border border-amber-200 rounded whitespace-pre-wrap">
+                          <Callout variant="warning" className="p-2 border rounded whitespace-pre-wrap">
                             {state.customer.chefanweisung || state.customer.executiveNote}
-                          </div>
+                          </Callout>
                         </div>
                       ) : (
                         <div className="text-muted-foreground">Keine Kunden-Notizen vorhanden</div>
@@ -2673,9 +2674,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             )}
 
             {!isPositionContextLoading && positionContextError && (
-              <div className="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <Callout variant="warning" className="mt-3 rounded border px-3 py-2 text-xs">
                 {positionContextError}
-              </div>
+              </Callout>
             )}
 
             {!isPositionContextLoading && positionContext && (
@@ -3088,9 +3089,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <div>
                   <h4 className="font-semibold mb-2">Chefanweisung</h4>
                   {state.customer.chefanweisung || state.customer.executiveNote ? (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm whitespace-pre-wrap">
+                    <Callout variant="warning" className="p-3 border rounded text-sm whitespace-pre-wrap">
                       {state.customer.chefanweisung || state.customer.executiveNote}
-                    </div>
+                    </Callout>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">
                       Keine Chefanweisung für diesen Kunden hinterlegt.

@@ -225,7 +225,7 @@ export default function AtlasPage(): JSX.Element {
         <OperationalContextPanel title="Nachweiskontext" sections={contextSections} />
       </div>
 
-      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+      <Alert variant="warning">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Kein isoliertes Zoll-Subprodukt</AlertTitle>
         <AlertDescription>

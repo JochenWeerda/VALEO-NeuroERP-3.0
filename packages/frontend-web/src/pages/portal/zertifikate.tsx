@@ -111,7 +111,7 @@ export default function PortalZertifikate() {
 
       {/* Warnung bei auslaufenden Zertifikaten */}
       {auslaufendeZertifikate > 0 && (
-        <Alert className="border-amber-200 bg-amber-50">
+        <Alert variant="warning">
           <AlertCircle className="h-4 w-4 text-status-warning" />
           <AlertTitle className="text-status-warning">Zertifikate laufen bald aus</AlertTitle>
           <AlertDescription className="text-status-warning">

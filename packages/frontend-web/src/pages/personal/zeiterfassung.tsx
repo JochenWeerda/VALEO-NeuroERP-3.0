@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -1548,7 +1549,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-4">
+              <Callout variant="success" className="flex items-center gap-3 rounded-md border p-4">
                 <CheckCircle2 className="h-5 w-5 text-status-success" />
                 <div className="flex-1">
                   <p className="font-semibold text-status-success">Export freigegeben</p>
@@ -1558,7 +1559,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                   <FileDown className="h-4 w-4" />
                   Export erstellen
                 </Button>
-              </div>
+              </Callout>
             )}
             <Card>
               <CardHeader>

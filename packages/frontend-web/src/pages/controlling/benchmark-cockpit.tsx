@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from '@/app/routing/typed-router'
 import { useBenchmark, useBenchmarkReadModel } from '@/lib/api/controlling'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
@@ -254,7 +255,7 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {strongest.length > 0 ? strongest.map(([key, comp]) => (
-                    <div key={key} className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                    <Callout key={key} variant="success" className="rounded-xl border p-3">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium">{KPI_LABELS[key] ?? key}</span>
                         <Badge variant="success">+{comp.deviation_pct ?? 0} %</Badge>
@@ -262,7 +263,7 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                       <p className="mt-1 text-sm text-muted-foreground">
                         Eigener Wert {formatValue(key, comp.own)} gegenüber Branche {comp.branch != null ? formatValue(key, comp.branch) : 'n/a'}.
                       </p>
-                    </div>
+                    </Callout>
                   )) : <p className="text-sm text-muted-foreground">Keine belastbaren Stärken verfuegbar.</p>}
                 </CardContent>
               </Card>
@@ -276,13 +277,13 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {weakest.length > 0 ? weakest.map(([key, comp]) => (
-                    <div key={key} className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                    <Callout key={key} variant="warning" className="rounded-xl border p-3">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium">{KPI_LABELS[key] ?? key}</span>
                         <Badge variant="secondary">{comp.deviation_pct ?? 0} %</Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{actionFromDelta(comp.deviation_pct)}</p>
-                    </div>
+                    </Callout>
                   )) : <p className="text-sm text-muted-foreground">Keine prioritaeren Schwaechen verfuegbar.</p>}
                 </CardContent>
               </Card>

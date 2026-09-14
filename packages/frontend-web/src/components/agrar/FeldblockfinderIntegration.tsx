@@ -284,7 +284,7 @@ export function FeldblockfinderIntegration({
 
             {/* Info für Niedersachsen Schlaginfo */}
             {selectedBundesland === 'niedersachsen' && (
-              <Alert className="bg-green-50 border-green-200">
+              <Alert variant="success">
                 <MapPin className="h-4 w-4 text-status-success" />
                 <AlertTitle className="text-status-success">Niedersachsen Schlaginfo</AlertTitle>
                 <AlertDescription className="text-status-success">

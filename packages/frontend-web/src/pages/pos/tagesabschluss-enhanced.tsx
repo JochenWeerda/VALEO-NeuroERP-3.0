@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -332,7 +333,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               </div>
 
               {/* DSFinV-K Export */}
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <Callout variant="info" className="rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -368,7 +369,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                     ZIP herunterladen
                   </Button>
                 </div>
-              </div>
+              </Callout>
             </div>
 
             <dl className="grid gap-3 mb-6">

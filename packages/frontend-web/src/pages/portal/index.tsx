@@ -5,6 +5,7 @@
  */
 
 import { Link } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -240,7 +241,7 @@ function EmpfehlungsBanner() {
 
   return (
     <Link to="/portal/empfehlungen">
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between gap-4 hover:bg-amber-100 transition-colors cursor-pointer">
+      <Callout variant="warning" className="rounded-xl border px-5 py-4 flex items-center justify-between gap-4 transition-colors cursor-pointer">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-400">
             <Sparkles className="h-5 w-5 text-white" />
@@ -258,7 +259,7 @@ function EmpfehlungsBanner() {
           </div>
         </div>
         <ChevronRight className="h-5 w-5 text-status-warning shrink-0" />
-      </div>
+      </Callout>
     </Link>
   )
 }

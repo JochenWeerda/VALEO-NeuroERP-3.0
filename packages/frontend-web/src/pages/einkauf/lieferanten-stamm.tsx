@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -625,9 +626,9 @@ export default function LieferantenStammPage(): JSX.Element {
             />
             <EvidenceTemplateLink link={{ label: 'Lieferantendokumente pruefen', href: '/einkauf/lieferanten-dokumente' }} />
             {expiringDocuments > 0 ? (
-              <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+              <Callout variant="warning" className="rounded border px-3 py-2 text-xs font-bold">
                 {expiringDocuments} Dokumente laufen bald ab.
-              </div>
+              </Callout>
             ) : null}
           </div>
         </div>
@@ -1094,7 +1095,7 @@ export default function LieferantenStammPage(): JSX.Element {
 
               {/* Expiring/Expired Documents Warning */}
               {lieferant.dokumente && lieferant.dokumente.some(d => d.status === 'abgelaufen' || d.status === 'wird_abgelaufen') && (
-                <div className="mt-4 border border-orange-500 rounded-lg p-4 bg-orange-50">
+                <Callout variant="warning" className="mt-4 border rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertTriangle className="h-5 w-5 text-status-warning" />
                     <Label className="text-orange-800 font-semibold">{t('crud.fields.expiringDocumentsWarning')}</Label>
@@ -1113,7 +1114,7 @@ export default function LieferantenStammPage(): JSX.Element {
                       {t('crud.actions.block')} {entityTypeLabel}
                     </Button>
                   )}
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>

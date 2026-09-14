@@ -5,6 +5,7 @@
 
 import { useState, useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -262,10 +263,10 @@ export default function BuchungsimportPage(): JSX.Element {
                 <div className="text-3xl font-bold">{preview.total_rows}</div>
                 <div className="text-sm text-muted-foreground">Zeilen gesamt</div>
               </div>
-              <div className="text-center p-4 border rounded-lg border-green-200 bg-green-50">
+              <Callout variant="success" className="text-center p-4 border rounded-lg">
                 <div className="text-3xl font-bold text-status-success">{preview.successful}</div>
                 <div className="text-sm text-muted-foreground">Gültig</div>
-              </div>
+              </Callout>
               <div className={`text-center p-4 border rounded-lg ${preview.failed > 0 ? 'border-red-200 bg-red-50' : ''}`}>
                 <div className={`text-3xl font-bold ${preview.failed > 0 ? 'text-status-error' : 'text-muted-foreground'}`}>
                   {preview.failed}
@@ -335,10 +336,10 @@ export default function BuchungsimportPage(): JSX.Element {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="text-center p-4 border rounded-lg border-green-200 bg-green-50">
+              <Callout variant="success" className="text-center p-4 border rounded-lg">
                 <div className="text-3xl font-bold text-status-success">{result.successful}</div>
                 <div className="text-sm text-muted-foreground">Erfolgreich importiert</div>
-              </div>
+              </Callout>
               <div className={`text-center p-4 border rounded-lg ${result.failed > 0 ? 'border-red-200 bg-red-50' : ''}`}>
                 <div className={`text-3xl font-bold ${result.failed > 0 ? 'text-status-error' : 'text-muted-foreground'}`}>
                   {result.failed}

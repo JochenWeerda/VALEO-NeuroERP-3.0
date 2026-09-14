@@ -125,7 +125,7 @@ function CustomerMaskEditPage(): JSX.Element {
       ) : null}
 
       {customer?.business_partner_id ? (
-        <Alert className="border-amber-300 bg-amber-50">
+        <Alert variant="warning">
           <AlertTitle>Verkaufs-Stammdaten</AlertTitle>
           <AlertDescription>
             Dieser CRM-Kunde ist mit einem Business-Partner verknüpft. Für die kanonische Pflege (Chef-Anweisungen,

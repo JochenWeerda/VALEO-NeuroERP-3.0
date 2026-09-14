@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -682,10 +683,10 @@ export default function FrmKontraktDetail(): JSX.Element {
           )}
 
           {isEdit && positionQuery.data && shortArticles.length === 0 && articleIdsForPosition.length > 0 && (
-            <div className="flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+            <Callout variant="success" className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
               <ShieldCheck className="h-4 w-4" />
               Alle Artikel dieses Kontrakts sind gedeckt (Long oder Balanced).
-            </div>
+            </Callout>
           )}
 
           {!isEdit ? (

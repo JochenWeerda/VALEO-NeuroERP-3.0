@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -599,14 +600,14 @@ export default function RetourenPage(): JSX.Element {
             </div>
 
             {returnData.creditMemoRequested && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <Callout variant="info" className="p-3 border rounded-md">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5" />
                   <div className="text-sm text-blue-800">
                     {t('crud.dialogs.createReturn.creditMemoInfo')}
                   </div>
                 </div>
-              </div>
+              </Callout>
             )}
           </div>
           <DialogFooter>

@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -86,14 +87,14 @@ export default function UebernahmeKassePage(): JSX.Element {
         <CardContent className="pt-4 space-y-4">
 
           {/* Untertitel */}
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+          <Callout variant="info" className="border rounded p-3 text-sm">
             <p className="font-semibold text-blue-800 uppercase text-xs mb-1">
               Übernahme von ServiceERP Kasse (SQLite)
             </p>
             <p className="text-blue-700 text-xs">
               Wählen Sie die Datentypen, die aus den SQLite-Kassendateien übernommen werden sollen.
             </p>
-          </div>
+          </Callout>
 
           {/* Checkboxen */}
           <div className="space-y-1">
@@ -148,10 +149,10 @@ export default function UebernahmeKassePage(): JSX.Element {
 
           {/* Fehler */}
           {mutation.isError && (
-            <div className="flex items-start gap-2 text-status-error text-sm bg-red-50 border border-red-200 rounded p-3">
+            <Callout variant="error" className="flex items-start gap-2 text-status-error text-sm border rounded p-3">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{(mutation.error as Error).message}</span>
-            </div>
+            </Callout>
           )}
 
           {/* Ergebnis */}

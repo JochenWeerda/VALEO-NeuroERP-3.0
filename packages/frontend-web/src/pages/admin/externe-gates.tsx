@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw, CheckCircle2, AlertTriangle, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Callout } from '@/components/ui/callout'
 
 interface GateStatus {
   system_id: string;
@@ -87,9 +88,9 @@ function GateCard({ gate }: { gate: GateStatus }) {
       </CardHeader>
       <CardContent className="space-y-2">
         {gate.hinweis && (
-          <div className="rounded-md bg-yellow-50 border border-yellow-200 px-3 py-2 text-sm text-yellow-800">
+          <Callout variant="warning" className="rounded-md border px-3 py-2 text-sm">
             {gate.hinweis}
-          </div>
+          </Callout>
         )}
         <dl className="grid grid-cols-1 gap-1 text-xs text-muted-foreground">
           {detailKeys.map(([k, v]) => (
@@ -166,9 +167,9 @@ export default function ExterneGatesPage() {
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-red-800 text-sm">
+        <Callout variant="error" className="rounded-md border px-4 py-3 text-sm">
           Fehler beim Laden: {String(error)}
-        </div>
+        </Callout>
       )}
 
       {data && (

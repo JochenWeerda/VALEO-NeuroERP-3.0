@@ -11,6 +11,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 
 type Tone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'red'
@@ -209,10 +210,10 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
         <div className="flex-1 space-y-4">
           <p className="max-w-3xl text-sm leading-relaxed text-gray-600">{decision.summary}</p>
           {typeof decision.blockerCount === 'number' && decision.blockerCount > 0 ? (
-            <div className="inline-flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-red-700">
+            <Callout variant="error" className="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide">
               <AlertTriangle className="h-3.5 w-3.5" />
               {decision.blockerCount} aktive Stopper
-            </div>
+            </Callout>
           ) : null}
         </div>
         <div className={`flex min-w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8 text-center sm:min-w-[320px] ${classes.border} ${classes.bg}`}>

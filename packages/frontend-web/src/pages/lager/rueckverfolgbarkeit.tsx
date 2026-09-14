@@ -4,6 +4,7 @@ import {
   CheckCircle2, AlertTriangle, Info, ArrowDown, Search, History, Plus, Bot,
   Lock, Unlock, Droplets, Ban,
 } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -304,7 +305,7 @@ export default function RueckverfolgbarkeitPage() {
               </div>
 
               {stornoOpen && trace.data.kanon_status?.status !== 'storniert' && (
-                <div className="flex flex-col gap-2 rounded-md border border-red-200 bg-red-50 p-2 sm:flex-row sm:items-center">
+                <Callout variant="error" className="flex flex-col gap-2 rounded-md border p-2 sm:flex-row sm:items-center">
                   <Input value={stornoGrund} onChange={(e) => setStornoGrund(e.target.value)}
                     placeholder="Storno-Grund (Pflicht)…" className="h-9 flex-1" disabled={cancelChain.isPending} />
                   <Button size="sm" variant="destructive" onClick={submitStorno} disabled={cancelChain.isPending}>
@@ -314,7 +315,7 @@ export default function RueckverfolgbarkeitPage() {
                   <Button size="sm" variant="ghost" onClick={() => setStornoOpen(false)} disabled={cancelChain.isPending}>
                     Abbrechen
                   </Button>
-                </div>
+                </Callout>
               )}
 
               {/* Genealogie-Timeline */}

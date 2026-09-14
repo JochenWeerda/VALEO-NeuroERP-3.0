@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DOCS_BASE_URL } from "@/lib/docs-help";
+import { Callout } from '@/components/ui/callout'
 
 interface DimensionResult {
   dimension: string;
@@ -163,7 +164,7 @@ export default function QualitaetsCockpitPage() {
       )}
 
       {error && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-amber-900 text-sm space-y-2">
+        <Callout variant="warning" className="rounded-md border px-4 py-3 text-sm space-y-2">
           <p>
             <strong>Keine Release-Evidenz verfügbar.</strong>{" "}
             {error instanceof Error ? error.message : String(error)}
@@ -175,7 +176,7 @@ export default function QualitaetsCockpitPage() {
             </code>{" "}
             ausführen, oder CI-Artefakt abwarten.
           </p>
-        </div>
+        </Callout>
       )}
 
       {data && (

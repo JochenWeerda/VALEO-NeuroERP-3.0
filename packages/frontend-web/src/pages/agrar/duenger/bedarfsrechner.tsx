@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
 import { useKulturen } from '@/lib/api/agrar'
+import { Callout } from '@/components/ui/callout'
 import { useToast } from '@/components/ui/toast-provider'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -361,7 +362,7 @@ export default function BedarfsrechnerPage(): JSX.Element {
 
             {/* Phase 2: Grünland – N-Düngebedarf + Aufteilung Tab. 3a/3b */}
             {gruenlandZeile && (
-              <div className="mb-6 space-y-3 rounded-lg border border-green-200 bg-green-50/50 p-4">
+              <Callout variant="success" className="mb-6 space-y-3 rounded-lg border p-4">
                 <div className="font-semibold text-status-success">
                   Grünland (LWK {bedarf.vorjahresOrgDungung ? 'Tab. 3b' : 'Tab. 3a'})
                 </div>
@@ -378,12 +379,12 @@ export default function BedarfsrechnerPage(): JSX.Element {
                   </ul>
                 </div>
                 <p className="text-xs text-muted-foreground">Jahres-Obergrenze aus Düngebedarfsermittlung beachten. Grundnährstoffe siehe Tab. 5.</p>
-              </div>
+              </Callout>
             )}
 
             {/* Phase 2: Wintergetreide/Raps – 1. N-Gabe Tab. 1/2 + Schwefel */}
             {wintergetreideN && (
-              <div className="mb-6 space-y-3 rounded-lg border border-blue-200 bg-blue-50/50 p-4">
+              <Callout variant="info" className="mb-6 space-y-3 rounded-lg border p-4">
                 <div className="font-semibold text-blue-900">Wintergetreide/Raps – 1. N-Gabe (LWK Tab. 1/2)</div>
                 <div className="flex justify-between text-sm">
                   <span>1. Gabe (kg N/ha)</span>
@@ -396,7 +397,7 @@ export default function BedarfsrechnerPage(): JSX.Element {
                 {bedarf.kultur !== 'raps' && bedarf.standortTyp === 'marsch' && (
                   <p className="text-xs">Getreide Marsch: Bei schwachen Beständen/leichten Böden {SCHWEFEL_GETREIDE_MARSCH_KG_HA.min}–{SCHWEFEL_GETREIDE_MARSCH_KG_HA.max} kg S/ha in 1. Gabe.</p>
                 )}
-              </div>
+              </Callout>
             )}
 
             <div className="space-y-3">

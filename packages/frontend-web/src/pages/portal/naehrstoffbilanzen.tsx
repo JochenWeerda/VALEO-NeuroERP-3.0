@@ -251,7 +251,7 @@ export default function PortalNaehrstoffbilanzen() {
           </AlertDescription>
         </Alert>
       ) : (
-        <Alert className="border-emerald-200 bg-emerald-50">
+        <Alert variant="success">
           <CheckCircle2 className="h-4 w-4 text-status-success" />
           <AlertTitle className="text-status-success">Grenzwerte eingehalten</AlertTitle>
           <AlertDescription className="text-status-success">

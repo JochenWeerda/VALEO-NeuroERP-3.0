@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -83,7 +84,7 @@ export default function BiodiversitaetPage(): JSX.Element {
         <p className="text-muted-foreground">Ökologische Nachhaltigkeit {reportYear}</p>
       </div>
 
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <Callout variant="info" className="rounded-lg border p-4">
         <div className="flex items-start gap-2">
           <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
           <div className="text-sm text-blue-900">
@@ -94,7 +95,7 @@ export default function BiodiversitaetPage(): JSX.Element {
             </p>
           </div>
         </div>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowRightCircle, ShieldCheck, UserCircle2 } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { operationalStatusLabel, operationalStatusVariant, type OperationalStatus } from '@/lib/operational-status'
@@ -70,10 +71,10 @@ export function OperationalCaseHeader({
           </div>
         </div>
         {blocker ? (
-          <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <Callout variant="warning" className="flex items-start gap-2 rounded-xl border px-4 py-3 text-sm">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{blocker}</span>
-          </div>
+          </Callout>
         ) : null}
       </CardContent>
     </Card>

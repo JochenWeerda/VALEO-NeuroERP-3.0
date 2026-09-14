@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -432,13 +433,13 @@ export default function RohwareAnnahmePage(): JSX.Element {
       title: 'Qualitätswerte',
       content: (
         <TouchSection title="Qualitätswerte (optional)">
-          <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-900">
+          <Callout variant="info" className="rounded-md border p-3 text-sm">
             <p className="font-semibold">Rohware-Annahme ohne Vollanalyse</p>
             <p className="mt-1 text-blue-700">
               Qualitätswerte sind optional. Vollständige Laboranalyse kann nachträglich ergänzt
               werden.
             </p>
-          </div>
+          </Callout>
           <TouchNumericInput
             label="Feuchte %"
             value={form.feuchtePct ? Number(form.feuchtePct) : 0}

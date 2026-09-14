@@ -6,6 +6,7 @@
 
 import { useState } from 'react'
 import { usePortalAnfragen } from '@/lib/api/portal'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
@@ -315,12 +316,12 @@ export default function PortalAnfragen() {
 
                 {/* Antwort */}
                 {selectedAnfrage.antwort && (
-                  <div className="rounded-lg border-2 border-emerald-200 bg-emerald-50 p-4">
+                  <Callout variant="success" className="rounded-lg border-2 p-4">
                     <p className="text-sm font-medium text-status-success mb-1">
                       Unsere Antwort ({selectedAnfrage.antwortDatum}):
                     </p>
                     <p className="text-status-success">{selectedAnfrage.antwort}</p>
-                  </div>
+                  </Callout>
                 )}
               </div>
             </>

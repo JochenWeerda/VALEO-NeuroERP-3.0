@@ -8,6 +8,7 @@ import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { CrudAuditTrailPanel } from '@/features/crud/components'
 import { useCrudAuditTrail } from '@/features/crud/hooks'
+import { Callout } from '@/components/ui/callout'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
@@ -648,14 +649,14 @@ export default function BestellungStammPage(): JSX.Element {
               </p>
             </div>
             {data?.status === 'FREIGEGEBEN' && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <Callout variant="warning" className="p-3 border rounded-md">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5" />
                   <div className="text-sm text-status-warning">
                     {t('crud.dialogs.cancel.warning')}
                   </div>
                 </div>
-              </div>
+              </Callout>
             )}
           </div>
           <DialogFooter>

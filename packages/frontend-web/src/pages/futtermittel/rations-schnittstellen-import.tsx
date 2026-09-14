@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Copy, Database, FileJson, Radio, TestTube, Upload } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import {
   importRationsData,
@@ -189,9 +190,9 @@ export default function RationsSchnittstellenImport() {
             aria-label="JSON-Payload"
           />
           {error && (
-            <div role="alert" className="mt-2 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <Callout role="alert" variant="error" className="mt-2 flex items-start gap-2 rounded-lg border p-3 text-sm">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{error}
-            </div>
+            </Callout>
           )}
           <Button className="mt-3 h-11 w-full" disabled={importMut.isPending} onClick={submit}>
             <Upload className="mr-2 h-5 w-5" />{importMut.isPending ? 'Importiert…' : 'Importieren'}
@@ -219,12 +220,12 @@ export default function RationsSchnittstellenImport() {
                 <div className="rounded-lg border p-2"><dt className="text-slate-500">Importiert</dt><dd>{result.imported_at ? new Date(result.imported_at).toLocaleString('de-DE') : '–'}</dd></div>
               </dl>
               {result.feeding_control != null && (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs">
+                <Callout variant="success" className="rounded-lg border p-3 text-xs">
                   <div className="font-semibold text-status-success">F1-Kontrolle erzeugt</div>
                   <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-all text-[11px] text-status-success">
                     {JSON.stringify(result.feeding_control, null, 2)}
                   </pre>
-                </div>
+                </Callout>
               )}
             </div>
           )}

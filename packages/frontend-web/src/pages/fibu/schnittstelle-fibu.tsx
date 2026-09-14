@@ -9,6 +9,7 @@ import { apiClient } from '@/lib/api-client'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -185,13 +186,13 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           </div>
 
           {/* Info-Bereich */}
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+          <Callout variant="info" className="border rounded p-3 text-sm">
             <p className="font-semibold text-blue-800 uppercase text-xs mb-1">Buchungsübergabe (ASC) erzeugen</p>
             <p className="text-blue-700">
               Die erzeugten Buchungssätze werden in eine <strong>ASC-Datei</strong> (Buchungsübergabe)
               zur Übergabe an die Finanzbuchhaltung exportiert.
             </p>
-          </div>
+          </Callout>
 
           {/* Pfad-Anzeige */}
           <div className="flex items-center gap-2">
@@ -347,15 +348,15 @@ export default function SchnittstelleFibuPage(): JSX.Element {
 
           {/* Fehler */}
           {error && (
-            <div className="flex items-start gap-2 text-status-error text-sm bg-red-50 border border-red-200 rounded p-3">
+            <Callout variant="error" className="flex items-start gap-2 text-status-error text-sm border rounded p-3">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
-            </div>
+            </Callout>
           )}
 
           {/* Vorschau-Ergebnis */}
           {summary && (
-            <div className="bg-green-50 border border-green-200 rounded p-3 space-y-2">
+            <Callout variant="success" className="border rounded p-3 space-y-2">
               <div className="flex items-center gap-2 text-status-success font-semibold text-sm">
                 <CheckCircle2 className="h-4 w-4" />
                 Vorschau: {summary.dateiname}
@@ -376,7 +377,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
                   Jetzt herunterladen
                 </Button>
               </div>
-            </div>
+            </Callout>
           )}
         </CardContent>
       </Card>

@@ -15,6 +15,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { inputValue, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
+import { Callout } from '@/components/ui/callout'
 
 const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -280,9 +281,9 @@ function BankImportErrorList({ errors }: { errors: string[] }) {
   const { t } = useTranslation()
   if (!errors || errors.length === 0) {
     return (
-      <div className="rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+      <Callout variant="success" className="rounded border p-3 text-sm">
         {t('crud.messages.noImportErrors', { defaultValue: 'Keine Importfehler.' })}
-      </div>
+      </Callout>
     )
   }
 

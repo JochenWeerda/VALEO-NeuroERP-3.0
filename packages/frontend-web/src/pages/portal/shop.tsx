@@ -696,7 +696,7 @@ export default function PortalShop() {
                           <div className="mt-3 pt-3 border-t border-dashed space-y-3">
                             {/* Kaufanreiz: Nächste günstigere Staffel */}
                             {staffelInfo.naechsteStaffel && (
-                              <Alert className="py-2 border-emerald-200 bg-emerald-50">
+                              <Alert variant="success" className="py-2">
                                 <Info className="h-4 w-4 text-status-success" />
                                 <AlertDescription className="text-status-success text-sm">
                                   <strong>Tipp:</strong> Sie erreichen die nächst günstigere Preisstaffel ab{' '}
@@ -711,7 +711,7 @@ export default function PortalShop() {
 
                             {/* Staffel erreicht */}
                             {!staffelInfo.naechsteStaffel && staffelInfo.zuschlag === 0 && (
-                              <Alert className="py-2 border-emerald-200 bg-emerald-50">
+                              <Alert variant="success" className="py-2">
                                 <Check className="h-4 w-4 text-status-success" />
                                 <AlertDescription className="text-status-success text-sm">
                                   <strong>Beste Staffel erreicht!</strong> Kein Mengenzuschlag.

@@ -5,6 +5,7 @@
 
 import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -1261,7 +1262,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
 
       {/* Belegfolge-Hinweis */}
       {vorgaengerCount > 0 && state.customer && (
-        <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
+        <Callout variant="warning" className="border-b px-4 py-1.5 flex items-center gap-3">
           <span className="text-status-warning text-sm font-medium">
             {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Angebote' : 's Angebot'} für{' '}
             <strong>{state.customer.name}</strong> vorhanden
@@ -1282,7 +1283,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
           >
             ×
           </Button>
-        </div>
+        </Callout>
       )}
 
       <div className="flex-1 overflow-auto p-4">
@@ -1358,11 +1359,11 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                 </Button>
               </div>
               {isWorkflowEntry ? (
-                <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+                <Callout variant="info" className="rounded-md border px-3 py-2 text-xs">
                   {workflowCase ? `Workflow-Vorgang ${workflowCase}` : 'Workflow-Einstieg'}
                   {workflowEntryMode ? ` · ${workflowEntryMode}` : ''}
                   {workflowCustomerName ? ` · ${workflowCustomerName}` : ''}
-                </div>
+                </Callout>
               ) : null}
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Auftrag-Datum:</Label>
@@ -1661,9 +1662,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                       {(state.customer.chefanweisung || state.customer.executiveNote) && (
                         <div>
                           <div className="font-semibold mb-1">Chefanweisung</div>
-                          <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs whitespace-pre-wrap">
+                          <Callout variant="warning" className="p-2 border rounded text-xs whitespace-pre-wrap">
                             {state.customer.chefanweisung || state.customer.executiveNote}
-                          </div>
+                          </Callout>
                         </div>
                       )}
                     </div>
@@ -2320,9 +2321,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                 <div>
                   <h4 className="font-semibold mb-2">Chefanweisung</h4>
                   {state.customer.chefanweisung || state.customer.executiveNote ? (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm whitespace-pre-wrap">
+                    <Callout variant="warning" className="p-3 border rounded text-sm whitespace-pre-wrap">
                       {state.customer.chefanweisung || state.customer.executiveNote}
-                    </div>
+                    </Callout>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">
                       Keine Chefanweisung für diesen Kunden hinterlegt.

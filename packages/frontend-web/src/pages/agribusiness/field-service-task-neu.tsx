@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Callout } from '@/components/ui/callout'
 
 const TASK_TYPES = ['FIELD_SERVICE', 'INSPECTION', 'MAINTENANCE', 'EMERGENCY'] as const;
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const;
@@ -94,16 +95,16 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
       </h1>
 
       {(workflowInstanceId || workflowCase) && (
-        <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+        <Callout variant="info" className="rounded-md border px-3 py-2 text-xs">
           {workflowCase ? `Workflow ${workflowCase}` : 'Workflow'}
           {workflowInstanceId ? ` · ${workflowInstanceId}` : ''}
-        </div>
+        </Callout>
       )}
 
       {serviceRequestId && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+        <Callout variant="success" className="rounded-md border px-3 py-2 text-xs">
           Service-Vorgang {serviceRequestId} · Einsatz wird direkt aus der Anfrage geplant.
-        </div>
+        </Callout>
       )}
 
       <Card className="p-4">

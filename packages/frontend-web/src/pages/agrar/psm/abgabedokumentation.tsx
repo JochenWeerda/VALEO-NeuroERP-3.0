@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -277,10 +278,10 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
             </div>
           </div>
           {!isSachkundeValid && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
+            <Callout variant="error" className="flex items-center gap-2 p-3 border rounded">
               <AlertTriangle className="h-5 w-5 text-status-error" />
               <span className="text-status-error font-medium">Sachkunde abgelaufen!</span>
-            </div>
+            </Callout>
           )}
         </CardContent>
       </Card>
@@ -351,11 +352,11 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
             </Button>
           </div>
           {abgabe.erklaerungStatus === 'ausstehend' && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+            <Callout variant="warning" className="p-3 border rounded">
               <p className="text-status-warning">
                 Die Erklärung des Landwirts ist erforderlich, da dieses PSM Ausgangsstoffe für Explosivstoffe enthält.
               </p>
-            </div>
+            </Callout>
           )}
         </CardContent>
       </Card>

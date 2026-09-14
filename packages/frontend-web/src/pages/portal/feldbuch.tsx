@@ -484,7 +484,7 @@ function ExportDialog({
         </DialogHeader>
 
         {success && (
-          <Alert className="border-emerald-200 bg-emerald-50">
+          <Alert variant="success">
             <CheckCircle2 className="h-4 w-4 text-status-success" />
             <AlertTitle className="text-status-success">Export erfolgreich</AlertTitle>
             <AlertDescription className="text-status-success">Die CSV-Datei wurde heruntergeladen.</AlertDescription>
@@ -577,7 +577,7 @@ function ImportDialog({
 
         {result ? (
           <div className="space-y-3">
-            <Alert className="border-emerald-200 bg-emerald-50">
+            <Alert variant="success">
               <CheckCircle2 className="h-4 w-4 text-status-success" />
               <AlertTitle className="text-status-success">Import abgeschlossen</AlertTitle>
               <AlertDescription className="text-status-success">

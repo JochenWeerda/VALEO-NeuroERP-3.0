@@ -54,7 +54,7 @@ export function CustomerChefHintsBanner({
 
   if (isLoading && !data) {
     return (
-      <Alert className="mb-4 border-amber-200 bg-amber-50/90">
+      <Alert variant="warning" className="mb-4">
         <AlertCircle className="h-4 w-4 text-status-warning" />
         <AlertTitle className="text-status-warning">Chef-Hinweise</AlertTitle>
         <AlertDescription className="text-status-warning text-sm">Lade Hinweise…</AlertDescription>
@@ -69,7 +69,7 @@ export function CustomerChefHintsBanner({
   if (!hasCrm && !hasInstr) return null
 
   return (
-    <Alert className="mb-4 border-amber-300 bg-amber-50/95">
+    <Alert variant="warning" className="mb-4">
       <AlertCircle className="h-4 w-4 text-status-warning" />
       <AlertTitle className="text-status-warning flex flex-wrap items-center gap-2">
         Chef-Hinweise

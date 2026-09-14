@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -90,11 +91,11 @@ function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: stri
           <h4 className="text-sm font-semibold text-status-warning mb-2">Aktive Blocker</h4>
           <div className="space-y-2">
             {process.blockers.filter(b => !b.resolved).map(blocker => (
-              <div key={blocker.blocker_id} className="rounded border border-orange-200 bg-orange-50 p-2 text-sm">
+              <Callout key={blocker.blocker_id} variant="warning" className="rounded border p-2 text-sm">
                 <div className="font-medium">{blocker.message}</div>
                 {blocker.external_system && <div className="text-muted-foreground text-xs">System: {blocker.external_system}</div>}
                 <div className="text-xs text-muted-foreground">Seit: {new Date(blocker.since).toLocaleString('de-DE')}</div>
-              </div>
+              </Callout>
             ))}
           </div>
         </div>
