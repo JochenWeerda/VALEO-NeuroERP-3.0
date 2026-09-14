@@ -10,6 +10,8 @@ file_ownership:
   - .grype.yaml
   - config/security/cpython-3.13.15/
   - scripts/verify_cpython_security.py
+  - scripts/verify_aiosmtplib_security.py
+  - services/crm-communication/requirements.txt
   - docs/agent-ops/slices/SECURITY-REMAINDER-20260910.yaml
   - docs/quality-assurance/security-remainder-2026-09-10.md
 acceptance:
@@ -32,3 +34,22 @@ ai_harness:
   dokumentations_vertrag: Workboard, Herstellerquellen und Nachmessung dokumentieren.
 external_gates:
   - Dependabot-Restbefunde in weiteren Wellen beheben.
+
+resume_20260913:
+  source_commit: "8e1f84a01"
+  owner: Codex
+  scope: "Eigene Binaer-Abnahme fortsetzen; RESTFEHLER-20260911 bleibt Cursor."
+  patch_integrity: "4/4 SHA256 stimmen mit provenance.json ueberein."
+  negative_control: "Offizielles Python 3.13.15 Bookworm: 4 Tests, 17 Teilfehler, Exit 1."
+  builder_control: "Gleiche vier Tests nach Patches bestanden."
+  runtime_image: "valeo-backend-security:resume-20260913; Build und Runtime 4/4 gruen; main importiert, 3949 Routen, uid 1000, kein pip."
+  historical_scan: "Grype-Abschluss 2026-09-10: 243 Meldungen, keine High/Critical mit Fixstatus fixed; QA-Bericht korrigiert."
+  current_scan: "Grype 0.115.0, DB 2026-09-13: 245 Meldungen; keine High/Critical mit Fixstatus fixed."
+  remaining: "Zwei neue Medium-Treffer CVE-2026-89092 ohne Fix laut Scanner; Trivy-Neumessung und Dependency-Welle offen."
+
+resume_20260914:
+  trivy: "246 Befunde; 5 Critical, 55 High, 99 Medium, 86 Low, 1 Unknown; keine High/Critical mit Fixversion."
+  smtp_patch: "aiosmtplib 5.1.1 -> 5.1.2; GHSA-vxj7-4xrp-5vr4."
+  smtp_regression: "Echtes Loopback-TLS: 5.1.1 ein Pass/ein Fail; 5.1.2 zwei Pass. Kein Mailversand."
+  github: "51 offene Dependabot-Meldungen, keine Archivpfade; lokaler Patch noch nicht remote geschlossen."
+  dependency_resolution: "Python 3.11: 50 Pakete aufgeloest, aiosmtplib 5.1.2, Exit 0; kein Dienst-Build."
