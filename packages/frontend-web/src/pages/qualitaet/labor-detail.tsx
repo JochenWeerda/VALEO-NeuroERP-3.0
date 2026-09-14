@@ -65,7 +65,11 @@ export default function LaborDetailPage(): JSX.Element {
     const inBearbeitung = auftrag.status === 'in-bearbeitung'
     return {
       status: istOffen ? 'Auftrag offen' : inBearbeitung ? 'Analyse laeuft' : 'Abgeschlossen',
-      statusColor: istOffen ? 'text-amber-700 bg-amber-50 border-amber-300' : inBearbeitung ? 'text-blue-700 bg-blue-50 border-blue-300' : 'text-green-700 bg-green-50 border-green-300',
+      statusColor: istOffen
+        ? 'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]'
+        : inBearbeitung
+          ? 'text-status-info bg-[hsl(var(--color-semantic-info-50-hsl))] border-[hsl(var(--color-semantic-info-500-hsl)/0.35)]'
+          : 'text-status-success bg-[hsl(var(--color-semantic-success-50-hsl))] border-[hsl(var(--color-semantic-success-500-hsl)/0.35)]',
       befundlage: auftrag.qs_entscheidung
         ? `Charge ${auftrag.chargenId} - Entscheidung: ${auftrag.qs_entscheidung}`
         : `Charge ${auftrag.chargenId} - ${auftrag.analysen} Analyse(n)`,

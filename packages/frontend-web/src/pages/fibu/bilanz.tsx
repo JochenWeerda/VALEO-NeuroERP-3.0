@@ -256,7 +256,7 @@ export default function BilanzPage(): JSX.Element {
             ) : (
               <p className="text-sm text-muted-foreground">Keine Aktivposten vorhanden</p>
             )}
-            <div className="rounded-lg bg-blue-50 p-4">
+            <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-4">
               <div className="flex justify-between text-xl font-bold text-blue-900">
                 <span>SUMME AKTIVA</span>
                 <span>{fmt(bilanzsumme)}</span>
@@ -282,7 +282,7 @@ export default function BilanzPage(): JSX.Element {
             {bilanz.equity.length === 0 && bilanz.liabilities.length === 0 && (
               <p className="text-sm text-muted-foreground">Keine Passivposten vorhanden</p>
             )}
-            <div className="rounded-lg bg-blue-50 p-4">
+            <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-4">
               <div className="flex justify-between text-xl font-bold text-blue-900">
                 <span>SUMME PASSIVA</span>
                 <span>{fmt(bilanzsumme)}</span>

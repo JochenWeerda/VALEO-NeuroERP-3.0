@@ -81,18 +81,19 @@ export function LocationCard({
   }, [position, customer.latitude, customer.longitude, showDistance])
 
   // Status-Farben (Metro Style)
+  // Akzentkante und leichte Toenung: dekorativ, deshalb Tokens statt Komponente
   const statusStyles = {
-    pending: 'border-l-amber-500 bg-amber-500/5',
-    in_progress: 'border-l-blue-500 bg-blue-500/5',
-    completed: 'border-l-emerald-500 bg-emerald-500/5',
-    cancelled: 'border-l-neutral-400 bg-neutral-100',
+    pending: 'border-l-[hsl(var(--color-semantic-warning-500-hsl))] bg-[hsl(var(--color-semantic-warning-500-hsl)/0.05)]',
+    in_progress: 'border-l-[hsl(var(--color-semantic-info-500-hsl))] bg-[hsl(var(--color-semantic-info-500-hsl)/0.05)]',
+    completed: 'border-l-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-500-hsl)/0.05)]',
+    cancelled: 'border-l-muted-foreground/40 bg-muted',
   }
 
   const priorityBadge = {
     low: null,
     normal: null,
-    high: 'bg-amber-500 text-white',
-    urgent: 'bg-red-500 text-white animate-pulse',
+    high: 'bg-[hsl(var(--color-semantic-warning-500-hsl))] text-white',
+    urgent: 'bg-[hsl(var(--color-semantic-error-500-hsl))] text-white animate-pulse',
   }
 
   const handleNavigate = (e: React.MouseEvent) => {

@@ -258,7 +258,7 @@ export default function PSMBeratungPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           {ausgewaehltesSchadbild && (
-            <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium text-blue-900">{ausgewaehltesSchadbild.name}</h3>
                 <Badge variant={
@@ -344,7 +344,7 @@ export default function PSMBeratungPage(): JSX.Element {
                 <p className="text-sm text-muted-foreground">{psm.begruendung}</p>
 
                 {index === 0 && (
-                  <div className="mt-3 flex items-center gap-2 p-2 bg-green-50 rounded">
+                  <div className="mt-3 flex items-center gap-2 p-2 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded">
                     <CheckCircle className="h-4 w-4 text-status-success" />
                     <span className="text-sm font-medium text-status-success">Top-Empfehlung</span>
                   </div>

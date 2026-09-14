@@ -108,7 +108,7 @@ export function ShortcutHelpPanel({
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b bg-green-50">
+        <div className="flex items-center justify-between p-3 border-b bg-[hsl(var(--color-semantic-success-50-hsl))]">
           <div className="flex items-center gap-2">
             <Keyboard className="h-4 w-4 text-status-success" />
             <h3 className="font-semibold text-sm text-status-success">Tastenkürzel</h3>

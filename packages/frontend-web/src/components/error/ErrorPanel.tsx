@@ -85,13 +85,13 @@ const _categoryIcon: Record<ErrorCategory, React.ReactNode> = {
 
 const _categoryColor: Record<ErrorCategory, string> = {
   NETWORK:       'text-slate-500 bg-slate-50 border-slate-200',
-  VALIDATION:    'text-status-warning bg-amber-50 border-amber-200',
-  AUTHORIZATION: 'text-status-error bg-red-50 border-red-200',
+  VALIDATION:    'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]',
+  AUTHORIZATION: 'text-status-error bg-[hsl(var(--color-semantic-error-50-hsl))] border-[hsl(var(--color-semantic-error-500-hsl)/0.35)]',
   NOT_FOUND:     'text-slate-500 bg-slate-50 border-slate-200',
-  SERVER:        'text-status-error bg-red-50 border-red-200',
-  CONFLICT:      'text-status-warning bg-orange-50 border-orange-200',
-  TIMEOUT:       'text-status-warning bg-amber-50 border-amber-200',
-  BUSINESS_RULE: 'text-blue-600 bg-blue-50 border-blue-200',
+  SERVER:        'text-status-error bg-[hsl(var(--color-semantic-error-50-hsl))] border-[hsl(var(--color-semantic-error-500-hsl)/0.35)]',
+  CONFLICT:      'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]',
+  TIMEOUT:       'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]',
+  BUSINESS_RULE: 'text-status-info bg-[hsl(var(--color-semantic-info-50-hsl))] border-[hsl(var(--color-semantic-info-500-hsl)/0.35)]',
   UNKNOWN:       'text-slate-600 bg-slate-50 border-slate-200',
 }
 

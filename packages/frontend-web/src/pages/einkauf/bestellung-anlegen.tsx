@@ -459,21 +459,21 @@ export default function BestellungAnlegenPage(): JSX.Element {
             />
           </div>
           {bestellung.requisitionId && (
-            <div className="p-3 bg-blue-50 rounded-md">
+            <div className="p-3 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-md">
               <p className="text-sm text-blue-700">
                 {t('crud.fields.requisition')}: {bestellung.requisitionId}
               </p>
             </div>
           )}
           {bestellung.contractId && (
-            <div className="p-3 bg-green-50 rounded-md">
+            <div className="p-3 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-md">
               <p className="text-sm text-status-success">
                 {t('crud.fields.contract')}: {bestellung.contractId}
               </p>
             </div>
           )}
           {bestellung.rfqId && (
-            <div className="p-3 bg-yellow-50 rounded-md">
+            <div className="p-3 bg-[hsl(var(--color-semantic-warning-50-hsl))] rounded-md">
               <p className="text-sm text-status-warning">
                 {t('crud.fields.rfq')}: {bestellung.rfqId}
               </p>

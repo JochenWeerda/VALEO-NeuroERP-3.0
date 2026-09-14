@@ -351,7 +351,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
                 <h4 className="font-medium text-blue-900 mb-2">Alternative PSM:</h4>
                 <div className="space-y-2">
                   {pruefErgebnis.alternative_psm.map((alt) => (
-                    <div key={alt.id} className="p-3 bg-blue-50 rounded border">
+                    <div key={alt.id} className="p-3 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded border">
                       <div className="font-medium">{alt.name} ({alt.wirkstoff})</div>
                       <div className="text-sm text-blue-700">
                         Max. {alt.max_dosierung} l/ha, Wartezeit: {alt.wartezeit} Tage

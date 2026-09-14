@@ -82,7 +82,7 @@ export default function SchlagKartePage(): JSX.Element {
           <CardTitle>Schlagkarte (vereinfacht)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border-2 border-dashed p-6 min-h-[400px] flex items-center justify-center bg-green-50">
+          <div className="rounded-lg border-2 border-dashed p-6 min-h-[400px] flex items-center justify-center bg-[hsl(var(--color-semantic-success-50-hsl))]">
             <div className="text-center">
               <Map className="h-16 w-16 mx-auto mb-4 text-gray-400" />
               <p className="text-muted-foreground font-semibold">Interaktive Karte</p>

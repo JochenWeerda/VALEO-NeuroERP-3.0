@@ -111,8 +111,8 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
     const stateStyles = {
       idle: 'border-border focus-within:border-primary',
       scanning: 'border-primary bg-primary/10 animate-pulse',
-      success: 'border-emerald-500 bg-emerald-500/20',
-      error: 'border-red-500 bg-red-500/20',
+      success: 'border-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-500-hsl)/0.2)]',
+      error: 'border-[hsl(var(--color-semantic-error-500-hsl))] bg-[hsl(var(--color-semantic-error-500-hsl)/0.2)]',
     }
 
     const stateIcons = {

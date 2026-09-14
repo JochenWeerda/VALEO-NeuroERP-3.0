@@ -1025,7 +1025,7 @@ export default function PortalFeldbuch() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-status-success">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                 <MapPin className="h-5 w-5" />
               </div>
               <div>
@@ -1051,7 +1051,7 @@ export default function PortalFeldbuch() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-status-warning">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                 <Calendar className="h-5 w-5" />
               </div>
               <div>

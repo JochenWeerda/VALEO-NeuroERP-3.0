@@ -158,17 +158,17 @@ export default function DuengungsplanungPage(): JSX.Element {
                     <Badge variant="outline">{schlag.status}</Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-4 mt-4">
-                    <div className="rounded-lg bg-blue-50 p-3 text-center">
+                    <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-3 text-center">
                       <div className="text-sm text-muted-foreground">N (Stickstoff)</div>
                       <div className="text-lg font-bold text-blue-600 mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
-                    <div className="rounded-lg bg-orange-50 p-3 text-center">
+                    <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-50-hsl))] p-3 text-center">
                       <div className="text-sm text-muted-foreground">P (Phosphor)</div>
                       <div className="text-lg font-bold text-status-warning mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
-                    <div className="rounded-lg bg-green-50 p-3 text-center">
+                    <div className="rounded-lg bg-[hsl(var(--color-semantic-success-50-hsl))] p-3 text-center">
                       <div className="text-sm text-muted-foreground">K (Kalium)</div>
                       <div className="text-lg font-bold text-status-success mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>

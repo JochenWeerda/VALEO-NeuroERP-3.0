@@ -422,11 +422,16 @@ const LIFECYCLE_LABELS: Record<FlowSpineLifecycleStatus, string> = {
 
 const LIFECYCLE_TONE_CLASSES: Record<FlowSpineLifecycleStatus, string> = {
   draft: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
-  in_progress: 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100',
-  on_hold: 'border-amber-400/40 bg-amber-500/15 text-amber-100',
-  completed: 'border-emerald-400/40 bg-emerald-500/15 text-emerald-100',
-  cancelled: 'border-rose-400/40 bg-rose-500/15 text-rose-100',
-  failed: 'border-red-400/40 bg-red-500/15 text-red-100',
+  in_progress:
+    'border-[hsl(var(--color-semantic-info-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-info-500-hsl)/0.15)] text-[hsl(var(--color-semantic-info-50-hsl))]',
+  on_hold:
+    'border-[hsl(var(--color-semantic-warning-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-warning-500-hsl)/0.15)] text-[hsl(var(--color-semantic-warning-50-hsl))]',
+  completed:
+    'border-[hsl(var(--color-semantic-success-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-success-500-hsl)/0.15)] text-[hsl(var(--color-semantic-success-50-hsl))]',
+  cancelled:
+    'border-[hsl(var(--color-semantic-error-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-error-500-hsl)/0.15)] text-[hsl(var(--color-semantic-error-50-hsl))]',
+  failed:
+    'border-[hsl(var(--color-semantic-error-500-hsl)/0.55)] bg-[hsl(var(--color-semantic-error-500-hsl)/0.2)] text-[hsl(var(--color-semantic-error-50-hsl))]',
 }
 
 const REASON_CATEGORY_OPTIONS = [

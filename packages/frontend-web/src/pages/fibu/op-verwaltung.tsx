@@ -186,7 +186,7 @@ export default function OPVerwaltungPage(): JSX.Element {
               </div>
             </div>
 
-            <div className="rounded-lg bg-orange-50 p-4 text-center">
+            <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-50-hsl))] p-4 text-center">
               <div className="text-sm text-muted-foreground mb-1">Erwartete Zahlungseingänge</div>
               <div className="text-xl font-bold text-orange-900">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.erwarteteEingaenge)}
@@ -228,7 +228,7 @@ export default function OPVerwaltungPage(): JSX.Element {
               </div>
             </div>
 
-            <div className="rounded-lg bg-blue-50 p-4 text-center">
+            <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-4 text-center">
               <div className="text-sm text-muted-foreground mb-1">Fällige Zahlungen</div>
               <div className="text-xl font-bold text-blue-900">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.falligeAusgaben)}

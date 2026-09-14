@@ -410,12 +410,12 @@ export default function DuengerMischungenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
                 <div className="text-sm text-blue-600">Gesamt N</div>
                 <div className="text-2xl font-bold text-blue-900">{mischung.berechnete_werte.gesamt_n}%</div>
                 <div className="text-xs text-blue-600">Ziel: {mischung.ziel_npk.n}%</div>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg">
+              <div className="p-4 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-lg">
                 <div className="text-sm text-status-success">Gesamt P</div>
                 <div className="text-2xl font-bold text-status-success">{mischung.berechnete_werte.gesamt_p}%</div>
                 <div className="text-xs text-status-success">Ziel: {mischung.ziel_npk.p}%</div>
@@ -425,7 +425,7 @@ export default function DuengerMischungenPage(): JSX.Element {
                 <div className="text-2xl font-bold text-purple-900">{mischung.berechnete_werte.gesamt_k}%</div>
                 <div className="text-xs text-purple-600">Ziel: {mischung.ziel_npk.k}%</div>
               </div>
-              <div className="p-4 bg-orange-50 rounded-lg">
+              <div className="p-4 bg-[hsl(var(--color-semantic-warning-50-hsl))] rounded-lg">
                 <div className="text-sm text-status-warning">Kosten/Tonne</div>
                 <div className="text-2xl font-bold text-orange-900">{mischung.berechnete_werte.kosten_pro_tonne}</div>
                 <div className="text-xs text-status-warning">Gesamt: {mischung.berechnete_werte.gesamt_menge}t</div>

@@ -16,9 +16,9 @@ interface KpiCardProps {
 
 const accentStyles: Record<KpiAccent, string> = {
   primary: 'border-l-primary bg-primary/5',
-  amber:   'border-l-amber-500 bg-amber-50 dark:bg-amber-950/30',
-  green:   'border-l-green-600 bg-green-50 dark:bg-green-950/30',
-  red:     'border-l-red-500 bg-red-50 dark:bg-red-950/30',
+  amber:   'border-l-[hsl(var(--color-semantic-warning-500-hsl))] bg-[hsl(var(--color-semantic-warning-50-hsl))] dark:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.12)]',
+  green:   'border-l-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-50-hsl))] dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]',
+  red:     'border-l-[hsl(var(--color-semantic-error-500-hsl))] bg-[hsl(var(--color-semantic-error-50-hsl))] dark:bg-[hsl(var(--color-semantic-error-500-hsl)/0.12)]',
   neutral: 'border-l-muted-foreground/30 bg-muted/30',
 }
 

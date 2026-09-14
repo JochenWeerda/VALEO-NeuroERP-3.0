@@ -227,7 +227,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
               />
               </div>
               {bestellung.kulturArt && (
-                <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
                   <h4 className="font-medium text-blue-900">Ausgewählte Kultur: {kulturArten.find(k => k.value === bestellung.kulturArt)?.label}</h4>
                   <p className="text-sm text-blue-700 mt-1">
                     Wählen Sie die gewünschte Sorte im nächsten Schritt aus.
@@ -263,7 +263,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
               />
               </div>
               {bestellung.saatgutName && (
-                <div className="p-4 bg-green-50 rounded-lg">
+                <div className="p-4 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-lg">
                   <h4 className="font-medium text-status-success">Ausgewähltes Saatgut</h4>
                   <p className="text-sm text-status-success mt-1">{bestellung.saatgutName}</p>
                 </div>
@@ -298,7 +298,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
                   />
                 </div>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg">
+              <div className="p-4 bg-[hsl(var(--color-semantic-warning-50-hsl))] rounded-lg">
                 <h4 className="font-medium text-status-warning">Empfohlene Menge</h4>
                 <p className="text-sm text-status-warning mt-1">
                   Für {bestellung.flaeche} ha: {empfohleneMenge.min} - {empfohleneMenge.max} kg
