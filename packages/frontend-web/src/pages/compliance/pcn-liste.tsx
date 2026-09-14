@@ -52,7 +52,7 @@ export default function PCNListePage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileText className="h-8 w-8 text-blue-600" />
+            <FileText className="h-8 w-8 text-muted-foreground" />
             PCN-Meldungen
           </h1>
           <p className="text-muted-foreground">Product Classification Notifications (EU 2017/542)</p>

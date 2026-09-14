@@ -122,7 +122,7 @@ export default function LiveMonitorPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Vertriebsereignisse</CardTitle></CardHeader>
           <CardContent className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-700" />
+            <FileText className="h-5 w-5 text-muted-foreground" />
             <span className="text-2xl font-bold">{salesDocs.length}</span>
           </CardContent>
         </Card>

@@ -333,7 +333,7 @@ export default function RationsZugangPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <Shield className="h-6 w-6 text-blue-600" />
+            <Shield className="h-6 w-6 text-muted-foreground" />
             Datenschutz – Zugangsverwaltung Rationen
           </h1>
           <p className="text-sm text-muted-foreground mt-1">

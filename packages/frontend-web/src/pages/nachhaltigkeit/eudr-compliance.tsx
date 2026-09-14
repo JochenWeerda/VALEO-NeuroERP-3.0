@@ -71,7 +71,7 @@ export default function EUDRCompliancePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-blue-600" />
+              <Globe className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{eudr.batches_total}</span>
             </div>
           </CardContent>

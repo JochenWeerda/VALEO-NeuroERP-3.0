@@ -175,7 +175,7 @@ export default function KlaerfallInboxPage() {
                         {item.channel}
                       </span>
                       {item.direction === 'aus'
-                        ? <ArrowUpRight size={14} className="text-blue-500" aria-label="ausgehend" />
+                        ? <ArrowUpRight size={14} className="text-muted-foreground" aria-label="ausgehend" />
                         : <ArrowDownLeft size={14} className="text-status-success" aria-label="eingehend" />}
                     </div>
 

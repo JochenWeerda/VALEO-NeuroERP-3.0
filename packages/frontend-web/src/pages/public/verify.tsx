@@ -105,7 +105,7 @@ export default function VerifyPage(): JSX.Element {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
               <p className="text-gray-600">Verifying document...</p>
             </div>
           </CardContent>

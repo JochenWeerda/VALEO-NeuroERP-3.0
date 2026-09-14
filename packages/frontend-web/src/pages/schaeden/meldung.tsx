@@ -141,7 +141,7 @@ export default function SchadenMeldungPage(): JSX.Element {
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
               {meldungMutation.isPending ? (
-                <Loader2 className="h-20 w-20 text-blue-600 animate-spin" />
+                <Loader2 className="h-20 w-20 text-muted-foreground animate-spin" />
               ) : (
                 <CheckCircle className="h-20 w-20 text-status-success" />
               )}

@@ -604,9 +604,9 @@ const DuengerStammPage: React.FC = () => {
                   />
                   <Label htmlFor="wassergefaehrdend" className="flex items-center gap-2">
                     {formData.wassergefaehrdend ? (
-                      <Droplets className="w-4 h-4 text-blue-500" />
+                      <Droplets className="w-4 h-4 text-muted-foreground" />
                     ) : (
-                      <Droplets className="w-4 h-4 text-gray-400" />
+                      <Droplets className="w-4 h-4 text-muted-foreground" />
                     )}
                     Wassergefährdend
                   </Label>
@@ -650,7 +650,7 @@ const DuengerStammPage: React.FC = () => {
                      {formData.ausgangsstoff_explosivstoffe ? (
                        <AlertTriangle className="w-4 h-4 text-status-warning" />
                      ) : (
-                       <AlertTriangle className="w-4 h-4 text-gray-400" />
+                       <AlertTriangle className="w-4 h-4 text-muted-foreground" />
                      )}
                      Enthält Ausgangsstoffe für Explosivstoffe
                    </Label>
@@ -670,7 +670,7 @@ const DuengerStammPage: React.FC = () => {
                          {formData.erklaerung_landwirt_erforderlich ? (
                            <CheckCircle className="w-4 h-4 text-status-success" />
                          ) : (
-                           <XCircle className="w-4 h-4 text-gray-400" />
+                           <XCircle className="w-4 h-4 text-muted-foreground" />
                          )}
                          Erklärung des Landwirts erforderlich
                        </Label>

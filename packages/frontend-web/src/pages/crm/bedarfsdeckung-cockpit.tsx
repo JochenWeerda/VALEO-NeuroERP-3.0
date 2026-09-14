@@ -119,7 +119,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h1 className="flex items-center gap-2 text-3xl font-bold"><Target className="h-7 w-7 text-blue-600" />Bedarfsdeckung</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold"><Target className="h-7 w-7 text-muted-foreground" />Bedarfsdeckung</h1>
         <p className="text-muted-foreground">Objektiver Jahresbedarf je Produktgruppe vs. Ist-Bezug — die Lücke ist das Vertriebsobjekt.</p>
       </div>
 
@@ -174,7 +174,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
           {/* Käufergruppe */}
           <Card className="border-indigo-200 bg-indigo-50/40">
             <CardContent className="flex flex-wrap items-start gap-3 p-4">
-              <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" />
+              <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-2 font-semibold text-indigo-900">
                   Käufergruppe: {data.kaeufergruppe.label}
@@ -212,7 +212,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
           {data.next_best_offer && (
             <Card className="border-blue-200 bg-blue-50/50">
               <CardContent className="flex flex-wrap items-start gap-3 p-4">
-                <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
+                <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-blue-900">Next-Best-Offer · {data.next_best_offer.label} <span className="font-normal text-blue-700">({EUR(data.next_best_offer.realistische_luecke_eur)} realistisch gewinnbar)</span></p>
                   <p className="text-sm text-blue-800">{data.next_best_offer.empfehlung}</p>

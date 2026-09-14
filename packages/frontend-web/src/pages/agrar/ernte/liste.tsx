@@ -103,7 +103,7 @@ export default function ErnteListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
+              <Calendar className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{ernten.length}</span>
             </div>
           </CardContent>

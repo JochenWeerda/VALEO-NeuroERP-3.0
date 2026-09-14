@@ -594,7 +594,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-blue-600" />
+              <Clock className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{cockpit.kpis.presentEmployees}</span>
             </div>
           </CardContent>
@@ -638,7 +638,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-sky-700" />
+              <Users className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{cockpit.kpis.pendingApprovals}</span>
             </div>
           </CardContent>
@@ -694,7 +694,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-            <Route className="h-5 w-5 text-cyan-700" />
+            <Route className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{driverTime?.kpis.tourCount ?? 0}</span>
             </div>
           </CardContent>
@@ -720,7 +720,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-indigo-700" />
+              <ShieldCheck className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{driverWarnings}</span>
             </div>
           </CardContent>

@@ -60,7 +60,7 @@ const statusIconMap: Record<Zahlungseingang['match_status'], JSX.Element> = {
   MATCHED: <CheckCircle className="h-4 w-4 text-status-success" />,
   UNMATCHED: <AlertTriangle className="h-4 w-4 text-status-warning" />,
   PARTIAL: <AlertTriangle className="h-4 w-4 text-status-warning" />,
-  MANUAL: <Link2 className="h-4 w-4 text-blue-600" />,
+  MANUAL: <Link2 className="h-4 w-4 text-muted-foreground" />,
 }
 
 export default function ZahlungseingangsPage(): JSX.Element {

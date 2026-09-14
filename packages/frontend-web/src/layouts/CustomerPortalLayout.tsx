@@ -99,7 +99,7 @@ function PortalNavLink({
             {item.badge}
           </Badge>
         )}
-        {!compact && <ChevronRight className="h-4 w-4 text-gray-400" />}
+        {!compact && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
       </span>
     </Link>
   )

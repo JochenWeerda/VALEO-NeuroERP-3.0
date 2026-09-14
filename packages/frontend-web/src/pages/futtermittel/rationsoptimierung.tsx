@@ -1608,7 +1608,7 @@ function GfaPickerModal({
         </div>
         <div className="px-4 py-3 border-b" style={{ borderColor: C.border }}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
             <input
               autoFocus
               type="text"
@@ -2323,7 +2323,7 @@ function Wizard({
             {/* Toolbar */}
             <div className="p-4 border-b flex items-center justify-between gap-4 flex-wrap" style={{ borderColor: C.border }}>
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                 <input
                   type="text"
                   value={searchQuery}

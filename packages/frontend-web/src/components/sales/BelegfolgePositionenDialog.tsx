@@ -69,7 +69,7 @@ function typLabel(typ: BelegTyp): string {
 }
 
 function typIcon(typ: BelegTyp) {
-  if (typ === 'angebot') return <FileText className="h-4 w-4 text-blue-500" />
+  if (typ === 'angebot') return <FileText className="h-4 w-4 text-muted-foreground" />
   if (typ === 'auftrag') return <ShoppingCart className="h-4 w-4 text-status-success" />
   if (typ === 'portalbestellung') return <Globe className="h-4 w-4 text-purple-500" />
   return <Truck className="h-4 w-4 text-status-warning" />

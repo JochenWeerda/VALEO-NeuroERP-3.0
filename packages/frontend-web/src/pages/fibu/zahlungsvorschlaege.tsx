@@ -256,7 +256,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-600" />
+              <CheckCircle className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{selected.size}</span>
             </div>
           </CardContent>

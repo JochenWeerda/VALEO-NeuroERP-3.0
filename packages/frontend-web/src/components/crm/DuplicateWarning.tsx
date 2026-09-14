@@ -24,7 +24,7 @@ export function DuplicateWarning({
   if (isChecking) {
     return (
       <Alert className={cn('border-blue-200 bg-blue-50', className)}>
-        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         <AlertTitle className="text-blue-800">Duplikat-Prüfung...</AlertTitle>
         <AlertDescription className="text-blue-700">
           Suche nach möglichen Duplikaten im System.

@@ -279,7 +279,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
       content: (
         <TouchSection>
           <div className="flex items-center justify-center py-2">
-            <Truck className="h-16 w-16 text-slate-300" />
+            <Truck className="h-16 w-16 text-muted-foreground" />
           </div>
           <div className="space-y-1">
             <TouchTextInput
@@ -307,7 +307,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
               className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
               <input {...dropzoneKennzeichen.getInputProps()} accept="image/*" capture="environment" aria-label="Foto Kennzeichen hochladen" />
-              <Upload className="mb-1 h-6 w-6 text-slate-400" />
+              <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
               <p className="text-sm text-slate-500">
                 {dropzoneKennzeichen.isDragActive ? 'Ablegen...' : 'Tippen oder Foto hierher ziehen'}
               </p>
@@ -362,7 +362,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
               className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
               <input {...dropzoneLieferschein.getInputProps()} accept="image/*" capture="environment" aria-label="Foto Lieferschein hochladen" />
-              <Upload className="mb-1 h-6 w-6 text-slate-400" />
+              <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
               <p className="text-sm text-slate-500">
                 {dropzoneLieferschein.isDragActive ? 'Ablegen...' : 'Tippen oder Foto hierher ziehen'}
               </p>
@@ -401,7 +401,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
         <div className="space-y-5">
           <div className="flex flex-col items-center gap-2 py-2">
             <div className="rounded-full bg-slate-100 p-5">
-              <Truck className="h-12 w-12 text-slate-600" />
+              <Truck className="h-12 w-12 text-muted-foreground" />
             </div>
             <h3 className="text-xl font-bold text-slate-900">{lkw.kennzeichen || 'KENNZEICHEN'}</h3>
           </div>

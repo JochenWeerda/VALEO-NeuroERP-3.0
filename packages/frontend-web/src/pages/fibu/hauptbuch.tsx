@@ -121,7 +121,7 @@ export default function HauptbuchPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>

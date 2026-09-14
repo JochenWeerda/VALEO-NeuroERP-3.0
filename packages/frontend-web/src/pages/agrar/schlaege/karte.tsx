@@ -47,7 +47,7 @@ export default function SchlagKartePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Map className="h-5 w-5 text-blue-600" />
+              <Map className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{gesamt}</span>
             </div>
           </CardContent>
@@ -84,7 +84,7 @@ export default function SchlagKartePage(): JSX.Element {
         <CardContent>
           <div className="rounded-lg border-2 border-dashed p-6 min-h-[400px] flex items-center justify-center bg-[hsl(var(--color-semantic-success-50-hsl))]">
             <div className="text-center">
-              <Map className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <Map className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground font-semibold">Interaktive Karte</p>
               <p className="text-sm text-muted-foreground mt-2">Integration: OpenStreetMap / Google Maps</p>
             </div>

@@ -122,7 +122,7 @@ export default function ArtikelListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-blue-600" />
+              <Package className="h-5 w-5 text-muted-foreground" />
               {isLoading ? (
                 <Skeleton className="h-8 w-12" />
               ) : (

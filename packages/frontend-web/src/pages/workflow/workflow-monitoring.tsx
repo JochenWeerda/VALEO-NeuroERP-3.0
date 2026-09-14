@@ -23,7 +23,7 @@ export default function WorkflowMonitoringPage(): JSX.Element {
     switch (status) {
       case 'SUCCESS': return <CheckCircle className="h-4 w-4 text-status-success" />
       case 'FAILED': return <XCircle className="h-4 w-4 text-status-error" />
-      case 'RUNNING': return <Clock className="h-4 w-4 text-blue-600" />
+      case 'RUNNING': return <Clock className="h-4 w-4 text-muted-foreground" />
       default: return <Clock className="h-4 w-4 text-status-warning" />
     }
   }

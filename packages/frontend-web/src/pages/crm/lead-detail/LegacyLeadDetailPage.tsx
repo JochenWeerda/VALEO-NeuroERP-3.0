@@ -154,7 +154,7 @@ function LegacyLeadDetailPage(): JSX.Element {
             {t('common.back')}
           </Button>
           <div className="flex items-center gap-3">
-            <Target className="h-8 w-8 text-blue-600" />
+            <Target className="h-8 w-8 text-muted-foreground" />
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 {pageTitle}

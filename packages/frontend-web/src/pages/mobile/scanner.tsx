@@ -67,7 +67,7 @@ export default function MobileScannerPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border-2 border-dashed p-12 flex flex-col items-center justify-center bg-gray-50 min-h-[300px]">
-            <Camera className="h-24 w-24 text-gray-400 mb-4" />
+            <Camera className="h-24 w-24 text-muted-foreground mb-4" />
             <p className="text-muted-foreground text-center">Kamera-Vorschau</p>
             <p className="text-sm text-muted-foreground mt-2">Barcode/QR-Code vor Kamera halten</p>
           </div>

@@ -62,13 +62,13 @@ export default function DurchdringungsPipelinePage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h1 className="flex items-center gap-2 text-3xl font-bold"><ListChecks className="h-7 w-7 text-blue-600" />Durchdringungs-Pipeline</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold"><ListChecks className="h-7 w-7 text-muted-foreground" />Durchdringungs-Pipeline</h1>
         <p className="text-muted-foreground">Priorisierte Arbeitsliste nach realistischer Chance — größte gewinnbare Lücke × Marge × Abschluss ÷ Aufwand.</p>
       </div>
 
       {/* Summen */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card><CardContent className="flex items-center gap-3 p-4"><Users className="h-5 w-5 text-blue-600" /><div><p className="text-xs text-muted-foreground">Betriebe</p><p className="text-2xl font-bold">{rows.length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-4"><Users className="h-5 w-5 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Betriebe</p><p className="text-2xl font-bold">{rows.length}</p></div></CardContent></Card>
         <Card><CardContent className="flex items-center gap-3 p-4"><Target className="h-5 w-5 text-status-warning" /><div><p className="text-xs text-muted-foreground">Realist. Potenzial</p><p className="text-2xl font-bold text-status-warning">{EUR(summe)}</p></div></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Ø realist. Lücke/Betrieb</p><p className="text-2xl font-bold">{rows.length ? EUR(summe / rows.length) : '—'}</p></CardContent></Card>
       </div>

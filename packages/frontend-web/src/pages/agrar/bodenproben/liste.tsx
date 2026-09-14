@@ -105,7 +105,7 @@ export default function BodenprobenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Beaker className="h-5 w-5 text-blue-600" />
+              <Beaker className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{proben.length}</span>
             </div>
           </CardContent>

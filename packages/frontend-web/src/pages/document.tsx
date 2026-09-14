@@ -58,9 +58,9 @@ function getFileIcon(type: string) {
     case 'jpeg':
     case 'png':
     case 'gif':
-      return <FileImage className="h-5 w-5 text-blue-500" />
+      return <FileImage className="h-5 w-5 text-muted-foreground" />
     default:
-      return <File className="h-5 w-5 text-gray-500" />
+      return <File className="h-5 w-5 text-muted-foreground" />
   }
 }
 
@@ -553,7 +553,7 @@ export default function DocumentPanel(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-600" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
               Verfahrensanweisungen
             </CardTitle>
           </CardHeader>

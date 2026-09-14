@@ -48,7 +48,7 @@ const VORTEILE = [
   { icon: <Tractor className="h-5 w-5 text-status-warning" />, text: 'Online-Buchung von Lohndienstleistungen' },
   { icon: <Wheat className="h-5 w-5 text-lime-600" />, text: 'Digitale Schlagkartei & Spritztagebuch' },
   { icon: <Leaf className="h-5 w-5 text-status-success" />, text: 'Personalisierte Ankaufs- und Kontraktangebote' },
-  { icon: <Users className="h-5 w-5 text-blue-600" />, text: 'Direkter Draht zu Ihrem Berater im Innendienst' },
+  { icon: <Users className="h-5 w-5 text-muted-foreground" />, text: 'Direkter Draht zu Ihrem Berater im Innendienst' },
 ]
 
 type FormState = {

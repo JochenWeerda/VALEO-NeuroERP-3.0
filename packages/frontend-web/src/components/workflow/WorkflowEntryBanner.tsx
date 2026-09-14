@@ -55,7 +55,7 @@ export function WorkflowEntryBanner({
 
   return (
     <Alert className="border-indigo-400/30 bg-indigo-500/10 text-slate-100">
-      <Workflow className="h-4 w-4 text-indigo-200" />
+      <Workflow className="h-4 w-4 text-muted-foreground" />
       <AlertTitle className="flex items-center gap-2 text-indigo-50">
         {title}
         <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/20 bg-indigo-400/10 px-2 py-0.5 text-[11px] font-medium text-indigo-100">
@@ -76,7 +76,7 @@ export function WorkflowEntryBanner({
         ) : null}
         {context.label ? (
           <div className="flex items-center gap-2 text-xs text-slate-300">
-            <Link2 className="h-3.5 w-3.5 text-slate-400" />
+            <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
             Interne Referenz: {context.label}
           </div>
         ) : null}

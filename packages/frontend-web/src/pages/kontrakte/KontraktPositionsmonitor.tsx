@@ -295,7 +295,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Minus className="h-4 w-4 text-slate-500" />
+              <Minus className="h-4 w-4 text-muted-foreground" />
               Balanced
             </CardTitle>
           </CardHeader>

@@ -46,7 +46,7 @@ export default function BewegungenStatistikPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <ArrowUpCircle className="h-5 w-5 text-blue-600" />
+              <ArrowUpCircle className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold text-blue-600">{bewegungen.heute.ausgaenge}</span>
             </div>
           </CardContent>
@@ -97,7 +97,7 @@ export default function BewegungenStatistikPage(): JSX.Element {
                     {artikel.netto > 0 ? (
                       <TrendingUp className="h-4 w-4 text-status-success" />
                     ) : (
-                      <ArrowUpCircle className="h-4 w-4 text-blue-600" />
+                      <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
                     )}
                     <Badge variant={artikel.netto > 0 ? 'outline' : 'secondary'}>
                       {artikel.netto > 0 ? '+' : ''}{artikel.netto} t

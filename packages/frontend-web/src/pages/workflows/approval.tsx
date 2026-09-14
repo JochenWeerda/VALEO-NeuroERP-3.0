@@ -138,7 +138,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-blue-600" />
+                    <Package className="h-5 w-5 text-muted-foreground" />
                     <span className="text-2xl font-bold">{proposal.items.length}</span>
                   </div>
                 </CardContent>

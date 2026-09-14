@@ -102,7 +102,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
       ) : null}
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Warehouse className="h-8 w-8 text-blue-600" />
+          <Warehouse className="h-8 w-8 text-muted-foreground" />
           Bestandsübersicht
         </h1>
         <p className="text-muted-foreground">Lagerbestände & Kennzahlen</p>
@@ -135,7 +135,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-blue-600" />
+              <Package className="h-4 w-4 text-muted-foreground" />
               Artikel Gesamt
             </CardTitle>
           </CardHeader>

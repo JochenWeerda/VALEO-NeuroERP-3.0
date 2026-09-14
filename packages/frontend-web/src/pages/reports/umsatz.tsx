@@ -33,7 +33,7 @@ export default function UmsatzReportPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-blue-600" />
+              <Euro className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(umsatz.gesamt)}
               </span>

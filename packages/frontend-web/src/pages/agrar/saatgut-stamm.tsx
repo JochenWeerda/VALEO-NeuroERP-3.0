@@ -408,7 +408,7 @@ const SaatgutStammPage: React.FC = () => {
                       {formData.bsa_zulassung ? (
                         <CheckCircle className="w-4 h-4 text-status-success" />
                       ) : (
-                        <XCircle className="w-4 h-4 text-gray-400" />
+                        <XCircle className="w-4 h-4 text-muted-foreground" />
                       )}
                       BSA-Zulassung
                     </Label>
@@ -427,7 +427,7 @@ const SaatgutStammPage: React.FC = () => {
                       {formData.eu_zulassung ? (
                         <CheckCircle className="w-4 h-4 text-status-success" />
                       ) : (
-                        <XCircle className="w-4 h-4 text-gray-400" />
+                        <XCircle className="w-4 h-4 text-muted-foreground" />
                       )}
                       EU-Zulassung
                     </Label>

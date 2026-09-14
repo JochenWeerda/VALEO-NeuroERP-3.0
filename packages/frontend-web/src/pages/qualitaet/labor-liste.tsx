@@ -115,7 +115,7 @@ export default function LaborListePage(): JSX.Element {
       </div>
       <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Labor-Auftraege</h1><p className="text-muted-foreground">Qualitaetsanalysen</p></div><Button onClick={() => navigate('/qualitaet/labor-auftrag')} className="gap-2"><Plus className="h-4 w-4" />Neuer Auftrag</Button></div>
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Auftraege Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteAuftraege.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Auftraege Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteAuftraege.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{gefilterteAuftraege.filter((a) => a.status === 'in-bearbeitung').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{gefilterteAuftraege.filter((a) => a.status === 'abgeschlossen').length}</span></CardContent></Card>
       </div>

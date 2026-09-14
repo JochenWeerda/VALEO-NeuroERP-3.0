@@ -168,12 +168,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
     switch (type) {
       case 'expiring': return <Clock className="h-4 w-4 text-status-warning" />
       case 'low_rest': return <Package className="h-4 w-4 text-status-warning" />
-      case 'matif_open': return <TrendingUp className="h-4 w-4 text-blue-600" />
+      case 'matif_open': return <TrendingUp className="h-4 w-4 text-muted-foreground" />
       case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-fuchsia-600" />
       case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-status-error" />
       case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-status-error" />
       case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-status-warning" />
-      case 'print_missing': return <Package className="h-4 w-4 text-slate-700" />
+      case 'print_missing': return <Package className="h-4 w-4 text-muted-foreground" />
     }
   }
 

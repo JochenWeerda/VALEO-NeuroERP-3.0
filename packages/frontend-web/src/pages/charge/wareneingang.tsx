@@ -280,7 +280,7 @@ export default function WareneingangPage(): JSX.Element {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
-                  <Package className="h-8 w-8 text-blue-600" />
+                  <Package className="h-8 w-8 text-muted-foreground" />
                   <div>
                     <div className="text-sm text-muted-foreground">Neue Charge</div>
                     <div className="text-xl font-bold font-mono">{wareneingang.chargenId}</div>
@@ -385,7 +385,7 @@ export default function WareneingangPage(): JSX.Element {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 mb-4">
-                <MapPin className="h-6 w-6 text-blue-600" />
+                <MapPin className="h-6 w-6 text-muted-foreground" />
                 <div>
                   <div className="font-semibold">Lagerplatz-Vorschau</div>
                   <div className="text-sm text-muted-foreground">

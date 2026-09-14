@@ -381,7 +381,7 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
             <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-artifact`}>Ablageort / Link</Label>
             <div className="relative">
               <Input id={`${gate.id}-artifact`} value={form.artifactRef} onChange={(event) => update('artifactRef', event.target.value)} placeholder="dms://..." className="pr-8 font-mono text-xs" />
-              <ExternalLink className="absolute right-2 top-2.5 h-3.5 w-3.5 text-gray-300" />
+              <ExternalLink className="absolute right-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             </div>
           </div>
           <div>
@@ -486,7 +486,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Zustaendig</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <User className="h-3 w-3 text-gray-400" />
+                <User className="h-3 w-3 text-muted-foreground" />
                 {gate.ownerRole}
               </span>
             </div>
@@ -500,7 +500,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Faellig bis</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <Calendar className="h-3 w-3 text-gray-400" />
+                <Calendar className="h-3 w-3 text-muted-foreground" />
                 {formatDateOnly(gate.dueDate)}
               </span>
             </div>
@@ -513,7 +513,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Nachweise</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <FileText className="h-3 w-3 text-blue-500" />
+                <FileText className="h-3 w-3 text-muted-foreground" />
                 {gate.evidenceCount}
               </span>
             </div>
@@ -531,7 +531,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
               <p className="text-[13px] font-bold text-status-success">{formatDateOnly(gate.approvedAt)}</p>
             </div>
           ) : null}
-          {expanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
+          {expanded ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
         </div>
       </button>
 
@@ -581,15 +581,15 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
                 </div>
                 <div className="space-y-2 text-[12px] text-gray-500">
                   <p className="flex items-center gap-2">
-                    <History className="h-3 w-3 text-gray-400" />
+                    <History className="h-3 w-3 text-muted-foreground" />
                     Letzte Aenderung: {formatDate(gate.lastChangedAt)}
                   </p>
                   <p className="flex items-center gap-2">
-                    <History className="h-3 w-3 text-gray-400" />
+                    <History className="h-3 w-3 text-muted-foreground" />
                     Rollen mit Schreibrecht: {gate.allowedRoles.join(', ')}
                   </p>
                   <p className="flex items-center gap-2">
-                    <History className="h-3 w-3 text-gray-400" />
+                    <History className="h-3 w-3 text-muted-foreground" />
                     Nur lesend: {gate.readOnlyRoles.join(', ')}
                   </p>
                 </div>

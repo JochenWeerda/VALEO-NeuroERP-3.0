@@ -126,7 +126,7 @@ export function SemanticSearch() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'customer':
-        return <User className="h-5 w-5 text-blue-600" />
+        return <User className="h-5 w-5 text-muted-foreground" />
       case 'article':
         return <Package className="h-5 w-5 text-status-success" />
       case 'document':

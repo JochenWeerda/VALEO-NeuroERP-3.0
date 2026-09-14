@@ -40,7 +40,7 @@ export default function LagerbestandReportPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Warehouse className="h-5 w-5 text-blue-600" />
+              <Warehouse className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{lager.gesamtmenge.toLocaleString('de-DE')} t</span>
             </div>
           </CardContent>

@@ -44,7 +44,7 @@ type PotentialResponse = {
 const GAP_ICONS: Record<string, React.ReactNode> = {
   ankauf_kein_kontrakt: <Wheat className="h-5 w-5 text-status-success" />,
   lohnspritz_kein_auftrag: <Tractor className="h-5 w-5 text-status-warning" />,
-  ration_kein_rohwaren_kontrakt: <Euro className="h-5 w-5 text-blue-600" />,
+  ration_kein_rohwaren_kontrakt: <Euro className="h-5 w-5 text-muted-foreground" />,
 }
 
 function GapKarte({ gap }: { gap: GapTyp }) {
@@ -112,7 +112,7 @@ export default function PotentialAnalysePage() {
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Target className="h-6 w-6 text-blue-600" />
+          <Target className="h-6 w-6 text-muted-foreground" />
           Potential-Analyse
         </h1>
         <p className="text-gray-500 text-sm mt-1">

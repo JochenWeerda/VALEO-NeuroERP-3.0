@@ -124,7 +124,7 @@ export default function ZertifikateListePage(): JSX.Element {
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zertifikate Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Award className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{zertifikate.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zertifikate Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Award className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{zertifikate.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{zertifikate.filter((z) => z.status === 'gueltig').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ablauf in 90 Tagen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{expiringCertificates.length}</span></CardContent></Card>
       </div>

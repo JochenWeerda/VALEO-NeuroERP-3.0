@@ -121,7 +121,7 @@ export default function BwaPage(): JSX.Element {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
                   <span className="text-2xl font-bold">{fmtNum(totalRevenue)} €</span>
                 </div>
               </CardContent>

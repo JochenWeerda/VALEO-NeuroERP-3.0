@@ -93,7 +93,7 @@ export default function KundenumsatzPage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamtumsatz</CardTitle></CardHeader>
-          <CardContent><div className="flex items-center gap-2"><Euro className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{formatValue(analyse.gesamtumsatz)}</span></div></CardContent>
+          <CardContent><div className="flex items-center gap-2"><Euro className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{formatValue(analyse.gesamtumsatz)}</span></div></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kunden</CardTitle></CardHeader>

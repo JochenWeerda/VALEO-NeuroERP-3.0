@@ -99,6 +99,34 @@ zurueckstellung:
     semantische Tokens umgestellt. Diese Welle betraf nur noch Ikon-, Text-
     und Akzentfarben.
 
+fortschritt:
+  schritt_1_sachikonen:
+    stand: abgeschlossen
+    datum: "2026-09-14"
+    ergebnis: >-
+      186 Ikonen in 130 Dateien auf text-muted-foreground zurueckgebaut.
+      Getrennt nach Farbfamilie: Bedeutungstraeger (red, green, emerald,
+      amber, orange, yellow, rose, lime) unangetastet, Akzentfamilien fuer
+      Agent/KI (violet, purple, fuchsia, pink) ausgenommen, Dekoration
+      (blue, sky, cyan, indigo, slate, gray, zinc, neutral, stone) neutral.
+    gegenprobe: >-
+      Danach tragen noch 12 Ikonen in 10 Dateien Farbe - 11 davon die
+      ausgenommenen Akzentfamilien (Agent/KI), 1 lime. Keine blaue Sachikone
+      mehr im Bestand.
+    abweichung_zur_vorarbeit: >-
+      Die zurueckgenommene Vorarbeit hatte 151 Ikonen in 121 Dateien
+      gemessen; dieser Lauf fasst zusaetzlich graue und slate-Sachikonen
+      sowie dark-Varianten an und liegt deshalb bei 186 in 130.
+    abnahme: >-
+      tsc --noEmit exit 0; vitest 126 Dateien, 495 Tests, 1 Skip - identisch
+      zur Baseline. Selbsttest des Codemods 7/7 gruen vor dem Lauf.
+  offen:
+    - "Textfarben (189) - Kennzahlen und Beschriftungen"
+    - "Button-Uebersteuerungen (54) - Muster text-blue-600 hover:underline"
+    - "Auswahlhervorhebung (36) - bg-green-100 auf bg-accent"
+    - "Tabellen- und Helferfarben (152)"
+    - "Deckende Flaechen ab Schattierung 500 (484)"
+
 tests:
   - >-
     Codemod-Selbsttest ueber fuenf Musterfaelle (Sachikone in Blau,

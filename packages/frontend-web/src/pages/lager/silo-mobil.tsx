@@ -240,7 +240,7 @@ function FlushChargePanel({ warehouseId, cells }: { warehouseId: string; cells: 
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <Droplets className="h-5 w-5 text-blue-500" />
+          <Droplets className="h-5 w-5 text-muted-foreground" />
           Spuelcharge
         </CardTitle>
       </CardHeader>

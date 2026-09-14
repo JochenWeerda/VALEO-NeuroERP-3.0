@@ -89,7 +89,7 @@ export default function MitarbeiterListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
+              <Users className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>

@@ -89,7 +89,7 @@ const massnahmenRoles = [
 
 function getMassnahmeIcon(typ: string) {
   switch (typ) {
-    case 'Düngung': return <Droplets className="h-4 w-4 text-blue-600" />
+    case 'Düngung': return <Droplets className="h-4 w-4 text-muted-foreground" />
     case 'PSM': return <Bug className="h-4 w-4 text-status-error" />
     case 'PSM-Behandlung': return <Bug className="h-4 w-4 text-status-error" />
     case 'Aussaat': return <Wheat className="h-4 w-4 text-status-warning" />
@@ -361,7 +361,7 @@ export default function MassnahmenPage(): JSX.Element {
           ) : (
             <AlertTriangle className="h-4 w-4 text-status-warning" />
           )}
-          {m.exportiert && <FileText className="h-4 w-4 text-blue-600" aria-label="Exportiert" />}
+          {m.exportiert && <FileText className="h-4 w-4 text-muted-foreground" aria-label="Exportiert" />}
         </div>
       )
     },
@@ -462,7 +462,7 @@ export default function MassnahmenPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <CalendarDays className="h-8 w-8 text-blue-600" />
+            <CalendarDays className="h-8 w-8 text-muted-foreground" />
             Maßnahmen-Dokumentation
           </h1>
           <p className="text-muted-foreground">
@@ -544,7 +544,7 @@ export default function MassnahmenPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Droplets className="h-4 w-4 text-blue-600" />
+              <Droplets className="h-4 w-4 text-muted-foreground" />
               Düngungen
             </CardTitle>
           </CardHeader>
@@ -803,7 +803,7 @@ export default function MassnahmenPage(): JSX.Element {
             <CardContent>
               <div className="h-64 bg-linear-to-br from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-lg flex items-center justify-center">
                 <div className="text-center space-y-4">
-                  <Droplets className="h-16 w-16 mx-auto text-blue-600" />
+                  <Droplets className="h-16 w-16 mx-auto text-muted-foreground" />
                   <div>
                     <h3 className="text-lg font-semibold">Stoffstrombilanz</h3>
                     <p className="text-sm text-muted-foreground">

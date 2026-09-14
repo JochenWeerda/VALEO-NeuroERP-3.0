@@ -98,7 +98,7 @@ export default function LaborProbenListePage(): JSX.Element {
       </div>
       <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Laborproben</h1><p className="text-muted-foreground">Proben-Verwaltung</p></div><Button onClick={() => navigate('/labor/probe/neu')} className="gap-2"><Plus className="h-4 w-4" />Neue Probe</Button></div>
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Proben Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteProben.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Proben Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteProben.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{processingCount}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{completedCount}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ausstehend</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{pendingCount}</span></CardContent></Card>

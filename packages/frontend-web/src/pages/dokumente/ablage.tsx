@@ -200,7 +200,7 @@ export default function DokumentenAblagePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{workspace.total}</span>
             </div>
           </CardContent>

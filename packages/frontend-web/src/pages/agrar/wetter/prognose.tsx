@@ -21,13 +21,13 @@ const severityVariant = (s: string): 'outline' | 'secondary' | 'destructive' => 
 }
 
 const wetterIcon = (cond?: string) => {
-  if (!cond) return <Cloud className="h-10 w-10 text-gray-400" />
+  if (!cond) return <Cloud className="h-10 w-10 text-muted-foreground" />
   if (cond.includes('rain') || cond.includes('drizzle') || cond.includes('shower'))
-    return <CloudRain className="h-10 w-10 text-blue-500" />
+    return <CloudRain className="h-10 w-10 text-muted-foreground" />
   if (cond.includes('thunder') || cond.includes('lightning'))
     return <Zap className="h-10 w-10 text-status-warning" />
   if (cond.includes('cloud') || cond.includes('fog') || cond.includes('overcast'))
-    return <Cloud className="h-10 w-10 text-gray-500" />
+    return <Cloud className="h-10 w-10 text-muted-foreground" />
   return <Sun className="h-10 w-10 text-status-warning" />
 }
 
@@ -222,7 +222,7 @@ export default function WetterPrognosePage(): JSX.Element {
                         <div className="text-xs font-medium text-muted-foreground">{label}</div>
                         <div className="my-2">
                           {regen
-                            ? <CloudRain className="h-8 w-8 mx-auto text-blue-500" />
+                            ? <CloudRain className="h-8 w-8 mx-auto text-muted-foreground" />
                             : <Sun className="h-8 w-8 mx-auto text-status-warning" />}
                         </div>
                         <div className="text-lg font-bold">{fmt(tag.temperatur_max, '°')}</div>

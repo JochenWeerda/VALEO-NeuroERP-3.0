@@ -36,7 +36,7 @@ export function IncomingCallPopup(): JSX.Element | null {
         <div className="space-y-1 px-3 py-3">
           {call.kunden_nr ? (
             <>
-              <p className="flex items-center gap-2 font-medium"><User2 className="h-4 w-4 text-blue-600" />{call.kunde_name ?? call.kunden_nr}</p>
+              <p className="flex items-center gap-2 font-medium"><User2 className="h-4 w-4 text-muted-foreground" />{call.kunde_name ?? call.kunden_nr}</p>
               <p className="text-xs text-muted-foreground">{call.kunden_nr} · {call.caller}</p>
             </>
           ) : (

@@ -122,7 +122,7 @@ export default function AdminSuiteConnectorenPage(): JSX.Element {
       <div className="flex justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
-            <Cable className="h-7 w-7 text-sky-700" /> Auto-Capture-Connectoren
+            <Cable className="h-7 w-7 text-muted-foreground" /> Auto-Capture-Connectoren
           </h1>
           <p className="mt-2 text-muted-foreground">
             STT- und IMAP-Einstellungen für die automatische Kontakt-Erfassung — pro Mandant,
@@ -138,7 +138,7 @@ export default function AdminSuiteConnectorenPage(): JSX.Element {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Mic className="h-5 w-5 text-sky-700" /> Telefon-Transkript (STT)
+            <Mic className="h-5 w-5 text-muted-foreground" /> Telefon-Transkript (STT)
             <StatusBadge ok={stt.configured} />
           </CardTitle>
           <CardDescription>
@@ -184,7 +184,7 @@ export default function AdminSuiteConnectorenPage(): JSX.Element {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-sky-700" /> E-Mail-Postfach (IMAP)
+            <Mail className="h-5 w-5 text-muted-foreground" /> E-Mail-Postfach (IMAP)
             <StatusBadge ok={imap.configured} />
           </CardTitle>
           <CardDescription>

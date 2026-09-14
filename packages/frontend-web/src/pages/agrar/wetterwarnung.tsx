@@ -36,12 +36,12 @@ function severityLabel(severity: string): string {
 function warnungIcon(event: string) {
   const lower = event.toLowerCase()
   if (lower.includes('regen') || lower.includes('niederschlag')) {
-    return <CloudRain className="h-8 w-8 text-blue-600" />
+    return <CloudRain className="h-8 w-8 text-muted-foreground" />
   }
   if (lower.includes('gewitter') || lower.includes('sturm') || lower.includes('wind')) {
     return <ShieldAlert className="h-8 w-8 text-status-warning" />
   }
-  return <Cloud className="h-8 w-8 text-gray-600" />
+  return <Cloud className="h-8 w-8 text-muted-foreground" />
 }
 
 export default function WetterwarnungPage(): JSX.Element {

@@ -76,7 +76,7 @@ export function TouchCard({
         )}
       </span>
       {selected && (
-        <Check className="h-5 w-5 shrink-0 text-blue-500" aria-hidden />
+        <Check className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
       )}
     </button>
   )

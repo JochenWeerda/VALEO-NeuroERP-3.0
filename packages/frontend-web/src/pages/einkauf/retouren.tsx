@@ -602,7 +602,7 @@ export default function RetourenPage(): JSX.Element {
             {returnData.creditMemoRequested && (
               <Callout variant="info" className="p-3 border rounded-md">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <AlertTriangle className="h-4 w-4 text-muted-foreground mt-0.5" />
                   <div className="text-sm text-blue-800">
                     {t('crud.dialogs.createReturn.creditMemoInfo')}
                   </div>

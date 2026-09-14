@@ -902,7 +902,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             </div>
           </div>
           <div className="relative w-full max-w-xl">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input aria-label="Globale Suche" placeholder={workspace.search_placeholder} className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500" />
           </div>
           <div className="flex items-center gap-3">
@@ -922,10 +922,10 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 </span>
               ))}
             </div>
-            <Bell className="h-4 w-4 text-slate-300" />
-            <Settings className="h-4 w-4 text-slate-300" />
+            <Bell className="h-4 w-4 text-muted-foreground" />
+            <Settings className="h-4 w-4 text-muted-foreground" />
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-100">
-              <UserCircle2 className="h-5 w-5 text-slate-300" />
+              <UserCircle2 className="h-5 w-5 text-muted-foreground" />
               <span>{workspace.user_role}</span>
             </div>
           </div>
@@ -1038,7 +1038,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
 
             {workspace.customer_data && (
               <div className="mb-4 flex items-center gap-4 rounded-2xl border border-indigo-400/20 bg-indigo-500/8 px-5 py-3">
-                <Building2 className="h-5 w-5 text-indigo-300 shrink-0" />
+                <Building2 className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-100">
                     {workspace.customer_data.name_1}
@@ -1231,7 +1231,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     </Card>
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Dokumente</CardTitle></CardHeader>
-                      <CardContent className="space-y-2 text-sm">{selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</button>)}</CardContent>
+                      <CardContent className="space-y-2 text-sm">{selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</button>)}</CardContent>
                     </Card>
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
@@ -1278,7 +1278,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                           className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
                         >
                           <span>{module.label}</span>
-                          <ChevronRight className="h-4 w-4 text-slate-500" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </button>
                       ))}
                     </CardContent>
@@ -1387,7 +1387,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/3 p-4">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 text-sm font-medium text-slate-100">
-                              <History className="h-4 w-4 text-slate-500" />
+                              <History className="h-4 w-4 text-muted-foreground" />
                               {event.event_type}
                             </div>
                             <div className="text-[11px] text-slate-500">{formatDateTime(event.created_at)}</div>
@@ -1415,8 +1415,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     onClick={() => go(doc.href)}
                     className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
                   >
-                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</span>
-                    <ChevronRight className="h-4 w-4 text-slate-500" />
+                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
                 ))}
               </TabsContent>
@@ -1483,7 +1483,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 /></Suspense>
               ) : (
                 <div className="relative">
-                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="instance-partner"
                     value={newInstancePartnerName}

@@ -113,7 +113,7 @@ export default function SiloKapazitaetenPage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Silos Gesamt</CardTitle></CardHeader>
-          <CardContent><div className="flex items-center gap-2"><Box className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{silos.gesamt}</span></div></CardContent>
+          <CardContent><div className="flex items-center gap-2"><Box className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{silos.gesamt}</span></div></CardContent>
         </Card>
 
         <Card>

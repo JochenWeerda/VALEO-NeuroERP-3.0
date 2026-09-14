@@ -146,7 +146,7 @@ export default function KontaktDetailPage(): JSX.Element {
             {t('common.back')}
           </Button>
           <div className="flex items-center gap-3">
-            <User className="h-8 w-8 text-blue-600" />
+            <User className="h-8 w-8 text-muted-foreground" />
             <div>
               <h1 className="text-3xl font-bold">{pageTitle}</h1>
               <p className="text-muted-foreground">{pageSubtitle}</p>

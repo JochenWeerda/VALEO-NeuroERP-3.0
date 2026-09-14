@@ -95,7 +95,7 @@ export default function FlowSpineStudioPage(): JSX.Element {
               </CardHeader>
               <CardContent className="flex items-end justify-between">
                 <p className="text-sm text-slate-400">{process.summary}</p>
-                <ChevronRight className="ml-3 h-4 w-4 shrink-0 text-slate-500" />
+                <ChevronRight className="ml-3 h-4 w-4 shrink-0 text-muted-foreground" />
               </CardContent>
             </Card>
           ))}

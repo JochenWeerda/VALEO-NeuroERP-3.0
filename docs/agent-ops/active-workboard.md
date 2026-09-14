@@ -712,6 +712,15 @@ kein Umfaerben.
    blaue Einzelklassen.
 5. **Kategoriale** Faerbung bleibt ausgenommen wie in Welle 4/5.
 
+**Schritt 1 erledigt (2026-09-14):** 186 Sachikonen in 130 Dateien auf
+`text-muted-foreground` zurueckgebaut. Bedeutungstragende Familien (rot, gruen,
+amber, orange) unangetastet, Agent/KI-Akzente (violett, purpur) ausgenommen.
+Danach tragen noch 12 Ikonen in 10 Dateien Farbe, 11 davon die ausgenommenen
+Akzente — **keine blaue Sachikone mehr im Bestand**. Abnahme: `tsc --noEmit`
+exit 0, Vitest 126 Dateien / 495 Tests / 1 Skip, identisch zur Baseline.
+**Offen:** Textfarben (189), Button-Uebersteuerungen (54), Auswahl (36),
+Tabellen/Helfer (152), deckende Flaechen (484).
+
 **Ausgangsmessung:** 1570 Palettenklassen — 169 Ikonfarben, 189 Textfarben,
 54 Button-Uebersteuerungen, 36 Auswahlhervorhebungen, 152 Tabellen/Helfer,
 484 deckende Flaechen.

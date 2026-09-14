@@ -75,7 +75,7 @@ export default function MaschinenauslastungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Maschinen Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16" /> : <div className="flex items-center gap-2"><Tractor className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{stats.gesamt ?? maschinen.length}</span></div>}
+            {isLoading ? <Skeleton className="h-8 w-16" /> : <div className="flex items-center gap-2"><Tractor className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{stats.gesamt ?? maschinen.length}</span></div>}
           </CardContent>
         </Card>
 

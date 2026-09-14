@@ -118,7 +118,7 @@ export default function OPVerwaltungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-blue-600" />
+              <Euro className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold text-blue-600">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.kreditoren.summe)}
               </span>
@@ -207,7 +207,7 @@ export default function OPVerwaltungPage(): JSX.Element {
             <div className="rounded-lg border p-4">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
+                  <FileText className="h-5 w-5 text-muted-foreground" />
                   <span className="font-semibold">Offene Posten</span>
                 </div>
                 <Badge variant="outline">{opData.kreditoren.gesamt}</Badge>

@@ -1055,7 +1055,7 @@ export default function ArtikelStammPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Warehouse className="h-5 w-5 text-blue-500" />
+                <Warehouse className="h-5 w-5 text-muted-foreground" />
                 Lagerhaltung
               </CardTitle>
             </CardHeader>

@@ -228,7 +228,7 @@ export default function PreisspiedelPage() {
           <Card className="border-[hsl(var(--color-semantic-info-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-info-50-hsl))]">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-blue-600 mt-0.5" />
+                <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium text-blue-900">Verbindliche Preisauskunft</div>
                   <div className="text-blue-700 text-sm mt-1">

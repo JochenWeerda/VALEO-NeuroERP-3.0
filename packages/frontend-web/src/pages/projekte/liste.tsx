@@ -56,7 +56,7 @@ export default function ProjekteListePage(): JSX.Element {
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Projekte</h1><p className="text-muted-foreground">Projektmanagement</p></div><Button onClick={() => navigate('/controlling/massnahmen')} className="gap-2"><Plus className="h-4 w-4" />Massnahme anlegen</Button></div>
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Projekte Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FolderKanban className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteProjekte.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Projekte Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FolderKanban className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteProjekte.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{gefilterteProjekte.filter((p) => p.status === 'aktiv').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Stockend/Pausiert</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{stockendeProjekte.length}</span></CardContent></Card>
       </div>

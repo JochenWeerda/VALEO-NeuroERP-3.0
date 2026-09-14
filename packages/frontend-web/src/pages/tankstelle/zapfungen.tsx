@@ -65,7 +65,7 @@ export default function ZapfungenPage(): JSX.Element {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zapfungen</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Fuel className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{filteredZapfungen.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zapfungen</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Fuel className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{filteredZapfungen.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt-Menge</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{gesamtMenge.toFixed(1)} l</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Durchschnitt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{(gesamtMenge / Math.max(filteredZapfungen.length, 1)).toFixed(1)} l</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Diesel-Vorgaenge</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{dieselCount}</span></CardContent></Card>

@@ -480,11 +480,11 @@ export default function ChartOfAccountsPage(): JSX.Element {
       </div>
 
       <div className="grid gap-4 md:grid-cols-6">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Building2 className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{stats.total}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Building2 className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{stats.total}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeAsset')}</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-status-success" /><span className="text-2xl font-bold">{stats.assets}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t('crud.fields.accountTypeLiability')}</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingDown className="h-5 w-5 text-status-error" /><span className="text-2xl font-bold">{stats.liabilities}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Eigenkapital</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><DollarSign className="h-5 w-5 text-purple-600" /><span className="text-2xl font-bold">{stats.equity}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Erloese</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{stats.revenue}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Erloese</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{stats.revenue}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aufwendungen</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><TrendingDown className="h-5 w-5 text-status-warning" /><span className="text-2xl font-bold">{stats.expenses}</span></div></CardContent></Card>
       </div>
 

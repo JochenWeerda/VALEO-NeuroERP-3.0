@@ -184,7 +184,7 @@ export default function SkontoOptimizerPage(): JSX.Element {
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Skonto-Posten</CardTitle></CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Euro className="h-5 w-5 text-blue-600" />
+                <Euro className="h-5 w-5 text-muted-foreground" />
                 <span className="text-2xl font-bold">{items.length}</span>
               </div>
             </CardContent>

@@ -156,7 +156,7 @@ export default function QSChecklistePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-blue-600" />
+              <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{qs.length}</span>
             </div>
           </CardContent>

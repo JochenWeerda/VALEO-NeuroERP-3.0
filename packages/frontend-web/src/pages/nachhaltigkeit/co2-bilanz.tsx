@@ -106,7 +106,7 @@ export default function CO2BilanzPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-blue-600" />
+              <TrendingDown className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{monthEntries.length}</span>
             </div>
           </CardContent>

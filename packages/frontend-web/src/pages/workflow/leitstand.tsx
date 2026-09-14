@@ -44,8 +44,8 @@ function StatusIcon({ status }: { status: string }) {
   if (status === 'completed') return <CheckCircle className="h-4 w-4 text-status-success" />
   if (status === 'failed') return <XCircle className="h-4 w-4 text-status-error" />
   if (status === 'blocked_external_gate') return <AlertTriangle className="h-4 w-4 text-status-warning" />
-  if (status === 'running') return <Zap className="h-4 w-4 text-blue-600" />
-  if (status === 'compensated') return <RotateCcw className="h-4 w-4 text-gray-500" />
+  if (status === 'running') return <Zap className="h-4 w-4 text-muted-foreground" />
+  if (status === 'compensated') return <RotateCcw className="h-4 w-4 text-muted-foreground" />
   return <Clock className="h-4 w-4 text-status-warning" />
 }
 

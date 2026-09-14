@@ -162,7 +162,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Prozesse gesamt</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <BarChart3 className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{processes.length}</span>
             </div>
           </CardContent>

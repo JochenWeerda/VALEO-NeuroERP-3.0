@@ -360,7 +360,7 @@ export default function RueckverfolgbarkeitPage() {
                       <div key={i} className="flex items-start gap-2 text-sm">
                         {l.schwere === 'warnung'
                           ? <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" />
-                          : <Info size={15} className="mt-0.5 text-sky-600 shrink-0" />}
+                          : <Info size={15} className="mt-0.5 text-muted-foreground shrink-0" />}
                         <span><span className="opacity-60">[{l.stufe}]</span> {l.text}</span>
                       </div>
                     ))}

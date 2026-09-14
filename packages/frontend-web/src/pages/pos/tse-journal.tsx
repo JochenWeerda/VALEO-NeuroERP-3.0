@@ -88,7 +88,7 @@ export default function TSEJournalPage(): JSX.Element {
           {t.fibuStatus === 'gebucht' ? (
             <CheckCircle className="h-4 w-4 text-status-success" />
           ) : t.fibuStatus === 'exportiert' ? (
-            <FileDown className="h-4 w-4 text-blue-600" />
+            <FileDown className="h-4 w-4 text-muted-foreground" />
           ) : (
             <XCircle className="h-4 w-4 text-status-warning" />
           )}

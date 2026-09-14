@@ -440,7 +440,7 @@ export default function SchlagkarteiPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-blue-600" />
+              <MapPin className="h-4 w-4 text-muted-foreground" />
               Schläge
             </CardTitle>
           </CardHeader>

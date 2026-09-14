@@ -337,7 +337,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <ShieldCheck className="h-4 w-4 text-blue-700" />
+                      <ShieldCheck className="h-4 w-4 text-muted-foreground" />
                       <p className="font-semibold text-blue-900 text-sm">DSFinV-K Export</p>
                       <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 border border-green-300">
                         Gesetzlich vorgeschrieben (KassenSichV)
